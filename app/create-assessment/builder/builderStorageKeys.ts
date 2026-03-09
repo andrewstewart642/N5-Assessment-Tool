@@ -1,0 +1,10 @@
+export const STORAGE_KEY = "n5_assessment_builder_v2";
+export const PANE_RATIO_KEY = "n5_assessment_builder_pane_ratio_v1";
+export const HUD_HEIGHT_KEY = "n5_assessment_builder_hud_height_v1";
+export const SHOW_PROGRESS_PANEL_KEY = "n5_assessment_builder_show_progress_panel_v1";
+export const INCLUDE_COVER_SHEET_KEY = "n5_assessment_builder_include_cover_sheet_v1";
+export const SHOW_COVER_DATE_TIME_KEY = "n5_assessment_builder_show_cover_date_time_v1";
+export const COVER_DATE_TEXT_KEY = "n5_assessment_builder_cover_date_text_v1";
+export const COVER_TIME_TEXT_KEY = "n5_assessment_builder_cover_time_text_v1";
+export const SHOW_SCN_BOX_KEY = "n5_assessment_builder_show_scn_box_v1";
+export const INCLUDE_FORMULA_SHEET_KEY = "n5_assessment_builder_include_formula_sheet_v1";
