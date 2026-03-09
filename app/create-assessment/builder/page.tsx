@@ -71,11 +71,62 @@ const P2_COVER_DATE_KEY = "n5-builder-p2-cover-date";
 const P2_START_TIME_KEY = "n5-builder-p2-start-time";
 const P2_END_TIME_KEY = "n5-builder-p2-end-time";
 
-const P1_DATE_CUSTOM_KEY = "n5-builder-p1-date-custom";
 const P2_DATE_CUSTOM_KEY = "n5-builder-p2-date-custom";
 
-function todayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10);
+function pad2(value: number): string {
+  return value.toString().padStart(2, "0");
+}
+
+function parseFlexibleDateInput(input: string): Date | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = Number(isoMatch[3]);
+
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    ) {
+      return date;
+    }
+  }
+
+  const displayMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (displayMatch) {
+    const day = Number(displayMatch[1]);
+    const month = Number(displayMatch[2]);
+    const year = Number(displayMatch[3]);
+
+    const date = new Date(year, month - 1, day);
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    ) {
+      return date;
+    }
+  }
+
+  return null;
+}
+
+function formatDisplayDate(date: Date): string {
+  return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+}
+
+function normaliseDisplayDate(input: string): string {
+  const parsed = parseFlexibleDateInput(input);
+  return parsed ? formatDisplayDate(parsed) : "";
+}
+
+function todayDisplayDate(): string {
+  return formatDisplayDate(new Date());
 }
 
 function ordinalDay(n: number): string {
@@ -91,8 +142,8 @@ function ordinalDay(n: number): string {
 function formatCoverDate(input: string): string {
   if (!input) return "";
 
-  const date = new Date(`${input}T12:00:00`);
-  if (Number.isNaN(date.getTime())) return input;
+  const date = parseFlexibleDateInput(input);
+  if (!date) return input;
 
   const weekday = date.toLocaleDateString("en-GB", { weekday: "long" });
   const month = date.toLocaleDateString("en-GB", { month: "long" });
@@ -114,7 +165,6 @@ type BuilderMetaFieldProps = {
   onChange: (value: string) => void;
   onFocus?: () => void;
   onBlur?: () => void;
-  type?: "text" | "date";
   width?: number;
 };
 
@@ -124,7 +174,6 @@ function BuilderMetaField({
   onChange,
   onFocus,
   onBlur,
-  type = "text",
   width,
 }: BuilderMetaFieldProps) {
   return (
@@ -151,7 +200,7 @@ function BuilderMetaField({
       </span>
 
       <input
-        type={type}
+        type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={onFocus}
@@ -277,7 +326,10 @@ export default function CreateAssessmentBuilderPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
 
   const [draftByPaper, setDraftByPaper] = useState<DraftByPaper>({ P1: null, P2: null });
-  const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>({ P1: null, P2: null });
+  const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>({
+    P1: null,
+    P2: null,
+  });
 
   const [qualityNotes, setQualityNotes] = useState<string[]>([]);
   const [flashWarning, setFlashWarning] = useState<string | null>(null);
@@ -290,6 +342,7 @@ export default function CreateAssessmentBuilderPage() {
   const hudResizeStartRef = useRef<{ startY: number; startHeight: number } | null>(null);
   const pageWrapperRefs = useRef<Array<HTMLDivElement | null>>([]);
   const pendingJumpDraftRef = useRef<{ paper: Paper; draftId: string } | null>(null);
+  const builderDateFieldRef = useRef<HTMLDivElement | null>(null);
 
   const [fitWidthScale, setFitWidthScale] = useState<number>(1);
   const [zoomPct, setZoomPct] = useState<number>(90);
@@ -314,23 +367,24 @@ export default function CreateAssessmentBuilderPage() {
 
   const [assessmentName, setAssessmentName] = useState("[Untitled file]");
   const [className, setClassName] = useState("");
-  const [assessmentDate, setAssessmentDate] = useState(todayIsoDate());
+  const [assessmentDate, setAssessmentDate] = useState(todayDisplayDate());
+  const [builderCalendarOpen, setBuilderCalendarOpen] = useState(false);
   const [createdAt, setCreatedAt] = useState<number>(Date.now());
 
-  const [p1CoverDate, setP1CoverDate] = useState(todayIsoDate());
   const [p1StartTime, setP1StartTime] = useState("");
   const [p1EndTime, setP1EndTime] = useState("");
 
-  const [p2CoverDate, setP2CoverDate] = useState(todayIsoDate());
+  const [p2CoverDate, setP2CoverDate] = useState(todayDisplayDate());
   const [p2StartTime, setP2StartTime] = useState("");
   const [p2EndTime, setP2EndTime] = useState("");
-
-  const [p1DateCustom, setP1DateCustom] = useState(false);
   const [p2DateCustom, setP2DateCustom] = useState(false);
+
+  const [p1EndTimeManuallyEdited, setP1EndTimeManuallyEdited] = useState(false);
+  const [p2EndTimeManuallyEdited, setP2EndTimeManuallyEdited] = useState(false);
 
   const theme = useMemo(
     () => getTheme(appearance, systemPrefersDark),
-    [appearance, systemPrefersDark]
+    [appearance, systemPrefersDark],
   );
 
   const editDraftRef = useRef<EditDraftByPaper>({ P1: null, P2: null });
@@ -383,7 +437,7 @@ export default function CreateAssessmentBuilderPage() {
 
     const raw = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
     if (raw === "dark" || raw === "light" || raw === "system") {
-      setAppearance(raw);
+      setAppearance(raw as AppearancePreference);
     }
 
     if (typeof media.addEventListener === "function") {
@@ -440,33 +494,42 @@ export default function CreateAssessmentBuilderPage() {
       const storedName = window.localStorage.getItem(META_NAME_KEY);
       const storedClass = window.localStorage.getItem(META_CLASS_KEY);
       const storedAssessmentDate = window.localStorage.getItem(META_ASSESSMENT_DATE_KEY);
-
-      if (storedName !== null) setAssessmentName(storedName);
-      if (storedClass !== null) setClassName(storedClass);
-      if (storedAssessmentDate) setAssessmentDate(storedAssessmentDate);
-
       const storedP1Date = window.localStorage.getItem(P1_COVER_DATE_KEY);
       const storedP2Date = window.localStorage.getItem(P2_COVER_DATE_KEY);
 
+      if (storedName !== null) setAssessmentName(storedName);
+      if (storedClass !== null) setClassName(storedClass);
+
+      const initialAssessmentDate = normaliseDisplayDate(
+        storedAssessmentDate || storedP1Date || "",
+      );
+      if (initialAssessmentDate) {
+        setAssessmentDate(initialAssessmentDate);
+      }
+
+      const normalisedP2Date = normaliseDisplayDate(storedP2Date || "");
+      if (normalisedP2Date) {
+        setP2CoverDate(normalisedP2Date);
+      }
+
       const storedP1Start = window.localStorage.getItem(P1_START_TIME_KEY);
       const storedP1End = window.localStorage.getItem(P1_END_TIME_KEY);
-
       const storedP2Start = window.localStorage.getItem(P2_START_TIME_KEY);
       const storedP2End = window.localStorage.getItem(P2_END_TIME_KEY);
-
-      const storedP1Custom = window.localStorage.getItem(P1_DATE_CUSTOM_KEY);
       const storedP2Custom = window.localStorage.getItem(P2_DATE_CUSTOM_KEY);
 
-      if (storedP1Date) setP1CoverDate(storedP1Date);
-      if (storedP2Date) setP2CoverDate(storedP2Date);
-
       if (storedP1Start !== null) setP1StartTime(storedP1Start);
-      if (storedP1End !== null) setP1EndTime(storedP1End);
+      if (storedP1End !== null) {
+        setP1EndTime(storedP1End);
+        if (storedP1End.trim()) setP1EndTimeManuallyEdited(true);
+      }
 
       if (storedP2Start !== null) setP2StartTime(storedP2Start);
-      if (storedP2End !== null) setP2EndTime(storedP2End);
+      if (storedP2End !== null) {
+        setP2EndTime(storedP2End);
+        if (storedP2End.trim()) setP2EndTimeManuallyEdited(true);
+      }
 
-      if (storedP1Custom === "true") setP1DateCustom(true);
       if (storedP2Custom === "true") setP2DateCustom(true);
     } catch {
       // ignore
@@ -485,22 +548,26 @@ export default function CreateAssessmentBuilderPage() {
         ? prev
         : brief.assessmentName && brief.assessmentName.trim().length
           ? brief.assessmentName
-          : "[Untitled file]"
+          : "[Untitled file]",
     );
 
     setClassName((prev) => (prev.trim().length ? prev : brief.className ?? ""));
-    setAssessmentDate((prev) =>
-      prev.trim().length ? prev : brief.assessmentDate || todayIsoDate()
-    );
+
+    const briefDate = normaliseDisplayDate(brief.assessmentDate || "");
+    if (briefDate) {
+      setAssessmentDate((prev) =>
+        prev && prev !== todayDisplayDate() ? prev : briefDate,
+      );
+      setP2CoverDate((prev) =>
+        prev && prev !== todayDisplayDate() ? prev : briefDate,
+      );
+    }
 
     setCreatedAt(
       typeof brief.createdAt === "number" && Number.isFinite(brief.createdAt)
         ? brief.createdAt
-        : Date.now()
+        : Date.now(),
     );
-
-    setP1CoverDate((prev) => (prev.trim().length ? prev : brief.assessmentDate || todayIsoDate()));
-    setP2CoverDate((prev) => (prev.trim().length ? prev : brief.assessmentDate || todayIsoDate()));
 
     if (brief.paperStructure === "P2_ONLY") {
       setActivePaper("P2");
@@ -529,9 +596,25 @@ export default function CreateAssessmentBuilderPage() {
   }, []);
 
   useEffect(() => {
-    if (!p1DateCustom) setP1CoverDate(assessmentDate || todayIsoDate());
-    if (!p2DateCustom) setP2CoverDate(assessmentDate || todayIsoDate());
-  }, [assessmentDate, p1DateCustom, p2DateCustom]);
+    if (!p2DateCustom) {
+      setP2CoverDate(assessmentDate || todayDisplayDate());
+    }
+  }, [assessmentDate, p2DateCustom]);
+
+  useEffect(() => {
+    if (!builderCalendarOpen) return;
+
+    function handleMouseDown(event: MouseEvent) {
+      if (!builderDateFieldRef.current) return;
+      if (builderDateFieldRef.current.contains(event.target as Node)) return;
+      setBuilderCalendarOpen(false);
+    }
+
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
+  }, [builderCalendarOpen]);
 
   useEffect(() => {
     try {
@@ -539,15 +622,14 @@ export default function CreateAssessmentBuilderPage() {
       window.localStorage.setItem(META_CLASS_KEY, className);
       window.localStorage.setItem(META_ASSESSMENT_DATE_KEY, assessmentDate);
 
-      window.localStorage.setItem(P1_COVER_DATE_KEY, p1CoverDate);
+      window.localStorage.setItem(P1_COVER_DATE_KEY, assessmentDate);
       window.localStorage.setItem(P1_START_TIME_KEY, p1StartTime);
       window.localStorage.setItem(P1_END_TIME_KEY, p1EndTime);
 
-      window.localStorage.setItem(P2_COVER_DATE_KEY, p2CoverDate);
+      window.localStorage.setItem(P2_COVER_DATE_KEY, p2DateCustom ? p2CoverDate : assessmentDate);
       window.localStorage.setItem(P2_START_TIME_KEY, p2StartTime);
       window.localStorage.setItem(P2_END_TIME_KEY, p2EndTime);
 
-      window.localStorage.setItem(P1_DATE_CUSTOM_KEY, String(p1DateCustom));
       window.localStorage.setItem(P2_DATE_CUSTOM_KEY, String(p2DateCustom));
     } catch {
       // ignore
@@ -556,13 +638,11 @@ export default function CreateAssessmentBuilderPage() {
     assessmentName,
     className,
     assessmentDate,
-    p1CoverDate,
     p1StartTime,
     p1EndTime,
     p2CoverDate,
     p2StartTime,
     p2EndTime,
-    p1DateCustom,
     p2DateCustom,
   ]);
 
@@ -710,7 +790,7 @@ export default function CreateAssessmentBuilderPage() {
   const totalSkillsCount = useMemo(() => {
     return Object.values(skillsData).reduce<number>(
       (acc, list) => acc + (list as Skill[]).length,
-      0
+      0,
     );
   }, []);
 
@@ -764,7 +844,7 @@ export default function CreateAssessmentBuilderPage() {
 
   const toggleSkillRow = useCallback((skillId: string) => {
     setExpandedSkillIds((prev) =>
-      prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId]
+      prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId],
     );
   }, []);
 
@@ -772,7 +852,7 @@ export default function CreateAssessmentBuilderPage() {
 
   const getConceptIndex = useCallback(
     (skillId: string) => conceptIndexBySkill[skillId] ?? 0,
-    [conceptIndexBySkill]
+    [conceptIndexBySkill],
   );
 
   const setConceptIndex = useCallback((skillId: string, nextIndex: number) => {
@@ -781,7 +861,7 @@ export default function CreateAssessmentBuilderPage() {
 
   const getDifficulty = useCallback(
     (skillId: string) => difficultyBySkill[skillId] ?? 3,
-    [difficultyBySkill]
+    [difficultyBySkill],
   );
 
   const setDifficulty = useCallback((skillId: string, next: DifficultyLevel) => {
@@ -857,7 +937,7 @@ export default function CreateAssessmentBuilderPage() {
       setDraftByPaper((prev) => ({ ...prev, [paper]: draft }));
       setViewPaper((prev) => (prev === paper ? prev : paper));
     },
-    [standardFilter, targetMarks]
+    [standardFilter, targetMarks],
   );
 
   const regenerateQuestionToPaper = useCallback(
@@ -924,12 +1004,12 @@ export default function CreateAssessmentBuilderPage() {
 
       setViewPaper((prev) => (prev === paper ? prev : paper));
     },
-    [standardFilter, targetMarks]
+    [standardFilter, targetMarks],
   );
 
   const assignedForView = useMemo(
     () => questions.filter((q) => q.paper === viewPaper),
-    [questions, viewPaper]
+    [questions, viewPaper],
   );
 
   const editForView = editDraftByPaper[viewPaper];
@@ -946,6 +1026,26 @@ export default function CreateAssessmentBuilderPage() {
 
   const p1Mins = useMemo(() => estimateMinutes("P1", p1Marks), [p1Marks]);
   const p2Mins = useMemo(() => estimateMinutes("P2", p2Marks), [p2Marks]);
+
+  useEffect(() => {
+    if (p1EndTimeManuallyEdited) return;
+    if (!p1StartTime.trim()) {
+      setP1EndTime("");
+      return;
+    }
+
+    setP1EndTime(calculateEndTime("N5", "paper1", p1Marks, p1StartTime));
+  }, [p1Marks, p1StartTime, p1EndTimeManuallyEdited]);
+
+  useEffect(() => {
+    if (p2EndTimeManuallyEdited) return;
+    if (!p2StartTime.trim()) {
+      setP2EndTime("");
+      return;
+    }
+
+    setP2EndTime(calculateEndTime("N5", "paper2", p2Marks, p2StartTime));
+  }, [p2Marks, p2StartTime, p2EndTimeManuallyEdited]);
 
   const activePaperCoverMarks = useMemo(() => {
     if (viewPaper === "P1") return p1ActualQuestionMarks;
@@ -993,7 +1093,7 @@ export default function CreateAssessmentBuilderPage() {
         },
       }));
     },
-    [questions]
+    [questions],
   );
 
   const saveEdit = useCallback(() => {
@@ -1172,7 +1272,9 @@ export default function CreateAssessmentBuilderPage() {
   const bodyGridColumns = `${(leftPaneRatio * 100).toFixed(3)}% ${dividerWidth}px minmax(0, 1fr)`;
 
   const coverDateTextForView =
-    viewPaper === "P1" ? formatCoverDate(p1CoverDate) : formatCoverDate(p2CoverDate);
+    viewPaper === "P1"
+      ? formatCoverDate(assessmentDate)
+      : formatCoverDate(p2DateCustom ? p2CoverDate : assessmentDate);
 
   const coverTimeTextForView =
     viewPaper === "P1"
@@ -1191,6 +1293,7 @@ export default function CreateAssessmentBuilderPage() {
           display: "grid",
           gridTemplateRows: "1fr",
           overflow: "hidden",
+          position: "relative",
           ...UI_TEXT.appRoot,
         }}
       >
@@ -1238,7 +1341,7 @@ export default function CreateAssessmentBuilderPage() {
                 ? theme.pageBg === "#eef3f8"
                   ? "#cfe0f5"
                   : "#1e2b3b"
-                : theme.borderSoft,
+                : (theme as any).borderSoft ?? theme.border,
               cursor: "col-resize",
               position: "relative",
             }}
@@ -1305,13 +1408,101 @@ export default function CreateAssessmentBuilderPage() {
                   width={118}
                 />
 
-                <BuilderMetaField
-                  label="Assessment Date"
-                  type="date"
-                  value={assessmentDate}
-                  onChange={setAssessmentDate}
-                  width={170}
-                />
+                <div
+                  ref={builderDateFieldRef}
+                  style={{
+                    display: "grid",
+                    gap: 3,
+                    minWidth: 0,
+                    width: 170,
+                    position: "relative",
+                    fontFamily: UI_TYPO.family,
+                  }}
+                >
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: UI_TYPO.weightMedium,
+                      letterSpacing: 0,
+                      color: "rgba(214,227,243,0.74)",
+                      lineHeight: 1.2,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Assessment Date
+                  </span>
+
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type="text"
+                      value={assessmentDate}
+                      onChange={(e) => setAssessmentDate(e.target.value)}
+                      onFocus={() => setBuilderCalendarOpen(true)}
+                      onClick={() => setBuilderCalendarOpen(true)}
+                      style={{
+                        height: 30,
+                        borderRadius: 9,
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(255,255,255,0.02)",
+                        color: "#f7fbff",
+                        padding: "0 34px 0 9px",
+                        fontSize: 13,
+                        fontFamily: UI_TYPO.family,
+                        fontWeight: UI_TYPO.weightSemibold,
+                        minWidth: 0,
+                        width: "100%",
+                        boxSizing: "border-box",
+                        outline: "none",
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() => setBuilderCalendarOpen((prev) => !prev)}
+                      style={{
+                        position: "absolute",
+                        right: 4,
+                        top: 4,
+                        width: 22,
+                        height: 22,
+                        borderRadius: 7,
+                        border: "1px solid rgba(255,255,255,0.08)",
+                        background: "rgba(255,255,255,0.03)",
+                        color: "rgba(214,227,243,0.78)",
+                        cursor: "pointer",
+                        display: "grid",
+                        placeItems: "center",
+                        fontSize: 12,
+                        lineHeight: 1,
+                      }}
+                      aria-label="Open assessment date calendar"
+                    >
+                      🗓️
+                    </button>
+                  </div>
+
+                  {builderCalendarOpen ? (
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "calc(100% + 10px)",
+                        left: 0,
+                        zIndex: 20,
+                        width: 320,
+                      }}
+                    >
+                      <SharedCalendarPicker
+                        theme={theme}
+                        value={assessmentDate}
+                        onCancel={() => setBuilderCalendarOpen(false)}
+                        onApply={(next) => {
+                          setAssessmentDate(next);
+                          setBuilderCalendarOpen(false);
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                </div>
               </div>
 
               <div
@@ -1336,6 +1527,30 @@ export default function CreateAssessmentBuilderPage() {
                 </div>
 
                 <ViewingToggle value={viewPaper} onChange={setViewPaper} />
+
+                              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  justifySelf: "end",
+                  whiteSpace: "nowrap",
+                  transform: "translateY(1px)",
+                }}
+              >
+                <div
+                  style={{
+                    color: "rgba(214,227,243,0.78)",
+                    fontSize: 13,
+                    fontFamily: UI_TYPO.family,
+                    fontWeight: UI_TYPO.weightMedium,
+                  }}
+                >
+                  Viewing
+                </div>
+
+                <ViewingToggle value={viewPaper} onChange={setViewPaper} />
+              </div>
               </div>
             </div>
 
@@ -1682,7 +1897,7 @@ export default function CreateAssessmentBuilderPage() {
                   theme.pageBg === "#eef3f8"
                     ? "rgba(255,255,255,0.92)"
                     : "rgba(11,17,24,0.92)",
-                color: theme.textMuted,
+                color: (theme as any).textMuted ?? theme.subtleText ?? theme.text,
                 borderRadius: 16,
                 padding: "10px 14px",
                 cursor: "pointer",
@@ -1781,16 +1996,16 @@ export default function CreateAssessmentBuilderPage() {
           onToggleIncludeCoverSheet={setIncludeCoverSheet}
           showCoverDateTime={showCoverDateTime}
           onToggleShowCoverDateTime={setShowCoverDateTime}
-          p1CoverDateText={p1CoverDate}
-          onChangeP1CoverDateText={(value) => {
-            setP1DateCustom(true);
-            setP1CoverDate(value);
-          }}
+          p1CoverDateText={assessmentDate}
+          onChangeP1CoverDateText={setAssessmentDate}
           p1StartTimeText={p1StartTime}
           onChangeP1StartTimeText={setP1StartTime}
           p1EndTimeText={p1EndTime}
-          onChangeP1EndTimeText={setP1EndTime}
-          p2CoverDateText={p2CoverDate}
+          onChangeP1EndTimeText={(value) => {
+            setP1EndTimeManuallyEdited(true);
+            setP1EndTime(value);
+          }}
+          p2CoverDateText={p2DateCustom ? p2CoverDate : assessmentDate}
           onChangeP2CoverDateText={(value) => {
             setP2DateCustom(true);
             setP2CoverDate(value);
@@ -1798,7 +2013,10 @@ export default function CreateAssessmentBuilderPage() {
           p2StartTimeText={p2StartTime}
           onChangeP2StartTimeText={setP2StartTime}
           p2EndTimeText={p2EndTime}
-          onChangeP2EndTimeText={setP2EndTime}
+          onChangeP2EndTimeText={(value) => {
+            setP2EndTimeManuallyEdited(true);
+            setP2EndTime(value);
+          }}
           showScottishCandidateNumberBox={showScottishCandidateNumberBox}
           onToggleShowScottishCandidateNumberBox={setShowScottishCandidateNumberBox}
           includeFormulaSheet={includeFormulaSheet}
