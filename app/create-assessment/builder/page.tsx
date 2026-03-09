@@ -1523,10 +1523,9 @@ export default function CreateAssessmentBuilderPage() {
                     fontWeight: UI_TYPO.weightMedium,
                   }}
                 >
-                  Viewing
-                </div>
+                                </div>
 
-                <ViewingToggle value={viewPaper} onChange={setViewPaper} />
+                
 
                               <div
                 style={{

@@ -105,11 +105,7 @@ function getDialPointFromPointer(
   let angle = Math.atan2(dy, dx) * (180 / Math.PI);
   angle = (angle + 90 + 360) % 360;
 
-  return {
-    angle,
-    dx,
-    dy,
-  };
+  return { angle };
 }
 
 function getMinuteFromAngle(angle: number) {
@@ -536,9 +532,7 @@ function TimePickerInline({
           applyPointer(event);
           try {
             event.currentTarget.setPointerCapture(event.pointerId);
-          } catch {
-            // no-op
-          }
+          } catch {}
         }}
         onPointerMove={(event) => {
           if (!isDragging) return;
@@ -548,16 +542,10 @@ function TimePickerInline({
           setIsDragging(false);
           try {
             event.currentTarget.releasePointerCapture(event.pointerId);
-          } catch {
-            // no-op
-          }
+          } catch {}
         }}
-        onPointerCancel={() => {
-          setIsDragging(false);
-        }}
-        onPointerLeave={() => {
-          setIsDragging(false);
-        }}
+        onPointerCancel={() => setIsDragging(false)}
+        onPointerLeave={() => setIsDragging(false)}
         style={{
           width: dialSize,
           height: dialSize,
@@ -905,16 +893,16 @@ export default function SettingsPanel({
     <div
       aria-hidden={!open}
       style={{
-        position: "absolute",
+        position: "fixed",
         inset: 0,
         pointerEvents: open ? "auto" : "none",
-        zIndex: 60,
+        zIndex: 200,
       }}
     >
       <div
         onClick={onClose}
         style={{
-          position: "absolute",
+          position: "fixed",
           inset: 0,
           background: open ? theme.overlay : "transparent",
           opacity: open ? 1 : 0,
@@ -925,14 +913,13 @@ export default function SettingsPanel({
       <aside
         ref={drawerRef}
         style={{
-          position: "absolute",
-          top: 56,
+          position: "fixed",
+          top: 0,
           right: 0,
           bottom: 0,
           width: "min(460px, calc(100vw - 24px))",
           maxWidth: "calc(100vw - 24px)",
           borderLeft: `1px solid ${theme.border}`,
-          borderTop: `1px solid ${theme.border}`,
           background: theme.panelBg,
           boxShadow: theme.shadow,
           overflow: "hidden",
@@ -940,7 +927,6 @@ export default function SettingsPanel({
           flexDirection: "column",
           transform: open ? "translateX(0)" : "translateX(104%)",
           transition: "transform 220ms ease",
-          borderTopLeftRadius: 22,
         }}
       >
         <style jsx>{`

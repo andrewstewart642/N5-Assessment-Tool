@@ -32,6 +32,10 @@ export type Theme = {
   buttonBgHover: string;
   buttonGhostBg: string;
 
+  rowHover: string;
+  controlBg: string;
+  ctaBlueText: string;
+
   overlay: string;
   shadow: string;
 
@@ -70,6 +74,10 @@ const DARK_THEME: Theme = {
   buttonBgHover: "rgba(255,255,255,0.09)",
   buttonGhostBg: "rgba(255,255,255,0.035)",
 
+  rowHover: "rgba(255,255,255,0.035)",
+  controlBg: "rgba(255,255,255,0.04)",
+  ctaBlueText: "#7db4ff",
+
   overlay: "rgba(3,8,16,0.72)",
   shadow: "0 20px 60px rgba(0,0,0,0.35)",
 
@@ -105,6 +113,10 @@ const LIGHT_THEME: Theme = {
   buttonBg: "rgba(20,33,51,0.045)",
   buttonBgHover: "rgba(20,33,51,0.08)",
   buttonGhostBg: "rgba(20,33,51,0.03)",
+
+  rowHover: "rgba(20,33,51,0.04)",
+  controlBg: "rgba(20,33,51,0.035)",
+  ctaBlueText: "#2f73e0",
 
   overlay: "rgba(13,21,33,0.18)",
   shadow: "0 18px 40px rgba(13,21,33,0.14)",
@@ -142,10 +154,7 @@ export function isAppearancePreference(value: unknown): value is AppearancePrefe
 }
 
 export function getStoredAppearance(): AppearancePreference {
-  if (typeof window === "undefined") {
-    return "system";
-  }
-
+  if (typeof window === "undefined") return "system";
   const stored = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
   return isAppearancePreference(stored) ? stored : "system";
 }
@@ -156,10 +165,7 @@ export function setStoredAppearance(value: AppearancePreference) {
 }
 
 export function getInitialAppearance(): AppearancePreference {
-  if (typeof window === "undefined") {
-    return "system";
-  }
-
+  if (typeof window === "undefined") return "system";
   const stored = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
   return isAppearancePreference(stored) ? stored : "system";
 }
