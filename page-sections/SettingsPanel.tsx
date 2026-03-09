@@ -52,6 +52,7 @@ type ToggleRowProps = {
   checked: boolean;
   onChange: (next: boolean) => void;
   theme: Theme;
+  noBorder?: boolean;
 };
 
 function ToggleRow({
@@ -60,16 +61,17 @@ function ToggleRow({
   checked,
   onChange,
   theme,
+  noBorder = false,
 }: ToggleRowProps) {
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "1fr auto",
+        gridTemplateColumns: "minmax(0, 1fr) auto",
         gap: 12,
         alignItems: "center",
         padding: "12px 0",
-        borderBottom: `1px solid ${theme.borderSoft}`,
+        borderBottom: noBorder ? "none" : `1px solid ${theme.borderSoft}`,
       }}
     >
       <div style={{ minWidth: 0 }}>
@@ -80,6 +82,7 @@ function ToggleRow({
             fontSize: 14,
             color: theme.text,
             marginBottom: description ? 4 : 0,
+            lineHeight: 1.25,
           }}
         >
           {label}
@@ -102,6 +105,7 @@ function ToggleRow({
       <button
         type="button"
         onClick={() => onChange(!checked)}
+        aria-pressed={checked}
         style={{
           width: 48,
           height: 28,
@@ -114,6 +118,7 @@ function ToggleRow({
             : "rgba(255,255,255,0.04)",
           position: "relative",
           cursor: "pointer",
+          flexShrink: 0,
         }}
       >
         <span
@@ -149,13 +154,14 @@ function Field({
   theme,
 }: FieldProps) {
   return (
-    <label style={{ display: "grid", gap: 6 }}>
+    <label style={{ display: "grid", gap: 6, minWidth: 0 }}>
       <span
         style={{
           fontFamily: UI_TYPO.family,
           fontSize: 12,
           fontWeight: UI_TYPO.weightSemibold,
           color: theme.textMuted,
+          lineHeight: 1.2,
         }}
       >
         {label}
@@ -180,6 +186,8 @@ function Field({
           fontWeight: UI_TYPO.weightMedium,
           outline: "none",
           boxSizing: "border-box",
+          width: "100%",
+          minWidth: 0,
         }}
       />
     </label>
@@ -348,7 +356,12 @@ function TimePickerField({
     return minute * 6;
   }
 
-  function polarToCartesian(angleDeg: number, radius: number, cx: number, cy: number) {
+  function polarToCartesian(
+    angleDeg: number,
+    radius: number,
+    cx: number,
+    cy: number
+  ) {
     const rad = ((angleDeg - 90) * Math.PI) / 180;
     return {
       x: cx + radius * Math.cos(rad),
@@ -361,8 +374,14 @@ function TimePickerField({
     return Math.min(diff, 60 - diff);
   }
 
-  function updateFromPoint(clientX: number, clientY: number, forceStage?: "hour" | "minute") {
-    const node = wrapperRef.current?.querySelector("[data-clock-face='true']") as HTMLElement | null;
+  function updateFromPoint(
+    clientX: number,
+    clientY: number,
+    forceStage?: "hour" | "minute"
+  ) {
+    const node = wrapperRef.current?.querySelector(
+      "[data-clock-face='true']"
+    ) as HTMLElement | null;
     if (!node) return;
 
     const rect = node.getBoundingClientRect();
@@ -423,11 +442,14 @@ function TimePickerField({
   const cx = 120;
   const cy = 120;
   const handLength = stage === "hour" ? 58 : 84;
-  const activeAngle = stage === "hour" ? angleForHour(draft.hour12) : angleForMinute(draft.minute);
+  const activeAngle =
+    stage === "hour"
+      ? angleForHour(draft.hour12)
+      : angleForMinute(draft.minute);
   const handTip = polarToCartesian(activeAngle, handLength, cx, cy);
 
   return (
-    <div ref={wrapperRef} style={{ position: "relative" }}>
+    <div ref={wrapperRef} style={{ position: "relative", minWidth: 0 }}>
       <label style={{ display: "grid", gap: 6 }}>
         <span
           style={{
@@ -435,6 +457,7 @@ function TimePickerField({
             fontSize: 12,
             fontWeight: UI_TYPO.weightSemibold,
             color: theme.textMuted,
+            lineHeight: 1.2,
           }}
         >
           {label}
@@ -443,7 +466,7 @@ function TimePickerField({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr 40px",
+            gridTemplateColumns: "minmax(0, 1fr) 40px",
             gap: 8,
             alignItems: "center",
           }}
@@ -469,6 +492,8 @@ function TimePickerField({
               fontWeight: UI_TYPO.weightMedium,
               outline: "none",
               boxSizing: "border-box",
+              width: "100%",
+              minWidth: 0,
             }}
           />
 
@@ -478,6 +503,7 @@ function TimePickerField({
             title="Open time picker"
             style={{
               height: 38,
+              width: 40,
               borderRadius: 12,
               border: `1px solid ${theme.border}`,
               background:
@@ -487,6 +513,7 @@ function TimePickerField({
               color: theme.textMuted,
               cursor: "pointer",
               fontSize: 16,
+              flexShrink: 0,
             }}
           >
             🕘
@@ -501,6 +528,7 @@ function TimePickerField({
             top: "calc(100% + 10px)",
             right: 0,
             width: 320,
+            maxWidth: "min(320px, calc(100vw - 40px))",
             borderRadius: 18,
             border: `1px solid ${theme.border}`,
             background:
@@ -615,9 +643,15 @@ function TimePickerField({
               updateFromPoint(e.clientX, e.clientY);
 
               const activeStage = stage;
+
               const handleMove = (moveEvent: MouseEvent) => {
-                updateFromPoint(moveEvent.clientX, moveEvent.clientY, activeStage);
+                updateFromPoint(
+                  moveEvent.clientX,
+                  moveEvent.clientY,
+                  activeStage
+                );
               };
+
               const handleUp = () => {
                 window.removeEventListener("mousemove", handleMove);
                 window.removeEventListener("mouseup", handleUp);
@@ -647,7 +681,13 @@ function TimePickerField({
 
               {stage === "hour"
                 ? Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => {
-                    const pos = polarToCartesian(angleForHour(hour), 86, 120, 120);
+                    const pos = polarToCartesian(
+                      angleForHour(hour),
+                      86,
+                      120,
+                      120
+                    );
+
                     return (
                       <text
                         key={hour}
@@ -675,7 +715,12 @@ function TimePickerField({
                     const angle = angleForMinute(minute);
                     const isMajor = minute % 5 === 0;
                     const outer = polarToCartesian(angle, 102, 120, 120);
-                    const inner = polarToCartesian(angle, isMajor ? 92 : 96, 120, 120);
+                    const inner = polarToCartesian(
+                      angle,
+                      isMajor ? 92 : 96,
+                      120,
+                      120
+                    );
 
                     return (
                       <g key={minute}>
@@ -830,7 +875,9 @@ export default function SettingsPanel(props: Props) {
     onResetZoom,
   } = props;
 
-  const [openTimePickerKey, setOpenTimePickerKey] = useState<string | null>(null);
+  const [openTimePickerKey, setOpenTimePickerKey] = useState<string | null>(
+    null
+  );
 
   const showSittingDetails = includeCoverSheet && showCoverDateTime;
 
@@ -867,7 +914,7 @@ export default function SettingsPanel(props: Props) {
           top: 56,
           right: 0,
           bottom: 0,
-          width: 560,
+          width: 540,
           maxWidth: "96vw",
           transform: open ? "translateX(0)" : "translateX(100%)",
           transition: "transform 220ms ease",
@@ -879,7 +926,7 @@ export default function SettingsPanel(props: Props) {
           boxShadow: "-20px 0 40px rgba(0,0,0,0.20)",
           zIndex: 121,
           display: "grid",
-          gridTemplateRows: "60px 1fr",
+          gridTemplateRows: "72px 1fr",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           overflow: "hidden",
@@ -892,9 +939,10 @@ export default function SettingsPanel(props: Props) {
             alignItems: "center",
             justifyContent: "space-between",
             padding: "0 18px",
+            minWidth: 0,
           }}
         >
-          <div>
+          <div style={{ minWidth: 0 }}>
             <div
               style={{
                 fontFamily: UI_TYPO.family,
@@ -930,6 +978,7 @@ export default function SettingsPanel(props: Props) {
               cursor: "pointer",
               fontSize: 18,
               lineHeight: 1,
+              flexShrink: 0,
             }}
           >
             ×
@@ -943,6 +992,7 @@ export default function SettingsPanel(props: Props) {
             padding: "18px 18px 28px",
             display: "grid",
             gap: 18,
+            minWidth: 0,
           }}
         >
           <section
@@ -991,6 +1041,7 @@ export default function SettingsPanel(props: Props) {
               checked={showScottishCandidateNumberBox}
               onChange={onToggleShowScottishCandidateNumberBox}
               theme={theme}
+              noBorder
             />
           </section>
 
@@ -1019,6 +1070,7 @@ export default function SettingsPanel(props: Props) {
               checked={showProgressPanel}
               onChange={onToggleShowProgressPanel}
               theme={theme}
+              noBorder
             />
 
             <div
@@ -1101,7 +1153,8 @@ export default function SettingsPanel(props: Props) {
                       color: theme.textMuted,
                     }}
                   >
-                    Used on the Paper 1 cover sheet when date/time display is turned on.
+                    Used on the Paper 1 cover sheet when date/time display is
+                    turned on.
                   </div>
                 </div>
 
@@ -1116,7 +1169,7 @@ export default function SettingsPanel(props: Props) {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
                     gap: 12,
                   }}
                 >
@@ -1173,7 +1226,8 @@ export default function SettingsPanel(props: Props) {
                       color: theme.textMuted,
                     }}
                   >
-                    Use this if Paper 2 sits at a different date or time from Paper 1.
+                    Use this if Paper 2 sits at a different date or time from
+                    Paper 1.
                   </div>
                 </div>
 
@@ -1188,7 +1242,7 @@ export default function SettingsPanel(props: Props) {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "1fr 1fr",
+                    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
                     gap: 12,
                   }}
                 >
