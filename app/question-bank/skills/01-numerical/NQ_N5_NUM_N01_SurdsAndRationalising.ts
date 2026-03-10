@@ -1,0 +1,62 @@
+import type { Skill } from "@/shared-types/assessmentTypes";
+
+export const NQ_N5_NUM_N01_SurdsAndRationalising: Skill = {
+  id: "num-n01-surds-and-rationalising",
+  code: "N1",
+  domain: "NUM",
+  text: "Work with surds",
+  paperSuitability: "BOTH",
+  tags: ["numerical", "surds"],
+  concepts: [
+    {
+      id: "num-n01-c01-simplification",
+      code: "N1.1",
+      label: "N1.1 Simplification · √a",
+      shortLabel: "Simplification",
+      badge: "√a",
+      fullDescription: "Surds - Simplification",
+      teacherNote:
+        "Simplify surd expressions into their simplest exact form.",
+      standard: "C+A",
+      marks: 2,
+      promptStyleId: "B",
+      metadata: {
+        standardTier: "C+A",
+        thinkingType: "operational",
+        paperSuitability: "BOTH",
+        calculator: "none",
+        interactionType: "core",
+        stepCount: "single",
+        topicTags: ["surds", "simplify", "exact values"],
+        canBePrimary: true,
+        canBeSupporting: false,
+        canBeOutputSkill: false,
+      },
+    },
+    {
+      id: "num-n01-c02-rationalising-denominators",
+      code: "N1.2",
+      label: "N1.2 Rationalising denominators · 1/√a",
+      shortLabel: "Rationalising denominators",
+      badge: "1/√a",
+      fullDescription: "Surds - Rationalising denominators",
+      teacherNote:
+        "Rewrite fractions so the denominator is rational, including simple surd denominators.",
+      standard: "C+A",
+      marks: 3,
+      promptStyleId: "B",
+      metadata: {
+        standardTier: "C+A",
+        thinkingType: "operational",
+        paperSuitability: "BOTH",
+        calculator: "none",
+        interactionType: "core",
+        stepCount: "multi",
+        topicTags: ["surds", "fractions", "rationalising"],
+        canBePrimary: true,
+        canBeSupporting: false,
+        canBeOutputSkill: false,
+      },
+    },
+  ],
+};

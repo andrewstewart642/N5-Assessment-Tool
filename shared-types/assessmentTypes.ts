@@ -28,44 +28,93 @@ export type Theme = {
 
 export type SkillPaperSuitability = "P1" | "P2" | "BOTH";
 
+export type SkillDomain = "NUM" | "ALG" | "GEO" | "TRIG" | "STAT";
+
+export type ConceptInteractionType = "core" | "modifier" | "either";
+
+export type QuestionSkillRole = "primary" | "supporting" | "output";
+
+export type QuestionSkillLink = {
+  skillId: string;
+  conceptId?: string;
+  role: QuestionSkillRole;
+};
+
+export type ConceptMetadata = {
+  standardTier: "C" | "A" | "C+A";
+  thinkingType: "operational" | "reasoning" | "mixed";
+  paperSuitability: SkillPaperSuitability;
+  calculator: "none" | "optional" | "required";
+  interactionType: ConceptInteractionType;
+  stepCount: "single" | "multi";
+  topicTags: string[];
+  canBePrimary?: boolean;
+  canBeSupporting?: boolean;
+  canBeOutputSkill?: boolean;
+};
+
+export type Concept = {
+  id: string;
+  code: string;
+  label: string;
+  shortLabel?: string;
+  badge?: string;
+  fullDescription?: string;
+  teacherNote?: string;
+  standard: StandardFilter;
+  marks?: number;
+  promptStyleId?: string;
+  metadata?: ConceptMetadata;
+};
+
 export type Skill = {
   id: string;
   code: string;
   text: string;
-  concepts: string[];
+  domain?: SkillDomain;
+  concepts: Concept[];
   paperSuitability: SkillPaperSuitability;
   tags?: string[];
 };
 
+export type SkillsData = Record<string, Skill[]>;
+
 export type Question = {
   id: string;
-
   category: string;
 
+  /**
+   * Legacy/main skill fields still used by current builder flow.
+   */
   skillId: string;
   skillCode: string;
   skillText: string;
 
+  /**
+   * New skill relationship fields for future balancing / analytics.
+   */
+  primarySkillId?: string;
+  primaryConceptId?: string;
+  supportingSkillIds?: string[];
+  skillLinks?: QuestionSkillLink[];
+
   standardFilter: StandardFilter;
-
   concept: string;
+  conceptId?: string;
   difficulty: DifficultyLevel;
-
   targetMarks: number;
   paper: Paper;
-
   createdAt: number;
 
   /**
-   * Legacy/plain text versions (still useful for non-maths prompts)
+   * Legacy/plain text versions
    */
   prompt?: string;
   answer?: string;
   marks?: number;
 
   /**
-   * ✅ Rich render versions (KaTeX-friendly)
-   * If present, the paper preview should render THESE instead of prompt/answer strings.
+   * Rich render versions (KaTeX-friendly)
    */
   promptParts?: PaperPart[];
   answerParts?: PaperPart[];
@@ -73,14 +122,8 @@ export type Question = {
   questionCode?: string;
 
   /**
-   * ✅ Baseline spacing stored at assign/save time (treat as A4 "base")
-   * Compile stage will scale this for A3/A5 and reflow pages.
+   * Stored layout values
    */
   spacingBasePx?: number;
-    /**
-   * ✅ Measured content height (A4 baseline, px).
-   * Captured from actual DOM render (includes KaTeX).
-   * Used by pagination/reflow to avoid bad page breaks.
-   */
   measuredHeightBasePx?: number;
 };
