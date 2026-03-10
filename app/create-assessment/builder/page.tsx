@@ -23,6 +23,7 @@ import {
   getTheme,
   type AppearancePreference,
 } from "@/app/ui/appTheme";
+import type { PaperPart } from "@/shared-types/paperParts";
 import type {
   Concept,
   DifficultyLevel,
@@ -79,7 +80,17 @@ type GeneratedQuestionData = {
   answer?: string;
   marks?: number;
   questionCode?: string;
+  promptParts?: PaperPart[];
+  answerParts?: PaperPart[];
 };
+
+function textPart(value: string): PaperPart {
+  return { kind: "text", value };
+}
+
+function mathPart(latex: string, displayMode = false): PaperPart {
+  return { kind: "math", latex, displayMode };
+}
 
 function randomInt(min: number, max: number): number {
   const low = Math.ceil(min);
@@ -115,10 +126,16 @@ function reduceFraction(numerator: number, denominator: number) {
   };
 }
 
-function formatFraction(numerator: number, denominator: number): string {
+function formatFractionPlain(numerator: number, denominator: number): string {
   const reduced = reduceFraction(numerator, denominator);
   if (reduced.denominator === 1) return `${reduced.numerator}`;
   return `${reduced.numerator}/${reduced.denominator}`;
+}
+
+function formatFractionLatex(numerator: number, denominator: number): string {
+  const reduced = reduceFraction(numerator, denominator);
+  if (reduced.denominator === 1) return `${reduced.numerator}`;
+  return `\\dfrac{${reduced.numerator}}{${reduced.denominator}}`;
 }
 
 function nonSquarePartFromRoot(radicand: number) {
@@ -135,20 +152,38 @@ function nonSquarePartFromRoot(radicand: number) {
   return { outside, inside };
 }
 
-function formatSimplifiedSurdFromRoot(radicand: number): string {
+function formatSimplifiedSurdPlain(radicand: number): string {
   const { outside, inside } = nonSquarePartFromRoot(radicand);
   if (inside === 1) return `${outside}`;
   if (outside === 1) return `√${inside}`;
   return `${outside}√${inside}`;
 }
 
+function formatSimplifiedSurdLatex(radicand: number): string {
+  const { outside, inside } = nonSquarePartFromRoot(radicand);
+  if (inside === 1) return `${outside}`;
+  if (outside === 1) return `\\sqrt{${inside}}`;
+  return `${outside}\\sqrt{${inside}}`;
+}
+
+function conceptSelectionText(concept: Concept): string {
+  const short = concept.shortLabel?.trim();
+  if (short) return `${concept.code} ${short}`;
+  return concept.label.trim();
+}
+
 function getConceptFromSelection(skill: Skill, selectedConcept: string): Concept | undefined {
-  return skill.concepts.find(
-    (c) =>
-      c.label === selectedConcept ||
-      c.code === selectedConcept ||
-      c.shortLabel === selectedConcept,
-  );
+  const trimmed = selectedConcept.trim();
+
+  return skill.concepts.find((c) => {
+    const compact = conceptSelectionText(c);
+    return (
+      c.label === trimmed ||
+      c.code === trimmed ||
+      c.shortLabel === trimmed ||
+      compact === trimmed
+    );
+  });
 }
 
 function buildQuestionCode(domain: string, skillCode: string, conceptCode: string) {
@@ -179,10 +214,12 @@ function generateSurdsSimplify(difficulty: DifficultyLevel): GeneratedQuestionDa
   const radicand = squareFactor * inside;
 
   return {
-    prompt: `Simplify \\(\\sqrt{${radicand}}\\).`,
-    answer: formatSimplifiedSurdFromRoot(radicand),
+    prompt: `Simplify √${radicand}.`,
+    answer: formatSimplifiedSurdPlain(radicand),
     marks: difficulty >= 4 ? 3 : 2,
     questionCode: "NQ_N5_NUM_N01_N11_SurdsSimplification",
+    promptParts: [textPart("Simplify "), mathPart(`\\sqrt{${radicand}}`), textPart(".")],
+    answerParts: [mathPart(formatSimplifiedSurdLatex(radicand))],
   };
 }
 
@@ -193,10 +230,16 @@ function generateRationalisingDenominator(difficulty: DifficultyLevel): Generate
   const radicand = chooseOne(radicandChoices);
 
   return {
-    prompt: `Write \\(\\dfrac{${numerator}}{\\sqrt{${radicand}}}\\) with a rational denominator.`,
-    answer: `\\dfrac{${numerator}\\sqrt{${radicand}}}{${radicand}}`,
+    prompt: `Write ${numerator}/√${radicand} with a rational denominator.`,
+    answer: `${numerator}√${radicand}/${radicand}`,
     marks: 3,
     questionCode: "NQ_N5_NUM_N01_N12_RationalisingDenominators",
+    promptParts: [
+      textPart("Write "),
+      mathPart(`\\dfrac{${numerator}}{\\sqrt{${radicand}}}`),
+      textPart(" with a rational denominator."),
+    ],
+    answerParts: [mathPart(`\\dfrac{${numerator}\\sqrt{${radicand}}}{${radicand}}`)],
   };
 }
 
@@ -208,17 +251,18 @@ function generateIndicesProductQuotient(difficulty: DifficultyLevel): GeneratedQ
   const m = randomInt(difficulty >= 4 ? -4 : 1, exponentCap);
   const n = randomInt(difficulty >= 3 ? -4 : 1, exponentCap);
 
-  const prompt = useDivision
-    ? `Simplify \\(${variable}^{${m}} \\div ${variable}^{${n}}\\).`
-    : `Simplify \\(${variable}^{${m}} \\times ${variable}^{${n}}\\).`;
-
   const result = useDivision ? m - n : m + n;
+  const expression = useDivision
+    ? `${variable}^{${m}} \\div ${variable}^{${n}}`
+    : `${variable}^{${m}} \\times ${variable}^{${n}}`;
 
   return {
-    prompt,
+    prompt: `Simplify ${useDivision ? `${variable}^${m} ÷ ${variable}^${n}` : `${variable}^${m} × ${variable}^${n}`}.`,
     answer: `${variable}^${result}`,
     marks: 2,
     questionCode: "NQ_N5_NUM_N02_N21_ProductQuotientIndices",
+    promptParts: [textPart("Simplify "), mathPart(expression), textPart(".")],
+    answerParts: [mathPart(`${variable}^{${result}}`)],
   };
 }
 
@@ -228,10 +272,16 @@ function generatePowerOfProduct(): GeneratedQuestionData {
   const power = randomInt(2, 5);
 
   return {
-    prompt: `Expand \\((${a}${b})^${power}\\) using the laws of indices.`,
+    prompt: `Expand (${a}${b})^${power} using the laws of indices.`,
     answer: `${a}^${power}${b}^${power}`,
     marks: 2,
     questionCode: "NQ_N5_NUM_N02_N22_PowerOfProduct",
+    promptParts: [
+      textPart("Expand "),
+      mathPart(`(${a}${b})^{${power}}`),
+      textPart(" using the laws of indices."),
+    ],
+    answerParts: [mathPart(`${a}^{${power}}${b}^{${power}}`)],
   };
 }
 
@@ -241,10 +291,12 @@ function generatePowerOfPower(): GeneratedQuestionData {
   const inner = randomInt(2, 5);
 
   return {
-    prompt: `Simplify \\((${variable}^{${inner}})^${outer}\\).`,
+    prompt: `Simplify (${variable}^${inner})^${outer}.`,
     answer: `${variable}^${inner * outer}`,
     marks: 2,
     questionCode: "NQ_N5_NUM_N02_N23_PowerOfPower",
+    promptParts: [textPart("Simplify "), mathPart(`(${variable}^{${inner}})^{${outer}}`), textPart(".")],
+    answerParts: [mathPart(`${variable}^{${inner * outer}}`)],
   };
 }
 
@@ -255,25 +307,38 @@ function generateFractionalIndices(difficulty: DifficultyLevel): GeneratedQuesti
     denominator === 2
       ? chooseOne([4, 9, 16, 25, 36, 49])
       : chooseOne([8, 27, 64, 125]);
-  const powerValue = Math.pow(base, numerator / denominator);
+
+  const variable = chooseOne(["a", "x"]);
 
   if (difficulty <= 3) {
+    const powerValue = Math.pow(base, numerator / denominator);
+
     return {
-      prompt: `Evaluate \\(${base}^{${numerator}/${denominator}}\\).`,
+      prompt: `Evaluate ${base}^(${numerator}/${denominator}).`,
       answer: `${powerValue}`,
       marks: 3,
       questionCode: "NQ_N5_NUM_N02_N24_FractionalIndices",
+      promptParts: [textPart("Evaluate "), mathPart(`${base}^{\\frac{${numerator}}{${denominator}}}`), textPart(".")],
+      answerParts: [mathPart(`${powerValue}`)],
     };
   }
 
+  const latex =
+    numerator === 1
+      ? `\\sqrt[${denominator}]{${variable}}`
+      : `\\sqrt[${denominator}]{${variable}^{${numerator}}}`;
+
   return {
-    prompt: `Write \\(${chooseOne(["a", "x"])}^{${numerator}/${denominator}}\\) in radical form.`,
-    answer:
-      numerator === 1
-        ? `\\sqrt[${denominator}]{${chooseOne(["a", "x"])}}`
-        : `\\sqrt[${denominator}]{${chooseOne(["a", "x"])}^${numerator}}`,
+    prompt: `Write ${variable}^(${numerator}/${denominator}) in radical form.`,
+    answer: latex,
     marks: 3,
     questionCode: "NQ_N5_NUM_N02_N24_FractionalIndices",
+    promptParts: [
+      textPart("Write "),
+      mathPart(`${variable}^{\\frac{${numerator}}{${denominator}}}`),
+      textPart(" in radical form."),
+    ],
+    answerParts: [mathPart(latex)],
   };
 }
 
@@ -286,23 +351,40 @@ function generateScientificNotation(difficulty: DifficultyLevel): GeneratedQuest
 
   if (useDivision) {
     const value = (a * Math.pow(10, powerA)) / (b * Math.pow(10, powerB));
-    const scientific = value.toExponential(2).replace("e+", " × 10^").replace("e", " × 10^");
+    const answer = value.toExponential(2);
+    const [mantissa, exponentRaw] = answer.split("e");
+    const exponent = Number(exponentRaw);
+
     return {
-      prompt: `Calculate \\(( ${a} \\times 10^{${powerA}} ) \\div ( ${b} \\times 10^{${powerB}} )\\). Give your answer in scientific notation.`,
-      answer: scientific,
+      prompt: `Calculate (${a} × 10^${powerA}) ÷ (${b} × 10^${powerB}). Give your answer in scientific notation.`,
+      answer: `${mantissa} × 10^${exponent}`,
       marks: 3,
       questionCode: "NQ_N5_NUM_N02_N25_ScientificNotation",
+      promptParts: [
+        textPart("Calculate "),
+        mathPart(`(${a} \\times 10^{${powerA}}) \\div (${b} \\times 10^{${powerB}})`),
+        textPart(". Give your answer in scientific notation."),
+      ],
+      answerParts: [mathPart(`${mantissa} \\times 10^{${exponent}}`)],
     };
   }
 
-  const value = (a * Math.pow(10, powerA)) * (b * Math.pow(10, powerB));
-  const scientific = value.toExponential(2).replace("e+", " × 10^").replace("e", " × 10^");
+  const value = a * Math.pow(10, powerA) * (b * Math.pow(10, powerB));
+  const answer = value.toExponential(2);
+  const [mantissa, exponentRaw] = answer.split("e");
+  const exponent = Number(exponentRaw);
 
   return {
-    prompt: `Calculate \\(( ${a} \\times 10^{${powerA}} ) \\times ( ${b} \\times 10^{${powerB}} )\\). Give your answer in scientific notation.`,
-    answer: scientific,
+    prompt: `Calculate (${a} × 10^${powerA}) × (${b} × 10^${powerB}). Give your answer in scientific notation.`,
+    answer: `${mantissa} × 10^${exponent}`,
     marks: 3,
     questionCode: "NQ_N5_NUM_N02_N25_ScientificNotation",
+    promptParts: [
+      textPart("Calculate "),
+      mathPart(`(${a} \\times 10^{${powerA}}) \\times (${b} \\times 10^{${powerB}})`),
+      textPart(". Give your answer in scientific notation."),
+    ],
+    answerParts: [mathPart(`${mantissa} \\times 10^{${exponent}}`)],
   };
 }
 
@@ -311,12 +393,19 @@ function generateSignificantFigures(difficulty: DifficultyLevel): GeneratedQuest
   const whole = randomInt(10, difficulty >= 4 ? 9999 : 999);
   const decimalPart = randomInt(100, 9999);
   const value = Number(`${whole}.${decimalPart}`);
+  const rounded = Number(value.toPrecision(sf)).toString();
 
   return {
     prompt: `Round ${value} to ${sf} significant figures.`,
-    answer: Number(value.toPrecision(sf)).toString(),
+    answer: rounded,
     marks: 1,
     questionCode: "NQ_N5_NUM_N03_N31_SignificantFigures",
+    promptParts: [
+      textPart("Round "),
+      mathPart(`${value}`),
+      textPart(` to ${sf} significant figures.`),
+    ],
+    answerParts: [mathPart(rounded)],
   };
 }
 
@@ -329,9 +418,7 @@ function generateReversePercentage(): GeneratedQuestionData {
     ? original * (1 + percent / 100)
     : original * (1 - percent / 100);
 
-  const finalText = Number.isInteger(finalAmount)
-    ? `${finalAmount}`
-    : finalAmount.toFixed(2);
+  const finalText = Number.isInteger(finalAmount) ? `${finalAmount}` : finalAmount.toFixed(2);
 
   return {
     prompt: increase
@@ -340,6 +427,14 @@ function generateReversePercentage(): GeneratedQuestionData {
     answer: `£${original}`,
     marks: 3,
     questionCode: "NQ_N5_NUM_N04_N41_ReversePercentage",
+    promptParts: [
+      textPart(
+        increase
+          ? `After an increase of ${percent}%, a price is £${finalText}. Find the original price.`
+          : `After a decrease of ${percent}%, a price is £${finalText}. Find the original price.`
+      ),
+    ],
+    answerParts: [textPart(`£${original}`)],
   };
 }
 
@@ -354,6 +449,12 @@ function generateAppreciation(): GeneratedQuestionData {
     answer: `£${value.toFixed(2)}`,
     marks: 3,
     questionCode: "NQ_N5_NUM_N04_N42_Appreciation",
+    promptParts: [
+      textPart(
+        `A value of £${principal} appreciates by ${rate}% each year for ${years} years. Calculate the final value.`
+      ),
+    ],
+    answerParts: [textPart(`£${value.toFixed(2)}`)],
   };
 }
 
@@ -368,6 +469,12 @@ function generateDepreciation(): GeneratedQuestionData {
     answer: `£${value.toFixed(2)}`,
     marks: 3,
     questionCode: "NQ_N5_NUM_N04_N43_Depreciation",
+    promptParts: [
+      textPart(
+        `A machine worth £${principal} depreciates by ${rate}% each year for ${years} years. Calculate its value after ${years} years.`
+      ),
+    ],
+    answerParts: [textPart(`£${value.toFixed(2)}`)],
   };
 }
 
@@ -383,46 +490,80 @@ function generateFractions(difficulty: DifficultyLevel): GeneratedQuestionData {
 
   if (op === "+") {
     const common = lcm(b, d);
-    const result = reduceFraction((a * common) / b + (c * common) / d, common);
+    const resultNum = (a * common) / b + (c * common) / d;
+    const result = reduceFraction(resultNum, common);
+
     return {
-      prompt: `Calculate \\(\\dfrac{${a}}{${b}} + \\dfrac{${c}}{${d}}\\).`,
-      answer: formatFraction(result.numerator, result.denominator),
+      prompt: `Calculate ${a}/${b} + ${c}/${d}.`,
+      answer: formatFractionPlain(result.numerator, result.denominator),
       marks: 2,
       questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+      promptParts: [
+        textPart("Calculate "),
+        mathPart(`\\dfrac{${a}}{${b}} + \\dfrac{${c}}{${d}}`),
+        textPart("."),
+      ],
+      answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
     };
   }
 
   if (op === "-") {
     const common = lcm(b, d);
-    const result = reduceFraction((a * common) / b - (c * common) / d, common);
+    const resultNum = (a * common) / b - (c * common) / d;
+    const result = reduceFraction(resultNum, common);
+
     return {
-      prompt: `Calculate \\(\\dfrac{${a}}{${b}} - \\dfrac{${c}}{${d}}\\).`,
-      answer: formatFraction(result.numerator, result.denominator),
+      prompt: `Calculate ${a}/${b} - ${c}/${d}.`,
+      answer: formatFractionPlain(result.numerator, result.denominator),
       marks: 2,
       questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+      promptParts: [
+        textPart("Calculate "),
+        mathPart(`\\dfrac{${a}}{${b}} - \\dfrac{${c}}{${d}}`),
+        textPart("."),
+      ],
+      answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
     };
   }
 
   if (op === "×") {
     const result = reduceFraction(a * c, b * d);
+
     return {
-      prompt: `Calculate \\(\\dfrac{${a}}{${b}} \\times \\dfrac{${c}}{${d}}\\).`,
-      answer: formatFraction(result.numerator, result.denominator),
+      prompt: `Calculate ${a}/${b} × ${c}/${d}.`,
+      answer: formatFractionPlain(result.numerator, result.denominator),
       marks: 2,
       questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+      promptParts: [
+        textPart("Calculate "),
+        mathPart(`\\dfrac{${a}}{${b}} \\times \\dfrac{${c}}{${d}}`),
+        textPart("."),
+      ],
+      answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
     };
   }
 
   const result = reduceFraction(a * d, b * c);
+
   return {
-    prompt: `Calculate \\(\\dfrac{${a}}{${b}} \\div \\dfrac{${c}}{${d}}\\).`,
-    answer: formatFraction(result.numerator, result.denominator),
+    prompt: `Calculate ${a}/${b} ÷ ${c}/${d}.`,
+    answer: formatFractionPlain(result.numerator, result.denominator),
     marks: 2,
     questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+    promptParts: [
+      textPart("Calculate "),
+      mathPart(`\\dfrac{${a}}{${b}} \\div \\dfrac{${c}}{${d}}`),
+      textPart("."),
+    ],
+    answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
   };
 }
 
-function buildGenerated(skill: Skill, selectedConcept: string, difficulty: DifficultyLevel): GeneratedQuestionData {
+function buildGenerated(
+  skill: Skill,
+  selectedConcept: string,
+  difficulty: DifficultyLevel
+): GeneratedQuestionData {
   const concept = getConceptFromSelection(skill, selectedConcept);
   const conceptCode = concept?.code ?? selectedConcept;
 
@@ -471,6 +612,14 @@ function buildGenerated(skill: Skill, selectedConcept: string, difficulty: Diffi
         answer: "Answer not yet implemented.",
         marks: concept?.marks ?? 2,
         questionCode: buildQuestionCode(skill.domain ?? "GEN", skill.code, concept?.code ?? "C00"),
+        promptParts: [
+          textPart(
+            concept?.fullDescription
+              ? `Placeholder question for ${concept.code}: ${concept.fullDescription}`
+              : `Placeholder question for ${skill.code}: ${selectedConcept}`
+          ),
+        ],
+        answerParts: [textPart("Answer not yet implemented.")],
       };
   }
 }
@@ -806,7 +955,7 @@ export default function CreateAssessmentBuilderPage() {
 
   const theme = useMemo(
     () => getTheme(appearance, systemPrefersDark),
-    [appearance, systemPrefersDark],
+    [appearance, systemPrefersDark]
   );
 
   const editDraftRef = useRef<EditDraftByPaper>({ P1: null, P2: null });
@@ -923,7 +1072,7 @@ export default function CreateAssessmentBuilderPage() {
       if (storedClass !== null) setClassName(storedClass);
 
       const initialAssessmentDate = normaliseDisplayDate(
-        storedAssessmentDate || storedP1Date || "",
+        storedAssessmentDate || storedP1Date || ""
       );
       if (initialAssessmentDate) {
         setAssessmentDate(initialAssessmentDate);
@@ -969,26 +1118,22 @@ export default function CreateAssessmentBuilderPage() {
       prev !== "[Untitled file]"
         ? prev
         : brief.assessmentName && brief.assessmentName.trim().length
-          ? brief.assessmentName
-          : "[Untitled file]",
+        ? brief.assessmentName
+        : "[Untitled file]"
     );
 
     setClassName((prev) => (prev.trim().length ? prev : brief.className ?? ""));
 
     const briefDate = normaliseDisplayDate(brief.assessmentDate || "");
     if (briefDate) {
-      setAssessmentDate((prev) =>
-        prev && prev !== todayDisplayDate() ? prev : briefDate,
-      );
-      setP2CoverDate((prev) =>
-        prev && prev !== todayDisplayDate() ? prev : briefDate,
-      );
+      setAssessmentDate((prev) => (prev && prev !== todayDisplayDate() ? prev : briefDate));
+      setP2CoverDate((prev) => (prev && prev !== todayDisplayDate() ? prev : briefDate));
     }
 
     setCreatedAt(
       typeof brief.createdAt === "number" && Number.isFinite(brief.createdAt)
         ? brief.createdAt
-        : Date.now(),
+        : Date.now()
     );
 
     if (brief.paperStructure === "P2_ONLY") {
@@ -1048,7 +1193,10 @@ export default function CreateAssessmentBuilderPage() {
       window.localStorage.setItem(P1_START_TIME_KEY, p1StartTime);
       window.localStorage.setItem(P1_END_TIME_KEY, p1EndTime);
 
-      window.localStorage.setItem(P2_COVER_DATE_KEY, p2DateCustom ? p2CoverDate : assessmentDate);
+      window.localStorage.setItem(
+        P2_COVER_DATE_KEY,
+        p2DateCustom ? p2CoverDate : assessmentDate
+      );
       window.localStorage.setItem(P2_START_TIME_KEY, p2StartTime);
       window.localStorage.setItem(P2_END_TIME_KEY, p2EndTime);
 
@@ -1231,7 +1379,7 @@ export default function CreateAssessmentBuilderPage() {
   const totalSkillsCount = useMemo(() => {
     return Object.values(skillsData).reduce<number>(
       (acc, list) => acc + (list as Skill[]).length,
-      0,
+      0
     );
   }, []);
 
@@ -1285,16 +1433,16 @@ export default function CreateAssessmentBuilderPage() {
 
   const toggleSkillRow = useCallback((skillId: string) => {
     setExpandedSkillIds((prev) =>
-      prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId],
+      prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId]
     );
   }, []);
 
   const collapseAllSkills = useCallback(() => setExpandedSkillIds([]), []);
 
   const getConceptIndex = useCallback(
-    (skillId: string) => conceptIndexBySkill[skillId] ?? 0,
-    [conceptIndexBySkill],
-  );
+  (skillId: string) => conceptIndexBySkill[skillId] ?? -1,
+  [conceptIndexBySkill],
+);
 
   const setConceptIndex = useCallback((skillId: string, nextIndex: number) => {
     setConceptIndexBySkill((prev) => ({ ...prev, [skillId]: nextIndex }));
@@ -1302,7 +1450,7 @@ export default function CreateAssessmentBuilderPage() {
 
   const getDifficulty = useCallback(
     (skillId: string) => difficultyBySkill[skillId] ?? 3,
-    [difficultyBySkill],
+    [difficultyBySkill]
   );
 
   const setDifficulty = useCallback((skillId: string, next: DifficultyLevel) => {
@@ -1363,7 +1511,7 @@ export default function CreateAssessmentBuilderPage() {
       setDraftByPaper((prev) => ({ ...prev, [paper]: draft }));
       setViewPaper((prev) => (prev === paper ? prev : paper));
     },
-    [standardFilter, targetMarks],
+    [standardFilter, targetMarks]
   );
 
   const regenerateQuestionToPaper = useCallback(
@@ -1442,12 +1590,12 @@ export default function CreateAssessmentBuilderPage() {
 
       setViewPaper((prev) => (prev === paper ? prev : paper));
     },
-    [standardFilter, targetMarks],
+    [standardFilter, targetMarks]
   );
 
   const assignedForView = useMemo(
     () => questions.filter((q) => q.paper === viewPaper),
-    [questions, viewPaper],
+    [questions, viewPaper]
   );
 
   const editForView = editDraftByPaper[viewPaper];
@@ -1531,7 +1679,7 @@ export default function CreateAssessmentBuilderPage() {
         },
       }));
     },
-    [questions],
+    [questions]
   );
 
   const saveEdit = useCallback(() => {
