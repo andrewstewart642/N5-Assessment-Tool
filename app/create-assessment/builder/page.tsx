@@ -350,7 +350,8 @@ export default function CreateAssessmentBuilderPage() {
   const [leftPaneRatio, setLeftPaneRatio] = useState<number>(1 / 2.25);
   const [isDraggingDivider, setIsDraggingDivider] = useState(false);
 
-  const [hudHeight, setHudHeight] = useState<number>(120);
+  const DEFAULT_HUD_HEIGHT = 170;
+  const [hudHeight, setHudHeight] = useState<number>(DEFAULT_HUD_HEIGHT);
   const [isDraggingHud, setIsDraggingHud] = useState(false);
   const [showProgressPanel, setShowProgressPanel] = useState(true);
 
@@ -410,7 +411,7 @@ export default function CreateAssessmentBuilderPage() {
 
   const resetLayout = useCallback(() => {
     setLeftPaneRatio(1 / 2.25);
-    setHudHeight(120);
+    setHudHeight(DEFAULT_HUD_HEIGHT);
     setShowProgressPanel(true);
 
     try {
@@ -468,7 +469,7 @@ export default function CreateAssessmentBuilderPage() {
       const rawHud = window.localStorage.getItem(HUD_HEIGHT_KEY);
       if (rawHud) {
         const parsedHud = Number(rawHud);
-        if (Number.isFinite(parsedHud)) setHudHeight(clamp(parsedHud, 88, 280));
+        if (Number.isFinite(parsedHud)) setHudHeight(clamp(parsedHud, DEFAULT_HUD_HEIGHT, 280));
       }
 
       const rawShowHud = window.localStorage.getItem(SHOW_PROGRESS_PANEL_KEY);
@@ -785,6 +786,24 @@ export default function CreateAssessmentBuilderPage() {
     const ro = new ResizeObserver(() => calc());
     ro.observe(el);
     return () => ro.disconnect();
+  }, []);
+    useEffect(() => {
+    const el = previewPaneRef.current;
+    if (!el) return;
+
+    const handleWheel = (event: WheelEvent) => {
+      if (!event.ctrlKey) return;
+
+      event.preventDefault();
+
+      setZoomPct((prev) => clamp(prev + (event.deltaY < 0 ? 5 : -5), 50, 160));
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+    };
   }, []);
 
   const totalSkillsCount = useMemo(() => {
@@ -1362,7 +1381,7 @@ export default function CreateAssessmentBuilderPage() {
             style={{
               background: theme.panelBg2,
               display: "grid",
-              gridTemplateRows: `56px minmax(0, 1fr) ${viewerHudRow}`,
+              gridTemplateRows: `65px minmax(0, 1fr) ${viewerHudRow}`,
               minHeight: 0,
               overflow: "hidden",
               position: "relative",
@@ -1375,9 +1394,9 @@ export default function CreateAssessmentBuilderPage() {
                 background: theme.panelBg2,
                 display: "grid",
                 gridTemplateColumns: "minmax(0, 1fr) auto",
-                alignItems: "end",
+                alignItems: "center",
                 gap: 10,
-                padding: "6px 14px 8px",
+                padding: "3px 10px 14px",
                 boxSizing: "border-box",
                 minHeight: 0,
                 position: "relative",
@@ -1505,29 +1524,7 @@ export default function CreateAssessmentBuilderPage() {
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  justifySelf: "end",
-                  whiteSpace: "nowrap",
-                  transform: "translateY(1px)",
-                }}
-              >
-                <div
-                  style={{
-                    color: "rgba(214,227,243,0.78)",
-                    fontSize: 13,
-                    fontFamily: UI_TYPO.family,
-                    fontWeight: UI_TYPO.weightMedium,
-                  }}
-                >
-                                </div>
-
-                
-
-                              <div
+                            <div
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -1550,7 +1547,6 @@ export default function CreateAssessmentBuilderPage() {
 
                 <ViewingToggle value={viewPaper} onChange={setViewPaper} />
               </div>
-              </div>
             </div>
 
             <div
@@ -1561,122 +1557,151 @@ export default function CreateAssessmentBuilderPage() {
                 minHeight: 0,
                 overflowY: "auto",
                 overflowX: "auto",
-                padding: "10px 14px 22px",
+                padding: "18px 18px 18px",
                 background: theme.pageBg === "#eef3f8" ? "#e9eff6" : theme.panelBg2,
               }}
             >
-              <div
+               <div
                 style={{
                   position: "sticky",
-                  top: 10,
+                  top: 8,
                   zIndex: 6,
                   width: "100%",
+                  height: 0,
                   display: "flex",
                   justifyContent: "center",
                   pointerEvents: "none",
-                  marginBottom: -30,
+                  overflow: "visible",
                 }}
               >
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0,
-                    background: "rgba(255,255,255,0.32)",
-                    border: "1px solid rgba(255,255,255,0.10)",
-                    borderRadius: 18,
-                    padding: "10px 18px",
-                    boxShadow: "0 18px 26px rgba(0,0,0,0.24)",
-                    backdropFilter: "blur(8px)",
-                    WebkitBackdropFilter: "blur(8px)",
+                    position: "relative",
+                    width: 188,
+                    height: 42,
+                    background: "rgba(188, 194, 203, 0.88)",
+                    border: "1px solid rgba(255,255,255,0.22)",
+                    borderRadius: 14,
+                    boxShadow: "0 12px 24px rgba(0,0,0,0.18)",
+                    backdropFilter: "blur(6px)",
+                    WebkitBackdropFilter: "blur(6px)",
                     pointerEvents: "auto",
                   }}
                 >
                   <div
                     style={{
-                      minWidth: 74,
-                      padding: "0 8px",
-                      textAlign: "center",
-                      color: "rgba(110,110,110,0.92)",
-                      fontSize: 18,
-                      fontFamily: UI_TYPO.family,
-                      fontWeight: UI_TYPO.weightMedium,
+                      position: "absolute",
+                      left: 6,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
                     }}
-                    title={`Page ${currentViewerPage} of ${totalViewerPages}`}
                   >
-                    {currentViewerPage} / {totalViewerPages}
+                    <div
+                      style={{
+                        width: 28,
+                        textAlign: "center",
+                        color: "rgba(70,70,70,0.65)",
+                        fontSize: 12,
+                        fontFamily: UI_TYPO.family,
+                        fontWeight: UI_TYPO.weightMedium,
+                        lineHeight: 1,
+                      }}
+                      title={`Page ${currentViewerPage} of ${totalViewerPages}`}
+                    >
+                      {currentViewerPage}/{totalViewerPages}
+                    </div>
+
+                    <div
+                      style={{
+                        width: 1,
+                        height: 18,
+                        background: "rgba(90,90,90,0.30)",
+                      }}
+                    />
                   </div>
 
                   <div
                     style={{
-                      width: 1,
-                      height: 74,
-                      background: "rgba(110,110,110,0.58)",
-                      margin: "0 16px",
-                    }}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={zoomOut}
-                    style={{
-                      width: 34,
-                      height: 34,
-                      border: "none",
-                      background: "transparent",
-                      color: "rgba(110,110,110,0.92)",
-                      cursor: "pointer",
-                      fontFamily: UI_TYPO.family,
-                      fontWeight: UI_TYPO.weightMedium,
-                      fontSize: 34,
-                      lineHeight: 1,
+                      position: "absolute",
+                      left: "58%",
+                      top: "50%",
+                      transform: "translate(-50%, -50%)",
                       display: "grid",
-                      placeItems: "center",
+                      gridTemplateColumns: "24px 54px 24px",
+                      alignItems: "center",
+                      justifyItems: "center",
+                      columnGap: 6,
+                      height: 24,
                     }}
-                    title="Zoom out"
                   >
-                    -
-                  </button>
+                    <button
+                      type="button"
+                      onClick={zoomOut}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        border: "none",
+                        borderRadius: 6,
+                        background: "transparent",
+                        color: "rgba(70,70,70,0.94)",
+                        cursor: "pointer",
+                        fontFamily: UI_TYPO.family,
+                        fontWeight: UI_TYPO.weightMedium,
+                        fontSize: 20,
+                        lineHeight: "24px",
+                        display: "grid",
+                        placeItems: "center",
+                        padding: 0,
+                      }}
+                      title="Zoom out"
+                    >
+                      −
+                    </button>
 
-                  <div
-                    style={{
-                      minWidth: 90,
-                      padding: "0 10px",
-                      textAlign: "center",
-                      color: "rgba(110,110,110,0.92)",
-                      fontSize: 18,
-                      fontFamily: UI_TYPO.family,
-                      fontWeight: UI_TYPO.weightMedium,
-                    }}
-                    title="Current zoom"
-                  >
-                    {zoomPct}%
+                    <div
+                      style={{
+                        width: 54,
+                        textAlign: "center",
+                        color: "rgba(70,70,70,0.95)",
+                        fontSize: 15,
+                        fontFamily: UI_TYPO.family,
+                        fontWeight: UI_TYPO.weightSemibold,
+                        lineHeight: "24px",
+                      }}
+                      title="Current zoom"
+                    >
+                      {zoomPct}%
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={zoomIn}
+                      style={{
+                        width: 24,
+                        height: 24,
+                        border: "none",
+                        borderRadius: 6,
+                        background: "transparent",
+                        color: "rgba(70,70,70,0.94)",
+                        cursor: "pointer",
+                        fontFamily: UI_TYPO.family,
+                        fontWeight: UI_TYPO.weightMedium,
+                        fontSize: 20,
+                        lineHeight: "24px",
+                        display: "grid",
+                        placeItems: "center",
+                        padding: 0,
+                      }}
+                      title="Zoom in"
+                    >
+                      +
+                    </button>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={zoomIn}
-                    style={{
-                      width: 34,
-                      height: 34,
-                      border: "none",
-                      background: "transparent",
-                      color: "rgba(110,110,110,0.92)",
-                      cursor: "pointer",
-                      fontFamily: UI_TYPO.family,
-                      fontWeight: UI_TYPO.weightMedium,
-                      fontSize: 34,
-                      lineHeight: 1,
-                      display: "grid",
-                      placeItems: "center",
-                    }}
-                    title="Zoom in"
-                  >
-                    +
-                  </button>
                 </div>
               </div>
-
               <div
                 style={{
                   width: "max-content",
