@@ -1,4 +1,4 @@
-import type { PaperPart } from "@/shared-types/paperParts";
+import type { PaperPart } from "@/shared-types/PaperParts";
 
 export type Paper = "P1" | "P2";
 

@@ -1,7 +1,7 @@
 // page-sections/AddQuestionButton.tsx
 
-import { UI_TEXT, UI_TYPO } from "@/app/ui/uiTypography";
-import type { Theme } from "@/shared-types/assessmentTypes";
+import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { Theme } from "@/shared-types/AssessmentTypes";
 
 type Props = {
   onClick: () => void;

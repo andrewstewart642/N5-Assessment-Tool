@@ -1,4 +1,4 @@
-import type { Skill } from "@/shared-types/assessmentTypes";
+import type { Skill } from "@/shared-types/AssessmentTypes";
 
 export const NQ_N5_NUM_N05_Fractions: Skill = {
   id: "num-n05-fractions",

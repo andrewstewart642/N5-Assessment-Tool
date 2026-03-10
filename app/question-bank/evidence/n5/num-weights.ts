@@ -1,7 +1,7 @@
 // app/question-bank/evidence/n5/num-weights.ts
-import { N5_NUM_EVIDENCE } from "./num";
-import { computePromptWeights } from "../../evidence-engine/compute-prompt-weights";
-import { computeMarksWeights } from "../../evidence-engine/compute-marks-weights";
+import { N5_NUM_EVIDENCE } from "./Num";
+import { computePromptWeights } from "../../evidence-engine/Compute-Prompt-Weights";
+import { computeMarksWeights } from "../../evidence-engine/Compute-Marks-Weights";
 
 /**
  * Cached weights for the N5 Numerical umbrella.

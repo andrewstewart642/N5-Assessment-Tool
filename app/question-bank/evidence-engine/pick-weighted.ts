@@ -1,4 +1,4 @@
-import type { WeightedItem } from "./evidence-types";
+import type { WeightedItem } from "./Evidence-Types";
 
 /**
  * Picks a weighted item safely:

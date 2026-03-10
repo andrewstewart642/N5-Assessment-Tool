@@ -2,7 +2,7 @@
 
 import katex from "katex";
 
-import type { PaperPart } from "@/shared-types/paperParts";
+import type { PaperPart } from "@/shared-types/PaperParts";
 
 type Props = {
   parts: PaperPart[];

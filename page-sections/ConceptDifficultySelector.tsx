@@ -2,8 +2,8 @@
 // Compact concept + difficulty cyclers with smaller arrow buttons.
 
 import type React from "react";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/uiTypography";
-import type { Theme } from "@/shared-types/assessmentTypes";
+import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { Theme } from "@/shared-types/AssessmentTypes";
 
 type StepperProps = {
   label: string;

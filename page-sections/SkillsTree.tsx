@@ -1,14 +1,14 @@
 "use client";
 
 import CategorySection from "@/page-sections/CategorySection";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/uiTypography";
+import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
   DifficultyLevel,
   Paper,
   Skill,
   StandardFilter,
   Theme,
-} from "@/shared-types/assessmentTypes";
+} from "@/shared-types/AssessmentTypes";
 
 function CircleRadio(props: {
   label: string;

@@ -1,7 +1,7 @@
 "use client";
 
-import type { Question } from "@/shared-types/assessmentTypes";
-import type { PaperPart } from "@/shared-types/paperParts";
+import type { Question } from "@/shared-types/AssessmentTypes";
+import type { PaperPart } from "@/shared-types/PaperParts";
 import PaperContent from "@/page-sections/PaperContent";
 
 export type PaperQuestionDraftProps = {

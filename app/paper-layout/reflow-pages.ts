@@ -1,6 +1,6 @@
-import type { Question } from "@/shared-types/assessmentTypes";
-import type { PageSizeConfig } from "@/app/paper-layout/page-sizes";
-import { getSpacingBasePx } from "@/app/paper-layout/n5-question-spacing-px";
+import type { Question } from "@/shared-types/AssessmentTypes";
+import type { PageSizeConfig } from "@/app/paper-layout/Page-Sizes";
+import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 
 /**
  * Fallback heuristic ONLY (used when measured height isn't available yet).

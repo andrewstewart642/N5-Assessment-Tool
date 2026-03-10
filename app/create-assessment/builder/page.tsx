@@ -13,17 +13,17 @@ import PaperQuestionDraft from "@/page-sections/PaperQuestionDraft";
 import MeasureBox from "@/page-sections/MeasureBox";
 import SettingsPanel from "@/page-sections/SettingsPanel";
 import SharedCalendarPicker from "@/page-sections/SharedCalendarPicker";
-import { calculateEndTime } from "./assessmentTiming";
+import { calculateEndTime } from "./AssessmentTiming";
 
-import { skillsData } from "@/course-data/n5-skills";
-import { makeId } from "@/math-helpers/questionLogic";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/uiTypography";
+import { skillsData } from "@/course-data/N5-Skills";
+import { makeId } from "@/math-helpers/QuestionLogic";
+import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
   APPEARANCE_STORAGE_KEY,
   getTheme,
   type AppearancePreference,
-} from "@/app/ui/appTheme";
-import type { PaperPart } from "@/shared-types/paperParts";
+} from "@/app/ui/AppTheme";
+import type { PaperPart } from "@/shared-types/PaperParts";
 import type {
   Concept,
   DifficultyLevel,
@@ -32,12 +32,12 @@ import type {
   QuestionSkillLink,
   Skill,
   StandardFilter,
-} from "@/shared-types/assessmentTypes";
+} from "@/shared-types/AssessmentTypes";
 
-import { getSpacingBasePx } from "@/app/paper-layout/n5-question-spacing-px";
+import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 
 import BuilderGlobalStyles from "./BuilderStyles";
-import { buildBuilderPages, buildPreviewPages } from "./buildPreviewPages";
+import { buildBuilderPages, buildPreviewPages } from "./BuildPreviewPages";
 import {
   A4_W_PX,
   clamp,
@@ -48,7 +48,7 @@ import {
   type DraftByPaper,
   type EditDraftByPaper,
   type PreviewPage,
-} from "./builderUtils";
+} from "./BuilderUtils";
 import {
   HUD_HEIGHT_KEY,
   INCLUDE_COVER_SHEET_KEY,
@@ -58,8 +58,8 @@ import {
   SHOW_PROGRESS_PANEL_KEY,
   SHOW_SCN_BOX_KEY,
   STORAGE_KEY,
-} from "./builderStorageKeys";
-import { loadAssessmentSetupBrief } from "../setup/assessmentSetupStorage";
+} from "./BuilderStorageKeys";
+import { loadAssessmentSetupBrief } from "../setup/AssessmentSetupStorage";
 
 const META_NAME_KEY = "n5-builder-meta-name";
 const META_CLASS_KEY = "n5-builder-meta-class";

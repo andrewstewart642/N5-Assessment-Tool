@@ -1,5 +1,5 @@
 // app/question-bank/evidence/n5/num.ts
-import type { EvidenceRow } from "../../evidence-engine/evidence-types";
+import type { EvidenceRow } from "../../evidence-engine/Evidence-Types";
 
 /**
  * N5 Numerical evidence (SQA + other sources).

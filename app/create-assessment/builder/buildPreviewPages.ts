@@ -1,7 +1,7 @@
-import type { Question } from "@/shared-types/assessmentTypes";
-import type { PreviewPage, EditDraftByPaper } from "./builderUtils";
-import { PAGE_SIZES } from "@/app/paper-layout/page-sizes";
-import { paginateQuestions } from "@/app/paper-layout/reflow-pages";
+import type { Question } from "@/shared-types/AssessmentTypes";
+import type { PreviewPage, EditDraftByPaper } from "./BuilderUtils";
+import { PAGE_SIZES } from "@/app/paper-layout/Page-Sizes";
+import { paginateQuestions } from "@/app/paper-layout/Reflow-Pages";
 
 export function buildBuilderPages(args: {
   assignedForView: Question[];

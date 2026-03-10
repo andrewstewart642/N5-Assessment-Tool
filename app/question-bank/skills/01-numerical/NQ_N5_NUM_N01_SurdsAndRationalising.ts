@@ -1,4 +1,4 @@
-import type { Skill } from "@/shared-types/assessmentTypes";
+import type { Skill } from "@/shared-types/AssessmentTypes";
 
 export const NQ_N5_NUM_N01_SurdsAndRationalising: Skill = {
   id: "num-n01-surds-and-rationalising",

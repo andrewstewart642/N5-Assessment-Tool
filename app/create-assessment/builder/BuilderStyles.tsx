@@ -1,6 +1,6 @@
 "use client";
 
-import type { Theme } from "@/shared-types/assessmentTypes";
+import type { Theme } from "@/shared-types/AssessmentTypes";
 
 type Props = {
   theme: Theme;

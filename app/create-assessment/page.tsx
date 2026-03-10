@@ -3,18 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { UI_TYPO } from "@/app/ui/uiTypography";
+import { UI_TYPO } from "@/app/ui/UiTypography";
 import {
   APPEARANCE_STORAGE_KEY,
   getTheme,
   type AppearancePreference,
-} from "@/app/ui/appTheme";
+} from "@/app/ui/AppTheme";
 import {
   saveAssessmentSetupBrief,
   type AssessmentType,
   type BuildPriority,
   type PaperStructure,
-} from "./setup/assessmentSetupStorage";
+} from "./setup/AssessmentSetupStorage";
 
 type SetupCardProps = {
   title: string;

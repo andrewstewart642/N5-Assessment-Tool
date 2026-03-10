@@ -1,7 +1,7 @@
 // math-helpers/questionLogic.ts
 // Reusable logic helpers shared across components.
 
-import type { Concept, DifficultyLevel, Skill, StandardFilter } from "@/shared-types/assessmentTypes";
+import type { Concept, DifficultyLevel, Skill, StandardFilter } from "@/shared-types/AssessmentTypes";
 
 export function conceptMatchesFilter(concept: Concept, filter: StandardFilter) {
   if (filter === "C+A") return true;

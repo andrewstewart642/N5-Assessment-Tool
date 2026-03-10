@@ -1,4 +1,4 @@
-import { EvidenceRow, PromptStyleId } from "./evidence-types";
+import { EvidenceRow, PromptStyleId } from "./Evidence-Types";
 
 export type PromptWeight = { id: PromptStyleId; weight: number };
 

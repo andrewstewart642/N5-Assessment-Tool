@@ -7,20 +7,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import AddQuestionButton from "@/page-sections/AddQuestionButton";
 import PaperContent from "@/page-sections/PaperContent";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/uiTypography";
+import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
   cycleDifficulty,
   getFilteredConcepts,
   rankConceptsByTargetMarks,
-} from "@/math-helpers/questionLogic";
-import type { PaperPart } from "@/shared-types/paperParts";
+} from "@/math-helpers/QuestionLogic";
+import type { PaperPart } from "@/shared-types/PaperParts";
 import type {
   Concept,
   DifficultyLevel,
   Skill,
   StandardFilter,
   Theme,
-} from "@/shared-types/assessmentTypes";
+} from "@/shared-types/AssessmentTypes";
 
 type Props = {
   category: string;

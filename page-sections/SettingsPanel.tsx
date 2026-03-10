@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { AppTheme as Theme, AppearancePreference } from "@/app/ui/appTheme";
+import type { AppTheme as Theme, AppearancePreference } from "@/app/ui/AppTheme";
 import SharedCalendarPicker from "@/page-sections/SharedCalendarPicker";
 
 type Props = {

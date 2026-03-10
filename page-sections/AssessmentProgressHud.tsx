@@ -1,7 +1,7 @@
 "use client";
 
-import { UI_TEXT, UI_TYPO } from "@/app/ui/uiTypography";
-import type { Paper, Theme } from "@/shared-types/assessmentTypes";
+import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { Paper, Theme } from "@/shared-types/AssessmentTypes";
 
 type Props = {
   viewPaper?: Paper;

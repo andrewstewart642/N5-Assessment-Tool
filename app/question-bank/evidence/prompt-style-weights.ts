@@ -1,2 +1,2 @@
-export { PROMPT_STYLES } from "@/app/question-bank/prompt-styles/prompt-styles";
-export type { PromptStyleId } from "@/app/question-bank/prompt-styles/prompt-styles";
+export { PROMPT_STYLES } from "@/app/Question-Bank/prompt-styles/prompt-styles";
+export type { PromptStyleId } from "@/app/Question-Bank/prompt-styles/prompt-styles";

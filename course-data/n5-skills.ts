@@ -1,10 +1,10 @@
-import type { Concept, Skill, SkillsData } from "@/shared-types/assessmentTypes";
+import type { Concept, Skill, SkillsData } from "@/shared-types/AssessmentTypes";
 
-import { NQ_N5_NUM_N01_SurdsAndRationalising } from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N01_SurdsAndRationalising";
-import { NQ_N5_NUM_N02_IndicesAndScientificNotation } from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_IndicesAndScientificNotation";
-import { NQ_N5_NUM_N03_SignificantFigures } from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N03_SignificantFigures";
-import { NQ_N5_NUM_N04_PercentageApplications } from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_PercentageApplications";
-import { NQ_N5_NUM_N05_Fractions } from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N05_Fractions";
+import { NQ_N5_NUM_N01_SurdsAndRationalising } from "@/app/Question-Bank/skills/01-numerical/NQ_N5_NUM_N01_SurdsAndRationalising";
+import { NQ_N5_NUM_N02_IndicesAndScientificNotation } from "@/app/Question-Bank/skills/01-numerical/NQ_N5_NUM_N02_IndicesAndScientificNotation";
+import { NQ_N5_NUM_N03_SignificantFigures } from "@/app/Question-Bank/skills/01-numerical/NQ_N5_NUM_N03_SignificantFigures";
+import { NQ_N5_NUM_N04_PercentageApplications } from "@/app/Question-Bank/skills/01-numerical/NQ_N5_NUM_N04_PercentageApplications";
+import { NQ_N5_NUM_N05_Fractions } from "@/app/Question-Bank/skills/01-numerical/NQ_N5_NUM_N05_Fractions";
 
 function placeholderConcept(
   id: string,

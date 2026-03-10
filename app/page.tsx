@@ -3,12 +3,12 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { UI_TYPO } from "@/app/ui/uiTypography";
+import { UI_TYPO } from "@/app/ui/UiTypography";
 import {
   APPEARANCE_STORAGE_KEY,
   getTheme,
   type AppearancePreference,
-} from "@/app/ui/appTheme";
+} from "@/app/ui/AppTheme";
 
 type HomeCard = {
   title: string;

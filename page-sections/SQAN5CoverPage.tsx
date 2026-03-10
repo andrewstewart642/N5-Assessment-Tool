@@ -2,7 +2,7 @@
 
 import { Fira_Sans } from "next/font/google";
 import SQAPageFrame from "@/page-sections/SQAPageFrame";
-import type { Paper } from "@/shared-types/assessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 
 const firaSans = Fira_Sans({
   subsets: ["latin"],

@@ -1,6 +1,6 @@
 // app/question-bank/evidence-engine/compute-marks-weights.ts
 
-import { EvidenceRow } from "./evidence-types";
+import { EvidenceRow } from "./Evidence-Types";
 
 export type MarksWeight = { marks: number; weight: number };
 

@@ -1,5 +1,5 @@
-import type { DifficultyLevel, Paper, Question } from "@/shared-types/assessmentTypes";
-import { getSpacingBasePx } from "@/app/paper-layout/n5-question-spacing-px";
+import type { DifficultyLevel, Paper, Question } from "@/shared-types/AssessmentTypes";
+import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 
 export type DraftByPaper = Record<Paper, Question | null>;
 

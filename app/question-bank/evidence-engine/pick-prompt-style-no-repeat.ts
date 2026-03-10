@@ -1,5 +1,5 @@
-import { pickWeighted } from "./pick-weighted";
-import type { WeightedItem } from "./evidence-types";
+import { pickWeighted } from "./Pick-Weighted";
+import type { WeightedItem } from "./Evidence-Types";
 
 /**
  * Creates a no-repeat picker for weighted IDs.
