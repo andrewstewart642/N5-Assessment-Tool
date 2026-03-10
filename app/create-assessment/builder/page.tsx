@@ -24,14 +24,15 @@ import {
   type AppearancePreference,
 } from "@/app/ui/appTheme";
 import type {
+  Concept,
   DifficultyLevel,
   Paper,
   Question,
+  QuestionSkillLink,
   Skill,
   StandardFilter,
 } from "@/shared-types/assessmentTypes";
 
-import { generateNQ_N5_NUM_N01 } from "@/app/question-bank/skills/01-numercial/01-surds/01-simplify-surds-basic";
 import { getSpacingBasePx } from "@/app/paper-layout/n5-question-spacing-px";
 
 import BuilderGlobalStyles from "./BuilderStyles";
@@ -72,6 +73,426 @@ const P2_START_TIME_KEY = "n5-builder-p2-start-time";
 const P2_END_TIME_KEY = "n5-builder-p2-end-time";
 
 const P2_DATE_CUSTOM_KEY = "n5-builder-p2-date-custom";
+
+type GeneratedQuestionData = {
+  prompt?: string;
+  answer?: string;
+  marks?: number;
+  questionCode?: string;
+};
+
+function randomInt(min: number, max: number): number {
+  const low = Math.ceil(min);
+  const high = Math.floor(max);
+  return Math.floor(Math.random() * (high - low + 1)) + low;
+}
+
+function chooseOne<T>(items: T[]): T {
+  return items[randomInt(0, items.length - 1)];
+}
+
+function gcd(a: number, b: number): number {
+  let x = Math.abs(a);
+  let y = Math.abs(b);
+  while (y !== 0) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x || 1;
+}
+
+function lcm(a: number, b: number): number {
+  return Math.abs(a * b) / gcd(a, b);
+}
+
+function reduceFraction(numerator: number, denominator: number) {
+  const sign = denominator < 0 ? -1 : 1;
+  const g = gcd(numerator, denominator);
+  return {
+    numerator: (sign * numerator) / g,
+    denominator: (sign * denominator) / g,
+  };
+}
+
+function formatFraction(numerator: number, denominator: number): string {
+  const reduced = reduceFraction(numerator, denominator);
+  if (reduced.denominator === 1) return `${reduced.numerator}`;
+  return `${reduced.numerator}/${reduced.denominator}`;
+}
+
+function nonSquarePartFromRoot(radicand: number) {
+  let outside = 1;
+  let inside = radicand;
+
+  for (let i = 2; i * i <= inside; i += 1) {
+    while (inside % (i * i) === 0) {
+      outside *= i;
+      inside /= i * i;
+    }
+  }
+
+  return { outside, inside };
+}
+
+function formatSimplifiedSurdFromRoot(radicand: number): string {
+  const { outside, inside } = nonSquarePartFromRoot(radicand);
+  if (inside === 1) return `${outside}`;
+  if (outside === 1) return `√${inside}`;
+  return `${outside}√${inside}`;
+}
+
+function getConceptFromSelection(skill: Skill, selectedConcept: string): Concept | undefined {
+  return skill.concepts.find(
+    (c) =>
+      c.label === selectedConcept ||
+      c.code === selectedConcept ||
+      c.shortLabel === selectedConcept,
+  );
+}
+
+function buildQuestionCode(domain: string, skillCode: string, conceptCode: string) {
+  const safeSkill = skillCode.replace(/\./g, "");
+  const safeConcept = conceptCode.replace(/\./g, "");
+  return `NQ_N5_${domain}_${safeSkill}_${safeConcept}`;
+}
+
+function generateSurdsSimplify(difficulty: DifficultyLevel): GeneratedQuestionData {
+  const squareFactorsByDifficulty: Record<DifficultyLevel, number[]> = {
+    1: [4, 9],
+    2: [4, 9, 16],
+    3: [4, 9, 16, 25],
+    4: [4, 9, 16, 25, 36],
+    5: [9, 16, 25, 36, 49],
+  };
+
+  const insideChoicesByDifficulty: Record<DifficultyLevel, number[]> = {
+    1: [2, 3, 5, 6],
+    2: [2, 3, 5, 6, 7, 10],
+    3: [2, 3, 5, 6, 7, 10, 11, 12],
+    4: [2, 3, 5, 6, 7, 10, 11, 13, 15],
+    5: [2, 3, 5, 6, 7, 10, 11, 13, 15, 17],
+  };
+
+  const squareFactor = chooseOne(squareFactorsByDifficulty[difficulty]);
+  const inside = chooseOne(insideChoicesByDifficulty[difficulty]);
+  const radicand = squareFactor * inside;
+
+  return {
+    prompt: `Simplify \\(\\sqrt{${radicand}}\\).`,
+    answer: formatSimplifiedSurdFromRoot(radicand),
+    marks: difficulty >= 4 ? 3 : 2,
+    questionCode: "NQ_N5_NUM_N01_N11_SurdsSimplification",
+  };
+}
+
+function generateRationalisingDenominator(difficulty: DifficultyLevel): GeneratedQuestionData {
+  const numerator = randomInt(1, difficulty >= 3 ? 7 : 5);
+  const radicandChoices =
+    difficulty <= 2 ? [2, 3, 5, 6, 7] : [2, 3, 5, 6, 7, 10, 11, 13];
+  const radicand = chooseOne(radicandChoices);
+
+  return {
+    prompt: `Write \\(\\dfrac{${numerator}}{\\sqrt{${radicand}}}\\) with a rational denominator.`,
+    answer: `\\dfrac{${numerator}\\sqrt{${radicand}}}{${radicand}}`,
+    marks: 3,
+    questionCode: "NQ_N5_NUM_N01_N12_RationalisingDenominators",
+  };
+}
+
+function generateIndicesProductQuotient(difficulty: DifficultyLevel): GeneratedQuestionData {
+  const variable = chooseOne(["a", "b", "x", "y"]);
+  const useDivision = Math.random() < 0.5;
+
+  const exponentCap = difficulty <= 2 ? 6 : difficulty === 3 ? 8 : 10;
+  const m = randomInt(difficulty >= 4 ? -4 : 1, exponentCap);
+  const n = randomInt(difficulty >= 3 ? -4 : 1, exponentCap);
+
+  const prompt = useDivision
+    ? `Simplify \\(${variable}^{${m}} \\div ${variable}^{${n}}\\).`
+    : `Simplify \\(${variable}^{${m}} \\times ${variable}^{${n}}\\).`;
+
+  const result = useDivision ? m - n : m + n;
+
+  return {
+    prompt,
+    answer: `${variable}^${result}`,
+    marks: 2,
+    questionCode: "NQ_N5_NUM_N02_N21_ProductQuotientIndices",
+  };
+}
+
+function generatePowerOfProduct(): GeneratedQuestionData {
+  const a = chooseOne(["a", "x", "p"]);
+  const b = chooseOne(["b", "y", "q"]);
+  const power = randomInt(2, 5);
+
+  return {
+    prompt: `Expand \\((${a}${b})^${power}\\) using the laws of indices.`,
+    answer: `${a}^${power}${b}^${power}`,
+    marks: 2,
+    questionCode: "NQ_N5_NUM_N02_N22_PowerOfProduct",
+  };
+}
+
+function generatePowerOfPower(): GeneratedQuestionData {
+  const variable = chooseOne(["a", "x", "m"]);
+  const outer = randomInt(2, 5);
+  const inner = randomInt(2, 5);
+
+  return {
+    prompt: `Simplify \\((${variable}^{${inner}})^${outer}\\).`,
+    answer: `${variable}^${inner * outer}`,
+    marks: 2,
+    questionCode: "NQ_N5_NUM_N02_N23_PowerOfPower",
+  };
+}
+
+function generateFractionalIndices(difficulty: DifficultyLevel): GeneratedQuestionData {
+  const denominator = chooseOne([2, 3]);
+  const numerator = denominator === 2 ? chooseOne([1, 3]) : chooseOne([1, 2, 4]);
+  const base =
+    denominator === 2
+      ? chooseOne([4, 9, 16, 25, 36, 49])
+      : chooseOne([8, 27, 64, 125]);
+  const powerValue = Math.pow(base, numerator / denominator);
+
+  if (difficulty <= 3) {
+    return {
+      prompt: `Evaluate \\(${base}^{${numerator}/${denominator}}\\).`,
+      answer: `${powerValue}`,
+      marks: 3,
+      questionCode: "NQ_N5_NUM_N02_N24_FractionalIndices",
+    };
+  }
+
+  return {
+    prompt: `Write \\(${chooseOne(["a", "x"])}^{${numerator}/${denominator}}\\) in radical form.`,
+    answer:
+      numerator === 1
+        ? `\\sqrt[${denominator}]{${chooseOne(["a", "x"])}}`
+        : `\\sqrt[${denominator}]{${chooseOne(["a", "x"])}^${numerator}}`,
+    marks: 3,
+    questionCode: "NQ_N5_NUM_N02_N24_FractionalIndices",
+  };
+}
+
+function generateScientificNotation(difficulty: DifficultyLevel): GeneratedQuestionData {
+  const a = chooseOne([1.2, 1.5, 2.4, 3.6, 4.8, 6.2, 7.5, 8.4]);
+  const b = chooseOne([1.1, 1.4, 2.5, 3.2, 4.6, 5.5]);
+  const powerA = randomInt(2, 6);
+  const powerB = randomInt(2, 6);
+  const useDivision = difficulty >= 3 ? Math.random() < 0.5 : false;
+
+  if (useDivision) {
+    const value = (a * Math.pow(10, powerA)) / (b * Math.pow(10, powerB));
+    const scientific = value.toExponential(2).replace("e+", " × 10^").replace("e", " × 10^");
+    return {
+      prompt: `Calculate \\(( ${a} \\times 10^{${powerA}} ) \\div ( ${b} \\times 10^{${powerB}} )\\). Give your answer in scientific notation.`,
+      answer: scientific,
+      marks: 3,
+      questionCode: "NQ_N5_NUM_N02_N25_ScientificNotation",
+    };
+  }
+
+  const value = (a * Math.pow(10, powerA)) * (b * Math.pow(10, powerB));
+  const scientific = value.toExponential(2).replace("e+", " × 10^").replace("e", " × 10^");
+
+  return {
+    prompt: `Calculate \\(( ${a} \\times 10^{${powerA}} ) \\times ( ${b} \\times 10^{${powerB}} )\\). Give your answer in scientific notation.`,
+    answer: scientific,
+    marks: 3,
+    questionCode: "NQ_N5_NUM_N02_N25_ScientificNotation",
+  };
+}
+
+function generateSignificantFigures(difficulty: DifficultyLevel): GeneratedQuestionData {
+  const sf = chooseOne([2, 3]);
+  const whole = randomInt(10, difficulty >= 4 ? 9999 : 999);
+  const decimalPart = randomInt(100, 9999);
+  const value = Number(`${whole}.${decimalPart}`);
+
+  return {
+    prompt: `Round ${value} to ${sf} significant figures.`,
+    answer: Number(value.toPrecision(sf)).toString(),
+    marks: 1,
+    questionCode: "NQ_N5_NUM_N03_N31_SignificantFigures",
+  };
+}
+
+function generateReversePercentage(): GeneratedQuestionData {
+  const original = randomInt(80, 400);
+  const percent = chooseOne([5, 10, 15, 20, 25]);
+  const increase = Math.random() < 0.5;
+
+  const finalAmount = increase
+    ? original * (1 + percent / 100)
+    : original * (1 - percent / 100);
+
+  const finalText = Number.isInteger(finalAmount)
+    ? `${finalAmount}`
+    : finalAmount.toFixed(2);
+
+  return {
+    prompt: increase
+      ? `After an increase of ${percent}%, a price is £${finalText}. Find the original price.`
+      : `After a decrease of ${percent}%, a price is £${finalText}. Find the original price.`,
+    answer: `£${original}`,
+    marks: 3,
+    questionCode: "NQ_N5_NUM_N04_N41_ReversePercentage",
+  };
+}
+
+function generateAppreciation(): GeneratedQuestionData {
+  const principal = randomInt(200, 3000);
+  const rate = chooseOne([2, 3, 4, 5, 6, 8, 10]);
+  const years = randomInt(2, 5);
+  const value = principal * Math.pow(1 + rate / 100, years);
+
+  return {
+    prompt: `A value of £${principal} appreciates by ${rate}% each year for ${years} years. Calculate the final value.`,
+    answer: `£${value.toFixed(2)}`,
+    marks: 3,
+    questionCode: "NQ_N5_NUM_N04_N42_Appreciation",
+  };
+}
+
+function generateDepreciation(): GeneratedQuestionData {
+  const principal = randomInt(500, 5000);
+  const rate = chooseOne([5, 8, 10, 12, 15, 20]);
+  const years = randomInt(2, 5);
+  const value = principal * Math.pow(1 - rate / 100, years);
+
+  return {
+    prompt: `A machine worth £${principal} depreciates by ${rate}% each year for ${years} years. Calculate its value after ${years} years.`,
+    answer: `£${value.toFixed(2)}`,
+    marks: 3,
+    questionCode: "NQ_N5_NUM_N04_N43_Depreciation",
+  };
+}
+
+function generateFractions(difficulty: DifficultyLevel): GeneratedQuestionData {
+  const denominatorCap = difficulty <= 2 ? 12 : 20;
+
+  const a = randomInt(1, denominatorCap - 1);
+  const b = randomInt(2, denominatorCap);
+  const c = randomInt(1, denominatorCap - 1);
+  const d = randomInt(2, denominatorCap);
+
+  const op = chooseOne(["+", "-", "×", "÷"] as const);
+
+  if (op === "+") {
+    const common = lcm(b, d);
+    const result = reduceFraction((a * common) / b + (c * common) / d, common);
+    return {
+      prompt: `Calculate \\(\\dfrac{${a}}{${b}} + \\dfrac{${c}}{${d}}\\).`,
+      answer: formatFraction(result.numerator, result.denominator),
+      marks: 2,
+      questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+    };
+  }
+
+  if (op === "-") {
+    const common = lcm(b, d);
+    const result = reduceFraction((a * common) / b - (c * common) / d, common);
+    return {
+      prompt: `Calculate \\(\\dfrac{${a}}{${b}} - \\dfrac{${c}}{${d}}\\).`,
+      answer: formatFraction(result.numerator, result.denominator),
+      marks: 2,
+      questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+    };
+  }
+
+  if (op === "×") {
+    const result = reduceFraction(a * c, b * d);
+    return {
+      prompt: `Calculate \\(\\dfrac{${a}}{${b}} \\times \\dfrac{${c}}{${d}}\\).`,
+      answer: formatFraction(result.numerator, result.denominator),
+      marks: 2,
+      questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+    };
+  }
+
+  const result = reduceFraction(a * d, b * c);
+  return {
+    prompt: `Calculate \\(\\dfrac{${a}}{${b}} \\div \\dfrac{${c}}{${d}}\\).`,
+    answer: formatFraction(result.numerator, result.denominator),
+    marks: 2,
+    questionCode: "NQ_N5_NUM_N05_N51_Fractions",
+  };
+}
+
+function buildGenerated(skill: Skill, selectedConcept: string, difficulty: DifficultyLevel): GeneratedQuestionData {
+  const concept = getConceptFromSelection(skill, selectedConcept);
+  const conceptCode = concept?.code ?? selectedConcept;
+
+  switch (conceptCode) {
+    case "N1.1":
+      return generateSurdsSimplify(difficulty);
+
+    case "N1.2":
+      return generateRationalisingDenominator(difficulty);
+
+    case "N2.1":
+      return generateIndicesProductQuotient(difficulty);
+
+    case "N2.2":
+      return generatePowerOfProduct();
+
+    case "N2.3":
+      return generatePowerOfPower();
+
+    case "N2.4":
+      return generateFractionalIndices(difficulty);
+
+    case "N2.5":
+      return generateScientificNotation(difficulty);
+
+    case "N3.1":
+      return generateSignificantFigures(difficulty);
+
+    case "N4.1":
+      return generateReversePercentage();
+
+    case "N4.2":
+      return generateAppreciation();
+
+    case "N4.3":
+      return generateDepreciation();
+
+    case "N5.1":
+      return generateFractions(difficulty);
+
+    default:
+      return {
+        prompt: concept?.fullDescription
+          ? `Placeholder question for ${concept.code}: ${concept.fullDescription}`
+          : `Placeholder question for ${skill.code}: ${selectedConcept}`,
+        answer: "Answer not yet implemented.",
+        marks: concept?.marks ?? 2,
+        questionCode: buildQuestionCode(skill.domain ?? "GEN", skill.code, concept?.code ?? "C00"),
+      };
+  }
+}
+
+function buildSkillLinks(skill: Skill, concept: Concept | undefined): QuestionSkillLink[] {
+  if (!concept) {
+    return [
+      {
+        skillId: skill.id,
+        role: "primary",
+      },
+    ];
+  }
+
+  return [
+    {
+      skillId: skill.id,
+      conceptId: concept.id,
+      role: "primary",
+    },
+  ];
+}
 
 function pad2(value: number): string {
   return value.toString().padStart(2, "0");
@@ -787,7 +1208,8 @@ export default function CreateAssessmentBuilderPage() {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-    useEffect(() => {
+
+  useEffect(() => {
     const el = previewPaneRef.current;
     if (!el) return;
 
@@ -905,28 +1327,6 @@ export default function CreateAssessmentBuilderPage() {
     setQualityNotes((prev) => [message, ...prev].slice(0, 10));
   }
 
-  function buildGenerated(skill: Skill, concept: string, difficulty: DifficultyLevel) {
-    let prompt: string | undefined;
-    let answer: string | undefined;
-    let marks: number | undefined;
-    let questionCode: string | undefined;
-
-    if (skill.id === "num-n1-surds-simplify" && concept === "Simplify (basic)") {
-      const g = generateNQ_N5_NUM_N01(difficulty);
-      prompt = (g as any).prompt;
-      answer = (g as any).answer;
-      marks = (g as any).marks;
-      questionCode = "NQ_N5_NUM_N01_C01_SimplifySurds_CollectLikeTerms";
-
-      const promptParts = (g as any).promptParts;
-      const answerParts = (g as any).answerParts;
-
-      return { prompt, answer, marks, questionCode, promptParts, answerParts };
-    }
-
-    return { prompt, answer, marks, questionCode };
-  }
-
   const addQuestionToPaper = useCallback(
     (category: string, skill: Skill, concept: string, difficulty: DifficultyLevel, paper: Paper) => {
       if (skill.paperSuitability !== "BOTH" && skill.paperSuitability !== paper) {
@@ -936,6 +1336,8 @@ export default function CreateAssessmentBuilderPage() {
       }
 
       const generated = buildGenerated(skill, concept, difficulty);
+      const conceptMeta = getConceptFromSelection(skill, concept);
+      const skillLinks = buildSkillLinks(skill, conceptMeta);
 
       const draft: Question = {
         id: makeId(),
@@ -943,8 +1345,13 @@ export default function CreateAssessmentBuilderPage() {
         skillId: skill.id,
         skillCode: skill.code,
         skillText: skill.text,
+        primarySkillId: skill.id,
+        primaryConceptId: conceptMeta?.id,
+        supportingSkillIds: [],
+        skillLinks,
         standardFilter,
         concept,
+        conceptId: conceptMeta?.id,
         difficulty,
         targetMarks,
         createdAt: Date.now(),
@@ -968,6 +1375,8 @@ export default function CreateAssessmentBuilderPage() {
       }
 
       const generated = buildGenerated(skill, concept, difficulty);
+      const conceptMeta = getConceptFromSelection(skill, concept);
+      const skillLinks = buildSkillLinks(skill, conceptMeta);
 
       const activeEdit = editDraftRef.current[paper];
 
@@ -982,8 +1391,13 @@ export default function CreateAssessmentBuilderPage() {
             skillId: skill.id,
             skillCode: skill.code,
             skillText: skill.text,
+            primarySkillId: skill.id,
+            primaryConceptId: conceptMeta?.id,
+            supportingSkillIds: [],
+            skillLinks,
             standardFilter,
             concept,
+            conceptId: conceptMeta?.id,
             difficulty,
             targetMarks,
             createdAt: Date.now(),
@@ -1007,8 +1421,13 @@ export default function CreateAssessmentBuilderPage() {
           skillId: skill.id,
           skillCode: skill.code,
           skillText: skill.text,
+          primarySkillId: skill.id,
+          primaryConceptId: conceptMeta?.id,
+          supportingSkillIds: [],
+          skillLinks,
           standardFilter,
           concept,
+          conceptId: conceptMeta?.id,
           difficulty,
           targetMarks,
           createdAt: Date.now(),
@@ -1075,7 +1494,7 @@ export default function CreateAssessmentBuilderPage() {
     const draft = draftByPaper[viewPaper];
     if (!draft) return;
 
-    const code = (draft as any).questionCode as string | undefined;
+    const code = draft.questionCode;
     const spacingBasePx = code ? getSpacingBasePx(code) : 48;
 
     setQuestions((prev) => [
@@ -1119,7 +1538,7 @@ export default function CreateAssessmentBuilderPage() {
     const edit = editDraftByPaper[viewPaper];
     if (!edit) return;
 
-    const code = (edit.draft as any).questionCode as string | undefined;
+    const code = edit.draft.questionCode;
     const nextSpacingBasePx = code ? getSpacingBasePx(code) : 48;
 
     setQuestions((prev) => {
@@ -1524,7 +1943,7 @@ export default function CreateAssessmentBuilderPage() {
                 </div>
               </div>
 
-                            <div
+              <div
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -1561,7 +1980,7 @@ export default function CreateAssessmentBuilderPage() {
                 background: theme.pageBg === "#eef3f8" ? "#e9eff6" : theme.panelBg2,
               }}
             >
-               <div
+              <div
                 style={{
                   position: "sticky",
                   top: 8,
@@ -1702,6 +2121,7 @@ export default function CreateAssessmentBuilderPage() {
                   </div>
                 </div>
               </div>
+
               <div
                 style={{
                   width: "max-content",
