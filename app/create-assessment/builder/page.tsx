@@ -3,16 +3,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import SkillsTree from "@/page-sections/SkillsTree";
-import AssessmentProgressHud from "@/page-sections/AssessmentProgressHud";
-import SQAPageFrame from "@/page-sections/SQAPageFrame";
-import SQAN5FormulaSheet from "@/page-sections/SQAN5FormulaSheet";
-import SQAN5CoverPage from "@/page-sections/SQAN5CoverPage";
-import PaperQuestionLocked from "@/page-sections/PaperQuestionLocked";
-import PaperQuestionDraft from "@/page-sections/PaperQuestionDraft";
-import MeasureBox from "@/page-sections/MeasureBox";
-import SettingsPanel from "@/page-sections/SettingsPanel";
-import SharedCalendarPicker from "@/page-sections/SharedCalendarPicker";
+import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/SkillsTree";
+import AssessmentProgressHud from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
+import SQAPageFrame from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAPageFrame";
+import SQAN5FormulaSheet from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5FormulaSheet";
+import SQAN5CoverPage from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5CoverPage";
+import PaperQuestionLocked from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked";
+import PaperQuestionDraft from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionDraft";
+import MeasureBox from "@/app/create-assessment/builder/components/assessment-preview/MeasureBox";
+import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
+import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { calculateEndTime } from "./AssessmentTiming";
 
 import { skillsData } from "@/course-data/N5-Skills";

@@ -1,7 +1,7 @@
 "use client";
 
 import { Fira_Sans } from "next/font/google";
-import SQAPageFrame from "@/page-sections/SQAPageFrame";
+import SQAPageFrame from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAPageFrame";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
 const firaSans = Fira_Sans({

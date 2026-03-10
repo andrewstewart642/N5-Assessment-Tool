@@ -2,7 +2,7 @@
 
 import type { Question } from "@/shared-types/AssessmentTypes";
 import type { PaperPart } from "@/shared-types/PaperParts";
-import PaperContent from "@/page-sections/PaperContent";
+import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
 
 export type PaperQuestionDraftProps = {
   index: number; // 1-based position on the paper

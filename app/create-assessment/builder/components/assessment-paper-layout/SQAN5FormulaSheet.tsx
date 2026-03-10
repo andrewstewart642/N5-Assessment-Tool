@@ -3,7 +3,7 @@
 import katex from "katex";
 import "katex/dist/katex.min.css";
 
-import SQAPageFrame from "@/page-sections/SQAPageFrame";
+import SQAPageFrame from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAPageFrame";
 
 export type SQAN5FormulaSheetProps = {
   pageNumber: number;

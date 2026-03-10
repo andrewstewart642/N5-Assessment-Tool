@@ -1,6 +1,6 @@
 "use client";
 
-import CategorySection from "@/page-sections/CategorySection";
+import CategorySection from "@/app/create-assessment/builder/components/skills-tree/CategorySection";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
   DifficultyLevel,

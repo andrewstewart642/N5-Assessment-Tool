@@ -5,8 +5,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import AddQuestionButton from "@/page-sections/AddQuestionButton";
-import PaperContent from "@/page-sections/PaperContent";
+import AddQuestionButton from "@/app/create-assessment/builder/components/skills-tree/AddQuestionButton";
+import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
   cycleDifficulty,
