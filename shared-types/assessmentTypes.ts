@@ -1,10 +1,9 @@
+// shared-types/AssessmentTypes.ts
+
 import type { PaperPart } from "@/shared-types/PaperParts";
 
 export type Paper = "P1" | "P2";
 
-/**
- * Difficulty: 1 (easiest) -> 5 (hardest)
- */
 export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
 
 export type StandardFilter = "C" | "A" | "C+A";
@@ -51,6 +50,9 @@ export type ConceptMetadata = {
   canBePrimary?: boolean;
   canBeSupporting?: boolean;
   canBeOutputSkill?: boolean;
+
+  availableDifficultyLevels?: DifficultyLevel[];
+  defaultDifficultyLevel?: DifficultyLevel;
 };
 
 export type Concept = {
@@ -83,16 +85,10 @@ export type Question = {
   id: string;
   category: string;
 
-  /**
-   * Legacy/main skill fields still used by current builder flow.
-   */
   skillId: string;
   skillCode: string;
   skillText: string;
 
-  /**
-   * New skill relationship fields for future balancing / analytics.
-   */
   primarySkillId?: string;
   primaryConceptId?: string;
   supportingSkillIds?: string[];
@@ -106,24 +102,34 @@ export type Question = {
   paper: Paper;
   createdAt: number;
 
-  /**
-   * Legacy/plain text versions
-   */
   prompt?: string;
   answer?: string;
   marks?: number;
 
-  /**
-   * Rich render versions (KaTeX-friendly)
-   */
   promptParts?: PaperPart[];
   answerParts?: PaperPart[];
 
   questionCode?: string;
 
-  /**
-   * Stored layout values
-   */
+  cMarks?: number;
+  aMarks?: number;
+  reasoningMarks?: number;
+  isReasoning?: boolean;
+
+  calculatorStatus?: "NonCalculatorOnly" | "CalculatorOnly" | "Either";
+
+  structureType?:
+    | "SingleStep"
+    | "MultiStep"
+    | "ExpressionSimplification"
+    | "EquationSolving"
+    | "GraphInterpretation"
+    | "ContextualProblem"
+    | "GeometricConstruction"
+    | "DataAnalysis"
+    | "CompoundSkills"
+    | "Other";
+
   spacingBasePx?: number;
   measuredHeightBasePx?: number;
 };

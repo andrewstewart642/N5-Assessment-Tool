@@ -257,6 +257,8 @@ function SkillRow(props: {
     <div
       style={{
         borderTop: index === 0 ? "none" : `1px solid ${theme.borderSoft}`,
+        position: "relative",
+        zIndex: dropdownOpen ? 50 : 1,
       }}
     >
       <button
@@ -275,6 +277,8 @@ function SkillRow(props: {
           border: "none",
           cursor: "pointer",
           fontFamily: UI_TYPO.family,
+          boxSizing: "border-box",
+          minWidth: 0,
         }}
       >
         <span
@@ -286,7 +290,17 @@ function SkillRow(props: {
           {skill.code}
         </span>
 
-        <span style={{ ...UI_TEXT.controlText }}>{skill.text}</span>
+        <span
+          style={{
+            ...UI_TEXT.controlText,
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {skill.text}
+        </span>
 
         <span
           style={{
@@ -309,6 +323,8 @@ function SkillRow(props: {
             columnGap: 14,
             rowGap: 10,
             alignItems: "end",
+            position: "relative",
+            overflow: "visible",
           }}
         >
           <div
@@ -319,6 +335,7 @@ function SkillRow(props: {
               columnGap: 14,
               rowGap: 8,
               alignItems: "end",
+              overflow: "visible",
             }}
           >
             <div style={{ minWidth: 0 }}>
@@ -358,6 +375,7 @@ function SkillRow(props: {
                 style={{
                   position: "relative",
                   minWidth: 0,
+                  overflow: "visible",
                 }}
               >
                 <button
@@ -425,7 +443,7 @@ function SkillRow(props: {
                       top: "calc(100% + 6px)",
                       left: 0,
                       right: 0,
-                      zIndex: 30,
+                      zIndex: 60,
                       width: "100%",
                       maxWidth: "100%",
                       maxHeight: 240,
@@ -659,10 +677,21 @@ export default function CategorySection(props: Props) {
   }
 
   return (
-    <div style={{ marginBottom: 14 }}>
+    <div
+      style={{
+        marginBottom: 14,
+        position: "relative",
+        zIndex: 1,
+        minWidth: 0,
+        maxWidth: "100%",
+      }}
+    >
       <div
         style={{
           width: "100%",
+          maxWidth: "100%",
+          minWidth: 0,
+          boxSizing: "border-box",
           display: "grid",
           gridTemplateColumns: "1fr auto",
           gap: 10,
@@ -672,6 +701,7 @@ export default function CategorySection(props: Props) {
           padding: "10px 12px",
           borderRadius: 14,
           border: `1px solid ${theme.border}`,
+          overflow: "hidden",
         }}
       >
         <button
@@ -709,6 +739,7 @@ export default function CategorySection(props: Props) {
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
+              minWidth: 0,
             }}
           >
             {category}
@@ -747,8 +778,10 @@ export default function CategorySection(props: Props) {
             marginTop: 8,
             border: `1px solid ${theme.borderSoft}`,
             borderRadius: 14,
-            overflow: "hidden",
+            overflow: "visible",
             background: theme.controlBg,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           {skills.map((skill, idx) => (
