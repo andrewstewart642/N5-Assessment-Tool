@@ -1,22 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/SkillsTree";
-import AssessmentProgressHud from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
-import SQAPageFrame from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAPageFrame";
-import SQAN5FormulaSheet from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5FormulaSheet";
-import SQAN5CoverPage from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5CoverPage";
-import PaperQuestionLocked from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked";
-import PaperQuestionDraft from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionDraft";
-import MeasureBox from "@/app/create-assessment/builder/components/assessment-preview/MeasureBox";
+import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
+import BuilderPreviewPane from "@/app/create-assessment/builder/components/builder-layout/BuilderPreviewPane";
+import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
-import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
-import { calculateEndTime } from "./AssessmentTiming";
 
 import { skillsData } from "@/course-data/N5-Skills";
-import { makeId } from "@/math-helpers/QuestionLogic";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
   APPEARANCE_STORAGE_KEY,
@@ -31,34 +24,26 @@ import type {
   StandardFilter,
 } from "@/shared-types/AssessmentTypes";
 
-import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
-
 import BuilderGlobalStyles from "./BuilderStyles";
 import { buildBuilderPages, buildPreviewPages } from "./BuildPreviewPages";
-import {
-  buildGenerated,
-  buildSkillLinks,
-  getConceptFromSelection,
-} from "./builder-logic/BuilderQuestionGenerators";
 import {
   buildTimeRange,
   formatCoverDate,
   todayDisplayDate,
 } from "./builder-logic/BuilderDateHelpers";
-import {
-  BuilderMetaField,
-  ViewingToggle,
-} from "./builder-logic/BuilderUiHelpers";
 import { useBuilderInitialisation } from "./builder-behaviour/UseBuilderInitialisation";
 import { useBuilderLayout } from "./builder-behaviour/UseBuilderLayouts";
 import { useBuilderPersistence } from "./builder-behaviour/UseBuilderPersistence";
+import { useBuilderFlashFeedback } from "./builder-behaviour/UseBuilderFlashFeedback";
+import { useBuilderMetadataTiming } from "./builder-behaviour/UseBuilderMetadataTiming";
+import { useBuilderProgressMetrics } from "./builder-behaviour/UseBuilderProgressMetrics";
+import { useBuilderUiChrome } from "./builder-behaviour/UseBuilderUiChrome";
+import { useDraftWorkflow } from "./builder-behaviour/UseDraftWorkflow";
+import { useMeasuredQuestionHeights } from "./builder-behaviour/UseMeasuredQuestionHeights";
 import { usePreviewViewport } from "./builder-behaviour/UsePreviewViewport";
+import { useQuestionDraftGeneration } from "./builder-behaviour/UseQuestionDraftGeneration";
 import {
   clamp,
-  estimateMinutes,
-  spacingBasePxFor,
-  sumActualQuestionMarks,
-  sumMarks,
   type DraftByPaper,
   type EditDraftByPaper,
   type PreviewPage,
@@ -98,16 +83,11 @@ export default function CreateAssessmentBuilderPage() {
   );
 
   const [questions, setQuestions] = useState<Question[]>([]);
-
   const [draftByPaper, setDraftByPaper] = useState<DraftByPaper>({ P1: null, P2: null });
   const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>({
     P1: null,
     P2: null,
   });
-
-  const [qualityNotes, setQualityNotes] = useState<string[]>([]);
-  const [flashWarning, setFlashWarning] = useState<string | null>(null);
-  const flashTimerRef = useRef<number | null>(null);
 
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
 
@@ -115,26 +95,6 @@ export default function CreateAssessmentBuilderPage() {
   const pageWrapperRefs = useRef<Array<HTMLDivElement | null>>([]);
   const pendingJumpDraftRef = useRef<{ paper: Paper; draftId: string } | null>(null);
   const builderDateFieldRef = useRef<HTMLDivElement | null>(null);
-
-  const DEFAULT_HUD_HEIGHT = 170;
-
-  const {
-    layoutRef,
-    hudResizeStartRef,
-    leftPaneRatio,
-    setLeftPaneRatio,
-    isDraggingDivider,
-    setIsDraggingDivider,
-    hudHeight,
-    setHudHeight,
-    isDraggingHud,
-    setIsDraggingHud,
-    showProgressPanel,
-    setShowProgressPanel,
-    resetLayout,
-  } = useBuilderLayout({
-    defaultHudHeight: DEFAULT_HUD_HEIGHT,
-  });
 
   const [includeCoverSheet, setIncludeCoverSheet] = useState(false);
   const [showCoverDateTime, setShowCoverDateTime] = useState(false);
@@ -162,6 +122,26 @@ export default function CreateAssessmentBuilderPage() {
 
   const [p1EndTimeManuallyEdited, setP1EndTimeManuallyEdited] = useState(false);
   const [p2EndTimeManuallyEdited, setP2EndTimeManuallyEdited] = useState(false);
+
+  const DEFAULT_HUD_HEIGHT = 170;
+
+  const {
+    layoutRef,
+    hudResizeStartRef,
+    leftPaneRatio,
+    setLeftPaneRatio,
+    isDraggingDivider,
+    setIsDraggingDivider,
+    hudHeight,
+    setHudHeight,
+    isDraggingHud,
+    setIsDraggingHud,
+    showProgressPanel,
+    setShowProgressPanel,
+    resetLayout,
+  } = useBuilderLayout({
+    defaultHudHeight: DEFAULT_HUD_HEIGHT,
+  });
 
   const theme = useMemo(
     () => getTheme(appearance, systemPrefersDark),
@@ -254,22 +234,95 @@ export default function CreateAssessmentBuilderPage() {
     p2DateCustomKey: P2_DATE_CUSTOM_KEY,
   });
 
+  const {
+    qualityNotes,
+    flashWarning,
+    pushFlash,
+    addQualityNote,
+  } = useBuilderFlashFeedback();
+
+  useBuilderUiChrome({
+    builderCalendarOpen,
+    setBuilderCalendarOpen,
+    builderDateFieldRef,
+    settingsOpen,
+    setSettingsOpen,
+  });
+
+  const {
+    assignedForView,
+    p1Marks,
+    p2Marks,
+    p1Mins,
+    p2Mins,
+    activePaperCoverMarks,
+  } = useBuilderProgressMetrics({
+    questions,
+    viewPaper,
+  });
+
+  const { handleAssessmentNameFocus, handleAssessmentNameBlur } = useBuilderMetadataTiming({
+    assessmentName,
+    setAssessmentName,
+
+    assessmentDate,
+    p2DateCustom,
+    setP2CoverDate,
+
+    p1StartTime,
+    p1Marks,
+    p1EndTimeManuallyEdited,
+    setP1EndTime,
+
+    p2StartTime,
+    p2Marks,
+    p2EndTimeManuallyEdited,
+    setP2EndTime,
+  });
+
+  const { onMeasure } = useMeasuredQuestionHeights({
+    questions,
+    draftByPaper,
+    editDraftByPaper,
+    setMeasuredHeights,
+  });
+
   const editDraftRef = useRef<EditDraftByPaper>({ P1: null, P2: null });
   useEffect(() => {
     editDraftRef.current = editDraftByPaper;
   }, [editDraftByPaper]);
 
-  const onMeasure = useCallback((id: string, heightPx: number) => {
-    if (!Number.isFinite(heightPx) || heightPx <= 0) return;
-    const rounded = Math.round(heightPx);
+  const {
+    addQuestionToPaper,
+    regenerateQuestionToPaper,
+  } = useQuestionDraftGeneration({
+    standardFilter,
+    targetMarks,
+    editDraftRef,
+    setDraftByPaper,
+    setEditDraftByPaper,
+    setViewPaper,
+    pendingJumpDraftRef,
+    pushFlash,
+    addQualityNote,
+  });
 
-    setMeasuredHeights((prev) => {
-      const prevH = prev[id];
-      if (typeof prevH !== "number") return { ...prev, [id]: rounded };
-      if (Math.abs(prevH - rounded) <= 1) return prev;
-      return { ...prev, [id]: rounded };
-    });
-  }, []);
+  const {
+    assignNewDraft,
+    removeNewDraft,
+    startEditLockedQuestion,
+    saveEdit,
+    removeWhileEditing,
+  } = useDraftWorkflow({
+    viewPaper,
+    questions,
+    draftByPaper,
+    editDraftByPaper,
+    setQuestions,
+    setDraftByPaper,
+    setEditDraftByPaper,
+    pendingJumpDraftRef,
+  });
 
   const totalSkillsCount = useMemo(() => {
     return Object.values(skillsData).reduce<number>(
@@ -278,351 +331,32 @@ export default function CreateAssessmentBuilderPage() {
     );
   }, []);
 
-  useEffect(() => {
-    if (!p2DateCustom) {
-      setP2CoverDate(assessmentDate || todayDisplayDate());
-    }
-  }, [assessmentDate, p2DateCustom]);
-
-  useEffect(() => {
-    if (!builderCalendarOpen) return;
-
-    function handleMouseDown(event: MouseEvent) {
-      if (!builderDateFieldRef.current) return;
-      if (builderDateFieldRef.current.contains(event.target as Node)) return;
-      setBuilderCalendarOpen(false);
-    }
-
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-    };
-  }, [builderCalendarOpen]);
-
-  useEffect(() => {
-    document.body.style.overflow = settingsOpen ? "hidden" : "";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [settingsOpen]);
-
-  useEffect(() => {
-    const onOpen = () => setSettingsOpen(true);
-    window.addEventListener("open-builder-settings", onOpen);
-    return () => window.removeEventListener("open-builder-settings", onOpen);
-  }, []);
-
-  useEffect(() => {
-    const liveIds = new Set<string>();
-    questions.forEach((q) => liveIds.add(q.id));
-    if (draftByPaper.P1) liveIds.add(draftByPaper.P1.id);
-    if (draftByPaper.P2) liveIds.add(draftByPaper.P2.id);
-    if (editDraftByPaper.P1) {
-      liveIds.add(editDraftByPaper.P1.original.id);
-      liveIds.add(editDraftByPaper.P1.draft.id);
-    }
-    if (editDraftByPaper.P2) {
-      liveIds.add(editDraftByPaper.P2.original.id);
-      liveIds.add(editDraftByPaper.P2.draft.id);
-    }
-
-    setMeasuredHeights((prev) => {
-      let changed = false;
-      const next: Record<string, number> = {};
-      for (const [id, h] of Object.entries(prev)) {
-        if (liveIds.has(id)) next[id] = h;
-        else changed = true;
-      }
-      return changed ? next : prev;
-    });
-  }, [questions, draftByPaper, editDraftByPaper]);
-
-  const toggleCategory = useCallback((name: string) => {
+  const toggleCategory = (name: string) => {
     setCollapsedCategories((prev) => ({ ...prev, [name]: !prev[name] }));
-  }, []);
+  };
 
-  const toggleSkillRow = useCallback((skillId: string) => {
+  const toggleSkillRow = (skillId: string) => {
     setExpandedSkillIds((prev) =>
       prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId]
     );
-  }, []);
+  };
 
-  const collapseAllSkills = useCallback(() => setExpandedSkillIds([]), []);
+  const collapseAllSkills = () => setExpandedSkillIds([]);
 
-  const getConceptIndex = useCallback(
-    (skillId: string) => conceptIndexBySkill[skillId] ?? -1,
-    [conceptIndexBySkill]
-  );
+  const getConceptIndex = (skillId: string) => conceptIndexBySkill[skillId] ?? -1;
 
-  const setConceptIndex = useCallback((skillId: string, nextIndex: number) => {
+  const setConceptIndex = (skillId: string, nextIndex: number) => {
     setConceptIndexBySkill((prev) => ({ ...prev, [skillId]: nextIndex }));
-  }, []);
+  };
 
-  const getDifficulty = useCallback(
-    (skillId: string) => difficultyBySkill[skillId] ?? 3,
-    [difficultyBySkill]
-  );
+  const getDifficulty = (skillId: string) => difficultyBySkill[skillId] ?? 3;
 
-  const setDifficulty = useCallback((skillId: string, next: DifficultyLevel) => {
+  const setDifficulty = (skillId: string, next: DifficultyLevel) => {
     setDifficultyBySkill((prev) => ({ ...prev, [skillId]: next }));
-  }, []);
-
-  function pushFlash(message: string) {
-    setFlashWarning(message);
-
-    if (flashTimerRef.current) {
-      window.clearTimeout(flashTimerRef.current);
-      flashTimerRef.current = null;
-    }
-
-    flashTimerRef.current = window.setTimeout(() => {
-      setFlashWarning(null);
-      flashTimerRef.current = null;
-    }, 3200);
-  }
-
-  function addQualityNote(message: string) {
-    setQualityNotes((prev) => [message, ...prev].slice(0, 10));
-  }
-
-  const addQuestionToPaper = useCallback(
-    (category: string, skill: Skill, concept: string, difficulty: DifficultyLevel, paper: Paper) => {
-      if (skill.paperSuitability !== "BOTH" && skill.paperSuitability !== paper) {
-        const msg = `Paper mismatch: ${skill.code} is typically ${skill.paperSuitability} but you added it to ${paper}.`;
-        pushFlash(msg);
-        addQualityNote(`• ${msg}`);
-      }
-
-      const generated = buildGenerated(skill, concept, difficulty);
-      const conceptMeta = getConceptFromSelection(skill, concept);
-      const skillLinks = buildSkillLinks(skill, conceptMeta);
-
-      const draft: Question = {
-        id: makeId(),
-        category,
-        skillId: skill.id,
-        skillCode: skill.code,
-        skillText: skill.text,
-        primarySkillId: skill.id,
-        primaryConceptId: conceptMeta?.id,
-        supportingSkillIds: [],
-        skillLinks,
-        standardFilter,
-        concept,
-        conceptId: conceptMeta?.id,
-        difficulty,
-        targetMarks,
-        createdAt: Date.now(),
-        paper,
-        ...generated,
-      };
-
-      pendingJumpDraftRef.current = { paper, draftId: draft.id };
-      setDraftByPaper((prev) => ({ ...prev, [paper]: draft }));
-      setViewPaper((prev) => (prev === paper ? prev : paper));
-    },
-    [standardFilter, targetMarks]
-  );
-
-  const regenerateQuestionToPaper = useCallback(
-    (category: string, skill: Skill, concept: string, difficulty: DifficultyLevel, paper: Paper) => {
-      if (skill.paperSuitability !== "BOTH" && skill.paperSuitability !== paper) {
-        const msg = `Paper mismatch: ${skill.code} is typically ${skill.paperSuitability} but you regenerated it for ${paper}.`;
-        pushFlash(msg);
-        addQualityNote(`• ${msg}`);
-      }
-
-      const generated = buildGenerated(skill, concept, difficulty);
-      const conceptMeta = getConceptFromSelection(skill, concept);
-      const skillLinks = buildSkillLinks(skill, conceptMeta);
-
-      const activeEdit = editDraftRef.current[paper];
-
-      if (activeEdit) {
-        setEditDraftByPaper((prev) => {
-          const nowEdit = prev[paper];
-          if (!nowEdit) return prev;
-
-          const nextDraft: Question = {
-            ...nowEdit.draft,
-            category,
-            skillId: skill.id,
-            skillCode: skill.code,
-            skillText: skill.text,
-            primarySkillId: skill.id,
-            primaryConceptId: conceptMeta?.id,
-            supportingSkillIds: [],
-            skillLinks,
-            standardFilter,
-            concept,
-            conceptId: conceptMeta?.id,
-            difficulty,
-            targetMarks,
-            createdAt: Date.now(),
-            paper,
-            ...generated,
-          };
-
-          pendingJumpDraftRef.current = { paper, draftId: nextDraft.id };
-
-          return { ...prev, [paper]: { ...nowEdit, draft: nextDraft } };
-        });
-
-        setViewPaper((prev) => (prev === paper ? prev : paper));
-        return;
-      }
-
-      setDraftByPaper((prevDrafts) => {
-        const nextDraft: Question = {
-          id: prevDrafts[paper]?.id ?? makeId(),
-          category,
-          skillId: skill.id,
-          skillCode: skill.code,
-          skillText: skill.text,
-          primarySkillId: skill.id,
-          primaryConceptId: conceptMeta?.id,
-          supportingSkillIds: [],
-          skillLinks,
-          standardFilter,
-          concept,
-          conceptId: conceptMeta?.id,
-          difficulty,
-          targetMarks,
-          createdAt: Date.now(),
-          paper,
-          ...generated,
-        };
-
-        pendingJumpDraftRef.current = { paper, draftId: nextDraft.id };
-
-        return { ...prevDrafts, [paper]: nextDraft };
-      });
-
-      setViewPaper((prev) => (prev === paper ? prev : paper));
-    },
-    [standardFilter, targetMarks]
-  );
-
-  const assignedForView = useMemo(
-    () => questions.filter((q) => q.paper === viewPaper),
-    [questions, viewPaper]
-  );
+  };
 
   const editForView = editDraftByPaper[viewPaper];
   const newDraftForView = draftByPaper[viewPaper];
-
-  const p1Questions = useMemo(() => questions.filter((q) => q.paper === "P1"), [questions]);
-  const p2Questions = useMemo(() => questions.filter((q) => q.paper === "P2"), [questions]);
-
-  const p1Marks = useMemo(() => sumMarks(p1Questions), [p1Questions]);
-  const p2Marks = useMemo(() => sumMarks(p2Questions), [p2Questions]);
-
-  const p1ActualQuestionMarks = useMemo(() => sumActualQuestionMarks(p1Questions), [p1Questions]);
-  const p2ActualQuestionMarks = useMemo(() => sumActualQuestionMarks(p2Questions), [p2Questions]);
-
-  const p1Mins = useMemo(() => estimateMinutes("P1", p1Marks), [p1Marks]);
-  const p2Mins = useMemo(() => estimateMinutes("P2", p2Marks), [p2Marks]);
-
-  useEffect(() => {
-    if (p1EndTimeManuallyEdited) return;
-    if (!p1StartTime.trim()) {
-      setP1EndTime("");
-      return;
-    }
-
-    setP1EndTime(calculateEndTime("N5", "paper1", p1Marks, p1StartTime));
-  }, [p1Marks, p1StartTime, p1EndTimeManuallyEdited]);
-
-  useEffect(() => {
-    if (p2EndTimeManuallyEdited) return;
-    if (!p2StartTime.trim()) {
-      setP2EndTime("");
-      return;
-    }
-
-    setP2EndTime(calculateEndTime("N5", "paper2", p2Marks, p2StartTime));
-  }, [p2Marks, p2StartTime, p2EndTimeManuallyEdited]);
-
-  const activePaperCoverMarks = useMemo(() => {
-    if (viewPaper === "P1") return p1ActualQuestionMarks;
-    return p2ActualQuestionMarks;
-  }, [viewPaper, p1ActualQuestionMarks, p2ActualQuestionMarks]);
-
-  const assignNewDraft = useCallback(() => {
-    const draft = draftByPaper[viewPaper];
-    if (!draft) return;
-
-    const code = draft.questionCode;
-    const spacingBasePx = code ? getSpacingBasePx(code) : 48;
-
-    setQuestions((prev) => [
-      ...prev,
-      {
-        ...draft,
-        id: makeId(),
-        createdAt: Date.now(),
-        spacingBasePx,
-      },
-    ]);
-
-    setDraftByPaper((prev) => ({ ...prev, [viewPaper]: null }));
-  }, [draftByPaper, viewPaper]);
-
-  const removeNewDraft = useCallback(() => {
-    pendingJumpDraftRef.current = null;
-    setDraftByPaper((prev) => ({ ...prev, [viewPaper]: null }));
-  }, [viewPaper]);
-
-  const startEditLockedQuestion = useCallback(
-    (lockedQuestionId: string) => {
-      const idx = questions.findIndex((q) => q.id === lockedQuestionId);
-      if (idx < 0) return;
-
-      const original = questions[idx];
-
-      setEditDraftByPaper((prev) => ({
-        ...prev,
-        [original.paper]: {
-          questionIndex: idx,
-          original,
-          draft: { ...original },
-        },
-      }));
-    },
-    [questions]
-  );
-
-  const saveEdit = useCallback(() => {
-    const edit = editDraftByPaper[viewPaper];
-    if (!edit) return;
-
-    const code = edit.draft.questionCode;
-    const nextSpacingBasePx = code ? getSpacingBasePx(code) : 48;
-
-    setQuestions((prev) => {
-      if (edit.questionIndex < 0 || edit.questionIndex >= prev.length) return prev;
-      const next = [...prev];
-      next[edit.questionIndex] = {
-        ...edit.draft,
-        createdAt: Date.now(),
-        spacingBasePx: nextSpacingBasePx,
-      };
-      return next;
-    });
-
-    setEditDraftByPaper((prev) => ({ ...prev, [viewPaper]: null }));
-  }, [editDraftByPaper, viewPaper]);
-
-  const removeWhileEditing = useCallback(() => {
-    pendingJumpDraftRef.current = null;
-
-    const edit = editDraftByPaper[viewPaper];
-    if (!edit) return;
-
-    setQuestions((prev) => prev.filter((q) => q.id !== edit.original.id));
-    setEditDraftByPaper((prev) => ({ ...prev, [viewPaper]: null }));
-  }, [editDraftByPaper, viewPaper]);
 
   const builderPages = useMemo(() => {
     return buildBuilderPages({
@@ -637,8 +371,12 @@ export default function CreateAssessmentBuilderPage() {
     const map = new Map<string, { kind: "locked" | "edit" | "draft"; q: Question }>();
 
     assignedForView.forEach((q) => map.set(q.id, { kind: "locked", q }));
-    if (editForView) map.set(editForView.original.id, { kind: "edit", q: editForView.draft });
-    if (newDraftForView) map.set(newDraftForView.id, { kind: "draft", q: newDraftForView });
+    if (editForView) {
+      map.set(editForView.original.id, { kind: "edit", q: editForView.draft });
+    }
+    if (newDraftForView) {
+      map.set(newDraftForView.id, { kind: "draft", q: newDraftForView });
+    }
 
     return map;
   }, [assignedForView, editForView, newDraftForView]);
@@ -702,20 +440,8 @@ export default function CreateAssessmentBuilderPage() {
     return () => window.cancelAnimationFrame(frame);
   }, [previewPages, viewPaper]);
 
-  function handleAssessmentNameFocus() {
-    if (assessmentName === "[Untitled file]") {
-      setAssessmentName("");
-    }
-  }
-
-  function handleAssessmentNameBlur() {
-    if (!assessmentName.trim().length) {
-      setAssessmentName("[Untitled file]");
-    }
-  }
-
-  const dividerWidth = 8;
   const viewerHudRow = showProgressPanel ? `${hudHeight}px` : "0px";
+  const dividerWidth = 8;
   const bodyGridColumns = `${(leftPaneRatio * 100).toFixed(3)}% ${dividerWidth}px minmax(0, 1fr)`;
 
   const coverDateTextForView =
@@ -816,629 +542,69 @@ export default function CreateAssessmentBuilderPage() {
               fontFamily: UI_TYPO.family,
             }}
           >
-            <div
-              style={{
-                borderBottom: `1px solid ${theme.border}`,
-                background: theme.panelBg2,
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1fr) auto",
-                alignItems: "center",
-                gap: 10,
-                padding: "3px 10px 14px",
-                boxSizing: "border-box",
-                minHeight: 0,
-                position: "relative",
-                zIndex: 3,
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "end",
-                  gap: 10,
-                  minWidth: 0,
-                }}
-              >
-                <BuilderMetaField
-                  label="Name"
-                  value={assessmentName}
-                  onChange={setAssessmentName}
-                  onFocus={handleAssessmentNameFocus}
-                  onBlur={handleAssessmentNameBlur}
-                  width={220}
-                />
+            <BuilderTopBar
+              theme={theme}
+              assessmentName={assessmentName}
+              setAssessmentName={setAssessmentName}
+              className={className}
+              setClassName={setClassName}
+              assessmentDate={assessmentDate}
+              setAssessmentDate={setAssessmentDate}
+              builderCalendarOpen={builderCalendarOpen}
+              setBuilderCalendarOpen={setBuilderCalendarOpen}
+              builderDateFieldRef={builderDateFieldRef}
+              handleAssessmentNameFocus={handleAssessmentNameFocus}
+              handleAssessmentNameBlur={handleAssessmentNameBlur}
+              viewPaper={viewPaper}
+              setViewPaper={setViewPaper}
+            />
 
-                <BuilderMetaField
-                  label="Class"
-                  value={className}
-                  onChange={setClassName}
-                  width={118}
-                />
+            <BuilderPreviewPane
+              theme={theme}
+              previewPaneRef={previewPaneRef}
+              pageWrapperRefs={pageWrapperRefs}
+              flashWarning={flashWarning}
+              currentViewerPage={currentViewerPage}
+              totalViewerPages={totalViewerPages}
+              zoomPct={zoomPct}
+              zoomIn={zoomIn}
+              zoomOut={zoomOut}
+              previewPages={previewPages}
+              viewPaper={viewPaper}
+              viewerScale={viewerScale}
+              activePaperCoverMarks={activePaperCoverMarks}
+              showCoverDateTime={showCoverDateTime}
+              coverDateTextForView={coverDateTextForView}
+              coverTimeTextForView={coverTimeTextForView}
+              showScottishCandidateNumberBox={showScottishCandidateNumberBox}
+              includeCoverSheet={includeCoverSheet}
+              includeFormulaSheet={includeFormulaSheet}
+              renderById={renderById}
+              editForView={editForView}
+              onMeasure={onMeasure}
+              saveEdit={saveEdit}
+              removeWhileEditing={removeWhileEditing}
+              assignNewDraft={assignNewDraft}
+              removeNewDraft={removeNewDraft}
+              startEditLockedQuestion={startEditLockedQuestion}
+            />
 
-                <div
-                  ref={builderDateFieldRef}
-                  style={{
-                    display: "grid",
-                    gap: 3,
-                    minWidth: 0,
-                    width: 170,
-                    position: "relative",
-                    fontFamily: UI_TYPO.family,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: UI_TYPO.weightMedium,
-                      letterSpacing: 0,
-                      color: "rgba(214,227,243,0.74)",
-                      lineHeight: 1.2,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    Assessment Date
-                  </span>
-
-                  <div style={{ position: "relative" }}>
-                    <input
-                      type="text"
-                      value={assessmentDate}
-                      onChange={(e) => setAssessmentDate(e.target.value)}
-                      onFocus={() => setBuilderCalendarOpen(true)}
-                      onClick={() => setBuilderCalendarOpen(true)}
-                      style={{
-                        height: 30,
-                        borderRadius: 9,
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        background: "rgba(255,255,255,0.02)",
-                        color: "#f7fbff",
-                        padding: "0 34px 0 9px",
-                        fontSize: 13,
-                        fontFamily: UI_TYPO.family,
-                        fontWeight: UI_TYPO.weightSemibold,
-                        minWidth: 0,
-                        width: "100%",
-                        boxSizing: "border-box",
-                        outline: "none",
-                      }}
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => setBuilderCalendarOpen((prev) => !prev)}
-                      style={{
-                        position: "absolute",
-                        right: 4,
-                        top: 4,
-                        width: 22,
-                        height: 22,
-                        borderRadius: 7,
-                        border: "1px solid rgba(255,255,255,0.08)",
-                        background: "rgba(255,255,255,0.03)",
-                        color: "rgba(214,227,243,0.78)",
-                        cursor: "pointer",
-                        display: "grid",
-                        placeItems: "center",
-                        fontSize: 12,
-                        lineHeight: 1,
-                      }}
-                      aria-label="Open assessment date calendar"
-                    >
-                      🗓️
-                    </button>
-                  </div>
-
-                  {builderCalendarOpen ? (
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "calc(100% + 10px)",
-                        left: 0,
-                        zIndex: 20,
-                        width: 320,
-                      }}
-                    >
-                      <SharedCalendarPicker
-                        theme={theme}
-                        value={assessmentDate}
-                        onCancel={() => setBuilderCalendarOpen(false)}
-                        onApply={(next) => {
-                          setAssessmentDate(next);
-                          setBuilderCalendarOpen(false);
-                        }}
-                      />
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  justifySelf: "end",
-                  whiteSpace: "nowrap",
-                  transform: "translateY(1px)",
-                }}
-              >
-                <div
-                  style={{
-                    color: "rgba(214,227,243,0.78)",
-                    fontSize: 13,
-                    fontFamily: UI_TYPO.family,
-                    fontWeight: UI_TYPO.weightMedium,
-                  }}
-                >
-                  Viewing
-                </div>
-
-                <ViewingToggle value={viewPaper} onChange={setViewPaper} />
-              </div>
-            </div>
-
-            <div
-              ref={previewPaneRef}
-              className="hover-scroll"
-              style={{
-                position: "relative",
-                minHeight: 0,
-                overflowY: "auto",
-                overflowX: "auto",
-                padding: "18px 18px 18px",
-                background: theme.pageBg === "#eef3f8" ? "#e9eff6" : theme.panelBg2,
-              }}
-            >
-              <div
-                style={{
-                  position: "sticky",
-                  top: 8,
-                  zIndex: 6,
-                  width: "100%",
-                  height: 0,
-                  display: "flex",
-                  justifyContent: "center",
-                  pointerEvents: "none",
-                  overflow: "visible",
-                }}
-              >
-                <div
-                  style={{
-                    position: "relative",
-                    width: 188,
-                    height: 42,
-                    background: "rgba(188, 194, 203, 0.88)",
-                    border: "1px solid rgba(255,255,255,0.22)",
-                    borderRadius: 14,
-                    boxShadow: "0 12px 24px rgba(0,0,0,0.18)",
-                    backdropFilter: "blur(6px)",
-                    WebkitBackdropFilter: "blur(6px)",
-                    pointerEvents: "auto",
-                  }}
-                >
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: 6,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 28,
-                        textAlign: "center",
-                        color: "rgba(70,70,70,0.65)",
-                        fontSize: 12,
-                        fontFamily: UI_TYPO.family,
-                        fontWeight: UI_TYPO.weightMedium,
-                        lineHeight: 1,
-                      }}
-                      title={`Page ${currentViewerPage} of ${totalViewerPages}`}
-                    >
-                      {currentViewerPage}/{totalViewerPages}
-                    </div>
-
-                    <div
-                      style={{
-                        width: 1,
-                        height: 18,
-                        background: "rgba(90,90,90,0.30)",
-                      }}
-                    />
-                  </div>
-
-                  <div
-                    style={{
-                      position: "absolute",
-                      left: "58%",
-                      top: "50%",
-                      transform: "translate(-50%, -50%)",
-                      display: "grid",
-                      gridTemplateColumns: "24px 54px 24px",
-                      alignItems: "center",
-                      justifyItems: "center",
-                      columnGap: 6,
-                      height: 24,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      onClick={zoomOut}
-                      style={{
-                        width: 24,
-                        height: 24,
-                        border: "none",
-                        borderRadius: 6,
-                        background: "transparent",
-                        color: "rgba(70,70,70,0.94)",
-                        cursor: "pointer",
-                        fontFamily: UI_TYPO.family,
-                        fontWeight: UI_TYPO.weightMedium,
-                        fontSize: 20,
-                        lineHeight: "24px",
-                        display: "grid",
-                        placeItems: "center",
-                        padding: 0,
-                      }}
-                      title="Zoom out"
-                    >
-                      −
-                    </button>
-
-                    <div
-                      style={{
-                        width: 54,
-                        textAlign: "center",
-                        color: "rgba(70,70,70,0.95)",
-                        fontSize: 15,
-                        fontFamily: UI_TYPO.family,
-                        fontWeight: UI_TYPO.weightSemibold,
-                        lineHeight: "24px",
-                      }}
-                      title="Current zoom"
-                    >
-                      {zoomPct}%
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={zoomIn}
-                      style={{
-                        width: 24,
-                        height: 24,
-                        border: "none",
-                        borderRadius: 6,
-                        background: "transparent",
-                        color: "rgba(70,70,70,0.94)",
-                        cursor: "pointer",
-                        fontFamily: UI_TYPO.family,
-                        fontWeight: UI_TYPO.weightMedium,
-                        fontSize: 20,
-                        lineHeight: "24px",
-                        display: "grid",
-                        placeItems: "center",
-                        padding: 0,
-                      }}
-                      title="Zoom in"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  width: "max-content",
-                  minWidth: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  gap: 12,
-                }}
-              >
-                {flashWarning ? (
-                  <div
-                    style={{
-                      width: "min(100%, 760px)",
-                      border: `1px solid ${theme.border}`,
-                      background: theme.pageBg === "#eef3f8" ? "#fff4e5" : "#241a0b",
-                      color: theme.pageBg === "#eef3f8" ? "#9a5b00" : "#ffd7a3",
-                      borderRadius: 12,
-                      padding: "10px 12px",
-                      ...UI_TEXT.controlTextStrong,
-                    }}
-                  >
-                    {flashWarning}
-                  </div>
-                ) : null}
-
-                <div
-                  style={{
-                    width: "max-content",
-                    minWidth: "100%",
-                    display: "grid",
-                    justifyItems: "center",
-                    gap: 18,
-                  }}
-                >
-                  {previewPages.map((previewPage, previewIndex) => {
-                    if (previewPage.kind === "cover") {
-                      return (
-                        <div
-                          key={`${viewPaper}-preview-cover-${previewPage.pageNumber}`}
-                          ref={(el) => {
-                            pageWrapperRefs.current[previewIndex] = el;
-                          }}
-                        >
-                          <SQAN5CoverPage
-                            pageNumber={previewPage.pageNumber}
-                            paper={viewPaper}
-                            totalMarks={activePaperCoverMarks}
-                            showDateTime={showCoverDateTime}
-                            dateText={coverDateTextForView}
-                            timeText={coverTimeTextForView}
-                            showScottishCandidateNumberBox={
-                              showScottishCandidateNumberBox
-                            }
-                            viewerScale={viewerScale}
-                            outerPaddingPx={0}
-                          />
-                        </div>
-                      );
-                    }
-
-                    if (previewPage.kind === "formula") {
-                      return (
-                        <div
-                          key={`${viewPaper}-preview-formula-${previewPage.pageNumber}`}
-                          ref={(el) => {
-                            pageWrapperRefs.current[previewIndex] = el;
-                          }}
-                        >
-                          <SQAN5FormulaSheet
-                            pageNumber={previewPage.pageNumber}
-                            viewerScale={viewerScale}
-                            outerPaddingPx={0}
-                          />
-                        </div>
-                      );
-                    }
-
-                    if (previewPage.kind === "empty") {
-                      return (
-                        <div
-                          key={`${viewPaper}-preview-empty-${previewPage.pageNumber}`}
-                          ref={(el) => {
-                            pageWrapperRefs.current[previewIndex] = el;
-                          }}
-                        >
-                          <SQAPageFrame
-                            viewerScale={viewerScale}
-                            outerPaddingPx={0}
-                            paper={viewPaper}
-                            pageIndex={0}
-                            footerPageNumber={previewPage.pageNumber}
-                            footerLabelMode="sqa-lower"
-                            isFirstQuestionPage={!includeCoverSheet && !includeFormulaSheet}
-                          >
-                            <div
-                              style={{
-                                marginTop: 10,
-                                border: "1px dashed rgba(15,23,42,0.25)",
-                                borderRadius: 8,
-                                padding: 14,
-                                color: "rgba(15,23,42,0.65)",
-                                ...UI_TEXT.controlTextStrong,
-                              }}
-                            >
-                              No questions added yet for{" "}
-                              {viewPaper === "P1" ? "Paper 1" : "Paper 2"}.
-                            </div>
-                          </SQAPageFrame>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div
-                        key={`${viewPaper}-builder-page-wrap-${previewPage.questionPageIndex}`}
-                        ref={(el) => {
-                          pageWrapperRefs.current[previewIndex] = el;
-                        }}
-                      >
-                        <SQAPageFrame
-                          viewerScale={viewerScale}
-                          outerPaddingPx={0}
-                          paper={viewPaper}
-                          pageIndex={previewPage.questionPageIndex}
-                          footerPageNumber={previewPage.pageNumber}
-                          footerLabelMode="sqa-lower"
-                          isFirstQuestionPage={previewPage.questionPageIndex === 0}
-                          showTurnOver
-                        >
-                          <div style={{ display: "grid", gap: 2 }}>
-                            {previewPage.pageQuestions.map((layoutQ, i) => {
-                              const globalIndex = previewPage.questionStartIndex + i;
-
-                              const render = renderById.get(layoutQ.id);
-                              const kind = render?.kind ?? "locked";
-                              const q = render?.q ?? layoutQ;
-
-                              let gapPx = spacingBasePxFor(q);
-                              if (kind === "edit" && editForView) {
-                                gapPx = spacingBasePxFor(editForView.original);
-                              }
-
-                              const content =
-                                kind === "edit" ? (
-                                  <MeasureBox id={q.id} onMeasure={onMeasure}>
-                                    <PaperQuestionDraft
-                                      index={globalIndex}
-                                      question={q}
-                                      primaryLabel="Save"
-                                      secondaryLabel="Remove"
-                                      onPrimary={saveEdit}
-                                      onSecondary={removeWhileEditing}
-                                    />
-                                  </MeasureBox>
-                                ) : kind === "draft" ? (
-                                  <MeasureBox id={q.id} onMeasure={onMeasure}>
-                                    <PaperQuestionDraft
-                                      index={globalIndex}
-                                      question={q}
-                                      primaryLabel="Assign"
-                                      secondaryLabel="Remove"
-                                      onPrimary={assignNewDraft}
-                                      onSecondary={removeNewDraft}
-                                    />
-                                  </MeasureBox>
-                                ) : (
-                                  <MeasureBox id={q.id} onMeasure={onMeasure}>
-                                    <div style={{ position: "relative" }}>
-                                      <PaperQuestionLocked index={globalIndex} question={q} />
-                                      <button
-                                        type="button"
-                                        onClick={() => startEditLockedQuestion(q.id)}
-                                        style={{
-                                          position: "absolute",
-                                          top: 6,
-                                          right: 86,
-                                          border: "1px solid rgba(15,23,42,0.25)",
-                                          background: "rgba(255,255,255,0.70)",
-                                          color: "rgba(15,23,42,0.75)",
-                                          borderRadius: 10,
-                                          padding: "6px 10px",
-                                          cursor: "pointer",
-                                          height: 32,
-                                          ...UI_TEXT.buttonTextSmall,
-                                        }}
-                                        title="Edit"
-                                      >
-                                        Edit
-                                      </button>
-                                    </div>
-                                  </MeasureBox>
-                                );
-
-                              return (
-                                <div key={`${kind}-${layoutQ.id}`}>
-                                  {content}
-                                  <div aria-hidden="true" style={{ height: gapPx }} />
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </SQAPageFrame>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => router.push("/compile-assessment")}
-              style={{
-                position: "absolute",
-                right: 14,
-                bottom: showProgressPanel ? hudHeight + 14 : 14,
-                border: `1px solid ${theme.border}`,
-                background:
-                  theme.pageBg === "#eef3f8"
-                    ? "rgba(255,255,255,0.92)"
-                    : "rgba(11,17,24,0.92)",
-                color: (theme as any).textMuted ?? theme.subtleText ?? theme.text,
-                borderRadius: 16,
-                padding: "10px 14px",
-                cursor: "pointer",
-                boxShadow: "0 10px 20px rgba(0,0,0,0.18)",
-                zIndex: 4,
-                ...UI_TEXT.buttonText,
-              }}
-              title="Compile assessment into printable pages"
-            >
-              Compile →
-            </button>
-
-            {showProgressPanel ? (
-              <div
-                style={{
-                  borderTop: `1px solid ${theme.border}`,
-                  minHeight: 0,
-                  height: "100%",
-                  overflow: "hidden",
-                  position: "relative",
-                  background:
-                    theme.pageBg === "#eef3f8"
-                      ? "rgba(255,255,255,0.72)"
-                      : "rgba(15,22,32,0.92)",
-                }}
-              >
-                <div
-                  onMouseDown={(e) => {
-                    hudResizeStartRef.current = {
-                      startY: e.clientY,
-                      startHeight: hudHeight,
-                    };
-                    setIsDraggingHud(true);
-                  }}
-                  title="Drag to resize notes panel"
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 12,
-                    cursor: "row-resize",
-                    zIndex: 3,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: 54,
-                      height: 4,
-                      borderRadius: 999,
-                      background:
-                        theme.pageBg === "#eef3f8"
-                          ? "rgba(80,97,116,0.28)"
-                          : "rgba(169,182,197,0.35)",
-                    }}
-                  />
-                </div>
-
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: "12px 0 0 0",
-                    minHeight: 0,
-                    overflow: "hidden",
-                  }}
-                >
-                  <AssessmentProgressHud
-                    viewPaper={viewPaper}
-                    p1Marks={p1Marks}
-                    p2Marks={p2Marks}
-                    p1TargetMarks={p1Target}
-                    p2TargetMarks={p2Target}
-                    p1TimeMinutes={p1Mins}
-                    p2TimeMinutes={p2Mins}
-                    notes={qualityNotes}
-                    theme={theme}
-                  />
-                </div>
-              </div>
-            ) : (
-              <div style={{ minHeight: 0, overflow: "hidden" }} />
-            )}
+            <BuilderBottomHud
+              theme={theme}
+              routerPushCompile={() => router.push("/compile-assessment")}
+              showProgressPanel={showProgressPanel}
+              hudHeight={hudHeight}
+              hudResizeStartRef={hudResizeStartRef}
+              setIsDraggingHud={setIsDraggingHud}
+              viewPaper={viewPaper}
+              p1Marks={p1Marks}
+              p2Marks={p2Marks}
+              p1Target={p1Target}
+              p2Target={p2Target}
+              p1Mins={p1Mins}
+              p2Mins={p2Mins}
+              qualityNotes={qualityNotes}
+            />
           </section>
         </div>
 
@@ -1457,19 +623,19 @@ export default function CreateAssessmentBuilderPage() {
           p1StartTimeText={p1StartTime}
           onChangeP1StartTimeText={setP1StartTime}
           p1EndTimeText={p1EndTime}
-          onChangeP1EndTimeText={(value) => {
+          onChangeP1EndTimeText={(value: string) => {
             setP1EndTimeManuallyEdited(true);
             setP1EndTime(value);
           }}
           p2CoverDateText={p2DateCustom ? p2CoverDate : assessmentDate}
-          onChangeP2CoverDateText={(value) => {
+          onChangeP2CoverDateText={(value: string) => {
             setP2DateCustom(true);
             setP2CoverDate(value);
           }}
           p2StartTimeText={p2StartTime}
           onChangeP2StartTimeText={setP2StartTime}
           p2EndTimeText={p2EndTime}
-          onChangeP2EndTimeText={(value) => {
+          onChangeP2EndTimeText={(value: string) => {
             setP2EndTimeManuallyEdited(true);
             setP2EndTime(value);
           }}

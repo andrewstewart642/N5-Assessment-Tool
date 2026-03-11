@@ -1,5 +1,6 @@
 "use client";
 
+import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Question } from "@/shared-types/AssessmentTypes";
 import type { PaperPart } from "@/shared-types/PaperParts";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
@@ -26,30 +27,48 @@ export default function PaperQuestionLocked({ index, question }: Props) {
     question.concept,
     `${question.standardFilter}-standard`,
     marks ? `${marks} marks` : null,
-    `Diff ${question.difficulty}`,
+    `Difficulty Level ${question.difficulty}`,
   ].filter(Boolean);
 
   const promptParts = (question as any).promptParts;
   const answerParts = (question as any).answerParts;
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* SQA-style: number in left gutter, content in middle, marks on far right */}
+    <div style={{ position: "relative", fontFamily: UI_TYPO.family }}>
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "26px 1fr 42px",
+          gridTemplateColumns: "30px 1fr 42px",
           columnGap: 10,
           alignItems: "start",
         }}
       >
-        {/* Left gutter: Question number */}
-        <div style={{ fontWeight: 900, fontSize: 14, lineHeight: 1.2 }}>{index}</div>
+        <div
+          style={{
+            fontFamily: UI_TYPO.family,
+            fontWeight: UI_TYPO.weightSemibold,
+            fontSize: 14,
+            lineHeight: 1.25,
+          }}
+        >
+          {index}.
+        </div>
 
-        {/* Main content */}
-        <div style={{ display: "grid", gap: 6 }}>
-          {/* Prompt */}
-          <div style={{ fontSize: 14, fontWeight: 800, lineHeight: 1.35 }}>
+        <div
+          style={{
+            display: "grid",
+            gap: 6,
+            fontFamily: UI_TYPO.family,
+          }}
+        >
+          <div
+            style={{
+              fontFamily: UI_TYPO.family,
+              fontSize: 14,
+              fontWeight: UI_TYPO.weightMedium,
+              lineHeight: 1.4,
+            }}
+          >
             {isParts(promptParts) ? (
               <PaperContent parts={promptParts} />
             ) : (
@@ -57,20 +76,53 @@ export default function PaperQuestionLocked({ index, question }: Props) {
             )}
           </div>
 
-          {/* Answer */}
-          <div style={{ fontSize: 13, fontWeight: 700, opacity: 0.85 }}>
+          <div
+            style={{
+              fontFamily: UI_TYPO.family,
+              fontSize: 13,
+              fontWeight: UI_TYPO.weightMedium,
+              opacity: 0.85,
+              lineHeight: 1.35,
+            }}
+          >
             Answer:{" "}
-            <span style={{ fontWeight: 900, opacity: 1 }}>
-              {isParts(answerParts) ? <PaperContent parts={answerParts} /> : <span>{question.answer ?? ""}</span>}
+            <span
+              style={{
+                fontWeight: UI_TYPO.weightSemibold,
+                opacity: 1,
+              }}
+            >
+              {isParts(answerParts) ? (
+                <PaperContent parts={answerParts} />
+              ) : (
+                <span>{question.answer ?? ""}</span>
+              )}
             </span>
           </div>
 
-          {/* Meta */}
-          <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.55 }}>{metaBits.join(" • ")}</div>
+          <div
+            style={{
+              fontFamily: UI_TYPO.family,
+              fontSize: 10,
+              fontWeight: UI_TYPO.weightMedium,
+              opacity: 0.55,
+              lineHeight: 1.3,
+            }}
+          >
+            {metaBits.join(" • ")}
+          </div>
         </div>
 
-        {/* Right gutter: Marks */}
-        <div style={{ textAlign: "right", fontWeight: 800, fontSize: 12, opacity: 0.65, lineHeight: 1.2 }}>
+        <div
+          style={{
+            textAlign: "right",
+            fontFamily: UI_TYPO.family,
+            fontWeight: UI_TYPO.weightSemibold,
+            fontSize: 12,
+            opacity: 0.65,
+            lineHeight: 1.2,
+          }}
+        >
           {marks ? `(${marks})` : null}
         </div>
       </div>

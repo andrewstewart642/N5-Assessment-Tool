@@ -1,5 +1,6 @@
 "use client";
 
+import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Question } from "@/shared-types/AssessmentTypes";
 import type { PaperPart } from "@/shared-types/PaperParts";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
@@ -46,33 +47,31 @@ export default function PaperQuestionDraft({
     question.concept,
     `${question.standardFilter}-standard`,
     marks ? `${marks} marks` : null,
-    `Diff ${question.difficulty}`,
+    `Difficulty Level ${question.difficulty}`,
   ].filter(Boolean);
 
   const promptParts = (question as any).promptParts;
   const answerParts = (question as any).answerParts;
 
-  // Must match the locked layout so alignment is consistent
-  const NUMBER_COL_PX = 26;
+  const NUMBER_COL_PX = 30;
   const COL_GAP_PX = 10;
   const TEXT_COL_LEFT_PX = NUMBER_COL_PX + COL_GAP_PX;
 
-  // Space reserved so the bottom overlay buttons don't cover meta line
   const BOTTOM_CONTROLS_HEIGHT_PX = 38;
   const BOTTOM_CONTROLS_GAP_PX = 10;
 
   return (
-    <div style={{ position: "relative", width: "100%" }}>
-      {/* Draft pill (label only) — sits where Edit button would normally be */}
+    <div style={{ position: "relative", width: "100%", fontFamily: UI_TYPO.family }}>
       <div
         aria-hidden="true"
         style={{
           position: "absolute",
           top: 6,
-          right: 86, // matches where the Edit button sits in the locked view
+          right: 86,
           zIndex: 3,
+          fontFamily: UI_TYPO.family,
           fontSize: 11,
-          fontWeight: 900,
+          fontWeight: UI_TYPO.weightSemibold,
           color: "rgba(15,23,42,0.55)",
           background: "rgba(255,255,255,0.75)",
           border: "1px solid rgba(15,23,42,0.18)",
@@ -87,14 +86,11 @@ export default function PaperQuestionDraft({
         Draft
       </div>
 
-      {/* Main content (locked-style structure) */}
       <div
         style={{
           outline: "2px solid rgba(147,197,253,0.28)",
           outlineOffset: 6,
           borderRadius: 8,
-          // reserve space for bottom overlay controls WITHOUT affecting question measurement logic
-          // (this padding is part of the draft's measured content, so keep it small & stable)
           paddingBottom: BOTTOM_CONTROLS_HEIGHT_PX + BOTTOM_CONTROLS_GAP_PX,
         }}
       >
@@ -106,13 +102,32 @@ export default function PaperQuestionDraft({
             alignItems: "start",
           }}
         >
-          {/* Left gutter: Question number */}
-          <div style={{ fontWeight: 900, fontSize: 14, lineHeight: 1.2 }}>{index}</div>
+          <div
+            style={{
+              fontFamily: UI_TYPO.family,
+              fontWeight: UI_TYPO.weightSemibold,
+              fontSize: 14,
+              lineHeight: 1.25,
+            }}
+          >
+            {index}.
+          </div>
 
-          {/* Main content */}
-          <div style={{ display: "grid", gap: 6 }}>
-            {/* Prompt */}
-            <div style={{ fontSize: 14, fontWeight: 800, lineHeight: 1.35 }}>
+          <div
+            style={{
+              display: "grid",
+              gap: 6,
+              fontFamily: UI_TYPO.family,
+            }}
+          >
+            <div
+              style={{
+                fontFamily: UI_TYPO.family,
+                fontSize: 14,
+                fontWeight: UI_TYPO.weightMedium,
+                lineHeight: 1.4,
+              }}
+            >
               {isParts(promptParts) ? (
                 <PaperContent parts={promptParts} />
               ) : (
@@ -120,26 +135,58 @@ export default function PaperQuestionDraft({
               )}
             </div>
 
-            {/* Answer */}
-            <div style={{ fontSize: 13, fontWeight: 700, opacity: 0.85 }}>
+            <div
+              style={{
+                fontFamily: UI_TYPO.family,
+                fontSize: 13,
+                fontWeight: UI_TYPO.weightMedium,
+                opacity: 0.85,
+                lineHeight: 1.35,
+              }}
+            >
               Answer:{" "}
-              <span style={{ fontWeight: 900, opacity: 1 }}>
-                {isParts(answerParts) ? <PaperContent parts={answerParts} /> : <span>{question.answer ?? ""}</span>}
+              <span
+                style={{
+                  fontWeight: UI_TYPO.weightSemibold,
+                  opacity: 1,
+                }}
+              >
+                {isParts(answerParts) ? (
+                  <PaperContent parts={answerParts} />
+                ) : (
+                  <span>{question.answer ?? ""}</span>
+                )}
               </span>
             </div>
 
-            {/* Meta */}
-            <div style={{ fontSize: 10, fontWeight: 700, opacity: 0.55 }}>{metaBits.join(" • ")}</div>
+            <div
+              style={{
+                fontFamily: UI_TYPO.family,
+                fontSize: 10,
+                fontWeight: UI_TYPO.weightMedium,
+                opacity: 0.55,
+                lineHeight: 1.3,
+              }}
+            >
+              {metaBits.join(" • ")}
+            </div>
           </div>
 
-          {/* Right gutter: Marks */}
-          <div style={{ textAlign: "right", fontWeight: 800, fontSize: 12, opacity: 0.65, lineHeight: 1.2 }}>
+          <div
+            style={{
+              textAlign: "right",
+              fontFamily: UI_TYPO.family,
+              fontWeight: UI_TYPO.weightSemibold,
+              fontSize: 12,
+              opacity: 0.65,
+              lineHeight: 1.2,
+            }}
+          >
             {marks ? `(${marks})` : null}
           </div>
         </div>
       </div>
 
-      {/* Bottom-left controls (overlay) — aligned with left edge of the text column */}
       <div
         style={{
           position: "absolute",
@@ -161,7 +208,8 @@ export default function PaperQuestionDraft({
             borderRadius: 10,
             padding: "6px 10px",
             cursor: "pointer",
-            fontWeight: 900,
+            fontFamily: UI_TYPO.family,
+            fontWeight: UI_TYPO.weightSemibold,
             fontSize: 12,
             height: 32,
           }}
@@ -180,7 +228,8 @@ export default function PaperQuestionDraft({
             borderRadius: 10,
             padding: "6px 10px",
             cursor: "pointer",
-            fontWeight: 800,
+            fontFamily: UI_TYPO.family,
+            fontWeight: UI_TYPO.weightMedium,
             fontSize: 12,
             height: 32,
           }}

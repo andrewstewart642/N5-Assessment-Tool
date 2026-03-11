@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 import {
   HUD_HEIGHT_KEY,
   INCLUDE_COVER_SHEET_KEY,
@@ -65,6 +66,18 @@ type UseBuilderInitialisationArgs = {
   p2EndTimeKey: string;
   p2DateCustomKey: string;
 };
+
+function withSpacingBase(question: Question): Question {
+  if (typeof question.spacingBasePx === "number" && Number.isFinite(question.spacingBasePx)) {
+    return question;
+  }
+
+  const code = question.questionCode;
+  return {
+    ...question,
+    spacingBasePx: code ? getSpacingBasePx(code) : 48,
+  };
+}
 
 export function useBuilderInitialisation({
   defaultHudHeight,
@@ -283,10 +296,11 @@ export function useBuilderInitialisation({
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
+
       const parsed = JSON.parse(raw) as { questions?: Question[] };
-      if (Array.isArray(parsed.questions)) {
-        setQuestions(parsed.questions);
-      }
+      if (!Array.isArray(parsed.questions)) return;
+
+      setQuestions(parsed.questions.map(withSpacingBase));
     } catch {
       // ignore
     }
