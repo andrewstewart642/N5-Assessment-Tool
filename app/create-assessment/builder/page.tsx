@@ -23,13 +23,10 @@ import {
   getTheme,
   type AppearancePreference,
 } from "@/app/ui/AppTheme";
-import type { PaperPart } from "@/shared-types/PaperParts";
 import type {
-  Concept,
   DifficultyLevel,
   Paper,
   Question,
-  QuestionSkillLink,
   Skill,
   StandardFilter,
 } from "@/shared-types/AssessmentTypes";
@@ -39,7 +36,24 @@ import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 import BuilderGlobalStyles from "./BuilderStyles";
 import { buildBuilderPages, buildPreviewPages } from "./BuildPreviewPages";
 import {
-  A4_W_PX,
+  buildGenerated,
+  buildSkillLinks,
+  getConceptFromSelection,
+} from "./builder-logic/BuilderQuestionGenerators";
+import {
+  buildTimeRange,
+  formatCoverDate,
+  todayDisplayDate,
+} from "./builder-logic/BuilderDateHelpers";
+import {
+  BuilderMetaField,
+  ViewingToggle,
+} from "./builder-logic/BuilderUiHelpers";
+import { useBuilderInitialisation } from "./builder-behaviour/UseBuilderInitialisation";
+import { useBuilderLayout } from "./builder-behaviour/UseBuilderLayouts";
+import { useBuilderPersistence } from "./builder-behaviour/UseBuilderPersistence";
+import { usePreviewViewport } from "./builder-behaviour/UsePreviewViewport";
+import {
   clamp,
   estimateMinutes,
   spacingBasePxFor,
@@ -49,17 +63,6 @@ import {
   type EditDraftByPaper,
   type PreviewPage,
 } from "./BuilderUtils";
-import {
-  HUD_HEIGHT_KEY,
-  INCLUDE_COVER_SHEET_KEY,
-  INCLUDE_FORMULA_SHEET_KEY,
-  PANE_RATIO_KEY,
-  SHOW_COVER_DATE_TIME_KEY,
-  SHOW_PROGRESS_PANEL_KEY,
-  SHOW_SCN_BOX_KEY,
-  STORAGE_KEY,
-} from "./BuilderStorageKeys";
-import { loadAssessmentSetupBrief } from "../setup/AssessmentSetupStorage";
 
 const META_NAME_KEY = "n5-builder-meta-name";
 const META_CLASS_KEY = "n5-builder-meta-class";
@@ -74,807 +77,6 @@ const P2_START_TIME_KEY = "n5-builder-p2-start-time";
 const P2_END_TIME_KEY = "n5-builder-p2-end-time";
 
 const P2_DATE_CUSTOM_KEY = "n5-builder-p2-date-custom";
-
-type GeneratedQuestionData = {
-  prompt?: string;
-  answer?: string;
-  marks?: number;
-  questionCode?: string;
-  promptParts?: PaperPart[];
-  answerParts?: PaperPart[];
-};
-
-function textPart(value: string): PaperPart {
-  return { kind: "text", value };
-}
-
-function mathPart(latex: string, displayMode = false): PaperPart {
-  return { kind: "math", latex, displayMode };
-}
-
-function randomInt(min: number, max: number): number {
-  const low = Math.ceil(min);
-  const high = Math.floor(max);
-  return Math.floor(Math.random() * (high - low + 1)) + low;
-}
-
-function chooseOne<T>(items: T[]): T {
-  return items[randomInt(0, items.length - 1)];
-}
-
-function gcd(a: number, b: number): number {
-  let x = Math.abs(a);
-  let y = Math.abs(b);
-  while (y !== 0) {
-    const t = y;
-    y = x % y;
-    x = t;
-  }
-  return x || 1;
-}
-
-function lcm(a: number, b: number): number {
-  return Math.abs(a * b) / gcd(a, b);
-}
-
-function reduceFraction(numerator: number, denominator: number) {
-  const sign = denominator < 0 ? -1 : 1;
-  const g = gcd(numerator, denominator);
-  return {
-    numerator: (sign * numerator) / g,
-    denominator: (sign * denominator) / g,
-  };
-}
-
-function formatFractionPlain(numerator: number, denominator: number): string {
-  const reduced = reduceFraction(numerator, denominator);
-  if (reduced.denominator === 1) return `${reduced.numerator}`;
-  return `${reduced.numerator}/${reduced.denominator}`;
-}
-
-function formatFractionLatex(numerator: number, denominator: number): string {
-  const reduced = reduceFraction(numerator, denominator);
-  if (reduced.denominator === 1) return `${reduced.numerator}`;
-  return `\\dfrac{${reduced.numerator}}{${reduced.denominator}}`;
-}
-
-function nonSquarePartFromRoot(radicand: number) {
-  let outside = 1;
-  let inside = radicand;
-
-  for (let i = 2; i * i <= inside; i += 1) {
-    while (inside % (i * i) === 0) {
-      outside *= i;
-      inside /= i * i;
-    }
-  }
-
-  return { outside, inside };
-}
-
-function formatSimplifiedSurdPlain(radicand: number): string {
-  const { outside, inside } = nonSquarePartFromRoot(radicand);
-  if (inside === 1) return `${outside}`;
-  if (outside === 1) return `√${inside}`;
-  return `${outside}√${inside}`;
-}
-
-function formatSimplifiedSurdLatex(radicand: number): string {
-  const { outside, inside } = nonSquarePartFromRoot(radicand);
-  if (inside === 1) return `${outside}`;
-  if (outside === 1) return `\\sqrt{${inside}}`;
-  return `${outside}\\sqrt{${inside}}`;
-}
-
-function conceptSelectionText(concept: Concept): string {
-  const short = concept.shortLabel?.trim();
-  if (short) return `${concept.code} ${short}`;
-  return concept.label.trim();
-}
-
-function getConceptFromSelection(skill: Skill, selectedConcept: string): Concept | undefined {
-  const trimmed = selectedConcept.trim();
-
-  return skill.concepts.find((c) => {
-    const compact = conceptSelectionText(c);
-    return (
-      c.label === trimmed ||
-      c.code === trimmed ||
-      c.shortLabel === trimmed ||
-      compact === trimmed
-    );
-  });
-}
-
-function buildQuestionCode(domain: string, skillCode: string, conceptCode: string) {
-  const safeSkill = skillCode.replace(/\./g, "");
-  const safeConcept = conceptCode.replace(/\./g, "");
-  return `NQ_N5_${domain}_${safeSkill}_${safeConcept}`;
-}
-
-function generateSurdsSimplify(difficulty: DifficultyLevel): GeneratedQuestionData {
-  const squareFactorsByDifficulty: Record<DifficultyLevel, number[]> = {
-    1: [4, 9],
-    2: [4, 9, 16],
-    3: [4, 9, 16, 25],
-    4: [4, 9, 16, 25, 36],
-    5: [9, 16, 25, 36, 49],
-  };
-
-  const insideChoicesByDifficulty: Record<DifficultyLevel, number[]> = {
-    1: [2, 3, 5, 6],
-    2: [2, 3, 5, 6, 7, 10],
-    3: [2, 3, 5, 6, 7, 10, 11, 12],
-    4: [2, 3, 5, 6, 7, 10, 11, 13, 15],
-    5: [2, 3, 5, 6, 7, 10, 11, 13, 15, 17],
-  };
-
-  const squareFactor = chooseOne(squareFactorsByDifficulty[difficulty]);
-  const inside = chooseOne(insideChoicesByDifficulty[difficulty]);
-  const radicand = squareFactor * inside;
-
-  return {
-    prompt: `Simplify √${radicand}.`,
-    answer: formatSimplifiedSurdPlain(radicand),
-    marks: difficulty >= 4 ? 3 : 2,
-    questionCode: "NQ_N5_NUM_N01_N11_SurdsSimplification",
-    promptParts: [textPart("Simplify "), mathPart(`\\sqrt{${radicand}}`), textPart(".")],
-    answerParts: [mathPart(formatSimplifiedSurdLatex(radicand))],
-  };
-}
-
-function generateRationalisingDenominator(difficulty: DifficultyLevel): GeneratedQuestionData {
-  const numerator = randomInt(1, difficulty >= 3 ? 7 : 5);
-  const radicandChoices =
-    difficulty <= 2 ? [2, 3, 5, 6, 7] : [2, 3, 5, 6, 7, 10, 11, 13];
-  const radicand = chooseOne(radicandChoices);
-
-  return {
-    prompt: `Write ${numerator}/√${radicand} with a rational denominator.`,
-    answer: `${numerator}√${radicand}/${radicand}`,
-    marks: 3,
-    questionCode: "NQ_N5_NUM_N01_N12_RationalisingDenominators",
-    promptParts: [
-      textPart("Write "),
-      mathPart(`\\dfrac{${numerator}}{\\sqrt{${radicand}}}`),
-      textPart(" with a rational denominator."),
-    ],
-    answerParts: [mathPart(`\\dfrac{${numerator}\\sqrt{${radicand}}}{${radicand}}`)],
-  };
-}
-
-function generateIndicesProductQuotient(difficulty: DifficultyLevel): GeneratedQuestionData {
-  const variable = chooseOne(["a", "b", "x", "y"]);
-  const useDivision = Math.random() < 0.5;
-
-  const exponentCap = difficulty <= 2 ? 6 : difficulty === 3 ? 8 : 10;
-  const m = randomInt(difficulty >= 4 ? -4 : 1, exponentCap);
-  const n = randomInt(difficulty >= 3 ? -4 : 1, exponentCap);
-
-  const result = useDivision ? m - n : m + n;
-  const expression = useDivision
-    ? `${variable}^{${m}} \\div ${variable}^{${n}}`
-    : `${variable}^{${m}} \\times ${variable}^{${n}}`;
-
-  return {
-    prompt: `Simplify ${useDivision ? `${variable}^${m} ÷ ${variable}^${n}` : `${variable}^${m} × ${variable}^${n}`}.`,
-    answer: `${variable}^${result}`,
-    marks: 2,
-    questionCode: "NQ_N5_NUM_N02_N21_ProductQuotientIndices",
-    promptParts: [textPart("Simplify "), mathPart(expression), textPart(".")],
-    answerParts: [mathPart(`${variable}^{${result}}`)],
-  };
-}
-
-function generatePowerOfProduct(): GeneratedQuestionData {
-  const a = chooseOne(["a", "x", "p"]);
-  const b = chooseOne(["b", "y", "q"]);
-  const power = randomInt(2, 5);
-
-  return {
-    prompt: `Expand (${a}${b})^${power} using the laws of indices.`,
-    answer: `${a}^${power}${b}^${power}`,
-    marks: 2,
-    questionCode: "NQ_N5_NUM_N02_N22_PowerOfProduct",
-    promptParts: [
-      textPart("Expand "),
-      mathPart(`(${a}${b})^{${power}}`),
-      textPart(" using the laws of indices."),
-    ],
-    answerParts: [mathPart(`${a}^{${power}}${b}^{${power}}`)],
-  };
-}
-
-function generatePowerOfPower(): GeneratedQuestionData {
-  const variable = chooseOne(["a", "x", "m"]);
-  const outer = randomInt(2, 5);
-  const inner = randomInt(2, 5);
-
-  return {
-    prompt: `Simplify (${variable}^${inner})^${outer}.`,
-    answer: `${variable}^${inner * outer}`,
-    marks: 2,
-    questionCode: "NQ_N5_NUM_N02_N23_PowerOfPower",
-    promptParts: [textPart("Simplify "), mathPart(`(${variable}^{${inner}})^{${outer}}`), textPart(".")],
-    answerParts: [mathPart(`${variable}^{${inner * outer}}`)],
-  };
-}
-
-function generateFractionalIndices(difficulty: DifficultyLevel): GeneratedQuestionData {
-  const denominator = chooseOne([2, 3]);
-  const numerator = denominator === 2 ? chooseOne([1, 3]) : chooseOne([1, 2, 4]);
-  const base =
-    denominator === 2
-      ? chooseOne([4, 9, 16, 25, 36, 49])
-      : chooseOne([8, 27, 64, 125]);
-
-  const variable = chooseOne(["a", "x"]);
-
-  if (difficulty <= 3) {
-    const powerValue = Math.pow(base, numerator / denominator);
-
-    return {
-      prompt: `Evaluate ${base}^(${numerator}/${denominator}).`,
-      answer: `${powerValue}`,
-      marks: 3,
-      questionCode: "NQ_N5_NUM_N02_N24_FractionalIndices",
-      promptParts: [textPart("Evaluate "), mathPart(`${base}^{\\frac{${numerator}}{${denominator}}}`), textPart(".")],
-      answerParts: [mathPart(`${powerValue}`)],
-    };
-  }
-
-  const latex =
-    numerator === 1
-      ? `\\sqrt[${denominator}]{${variable}}`
-      : `\\sqrt[${denominator}]{${variable}^{${numerator}}}`;
-
-  return {
-    prompt: `Write ${variable}^(${numerator}/${denominator}) in radical form.`,
-    answer: latex,
-    marks: 3,
-    questionCode: "NQ_N5_NUM_N02_N24_FractionalIndices",
-    promptParts: [
-      textPart("Write "),
-      mathPart(`${variable}^{\\frac{${numerator}}{${denominator}}}`),
-      textPart(" in radical form."),
-    ],
-    answerParts: [mathPart(latex)],
-  };
-}
-
-function generateScientificNotation(difficulty: DifficultyLevel): GeneratedQuestionData {
-  const a = chooseOne([1.2, 1.5, 2.4, 3.6, 4.8, 6.2, 7.5, 8.4]);
-  const b = chooseOne([1.1, 1.4, 2.5, 3.2, 4.6, 5.5]);
-  const powerA = randomInt(2, 6);
-  const powerB = randomInt(2, 6);
-  const useDivision = difficulty >= 3 ? Math.random() < 0.5 : false;
-
-  if (useDivision) {
-    const value = (a * Math.pow(10, powerA)) / (b * Math.pow(10, powerB));
-    const answer = value.toExponential(2);
-    const [mantissa, exponentRaw] = answer.split("e");
-    const exponent = Number(exponentRaw);
-
-    return {
-      prompt: `Calculate (${a} × 10^${powerA}) ÷ (${b} × 10^${powerB}). Give your answer in scientific notation.`,
-      answer: `${mantissa} × 10^${exponent}`,
-      marks: 3,
-      questionCode: "NQ_N5_NUM_N02_N25_ScientificNotation",
-      promptParts: [
-        textPart("Calculate "),
-        mathPart(`(${a} \\times 10^{${powerA}}) \\div (${b} \\times 10^{${powerB}})`),
-        textPart(". Give your answer in scientific notation."),
-      ],
-      answerParts: [mathPart(`${mantissa} \\times 10^{${exponent}}`)],
-    };
-  }
-
-  const value = a * Math.pow(10, powerA) * (b * Math.pow(10, powerB));
-  const answer = value.toExponential(2);
-  const [mantissa, exponentRaw] = answer.split("e");
-  const exponent = Number(exponentRaw);
-
-  return {
-    prompt: `Calculate (${a} × 10^${powerA}) × (${b} × 10^${powerB}). Give your answer in scientific notation.`,
-    answer: `${mantissa} × 10^${exponent}`,
-    marks: 3,
-    questionCode: "NQ_N5_NUM_N02_N25_ScientificNotation",
-    promptParts: [
-      textPart("Calculate "),
-      mathPart(`(${a} \\times 10^{${powerA}}) \\times (${b} \\times 10^{${powerB}})`),
-      textPart(". Give your answer in scientific notation."),
-    ],
-    answerParts: [mathPart(`${mantissa} \\times 10^{${exponent}}`)],
-  };
-}
-
-function generateSignificantFigures(difficulty: DifficultyLevel): GeneratedQuestionData {
-  const sf = chooseOne([2, 3]);
-  const whole = randomInt(10, difficulty >= 4 ? 9999 : 999);
-  const decimalPart = randomInt(100, 9999);
-  const value = Number(`${whole}.${decimalPart}`);
-  const rounded = Number(value.toPrecision(sf)).toString();
-
-  return {
-    prompt: `Round ${value} to ${sf} significant figures.`,
-    answer: rounded,
-    marks: 1,
-    questionCode: "NQ_N5_NUM_N03_N31_SignificantFigures",
-    promptParts: [
-      textPart("Round "),
-      mathPart(`${value}`),
-      textPart(` to ${sf} significant figures.`),
-    ],
-    answerParts: [mathPart(rounded)],
-  };
-}
-
-function generateReversePercentage(): GeneratedQuestionData {
-  const original = randomInt(80, 400);
-  const percent = chooseOne([5, 10, 15, 20, 25]);
-  const increase = Math.random() < 0.5;
-
-  const finalAmount = increase
-    ? original * (1 + percent / 100)
-    : original * (1 - percent / 100);
-
-  const finalText = Number.isInteger(finalAmount) ? `${finalAmount}` : finalAmount.toFixed(2);
-
-  return {
-    prompt: increase
-      ? `After an increase of ${percent}%, a price is £${finalText}. Find the original price.`
-      : `After a decrease of ${percent}%, a price is £${finalText}. Find the original price.`,
-    answer: `£${original}`,
-    marks: 3,
-    questionCode: "NQ_N5_NUM_N04_N41_ReversePercentage",
-    promptParts: [
-      textPart(
-        increase
-          ? `After an increase of ${percent}%, a price is £${finalText}. Find the original price.`
-          : `After a decrease of ${percent}%, a price is £${finalText}. Find the original price.`
-      ),
-    ],
-    answerParts: [textPart(`£${original}`)],
-  };
-}
-
-function generateAppreciation(): GeneratedQuestionData {
-  const principal = randomInt(200, 3000);
-  const rate = chooseOne([2, 3, 4, 5, 6, 8, 10]);
-  const years = randomInt(2, 5);
-  const value = principal * Math.pow(1 + rate / 100, years);
-
-  return {
-    prompt: `A value of £${principal} appreciates by ${rate}% each year for ${years} years. Calculate the final value.`,
-    answer: `£${value.toFixed(2)}`,
-    marks: 3,
-    questionCode: "NQ_N5_NUM_N04_N42_Appreciation",
-    promptParts: [
-      textPart(
-        `A value of £${principal} appreciates by ${rate}% each year for ${years} years. Calculate the final value.`
-      ),
-    ],
-    answerParts: [textPart(`£${value.toFixed(2)}`)],
-  };
-}
-
-function generateDepreciation(): GeneratedQuestionData {
-  const principal = randomInt(500, 5000);
-  const rate = chooseOne([5, 8, 10, 12, 15, 20]);
-  const years = randomInt(2, 5);
-  const value = principal * Math.pow(1 - rate / 100, years);
-
-  return {
-    prompt: `A machine worth £${principal} depreciates by ${rate}% each year for ${years} years. Calculate its value after ${years} years.`,
-    answer: `£${value.toFixed(2)}`,
-    marks: 3,
-    questionCode: "NQ_N5_NUM_N04_N43_Depreciation",
-    promptParts: [
-      textPart(
-        `A machine worth £${principal} depreciates by ${rate}% each year for ${years} years. Calculate its value after ${years} years.`
-      ),
-    ],
-    answerParts: [textPart(`£${value.toFixed(2)}`)],
-  };
-}
-
-function generateFractions(difficulty: DifficultyLevel): GeneratedQuestionData {
-  const denominatorCap = difficulty <= 2 ? 12 : 20;
-
-  const a = randomInt(1, denominatorCap - 1);
-  const b = randomInt(2, denominatorCap);
-  const c = randomInt(1, denominatorCap - 1);
-  const d = randomInt(2, denominatorCap);
-
-  const op = chooseOne(["+", "-", "×", "÷"] as const);
-
-  if (op === "+") {
-    const common = lcm(b, d);
-    const resultNum = (a * common) / b + (c * common) / d;
-    const result = reduceFraction(resultNum, common);
-
-    return {
-      prompt: `Calculate ${a}/${b} + ${c}/${d}.`,
-      answer: formatFractionPlain(result.numerator, result.denominator),
-      marks: 2,
-      questionCode: "NQ_N5_NUM_N05_N51_Fractions",
-      promptParts: [
-        textPart("Calculate "),
-        mathPart(`\\dfrac{${a}}{${b}} + \\dfrac{${c}}{${d}}`),
-        textPart("."),
-      ],
-      answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
-    };
-  }
-
-  if (op === "-") {
-    const common = lcm(b, d);
-    const resultNum = (a * common) / b - (c * common) / d;
-    const result = reduceFraction(resultNum, common);
-
-    return {
-      prompt: `Calculate ${a}/${b} - ${c}/${d}.`,
-      answer: formatFractionPlain(result.numerator, result.denominator),
-      marks: 2,
-      questionCode: "NQ_N5_NUM_N05_N51_Fractions",
-      promptParts: [
-        textPart("Calculate "),
-        mathPart(`\\dfrac{${a}}{${b}} - \\dfrac{${c}}{${d}}`),
-        textPart("."),
-      ],
-      answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
-    };
-  }
-
-  if (op === "×") {
-    const result = reduceFraction(a * c, b * d);
-
-    return {
-      prompt: `Calculate ${a}/${b} × ${c}/${d}.`,
-      answer: formatFractionPlain(result.numerator, result.denominator),
-      marks: 2,
-      questionCode: "NQ_N5_NUM_N05_N51_Fractions",
-      promptParts: [
-        textPart("Calculate "),
-        mathPart(`\\dfrac{${a}}{${b}} \\times \\dfrac{${c}}{${d}}`),
-        textPart("."),
-      ],
-      answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
-    };
-  }
-
-  const result = reduceFraction(a * d, b * c);
-
-  return {
-    prompt: `Calculate ${a}/${b} ÷ ${c}/${d}.`,
-    answer: formatFractionPlain(result.numerator, result.denominator),
-    marks: 2,
-    questionCode: "NQ_N5_NUM_N05_N51_Fractions",
-    promptParts: [
-      textPart("Calculate "),
-      mathPart(`\\dfrac{${a}}{${b}} \\div \\dfrac{${c}}{${d}}`),
-      textPart("."),
-    ],
-    answerParts: [mathPart(formatFractionLatex(result.numerator, result.denominator))],
-  };
-}
-
-function buildGenerated(
-  skill: Skill,
-  selectedConcept: string,
-  difficulty: DifficultyLevel
-): GeneratedQuestionData {
-  const concept = getConceptFromSelection(skill, selectedConcept);
-  const conceptCode = concept?.code ?? selectedConcept;
-
-  switch (conceptCode) {
-    case "N1.1":
-      return generateSurdsSimplify(difficulty);
-
-    case "N1.2":
-      return generateRationalisingDenominator(difficulty);
-
-    case "N2.1":
-      return generateIndicesProductQuotient(difficulty);
-
-    case "N2.2":
-      return generatePowerOfProduct();
-
-    case "N2.3":
-      return generatePowerOfPower();
-
-    case "N2.4":
-      return generateFractionalIndices(difficulty);
-
-    case "N2.5":
-      return generateScientificNotation(difficulty);
-
-    case "N3.1":
-      return generateSignificantFigures(difficulty);
-
-    case "N4.1":
-      return generateReversePercentage();
-
-    case "N4.2":
-      return generateAppreciation();
-
-    case "N4.3":
-      return generateDepreciation();
-
-    case "N5.1":
-      return generateFractions(difficulty);
-
-    default:
-      return {
-        prompt: concept?.fullDescription
-          ? `Placeholder question for ${concept.code}: ${concept.fullDescription}`
-          : `Placeholder question for ${skill.code}: ${selectedConcept}`,
-        answer: "Answer not yet implemented.",
-        marks: concept?.marks ?? 2,
-        questionCode: buildQuestionCode(skill.domain ?? "GEN", skill.code, concept?.code ?? "C00"),
-        promptParts: [
-          textPart(
-            concept?.fullDescription
-              ? `Placeholder question for ${concept.code}: ${concept.fullDescription}`
-              : `Placeholder question for ${skill.code}: ${selectedConcept}`
-          ),
-        ],
-        answerParts: [textPart("Answer not yet implemented.")],
-      };
-  }
-}
-
-function buildSkillLinks(skill: Skill, concept: Concept | undefined): QuestionSkillLink[] {
-  if (!concept) {
-    return [
-      {
-        skillId: skill.id,
-        role: "primary",
-      },
-    ];
-  }
-
-  return [
-    {
-      skillId: skill.id,
-      conceptId: concept.id,
-      role: "primary",
-    },
-  ];
-}
-
-function pad2(value: number): string {
-  return value.toString().padStart(2, "0");
-}
-
-function parseFlexibleDateInput(input: string): Date | null {
-  const trimmed = input.trim();
-  if (!trimmed) return null;
-
-  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (isoMatch) {
-    const year = Number(isoMatch[1]);
-    const month = Number(isoMatch[2]);
-    const day = Number(isoMatch[3]);
-
-    const date = new Date(year, month - 1, day);
-    if (
-      date.getFullYear() === year &&
-      date.getMonth() === month - 1 &&
-      date.getDate() === day
-    ) {
-      return date;
-    }
-  }
-
-  const displayMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (displayMatch) {
-    const day = Number(displayMatch[1]);
-    const month = Number(displayMatch[2]);
-    const year = Number(displayMatch[3]);
-
-    const date = new Date(year, month - 1, day);
-    if (
-      date.getFullYear() === year &&
-      date.getMonth() === month - 1 &&
-      date.getDate() === day
-    ) {
-      return date;
-    }
-  }
-
-  return null;
-}
-
-function formatDisplayDate(date: Date): string {
-  return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
-}
-
-function normaliseDisplayDate(input: string): string {
-  const parsed = parseFlexibleDateInput(input);
-  return parsed ? formatDisplayDate(parsed) : "";
-}
-
-function todayDisplayDate(): string {
-  return formatDisplayDate(new Date());
-}
-
-function ordinalDay(n: number): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-
-  if (mod10 === 1 && mod100 !== 11) return `${n}st`;
-  if (mod10 === 2 && mod100 !== 12) return `${n}nd`;
-  if (mod10 === 3 && mod100 !== 13) return `${n}rd`;
-  return `${n}th`;
-}
-
-function formatCoverDate(input: string): string {
-  if (!input) return "";
-
-  const date = parseFlexibleDateInput(input);
-  if (!date) return input;
-
-  const weekday = date.toLocaleDateString("en-GB", { weekday: "long" });
-  const month = date.toLocaleDateString("en-GB", { month: "long" });
-  const day = ordinalDay(date.getDate());
-
-  return `${weekday}, ${day} ${month}`;
-}
-
-function buildTimeRange(start: string, end: string): string {
-  if (start && end) return `${start} - ${end}`;
-  if (start) return start;
-  if (end) return end;
-  return "";
-}
-
-type BuilderMetaFieldProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  onFocus?: () => void;
-  onBlur?: () => void;
-  width?: number;
-};
-
-function BuilderMetaField({
-  label,
-  value,
-  onChange,
-  onFocus,
-  onBlur,
-  width,
-}: BuilderMetaFieldProps) {
-  return (
-    <label
-      style={{
-        display: "grid",
-        gap: 3,
-        minWidth: 0,
-        width: width ?? "auto",
-        fontFamily: UI_TYPO.family,
-      }}
-    >
-      <span
-        style={{
-          fontSize: 12,
-          fontWeight: UI_TYPO.weightMedium,
-          letterSpacing: 0,
-          color: "rgba(214,227,243,0.74)",
-          lineHeight: 1.2,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {label}
-      </span>
-
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        style={{
-          height: 30,
-          borderRadius: 9,
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.02)",
-          color: "#f7fbff",
-          padding: "0 9px",
-          fontSize: 13,
-          fontFamily: UI_TYPO.family,
-          fontWeight: UI_TYPO.weightSemibold,
-          minWidth: 0,
-          width: "100%",
-          boxSizing: "border-box",
-          outline: "none",
-        }}
-      />
-    </label>
-  );
-}
-
-type ViewingToggleProps = {
-  value: Paper;
-  onChange: (paper: Paper) => void;
-};
-
-function ViewingToggle({ value, onChange }: ViewingToggleProps) {
-  return (
-    <div
-      style={{
-        position: "relative",
-        width: 176,
-        height: 34,
-        borderRadius: 999,
-        background: "rgba(255,255,255,0.03)",
-        border: "1px solid rgba(255,255,255,0.08)",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 2,
-          bottom: 2,
-          left: 2,
-          width: "calc(50% - 2px)",
-          borderRadius: 999,
-          background: "rgba(37,99,235,0.20)",
-          border: "1px solid rgba(96,165,250,0.95)",
-          transform: value === "P1" ? "translateX(0%)" : "translateX(100%)",
-          transition: "transform 180ms ease",
-          boxSizing: "border-box",
-        }}
-      />
-
-      <div
-        style={{
-          position: "relative",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          height: "100%",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => onChange("P1")}
-          style={{
-            border: "none",
-            background: "transparent",
-            color: value === "P1" ? "#f7fbff" : "rgba(214,227,243,0.76)",
-            cursor: "pointer",
-            fontSize: 14,
-            fontFamily: UI_TYPO.family,
-            fontWeight: UI_TYPO.weightBold,
-            lineHeight: 1,
-          }}
-        >
-          Paper 1
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onChange("P2")}
-          style={{
-            border: "none",
-            background: "transparent",
-            color: value === "P2" ? "#f7fbff" : "rgba(214,227,243,0.76)",
-            cursor: "pointer",
-            fontSize: 14,
-            fontFamily: UI_TYPO.family,
-            fontWeight: UI_TYPO.weightBold,
-            lineHeight: 1,
-          }}
-        >
-          Paper 2
-        </button>
-      </div>
-    </div>
-  );
-}
 
 export default function CreateAssessmentBuilderPage() {
   const router = useRouter();
@@ -891,7 +93,9 @@ export default function CreateAssessmentBuilderPage() {
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
   const [expandedSkillIds, setExpandedSkillIds] = useState<string[]>([]);
   const [conceptIndexBySkill, setConceptIndexBySkill] = useState<Record<string, number>>({});
-  const [difficultyBySkill, setDifficultyBySkill] = useState<Record<string, DifficultyLevel>>({});
+  const [difficultyBySkill, setDifficultyBySkill] = useState<Record<string, DifficultyLevel>>(
+    {}
+  );
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -908,29 +112,35 @@ export default function CreateAssessmentBuilderPage() {
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
 
   const previewPaneRef = useRef<HTMLDivElement | null>(null);
-  const layoutRef = useRef<HTMLDivElement | null>(null);
-  const hudResizeStartRef = useRef<{ startY: number; startHeight: number } | null>(null);
   const pageWrapperRefs = useRef<Array<HTMLDivElement | null>>([]);
   const pendingJumpDraftRef = useRef<{ paper: Paper; draftId: string } | null>(null);
   const builderDateFieldRef = useRef<HTMLDivElement | null>(null);
 
-  const [fitWidthScale, setFitWidthScale] = useState<number>(1);
-  const [zoomPct, setZoomPct] = useState<number>(90);
-
-  const [leftPaneRatio, setLeftPaneRatio] = useState<number>(1 / 2.25);
-  const [isDraggingDivider, setIsDraggingDivider] = useState(false);
-
   const DEFAULT_HUD_HEIGHT = 170;
-  const [hudHeight, setHudHeight] = useState<number>(DEFAULT_HUD_HEIGHT);
-  const [isDraggingHud, setIsDraggingHud] = useState(false);
-  const [showProgressPanel, setShowProgressPanel] = useState(true);
+
+  const {
+    layoutRef,
+    hudResizeStartRef,
+    leftPaneRatio,
+    setLeftPaneRatio,
+    isDraggingDivider,
+    setIsDraggingDivider,
+    hudHeight,
+    setHudHeight,
+    isDraggingHud,
+    setIsDraggingHud,
+    showProgressPanel,
+    setShowProgressPanel,
+    resetLayout,
+  } = useBuilderLayout({
+    defaultHudHeight: DEFAULT_HUD_HEIGHT,
+  });
 
   const [includeCoverSheet, setIncludeCoverSheet] = useState(false);
   const [showCoverDateTime, setShowCoverDateTime] = useState(false);
-  const [showScottishCandidateNumberBox, setShowScottishCandidateNumberBox] = useState(true);
+  const [showScottishCandidateNumberBox, setShowScottishCandidateNumberBox] =
+    useState(true);
   const [includeFormulaSheet, setIncludeFormulaSheet] = useState(false);
-
-  const [currentViewerPage, setCurrentViewerPage] = useState<number>(1);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [appearance, setAppearance] = useState<AppearancePreference>("dark");
@@ -958,6 +168,92 @@ export default function CreateAssessmentBuilderPage() {
     [appearance, systemPrefersDark]
   );
 
+  useBuilderInitialisation({
+    defaultHudHeight: DEFAULT_HUD_HEIGHT,
+    appearanceStorageKey: APPEARANCE_STORAGE_KEY,
+    clampFn: clamp,
+
+    setSystemPrefersDark,
+    setAppearance,
+
+    setLeftPaneRatio,
+    setHudHeight,
+    setShowProgressPanel,
+    setIncludeCoverSheet,
+    setShowCoverDateTime,
+    setShowScottishCandidateNumberBox,
+    setIncludeFormulaSheet,
+
+    setAssessmentName,
+    setClassName,
+    setAssessmentDate,
+    setP2CoverDate,
+    setCreatedAt,
+
+    setP1StartTime,
+    setP1EndTime,
+    setP2StartTime,
+    setP2EndTime,
+    setP2DateCustom,
+    setP1EndTimeManuallyEdited,
+    setP2EndTimeManuallyEdited,
+
+    setActivePaper,
+    setViewPaper,
+
+    setP1Target,
+    setP2Target,
+
+    setQuestions,
+
+    metaNameKey: META_NAME_KEY,
+    metaClassKey: META_CLASS_KEY,
+    metaAssessmentDateKey: META_ASSESSMENT_DATE_KEY,
+    p1CoverDateKey: P1_COVER_DATE_KEY,
+    p1StartTimeKey: P1_START_TIME_KEY,
+    p1EndTimeKey: P1_END_TIME_KEY,
+    p2CoverDateKey: P2_COVER_DATE_KEY,
+    p2StartTimeKey: P2_START_TIME_KEY,
+    p2EndTimeKey: P2_END_TIME_KEY,
+    p2DateCustomKey: P2_DATE_CUSTOM_KEY,
+  });
+
+  useBuilderPersistence({
+    appearance,
+    appearanceStorageKey: APPEARANCE_STORAGE_KEY,
+
+    leftPaneRatio,
+    hudHeight,
+    showProgressPanel,
+    includeCoverSheet,
+    showCoverDateTime,
+    showScottishCandidateNumberBox,
+    includeFormulaSheet,
+
+    assessmentName,
+    className,
+    assessmentDate,
+    p1StartTime,
+    p1EndTime,
+    p2CoverDate,
+    p2StartTime,
+    p2EndTime,
+    p2DateCustom,
+
+    questions,
+
+    metaNameKey: META_NAME_KEY,
+    metaClassKey: META_CLASS_KEY,
+    metaAssessmentDateKey: META_ASSESSMENT_DATE_KEY,
+    p1CoverDateKey: P1_COVER_DATE_KEY,
+    p1StartTimeKey: P1_START_TIME_KEY,
+    p1EndTimeKey: P1_END_TIME_KEY,
+    p2CoverDateKey: P2_COVER_DATE_KEY,
+    p2StartTimeKey: P2_START_TIME_KEY,
+    p2EndTimeKey: P2_END_TIME_KEY,
+    p2DateCustomKey: P2_DATE_CUSTOM_KEY,
+  });
+
   const editDraftRef = useRef<EditDraftByPaper>({ P1: null, P2: null });
   useEffect(() => {
     editDraftRef.current = editDraftByPaper;
@@ -975,191 +271,11 @@ export default function CreateAssessmentBuilderPage() {
     });
   }, []);
 
-  const zoomIn = useCallback(() => setZoomPct((p) => clamp(p + 5, 50, 160)), []);
-  const zoomOut = useCallback(() => setZoomPct((p) => clamp(p - 5, 50, 160)), []);
-  const resetZoom = useCallback(() => setZoomPct(100), []);
-
-  const resetLayout = useCallback(() => {
-    setLeftPaneRatio(1 / 2.25);
-    setHudHeight(DEFAULT_HUD_HEIGHT);
-    setShowProgressPanel(true);
-
-    try {
-      window.localStorage.removeItem(PANE_RATIO_KEY);
-      window.localStorage.removeItem(HUD_HEIGHT_KEY);
-      window.localStorage.removeItem(SHOW_PROGRESS_PANEL_KEY);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  const viewerScale = useMemo(() => {
-    const mult = zoomPct / 100;
-    return fitWidthScale * mult;
-  }, [fitWidthScale, zoomPct]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => setSystemPrefersDark(media.matches);
-
-    apply();
-
-    const raw = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-    if (raw === "dark" || raw === "light" || raw === "system") {
-      setAppearance(raw as AppearancePreference);
-    }
-
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", apply);
-      return () => media.removeEventListener("change", apply);
-    }
-
-    media.addListener(apply);
-    return () => media.removeListener(apply);
-  }, []);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(APPEARANCE_STORAGE_KEY, appearance);
-    } catch {
-      // ignore
-    }
-  }, [appearance]);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(PANE_RATIO_KEY);
-      if (raw) {
-        const parsed = Number(raw);
-        if (Number.isFinite(parsed)) setLeftPaneRatio(clamp(parsed, 0.28, 0.62));
-      }
-
-      const rawHud = window.localStorage.getItem(HUD_HEIGHT_KEY);
-      if (rawHud) {
-        const parsedHud = Number(rawHud);
-        if (Number.isFinite(parsedHud)) setHudHeight(clamp(parsedHud, DEFAULT_HUD_HEIGHT, 280));
-      }
-
-      const rawShowHud = window.localStorage.getItem(SHOW_PROGRESS_PANEL_KEY);
-      if (rawShowHud === "true") setShowProgressPanel(true);
-      if (rawShowHud === "false") setShowProgressPanel(false);
-
-      const rawIncludeCover = window.localStorage.getItem(INCLUDE_COVER_SHEET_KEY);
-      if (rawIncludeCover === "true") setIncludeCoverSheet(true);
-      if (rawIncludeCover === "false") setIncludeCoverSheet(false);
-
-      const rawShowDateTime = window.localStorage.getItem(SHOW_COVER_DATE_TIME_KEY);
-      if (rawShowDateTime === "true") setShowCoverDateTime(true);
-      if (rawShowDateTime === "false") setShowCoverDateTime(false);
-
-      const rawScn = window.localStorage.getItem(SHOW_SCN_BOX_KEY);
-      if (rawScn === "true") setShowScottishCandidateNumberBox(true);
-      if (rawScn === "false") setShowScottishCandidateNumberBox(false);
-
-      const rawFormula = window.localStorage.getItem(INCLUDE_FORMULA_SHEET_KEY);
-      if (rawFormula === "true") setIncludeFormulaSheet(true);
-      if (rawFormula === "false") setIncludeFormulaSheet(false);
-
-      const storedName = window.localStorage.getItem(META_NAME_KEY);
-      const storedClass = window.localStorage.getItem(META_CLASS_KEY);
-      const storedAssessmentDate = window.localStorage.getItem(META_ASSESSMENT_DATE_KEY);
-      const storedP1Date = window.localStorage.getItem(P1_COVER_DATE_KEY);
-      const storedP2Date = window.localStorage.getItem(P2_COVER_DATE_KEY);
-
-      if (storedName !== null) setAssessmentName(storedName);
-      if (storedClass !== null) setClassName(storedClass);
-
-      const initialAssessmentDate = normaliseDisplayDate(
-        storedAssessmentDate || storedP1Date || ""
-      );
-      if (initialAssessmentDate) {
-        setAssessmentDate(initialAssessmentDate);
-      }
-
-      const normalisedP2Date = normaliseDisplayDate(storedP2Date || "");
-      if (normalisedP2Date) {
-        setP2CoverDate(normalisedP2Date);
-      }
-
-      const storedP1Start = window.localStorage.getItem(P1_START_TIME_KEY);
-      const storedP1End = window.localStorage.getItem(P1_END_TIME_KEY);
-      const storedP2Start = window.localStorage.getItem(P2_START_TIME_KEY);
-      const storedP2End = window.localStorage.getItem(P2_END_TIME_KEY);
-      const storedP2Custom = window.localStorage.getItem(P2_DATE_CUSTOM_KEY);
-
-      if (storedP1Start !== null) setP1StartTime(storedP1Start);
-      if (storedP1End !== null) {
-        setP1EndTime(storedP1End);
-        if (storedP1End.trim()) setP1EndTimeManuallyEdited(true);
-      }
-
-      if (storedP2Start !== null) setP2StartTime(storedP2Start);
-      if (storedP2End !== null) {
-        setP2EndTime(storedP2End);
-        if (storedP2End.trim()) setP2EndTimeManuallyEdited(true);
-      }
-
-      if (storedP2Custom === "true") setP2DateCustom(true);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    const brief = loadAssessmentSetupBrief();
-    if (!brief) return;
-
-    setIncludeCoverSheet(brief.includeCoverSheet);
-    setIncludeFormulaSheet(brief.includeFormulaSheet);
-
-    setAssessmentName((prev) =>
-      prev !== "[Untitled file]"
-        ? prev
-        : brief.assessmentName && brief.assessmentName.trim().length
-        ? brief.assessmentName
-        : "[Untitled file]"
+  const totalSkillsCount = useMemo(() => {
+    return Object.values(skillsData).reduce<number>(
+      (acc, list) => acc + (list as Skill[]).length,
+      0
     );
-
-    setClassName((prev) => (prev.trim().length ? prev : brief.className ?? ""));
-
-    const briefDate = normaliseDisplayDate(brief.assessmentDate || "");
-    if (briefDate) {
-      setAssessmentDate((prev) => (prev && prev !== todayDisplayDate() ? prev : briefDate));
-      setP2CoverDate((prev) => (prev && prev !== todayDisplayDate() ? prev : briefDate));
-    }
-
-    setCreatedAt(
-      typeof brief.createdAt === "number" && Number.isFinite(brief.createdAt)
-        ? brief.createdAt
-        : Date.now()
-    );
-
-    if (brief.paperStructure === "P2_ONLY") {
-      setActivePaper("P2");
-      setViewPaper("P2");
-    } else {
-      setActivePaper("P1");
-      setViewPaper("P1");
-    }
-
-    if (brief.buildPriority === "MARKS") {
-      if (typeof brief.marksTargetP1 === "number" && brief.marksTargetP1 > 0) {
-        setP1Target(brief.marksTargetP1);
-      }
-      if (typeof brief.marksTargetP2 === "number" && brief.marksTargetP2 > 0) {
-        setP2Target(brief.marksTargetP2);
-      }
-      return;
-    }
-
-    if (typeof brief.timeTargetP1 === "number" && brief.timeTargetP1 > 0) {
-      setP1Target(Math.max(1, Math.floor(brief.timeTargetP1 / 1.5)));
-    }
-    if (typeof brief.timeTargetP2 === "number" && brief.timeTargetP2 > 0) {
-      setP2Target(Math.max(1, Math.floor(brief.timeTargetP2 / 1.8)));
-    }
   }, []);
 
   useEffect(() => {
@@ -1184,223 +300,18 @@ export default function CreateAssessmentBuilderPage() {
   }, [builderCalendarOpen]);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(META_NAME_KEY, assessmentName);
-      window.localStorage.setItem(META_CLASS_KEY, className);
-      window.localStorage.setItem(META_ASSESSMENT_DATE_KEY, assessmentDate);
-
-      window.localStorage.setItem(P1_COVER_DATE_KEY, assessmentDate);
-      window.localStorage.setItem(P1_START_TIME_KEY, p1StartTime);
-      window.localStorage.setItem(P1_END_TIME_KEY, p1EndTime);
-
-      window.localStorage.setItem(
-        P2_COVER_DATE_KEY,
-        p2DateCustom ? p2CoverDate : assessmentDate
-      );
-      window.localStorage.setItem(P2_START_TIME_KEY, p2StartTime);
-      window.localStorage.setItem(P2_END_TIME_KEY, p2EndTime);
-
-      window.localStorage.setItem(P2_DATE_CUSTOM_KEY, String(p2DateCustom));
-    } catch {
-      // ignore
-    }
-  }, [
-    assessmentName,
-    className,
-    assessmentDate,
-    p1StartTime,
-    p1EndTime,
-    p2CoverDate,
-    p2StartTime,
-    p2EndTime,
-    p2DateCustom,
-  ]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(PANE_RATIO_KEY, String(leftPaneRatio));
-    } catch {
-      // ignore
-    }
-  }, [leftPaneRatio]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(HUD_HEIGHT_KEY, String(hudHeight));
-    } catch {
-      // ignore
-    }
-  }, [hudHeight]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(SHOW_PROGRESS_PANEL_KEY, String(showProgressPanel));
-    } catch {
-      // ignore
-    }
-  }, [showProgressPanel]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(INCLUDE_COVER_SHEET_KEY, String(includeCoverSheet));
-    } catch {
-      // ignore
-    }
-  }, [includeCoverSheet]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(SHOW_COVER_DATE_TIME_KEY, String(showCoverDateTime));
-    } catch {
-      // ignore
-    }
-  }, [showCoverDateTime]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(SHOW_SCN_BOX_KEY, String(showScottishCandidateNumberBox));
-    } catch {
-      // ignore
-    }
-  }, [showScottishCandidateNumberBox]);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(INCLUDE_FORMULA_SHEET_KEY, String(includeFormulaSheet));
-    } catch {
-      // ignore
-    }
-  }, [includeFormulaSheet]);
-
-  useEffect(() => {
-    document.body.classList.toggle("dragging-divider", isDraggingDivider);
-    document.body.classList.toggle("dragging-hud", isDraggingHud);
     document.body.style.overflow = settingsOpen ? "hidden" : "";
 
     return () => {
-      document.body.classList.remove("dragging-divider");
-      document.body.classList.remove("dragging-hud");
       document.body.style.overflow = "";
     };
-  }, [isDraggingDivider, isDraggingHud, settingsOpen]);
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!isDraggingDivider || !layoutRef.current) return;
-
-      const rect = layoutRef.current.getBoundingClientRect();
-      const dividerW = 8;
-      const usableW = rect.width - dividerW;
-      if (usableW <= 0) return;
-
-      const nextRatio = (e.clientX - rect.left) / usableW;
-      setLeftPaneRatio(clamp(nextRatio, 0.28, 0.62));
-    };
-
-    const onUp = () => setIsDraggingDivider(false);
-
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-  }, [isDraggingDivider]);
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      if (!showProgressPanel) return;
-
-      const start = hudResizeStartRef.current;
-      if (!start) return;
-
-      const delta = start.startY - e.clientY;
-      setHudHeight(clamp(start.startHeight + delta, 88, 280));
-    };
-
-    const onUp = () => {
-      hudResizeStartRef.current = null;
-      setIsDraggingHud(false);
-    };
-
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-
-    return () => {
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-  }, [showProgressPanel]);
+  }, [settingsOpen]);
 
   useEffect(() => {
     const onOpen = () => setSettingsOpen(true);
     window.addEventListener("open-builder-settings", onOpen);
     return () => window.removeEventListener("open-builder-settings", onOpen);
   }, []);
-
-  useEffect(() => {
-    const el = previewPaneRef.current;
-    if (!el) return;
-
-    const calc = () => {
-      const w = el.clientWidth;
-      const pad = 40;
-      const next = clamp((w - pad) / A4_W_PX, 0.45, 1.35);
-      setFitWidthScale((prev) => (Math.abs(prev - next) < 0.01 ? prev : next));
-    };
-
-    calc();
-
-    const ro = new ResizeObserver(() => calc());
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const el = previewPaneRef.current;
-    if (!el) return;
-
-    const handleWheel = (event: WheelEvent) => {
-      if (!event.ctrlKey) return;
-
-      event.preventDefault();
-
-      setZoomPct((prev) => clamp(prev + (event.deltaY < 0 ? 5 : -5), 50, 160));
-    };
-
-    el.addEventListener("wheel", handleWheel, { passive: false });
-
-    return () => {
-      el.removeEventListener("wheel", handleWheel);
-    };
-  }, []);
-
-  const totalSkillsCount = useMemo(() => {
-    return Object.values(skillsData).reduce<number>(
-      (acc, list) => acc + (list as Skill[]).length,
-      0
-    );
-  }, []);
-
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as { questions?: Question[] };
-      if (Array.isArray(parsed.questions)) setQuestions(parsed.questions);
-    } catch {
-      // ignore
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ questions }));
-    } catch {
-      // ignore
-    }
-  }, [questions]);
 
   useEffect(() => {
     const liveIds = new Set<string>();
@@ -1440,9 +351,9 @@ export default function CreateAssessmentBuilderPage() {
   const collapseAllSkills = useCallback(() => setExpandedSkillIds([]), []);
 
   const getConceptIndex = useCallback(
-  (skillId: string) => conceptIndexBySkill[skillId] ?? -1,
-  [conceptIndexBySkill],
-);
+    (skillId: string) => conceptIndexBySkill[skillId] ?? -1,
+    [conceptIndexBySkill]
+  );
 
   const setConceptIndex = useCallback((skillId: string, nextIndex: number) => {
     setConceptIndexBySkill((prev) => ({ ...prev, [skillId]: nextIndex }));
@@ -1740,39 +651,23 @@ export default function CreateAssessmentBuilderPage() {
     });
   }, [includeCoverSheet, includeFormulaSheet, builderPages]);
 
-  const totalViewerPages = Math.max(previewPages.length, 1);
-
-  const updateCurrentViewerPage = useCallback(() => {
-    const container = previewPaneRef.current;
-    if (!container) {
-      setCurrentViewerPage(1);
-      return;
-    }
-
-    if (previewPages.length === 0) {
-      setCurrentViewerPage(1);
-      return;
-    }
-
-    const containerRect = container.getBoundingClientRect();
-    let bestPage = 1;
-    let bestVisible = -1;
-
-    pageWrapperRefs.current.forEach((node, idx) => {
-      if (!node) return;
-      const rect = node.getBoundingClientRect();
-      const visibleTop = Math.max(rect.top, containerRect.top);
-      const visibleBottom = Math.min(rect.bottom, containerRect.bottom);
-      const visible = Math.max(0, visibleBottom - visibleTop);
-
-      if (visible > bestVisible) {
-        bestVisible = visible;
-        bestPage = idx + 1;
-      }
-    });
-
-    setCurrentViewerPage(bestPage);
-  }, [previewPages.length]);
+  const {
+    zoomPct,
+    currentViewerPage,
+    viewerScale,
+    totalViewerPages,
+    zoomIn,
+    zoomOut,
+    resetZoom,
+  } = usePreviewViewport({
+    previewPaneRef,
+    pageWrapperRefs,
+    previewPages,
+    showProgressPanel,
+    includeCoverSheet,
+    includeFormulaSheet,
+    viewPaper,
+  });
 
   useEffect(() => {
     const pending = pendingJumpDraftRef.current;
@@ -1806,40 +701,6 @@ export default function CreateAssessmentBuilderPage() {
 
     return () => window.cancelAnimationFrame(frame);
   }, [previewPages, viewPaper]);
-
-  useEffect(() => {
-    const container = previewPaneRef.current;
-    if (!container) return;
-
-    const handle = () => updateCurrentViewerPage();
-
-    handle();
-    container.addEventListener("scroll", handle);
-
-    const ro = new ResizeObserver(() => handle());
-    ro.observe(container);
-
-    window.addEventListener("resize", handle);
-
-    return () => {
-      container.removeEventListener("scroll", handle);
-      ro.disconnect();
-      window.removeEventListener("resize", handle);
-    };
-  }, [updateCurrentViewerPage, viewerScale, viewPaper, previewPages]);
-
-  useEffect(() => {
-    const id = window.requestAnimationFrame(() => updateCurrentViewerPage());
-    return () => window.cancelAnimationFrame(id);
-  }, [
-    updateCurrentViewerPage,
-    previewPages,
-    viewerScale,
-    viewPaper,
-    showProgressPanel,
-    includeCoverSheet,
-    includeFormulaSheet,
-  ]);
 
   function handleAssessmentNameFocus() {
     if (assessmentName === "[Untitled file]") {
@@ -2321,7 +1182,9 @@ export default function CreateAssessmentBuilderPage() {
                             showDateTime={showCoverDateTime}
                             dateText={coverDateTextForView}
                             timeText={coverTimeTextForView}
-                            showScottishCandidateNumberBox={showScottishCandidateNumberBox}
+                            showScottishCandidateNumberBox={
+                              showScottishCandidateNumberBox
+                            }
                             viewerScale={viewerScale}
                             outerPaddingPx={0}
                           />
@@ -2373,7 +1236,8 @@ export default function CreateAssessmentBuilderPage() {
                                 ...UI_TEXT.controlTextStrong,
                               }}
                             >
-                              No questions added yet for {viewPaper === "P1" ? "Paper 1" : "Paper 2"}.
+                              No questions added yet for{" "}
+                              {viewPaper === "P1" ? "Paper 1" : "Paper 2"}.
                             </div>
                           </SQAPageFrame>
                         </div>
