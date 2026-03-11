@@ -7,9 +7,11 @@ import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/S
 import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
 import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
-import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
 
-import { BUILDER_DEFAULT_HUD_HEIGHT, BUILDER_DIVIDER_WIDTH_PX,} from "./builder-definitions/BuilderConstants";
+import {
+  BUILDER_DEFAULT_HUD_HEIGHT,
+  BUILDER_DIVIDER_WIDTH_PX,
+} from "./builder-definitions/BuilderConstants";
 
 import { skillsData } from "@/course-data/N5-Skills";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
@@ -27,12 +29,11 @@ import type {
 } from "@/shared-types/AssessmentTypes";
 
 import BuilderGlobalStyles from "./BuilderStyles";
-import { buildBuilderPages, buildPreviewPages } from "./builder-preview-engine/BuildPreviewPages";
-import {
-  buildTimeRange,
-  formatCoverDate,
-  todayDisplayDate,
-} from "./builder-logic/BuilderDateHelpers";
+import BuilderSettingsPanel from "@/app/create-assessment/builder/components/builder-controls/BuilderSettingsPanel";
+import { todayDisplayDate } from "./builder-logic/BuilderDateHelpers";
+import { usePaperViewMetadata } from "./builder-behaviour/UsePaperViewMetadata";
+import { usePreviewJumpNavigation } from "./builder-preview-engine/UsePreviewJumpNavigation";
+import { usePreviewPages } from "./builder-preview-engine/UsePreviewPages";
 import { useBuilderInitialisation } from "./builder-behaviour/UseBuilderInitialisation";
 import { useBuilderLayout } from "./builder-behaviour/UseBuilderLayouts";
 import { useBuilderPersistence } from "./builder-behaviour/UseBuilderPersistence";
@@ -40,15 +41,15 @@ import { useBuilderFlashFeedback } from "./builder-behaviour/UseBuilderFlashFeed
 import { useBuilderMetadataTiming } from "./builder-behaviour/UseBuilderMetadataTiming";
 import { useBuilderProgressMetrics } from "./builder-behaviour/UseBuilderProgressMetrics";
 import { useBuilderUiChrome } from "./builder-behaviour/UseBuilderUiChrome";
-import { useDraftWorkflow } from "./builder-behaviour/UseDraftWorkflow";
 import { useMeasuredQuestionHeights } from "./builder-preview-engine/UseMeasuredQuestionHeights";
 import { usePreviewViewport } from "./builder-behaviour/UsePreviewViewport";
-import { useQuestionDraftGeneration } from "./builder-behaviour/UseQuestionDraftGeneration";
+import { useQuestionWorkflow } from "./builder-behaviour/UseQuestionWorkflow";
+import { useSkillsTreeState } from "./builder-behaviour/UseSkillsTreeState";
+
 import {
   clamp,
   type DraftByPaper,
   type EditDraftByPaper,
-  type PreviewPage,
 } from "./BuilderUtils";
 
 const META_NAME_KEY = "n5-builder-meta-name";
@@ -77,12 +78,17 @@ export default function CreateAssessmentBuilderPage() {
   const [p1Target, setP1Target] = useState<number>(40);
   const [p2Target, setP2Target] = useState<number>(50);
 
-  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
-  const [expandedSkillIds, setExpandedSkillIds] = useState<string[]>([]);
-  const [conceptIndexBySkill, setConceptIndexBySkill] = useState<Record<string, number>>({});
-  const [difficultyBySkill, setDifficultyBySkill] = useState<Record<string, DifficultyLevel>>(
-    {}
-  );
+  const {
+  collapsedCategories,
+  expandedSkillIds,
+  conceptIndexBySkill,
+  difficultyBySkill,
+  toggleCategory,
+  toggleSkill: toggleSkillRow,
+  setConceptIndex,
+  setDifficulty,
+  collapseAllSkills,
+  } = useSkillsTreeState();
 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [draftByPaper, setDraftByPaper] = useState<DraftByPaper>({ P1: null, P2: null });
@@ -294,36 +300,29 @@ export default function CreateAssessmentBuilderPage() {
     editDraftRef.current = editDraftByPaper;
   }, [editDraftByPaper]);
 
-  const {
+    const {
     addQuestionToPaper,
     regenerateQuestionToPaper,
-  } = useQuestionDraftGeneration({
+    assignNewDraft,
+    removeNewDraft,
+    startEditLockedQuestion,
+    saveEdit,
+    removeWhileEditing,
+  } = useQuestionWorkflow({
     standardFilter,
     targetMarks,
+    viewPaper,
+    questions,
+    draftByPaper,
+    editDraftByPaper,
     editDraftRef,
+    setQuestions,
     setDraftByPaper,
     setEditDraftByPaper,
     setViewPaper,
     pendingJumpDraftRef,
     pushFlash,
     addQualityNote,
-  });
-
-  const {
-    assignNewDraft,
-    removeNewDraft,
-    startEditLockedQuestion,
-    saveEdit,
-    removeWhileEditing,
-  } = useDraftWorkflow({
-    viewPaper,
-    questions,
-    draftByPaper,
-    editDraftByPaper,
-    setQuestions,
-    setDraftByPaper,
-    setEditDraftByPaper,
-    pendingJumpDraftRef,
   });
 
   const totalSkillsCount = useMemo(() => {
@@ -333,63 +332,20 @@ export default function CreateAssessmentBuilderPage() {
     );
   }, []);
 
-  const toggleCategory = (name: string) => {
-    setCollapsedCategories((prev) => ({ ...prev, [name]: !prev[name] }));
-  };
-
-  const toggleSkillRow = (skillId: string) => {
-    setExpandedSkillIds((prev) =>
-      prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId]
-    );
-  };
-
-  const collapseAllSkills = () => setExpandedSkillIds([]);
-
   const getConceptIndex = (skillId: string) => conceptIndexBySkill[skillId] ?? -1;
-
-  const setConceptIndex = (skillId: string, nextIndex: number) => {
-    setConceptIndexBySkill((prev) => ({ ...prev, [skillId]: nextIndex }));
-  };
-
   const getDifficulty = (skillId: string) => difficultyBySkill[skillId] ?? 3;
-
-  const setDifficulty = (skillId: string, next: DifficultyLevel) => {
-    setDifficultyBySkill((prev) => ({ ...prev, [skillId]: next }));
-  };
 
   const editForView = editDraftByPaper[viewPaper];
   const newDraftForView = draftByPaper[viewPaper];
 
-  const builderPages = useMemo(() => {
-    return buildBuilderPages({
-      assignedForView,
-      editForView,
-      newDraftForView,
-      measuredHeights,
-    });
-  }, [assignedForView, editForView, newDraftForView, measuredHeights]);
-
-  const renderById = useMemo(() => {
-    const map = new Map<string, { kind: "locked" | "edit" | "draft"; q: Question }>();
-
-    assignedForView.forEach((q) => map.set(q.id, { kind: "locked", q }));
-    if (editForView) {
-      map.set(editForView.original.id, { kind: "edit", q: editForView.draft });
-    }
-    if (newDraftForView) {
-      map.set(newDraftForView.id, { kind: "draft", q: newDraftForView });
-    }
-
-    return map;
-  }, [assignedForView, editForView, newDraftForView]);
-
-  const previewPages = useMemo<PreviewPage[]>(() => {
-    return buildPreviewPages({
-      includeCoverSheet,
-      includeFormulaSheet,
-      builderPages,
-    });
-  }, [includeCoverSheet, includeFormulaSheet, builderPages]);
+    const { renderById, previewPages } = usePreviewPages({
+    assignedForView,
+    editForView,
+    newDraftForView,
+    measuredHeights,
+    includeCoverSheet,
+    includeFormulaSheet,
+  });
 
   const {
     zoomPct,
@@ -407,54 +363,28 @@ export default function CreateAssessmentBuilderPage() {
     includeCoverSheet,
     includeFormulaSheet,
     viewPaper,
-  });
+   });
 
-  useEffect(() => {
-    const pending = pendingJumpDraftRef.current;
-    if (!pending) return;
-    if (pending.paper !== viewPaper) return;
-
-    let targetPreviewIndex = -1;
-
-    for (let i = 0; i < previewPages.length; i += 1) {
-      const page = previewPages[i];
-      if (page.kind !== "questions") continue;
-      if (page.pageQuestions.some((q) => q.id === pending.draftId)) {
-        targetPreviewIndex = i;
-        break;
-      }
-    }
-
-    if (targetPreviewIndex < 0) return;
-
-    const targetNode = pageWrapperRefs.current[targetPreviewIndex];
-    if (!targetNode) return;
-
-    const frame = window.requestAnimationFrame(() => {
-      targetNode.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "nearest",
-      });
-      pendingJumpDraftRef.current = null;
+    usePreviewJumpNavigation({
+    pendingJumpDraftRef,
+    previewPages,
+    viewPaper,
+    pageWrapperRefs,
     });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [previewPages, viewPaper]);
 
   const viewerHudRow = showProgressPanel ? `${hudHeight}px` : "0px";
   const dividerWidth = BUILDER_DIVIDER_WIDTH_PX;
   const bodyGridColumns = `${(leftPaneRatio * 100).toFixed(3)}% ${dividerWidth}px minmax(0, 1fr)`;
-
-  const coverDateTextForView =
-    viewPaper === "P1"
-      ? formatCoverDate(assessmentDate)
-      : formatCoverDate(p2DateCustom ? p2CoverDate : assessmentDate);
-
-  const coverTimeTextForView =
-    viewPaper === "P1"
-      ? buildTimeRange(p1StartTime, p1EndTime)
-      : buildTimeRange(p2StartTime, p2EndTime);
+  const { coverDateTextForView, coverTimeTextForView } = usePaperViewMetadata({
+    viewPaper,
+    assessmentDate,
+    p2CoverDate,
+    p2DateCustom,
+    p1StartTime,
+    p1EndTime,
+    p2StartTime,
+    p2EndTime,
+  });
 
   return (
     <>
@@ -610,45 +540,40 @@ export default function CreateAssessmentBuilderPage() {
           </section>
         </div>
 
-        <SettingsPanel
+                <BuilderSettingsPanel
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           theme={theme}
           appearance={appearance}
-          onChangeAppearance={setAppearance}
+          setAppearance={setAppearance}
           includeCoverSheet={includeCoverSheet}
-          onToggleIncludeCoverSheet={setIncludeCoverSheet}
+          setIncludeCoverSheet={setIncludeCoverSheet}
           showCoverDateTime={showCoverDateTime}
-          onToggleShowCoverDateTime={setShowCoverDateTime}
-          p1CoverDateText={assessmentDate}
-          onChangeP1CoverDateText={setAssessmentDate}
-          p1StartTimeText={p1StartTime}
-          onChangeP1StartTimeText={setP1StartTime}
-          p1EndTimeText={p1EndTime}
-          onChangeP1EndTimeText={(value: string) => {
-            setP1EndTimeManuallyEdited(true);
-            setP1EndTime(value);
-          }}
-          p2CoverDateText={p2DateCustom ? p2CoverDate : assessmentDate}
-          onChangeP2CoverDateText={(value: string) => {
-            setP2DateCustom(true);
-            setP2CoverDate(value);
-          }}
-          p2StartTimeText={p2StartTime}
-          onChangeP2StartTimeText={setP2StartTime}
-          p2EndTimeText={p2EndTime}
-          onChangeP2EndTimeText={(value: string) => {
-            setP2EndTimeManuallyEdited(true);
-            setP2EndTime(value);
-          }}
+          setShowCoverDateTime={setShowCoverDateTime}
+          assessmentDate={assessmentDate}
+          setAssessmentDate={setAssessmentDate}
+          p1StartTime={p1StartTime}
+          setP1StartTime={setP1StartTime}
+          p1EndTime={p1EndTime}
+          setP1EndTime={setP1EndTime}
+          setP1EndTimeManuallyEdited={setP1EndTimeManuallyEdited}
+          p2CoverDate={p2CoverDate}
+          setP2CoverDate={setP2CoverDate}
+          p2DateCustom={p2DateCustom}
+          setP2DateCustom={setP2DateCustom}
+          p2StartTime={p2StartTime}
+          setP2StartTime={setP2StartTime}
+          p2EndTime={p2EndTime}
+          setP2EndTime={setP2EndTime}
+          setP2EndTimeManuallyEdited={setP2EndTimeManuallyEdited}
           showScottishCandidateNumberBox={showScottishCandidateNumberBox}
-          onToggleShowScottishCandidateNumberBox={setShowScottishCandidateNumberBox}
+          setShowScottishCandidateNumberBox={setShowScottishCandidateNumberBox}
           includeFormulaSheet={includeFormulaSheet}
-          onToggleIncludeFormulaSheet={setIncludeFormulaSheet}
+          setIncludeFormulaSheet={setIncludeFormulaSheet}
           showProgressPanel={showProgressPanel}
-          onToggleShowProgressPanel={setShowProgressPanel}
-          onResetLayout={resetLayout}
-          onResetZoom={resetZoom}
+          setShowProgressPanel={setShowProgressPanel}
+          resetLayout={resetLayout}
+          resetZoom={resetZoom}
         />
       </main>
     </>
