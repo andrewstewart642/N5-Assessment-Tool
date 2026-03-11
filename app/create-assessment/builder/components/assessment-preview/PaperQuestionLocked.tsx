@@ -4,6 +4,11 @@ import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Question } from "@/shared-types/AssessmentTypes";
 import type { PaperPart } from "@/shared-types/PaperParts";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
+import {
+  QUESTION_COL_GAP_PX,
+  QUESTION_MARKS_COL_PX,
+  QUESTION_NUMBER_COL_PX,
+} from "../../builder-definitions/BuilderConstants";
 
 type Props = {
   index: number; // 1-based
@@ -27,7 +32,7 @@ export default function PaperQuestionLocked({ index, question }: Props) {
     question.concept,
     `${question.standardFilter}-standard`,
     marks ? `${marks} marks` : null,
-    `Difficulty Level ${question.difficulty}`,
+    `Diff ${question.difficulty}`,
   ].filter(Boolean);
 
   const promptParts = (question as any).promptParts;
@@ -38,8 +43,8 @@ export default function PaperQuestionLocked({ index, question }: Props) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "30px 1fr 42px",
-          columnGap: 10,
+          gridTemplateColumns: `${QUESTION_NUMBER_COL_PX}px 1fr ${QUESTION_MARKS_COL_PX}px`,
+          columnGap: QUESTION_COL_GAP_PX,
           alignItems: "start",
         }}
       >

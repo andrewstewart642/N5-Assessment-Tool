@@ -9,6 +9,7 @@ import type {
   Skill,
   StandardFilter,
 } from "@/shared-types/AssessmentTypes";
+import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
   buildGenerated,
   buildSkillLinks,
@@ -35,7 +36,7 @@ function withSpacingBase(question: Question): Question {
   const code = question.questionCode;
   return {
     ...question,
-    spacingBasePx: code ? getSpacingBasePx(code) : 48,
+    spacingBasePx: code ? getSpacingBasePx(code) : DEFAULT_QUESTION_SPACING_BASE_PX,
   };
 }
 

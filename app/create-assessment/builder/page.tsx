@@ -9,6 +9,8 @@ import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
 
+import { BUILDER_DEFAULT_HUD_HEIGHT, BUILDER_DIVIDER_WIDTH_PX,} from "./builder-definitions/BuilderConstants";
+
 import { skillsData } from "@/course-data/N5-Skills";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
@@ -123,7 +125,7 @@ export default function CreateAssessmentBuilderPage() {
   const [p1EndTimeManuallyEdited, setP1EndTimeManuallyEdited] = useState(false);
   const [p2EndTimeManuallyEdited, setP2EndTimeManuallyEdited] = useState(false);
 
-  const DEFAULT_HUD_HEIGHT = 170;
+  const DEFAULT_HUD_HEIGHT = BUILDER_DEFAULT_HUD_HEIGHT;
 
   const {
     layoutRef,
@@ -441,7 +443,7 @@ export default function CreateAssessmentBuilderPage() {
   }, [previewPages, viewPaper]);
 
   const viewerHudRow = showProgressPanel ? `${hudHeight}px` : "0px";
-  const dividerWidth = 8;
+  const dividerWidth = BUILDER_DIVIDER_WIDTH_PX;
   const bodyGridColumns = `${(leftPaneRatio * 100).toFixed(3)}% ${dividerWidth}px minmax(0, 1fr)`;
 
   const coverDateTextForView =

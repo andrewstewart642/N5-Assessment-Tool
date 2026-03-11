@@ -4,14 +4,21 @@ import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Question } from "@/shared-types/AssessmentTypes";
 import type { PaperPart } from "@/shared-types/PaperParts";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
+import {
+  DRAFT_BOTTOM_CONTROLS_GAP_PX,
+  DRAFT_BOTTOM_CONTROLS_HEIGHT_PX,
+  DRAFT_EDIT_BUTTON_RIGHT_PX,
+  QUESTION_COL_GAP_PX,
+  QUESTION_MARKS_COL_PX,
+  QUESTION_NUMBER_COL_PX,
+  QUESTION_TEXT_COL_LEFT_PX,
+} from "../../builder-definitions/BuilderConstants";
 
 export type PaperQuestionDraftProps = {
-  index: number; // 1-based position on the paper
+  index: number;
   question: Question;
-
-  primaryLabel: string; // "Assign" or "Save"
-  secondaryLabel: string; // "Remove" or "Cancel"
-
+  primaryLabel: string;
+  secondaryLabel: string;
   onPrimary: () => void;
   onSecondary: () => void;
 };
@@ -26,13 +33,6 @@ function isParts(value: unknown): value is PaperPart[] {
   return Array.isArray(value) && value.every((p) => p && typeof p === "object" && "kind" in (p as any));
 }
 
-/**
- * Draft question:
- * - Measures like a locked question (WYSIWYG)
- * - Controls are overlays (do NOT affect measured height)
- * - Draft pill top-right (label only)
- * - Assign/Remove bottom-left, aligned with the start of the text column (not the number gutter)
- */
 export default function PaperQuestionDraft({
   index,
   question,
@@ -47,18 +47,11 @@ export default function PaperQuestionDraft({
     question.concept,
     `${question.standardFilter}-standard`,
     marks ? `${marks} marks` : null,
-    `Difficulty Level ${question.difficulty}`,
+    `Diff ${question.difficulty}`,
   ].filter(Boolean);
 
   const promptParts = (question as any).promptParts;
   const answerParts = (question as any).answerParts;
-
-  const NUMBER_COL_PX = 30;
-  const COL_GAP_PX = 10;
-  const TEXT_COL_LEFT_PX = NUMBER_COL_PX + COL_GAP_PX;
-
-  const BOTTOM_CONTROLS_HEIGHT_PX = 38;
-  const BOTTOM_CONTROLS_GAP_PX = 10;
 
   return (
     <div style={{ position: "relative", width: "100%", fontFamily: UI_TYPO.family }}>
@@ -67,7 +60,7 @@ export default function PaperQuestionDraft({
         style={{
           position: "absolute",
           top: 6,
-          right: 86,
+          right: DRAFT_EDIT_BUTTON_RIGHT_PX,
           zIndex: 3,
           fontFamily: UI_TYPO.family,
           fontSize: 11,
@@ -91,14 +84,14 @@ export default function PaperQuestionDraft({
           outline: "2px solid rgba(147,197,253,0.28)",
           outlineOffset: 6,
           borderRadius: 8,
-          paddingBottom: BOTTOM_CONTROLS_HEIGHT_PX + BOTTOM_CONTROLS_GAP_PX,
+          paddingBottom: DRAFT_BOTTOM_CONTROLS_HEIGHT_PX + DRAFT_BOTTOM_CONTROLS_GAP_PX,
         }}
       >
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: `${NUMBER_COL_PX}px 1fr 42px`,
-            columnGap: COL_GAP_PX,
+            gridTemplateColumns: `${QUESTION_NUMBER_COL_PX}px 1fr ${QUESTION_MARKS_COL_PX}px`,
+            columnGap: QUESTION_COL_GAP_PX,
             alignItems: "start",
           }}
         >
@@ -190,7 +183,7 @@ export default function PaperQuestionDraft({
       <div
         style={{
           position: "absolute",
-          left: TEXT_COL_LEFT_PX,
+          left: QUESTION_TEXT_COL_LEFT_PX,
           bottom: 6,
           display: "flex",
           gap: 8,

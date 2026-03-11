@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
+import type { AppearancePreference } from "@/app/ui/AppTheme";
+import type { Paper, Question } from "@/shared-types/AssessmentTypes";
+import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
   HUD_HEIGHT_KEY,
   INCLUDE_COVER_SHEET_KEY,
@@ -13,8 +16,6 @@ import {
 } from "../BuilderStorageKeys";
 import { loadAssessmentSetupBrief } from "../../setup/AssessmentSetupStorage";
 import { normaliseDisplayDate, todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
-import type { AppearancePreference } from "@/app/ui/AppTheme";
-import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import type { clamp } from "../BuilderUtils";
 
 type UseBuilderInitialisationArgs = {
@@ -75,7 +76,7 @@ function withSpacingBase(question: Question): Question {
   const code = question.questionCode;
   return {
     ...question,
-    spacingBasePx: code ? getSpacingBasePx(code) : 48,
+    spacingBasePx: code ? getSpacingBasePx(code) : DEFAULT_QUESTION_SPACING_BASE_PX,
   };
 }
 
