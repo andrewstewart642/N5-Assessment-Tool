@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/SkillsTree";
 import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
-import BuilderPreviewPane from "@/app/create-assessment/builder/components/builder-layout/BuilderPreviewPane";
+import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
 
@@ -25,7 +25,7 @@ import type {
 } from "@/shared-types/AssessmentTypes";
 
 import BuilderGlobalStyles from "./BuilderStyles";
-import { buildBuilderPages, buildPreviewPages } from "./BuildPreviewPages";
+import { buildBuilderPages, buildPreviewPages } from "./builder-preview-engine/BuildPreviewPages";
 import {
   buildTimeRange,
   formatCoverDate,
@@ -39,7 +39,7 @@ import { useBuilderMetadataTiming } from "./builder-behaviour/UseBuilderMetadata
 import { useBuilderProgressMetrics } from "./builder-behaviour/UseBuilderProgressMetrics";
 import { useBuilderUiChrome } from "./builder-behaviour/UseBuilderUiChrome";
 import { useDraftWorkflow } from "./builder-behaviour/UseDraftWorkflow";
-import { useMeasuredQuestionHeights } from "./builder-behaviour/UseMeasuredQuestionHeights";
+import { useMeasuredQuestionHeights } from "./builder-preview-engine/UseMeasuredQuestionHeights";
 import { usePreviewViewport } from "./builder-behaviour/UsePreviewViewport";
 import { useQuestionDraftGeneration } from "./builder-behaviour/UseQuestionDraftGeneration";
 import {

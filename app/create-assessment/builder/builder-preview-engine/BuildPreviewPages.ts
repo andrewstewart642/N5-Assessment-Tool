@@ -1,5 +1,5 @@
 import type { Question } from "@/shared-types/AssessmentTypes";
-import type { PreviewPage, EditDraftByPaper } from "./BuilderUtils";
+import type { PreviewPage, EditDraftByPaper } from "../BuilderUtils";
 import { PAGE_SIZES } from "@/app/paper-layout/Page-Sizes";
 import { paginateQuestions } from "@/app/paper-layout/Reflow-Pages";
 

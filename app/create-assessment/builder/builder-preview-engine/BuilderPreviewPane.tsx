@@ -1,6 +1,6 @@
 "use client";
 
-import BuilderPreviewPageRenderer from "@/app/create-assessment/builder/components/builder-layout/BuilderPreviewPageRenderer";
+import BuilderPreviewPageRenderer from "./BuilderPreviewPageRenderer";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import { getTheme } from "@/app/ui/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
