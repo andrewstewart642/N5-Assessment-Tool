@@ -8,25 +8,12 @@ import BuilderBottomHud from "@/app/create-assessment/builder/components/builder
 import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 
-import {
-  BUILDER_DEFAULT_HUD_HEIGHT,
-  BUILDER_DIVIDER_WIDTH_PX,
-} from "./builder-definitions/BuilderConstants";
+import { BUILDER_DEFAULT_HUD_HEIGHT, BUILDER_DIVIDER_WIDTH_PX,} from "./builder-definitions/BuilderConstants";
 
 import { skillsData } from "@/course-data/N5-Skills";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import {
-  APPEARANCE_STORAGE_KEY,
-  getTheme,
-  type AppearancePreference,
-} from "@/app/ui/AppTheme";
-import type {
-  DifficultyLevel,
-  Paper,
-  Question,
-  Skill,
-  StandardFilter,
-} from "@/shared-types/AssessmentTypes";
+import { APPEARANCE_STORAGE_KEY, getTheme, type AppearancePreference, } from "@/app/ui/AppTheme";
+import type { DifficultyLevel, Paper, Question, Skill, StandardFilter, } from "@/shared-types/AssessmentTypes";
 
 import BuilderGlobalStyles from "./BuilderStyles";
 import BuilderSettingsPanel from "@/app/create-assessment/builder/components/builder-controls/BuilderSettingsPanel";
