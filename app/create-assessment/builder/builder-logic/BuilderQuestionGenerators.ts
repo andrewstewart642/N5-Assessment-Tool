@@ -11,6 +11,11 @@ import type {
   GeneratedQuestionData,
   GeneratorContext,
 } from "@/shared-types/QuestionGenerationTypes";
+import type {
+  QuestionSelectionFilters,
+  QuestionVariantSelectionMeta,
+} from "@/shared-types/QuestionSelectionTypes";
+import { isVariantEligibleForFilters } from "@/shared-types/QuestionSelectionTypes";
 
 import SurdsConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N01_1_Surds";
 import RationaliseConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N01_2_Rationalise";
@@ -70,7 +75,8 @@ function getModule(conceptCode: string): ConceptGeneratorModule | undefined {
 function buildContext(
   skill: Skill,
   selectedConcept: string,
-  difficulty: DifficultyLevel
+  difficulty: DifficultyLevel,
+  selectionFilters?: QuestionSelectionFilters
 ): GeneratorContext {
   const concept = getConceptFromSelection(skill, selectedConcept);
 
@@ -79,17 +85,160 @@ function buildContext(
     concept,
     difficulty,
     selectedConceptText: selectedConcept,
+    selectionFilters,
   };
+}
+
+function getLevelSelectionEntries(
+  module: ConceptGeneratorModule,
+  difficulty: DifficultyLevel
+): QuestionVariantSelectionMeta[] {
+  const profile = module.metadata.levelSelectionProfile;
+  if (!profile) return [];
+
+  return profile[difficulty] ?? [];
+}
+
+export function getAvailableDifficultiesForConcept(
+  skill: Skill,
+  selectedConcept: string
+): DifficultyLevel[] {
+  const concept = getConceptFromSelection(skill, selectedConcept);
+  const conceptCode = concept?.code ?? selectedConcept;
+  const module = getModule(conceptCode);
+
+  if (!module) return [];
+
+  return [...module.metadata.difficultyProfile.availableLevels];
+}
+
+export function isDifficultyEligibleForConcept(
+  skill: Skill,
+  selectedConcept: string,
+  difficulty: DifficultyLevel,
+  selectionFilters?: QuestionSelectionFilters
+): boolean {
+  if (!selectionFilters) return true;
+
+  const concept = getConceptFromSelection(skill, selectedConcept);
+  const conceptCode = concept?.code ?? selectedConcept;
+  const module = getModule(conceptCode);
+
+  if (!module) return true;
+
+  const profile = module.metadata.levelSelectionProfile;
+  if (!profile) return true;
+
+  const entries = getLevelSelectionEntries(module, difficulty);
+
+  if (entries.length === 0) return false;
+
+  return entries.some((entry) =>
+    isVariantEligibleForFilters(entry, selectionFilters)
+  );
+}
+
+export function getEligibleDifficultiesForConcept(
+  skill: Skill,
+  selectedConcept: string,
+  selectionFilters?: QuestionSelectionFilters
+): DifficultyLevel[] {
+  const concept = getConceptFromSelection(skill, selectedConcept);
+  const conceptCode = concept?.code ?? selectedConcept;
+  const module = getModule(conceptCode);
+
+  if (!module) return [];
+
+  const availableLevels = module.metadata.difficultyProfile.availableLevels;
+  const profile = module.metadata.levelSelectionProfile;
+
+  if (!selectionFilters || !profile) {
+    return [...availableLevels];
+  }
+
+  return availableLevels.filter((level) =>
+    isDifficultyEligibleForConcept(
+      skill,
+      selectedConcept,
+      level,
+      selectionFilters
+    )
+  );
+}
+
+function resolveGenerationDifficulty(
+  skill: Skill,
+  selectedConcept: string,
+  requestedDifficulty: DifficultyLevel,
+  selectionFilters?: QuestionSelectionFilters
+): DifficultyLevel {
+  const concept = getConceptFromSelection(skill, selectedConcept);
+  const conceptCode = concept?.code ?? selectedConcept;
+  const module = getModule(conceptCode);
+
+  if (!module) return requestedDifficulty;
+  if (!selectionFilters) return requestedDifficulty;
+
+  const profile = module.metadata.levelSelectionProfile;
+  if (!profile) return requestedDifficulty;
+
+  if (
+    isDifficultyEligibleForConcept(
+      skill,
+      selectedConcept,
+      requestedDifficulty,
+      selectionFilters
+    )
+  ) {
+    return requestedDifficulty;
+  }
+
+  const defaultLevel = module.metadata.difficultyProfile.defaultLevel;
+  if (
+    isDifficultyEligibleForConcept(
+      skill,
+      selectedConcept,
+      defaultLevel,
+      selectionFilters
+    )
+  ) {
+    return defaultLevel;
+  }
+
+  const eligibleLevels = getEligibleDifficultiesForConcept(
+    skill,
+    selectedConcept,
+    selectionFilters
+  );
+
+  if (eligibleLevels.length > 0) {
+    return eligibleLevels[0];
+  }
+
+  return requestedDifficulty;
 }
 
 export function buildGenerated(
   skill: Skill,
   selectedConcept: string,
-  difficulty: DifficultyLevel
+  difficulty: DifficultyLevel,
+  selectionFilters?: QuestionSelectionFilters
 ): GeneratedQuestionData {
-  const context = buildContext(skill, selectedConcept, difficulty);
-  const conceptCode = context.concept?.code ?? selectedConcept;
+  const resolvedDifficulty = resolveGenerationDifficulty(
+    skill,
+    selectedConcept,
+    difficulty,
+    selectionFilters
+  );
 
+  const context = buildContext(
+    skill,
+    selectedConcept,
+    resolvedDifficulty,
+    selectionFilters
+  );
+
+  const conceptCode = context.concept?.code ?? selectedConcept;
   const module = getModule(conceptCode);
 
   if (module) {

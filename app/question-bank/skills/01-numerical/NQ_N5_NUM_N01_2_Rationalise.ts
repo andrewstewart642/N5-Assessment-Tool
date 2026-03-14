@@ -15,9 +15,9 @@
 // • Never reasoning
 //
 // STANDARD CLASSIFICATION
-// • C-standard when the task is purely rationalising
-// • A-standard (operational) when surd simplification is required after rationalising
-// • Rare integrated / embedded versions are also treated as A-standard operational
+// • Level 1 bank = C-standard operational
+// • Levels 2 and 3 banks = mixed-profile operational (2C + 1A)
+// • Level 4 bank = integrated / embedded A-standard operational (2A, 0C)
 //
 // STRUCTURE TYPE
 // • Expression simplification
@@ -51,19 +51,22 @@
 // • No further surd simplification beyond the rationalising step
 // • Final answer still contains a surd fraction
 //
-// Level 2 (A-standard operational)
+// Level 2 (Mixed-profile operational)
 // • Rationalise then simplify
 // • Includes surd simplification and often whole-number cancellation
+// • Mark profile: 2C + 1A
 //
-// Level 3 (A-standard operational)
+// Level 3 (Mixed-profile operational)
 // • More structurally demanding
 // • Often includes a surd in the numerator
 // • Must still require surd simplification
 // • Final answer still remains a fraction containing a surd
+// • Mark profile: 2C + 1A
 //
 // Level 4 (Integrated skill – rare)
 // • Rationalising embedded in another process
 // • Current embedded wrapper: functional notation
+// • Mark profile: 2A + 0C
 //
 // ======================================================================================
 // GENERATOR DESIGN NOTES
@@ -73,9 +76,16 @@
 // • The numbers are deliberately kept within the tighter scope we discussed
 // • Variety is increased without changing the behavioural difficulty
 //
-// NOTE FOR LATER UI / BUILDER WORK
-// • The difficulty picker should eventually only allow levels that exist in the generator
-// • Example: this concept supports levels 1–4 only, so level 5 should not be selectable
+// SELECTION / BUILDER LOGIC NOTES
+// • Level 1 contributes 2 total marks as 2C + 0A
+// • Levels 2 and 3 contribute 3 total marks as 2C + 1A
+// • Level 4 contributes 2 total marks as 0C + 2A
+// • All levels are Paper 1 only
+// • This file exposes selection metadata so the builder can:
+//   - filter by standards pill
+//   - filter by target marks
+//   - filter by paper slot
+//   - grey out unavailable levels later
 //
 // ======================================================================================
 
@@ -86,6 +96,11 @@ import type {
   GeneratedQuestionData,
   GeneratorContext,
 } from "@/shared-types/QuestionGenerationTypes";
+import type {
+  QuestionVariantSelectionMeta,
+  QuestionMarkProfile,
+} from "@/shared-types/QuestionSelectionTypes";
+import { deriveStandardProfile } from "@/shared-types/QuestionSelectionTypes";
 
 function textPart(value: string): PaperPart {
   return { kind: "text", value };
@@ -282,6 +297,60 @@ const LEVEL_4_VARIANTS: FunctionalVariant[] = [
   { mode: "functional", functionCoeff: 7, inputValue: 28, expectedStandard: "A", templateId: "rationalise-l4-j" },
 ];
 
+function buildSelectionMeta(
+  level: 1 | 2 | 3 | 4,
+  templateId: string,
+): QuestionVariantSelectionMeta {
+  let marks: QuestionMarkProfile;
+
+  if (level === 1) {
+    marks = {
+      totalMarks: 2,
+      cMarks: 2,
+      aMarks: 0,
+      reasoningMarks: 0,
+    };
+  } else if (level === 4) {
+    marks = {
+      totalMarks: 2,
+      cMarks: 0,
+      aMarks: 2,
+      reasoningMarks: 0,
+    };
+  } else {
+    marks = {
+      totalMarks: 3,
+      cMarks: 2,
+      aMarks: 1,
+      reasoningMarks: 0,
+    };
+  }
+
+  return {
+    level,
+    templateId,
+    marks,
+    standardProfile: deriveStandardProfile(marks),
+    paperSuitability: "P1",
+    calculatorStatus: "NonCalculatorOnly",
+  };
+}
+
+function getLevelSelectionProfileEntries(
+  level: 1 | 2 | 3 | 4,
+): QuestionVariantSelectionMeta[] {
+  const variantsByLevel: Record<1 | 2 | 3 | 4, RationaliseVariant[]> = {
+    1: LEVEL_1_VARIANTS,
+    2: LEVEL_2_VARIANTS,
+    3: LEVEL_3_VARIANTS,
+    4: LEVEL_4_VARIANTS,
+  };
+
+  return variantsByLevel[level].map((variant) =>
+    buildSelectionMeta(level, variant.templateId),
+  );
+}
+
 function chooseVariant(level: 1 | 2 | 3 | 4): RationaliseVariant {
   if (level === 1) return chooseOne(LEVEL_1_VARIANTS);
   if (level === 2) return chooseOne(LEVEL_2_VARIANTS);
@@ -365,8 +434,8 @@ function buildMarks(level: 1 | 2 | 3 | 4): {
 
   if (level === 4) {
     return {
-      totalMarks: 3,
-      cMarks: 1,
+      totalMarks: 2,
+      cMarks: 0,
       aMarks: 2,
       reasoningMarks: 0,
     };
@@ -384,6 +453,7 @@ function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
   const level = normaliseDifficulty(context.difficulty);
   const variant = chooseValidVariant(level);
   const markBreakdown = buildMarks(level);
+  const selectionMeta = buildSelectionMeta(level, variant.templateId);
 
   if (variant.mode === "functional") {
     const answer = simplifyStandaloneRationalisedForm(
@@ -411,12 +481,14 @@ function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
 
       markBreakdown,
       classification: {
-        standard: variant.expectedStandard,
+        standard: "A",
         calculatorStatus: "NonCalculatorOnly",
         structureType: "ExpressionSimplification",
         isReasoning: false,
         paperSuitability: "P1",
       },
+
+      selectionMeta,
 
       sourceSkillCode: "NQ_N5_NUM_N01",
       sourceConceptCode: "N1.2",
@@ -451,12 +523,14 @@ function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
 
     markBreakdown,
     classification: {
-      standard: variant.expectedStandard,
+      standard: level === 1 ? "C" : "Mixed",
       calculatorStatus: "NonCalculatorOnly",
       structureType: "ExpressionSimplification",
       isReasoning: false,
       paperSuitability: "P1",
     },
+
+    selectionMeta,
 
     sourceSkillCode: "NQ_N5_NUM_N01",
     sourceConceptCode: "N1.2",
@@ -485,11 +559,18 @@ export const RationaliseConceptModule: ConceptGeneratorModule = {
     },
 
     capabilities: {
-      standardCoverage: ["C", "A"],
+      standardCoverage: ["C", "A", "Mixed"],
       canGenerateReasoning: false,
       calculatorStatus: "NonCalculatorOnly",
       paperSuitability: "P1",
       typicalStructureTypes: ["ExpressionSimplification"],
+    },
+
+    levelSelectionProfile: {
+      1: getLevelSelectionProfileEntries(1),
+      2: getLevelSelectionProfileEntries(2),
+      3: getLevelSelectionProfileEntries(3),
+      4: getLevelSelectionProfileEntries(4),
     },
   },
 

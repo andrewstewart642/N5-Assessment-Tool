@@ -1,6 +1,6 @@
 "use client";
 
-// page-sections/CategorySection.tsx
+// app/create-assessment/builder/components/skills-tree/CategorySection.tsx
 // One umbrella category (e.g. Numerical Skills) containing clickable skills.
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,11 +9,15 @@ import AddQuestionButton from "@/app/create-assessment/builder/components/skills
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
-  cycleDifficulty,
+  getEligibleDifficultiesForConcept,
+  getAvailableDifficultiesForConcept,
+} from "@/app/create-assessment/builder/builder-logic/BuilderQuestionGenerators";
+import {
   getFilteredConcepts,
   rankConceptsByTargetMarks,
 } from "@/math-helpers/QuestionLogic";
 import type { PaperPart } from "@/shared-types/PaperParts";
+import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
 import type {
   Concept,
   DifficultyLevel,
@@ -33,8 +37,8 @@ type Props = {
   onToggleSkill: (skillId: string) => void;
 
   standardFilter: StandardFilter;
-
   targetMarks: number;
+  selectionFilters: QuestionSelectionFilters;
 
   getConceptIndex: (skillId: string) => number;
   setConceptIndex: (skillId: string, nextIndex: number) => void;
@@ -74,12 +78,12 @@ function conceptSelectionText(concept: Concept): string {
 
 function conceptInlineParts(concept: Concept): PaperPart[] {
   const short = concept.shortLabel?.trim();
-  const fallbackLabel = concept.label.replace(new RegExp(`^${concept.code}\\s*`), "").trim();
+  const fallbackLabel = concept.label
+    .replace(new RegExp(`^${concept.code}\\s*`), "")
+    .trim();
   const labelText = short || fallbackLabel || concept.label;
 
-  const parts: PaperPart[] = [
-    textPart(`${concept.code}\u2003${labelText}`), // em-space between code and label
-  ];
+  const parts: PaperPart[] = [textPart(`${concept.code}\u2003${labelText}`)];
 
   if (concept.badge?.trim()) {
     parts.push(textPart(" · "));
@@ -89,13 +93,50 @@ function conceptInlineParts(concept: Concept): PaperPart[] {
   return parts;
 }
 
+function stepDifficulty(
+  availableLevels: DifficultyLevel[],
+  current: DifficultyLevel,
+  direction: "prev" | "next"
+): DifficultyLevel {
+  if (availableLevels.length === 0) return current;
+
+  const currentIndex = availableLevels.indexOf(current);
+
+  if (currentIndex === -1) {
+    return direction === "prev"
+      ? availableLevels[availableLevels.length - 1]
+      : availableLevels[0];
+  }
+
+  if (direction === "prev") {
+    return currentIndex === 0
+      ? availableLevels[availableLevels.length - 1]
+      : availableLevels[currentIndex - 1];
+  }
+
+  return currentIndex === availableLevels.length - 1
+    ? availableLevels[0]
+    : availableLevels[currentIndex + 1];
+}
+
 function DifficultyStepper(props: {
   value: DifficultyLevel;
+  availableLevels: DifficultyLevel[];
+  eligibleLevels: DifficultyLevel[];
   onDecrease: () => void;
   onIncrease: () => void;
   theme: Theme;
 }) {
-  const { value, onDecrease, onIncrease, theme } = props;
+  const {
+    value,
+    availableLevels,
+    eligibleLevels,
+    onDecrease,
+    onIncrease,
+    theme,
+  } = props;
+
+  const isEligible = eligibleLevels.includes(value);
 
   return (
     <div
@@ -109,6 +150,7 @@ function DifficultyStepper(props: {
       <button
         type="button"
         onClick={onDecrease}
+        disabled={availableLevels.length === 0}
         style={{
           height: 34,
           width: 30,
@@ -116,7 +158,8 @@ function DifficultyStepper(props: {
           border: `1px solid ${theme.border}`,
           background: theme.controlBg,
           color: theme.textMuted,
-          cursor: "pointer",
+          cursor: availableLevels.length === 0 ? "default" : "pointer",
+          opacity: availableLevels.length === 0 ? 0.5 : 1,
           display: "grid",
           placeItems: "center",
           fontFamily: UI_TYPO.family,
@@ -135,9 +178,10 @@ function DifficultyStepper(props: {
         style={{
           height: 34,
           borderRadius: 10,
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${isEligible ? theme.border : theme.borderSoft}`,
           background: theme.controlBg,
-          color: theme.text,
+          color: isEligible ? theme.text : theme.textDim,
+          opacity: isEligible ? 1 : 0.55,
           display: "grid",
           placeItems: "center",
           whiteSpace: "nowrap",
@@ -146,6 +190,11 @@ function DifficultyStepper(props: {
           fontSize: UI_TYPO.sizeSm,
           lineHeight: 1,
         }}
+        title={
+          isEligible
+            ? `Level ${value} is within the current filters`
+            : `Level ${value} is outside the current filters`
+        }
       >
         Level {value}
       </div>
@@ -153,6 +202,7 @@ function DifficultyStepper(props: {
       <button
         type="button"
         onClick={onIncrease}
+        disabled={availableLevels.length === 0}
         style={{
           height: 34,
           width: 30,
@@ -160,7 +210,8 @@ function DifficultyStepper(props: {
           border: `1px solid ${theme.border}`,
           background: theme.controlBg,
           color: theme.textMuted,
-          cursor: "pointer",
+          cursor: availableLevels.length === 0 ? "default" : "pointer",
+          opacity: availableLevels.length === 0 ? 0.5 : 1,
           display: "grid",
           placeItems: "center",
           fontFamily: UI_TYPO.family,
@@ -186,6 +237,7 @@ function SkillRow(props: {
   onToggleSkill: (skillId: string) => void;
   standardFilter: StandardFilter;
   targetMarks: number;
+  selectionFilters: QuestionSelectionFilters;
   getConceptIndex: (skillId: string) => number;
   setConceptIndex: (skillId: string, nextIndex: number) => void;
   getDifficulty: (skillId: string) => DifficultyLevel;
@@ -212,6 +264,7 @@ function SkillRow(props: {
     onToggleSkill,
     standardFilter,
     targetMarks,
+    selectionFilters,
     getConceptIndex,
     setConceptIndex,
     getDifficulty,
@@ -224,15 +277,39 @@ function SkillRow(props: {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const filtered = useMemo(() => getFilteredConcepts(skill, standardFilter), [skill, standardFilter]);
-  const ranked = useMemo(() => rankConceptsByTargetMarks(filtered, targetMarks), [filtered, targetMarks]);
+  const filtered = useMemo(
+    () => getFilteredConcepts(skill, standardFilter),
+    [skill, standardFilter]
+  );
+  const ranked = useMemo(
+    () => rankConceptsByTargetMarks(filtered, targetMarks),
+    [filtered, targetMarks]
+  );
 
   const storedIndex = getConceptIndex(skill.id);
   const hasSelection = storedIndex >= 0 && storedIndex < ranked.length;
   const currentIndex = hasSelection ? storedIndex : -1;
   const selected = hasSelection ? ranked[currentIndex] : undefined;
+  const selectedConceptText = selected ? conceptSelectionText(selected) : "";
 
   const currentDifficulty = getDifficulty(skill.id);
+
+  const availableLevels = useMemo<DifficultyLevel[]>(() => {
+    if (!selected) return [];
+    return getAvailableDifficultiesForConcept(skill, selectedConceptText);
+  }, [skill, selected, selectedConceptText]);
+
+  const eligibleLevels = useMemo<DifficultyLevel[]>(() => {
+    if (!selected) return [];
+    return getEligibleDifficultiesForConcept(
+      skill,
+      selectedConceptText,
+      selectionFilters
+    );
+  }, [skill, selected, selectedConceptText, selectionFilters]);
+
+  const currentDifficultyIsEligible = eligibleLevels.includes(currentDifficulty);
+  const hasAnyEligibleLevels = eligibleLevels.length > 0;
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -252,6 +329,26 @@ function SkillRow(props: {
       setDropdownOpen(false);
     }
   }, [isExpanded]);
+
+  // Only snap to a valid available level if the currently stored one is not
+  // part of the concept at all. Do NOT auto-snap to the first eligible level.
+  useEffect(() => {
+    if (!selected) return;
+    if (availableLevels.length === 0) return;
+    if (availableLevels.includes(currentDifficulty)) return;
+
+    setDifficulty(skill.id, availableLevels[0]);
+  }, [selected, availableLevels, currentDifficulty, setDifficulty, skill.id]);
+
+  const canAdd =
+    !!selected && hasAnyEligibleLevels && currentDifficultyIsEligible;
+
+  const canRegenerate = !!selected && availableLevels.length > 0;
+
+  const difficultyRangeText =
+    availableLevels.length === 0
+      ? "Select concept"
+      : `${availableLevels[0]}–${availableLevels[availableLevels.length - 1]}`;
 
   return (
     <div
@@ -366,7 +463,9 @@ function SkillRow(props: {
                     flex: "0 0 auto",
                   }}
                 >
-                  {ranked.length ? `${hasSelection ? currentIndex + 1 : 0}/${ranked.length}` : "0/0"}
+                  {ranked.length
+                    ? `${hasSelection ? currentIndex + 1 : 0}/${ranked.length}`
+                    : "0/0"}
                 </div>
               </div>
 
@@ -560,22 +659,42 @@ function SkillRow(props: {
                     whiteSpace: "nowrap",
                   }}
                 >
-                  1–5
+                  {difficultyRangeText}
                 </div>
               </div>
 
               <DifficultyStepper
                 value={currentDifficulty}
+                availableLevels={availableLevels}
+                eligibleLevels={eligibleLevels}
                 onDecrease={() =>
-                  setDifficulty(skill.id, cycleDifficulty(currentDifficulty, "prev"))
+                  setDifficulty(
+                    skill.id,
+                    stepDifficulty(availableLevels, currentDifficulty, "prev")
+                  )
                 }
                 onIncrease={() =>
-                  setDifficulty(skill.id, cycleDifficulty(currentDifficulty, "next"))
+                  setDifficulty(
+                    skill.id,
+                    stepDifficulty(availableLevels, currentDifficulty, "next")
+                  )
                 }
                 theme={theme}
               />
             </div>
           </div>
+
+          {selected && availableLevels.length > 0 && !currentDifficultyIsEligible ? (
+            <div
+              style={{
+                gridColumn: "1 / -1",
+                ...UI_TEXT.metadata,
+                color: theme.textMuted,
+              }}
+            >
+              This difficulty is outside the active standard, marks, or paper filters.
+            </div>
+          ) : null}
 
           <div
             style={{
@@ -589,13 +708,13 @@ function SkillRow(props: {
           >
             <div
               style={{
-                opacity: selected ? 1 : 0.48,
-                pointerEvents: selected ? "auto" : "none",
+                opacity: canAdd ? 1 : 0.48,
+                pointerEvents: canAdd ? "auto" : "none",
               }}
             >
               <AddQuestionButton
                 onClick={() => {
-                  if (!selected) return;
+                  if (!selected || !currentDifficultyIsEligible) return;
                   onAddQuestion(
                     category,
                     skill,
@@ -606,9 +725,11 @@ function SkillRow(props: {
                 theme={theme}
                 label="Add Question"
                 title={
-                  selected
-                    ? "Add this (skill + concept + difficulty) to the assessment"
-                    : "Select a concept first"
+                  !selected
+                    ? "Select a concept first"
+                    : !currentDifficultyIsEligible
+                    ? "Expand tree filters to allow the addition of this skill"
+                    : "Add this (skill + concept + difficulty) to the assessment"
                 }
                 variant="primary"
               />
@@ -616,8 +737,8 @@ function SkillRow(props: {
 
             <div
               style={{
-                opacity: selected ? 1 : 0.48,
-                pointerEvents: selected ? "auto" : "none",
+                opacity: canRegenerate ? 1 : 0.48,
+                pointerEvents: canRegenerate ? "auto" : "none",
               }}
             >
               <AddQuestionButton
@@ -633,9 +754,9 @@ function SkillRow(props: {
                 theme={theme}
                 label="Regenerate"
                 title={
-                  selected
-                    ? "Replaces the most recent matching question on the paper (same skill, concept, difficulty)"
-                    : "Select a concept first"
+                  !selected
+                    ? "Select a concept first"
+                    : "Generate another version of this question for exploration"
                 }
                 variant="secondary"
               />
@@ -658,6 +779,7 @@ export default function CategorySection(props: Props) {
     onToggleSkill,
     standardFilter,
     targetMarks,
+    selectionFilters,
     getConceptIndex,
     setConceptIndex,
     getDifficulty,
@@ -794,6 +916,7 @@ export default function CategorySection(props: Props) {
               onToggleSkill={onToggleSkill}
               standardFilter={standardFilter}
               targetMarks={targetMarks}
+              selectionFilters={selectionFilters}
               getConceptIndex={getConceptIndex}
               setConceptIndex={setConceptIndex}
               getDifficulty={getDifficulty}

@@ -9,6 +9,7 @@ import type {
   StandardFilter,
   Theme,
 } from "@/shared-types/AssessmentTypes";
+import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
 
 function CircleRadio(props: {
   label: string;
@@ -190,6 +191,12 @@ export default function SkillsTree({
         toggleSkillRow(id);
       }
     });
+  };
+
+  const selectionFilters: QuestionSelectionFilters = {
+    selectedStandard: standardFilter,
+    targetMarks,
+    targetPaper: activePaper,
   };
 
   return (
@@ -454,6 +461,8 @@ export default function SkillsTree({
               onToggleSkill={toggleSkillRow}
               standardFilter={standardFilter}
               targetMarks={targetMarks}
+              selectionFilters={selectionFilters}
+              activePaper={activePaper}
               getConceptIndex={getConceptIndex}
               setConceptIndex={setConceptIndex}
               getDifficulty={getDifficulty}
