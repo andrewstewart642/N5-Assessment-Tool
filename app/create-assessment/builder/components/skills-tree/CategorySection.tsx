@@ -309,7 +309,6 @@ function SkillRow(props: {
   }, [skill, selected, selectedConceptText, selectionFilters]);
 
   const currentDifficultyIsEligible = eligibleLevels.includes(currentDifficulty);
-  const hasAnyEligibleLevels = eligibleLevels.length > 0;
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -330,8 +329,7 @@ function SkillRow(props: {
     }
   }, [isExpanded]);
 
-  // Only snap to a valid available level if the currently stored one is not
-  // part of the concept at all. Do NOT auto-snap to the first eligible level.
+  // Only snap if the current stored difficulty is not supported by the concept at all.
   useEffect(() => {
     if (!selected) return;
     if (availableLevels.length === 0) return;
@@ -340,9 +338,7 @@ function SkillRow(props: {
     setDifficulty(skill.id, availableLevels[0]);
   }, [selected, availableLevels, currentDifficulty, setDifficulty, skill.id]);
 
-  const canAdd =
-    !!selected && hasAnyEligibleLevels && currentDifficultyIsEligible;
-
+  const canAdd = !!selected && currentDifficultyIsEligible;
   const canRegenerate = !!selected && availableLevels.length > 0;
 
   const difficultyRangeText =

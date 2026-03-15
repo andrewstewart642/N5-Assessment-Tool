@@ -14,10 +14,11 @@
 // • Always operational
 // • Never reasoning
 //
-// STANDARD CLASSIFICATION
-// • Level 1 bank = C-standard operational
-// • Levels 2 and 3 banks = mixed-profile operational (2C + 1A)
-// • Level 4 bank = integrated / embedded A-standard operational (2A, 0C)
+// STANDARD / MARK PROFILE BY LEVEL
+// • Level 1 = 2 total marks, 2C, 0A
+// • Level 2 = 3 total marks, 3C, 0A
+// • Level 3 = 3 total marks, 0C, 3A
+// • Level 4 = 2 total marks, 0C, 2A
 //
 // STRUCTURE TYPE
 // • Expression simplification
@@ -38,54 +39,11 @@
 // • Do NOT allow cases which simplify to a fully rational value
 // • Do NOT allow cases which simplify to a surd over 1 or an integer multiple of a surd
 //
-// Examples to avoid:
-//     √3 / √27  ->  1/3
-//     4 / √16   ->  1
-//     3 / √3    ->  √3
-//
-// ======================================================================================
-// DIFFICULTY STRUCTURE
-//
-// Level 1 (C-standard operational)
-// • Direct rationalising
-// • No further surd simplification beyond the rationalising step
-// • Final answer still contains a surd fraction
-//
-// Level 2 (Mixed-profile operational)
-// • Rationalise then simplify
-// • Includes surd simplification and often whole-number cancellation
-// • Mark profile: 2C + 1A
-//
-// Level 3 (Mixed-profile operational)
-// • More structurally demanding
-// • Often includes a surd in the numerator
-// • Must still require surd simplification
-// • Final answer still remains a fraction containing a surd
-// • Mark profile: 2C + 1A
-//
-// Level 4 (Integrated skill – rare)
-// • Rationalising embedded in another process
-// • Current embedded wrapper: functional notation
-// • Mark profile: 2A + 0C
-//
-// ======================================================================================
-// GENERATOR DESIGN NOTES
-//
-// • Each level uses a hand-curated bank of valid variants
-// • This avoids the generator collapsing to one fallback question
-// • The numbers are deliberately kept within the tighter scope we discussed
-// • Variety is increased without changing the behavioural difficulty
-//
-// SELECTION / BUILDER LOGIC NOTES
-// • Level 1 contributes 2 total marks as 2C + 0A
-// • Levels 2 and 3 contribute 3 total marks as 2C + 1A
-// • Level 4 contributes 2 total marks as 0C + 2A
-// • All levels are Paper 1 only
-// • This file exposes selection metadata so the builder can:
-//   - filter by standards pill
-//   - filter by target marks
-//   - filter by paper slot
-//   - grey out unavailable levels later
+// LEVEL DESIGN
+// • Level 1 = direct rationalising only
+// • Level 2 = rationalise + simplify whole-number coefficient only (still C-standard)
+// • Level 3 = rationalise + genuine surd simplification (fully A-standard)
+// • Level 4 = integrated / embedded A-standard version (functional notation)
 //
 // ======================================================================================
 
@@ -231,7 +189,6 @@ type StandaloneVariant = {
   numeratorCoeff: number;
   numeratorSurd?: number;
   denominatorRoot: number;
-  expectedStandard: "C" | "A";
   templateId: string;
 };
 
@@ -239,62 +196,73 @@ type FunctionalVariant = {
   mode: "functional";
   functionCoeff: number;
   inputValue: number;
-  expectedStandard: "A";
   templateId: string;
 };
 
 type RationaliseVariant = StandaloneVariant | FunctionalVariant;
 
+/**
+ * Level 1
+ * Direct rationalising only.
+ * Output remains a surd fraction.
+ */
 const LEVEL_1_VARIANTS: StandaloneVariant[] = [
-  { mode: "standalone", numeratorCoeff: 1, denominatorRoot: 2, expectedStandard: "C", templateId: "rationalise-l1-a" },
-  { mode: "standalone", numeratorCoeff: 2, denominatorRoot: 3, expectedStandard: "C", templateId: "rationalise-l1-b" },
-  { mode: "standalone", numeratorCoeff: 2, denominatorRoot: 5, expectedStandard: "C", templateId: "rationalise-l1-c" },
-  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 5, expectedStandard: "C", templateId: "rationalise-l1-d" },
-  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 7, expectedStandard: "C", templateId: "rationalise-l1-e" },
-  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 3, expectedStandard: "C", templateId: "rationalise-l1-f" },
-  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 7, expectedStandard: "C", templateId: "rationalise-l1-g" },
-  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 2, expectedStandard: "C", templateId: "rationalise-l1-h" },
-  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 6, expectedStandard: "C", templateId: "rationalise-l1-i" },
-  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 10, expectedStandard: "C", templateId: "rationalise-l1-j" },
+  { mode: "standalone", numeratorCoeff: 1, denominatorRoot: 2, templateId: "rationalise-l1-a" },
+  { mode: "standalone", numeratorCoeff: 2, denominatorRoot: 3, templateId: "rationalise-l1-b" },
+  { mode: "standalone", numeratorCoeff: 2, denominatorRoot: 5, templateId: "rationalise-l1-c" },
+  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 5, templateId: "rationalise-l1-d" },
+  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 7, templateId: "rationalise-l1-e" },
+  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 3, templateId: "rationalise-l1-f" },
+  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 7, templateId: "rationalise-l1-g" },
+  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 2, templateId: "rationalise-l1-h" },
+  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 6, templateId: "rationalise-l1-i" },
+  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 10, templateId: "rationalise-l1-j" },
 ];
 
+/**
+ * Level 2
+ * Still C-standard.
+ * Rationalise and simplify whole-number coefficient only.
+ * Avoid genuine surd simplification in the final radical.
+ */
 const LEVEL_2_VARIANTS: StandaloneVariant[] = [
-  { mode: "standalone", numeratorCoeff: 2, denominatorRoot: 8, expectedStandard: "A", templateId: "rationalise-l2-a" },
-  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 12, expectedStandard: "A", templateId: "rationalise-l2-b" },
-  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 18, expectedStandard: "A", templateId: "rationalise-l2-c" },
-  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 20, expectedStandard: "A", templateId: "rationalise-l2-d" },
-  { mode: "standalone", numeratorCoeff: 2, denominatorRoot: 18, expectedStandard: "A", templateId: "rationalise-l2-e" },
-  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 27, expectedStandard: "A", templateId: "rationalise-l2-f" },
-  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 28, expectedStandard: "A", templateId: "rationalise-l2-g" },
-  { mode: "standalone", numeratorCoeff: 7, denominatorRoot: 28, expectedStandard: "A", templateId: "rationalise-l2-h" },
-  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 45, expectedStandard: "A", templateId: "rationalise-l2-i" },
-  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 2, denominatorRoot: 40, expectedStandard: "A", templateId: "rationalise-l2-j" },
+  { mode: "standalone", numeratorCoeff: 2, denominatorRoot: 8, templateId: "rationalise-l2-a" },   // √2/2
+  { mode: "standalone", numeratorCoeff: 3, denominatorRoot: 12, templateId: "rationalise-l2-b" },  // √3/2
+  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 20, templateId: "rationalise-l2-c" },  // 2√5/5
+  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 20, templateId: "rationalise-l2-d" },  // √5/2
+  { mode: "standalone", numeratorCoeff: 6, denominatorRoot: 12, templateId: "rationalise-l2-e" },  // √3
+  { mode: "standalone", numeratorCoeff: 4, denominatorRoot: 28, templateId: "rationalise-l2-f" },  // 2√7/7
+  { mode: "standalone", numeratorCoeff: 7, denominatorRoot: 28, templateId: "rationalise-l2-g" },  // √7/2
+  { mode: "standalone", numeratorCoeff: 5, denominatorRoot: 45, templateId: "rationalise-l2-h" },  // √5/3
 ];
 
+/**
+ * Level 3
+ * Fully A-standard.
+ * Must involve genuine surd simplification.
+ */
 const LEVEL_3_VARIANTS: StandaloneVariant[] = [
-  { mode: "standalone", numeratorCoeff: 3, numeratorSurd: 2, denominatorRoot: 12, expectedStandard: "A", templateId: "rationalise-l3-a" },
-  { mode: "standalone", numeratorCoeff: 2, numeratorSurd: 5, denominatorRoot: 12, expectedStandard: "A", templateId: "rationalise-l3-b" },
-  { mode: "standalone", numeratorCoeff: 3, numeratorSurd: 5, denominatorRoot: 18, expectedStandard: "A", templateId: "rationalise-l3-c" },
-  { mode: "standalone", numeratorCoeff: 2, numeratorSurd: 6, denominatorRoot: 27, expectedStandard: "A", templateId: "rationalise-l3-d" },
-  { mode: "standalone", numeratorCoeff: 3, numeratorSurd: 6, denominatorRoot: 12, expectedStandard: "A", templateId: "rationalise-l3-e" },
-  { mode: "standalone", numeratorCoeff: 2, numeratorSurd: 3, denominatorRoot: 24, expectedStandard: "A", templateId: "rationalise-l3-f" },
-  { mode: "standalone", numeratorCoeff: 3, numeratorSurd: 2, denominatorRoot: 24, expectedStandard: "A", templateId: "rationalise-l3-g" },
-  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 6, denominatorRoot: 27, expectedStandard: "A", templateId: "rationalise-l3-h" },
-  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 2, denominatorRoot: 24, expectedStandard: "A", templateId: "rationalise-l3-i" },
-  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 5, denominatorRoot: 12, expectedStandard: "A", templateId: "rationalise-l3-j" },
+  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 2, denominatorRoot: 40, templateId: "rationalise-l3-a" },
+  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 5, denominatorRoot: 12, templateId: "rationalise-l3-b" },
+  { mode: "standalone", numeratorCoeff: 2, numeratorSurd: 5, denominatorRoot: 12, templateId: "rationalise-l3-c" },
+  { mode: "standalone", numeratorCoeff: 3, numeratorSurd: 2, denominatorRoot: 12, templateId: "rationalise-l3-d" },
+  { mode: "standalone", numeratorCoeff: 3, numeratorSurd: 5, denominatorRoot: 18, templateId: "rationalise-l3-e" },
+  { mode: "standalone", numeratorCoeff: 2, numeratorSurd: 3, denominatorRoot: 24, templateId: "rationalise-l3-f" },
+  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 2, denominatorRoot: 24, templateId: "rationalise-l3-g" },
+  { mode: "standalone", numeratorCoeff: 1, numeratorSurd: 6, denominatorRoot: 27, templateId: "rationalise-l3-h" },
 ];
 
+/**
+ * Level 4
+ * Integrated A-standard via functional notation.
+ */
 const LEVEL_4_VARIANTS: FunctionalVariant[] = [
-  { mode: "functional", functionCoeff: 2, inputValue: 8, expectedStandard: "A", templateId: "rationalise-l4-a" },
-  { mode: "functional", functionCoeff: 3, inputValue: 12, expectedStandard: "A", templateId: "rationalise-l4-b" },
-  { mode: "functional", functionCoeff: 4, inputValue: 18, expectedStandard: "A", templateId: "rationalise-l4-c" },
-  { mode: "functional", functionCoeff: 5, inputValue: 20, expectedStandard: "A", templateId: "rationalise-l4-d" },
-  { mode: "functional", functionCoeff: 2, inputValue: 18, expectedStandard: "A", templateId: "rationalise-l4-e" },
-  { mode: "functional", functionCoeff: 3, inputValue: 27, expectedStandard: "A", templateId: "rationalise-l4-f" },
-  { mode: "functional", functionCoeff: 4, inputValue: 28, expectedStandard: "A", templateId: "rationalise-l4-g" },
-  { mode: "functional", functionCoeff: 5, inputValue: 45, expectedStandard: "A", templateId: "rationalise-l4-h" },
-  { mode: "functional", functionCoeff: 6, inputValue: 27, expectedStandard: "A", templateId: "rationalise-l4-i" },
-  { mode: "functional", functionCoeff: 7, inputValue: 28, expectedStandard: "A", templateId: "rationalise-l4-j" },
+  { mode: "functional", functionCoeff: 2, inputValue: 8, templateId: "rationalise-l4-a" },
+  { mode: "functional", functionCoeff: 3, inputValue: 12, templateId: "rationalise-l4-b" },
+  { mode: "functional", functionCoeff: 4, inputValue: 18, templateId: "rationalise-l4-c" },
+  { mode: "functional", functionCoeff: 5, inputValue: 20, templateId: "rationalise-l4-d" },
+  { mode: "functional", functionCoeff: 3, inputValue: 27, templateId: "rationalise-l4-e" },
+  { mode: "functional", functionCoeff: 4, inputValue: 28, templateId: "rationalise-l4-f" },
 ];
 
 function buildSelectionMeta(
@@ -310,18 +278,25 @@ function buildSelectionMeta(
       aMarks: 0,
       reasoningMarks: 0,
     };
-  } else if (level === 4) {
+  } else if (level === 2) {
     marks = {
-      totalMarks: 2,
+      totalMarks: 3,
+      cMarks: 3,
+      aMarks: 0,
+      reasoningMarks: 0,
+    };
+  } else if (level === 3) {
+    marks = {
+      totalMarks: 3,
       cMarks: 0,
-      aMarks: 2,
+      aMarks: 3,
       reasoningMarks: 0,
     };
   } else {
     marks = {
-      totalMarks: 3,
-      cMarks: 2,
-      aMarks: 1,
+      totalMarks: 2,
+      cMarks: 0,
+      aMarks: 2,
       reasoningMarks: 0,
     };
   }
@@ -417,36 +392,17 @@ function buildStandalonePromptText(variant: StandaloneVariant): string {
   return `${variant.numeratorCoeff}/√${variant.denominatorRoot}`;
 }
 
-function buildMarks(level: 1 | 2 | 3 | 4): {
-  totalMarks: number;
-  cMarks: number;
-  aMarks: number;
-  reasoningMarks: number;
-} {
+function buildMarks(level: 1 | 2 | 3 | 4): QuestionMarkProfile {
   if (level === 1) {
-    return {
-      totalMarks: 2,
-      cMarks: 2,
-      aMarks: 0,
-      reasoningMarks: 0,
-    };
+    return { totalMarks: 2, cMarks: 2, aMarks: 0, reasoningMarks: 0 };
   }
-
-  if (level === 4) {
-    return {
-      totalMarks: 2,
-      cMarks: 0,
-      aMarks: 2,
-      reasoningMarks: 0,
-    };
+  if (level === 2) {
+    return { totalMarks: 3, cMarks: 3, aMarks: 0, reasoningMarks: 0 };
   }
-
-  return {
-    totalMarks: 3,
-    cMarks: 2,
-    aMarks: 1,
-    reasoningMarks: 0,
-  };
+  if (level === 3) {
+    return { totalMarks: 3, cMarks: 0, aMarks: 3, reasoningMarks: 0 };
+  }
+  return { totalMarks: 2, cMarks: 0, aMarks: 2, reasoningMarks: 0 };
 }
 
 function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
@@ -523,7 +479,7 @@ function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
 
     markBreakdown,
     classification: {
-      standard: level === 1 ? "C" : "Mixed",
+      standard: level <= 2 ? "C" : "A",
       calculatorStatus: "NonCalculatorOnly",
       structureType: "ExpressionSimplification",
       isReasoning: false,
@@ -551,15 +507,15 @@ export const RationaliseConceptModule: ConceptGeneratorModule = {
       availableLevels: [1, 2, 3, 4],
       defaultLevel: 2,
       levelDescriptions: {
-        1: "Direct rationalising only, with a clean exact surd fraction and no further surd simplification requirement.",
-        2: "Rationalising followed by surd simplification, typically with some whole-number cancellation.",
-        3: "More structurally demanding rationalising with surd simplification, often including a surd in the numerator.",
-        4: "Rare integrated version where rationalising is embedded inside another process such as functional notation.",
+        1: "Direct rationalising only, worth 2 C-standard marks.",
+        2: "Rationalising with whole-number simplification only, worth 3 C-standard marks.",
+        3: "Rationalising with genuine surd simplification, worth 3 A-standard marks.",
+        4: "Rare integrated functional-notation version, worth 2 A-standard marks.",
       },
     },
 
     capabilities: {
-      standardCoverage: ["C", "A", "Mixed"],
+      standardCoverage: ["C", "A"],
       canGenerateReasoning: false,
       calculatorStatus: "NonCalculatorOnly",
       paperSuitability: "P1",
