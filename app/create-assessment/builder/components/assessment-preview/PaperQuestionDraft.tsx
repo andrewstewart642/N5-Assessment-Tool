@@ -21,6 +21,8 @@ export type PaperQuestionDraftProps = {
   secondaryLabel: string;
   onPrimary: () => void;
   onSecondary: () => void;
+  primaryDisabled?: boolean;
+  primaryDisabledReason?: string;
 };
 
 function getMarks(q: Question) {
@@ -40,6 +42,8 @@ export default function PaperQuestionDraft({
   secondaryLabel,
   onPrimary,
   onSecondary,
+  primaryDisabled = false,
+  primaryDisabledReason,
 }: PaperQuestionDraftProps) {
   const marks = getMarks(question);
 
@@ -194,19 +198,28 @@ export default function PaperQuestionDraft({
         <button
           type="button"
           onClick={onPrimary}
+          disabled={primaryDisabled}
+          aria-disabled={primaryDisabled}
           style={{
-            border: "1px solid rgba(255,255,255,0.18)",
-            background: "rgba(147,197,253,0.92)",
-            color: "rgba(30,58,138,0.95)",
+            border: primaryDisabled
+              ? "1px solid rgba(15,23,42,0.14)"
+              : "1px solid rgba(255,255,255,0.18)",
+            background: primaryDisabled
+              ? "rgba(203,213,225,0.75)"
+              : "rgba(147,197,253,0.92)",
+            color: primaryDisabled
+              ? "rgba(71,85,105,0.82)"
+              : "rgba(30,58,138,0.95)",
             borderRadius: 10,
             padding: "6px 10px",
-            cursor: "pointer",
+            cursor: primaryDisabled ? "not-allowed" : "pointer",
             fontFamily: UI_TYPO.family,
             fontWeight: UI_TYPO.weightSemibold,
             fontSize: 12,
             height: 32,
+            opacity: primaryDisabled ? 0.82 : 1,
           }}
-          title={primaryLabel}
+          title={primaryDisabled ? primaryDisabledReason ?? primaryLabel : primaryLabel}
         >
           {primaryLabel}
         </button>

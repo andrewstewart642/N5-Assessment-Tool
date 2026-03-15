@@ -45,6 +45,9 @@ type Props = {
   assignNewDraft: () => void;
   removeNewDraft: () => void;
   startEditLockedQuestion: (questionId: string) => void;
+  canAssignNewDraft: boolean;
+  canSaveEdit: boolean;
+  invalidCommitMessage: string;
   theme: Theme;
 };
 
@@ -69,6 +72,9 @@ export default function BuilderPreviewPageRenderer({
   assignNewDraft,
   removeNewDraft,
   startEditLockedQuestion,
+  canAssignNewDraft,
+  canSaveEdit,
+  invalidCommitMessage,
   theme,
 }: Props) {
   if (previewPage.kind === "cover") {
@@ -181,6 +187,8 @@ export default function BuilderPreviewPageRenderer({
                     secondaryLabel="Remove"
                     onPrimary={saveEdit}
                     onSecondary={removeWhileEditing}
+                    primaryDisabled={!canSaveEdit}
+                    primaryDisabledReason={invalidCommitMessage}
                   />
                 </MeasureBox>
               ) : kind === "draft" ? (
@@ -192,6 +200,8 @@ export default function BuilderPreviewPageRenderer({
                     secondaryLabel="Remove"
                     onPrimary={assignNewDraft}
                     onSecondary={removeNewDraft}
+                    primaryDisabled={!canAssignNewDraft}
+                    primaryDisabledReason={invalidCommitMessage}
                   />
                 </MeasureBox>
               ) : (

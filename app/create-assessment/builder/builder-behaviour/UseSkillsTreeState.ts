@@ -21,11 +21,24 @@ export function useSkillsTreeState() {
     }));
   };
 
+  const expandCategory = (category: string) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [category]: false,
+    }));
+  };
+
   const toggleSkill = (skillId: string) => {
     setExpandedSkillIds((prev) =>
       prev.includes(skillId)
         ? prev.filter((id) => id !== skillId)
         : [...prev, skillId]
+    );
+  };
+
+  const expandSkill = (skillId: string) => {
+    setExpandedSkillIds((prev) =>
+      prev.includes(skillId) ? prev : [...prev, skillId]
     );
   };
 
@@ -54,7 +67,9 @@ export function useSkillsTreeState() {
     difficultyBySkill,
 
     toggleCategory,
+    expandCategory,
     toggleSkill,
+    expandSkill,
     setConceptIndex,
     setDifficulty,
     collapseAllSkills,

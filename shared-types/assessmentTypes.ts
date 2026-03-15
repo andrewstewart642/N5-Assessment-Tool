@@ -1,6 +1,7 @@
 // shared-types/AssessmentTypes.ts
 
 import type { PaperPart } from "@/shared-types/PaperParts";
+import type { QuestionVariantSelectionMeta } from "@/shared-types/QuestionSelectionTypes";
 
 export type Paper = "P1" | "P2";
 
@@ -132,4 +133,10 @@ export type Question = {
 
   spacingBasePx?: number;
   measuredHeightBasePx?: number;
+
+  /**
+   * Optional exact selection metadata for the generated question variant.
+   * When present, this is the source of truth for builder eligibility checks.
+   */
+  selectionMeta?: QuestionVariantSelectionMeta;
 };

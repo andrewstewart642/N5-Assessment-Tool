@@ -44,6 +44,9 @@ type Props = {
   assignNewDraft: () => void;
   removeNewDraft: () => void;
   startEditLockedQuestion: (questionId: string) => void;
+  canAssignNewDraft: boolean;
+  canSaveEdit: boolean;
+  invalidCommitMessage: string;
 };
 
 export default function BuilderPreviewPane({
@@ -74,6 +77,9 @@ export default function BuilderPreviewPane({
   assignNewDraft,
   removeNewDraft,
   startEditLockedQuestion,
+  canAssignNewDraft,
+  canSaveEdit,
+  invalidCommitMessage,
 }: Props) {
   return (
     <div
@@ -288,6 +294,9 @@ export default function BuilderPreviewPane({
               assignNewDraft={assignNewDraft}
               removeNewDraft={removeNewDraft}
               startEditLockedQuestion={startEditLockedQuestion}
+              canAssignNewDraft={canAssignNewDraft}
+              canSaveEdit={canSaveEdit}
+              invalidCommitMessage={invalidCommitMessage}
               theme={theme}
             />
           ))}

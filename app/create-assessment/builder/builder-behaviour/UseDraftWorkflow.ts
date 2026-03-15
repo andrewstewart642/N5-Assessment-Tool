@@ -16,6 +16,10 @@ type UseDraftWorkflowArgs = {
   setDraftByPaper: React.Dispatch<React.SetStateAction<DraftByPaper>>;
   setEditDraftByPaper: React.Dispatch<React.SetStateAction<EditDraftByPaper>>;
   pendingJumpDraftRef: PendingJumpRef;
+
+  isQuestionCommitEligible: (question: Question) => boolean;
+  onInvalidCommit: () => void;
+  restoreTreeForQuestion: (question: Question) => void;
 };
 
 export function useDraftWorkflow({
@@ -27,10 +31,18 @@ export function useDraftWorkflow({
   setDraftByPaper,
   setEditDraftByPaper,
   pendingJumpDraftRef,
+  isQuestionCommitEligible,
+  onInvalidCommit,
+  restoreTreeForQuestion,
 }: UseDraftWorkflowArgs) {
   const assignNewDraft = useCallback(() => {
     const draft = draftByPaper[viewPaper];
     if (!draft) return;
+
+    if (!isQuestionCommitEligible(draft)) {
+      onInvalidCommit();
+      return;
+    }
 
     const code = draft.questionCode;
     const spacingBasePx = code ? getSpacingBasePx(code) : 48;
@@ -46,7 +58,14 @@ export function useDraftWorkflow({
     ]);
 
     setDraftByPaper((prev) => ({ ...prev, [viewPaper]: null }));
-  }, [draftByPaper, viewPaper, setQuestions, setDraftByPaper]);
+  }, [
+    draftByPaper,
+    viewPaper,
+    setQuestions,
+    setDraftByPaper,
+    isQuestionCommitEligible,
+    onInvalidCommit,
+  ]);
 
   const removeNewDraft = useCallback(() => {
     pendingJumpDraftRef.current = null;
@@ -60,6 +79,13 @@ export function useDraftWorkflow({
 
       const original = questions[idx];
 
+      restoreTreeForQuestion(original);
+
+      pendingJumpDraftRef.current = {
+        paper: original.paper,
+        draftId: original.id,
+      };
+
       setEditDraftByPaper((prev) => ({
         ...prev,
         [original.paper]: {
@@ -69,12 +95,17 @@ export function useDraftWorkflow({
         },
       }));
     },
-    [questions, setEditDraftByPaper]
+    [questions, setEditDraftByPaper, restoreTreeForQuestion, pendingJumpDraftRef]
   );
 
   const saveEdit = useCallback(() => {
     const edit = editDraftByPaper[viewPaper];
     if (!edit) return;
+
+    if (!isQuestionCommitEligible(edit.draft)) {
+      onInvalidCommit();
+      return;
+    }
 
     const code = edit.draft.questionCode;
     const nextSpacingBasePx = code ? getSpacingBasePx(code) : 48;
@@ -92,7 +123,14 @@ export function useDraftWorkflow({
     });
 
     setEditDraftByPaper((prev) => ({ ...prev, [viewPaper]: null }));
-  }, [editDraftByPaper, viewPaper, setQuestions, setEditDraftByPaper]);
+  }, [
+    editDraftByPaper,
+    viewPaper,
+    setQuestions,
+    setEditDraftByPaper,
+    isQuestionCommitEligible,
+    onInvalidCommit,
+  ]);
 
   const removeWhileEditing = useCallback(() => {
     pendingJumpDraftRef.current = null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/SkillsTree";
@@ -8,12 +8,25 @@ import BuilderBottomHud from "@/app/create-assessment/builder/components/builder
 import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 
-import { BUILDER_DEFAULT_HUD_HEIGHT, BUILDER_DIVIDER_WIDTH_PX,} from "./builder-definitions/BuilderConstants";
+import {
+  BUILDER_DEFAULT_HUD_HEIGHT,
+  BUILDER_DIVIDER_WIDTH_PX,
+} from "./builder-definitions/BuilderConstants";
 
 import { skillsData } from "@/course-data/N5-Skills";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import { APPEARANCE_STORAGE_KEY, getTheme, type AppearancePreference, } from "@/app/ui/AppTheme";
-import type { DifficultyLevel, Paper, Question, Skill, StandardFilter, } from "@/shared-types/AssessmentTypes";
+import {
+  APPEARANCE_STORAGE_KEY,
+  getTheme,
+  type AppearancePreference,
+} from "@/app/ui/AppTheme";
+import type {
+  DifficultyLevel,
+  Paper,
+  Question,
+  Skill,
+  StandardFilter,
+} from "@/shared-types/AssessmentTypes";
 
 import BuilderGlobalStyles from "./BuilderStyles";
 import BuilderSettingsPanel from "@/app/create-assessment/builder/components/builder-controls/BuilderSettingsPanel";
@@ -32,6 +45,10 @@ import { useMeasuredQuestionHeights } from "./builder-preview-engine/UseMeasured
 import { usePreviewViewport } from "./builder-behaviour/UsePreviewViewport";
 import { useQuestionWorkflow } from "./builder-behaviour/UseQuestionWorkflow";
 import { useSkillsTreeState } from "./builder-behaviour/UseSkillsTreeState";
+import {
+  getFilteredConcepts,
+  rankConceptsByTargetMarks,
+} from "@/math-helpers/QuestionLogic";
 
 import {
   clamp,
@@ -66,15 +83,17 @@ export default function CreateAssessmentBuilderPage() {
   const [p2Target, setP2Target] = useState<number>(50);
 
   const {
-  collapsedCategories,
-  expandedSkillIds,
-  conceptIndexBySkill,
-  difficultyBySkill,
-  toggleCategory,
-  toggleSkill: toggleSkillRow,
-  setConceptIndex,
-  setDifficulty,
-  collapseAllSkills,
+    collapsedCategories,
+    expandedSkillIds,
+    conceptIndexBySkill,
+    difficultyBySkill,
+    toggleCategory,
+    expandCategory,
+    toggleSkill: toggleSkillRow,
+    expandSkill,
+    setConceptIndex,
+    setDifficulty,
+    collapseAllSkills,
   } = useSkillsTreeState();
 
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -287,7 +306,56 @@ export default function CreateAssessmentBuilderPage() {
     editDraftRef.current = editDraftByPaper;
   }, [editDraftByPaper]);
 
-    const {
+  const restoreTreeForQuestion = useCallback(
+    (question: Question) => {
+      setStandardFilter(question.standardFilter);
+      setTargetMarks(question.targetMarks);
+      setActivePaper(question.paper);
+      setViewPaper(question.paper);
+
+      if (!question.category || !question.skillId) return;
+
+      expandCategory(question.category);
+      expandSkill(question.skillId);
+
+      const categorySkills = (skillsData[question.category] ?? []) as Skill[];
+      const skill = categorySkills.find((entry) => entry.id === question.skillId);
+
+      if (!skill) {
+        setDifficulty(question.skillId, question.difficulty);
+        return;
+      }
+
+      const filteredConcepts = getFilteredConcepts(skill, question.standardFilter);
+      const rankedConcepts = rankConceptsByTargetMarks(
+        filteredConcepts,
+        question.targetMarks
+      );
+
+      const conceptIndex = rankedConcepts.findIndex(
+        (concept) =>
+          (question.conceptId && concept.id === question.conceptId) ||
+          concept.label === question.concept ||
+          concept.code === question.concept ||
+          `${concept.code} ${concept.shortLabel ?? ""}`.trim() === question.concept.trim()
+      );
+
+      setConceptIndex(skill.id, conceptIndex >= 0 ? conceptIndex : -1);
+      setDifficulty(skill.id, question.difficulty);
+    },
+    [
+      expandCategory,
+      expandSkill,
+      setConceptIndex,
+      setDifficulty,
+      setStandardFilter,
+      setTargetMarks,
+      setActivePaper,
+      setViewPaper,
+    ]
+  );
+
+  const {
     addQuestionToPaper,
     regenerateQuestionToPaper,
     assignNewDraft,
@@ -295,9 +363,13 @@ export default function CreateAssessmentBuilderPage() {
     startEditLockedQuestion,
     saveEdit,
     removeWhileEditing,
+    canAssignNewDraft,
+    canSaveEdit,
+    invalidCommitMessage,
   } = useQuestionWorkflow({
     standardFilter,
     targetMarks,
+    activePaper,
     viewPaper,
     questions,
     draftByPaper,
@@ -310,6 +382,7 @@ export default function CreateAssessmentBuilderPage() {
     pendingJumpDraftRef,
     pushFlash,
     addQualityNote,
+    restoreTreeForQuestion,
   });
 
   const totalSkillsCount = useMemo(() => {
@@ -325,7 +398,7 @@ export default function CreateAssessmentBuilderPage() {
   const editForView = editDraftByPaper[viewPaper];
   const newDraftForView = draftByPaper[viewPaper];
 
-    const { renderById, previewPages } = usePreviewPages({
+  const { renderById, previewPages } = usePreviewPages({
     assignedForView,
     editForView,
     newDraftForView,
@@ -350,14 +423,14 @@ export default function CreateAssessmentBuilderPage() {
     includeCoverSheet,
     includeFormulaSheet,
     viewPaper,
-   });
+  });
 
-    usePreviewJumpNavigation({
+  usePreviewJumpNavigation({
     pendingJumpDraftRef,
     previewPages,
     viewPaper,
     pageWrapperRefs,
-    });
+  });
 
   const viewerHudRow = showProgressPanel ? `${hudHeight}px` : "0px";
   const dividerWidth = BUILDER_DIVIDER_WIDTH_PX;
@@ -506,6 +579,9 @@ export default function CreateAssessmentBuilderPage() {
               assignNewDraft={assignNewDraft}
               removeNewDraft={removeNewDraft}
               startEditLockedQuestion={startEditLockedQuestion}
+              canAssignNewDraft={canAssignNewDraft}
+              canSaveEdit={canSaveEdit}
+              invalidCommitMessage={invalidCommitMessage}
             />
 
             <BuilderBottomHud
@@ -527,7 +603,7 @@ export default function CreateAssessmentBuilderPage() {
           </section>
         </div>
 
-                <BuilderSettingsPanel
+        <BuilderSettingsPanel
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           theme={theme}
