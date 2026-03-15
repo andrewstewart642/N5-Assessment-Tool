@@ -7,6 +7,7 @@ import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/S
 import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
 import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
+import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 
 import {
   BUILDER_DEFAULT_HUD_HEIGHT,
@@ -14,6 +15,7 @@ import {
 } from "./builder-definitions/BuilderConstants";
 
 import { skillsData } from "@/course-data/N5-Skills";
+import { N5_MATH_COURSE_CONFIG } from "@/course-data/course-configs/N5MathsCourseConfig";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
   APPEARANCE_STORAGE_KEY,
@@ -21,7 +23,6 @@ import {
   type AppearancePreference,
 } from "@/app/ui/AppTheme";
 import type {
-  DifficultyLevel,
   Paper,
   Question,
   Skill,
@@ -49,6 +50,10 @@ import {
   getFilteredConcepts,
   rankConceptsByTargetMarks,
 } from "@/math-helpers/QuestionLogic";
+import {
+  analyseTopicBalance,
+  calculateTotalAssessmentMarks,
+} from "./builder-logic/AssessmentDistributionAnalysis";
 
 import {
   clamp,
@@ -148,7 +153,6 @@ export default function CreateAssessmentBuilderPage() {
     setIsDraggingDivider,
     hudHeight,
     setHudHeight,
-    isDraggingHud,
     setIsDraggingHud,
     showProgressPanel,
     setShowProgressPanel,
@@ -432,6 +436,74 @@ export default function CreateAssessmentBuilderPage() {
     pageWrapperRefs,
   });
 
+  const includedPapers = useMemo<Paper[]>(() => {
+    const papers: Paper[] = [];
+    if (p1Target > 0) papers.push("P1");
+    if (p2Target > 0) papers.push("P2");
+    return papers;
+  }, [p1Target, p2Target]);
+
+  const totalAssessmentMarks = useMemo(() => {
+    return calculateTotalAssessmentMarks({
+      includePaper1: includedPapers.includes("P1"),
+      includePaper2: includedPapers.includes("P2"),
+      p1TargetMarks: p1Target,
+      p2TargetMarks: p2Target,
+    });
+  }, [includedPapers, p1Target, p2Target]);
+
+  const topicBalanceAnalysis = useMemo(() => {
+    return analyseTopicBalance({
+      questions,
+      totalAssessmentMarks,
+      courseConfig: N5_MATH_COURSE_CONFIG,
+      includedPapers,
+    });
+  }, [questions, totalAssessmentMarks, includedPapers]);
+
+  const topicQualityNotes = useMemo<Array<string | BuilderNote>>(() => {
+  const notes: BuilderNote[] = [];
+
+  notes.push({
+    id: "topic-basis",
+    severity: "suggestion",
+    source: "topic-balance",
+    rank: 1,
+    message: `Topic balance basis: ${topicBalanceAnalysis.totalAssessmentMarks} total assessment marks across ${topicBalanceAnalysis.includedPapers.join(" + ")}.`,
+  });
+
+  const statsRow = topicBalanceAnalysis.rows.find((row) => row.topic === "STAT");
+
+  if (statsRow) {
+    const statsOutsideRange =
+      statsRow.currentPct < statsRow.minPct || statsRow.currentPct > statsRow.maxPct;
+
+    notes.push({
+      id: "topic-statistics",
+      severity: statsOutsideRange ? "essential" : "advised",
+      source: "topic-balance",
+      rank: statsOutsideRange ? 100 : 70,
+      message: `Statistics currently contributes ${statsRow.currentMarks} marks (${statsRow.currentPct}%). Target midpoint is ${statsRow.targetMarks} marks (${statsRow.targetPct}%), with an SQA-style range of ${statsRow.minMarks}–${statsRow.maxMarks} marks.`,
+    });
+  }
+
+  if (topicBalanceAnalysis.recommendedNextTopic) {
+    notes.push({
+      id: "topic-recommendation",
+      severity: "suggestion",
+      source: "topic-balance",
+      rank: 10,
+      message: `Recommended next topic area: ${topicBalanceAnalysis.recommendedNextTopic.label}.`,
+    });
+  }
+
+  return notes;
+}, [topicBalanceAnalysis]);
+
+  const mergedQualityNotes = useMemo(() => {
+    return [...qualityNotes, ...topicQualityNotes];
+  }, [qualityNotes, topicQualityNotes]);
+
   const viewerHudRow = showProgressPanel ? `${hudHeight}px` : "0px";
   const dividerWidth = BUILDER_DIVIDER_WIDTH_PX;
   const bodyGridColumns = `${(leftPaneRatio * 100).toFixed(3)}% ${dividerWidth}px minmax(0, 1fr)`;
@@ -598,7 +670,7 @@ export default function CreateAssessmentBuilderPage() {
               p2Target={p2Target}
               p1Mins={p1Mins}
               p2Mins={p2Mins}
-              qualityNotes={qualityNotes}
+              qualityNotes={mergedQualityNotes}
             />
           </section>
         </div>

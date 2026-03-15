@@ -8,6 +8,7 @@ import type {
   Concept,
   SkillDomain,
   SkillPaperSuitability,
+  QuestionTopicMarkBreakdown,
 } from "@/shared-types/AssessmentTypes";
 import type {
   QuestionSelectionFilters,
@@ -97,6 +98,13 @@ export type GeneratedQuestionData = {
   sourceConceptCode?: string;
   sourceConceptLabel?: string;
   templateId?: string;
+
+  /**
+   * Optional exact topic mark ownership for this generated question.
+   * If omitted, the builder can fall back to assigning the whole question
+   * to the skill's primary domain for now.
+   */
+  topicMarkBreakdown?: QuestionTopicMarkBreakdown;
 
   /**
    * Optional selection metadata for the specific generated question.

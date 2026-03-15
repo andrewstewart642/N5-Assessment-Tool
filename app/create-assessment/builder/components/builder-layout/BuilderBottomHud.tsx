@@ -4,6 +4,7 @@ import { UI_TEXT } from "@/app/ui/UiTypography";
 import { getTheme } from "@/app/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import AssessmentProgressHud from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
+import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 
 type Theme = ReturnType<typeof getTheme>;
 
@@ -21,7 +22,7 @@ type Props = {
   p2Target: number;
   p1Mins: number;
   p2Mins: number;
-  qualityNotes: string[];
+  qualityNotes: Array<string | BuilderNote>;
 };
 
 export default function BuilderBottomHud({
@@ -54,7 +55,7 @@ export default function BuilderBottomHud({
             theme.pageBg === "#eef3f8"
               ? "rgba(255,255,255,0.92)"
               : "rgba(11,17,24,0.92)",
-          color: (theme as any).textMuted ?? theme.subtleText ?? theme.text,
+          color: (theme as any).textMuted ?? theme.text,
           borderRadius: 16,
           padding: "10px 14px",
           cursor: "pointer",

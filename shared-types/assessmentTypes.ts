@@ -9,6 +9,8 @@ export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
 
 export type StandardFilter = "C" | "A" | "C+A";
 
+export type CourseId = "N5_MATH";
+
 export type Theme = {
   pageBg: string;
   panelBg: string;
@@ -29,6 +31,10 @@ export type Theme = {
 export type SkillPaperSuitability = "P1" | "P2" | "BOTH";
 
 export type SkillDomain = "NUM" | "ALG" | "GEO" | "TRIG" | "STAT";
+
+export type AssessmentTopicCode = SkillDomain;
+
+export type QuestionTopicMarkBreakdown = Record<AssessmentTopicCode, number>;
 
 export type ConceptInteractionType = "core" | "modifier" | "either";
 
@@ -86,9 +92,12 @@ export type Question = {
   id: string;
   category: string;
 
+  courseId?: CourseId;
+
   skillId: string;
   skillCode: string;
   skillText: string;
+  skillDomain?: SkillDomain;
 
   primarySkillId?: string;
   primaryConceptId?: string;
@@ -135,8 +144,17 @@ export type Question = {
   measuredHeightBasePx?: number;
 
   /**
-   * Optional exact selection metadata for the generated question variant.
-   * When present, this is the source of truth for builder eligibility checks.
+   * Exact generated-variant metadata, when provided by the concept module.
    */
   selectionMeta?: QuestionVariantSelectionMeta;
+
+  /**
+   * Topic mark ownership for whole-assessment monitoring.
+   * The sum should normally equal the question total marks.
+   *
+   * Example:
+   * - Composite volume rounded to 2 sf:
+   *   GEO: 4, NUM: 1
+   */
+  topicMarkBreakdown?: QuestionTopicMarkBreakdown;
 };

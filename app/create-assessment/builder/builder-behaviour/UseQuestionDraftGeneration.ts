@@ -15,6 +15,9 @@ import {
   buildSkillLinks,
   getConceptFromSelection,
 } from "../builder-logic/BuilderQuestionGenerators";
+import {
+  buildSingleTopicMarkBreakdown,
+} from "../builder-logic/AssessmentDistributionAnalysis";
 import type { DraftByPaper, EditDraftByPaper } from "../BuilderUtils";
 
 type PendingJumpRef = React.MutableRefObject<{ paper: Paper; draftId: string } | null>;
@@ -38,6 +41,24 @@ function withSpacingBase(question: Question): Question {
     ...question,
     spacingBasePx: code ? getSpacingBasePx(code) : DEFAULT_QUESTION_SPACING_BASE_PX,
   };
+}
+
+function resolveGeneratedTotalMarks(
+  generated: ReturnType<typeof buildGenerated>,
+  targetMarks: number
+): number {
+  if (
+    typeof generated.markBreakdown?.totalMarks === "number" &&
+    Number.isFinite(generated.markBreakdown.totalMarks)
+  ) {
+    return generated.markBreakdown.totalMarks;
+  }
+
+  if (typeof generated.marks === "number" && Number.isFinite(generated.marks)) {
+    return generated.marks;
+  }
+
+  return targetMarks;
 }
 
 export function useQuestionDraftGeneration({
@@ -68,13 +89,16 @@ export function useQuestionDraftGeneration({
       const generated = buildGenerated(skill, concept, difficulty);
       const conceptMeta = getConceptFromSelection(skill, concept);
       const skillLinks = buildSkillLinks(skill, conceptMeta);
+      const resolvedMarks = resolveGeneratedTotalMarks(generated, targetMarks);
 
       const draft = withSpacingBase({
         id: makeId(),
         category,
+        courseId: "N5_MATH",
         skillId: skill.id,
         skillCode: skill.code,
         skillText: skill.text,
+        skillDomain: skill.domain,
         primarySkillId: skill.id,
         primaryConceptId: conceptMeta?.id,
         supportingSkillIds: [],
@@ -87,6 +111,9 @@ export function useQuestionDraftGeneration({
         createdAt: Date.now(),
         paper,
         ...generated,
+        topicMarkBreakdown:
+          generated.topicMarkBreakdown ??
+          buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
       });
 
       pendingJumpDraftRef.current = { paper, draftId: draft.id };
@@ -121,6 +148,7 @@ export function useQuestionDraftGeneration({
       const generated = buildGenerated(skill, concept, difficulty);
       const conceptMeta = getConceptFromSelection(skill, concept);
       const skillLinks = buildSkillLinks(skill, conceptMeta);
+      const resolvedMarks = resolveGeneratedTotalMarks(generated, targetMarks);
 
       const activeEdit = editDraftRef.current[paper];
 
@@ -132,9 +160,11 @@ export function useQuestionDraftGeneration({
           const nextDraft = withSpacingBase({
             ...nowEdit.draft,
             category,
+            courseId: "N5_MATH",
             skillId: skill.id,
             skillCode: skill.code,
             skillText: skill.text,
+            skillDomain: skill.domain,
             primarySkillId: skill.id,
             primaryConceptId: conceptMeta?.id,
             supportingSkillIds: [],
@@ -147,6 +177,9 @@ export function useQuestionDraftGeneration({
             createdAt: Date.now(),
             paper,
             ...generated,
+            topicMarkBreakdown:
+              generated.topicMarkBreakdown ??
+              buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
           });
 
           pendingJumpDraftRef.current = { paper, draftId: nextDraft.id };
@@ -162,9 +195,11 @@ export function useQuestionDraftGeneration({
         const nextDraft = withSpacingBase({
           id: prevDrafts[paper]?.id ?? makeId(),
           category,
+          courseId: "N5_MATH",
           skillId: skill.id,
           skillCode: skill.code,
           skillText: skill.text,
+          skillDomain: skill.domain,
           primarySkillId: skill.id,
           primaryConceptId: conceptMeta?.id,
           supportingSkillIds: [],
@@ -177,6 +212,9 @@ export function useQuestionDraftGeneration({
           createdAt: Date.now(),
           paper,
           ...generated,
+          topicMarkBreakdown:
+            generated.topicMarkBreakdown ??
+            buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
         });
 
         pendingJumpDraftRef.current = { paper, draftId: nextDraft.id };
