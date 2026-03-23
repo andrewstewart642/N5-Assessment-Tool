@@ -47,6 +47,8 @@ import { useMeasuredQuestionHeights } from "./builder-preview-engine/UseMeasured
 import { usePreviewViewport } from "./builder-behaviour/UsePreviewViewport";
 import { useQuestionWorkflow } from "./builder-behaviour/UseQuestionWorkflow";
 import { useSkillsTreeState } from "./builder-behaviour/UseSkillsTreeState";
+import { buildCalculatorSuitabilityNotes } from "@/app/create-assessment/builder/builder-logic/BuildCalculatorSuitabilityNotes";
+import { buildStandardBalanceNotes } from "@/app/create-assessment/builder/builder-logic/BuildStandardBalanceNotes";
 import {
   getFilteredConcepts,
   rankConceptsByTargetMarks,
@@ -107,17 +109,24 @@ export default function CreateAssessmentBuilderPage() {
   } = useSkillsTreeState();
 
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [draftByPaper, setDraftByPaper] = useState<DraftByPaper>({ P1: null, P2: null });
+  const [draftByPaper, setDraftByPaper] = useState<DraftByPaper>({
+    P1: null,
+    P2: null,
+  });
   const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>({
     P1: null,
     P2: null,
   });
 
-  const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>({});
+  const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>(
+    {}
+  );
 
   const previewPaneRef = useRef<HTMLDivElement | null>(null);
   const pageWrapperRefs = useRef<Array<HTMLDivElement | null>>([]);
-  const pendingJumpDraftRef = useRef<{ paper: Paper; draftId: string } | null>(null);
+  const pendingJumpDraftRef = useRef<{ paper: Paper; draftId: string } | null>(
+    null
+  );
   const builderDateFieldRef = useRef<HTMLDivElement | null>(null);
 
   const [includeCoverSheet, setIncludeCoverSheet] = useState(false);
@@ -257,12 +266,8 @@ export default function CreateAssessmentBuilderPage() {
     p2DateCustomKey: P2_DATE_CUSTOM_KEY,
   });
 
-  const {
-    qualityNotes,
-    flashWarning,
-    pushFlash,
-    addQualityNote,
-  } = useBuilderFlashFeedback();
+  const { qualityNotes, flashWarning, pushFlash, addQualityNote } =
+    useBuilderFlashFeedback();
 
   useBuilderUiChrome({
     builderCalendarOpen,
@@ -284,24 +289,25 @@ export default function CreateAssessmentBuilderPage() {
     viewPaper,
   });
 
-  const { handleAssessmentNameFocus, handleAssessmentNameBlur } = useBuilderMetadataTiming({
-    assessmentName,
-    setAssessmentName,
+  const { handleAssessmentNameFocus, handleAssessmentNameBlur } =
+    useBuilderMetadataTiming({
+      assessmentName,
+      setAssessmentName,
 
-    assessmentDate,
-    p2DateCustom,
-    setP2CoverDate,
+      assessmentDate,
+      p2DateCustom,
+      setP2CoverDate,
 
-    p1StartTime,
-    p1Marks,
-    p1EndTimeManuallyEdited,
-    setP1EndTime,
+      p1StartTime,
+      p1Marks,
+      p1EndTimeManuallyEdited,
+      setP1EndTime,
 
-    p2StartTime,
-    p2Marks,
-    p2EndTimeManuallyEdited,
-    setP2EndTime,
-  });
+      p2StartTime,
+      p2Marks,
+      p2EndTimeManuallyEdited,
+      setP2EndTime,
+    });
 
   const { onMeasure } = useMeasuredQuestionHeights({
     questions,
@@ -346,7 +352,8 @@ export default function CreateAssessmentBuilderPage() {
           (question.conceptId && concept.id === question.conceptId) ||
           concept.label === question.concept ||
           concept.code === question.concept ||
-          `${concept.code} ${concept.shortLabel ?? ""}`.trim() === question.concept.trim()
+          `${concept.code} ${concept.shortLabel ?? ""}`.trim() ===
+            question.concept.trim()
       );
 
       setConceptIndex(skill.id, conceptIndex >= 0 ? conceptIndex : -1);
@@ -466,7 +473,7 @@ export default function CreateAssessmentBuilderPage() {
     });
   }, [questions, totalAssessmentMarks, includedPapers]);
 
-        const topicQualityNotes = useMemo<Array<string | BuilderNote>>(() => {
+  const topicQualityNotes = useMemo<Array<string | BuilderNote>>(() => {
     return buildTopicBalanceNotes({
       analysis: topicBalanceAnalysis,
       includeBasisNote: true,
@@ -484,17 +491,44 @@ export default function CreateAssessmentBuilderPage() {
     });
   }, [questions, includedPapers, totalAssessmentMarks]);
 
+  const calculatorSuitabilityNotes = useMemo<Array<string | BuilderNote>>(() => {
+    return buildCalculatorSuitabilityNotes({
+      questions,
+      includedPapers,
+    });
+  }, [questions, includedPapers]);
+
+  const standardBalanceNotes = useMemo<Array<string | BuilderNote>>(() => {
+    return buildStandardBalanceNotes({
+      questions,
+      includedPapers,
+      totalAssessmentMarks,
+      includeBasisNote: true,
+      includeRecommendationNote: true,
+    });
+  }, [questions, includedPapers, totalAssessmentMarks]);
+
   const mergedQualityNotes = useMemo(() => {
     return [
       ...qualityNotes,
       ...topicQualityNotes,
       ...operationalReasoningNotes,
+      ...calculatorSuitabilityNotes,
+      ...standardBalanceNotes,
     ];
-  }, [qualityNotes, topicQualityNotes, operationalReasoningNotes]);
+  }, [
+    qualityNotes,
+    topicQualityNotes,
+    operationalReasoningNotes,
+    calculatorSuitabilityNotes,
+    standardBalanceNotes,
+  ]);
 
   const viewerHudRow = showProgressPanel ? `${hudHeight}px` : "0px";
   const dividerWidth = BUILDER_DIVIDER_WIDTH_PX;
-  const bodyGridColumns = `${(leftPaneRatio * 100).toFixed(3)}% ${dividerWidth}px minmax(0, 1fr)`;
+  const bodyGridColumns = `${(leftPaneRatio * 100).toFixed(
+    3
+  )}% ${dividerWidth}px minmax(0, 1fr)`;
   const { coverDateTextForView, coverTimeTextForView } = usePaperViewMetadata({
     viewPaper,
     assessmentDate,
