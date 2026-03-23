@@ -1,17 +1,48 @@
-// math-helpers/questionLogic.ts
+// math-helpers/QuestionLogic.ts
 // Reusable logic helpers shared across components.
 
-import type { Concept, DifficultyLevel, Skill, StandardFilter } from "@/shared-types/AssessmentTypes";
+import type {
+  Concept,
+  DifficultyLevel,
+  Skill,
+  StandardFilter,
+  ThinkingTypeFilter,
+} from "@/shared-types/AssessmentTypes";
 
-export function conceptMatchesFilter(concept: Concept, filter: StandardFilter) {
+export function conceptMatchesFilter(
+  concept: Concept,
+  filter: StandardFilter
+) {
   if (filter === "C+A") return true;
   if (concept.standard === "C+A") return true;
   return concept.standard === filter;
 }
 
-export function getFilteredConcepts(skill: Skill, filter: StandardFilter): Concept[] {
+export function conceptMatchesThinkingTypeFilter(
+  concept: Concept,
+  filter: ThinkingTypeFilter
+): boolean {
+  if (filter === "ANY") return true;
+
+  const thinkingType = concept.metadata?.thinkingType;
+
+  if (!thinkingType) return true;
+
+  if (filter === "OPERATIONAL") {
+    return thinkingType === "operational" || thinkingType === "mixed";
+  }
+
+  return thinkingType === "reasoning" || thinkingType === "mixed";
+}
+
+export function getFilteredConcepts(
+  skill: Skill,
+  filter: StandardFilter
+): Concept[] {
   const filtered = skill.concepts.filter((c) => conceptMatchesFilter(c, filter));
-  return filtered.length ? filtered : [{ label: "No concepts match this filter", standard: "C+A" }];
+  return filtered.length
+    ? filtered
+    : ([{ label: "No concepts match this filter", standard: "C+A" }] as Concept[]);
 }
 
 /**
@@ -21,7 +52,10 @@ export function getFilteredConcepts(skill: Skill, filter: StandardFilter): Conce
  *  2) Concepts with no marks metadata go to the end
  *  3) Stable tie-break (original order)
  */
-export function rankConceptsByTargetMarks(concepts: Concept[], targetMarks: number): Concept[] {
+export function rankConceptsByTargetMarks(
+  concepts: Concept[],
+  targetMarks: number
+): Concept[] {
   const withIndex = concepts.map((c, i) => ({ c, i }));
 
   withIndex.sort((a, b) => {
@@ -44,7 +78,11 @@ export function rankConceptsByTargetMarks(concepts: Concept[], targetMarks: numb
  * - does NOT loop
  * - clamps at [0, total-1]
  */
-export function cycleIndex(currentIndex: number, total: number, direction: "prev" | "next") {
+export function cycleIndex(
+  currentIndex: number,
+  total: number,
+  direction: "prev" | "next"
+) {
   if (total <= 1) return 0;
 
   const safe = Math.max(0, Math.min(currentIndex, total - 1));
@@ -61,12 +99,17 @@ export const DIFFICULTY_OPTIONS: DifficultyLevel[] = [1, 2, 3, 4, 5];
  * - 5 stays at 5 when you go "down"
  * (No ferris-wheel wraparound)
  */
-export function cycleDifficulty(current: DifficultyLevel, direction: "prev" | "next"): DifficultyLevel {
+export function cycleDifficulty(
+  current: DifficultyLevel,
+  direction: "prev" | "next"
+): DifficultyLevel {
   const idx = DIFFICULTY_OPTIONS.indexOf(current);
   const safe = idx === -1 ? 0 : idx;
 
   if (direction === "next") {
-    return DIFFICULTY_OPTIONS[Math.min(safe + 1, DIFFICULTY_OPTIONS.length - 1)];
+    return DIFFICULTY_OPTIONS[
+      Math.min(safe + 1, DIFFICULTY_OPTIONS.length - 1)
+    ];
   }
 
   return DIFFICULTY_OPTIONS[Math.max(safe - 1, 0)];

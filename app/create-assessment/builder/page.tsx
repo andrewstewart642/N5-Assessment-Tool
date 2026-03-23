@@ -27,6 +27,7 @@ import type {
   Question,
   Skill,
   StandardFilter,
+  ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 
 import BuilderGlobalStyles from "./BuilderStyles";
@@ -54,6 +55,8 @@ import {
   analyseTopicBalance,
   calculateTotalAssessmentMarks,
 } from "./builder-logic/AssessmentDistributionAnalysis";
+import { buildTopicBalanceNotes } from "./builder-logic/BuildTopicBalanceNotes";
+import { buildOperationalReasoningNotes } from "./builder-logic/BuildOperationalReasoningNotes";
 
 import {
   clamp,
@@ -79,6 +82,8 @@ export default function CreateAssessmentBuilderPage() {
   const router = useRouter();
 
   const [standardFilter, setStandardFilter] = useState<StandardFilter>("C+A");
+  const [thinkingTypeFilter, setThinkingTypeFilter] =
+    useState<ThinkingTypeFilter>("ANY");
   const [targetMarks, setTargetMarks] = useState<number>(2);
 
   const [activePaper, setActivePaper] = useState<Paper>("P1");
@@ -461,48 +466,31 @@ export default function CreateAssessmentBuilderPage() {
     });
   }, [questions, totalAssessmentMarks, includedPapers]);
 
-  const topicQualityNotes = useMemo<Array<string | BuilderNote>>(() => {
-  const notes: BuilderNote[] = [];
-
-  notes.push({
-    id: "topic-basis",
-    severity: "suggestion",
-    source: "topic-balance",
-    rank: 1,
-    message: `Topic balance basis: ${topicBalanceAnalysis.totalAssessmentMarks} total assessment marks across ${topicBalanceAnalysis.includedPapers.join(" + ")}.`,
-  });
-
-  const statsRow = topicBalanceAnalysis.rows.find((row) => row.topic === "STAT");
-
-  if (statsRow) {
-    const statsOutsideRange =
-      statsRow.currentPct < statsRow.minPct || statsRow.currentPct > statsRow.maxPct;
-
-    notes.push({
-      id: "topic-statistics",
-      severity: statsOutsideRange ? "essential" : "advised",
-      source: "topic-balance",
-      rank: statsOutsideRange ? 100 : 70,
-      message: `Statistics currently contributes ${statsRow.currentMarks} marks (${statsRow.currentPct}%). Target midpoint is ${statsRow.targetMarks} marks (${statsRow.targetPct}%), with an SQA-style range of ${statsRow.minMarks}–${statsRow.maxMarks} marks.`,
+        const topicQualityNotes = useMemo<Array<string | BuilderNote>>(() => {
+    return buildTopicBalanceNotes({
+      analysis: topicBalanceAnalysis,
+      includeBasisNote: true,
+      includeRecommendationNote: true,
     });
-  }
+  }, [topicBalanceAnalysis]);
 
-  if (topicBalanceAnalysis.recommendedNextTopic) {
-    notes.push({
-      id: "topic-recommendation",
-      severity: "suggestion",
-      source: "topic-balance",
-      rank: 10,
-      message: `Recommended next topic area: ${topicBalanceAnalysis.recommendedNextTopic.label}.`,
+  const operationalReasoningNotes = useMemo<Array<string | BuilderNote>>(() => {
+    return buildOperationalReasoningNotes({
+      questions,
+      includedPapers,
+      totalAssessmentMarks,
+      includeBasisNote: true,
+      includeRecommendationNote: true,
     });
-  }
-
-  return notes;
-}, [topicBalanceAnalysis]);
+  }, [questions, includedPapers, totalAssessmentMarks]);
 
   const mergedQualityNotes = useMemo(() => {
-    return [...qualityNotes, ...topicQualityNotes];
-  }, [qualityNotes, topicQualityNotes]);
+    return [
+      ...qualityNotes,
+      ...topicQualityNotes,
+      ...operationalReasoningNotes,
+    ];
+  }, [qualityNotes, topicQualityNotes, operationalReasoningNotes]);
 
   const viewerHudRow = showProgressPanel ? `${hudHeight}px` : "0px";
   const dividerWidth = BUILDER_DIVIDER_WIDTH_PX;
@@ -549,6 +537,8 @@ export default function CreateAssessmentBuilderPage() {
             totalSkillsCount={totalSkillsCount}
             standardFilter={standardFilter}
             setStandardFilter={setStandardFilter}
+            thinkingTypeFilter={thinkingTypeFilter}
+            setThinkingTypeFilter={setThinkingTypeFilter}
             targetMarks={targetMarks}
             setTargetMarks={setTargetMarks}
             minTargetMarks={1}

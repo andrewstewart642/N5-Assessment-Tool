@@ -8,6 +8,7 @@ import type {
   Skill,
   StandardFilter,
   Theme,
+  ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
 
@@ -107,6 +108,9 @@ type SkillsTreeProps = {
   standardFilter: StandardFilter;
   setStandardFilter: (v: StandardFilter) => void;
 
+  thinkingTypeFilter: ThinkingTypeFilter;
+  setThinkingTypeFilter: (v: ThinkingTypeFilter) => void;
+
   targetMarks: number;
   setTargetMarks: (n: number) => void;
   minTargetMarks: number;
@@ -152,6 +156,8 @@ export default function SkillsTree({
   totalSkillsCount,
   standardFilter,
   setStandardFilter,
+  thinkingTypeFilter,
+  setThinkingTypeFilter,
   targetMarks,
   setTargetMarks,
   minTargetMarks,
@@ -195,6 +201,7 @@ export default function SkillsTree({
 
   const selectionFilters: QuestionSelectionFilters = {
     selectedStandard: standardFilter,
+    selectedThinkingType: thinkingTypeFilter,
     targetMarks,
     targetPaper: activePaper,
   };
@@ -272,8 +279,9 @@ export default function SkillsTree({
               maxWidth: 520,
             }}
           >
-            Filter by standard, choose a paper to add to, and generate questions for
-            your assessment. View them in the PDF builder in the right pane.
+            Filter by standard, choose a thinking type, select a paper to add to,
+            and generate questions for your assessment. View them in the PDF builder
+            in the right pane.
           </div>
 
           <div
@@ -325,6 +333,51 @@ export default function SkillsTree({
                   onClick={() => setStandardFilter("C+A")}
                   theme={theme}
                   fontSize={UI_TYPO.sizeXs}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gap: 6 }}>
+              <div
+                style={{
+                  ...UI_TEXT.sectionLabel,
+                  color: theme.textDim,
+                }}
+              >
+                Thinking type
+              </div>
+
+              <div
+                role="radiogroup"
+                aria-label="Thinking type filter"
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  flexWrap: "nowrap",
+                  alignItems: "center",
+                  minWidth: 0,
+                }}
+              >
+                <CircleRadio
+                  label="Operational"
+                  checked={thinkingTypeFilter === "OPERATIONAL"}
+                  onClick={() => setThinkingTypeFilter("OPERATIONAL")}
+                  theme={theme}
+                  fontSize={UI_TYPO.sizeSm}
+                />
+                <CircleRadio
+                  label="Reasoning"
+                  checked={thinkingTypeFilter === "REASONING"}
+                  onClick={() => setThinkingTypeFilter("REASONING")}
+                  theme={theme}
+                  fontSize={UI_TYPO.sizeSm}
+                />
+                <CircleRadio
+                  label="Any"
+                  checked={thinkingTypeFilter === "ANY"}
+                  onClick={() => setThinkingTypeFilter("ANY")}
+                  theme={theme}
+                  fontSize={UI_TYPO.sizeSm}
                 />
               </div>
             </div>
@@ -460,18 +513,30 @@ export default function SkillsTree({
               expandedSkillIds={expandedSkillIds}
               onToggleSkill={toggleSkillRow}
               standardFilter={standardFilter}
+              thinkingTypeFilter={thinkingTypeFilter}
               targetMarks={targetMarks}
               selectionFilters={selectionFilters}
-              activePaper={activePaper}
               getConceptIndex={getConceptIndex}
               setConceptIndex={setConceptIndex}
               getDifficulty={getDifficulty}
               setDifficulty={setDifficulty}
-              onAddQuestion={(cat, skill, concept, diff) =>
-                addQuestionToPaper(cat, skill, concept, diff, activePaper)
+              onAddQuestion={(categoryName, skill, concept, difficulty) =>
+                addQuestionToPaper(
+                  categoryName,
+                  skill,
+                  concept,
+                  difficulty,
+                  activePaper
+                )
               }
-              onRegenerateQuestion={(cat, skill, concept, diff) =>
-                regenerateQuestionToPaper(cat, skill, concept, diff, activePaper)
+              onRegenerateQuestion={(categoryName, skill, concept, difficulty) =>
+                regenerateQuestionToPaper(
+                  categoryName,
+                  skill,
+                  concept,
+                  difficulty,
+                  activePaper
+                )
               }
               theme={theme}
             />

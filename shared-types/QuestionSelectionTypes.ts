@@ -14,6 +14,7 @@
  *
  * Instead, it defines:
  * - the standard pill options
+ * - the thinking-type pill options
  * - the meaning of target marks
  * - the paper slot being filled
  * - the filter object passed into selection logic
@@ -31,6 +32,12 @@
  * - "A"   => target marks refers to A marks
  * - "C+A" => target marks refers to total marks
  *
+ * Thinking-type behaviour
+ * -----------------------
+ * - "OPERATIONAL" => only operational-style questions should match
+ * - "REASONING"   => only reasoning-rich questions should match
+ * - "ANY"         => no thinking-type restriction
+ *
  * Paper behaviour
  * ---------------
  * Some questions are restricted to:
@@ -47,29 +54,19 @@
 
 /**
  * The teacher's selected standard pill in the builder.
- *
- * "C"
- *   = hunt for questions containing exactly the requested number of C marks
- *
- * "A"
- *   = hunt for questions containing exactly the requested number of A marks
- *
- * "C+A"
- *   = ignore standard split and hunt using total marks instead
  */
 export type QuestionStandardMode = "C" | "A" | "C+A";
 
 /**
+ * The teacher's selected thinking-type pill in the builder.
+ */
+export type QuestionThinkingTypeMode =
+  | "OPERATIONAL"
+  | "REASONING"
+  | "ANY";
+
+/**
  * Which paper slot the teacher is currently building into.
- *
- * "P1"
- *   = Paper 1 only
- *
- * "P2"
- *   = Paper 2 only
- *
- * "BOTH"
- *   = question is valid in either paper
  */
 export type QuestionPaperMode = "P1" | "P2" | "BOTH";
 
@@ -84,12 +81,6 @@ export type QuestionCalculatorStatus =
 
 /**
  * Exact mark split carried by a single question variant.
- *
- * Example:
- * - totalMarks: 3
- * - cMarks: 2
- * - aMarks: 1
- * - reasoningMarks: 0
  */
 export type QuestionMarkProfile = {
   totalMarks: number;
@@ -100,17 +91,11 @@ export type QuestionMarkProfile = {
 
 /**
  * A derived high-level label for the variant's standard composition.
- *
- * This is useful for display/debugging, but the real filtering truth remains
- * the mark profile itself.
  */
 export type QuestionStandardProfile = "C" | "A" | "C+A";
 
 /**
  * Metadata that a single variant can expose for filtering.
- *
- * This should eventually live beside each curated question variant
- * inside concept generator files.
  */
 export type QuestionVariantSelectionMeta = {
   /**
@@ -153,9 +138,15 @@ export type QuestionVariantSelectionMeta = {
  * - "C"   => targetMarks means C marks
  * - "A"   => targetMarks means A marks
  * - "C+A" => targetMarks means total marks
+ *
+ * selectedThinkingType:
+ * - "OPERATIONAL" => operational only
+ * - "REASONING"   => reasoning only
+ * - "ANY"         => no thinking-type restriction
  */
 export type QuestionSelectionFilters = {
   selectedStandard: QuestionStandardMode;
+  selectedThinkingType: QuestionThinkingTypeMode;
   targetMarks: number;
   targetPaper: "P1" | "P2";
 };
@@ -163,11 +154,6 @@ export type QuestionSelectionFilters = {
 /**
  * A helper return shape that can be used by central filtering logic to explain
  * why a variant is eligible or not.
- *
- * This is optional, but useful later for:
- * - debugging
- * - greying out unavailable levels
- * - teacher-facing helper messages
  */
 export type QuestionVariantFilterResult = {
   isEligible: boolean;
@@ -176,21 +162,35 @@ export type QuestionVariantFilterResult = {
 
 /**
  * Derive a high-level standard profile from a mark split.
- *
- * Rules:
- * - cMarks > 0 and aMarks === 0 => "C"
- * - aMarks > 0 and cMarks === 0 => "A"
- * - cMarks > 0 and aMarks > 0   => "C+A"
- *
- * If both are zero, default to "C" for now as a safe fallback,
- * though in practice that case should not occur for real questions.
  */
 export function deriveStandardProfile(
-  marks: QuestionMarkProfile,
+  marks: QuestionMarkProfile
 ): QuestionStandardProfile {
   if (marks.cMarks > 0 && marks.aMarks > 0) return "C+A";
   if (marks.aMarks > 0) return "A";
   return "C";
+}
+
+/**
+ * Determine whether the current variant matches the selected thinking type.
+ *
+ * Current working rule:
+ * - reasoningMarks > 0 => reasoning
+ * - reasoningMarks = 0 => operational
+ */
+export function variantMatchesThinkingType(
+  variant: QuestionVariantSelectionMeta,
+  selectedThinkingType: QuestionThinkingTypeMode
+): boolean {
+  if (selectedThinkingType === "ANY") return true;
+
+  const isReasoning = variant.marks.reasoningMarks > 0;
+
+  if (selectedThinkingType === "REASONING") {
+    return isReasoning;
+  }
+
+  return !isReasoning;
 }
 
 /**
@@ -204,16 +204,28 @@ export function deriveStandardProfile(
  * Paper rules:
  * - targetPaper "P1" accepts "P1" or "BOTH"
  * - targetPaper "P2" accepts "P2" or "BOTH"
+ *
+ * Thinking-type rules:
+ * - "ANY"         => no restriction
+ * - "OPERATIONAL" => reasoningMarks must be 0
+ * - "REASONING"   => reasoningMarks must be > 0
  */
 export function isVariantEligibleForFilters(
   variant: QuestionVariantSelectionMeta,
-  filters: QuestionSelectionFilters,
+  filters: QuestionSelectionFilters
 ): boolean {
   const paperMatches =
     variant.paperSuitability === "BOTH" ||
     variant.paperSuitability === filters.targetPaper;
 
   if (!paperMatches) return false;
+
+  const thinkingTypeMatches = variantMatchesThinkingType(
+    variant,
+    filters.selectedThinkingType
+  );
+
+  if (!thinkingTypeMatches) return false;
 
   if (filters.selectedStandard === "C") {
     return variant.marks.cMarks === filters.targetMarks;
@@ -232,7 +244,7 @@ export function isVariantEligibleForFilters(
  */
 export function explainVariantEligibility(
   variant: QuestionVariantSelectionMeta,
-  filters: QuestionSelectionFilters,
+  filters: QuestionSelectionFilters
 ): QuestionVariantFilterResult {
   const reasons: string[] = [];
 
@@ -242,26 +254,43 @@ export function explainVariantEligibility(
 
   if (!paperMatches) {
     reasons.push(
-      `Variant is ${variant.paperSuitability}-only and cannot be used in ${filters.targetPaper}.`,
+      `Variant is ${variant.paperSuitability}-only and cannot be used in ${filters.targetPaper}.`
     );
+  }
+
+  const thinkingTypeMatches = variantMatchesThinkingType(
+    variant,
+    filters.selectedThinkingType
+  );
+
+  if (!thinkingTypeMatches) {
+    if (filters.selectedThinkingType === "REASONING") {
+      reasons.push(
+        "Variant has no reasoning marks and does not match the Reasoning filter."
+      );
+    } else if (filters.selectedThinkingType === "OPERATIONAL") {
+      reasons.push(
+        "Variant includes reasoning marks and does not match the Operational filter."
+      );
+    }
   }
 
   if (filters.selectedStandard === "C") {
     if (variant.marks.cMarks !== filters.targetMarks) {
       reasons.push(
-        `Requires exactly ${filters.targetMarks} C marks, but this variant has ${variant.marks.cMarks}.`,
+        `Requires exactly ${filters.targetMarks} C marks, but this variant has ${variant.marks.cMarks}.`
       );
     }
   } else if (filters.selectedStandard === "A") {
     if (variant.marks.aMarks !== filters.targetMarks) {
       reasons.push(
-        `Requires exactly ${filters.targetMarks} A marks, but this variant has ${variant.marks.aMarks}.`,
+        `Requires exactly ${filters.targetMarks} A marks, but this variant has ${variant.marks.aMarks}.`
       );
     }
   } else {
     if (variant.marks.totalMarks !== filters.targetMarks) {
       reasons.push(
-        `Requires exactly ${filters.targetMarks} total marks, but this variant has ${variant.marks.totalMarks}.`,
+        `Requires exactly ${filters.targetMarks} total marks, but this variant has ${variant.marks.totalMarks}.`
       );
     }
   }

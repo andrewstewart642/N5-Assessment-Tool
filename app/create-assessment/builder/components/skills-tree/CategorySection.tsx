@@ -13,6 +13,7 @@ import {
   getAvailableDifficultiesForConcept,
 } from "@/app/create-assessment/builder/builder-logic/BuilderQuestionGenerators";
 import {
+  conceptMatchesThinkingTypeFilter,
   getFilteredConcepts,
   rankConceptsByTargetMarks,
 } from "@/math-helpers/QuestionLogic";
@@ -22,8 +23,10 @@ import type {
   Concept,
   DifficultyLevel,
   Skill,
+  SkillPaperSuitability,
   StandardFilter,
   Theme,
+  ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 
 type Props = {
@@ -37,6 +40,7 @@ type Props = {
   onToggleSkill: (skillId: string) => void;
 
   standardFilter: StandardFilter;
+  thinkingTypeFilter: ThinkingTypeFilter;
   targetMarks: number;
   selectionFilters: QuestionSelectionFilters;
 
@@ -117,6 +121,109 @@ function stepDifficulty(
   return currentIndex === availableLevels.length - 1
     ? availableLevels[0]
     : availableLevels[currentIndex + 1];
+}
+
+function getPaperSuitabilityForConcept(
+  skill: Skill,
+  concept: Concept
+): SkillPaperSuitability {
+  return concept.metadata?.paperSuitability ?? skill.paperSuitability;
+}
+
+function conceptMatchesPaper(
+  skill: Skill,
+  concept: Concept,
+  targetPaper: "P1" | "P2"
+): boolean {
+  const suitability = getPaperSuitabilityForConcept(skill, concept);
+  return suitability === "BOTH" || suitability === targetPaper;
+}
+
+function buildThinkingTypeMismatchMessage(
+  filter: ThinkingTypeFilter
+): string {
+  if (filter === "REASONING") {
+    return "No reasoning marks here — choose Any or Operational.";
+  }
+
+  if (filter === "OPERATIONAL") {
+    return "Reasoning-only here — choose Any or Reasoning.";
+  }
+
+  return "This concept does not match the current thinking type.";
+}
+
+function buildPaperMismatchMessage(targetPaper: "P1" | "P2"): string {
+  return targetPaper === "P1"
+    ? "Paper 2 only — switch to Paper 2."
+    : "Paper 1 only — switch to Paper 1.";
+}
+
+function buildDropdownMismatchTag(args: {
+  skill: Skill;
+  concept: Concept;
+  targetPaper: "P1" | "P2";
+  thinkingTypeFilter: ThinkingTypeFilter;
+}): string | null {
+  const { skill, concept, targetPaper, thinkingTypeFilter } = args;
+
+  if (!conceptMatchesPaper(skill, concept, targetPaper)) {
+    return targetPaper === "P1" ? "P2 only" : "P1 only";
+  }
+
+  if (!conceptMatchesThinkingTypeFilter(concept, thinkingTypeFilter)) {
+    return thinkingTypeFilter === "REASONING"
+      ? "Operational only"
+      : "Reasoning only";
+  }
+
+  return null;
+}
+
+function buildPrimaryBlockReason(args: {
+  selected: Concept | undefined;
+  skill: Skill;
+  targetPaper: "P1" | "P2";
+  thinkingTypeFilter: ThinkingTypeFilter;
+  currentDifficulty: DifficultyLevel;
+  availableLevels: DifficultyLevel[];
+  currentDifficultyIsEligible: boolean;
+}): string {
+  const {
+    selected,
+    skill,
+    targetPaper,
+    thinkingTypeFilter,
+    currentDifficulty,
+    availableLevels,
+    currentDifficultyIsEligible,
+  } = args;
+
+  if (!selected) {
+    return "Select a concept first.";
+  }
+
+  if (!conceptMatchesPaper(skill, selected, targetPaper)) {
+    return buildPaperMismatchMessage(targetPaper);
+  }
+
+  if (!conceptMatchesThinkingTypeFilter(selected, thinkingTypeFilter)) {
+    return buildThinkingTypeMismatchMessage(thinkingTypeFilter);
+  }
+
+  if (availableLevels.length === 0) {
+    return "No selectable levels for this concept.";
+  }
+
+  if (!availableLevels.includes(currentDifficulty)) {
+    return `Level ${currentDifficulty} is not available for this concept.`;
+  }
+
+  if (!currentDifficultyIsEligible) {
+    return `Level ${currentDifficulty} does not match the current marks filter.`;
+  }
+
+  return "This concept is not available under the current filters.";
 }
 
 function DifficultyStepper(props: {
@@ -236,6 +343,7 @@ function SkillRow(props: {
   isExpanded: boolean;
   onToggleSkill: (skillId: string) => void;
   standardFilter: StandardFilter;
+  thinkingTypeFilter: ThinkingTypeFilter;
   targetMarks: number;
   selectionFilters: QuestionSelectionFilters;
   getConceptIndex: (skillId: string) => number;
@@ -263,6 +371,7 @@ function SkillRow(props: {
     isExpanded,
     onToggleSkill,
     standardFilter,
+    thinkingTypeFilter,
     targetMarks,
     selectionFilters,
     getConceptIndex,
@@ -309,6 +418,12 @@ function SkillRow(props: {
   }, [skill, selected, selectedConceptText, selectionFilters]);
 
   const currentDifficultyIsEligible = eligibleLevels.includes(currentDifficulty);
+  const selectedConceptMatchesThinkingType =
+    !!selected &&
+    conceptMatchesThinkingTypeFilter(selected, thinkingTypeFilter);
+  const selectedConceptMatchesPaper =
+    !!selected &&
+    conceptMatchesPaper(skill, selected, selectionFilters.targetPaper);
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -338,13 +453,34 @@ function SkillRow(props: {
     setDifficulty(skill.id, availableLevels[0]);
   }, [selected, availableLevels, currentDifficulty, setDifficulty, skill.id]);
 
-  const canAdd = !!selected && currentDifficultyIsEligible;
-  const canRegenerate = !!selected && availableLevels.length > 0;
+  const canAdd =
+    !!selected &&
+    selectedConceptMatchesPaper &&
+    selectedConceptMatchesThinkingType &&
+    currentDifficultyIsEligible;
+
+  const canRegenerate =
+    !!selected &&
+    selectedConceptMatchesPaper &&
+    selectedConceptMatchesThinkingType &&
+    currentDifficultyIsEligible;
 
   const difficultyRangeText =
     availableLevels.length === 0
       ? "Select concept"
       : `${availableLevels[0]}–${availableLevels[availableLevels.length - 1]}`;
+
+  const primaryBlockReason = buildPrimaryBlockReason({
+    selected,
+    skill,
+    targetPaper: selectionFilters.targetPaper,
+    thinkingTypeFilter,
+    currentDifficulty,
+    availableLevels,
+    currentDifficultyIsEligible,
+  });
+
+  const showBlockReason = !canAdd;
 
   return (
     <div
@@ -581,6 +717,13 @@ function SkillRow(props: {
 
                     {ranked.map((concept, conceptIdx) => {
                       const active = conceptIdx === currentIndex;
+                      const mismatchTag = buildDropdownMismatchTag({
+                        skill,
+                        concept,
+                        targetPaper: selectionFilters.targetPaper,
+                        thinkingTypeFilter,
+                      });
+                      const isDropdownEligible = mismatchTag === null;
 
                       return (
                         <button
@@ -598,15 +741,22 @@ function SkillRow(props: {
                                 ? "none"
                                 : `1px solid ${theme.borderSoft}`,
                             background: active ? theme.rowHover : "transparent",
-                            color: theme.text,
+                            color: isDropdownEligible ? theme.text : theme.textMuted,
+                            opacity: isDropdownEligible ? 1 : 0.62,
                             textAlign: "left",
                             padding: "10px 12px",
                             cursor: "pointer",
-                            display: "flex",
+                            display: "grid",
+                            gridTemplateColumns: "minmax(0, 1fr) auto",
                             alignItems: "center",
+                            columnGap: 10,
                             minWidth: 0,
                           }}
-                          title={conceptSelectionText(concept)}
+                          title={
+                            mismatchTag
+                              ? `${conceptSelectionText(concept)} — ${mismatchTag}`
+                              : conceptSelectionText(concept)
+                          }
                         >
                           <span
                             style={{
@@ -620,6 +770,23 @@ function SkillRow(props: {
                           >
                             <PaperContent parts={conceptInlineParts(concept)} />
                           </span>
+
+                          {mismatchTag ? (
+                            <span
+                              style={{
+                                fontSize: UI_TYPO.sizeXs,
+                                lineHeight: 1,
+                                color: theme.textDim,
+                                whiteSpace: "nowrap",
+                                border: `1px solid ${theme.borderSoft}`,
+                                borderRadius: 999,
+                                padding: "4px 8px",
+                                background: theme.controlBg,
+                              }}
+                            >
+                              {mismatchTag}
+                            </span>
+                          ) : null}
                         </button>
                       );
                     })}
@@ -680,7 +847,7 @@ function SkillRow(props: {
             </div>
           </div>
 
-          {selected && availableLevels.length > 0 && !currentDifficultyIsEligible ? (
+          {showBlockReason ? (
             <div
               style={{
                 gridColumn: "1 / -1",
@@ -688,7 +855,7 @@ function SkillRow(props: {
                 color: theme.textMuted,
               }}
             >
-              This difficulty is outside the active standard, marks, or paper filters.
+              {primaryBlockReason}
             </div>
           ) : null}
 
@@ -710,7 +877,7 @@ function SkillRow(props: {
             >
               <AddQuestionButton
                 onClick={() => {
-                  if (!selected || !currentDifficultyIsEligible) return;
+                  if (!selected || !canAdd) return;
                   onAddQuestion(
                     category,
                     skill,
@@ -720,13 +887,7 @@ function SkillRow(props: {
                 }}
                 theme={theme}
                 label="Add Question"
-                title={
-                  !selected
-                    ? "Select a concept first"
-                    : !currentDifficultyIsEligible
-                    ? "Expand tree filters to allow the addition of this skill"
-                    : "Add this (skill + concept + difficulty) to the assessment"
-                }
+                title={canAdd ? "Add this question to the assessment" : primaryBlockReason}
                 variant="primary"
               />
             </div>
@@ -739,7 +900,7 @@ function SkillRow(props: {
             >
               <AddQuestionButton
                 onClick={() => {
-                  if (!selected) return;
+                  if (!selected || !canRegenerate) return;
                   onRegenerateQuestion(
                     category,
                     skill,
@@ -750,9 +911,9 @@ function SkillRow(props: {
                 theme={theme}
                 label="Regenerate"
                 title={
-                  !selected
-                    ? "Select a concept first"
-                    : "Generate another version of this question for exploration"
+                  canRegenerate
+                    ? "Generate another version of this question"
+                    : primaryBlockReason
                 }
                 variant="secondary"
               />
@@ -774,6 +935,7 @@ export default function CategorySection(props: Props) {
     expandedSkillIds,
     onToggleSkill,
     standardFilter,
+    thinkingTypeFilter,
     targetMarks,
     selectionFilters,
     getConceptIndex,
@@ -911,6 +1073,7 @@ export default function CategorySection(props: Props) {
               isExpanded={expandedSkillIds.includes(skill.id)}
               onToggleSkill={onToggleSkill}
               standardFilter={standardFilter}
+              thinkingTypeFilter={thinkingTypeFilter}
               targetMarks={targetMarks}
               selectionFilters={selectionFilters}
               getConceptIndex={getConceptIndex}

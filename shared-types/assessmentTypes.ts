@@ -9,6 +9,8 @@ export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
 
 export type StandardFilter = "C" | "A" | "C+A";
 
+export type ThinkingTypeFilter = "OPERATIONAL" | "REASONING" | "ANY";
+
 export type CourseId = "N5_MATH";
 
 export type Theme = {
