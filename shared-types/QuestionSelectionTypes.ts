@@ -38,17 +38,15 @@
  * - "REASONING"   => only reasoning-rich questions should match
  * - "ANY"         => no thinking-type restriction
  *
- * Paper behaviour
- * ---------------
- * Some questions are restricted to:
- * - Paper 1 only
- * - Paper 2 only
- * - both papers
+ * Paper / calculator behaviour
+ * ----------------------------
+ * We treat calculator status as a hard validity rule:
  *
- * Example:
- * Rationalise is Paper 1 only.
- * Scientific notation is usually Paper 2 only.
- * Some concepts may be usable in both.
+ * - "NonCalculatorOnly" => valid in P1 only
+ * - "CalculatorAllowed" => valid in both papers
+ * - "CalculatorRequired" => valid in P2 only
+ *
+ * This prevents invalid questions from slipping into the wrong paper.
  * ============================================================================
  */
 
@@ -71,8 +69,12 @@ export type QuestionThinkingTypeMode =
 export type QuestionPaperMode = "P1" | "P2" | "BOTH";
 
 /**
- * Optional calculator suitability metadata for a question variant.
- * Useful later when filtering by paper or calculator restrictions.
+ * Calculator suitability metadata for a question variant.
+ *
+ * Interpretation used by filtering:
+ * - NonCalculatorOnly => P1 only
+ * - CalculatorAllowed => P1 or P2
+ * - CalculatorRequired => P2 only
  */
 export type QuestionCalculatorStatus =
   | "NonCalculatorOnly"
@@ -133,16 +135,6 @@ export type QuestionVariantSelectionMeta = {
 
 /**
  * The builder's active filter request at the moment a question is being chosen.
- *
- * selectedStandard:
- * - "C"   => targetMarks means C marks
- * - "A"   => targetMarks means A marks
- * - "C+A" => targetMarks means total marks
- *
- * selectedThinkingType:
- * - "OPERATIONAL" => operational only
- * - "REASONING"   => reasoning only
- * - "ANY"         => no thinking-type restriction
  */
 export type QuestionSelectionFilters = {
   selectedStandard: QuestionStandardMode;
@@ -194,6 +186,31 @@ export function variantMatchesThinkingType(
 }
 
 /**
+ * Determine whether the variant is valid for the target paper based on
+ * calculator status.
+ *
+ * Hard rule:
+ * - P1 accepts NonCalculatorOnly or CalculatorAllowed
+ * - P2 accepts CalculatorAllowed or CalculatorRequired
+ */
+export function variantMatchesCalculatorAndPaper(
+  variant: QuestionVariantSelectionMeta,
+  targetPaper: "P1" | "P2"
+): boolean {
+  if (targetPaper === "P1") {
+    return (
+      variant.calculatorStatus === "NonCalculatorOnly" ||
+      variant.calculatorStatus === "CalculatorAllowed"
+    );
+  }
+
+  return (
+    variant.calculatorStatus === "CalculatorAllowed" ||
+    variant.calculatorStatus === "CalculatorRequired"
+  );
+}
+
+/**
  * Determine whether a variant is eligible under the current builder filters.
  *
  * Rules:
@@ -201,14 +218,10 @@ export function variantMatchesThinkingType(
  * - Standard "A"   => targetMarks matches aMarks
  * - Standard "C+A" => targetMarks matches totalMarks
  *
- * Paper rules:
- * - targetPaper "P1" accepts "P1" or "BOTH"
- * - targetPaper "P2" accepts "P2" or "BOTH"
- *
- * Thinking-type rules:
- * - "ANY"         => no restriction
- * - "OPERATIONAL" => reasoningMarks must be 0
- * - "REASONING"   => reasoningMarks must be > 0
+ * Hard validity gates:
+ * 1) paper suitability must match
+ * 2) calculator suitability must match the target paper
+ * 3) thinking type must match
  */
 export function isVariantEligibleForFilters(
   variant: QuestionVariantSelectionMeta,
@@ -219,6 +232,13 @@ export function isVariantEligibleForFilters(
     variant.paperSuitability === filters.targetPaper;
 
   if (!paperMatches) return false;
+
+  const calculatorMatches = variantMatchesCalculatorAndPaper(
+    variant,
+    filters.targetPaper
+  );
+
+  if (!calculatorMatches) return false;
 
   const thinkingTypeMatches = variantMatchesThinkingType(
     variant,
@@ -256,6 +276,25 @@ export function explainVariantEligibility(
     reasons.push(
       `Variant is ${variant.paperSuitability}-only and cannot be used in ${filters.targetPaper}.`
     );
+  }
+
+  const calculatorMatches = variantMatchesCalculatorAndPaper(
+    variant,
+    filters.targetPaper
+  );
+
+  if (!calculatorMatches) {
+    if (
+      filters.targetPaper === "P1" &&
+      variant.calculatorStatus === "CalculatorRequired"
+    ) {
+      reasons.push("Variant requires a calculator and cannot be used in Paper 1.");
+    } else if (
+      filters.targetPaper === "P2" &&
+      variant.calculatorStatus === "NonCalculatorOnly"
+    ) {
+      reasons.push("Variant is non-calculator only and cannot be used in Paper 2.");
+    }
   }
 
   const thinkingTypeMatches = variantMatchesThinkingType(
