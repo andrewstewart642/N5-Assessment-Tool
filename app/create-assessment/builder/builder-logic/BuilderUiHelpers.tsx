@@ -72,78 +72,56 @@ type ViewingToggleProps = {
   onChange: (paper: Paper) => void;
 };
 
-export function ViewingToggle({ value, onChange }: ViewingToggleProps) {
+export function ViewingToggle({
+  value,
+  onChange,
+}: {
+  value: "P1" | "P2";
+  onChange: (next: "P1" | "P2") => void;
+}) {
   return (
     <div
       style={{
-        position: "relative",
-        width: 176,
-        height: 34,
-        borderRadius: 999,
-        background: "rgba(255,255,255,0.03)",
+        display: "inline-flex",
+        height: 30,
+        borderRadius: 9,
+        background: "rgba(255,255,255,0.04)",
         border: "1px solid rgba(255,255,255,0.08)",
-        overflow: "hidden",
+        padding: 2,
+        boxSizing: "border-box",
       }}
     >
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: 2,
-          bottom: 2,
-          left: 2,
-          width: "calc(50% - 2px)",
-          borderRadius: 999,
-          background: "rgba(37,99,235,0.20)",
-          border: "1px solid rgba(96,165,250,0.95)",
-          transform: value === "P1" ? "translateX(0%)" : "translateX(100%)",
-          transition: "transform 180ms ease",
-          boxSizing: "border-box",
-        }}
-      />
+      {(["P1", "P2"] as const).map((paper) => {
+        const active = value === paper;
 
-      <div
-        style={{
-          position: "relative",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          height: "100%",
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => onChange("P1")}
-          style={{
-            border: "none",
-            background: "transparent",
-            color: value === "P1" ? "#f7fbff" : "rgba(214,227,243,0.76)",
-            cursor: "pointer",
-            fontSize: 14,
-            fontFamily: UI_TYPO.family,
-            fontWeight: UI_TYPO.weightBold,
-            lineHeight: 1,
-          }}
-        >
-          Paper 1
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onChange("P2")}
-          style={{
-            border: "none",
-            background: "transparent",
-            color: value === "P2" ? "#f7fbff" : "rgba(214,227,243,0.76)",
-            cursor: "pointer",
-            fontSize: 14,
-            fontFamily: UI_TYPO.family,
-            fontWeight: UI_TYPO.weightBold,
-            lineHeight: 1,
-          }}
-        >
-          Paper 2
-        </button>
-      </div>
+        return (
+          <button
+            key={paper}
+            onClick={() => onChange(paper)}
+            style={{
+              height: "100%",
+              padding: "0 12px",
+              borderRadius: 7,
+              border: "none",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 600,
+              fontFamily: "inherit",
+              color: active ? "#ffffff" : "rgba(214,227,243,0.72)",
+              background: active
+                ? "rgba(96,165,250,0.18)"
+                : "transparent",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              lineHeight: 1,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {paper === "P1" ? "Paper 1" : "Paper 2"}
+          </button>
+        );
+      })}
     </div>
   );
 }

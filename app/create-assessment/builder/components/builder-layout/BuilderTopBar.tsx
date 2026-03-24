@@ -65,13 +65,14 @@ function fieldLabelStyle(): React.CSSProperties {
   };
 }
 
-function fieldShellStyle(width: number): React.CSSProperties {
+function fixedFieldShellStyle(width: number): React.CSSProperties {
   return {
     display: "grid",
     gap: 3,
     minWidth: 0,
     width,
     fontFamily: UI_TYPO.family,
+    flex: "0 0 auto",
   };
 }
 
@@ -82,7 +83,7 @@ function sharedInputStyle(): React.CSSProperties {
     border: "1px solid rgba(255,255,255,0.08)",
     background: "rgba(255,255,255,0.02)",
     color: "#f7fbff",
-    padding: "0 38px 0 10px",
+    padding: "0 30px 0 10px",
     fontSize: 13,
     fontFamily: UI_TYPO.family,
     fontWeight: UI_TYPO.weightSemibold,
@@ -120,10 +121,9 @@ export default function BuilderTopBar({
       style={{
         borderBottom: `1px solid ${theme.border}`,
         background: theme.panelBg2,
-        display: "grid",
-        gridTemplateColumns: "minmax(0, 1fr) auto",
-        alignItems: "center",
-        gap: 10,
+        display: "flex",
+        alignItems: "end",
+        gap: 8,
         padding: "8px 10px 10px",
         boxSizing: "border-box",
         minHeight: 0,
@@ -135,42 +135,66 @@ export default function BuilderTopBar({
         style={{
           display: "flex",
           alignItems: "end",
-          gap: 10,
+          gap: 8,
+          flex: "1 1 auto",
           minWidth: 0,
-          flexWrap: "nowrap",
         }}
       >
-        <BuilderMetaField
-          label="Name"
-          value={assessmentName}
-          onChange={setAssessmentName}
-          onFocus={handleAssessmentNameFocus}
-          onBlur={handleAssessmentNameBlur}
-          width={220}
-        />
+        <div
+          style={{
+            flex: "1.2 1 0",
+            minWidth: 0,
+          }}
+        >
+          <BuilderMetaField
+            label="Name"
+            value={assessmentName}
+            onChange={setAssessmentName}
+            onFocus={handleAssessmentNameFocus}
+            onBlur={handleAssessmentNameBlur}
+            width={undefined as never}
+          />
+        </div>
 
-        <ClassCoverageSelect
-          levelLabel={classLevelLabel}
-          classes={availableClasses}
-          selectedClassIds={selectedClassIds}
-          useCompleteCourseCoverage={useCompleteCourseCoverage}
-          onToggleClass={onToggleClass}
-          onSelectCompleteCourseCoverage={onSelectCompleteCourseCoverage}
-          label="Class"
-          emptyText="Select classes"
-          disabledText="No level"
-          completeCoverageSummaryText="Complete course"
-          hideHelperText
-          compact
-          width={190}
-          dropdownWidth={340}
-          zIndex={320}
-        />
+        <div
+          style={{
+            flex: "1 1 0",
+            minWidth: 0,
+          }}
+        >
+          <ClassCoverageSelect
+            levelLabel={classLevelLabel}
+            classes={availableClasses}
+            selectedClassIds={selectedClassIds}
+            useCompleteCourseCoverage={useCompleteCourseCoverage}
+            onToggleClass={onToggleClass}
+            onSelectCompleteCourseCoverage={onSelectCompleteCourseCoverage}
+            label="Class"
+            emptyText="Select classes"
+            disabledText="No level"
+            completeCoverageSummaryText="Complete course"
+            hideHelperText
+            compact
+            width="100%"
+            dropdownWidth={340}
+            zIndex={320}
+          />
+        </div>
+      </div>
 
+      <div
+        style={{
+          display: "flex",
+          alignItems: "end",
+          gap: 8,
+          flex: "0 0 auto",
+          minWidth: 0,
+        }}
+      >
         <div
           ref={builderDateFieldRef}
           style={{
-            ...fieldShellStyle(190),
+            ...fixedFieldShellStyle(140),
             position: "relative",
             zIndex: builderCalendarOpen ? 200 : "auto",
           }}
@@ -253,30 +277,22 @@ export default function BuilderTopBar({
             </div>
           ) : null}
         </div>
-      </div>
 
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          justifySelf: "end",
-          whiteSpace: "nowrap",
-          minWidth: 0,
-        }}
-      >
         <div
           style={{
-            color: "rgba(214,227,243,0.78)",
-            fontSize: 13,
+            display: "grid",
+            gap: 3,
+            minWidth: 0,
+            width: "fit-content",
             fontFamily: UI_TYPO.family,
-            fontWeight: UI_TYPO.weightMedium,
+            flex: "0 0 auto",
           }}
         >
-          Viewing
+          <span style={fieldLabelStyle()}>Viewing</span>
+          <div style={{ height: 30, display: "flex", alignItems: "center" }}>
+            <ViewingToggle value={viewPaper} onChange={setViewPaper} />
+          </div>
         </div>
-
-        <ViewingToggle value={viewPaper} onChange={setViewPaper} />
       </div>
     </div>
   );
