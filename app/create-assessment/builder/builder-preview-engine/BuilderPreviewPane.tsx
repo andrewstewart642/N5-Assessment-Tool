@@ -98,7 +98,7 @@ export default function BuilderPreviewPane({
         style={{
           position: "sticky",
           top: 8,
-          zIndex: 6,
+          zIndex: 2,
           width: "100%",
           height: 0,
           display: "flex",

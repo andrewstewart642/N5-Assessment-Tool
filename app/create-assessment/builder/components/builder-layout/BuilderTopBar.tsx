@@ -1,9 +1,11 @@
 "use client";
 
+import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TYPO } from "@/app/ui/UiTypography";
 import { getTheme } from "@/app/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import {
   BuilderMetaField,
   ViewingToggle,
@@ -15,8 +17,6 @@ type Props = {
   theme: Theme;
   assessmentName: string;
   setAssessmentName: React.Dispatch<React.SetStateAction<string>>;
-  className: string;
-  setClassName: React.Dispatch<React.SetStateAction<string>>;
   assessmentDate: string;
   setAssessmentDate: React.Dispatch<React.SetStateAction<string>>;
   builderCalendarOpen: boolean;
@@ -26,16 +26,77 @@ type Props = {
   handleAssessmentNameBlur: () => void;
   viewPaper: Paper;
   setViewPaper: React.Dispatch<React.SetStateAction<Paper>>;
-  saveStateLabel: string;
-  isSaving: boolean;
+
+  classLevelLabel: string | null;
+  availableClasses: SchoolClass[];
+  selectedClassIds: string[];
+  useCompleteCourseCoverage: boolean;
+  onToggleClass: (classId: string) => void;
+  onSelectCompleteCourseCoverage: () => void;
 };
+
+function formatAssessmentDateDisplay(value: string): string {
+  if (!value) return "";
+
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!isoMatch) return value;
+
+  const [, year, month, day] = isoMatch;
+  const utcDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+
+  if (Number.isNaN(utcDate.getTime())) return value;
+
+  return utcDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+function fieldLabelStyle(): React.CSSProperties {
+  return {
+    fontSize: 12,
+    fontWeight: UI_TYPO.weightMedium,
+    letterSpacing: 0,
+    color: "rgba(214,227,243,0.74)",
+    lineHeight: 1.2,
+    whiteSpace: "nowrap",
+  };
+}
+
+function fieldShellStyle(width: number): React.CSSProperties {
+  return {
+    display: "grid",
+    gap: 3,
+    minWidth: 0,
+    width,
+    fontFamily: UI_TYPO.family,
+  };
+}
+
+function sharedInputStyle(): React.CSSProperties {
+  return {
+    height: 30,
+    borderRadius: 9,
+    border: "1px solid rgba(255,255,255,0.08)",
+    background: "rgba(255,255,255,0.02)",
+    color: "#f7fbff",
+    padding: "0 38px 0 10px",
+    fontSize: 13,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightSemibold,
+    minWidth: 0,
+    width: "100%",
+    boxSizing: "border-box",
+    outline: "none",
+  };
+}
 
 export default function BuilderTopBar({
   theme,
   assessmentName,
   setAssessmentName,
-  className,
-  setClassName,
   assessmentDate,
   setAssessmentDate,
   builderCalendarOpen,
@@ -45,9 +106,15 @@ export default function BuilderTopBar({
   handleAssessmentNameBlur,
   viewPaper,
   setViewPaper,
-  saveStateLabel,
-  isSaving,
+  classLevelLabel,
+  availableClasses,
+  selectedClassIds,
+  useCompleteCourseCoverage,
+  onToggleClass,
+  onSelectCompleteCourseCoverage,
 }: Props) {
+  const formattedAssessmentDate = formatAssessmentDateDisplay(assessmentDate);
+
   return (
     <div
       style={{
@@ -57,11 +124,11 @@ export default function BuilderTopBar({
         gridTemplateColumns: "minmax(0, 1fr) auto",
         alignItems: "center",
         gap: 10,
-        padding: "3px 10px 14px",
+        padding: "8px 10px 10px",
         boxSizing: "border-box",
         minHeight: 0,
         position: "relative",
-        zIndex: 3,
+        zIndex: 5,
       }}
     >
       <div
@@ -70,6 +137,7 @@ export default function BuilderTopBar({
           alignItems: "end",
           gap: 10,
           minWidth: 0,
+          flexWrap: "nowrap",
         }}
       >
         <BuilderMetaField
@@ -81,59 +149,46 @@ export default function BuilderTopBar({
           width={220}
         />
 
-        <BuilderMetaField
+        <ClassCoverageSelect
+          levelLabel={classLevelLabel}
+          classes={availableClasses}
+          selectedClassIds={selectedClassIds}
+          useCompleteCourseCoverage={useCompleteCourseCoverage}
+          onToggleClass={onToggleClass}
+          onSelectCompleteCourseCoverage={onSelectCompleteCourseCoverage}
           label="Class"
-          value={className}
-          onChange={setClassName}
-          width={118}
+          emptyText="Select classes"
+          disabledText="No level"
+          completeCoverageSummaryText="Complete course"
+          hideHelperText
+          compact
+          width={190}
+          dropdownWidth={340}
+          zIndex={320}
         />
 
         <div
           ref={builderDateFieldRef}
           style={{
-            display: "grid",
-            gap: 3,
-            minWidth: 0,
-            width: 170,
+            ...fieldShellStyle(190),
             position: "relative",
-            fontFamily: UI_TYPO.family,
+            zIndex: builderCalendarOpen ? 200 : "auto",
           }}
         >
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: UI_TYPO.weightMedium,
-              letterSpacing: 0,
-              color: "rgba(214,227,243,0.74)",
-              lineHeight: 1.2,
-              whiteSpace: "nowrap",
-            }}
-          >
-            Assessment Date
-          </span>
+          <span style={fieldLabelStyle()}>Assessment Date</span>
 
           <div style={{ position: "relative" }}>
             <input
               type="text"
-              value={assessmentDate}
-              onChange={(e) => setAssessmentDate(e.target.value)}
+              value={formattedAssessmentDate}
+              readOnly
               onFocus={() => setBuilderCalendarOpen(true)}
               onClick={() => setBuilderCalendarOpen(true)}
               style={{
-                height: 30,
-                borderRadius: 9,
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.02)",
-                color: "#f7fbff",
-                padding: "0 34px 0 9px",
-                fontSize: 13,
-                fontFamily: UI_TYPO.family,
-                fontWeight: UI_TYPO.weightSemibold,
-                minWidth: 0,
-                width: "100%",
-                boxSizing: "border-box",
-                outline: "none",
+                ...sharedInputStyle(),
+                cursor: "pointer",
               }}
+              aria-label="Assessment date"
             />
 
             <button
@@ -142,7 +197,8 @@ export default function BuilderTopBar({
               style={{
                 position: "absolute",
                 right: 4,
-                top: 4,
+                top: "50%",
+                transform: "translateY(-50%)",
                 width: 22,
                 height: 22,
                 borderRadius: 7,
@@ -150,14 +206,28 @@ export default function BuilderTopBar({
                 background: "rgba(255,255,255,0.03)",
                 color: "rgba(214,227,243,0.78)",
                 cursor: "pointer",
-                display: "grid",
-                placeItems: "center",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
                 fontSize: 12,
                 lineHeight: 1,
+                padding: 0,
               }}
               aria-label="Open assessment date calendar"
             >
-              🗓️
+              <span
+                aria-hidden="true"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  height: "100%",
+                  transform: "translateY(-0.5px)",
+                }}
+              >
+                🗓️
+              </span>
             </button>
           </div>
 
@@ -167,7 +237,7 @@ export default function BuilderTopBar({
                 position: "absolute",
                 top: "calc(100% + 10px)",
                 left: 0,
-                zIndex: 20,
+                zIndex: 300,
                 width: 320,
               }}
             >
@@ -192,40 +262,9 @@ export default function BuilderTopBar({
           gap: 12,
           justifySelf: "end",
           whiteSpace: "nowrap",
-          transform: "translateY(1px)",
+          minWidth: 0,
         }}
       >
-        <div
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "6px 10px",
-            borderRadius: 999,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.03)",
-            color: "rgba(214,227,243,0.82)",
-            fontSize: 12,
-            fontFamily: UI_TYPO.family,
-            fontWeight: UI_TYPO.weightSemibold,
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: 999,
-              background: isSaving ? "#facc15" : "#4ade80",
-              boxShadow: isSaving
-                ? "0 0 10px rgba(250,204,21,0.35)"
-                : "0 0 10px rgba(74,222,128,0.35)",
-              animation: isSaving ? "builder-save-pulse 1s ease-in-out infinite" : "none",
-              flexShrink: 0,
-            }}
-          />
-          <span>{saveStateLabel}</span>
-        </div>
-
         <div
           style={{
             color: "rgba(214,227,243,0.78)",
@@ -239,23 +278,6 @@ export default function BuilderTopBar({
 
         <ViewingToggle value={viewPaper} onChange={setViewPaper} />
       </div>
-
-      <style jsx>{`
-        @keyframes builder-save-pulse {
-          0% {
-            transform: scale(1);
-            opacity: 0.9;
-          }
-          50% {
-            transform: scale(1.25);
-            opacity: 1;
-          }
-          100% {
-            transform: scale(1);
-            opacity: 0.9;
-          }
-        }
-      `}</style>
     </div>
   );
 }

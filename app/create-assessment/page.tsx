@@ -11,7 +11,7 @@ import {
 } from "@/app/ui/AppTheme";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import LevelSelect from "./components/LevelSelect";
-import ClassCoverageSelect from "./components/ClassCoverageSelect";
+import ClassCoverageSelect from "../components/ClassCoverageSelect";
 import {
   ASSESSMENT_LEVEL_OPTIONS,
   loadAssessmentClassCoverageBrief,

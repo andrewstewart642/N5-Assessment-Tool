@@ -10,17 +10,33 @@ type Props = {
   useCompleteCourseCoverage: boolean;
   onToggleClass: (classId: string) => void;
   onSelectCompleteCourseCoverage: () => void;
+
+  label?: string;
+  emptyText?: string;
+  disabledText?: string;
+  completeCoverageSummaryText?: string;
+  hideHelperText?: boolean;
+  compact?: boolean;
+  width?: number | string;
+  dropdownWidth?: number | string;
+  zIndex?: number;
 };
 
 function getSummaryText(args: {
   classes: SchoolClass[];
   selectedClassIds: string[];
   useCompleteCourseCoverage: boolean;
+  completeCoverageSummaryText: string;
 }): string {
-  const { classes, selectedClassIds, useCompleteCourseCoverage } = args;
+  const {
+    classes,
+    selectedClassIds,
+    useCompleteCourseCoverage,
+    completeCoverageSummaryText,
+  } = args;
 
   if (useCompleteCourseCoverage) {
-    return "Complete course coverage";
+    return completeCoverageSummaryText;
   }
 
   if (selectedClassIds.length === 0) {
@@ -49,6 +65,15 @@ export default function ClassCoverageSelect({
   useCompleteCourseCoverage,
   onToggleClass,
   onSelectCompleteCourseCoverage,
+  label = "Classes sitting this assessment",
+  emptyText = "Select classes",
+  disabledText = "Choose level first",
+  completeCoverageSummaryText = "Complete course coverage",
+  hideHelperText = false,
+  compact = false,
+  width = "100%",
+  dropdownWidth = "100%",
+  zIndex = 20,
 }: Props) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
@@ -74,12 +99,25 @@ export default function ClassCoverageSelect({
   }, []);
 
   const summaryText = useMemo(() => {
-    return getSummaryText({
+    const rawSummary = getSummaryText({
       classes,
       selectedClassIds,
       useCompleteCourseCoverage,
+      completeCoverageSummaryText,
     });
-  }, [classes, selectedClassIds, useCompleteCourseCoverage]);
+
+    if (!useCompleteCourseCoverage && selectedClassIds.length === 0) {
+      return emptyText;
+    }
+
+    return rawSummary;
+  }, [
+    classes,
+    selectedClassIds,
+    useCompleteCourseCoverage,
+    completeCoverageSummaryText,
+    emptyText,
+  ]);
 
   const helperText = useMemo(() => {
     if (useCompleteCourseCoverage) {
@@ -95,17 +133,49 @@ export default function ClassCoverageSelect({
       : "Choose a level first.";
   }, [levelLabel, selectedClassIds.length, useCompleteCourseCoverage]);
 
+  const labelStyle: React.CSSProperties = {
+    fontSize: compact ? 12 : 13,
+    color: "rgba(214,227,243,0.72)",
+    fontWeight: 600,
+    lineHeight: 1.2,
+    whiteSpace: "nowrap",
+  };
+
+    const triggerStyle: React.CSSProperties = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    width: "100%",
+    minWidth: 0,
+    overflow: "hidden",
+    border: "1px solid rgba(255,255,255,0.10)",
+    borderRadius: compact ? 9 : 14,
+    background: "rgba(255,255,255,0.02)",
+    padding: compact ? "0 10px" : "10px 12px",
+    minHeight: compact ? 30 : 48,
+    height: compact ? 30 : undefined,
+    cursor: levelLabel ? "pointer" : "not-allowed",
+    color: levelLabel ? "#f7fbff" : "rgba(214,227,243,0.45)",
+    fontSize: compact ? 13 : 16,
+    fontFamily: "inherit",
+    fontWeight: compact ? 600 : undefined,
+    textAlign: "left",
+    boxSizing: "border-box",
+  };
+
   return (
-    <div ref={wrapperRef} style={{ display: "grid", gap: 6, position: "relative" }}>
-      <span
-        style={{
-          fontSize: 13,
-          color: "rgba(214,227,243,0.72)",
-          fontWeight: 600,
-        }}
-      >
-        Classes sitting this assessment
-      </span>
+    <div
+      ref={wrapperRef}
+      style={{
+        display: "grid",
+        gap: hideHelperText ? 3 : 6,
+        position: "relative",
+        width,
+        minWidth: 0,
+      }}
+    >
+      <span style={labelStyle}>{label}</span>
 
       <button
         type="button"
@@ -113,65 +183,63 @@ export default function ClassCoverageSelect({
           if (!levelLabel) return;
           setOpen((prev) => !prev);
         }}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 12,
-          width: "100%",
-          border: "1px solid rgba(255,255,255,0.10)",
-          borderRadius: 14,
-          background: "rgba(255,255,255,0.02)",
-          padding: "10px 12px",
-          minHeight: 48,
-          cursor: levelLabel ? "pointer" : "not-allowed",
-          color: levelLabel ? "#f7fbff" : "rgba(214,227,243,0.45)",
-          fontSize: 16,
-          fontFamily: "inherit",
-          textAlign: "left",
-        }}
+        style={triggerStyle}
       >
-        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
-          {levelLabel ? summaryText : "Choose level first"}
+                <span
+          style={{
+            display: "block",
+            flex: "1 1 auto",
+            minWidth: 0,
+            maxWidth: "100%",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {levelLabel ? summaryText : disabledText}
         </span>
 
         <span
           style={{
             color: "rgba(214,227,243,0.72)",
-            fontSize: 14,
+            fontSize: compact ? 11 : 14,
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 140ms ease",
             flexShrink: 0,
+            marginLeft: 2,
+            lineHeight: 1,
           }}
         >
           ▾
         </span>
       </button>
 
-      <div
-        style={{
-          fontSize: 12,
-          lineHeight: 1.4,
-          color: "rgba(214,227,243,0.58)",
-        }}
-      >
-        {helperText}
-      </div>
+      {!hideHelperText ? (
+        <div
+          style={{
+            fontSize: 12,
+            lineHeight: 1.4,
+            color: "rgba(214,227,243,0.58)",
+          }}
+        >
+          {helperText}
+        </div>
+      ) : null}
 
       {open && levelLabel ? (
         <div
           style={{
             position: "absolute",
-            top: "100%",
+            top: hideHelperText ? "calc(100% + 6px)" : "100%",
             left: 0,
-            right: 0,
-            marginTop: 8,
+            width: dropdownWidth,
+            marginTop: hideHelperText ? 0 : 8,
             border: "1px solid rgba(255,255,255,0.10)",
             borderRadius: 16,
             background: "#121a24",
             boxShadow: "0 18px 36px rgba(0,0,0,0.28)",
             padding: 10,
-            zIndex: 20,
+            zIndex,
             display: "grid",
             gap: 8,
           }}

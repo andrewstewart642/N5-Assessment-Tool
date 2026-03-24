@@ -15,28 +15,50 @@ function pad2(value: number) {
 }
 
 function parseDateText(text: string): Date | null {
-  const match = text.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (!match) return null;
+  const trimmed = text.trim();
+  if (!trimmed) return null;
 
-  const day = Number(match[1]);
-  const month = Number(match[2]);
-  const year = Number(match[3]);
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = Number(isoMatch[3]);
 
-  const date = new Date(year, month - 1, day);
+    const date = new Date(year, month - 1, day);
 
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    ) {
+      return date;
+    }
+
     return null;
   }
 
-  return date;
+  const slashMatch = trimmed.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (slashMatch) {
+    const day = Number(slashMatch[1]);
+    const month = Number(slashMatch[2]);
+    const year = Number(slashMatch[3]);
+
+    const date = new Date(year, month - 1, day);
+
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() === month - 1 &&
+      date.getDate() === day
+    ) {
+      return date;
+    }
+  }
+
+  return null;
 }
 
-function formatDateText(date: Date) {
-  return `${pad2(date.getDate())}/${pad2(date.getMonth() + 1)}/${date.getFullYear()}`;
+function formatDateIso(date: Date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
 
 function getMonthMatrix(viewDate: Date) {
@@ -144,6 +166,7 @@ export default function SharedCalendarPicker({
   onApply,
 }: Props) {
   const parsed = parseDateText(value) ?? new Date();
+
   const [viewDate, setViewDate] = useState(
     new Date(parsed.getFullYear(), parsed.getMonth(), 1),
   );
@@ -165,6 +188,8 @@ export default function SharedCalendarPicker({
         background: theme.panelBg,
         padding: 14,
         boxShadow: theme.shadow,
+        position: "relative",
+        zIndex: 200,
       }}
     >
       <div
@@ -286,7 +311,7 @@ export default function SharedCalendarPicker({
         </button>
         <button
           type="button"
-          onClick={() => onApply(formatDateText(selectedDate))}
+          onClick={() => onApply(formatDateIso(selectedDate))}
           style={pickerPrimaryButtonStyle(theme)}
         >
           OK

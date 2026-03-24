@@ -23,6 +23,8 @@ type Props = {
   p1Mins: number;
   p2Mins: number;
   qualityNotes: Array<string | BuilderNote>;
+  saveStateLabel?: string;
+  isSaving?: boolean;
 };
 
 export default function BuilderBottomHud({
@@ -40,33 +42,91 @@ export default function BuilderBottomHud({
   p1Mins,
   p2Mins,
   qualityNotes,
+  saveStateLabel,
+  isSaving = false,
 }: Props) {
+  const bottomOffset = showProgressPanel ? hudHeight + 14 : 14;
+  const showSaveState =
+    typeof saveStateLabel === "string" && saveStateLabel.trim().length > 0;
+
   return (
     <>
-      <button
-        type="button"
-        onClick={routerPushCompile}
+      <div
         style={{
           position: "absolute",
           right: 14,
-          bottom: showProgressPanel ? hudHeight + 14 : 14,
-          border: `1px solid ${theme.border}`,
-          background:
-            theme.pageBg === "#eef3f8"
-              ? "rgba(255,255,255,0.92)"
-              : "rgba(11,17,24,0.92)",
-          color: (theme as any).textMuted ?? theme.text,
-          borderRadius: 16,
-          padding: "10px 14px",
-          cursor: "pointer",
-          boxShadow: "0 10px 20px rgba(0,0,0,0.18)",
-          zIndex: 4,
-          ...UI_TEXT.buttonText,
+          bottom: bottomOffset,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 8,
+          zIndex: 10,
         }}
-        title="Compile assessment into printable pages"
       >
-        Compile →
-      </button>
+        {showSaveState ? (
+          <div
+            aria-live="polite"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 10px",
+              borderRadius: 999,
+              border: `1px solid ${theme.border}`,
+              background:
+                theme.pageBg === "#eef3f8"
+                  ? "rgba(255,255,255,0.88)"
+                  : "rgba(11,17,24,0.78)",
+              color: (theme as any).textMuted ?? theme.text,
+              boxShadow: "0 8px 18px rgba(0,0,0,0.14)",
+              pointerEvents: "none",
+              fontSize: 12,
+              fontWeight: 700,
+              lineHeight: 1,
+              backdropFilter: "blur(8px)",
+              WebkitBackdropFilter: "blur(8px)",
+            }}
+          >
+            <span
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: 999,
+                background: isSaving ? "#facc15" : "#4ade80",
+                boxShadow: isSaving
+                  ? "0 0 10px rgba(250,204,21,0.35)"
+                  : "0 0 10px rgba(74,222,128,0.35)",
+                animation: isSaving
+                  ? "builder-save-pulse 1s ease-in-out infinite"
+                  : "none",
+                flexShrink: 0,
+              }}
+            />
+            <span>{saveStateLabel}</span>
+          </div>
+        ) : null}
+
+        <button
+          type="button"
+          onClick={routerPushCompile}
+          style={{
+            border: `1px solid ${theme.border}`,
+            background:
+              theme.pageBg === "#eef3f8"
+                ? "rgba(255,255,255,0.92)"
+                : "rgba(11,17,24,0.92)",
+            color: (theme as any).textMuted ?? theme.text,
+            borderRadius: 16,
+            padding: "10px 14px",
+            cursor: "pointer",
+            boxShadow: "0 10px 20px rgba(0,0,0,0.18)",
+            ...UI_TEXT.buttonText,
+          }}
+          title="Compile assessment into printable pages"
+        >
+          Compile →
+        </button>
+      </div>
 
       {showProgressPanel ? (
         <div
@@ -141,6 +201,23 @@ export default function BuilderBottomHud({
       ) : (
         <div style={{ minHeight: 0, overflow: "hidden" }} />
       )}
+
+      <style jsx>{`
+        @keyframes builder-save-pulse {
+          0% {
+            transform: scale(1);
+            opacity: 0.9;
+          }
+          50% {
+            transform: scale(1.25);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0.9;
+          }
+        }
+      `}</style>
     </>
   );
 }

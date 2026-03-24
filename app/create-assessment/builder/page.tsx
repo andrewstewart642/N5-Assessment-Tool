@@ -186,6 +186,36 @@ function buildFilteredSkillsData(
   return Object.fromEntries(filteredEntries);
 }
 
+function buildClassCoverageSummary(args: {
+  classes: SchoolClass[];
+  selectedClassIds: string[];
+  useCompleteCourseCoverage: boolean;
+}): string {
+  const { classes, selectedClassIds, useCompleteCourseCoverage } = args;
+
+  if (useCompleteCourseCoverage) {
+    return "Complete course";
+  }
+
+  if (selectedClassIds.length === 0) {
+    return "";
+  }
+
+  const selectedClasses = classes.filter((item) =>
+    selectedClassIds.includes(item.id)
+  );
+
+  if (selectedClasses.length === 1) {
+    return selectedClasses[0].name;
+  }
+
+  if (selectedClasses.length === 2) {
+    return `${selectedClasses[0].name}, ${selectedClasses[1].name}`;
+  }
+
+  return `${selectedClasses.length} classes selected`;
+}
+
 export default function CreateAssessmentBuilderPage() {
   const router = useRouter();
 
@@ -235,6 +265,12 @@ export default function CreateAssessmentBuilderPage() {
   const [loadedSavedAssessment, setLoadedSavedAssessment] =
     useState<SavedAssessment | null>(null);
   const [hasLoadedSavedAssessment, setHasLoadedSavedAssessment] =
+    useState(false);
+
+  const [builderSelectedClassIds, setBuilderSelectedClassIds] = useState<string[]>(
+    []
+  );
+  const [builderUseCompleteCourseCoverage, setBuilderUseCompleteCourseCoverage] =
     useState(false);
 
   const [saveStateLabel, setSaveStateLabel] = useState("Saved");
@@ -499,10 +535,55 @@ export default function CreateAssessmentBuilderPage() {
       savedAssessment.builder.p2EndTime.trim().length > 0
     );
 
+    setBuilderSelectedClassIds(savedAssessment.setup.selectedClassIds);
+    setBuilderUseCompleteCourseCoverage(
+      savedAssessment.setup.useCompleteCourseCoverage
+    );
+
     setSaveStateLabel("Saved");
     setIsSaving(false);
     setHasLoadedSavedAssessment(true);
   }, []);
+
+  const builderLevelLabel = useMemo(() => {
+    if (!loadedSavedAssessment?.setup.levelId) return null;
+
+    return (
+      ASSESSMENT_LEVEL_OPTIONS.find(
+        (option) => option.id === loadedSavedAssessment.setup.levelId
+      )?.label ?? null
+    );
+  }, [loadedSavedAssessment]);
+
+  const builderAvailableClasses = useMemo(() => {
+    if (!loadedSavedAssessment?.setup.levelId) return [];
+
+    const expectedCourse = getCourseLabelForLevelId(
+      loadedSavedAssessment.setup.levelId
+    );
+
+    if (!expectedCourse) return [];
+
+    return savedClasses.filter(
+      (schoolClass) => schoolClass.course === expectedCourse
+    );
+  }, [loadedSavedAssessment, savedClasses]);
+
+  const computedClassSummary = useMemo(() => {
+    return buildClassCoverageSummary({
+      classes: builderAvailableClasses,
+      selectedClassIds: builderSelectedClassIds,
+      useCompleteCourseCoverage: builderUseCompleteCourseCoverage,
+    });
+  }, [
+    builderAvailableClasses,
+    builderSelectedClassIds,
+    builderUseCompleteCourseCoverage,
+  ]);
+
+  useEffect(() => {
+    setClassName(computedClassSummary);
+  }, [computedClassSummary]);
 
   useEffect(() => {
     if (!currentAssessmentId || !savedAssessmentRef.current || !hasLoadedSavedAssessment) {
@@ -518,10 +599,12 @@ export default function CreateAssessmentBuilderPage() {
           assessmentName.trim().length > 0
             ? assessmentName.trim()
             : "[Untitled file]",
-        className: className.trim(),
+        className: computedClassSummary,
         assessmentDate,
         includeCoverSheet,
         includeFormulaSheet,
+        selectedClassIds: builderSelectedClassIds,
+        useCompleteCourseCoverage: builderUseCompleteCourseCoverage,
       },
       builder: {
         standardFilter,
@@ -542,7 +625,7 @@ export default function CreateAssessmentBuilderPage() {
           assessmentName.trim().length > 0
             ? assessmentName.trim()
             : "[Untitled file]",
-        className: className.trim(),
+        className: computedClassSummary,
         assessmentDate,
         p1StartTime,
         p1EndTime,
@@ -591,7 +674,6 @@ export default function CreateAssessmentBuilderPage() {
     showCoverDateTime,
     showScottishCandidateNumberBox,
     assessmentName,
-    className,
     assessmentDate,
     p1StartTime,
     p1EndTime,
@@ -599,6 +681,9 @@ export default function CreateAssessmentBuilderPage() {
     p2StartTime,
     p2EndTime,
     p2DateCustom,
+    builderSelectedClassIds,
+    builderUseCompleteCourseCoverage,
+    computedClassSummary,
   ]);
 
   useEffect(() => {
@@ -621,7 +706,7 @@ export default function CreateAssessmentBuilderPage() {
       loadedSavedAssessment.setup.levelId
     );
 
-    const selectedClasses = loadedSavedAssessment.setup.selectedClassIds
+    const selectedClasses = builderSelectedClassIds
       .map((classId) => savedClasses.find((schoolClass) => schoolClass.id === classId))
       .filter((schoolClass): schoolClass is SchoolClass => schoolClass !== undefined);
 
@@ -630,7 +715,7 @@ export default function CreateAssessmentBuilderPage() {
     return selectedClasses.filter(
       (schoolClass) => schoolClass.course === expectedCourse
     );
-  }, [loadedSavedAssessment, savedClasses]);
+  }, [loadedSavedAssessment, savedClasses, builderSelectedClassIds]);
 
   const sharedCompletedSkillIds = useMemo(() => {
     return getSharedCompletedSkillIds(selectedClassesForCoverage);
@@ -641,11 +726,11 @@ export default function CreateAssessmentBuilderPage() {
       return skillsData as Record<string, Skill[]>;
     }
 
-    if (loadedSavedAssessment.setup.useCompleteCourseCoverage) {
+    if (builderUseCompleteCourseCoverage) {
       return skillsData as Record<string, Skill[]>;
     }
 
-    if (loadedSavedAssessment.setup.selectedClassIds.length === 0) {
+    if (builderSelectedClassIds.length === 0) {
       return skillsData as Record<string, Skill[]>;
     }
 
@@ -659,7 +744,13 @@ export default function CreateAssessmentBuilderPage() {
       skillsData as Record<string, Skill[]>,
       allowedSkillIds
     );
-  }, [loadedSavedAssessment, selectedClassesForCoverage, sharedCompletedSkillIds]);
+  }, [
+    loadedSavedAssessment,
+    selectedClassesForCoverage,
+    sharedCompletedSkillIds,
+    builderUseCompleteCourseCoverage,
+    builderSelectedClassIds,
+  ]);
 
   const totalSkillsCount = useMemo(() => {
     return Object.values(filteredSkillsData).reduce<number>(
@@ -880,6 +971,24 @@ export default function CreateAssessmentBuilderPage() {
     p2EndTime,
   });
 
+  function handleBuilderToggleClass(classId: string) {
+    setBuilderUseCompleteCourseCoverage(false);
+    setBuilderSelectedClassIds((current) =>
+      current.includes(classId)
+        ? current.filter((id) => id !== classId)
+        : [...current, classId]
+    );
+  }
+
+  function handleBuilderSelectCompleteCourseCoverage() {
+    setBuilderUseCompleteCourseCoverage(true);
+    setBuilderSelectedClassIds([]);
+  }
+
+  const routerPushCompile = useCallback(() => {
+    router.push("/compile-assessment");
+  }, [router]);
+
   return (
     <>
       <BuilderGlobalStyles theme={theme} />
@@ -974,8 +1083,6 @@ export default function CreateAssessmentBuilderPage() {
               theme={theme}
               assessmentName={assessmentName}
               setAssessmentName={setAssessmentName}
-              className={className}
-              setClassName={setClassName}
               assessmentDate={assessmentDate}
               setAssessmentDate={setAssessmentDate}
               builderCalendarOpen={builderCalendarOpen}
@@ -985,8 +1092,14 @@ export default function CreateAssessmentBuilderPage() {
               handleAssessmentNameBlur={handleAssessmentNameBlur}
               viewPaper={viewPaper}
               setViewPaper={setViewPaper}
-              saveStateLabel={saveStateLabel}
-              isSaving={isSaving}
+              classLevelLabel={builderLevelLabel}
+              availableClasses={builderAvailableClasses}
+              selectedClassIds={builderSelectedClassIds}
+              useCompleteCourseCoverage={builderUseCompleteCourseCoverage}
+              onToggleClass={handleBuilderToggleClass}
+              onSelectCompleteCourseCoverage={
+                handleBuilderSelectCompleteCourseCoverage
+              }
             />
 
             <BuilderPreviewPane
@@ -1024,7 +1137,7 @@ export default function CreateAssessmentBuilderPage() {
 
             <BuilderBottomHud
               theme={theme}
-              routerPushCompile={() => router.push("/compile-assessment")}
+              routerPushCompile={routerPushCompile}
               showProgressPanel={showProgressPanel}
               hudHeight={hudHeight}
               hudResizeStartRef={hudResizeStartRef}
@@ -1037,6 +1150,8 @@ export default function CreateAssessmentBuilderPage() {
               p1Mins={p1Mins}
               p2Mins={p2Mins}
               qualityNotes={mergedQualityNotes}
+              saveStateLabel={saveStateLabel}
+              isSaving={isSaving}
             />
           </section>
         </div>
