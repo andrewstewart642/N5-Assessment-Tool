@@ -9,6 +9,15 @@ import {
   getTheme,
   type AppearancePreference,
 } from "@/app/ui/AppTheme";
+import type { SchoolClass } from "@/app/my-classes/types/Classes";
+import LevelSelect from "./components/LevelSelect";
+import ClassCoverageSelect from "./components/ClassCoverageSelect";
+import {
+  ASSESSMENT_LEVEL_OPTIONS,
+  loadAssessmentClassCoverageBrief,
+  saveAssessmentClassCoverageBrief,
+  type AssessmentLevelId,
+} from "./setup/AssessmentClassCoverageStorage";
 import {
   saveAssessmentSetupBrief,
   type AssessmentType,
@@ -300,6 +309,35 @@ function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
+function loadAllClasses(): SchoolClass[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem("n5-my-classes");
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.filter((item): item is SchoolClass => {
+      if (!item || typeof item !== "object") return false;
+
+      const candidate = item as Partial<SchoolClass>;
+      return (
+        typeof candidate.id === "string" &&
+        typeof candidate.name === "string" &&
+        typeof candidate.course === "string" &&
+        typeof candidate.level === "string" &&
+        typeof candidate.teacher === "string" &&
+        typeof candidate.createdAt === "number" &&
+        Array.isArray(candidate.completedSkillIds)
+      );
+    });
+  } catch {
+    return [];
+  }
+}
+
 export default function CreateAssessmentSetupPage() {
   const router = useRouter();
 
@@ -325,8 +363,16 @@ export default function CreateAssessmentSetupPage() {
   const [timeTargetP2, setTimeTargetP2] = useState("");
 
   const [assessmentName, setAssessmentName] = useState("[Untitled file]");
-  const [className, setClassName] = useState("");
   const [assessmentDate, setAssessmentDate] = useState(todayIsoDate());
+
+  const [selectedLevelId, setSelectedLevelId] = useState<AssessmentLevelId | null>(
+    "N5_MATHS"
+  );
+  const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
+  const [useCompleteCourseCoverage, setUseCompleteCourseCoverage] =
+    useState(false);
+
+  const [allClasses, setAllClasses] = useState<SchoolClass[]>([]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -340,6 +386,15 @@ export default function CreateAssessmentSetupPage() {
     if (raw === "dark" || raw === "light" || raw === "system") {
       setAppearance(raw);
     }
+
+    const savedCoverageBrief = loadAssessmentClassCoverageBrief();
+    if (savedCoverageBrief) {
+      setSelectedLevelId(savedCoverageBrief.levelId ?? "N5_MATHS");
+      setSelectedClassIds(savedCoverageBrief.selectedClassIds);
+      setUseCompleteCourseCoverage(savedCoverageBrief.useCompleteCourseCoverage);
+    }
+
+    setAllClasses(loadAllClasses());
 
     if (typeof media.addEventListener === "function") {
       media.addEventListener("change", apply);
@@ -390,12 +445,34 @@ export default function CreateAssessmentSetupPage() {
     setMarksTargetP2("");
   }, [buildPriority, paperStructure]);
 
+  const themeLevel = useMemo(() => {
+    return (
+      ASSESSMENT_LEVEL_OPTIONS.find((option) => option.id === selectedLevelId) ?? null
+    );
+  }, [selectedLevelId]);
+
+  const levelClasses = useMemo(() => {
+    if (!themeLevel) return [];
+    return allClasses.filter(
+      (schoolClass) => schoolClass.course === themeLevel.classCourseLabel
+    );
+  }, [allClasses, themeLevel]);
+
+  useEffect(() => {
+    setSelectedClassIds((current) =>
+      current.filter((classId) =>
+        levelClasses.some((schoolClass) => schoolClass.id === classId)
+      )
+    );
+  }, [levelClasses]);
+
   const showPaperStructure = assessmentType !== null;
   const showBuildPriority = paperStructure !== null;
   const showContinue =
     assessmentType !== null &&
     paperStructure !== null &&
-    buildPriority !== null;
+    buildPriority !== null &&
+    selectedLevelId !== null;
 
   const parsedMarksP1 = toPositiveInt(marksTargetP1);
   const parsedMarksP2 = toPositiveInt(marksTargetP2);
@@ -455,15 +532,11 @@ export default function CreateAssessmentSetupPage() {
     const rows: string[] = [];
 
     if (paperStructure !== "P2_ONLY" && parsedTimeP1 !== null) {
-      rows.push(
-        `Paper 1 estimated marks: ${Math.floor(parsedTimeP1 / 1.5)}`
-      );
+      rows.push(`Paper 1 estimated marks: ${Math.floor(parsedTimeP1 / 1.5)}`);
     }
 
     if (paperStructure !== "P1_ONLY" && parsedTimeP2 !== null) {
-      rows.push(
-        `Paper 2 estimated marks: ${Math.floor(parsedTimeP2 / 1.8)}`
-      );
+      rows.push(`Paper 2 estimated marks: ${Math.floor(parsedTimeP2 / 1.8)}`);
     }
 
     return rows;
@@ -477,7 +550,13 @@ export default function CreateAssessmentSetupPage() {
   ]);
 
   function handleContinue() {
-    if (!assessmentType || !paperStructure || !buildPriority || !targetsValid) {
+    if (
+      !assessmentType ||
+      !paperStructure ||
+      !buildPriority ||
+      !targetsValid ||
+      !selectedLevelId
+    ) {
       return;
     }
 
@@ -495,9 +574,17 @@ export default function CreateAssessmentSetupPage() {
         assessmentName.trim().length > 0
           ? assessmentName.trim()
           : "[Untitled file]",
-      className: className.trim(),
+      className: "",
       assessmentDate: assessmentDate || todayIsoDate(),
       createdAt: Date.now(),
+    });
+
+    saveAssessmentClassCoverageBrief({
+      levelId: selectedLevelId,
+      selectedClassIds,
+      useCompleteCourseCoverage:
+        useCompleteCourseCoverage || selectedClassIds.length === 0,
+      savedAt: Date.now(),
     });
 
     router.push("/create-assessment/builder");
@@ -513,6 +600,20 @@ export default function CreateAssessmentSetupPage() {
     if (!assessmentName.trim().length) {
       setAssessmentName("[Untitled file]");
     }
+  }
+
+  function handleToggleClass(classId: string) {
+    setUseCompleteCourseCoverage(false);
+    setSelectedClassIds((current) =>
+      current.includes(classId)
+        ? current.filter((id) => id !== classId)
+        : [...current, classId]
+    );
+  }
+
+  function handleSelectCompleteCourseCoverage() {
+    setUseCompleteCourseCoverage(true);
+    setSelectedClassIds([]);
   }
 
   return (
@@ -591,8 +692,10 @@ export default function CreateAssessmentSetupPage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "minmax(0, 1.4fr) minmax(0, 1fr) 220px",
+              gridTemplateColumns:
+                "minmax(0, 1.2fr) 260px minmax(0, 1.15fr) 220px",
               gap: 14,
+              alignItems: "start",
             }}
           >
             <div onBlur={handleAssessmentNameBlur}>
@@ -604,11 +707,15 @@ export default function CreateAssessmentSetupPage() {
               />
             </div>
 
-            <TextField
-              label="Class"
-              value={className}
-              onChange={setClassName}
-              placeholder="e.g. 5A / N5 Set 2"
+            <LevelSelect value={selectedLevelId} onChange={setSelectedLevelId} />
+
+            <ClassCoverageSelect
+              levelLabel={themeLevel?.label ?? null}
+              classes={levelClasses}
+              selectedClassIds={selectedClassIds}
+              useCompleteCourseCoverage={useCompleteCourseCoverage}
+              onToggleClass={handleToggleClass}
+              onSelectCompleteCourseCoverage={handleSelectCompleteCourseCoverage}
             />
 
             <TextField
