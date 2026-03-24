@@ -1,4 +1,4 @@
-import type { SavedAssessment } from "./SavedAssessment";
+import type { SavedAssessment } from "../types/SavedAssessment";
 
 const SAVED_ASSESSMENTS_STORAGE_KEY = "n5-saved-assessments";
 const CURRENT_ASSESSMENT_ID_STORAGE_KEY = "n5-current-assessment-id";
@@ -21,6 +21,7 @@ function normaliseSavedAssessment(candidate: unknown): SavedAssessment | null {
     typeof item.status !== "string" ||
     typeof item.createdAt !== "number" ||
     typeof item.updatedAt !== "number" ||
+    typeof item.isPinned !== "boolean" ||
     !item.setup ||
     typeof item.setup !== "object" ||
     !item.builder ||
@@ -85,13 +86,17 @@ export function upsertSavedAssessment(assessment: SavedAssessment) {
 }
 
 export function createSavedAssessmentDraft(
-  input: Omit<SavedAssessment, "id" | "status" | "createdAt" | "updatedAt">
+  input: Omit<
+    SavedAssessment,
+    "id" | "status" | "createdAt" | "updatedAt" | "isPinned"
+  >
 ): SavedAssessment {
   const now = Date.now();
 
   const nextAssessment: SavedAssessment = {
     id: makeAssessmentId(),
     status: "DRAFT",
+    isPinned: false,
     createdAt: now,
     updatedAt: now,
     setup: input.setup,

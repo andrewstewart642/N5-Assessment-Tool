@@ -75,6 +75,7 @@ export type SavedAssessmentBuilder = {
 export type SavedAssessment = {
   id: string;
   status: SavedAssessmentStatus;
+  isPinned: boolean;
   createdAt: number;
   updatedAt: number;
   setup: SavedAssessmentSetup;

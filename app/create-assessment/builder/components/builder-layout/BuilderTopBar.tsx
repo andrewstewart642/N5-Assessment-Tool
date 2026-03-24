@@ -26,6 +26,8 @@ type Props = {
   handleAssessmentNameBlur: () => void;
   viewPaper: Paper;
   setViewPaper: React.Dispatch<React.SetStateAction<Paper>>;
+  saveStateLabel: string;
+  isSaving: boolean;
 };
 
 export default function BuilderTopBar({
@@ -43,6 +45,8 @@ export default function BuilderTopBar({
   handleAssessmentNameBlur,
   viewPaper,
   setViewPaper,
+  saveStateLabel,
+  isSaving,
 }: Props) {
   return (
     <div
@@ -185,12 +189,43 @@ export default function BuilderTopBar({
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 10,
+          gap: 12,
           justifySelf: "end",
           whiteSpace: "nowrap",
           transform: "translateY(1px)",
         }}
       >
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 8,
+            padding: "6px 10px",
+            borderRadius: 999,
+            border: "1px solid rgba(255,255,255,0.08)",
+            background: "rgba(255,255,255,0.03)",
+            color: "rgba(214,227,243,0.82)",
+            fontSize: 12,
+            fontFamily: UI_TYPO.family,
+            fontWeight: UI_TYPO.weightSemibold,
+          }}
+        >
+          <span
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 999,
+              background: isSaving ? "#facc15" : "#4ade80",
+              boxShadow: isSaving
+                ? "0 0 10px rgba(250,204,21,0.35)"
+                : "0 0 10px rgba(74,222,128,0.35)",
+              animation: isSaving ? "builder-save-pulse 1s ease-in-out infinite" : "none",
+              flexShrink: 0,
+            }}
+          />
+          <span>{saveStateLabel}</span>
+        </div>
+
         <div
           style={{
             color: "rgba(214,227,243,0.78)",
@@ -204,6 +239,23 @@ export default function BuilderTopBar({
 
         <ViewingToggle value={viewPaper} onChange={setViewPaper} />
       </div>
+
+      <style jsx>{`
+        @keyframes builder-save-pulse {
+          0% {
+            transform: scale(1);
+            opacity: 0.9;
+          }
+          50% {
+            transform: scale(1.25);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0.9;
+          }
+        }
+      `}</style>
     </div>
   );
 }

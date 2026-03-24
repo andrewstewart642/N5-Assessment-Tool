@@ -237,7 +237,12 @@ export default function CreateAssessmentBuilderPage() {
   const [hasLoadedSavedAssessment, setHasLoadedSavedAssessment] =
     useState(false);
 
+  const [saveStateLabel, setSaveStateLabel] = useState("Saved");
+  const [isSaving, setIsSaving] = useState(false);
+
   const savedAssessmentRef = useRef<SavedAssessment | null>(null);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasInitialSaveCycleCompletedRef = useRef(false);
 
   const previewPaneRef = useRef<HTMLDivElement | null>(null);
   const pageWrapperRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -494,6 +499,8 @@ export default function CreateAssessmentBuilderPage() {
       savedAssessment.builder.p2EndTime.trim().length > 0
     );
 
+    setSaveStateLabel("Saved");
+    setIsSaving(false);
     setHasLoadedSavedAssessment(true);
   }, []);
 
@@ -546,8 +553,26 @@ export default function CreateAssessmentBuilderPage() {
       },
     };
 
+    setIsSaving(true);
+    setSaveStateLabel("Saving...");
+
     upsertSavedAssessment(nextSavedAssessment);
     savedAssessmentRef.current = nextSavedAssessment;
+
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    if (hasInitialSaveCycleCompletedRef.current) {
+      saveTimeoutRef.current = setTimeout(() => {
+        setIsSaving(false);
+        setSaveStateLabel("Saved");
+      }, 350);
+    } else {
+      hasInitialSaveCycleCompletedRef.current = true;
+      setIsSaving(false);
+      setSaveStateLabel("Saved");
+    }
   }, [
     currentAssessmentId,
     hasLoadedSavedAssessment,
@@ -575,6 +600,14 @@ export default function CreateAssessmentBuilderPage() {
     p2EndTime,
     p2DateCustom,
   ]);
+
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const editDraftRef = useRef<EditDraftByPaper>({ P1: null, P2: null });
   useEffect(() => {
@@ -952,6 +985,8 @@ export default function CreateAssessmentBuilderPage() {
               handleAssessmentNameBlur={handleAssessmentNameBlur}
               viewPaper={viewPaper}
               setViewPaper={setViewPaper}
+              saveStateLabel={saveStateLabel}
+              isSaving={isSaving}
             />
 
             <BuilderPreviewPane
