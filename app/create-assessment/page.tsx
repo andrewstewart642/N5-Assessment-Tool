@@ -24,6 +24,10 @@ import {
   type BuildPriority,
   type PaperStructure,
 } from "./setup/AssessmentSetupStorage";
+import {
+  createSavedAssessmentDraft,
+  setCurrentSavedAssessmentId,
+} from "@/app/my-assessments/state/SavedAssessmentsStorage";
 
 type SetupCardProps = {
   title: string;
@@ -560,6 +564,32 @@ export default function CreateAssessmentSetupPage() {
       return;
     }
 
+    const now = Date.now();
+
+    const normalisedAssessmentName =
+      assessmentName.trim().length > 0
+        ? assessmentName.trim()
+        : "[Untitled file]";
+
+    const normalisedAssessmentDate = assessmentDate || todayIsoDate();
+
+    const normalisedUseCompleteCourseCoverage =
+      useCompleteCourseCoverage || selectedClassIds.length === 0;
+
+    const initialP1Target =
+      buildPriority === "MARKS"
+        ? parsedMarksP1 ?? 40
+        : parsedTimeP1 !== null
+          ? Math.max(1, Math.floor(parsedTimeP1 / 1.5))
+          : 40;
+
+    const initialP2Target =
+      buildPriority === "MARKS"
+        ? parsedMarksP2 ?? 50
+        : parsedTimeP2 !== null
+          ? Math.max(1, Math.floor(parsedTimeP2 / 1.8))
+          : 50;
+
     saveAssessmentSetupBrief({
       assessmentType,
       buildPriority,
@@ -570,23 +600,65 @@ export default function CreateAssessmentSetupPage() {
       marksTargetP2: buildPriority === "MARKS" ? parsedMarksP2 : null,
       timeTargetP1: buildPriority === "TIME" ? parsedTimeP1 : null,
       timeTargetP2: buildPriority === "TIME" ? parsedTimeP2 : null,
-      assessmentName:
-        assessmentName.trim().length > 0
-          ? assessmentName.trim()
-          : "[Untitled file]",
+      assessmentName: normalisedAssessmentName,
       className: "",
-      assessmentDate: assessmentDate || todayIsoDate(),
-      createdAt: Date.now(),
+      assessmentDate: normalisedAssessmentDate,
+      createdAt: now,
     });
 
     saveAssessmentClassCoverageBrief({
       levelId: selectedLevelId,
       selectedClassIds,
-      useCompleteCourseCoverage:
-        useCompleteCourseCoverage || selectedClassIds.length === 0,
-      savedAt: Date.now(),
+      useCompleteCourseCoverage: normalisedUseCompleteCourseCoverage,
+      savedAt: now,
     });
 
+    const savedAssessment = createSavedAssessmentDraft({
+      setup: {
+        assessmentType,
+        buildPriority,
+        paperStructure,
+        includeCoverSheet,
+        includeFormulaSheet,
+        marksTargetP1: buildPriority === "MARKS" ? parsedMarksP1 : null,
+        marksTargetP2: buildPriority === "MARKS" ? parsedMarksP2 : null,
+        timeTargetP1: buildPriority === "TIME" ? parsedTimeP1 : null,
+        timeTargetP2: buildPriority === "TIME" ? parsedTimeP2 : null,
+        assessmentName: normalisedAssessmentName,
+        className: "",
+        assessmentDate: normalisedAssessmentDate,
+        levelId: selectedLevelId,
+        selectedClassIds,
+        useCompleteCourseCoverage: normalisedUseCompleteCourseCoverage,
+      },
+      builder: {
+        standardFilter: "C+A",
+        thinkingTypeFilter: "ANY",
+        targetMarks: 2,
+        activePaper: paperStructure === "P2_ONLY" ? "P2" : "P1",
+        viewPaper: paperStructure === "P2_ONLY" ? "P2" : "P1",
+        p1Target: initialP1Target,
+        p2Target: initialP2Target,
+        questions: [],
+        draftByPaper: { P1: null, P2: null },
+        editDraftByPaper: { P1: null, P2: null },
+        includeCoverSheet,
+        includeFormulaSheet,
+        showCoverDateTime: false,
+        showScottishCandidateNumberBox: true,
+        assessmentName: normalisedAssessmentName,
+        className: "",
+        assessmentDate: normalisedAssessmentDate,
+        p1StartTime: "",
+        p1EndTime: "",
+        p2CoverDate: normalisedAssessmentDate,
+        p2StartTime: "",
+        p2EndTime: "",
+        p2DateCustom: false,
+      },
+    });
+
+    setCurrentSavedAssessmentId(savedAssessment.id);
     router.push("/create-assessment/builder");
   }
 

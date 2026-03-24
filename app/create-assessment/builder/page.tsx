@@ -66,6 +66,18 @@ import {
   type EditDraftByPaper,
 } from "./BuilderUtils";
 
+import {
+  ASSESSMENT_LEVEL_OPTIONS,
+  type AssessmentLevelId,
+} from "@/app/create-assessment/setup/AssessmentClassCoverageStorage";
+import type { CourseOption, SchoolClass } from "@/app/my-classes/types/Classes";
+import type { SavedAssessment } from "@/app/my-assessments/types/SavedAssessment";
+import {
+  getCurrentSavedAssessmentId,
+  loadSavedAssessmentById,
+  upsertSavedAssessment,
+} from "@/app/my-assessments/state/SavedAssessmentsStorage";
+
 const META_NAME_KEY = "n5-builder-meta-name";
 const META_CLASS_KEY = "n5-builder-meta-class";
 const META_ASSESSMENT_DATE_KEY = "n5-builder-meta-assessment-date";
@@ -79,6 +91,100 @@ const P2_START_TIME_KEY = "n5-builder-p2-start-time";
 const P2_END_TIME_KEY = "n5-builder-p2-end-time";
 
 const P2_DATE_CUSTOM_KEY = "n5-builder-p2-date-custom";
+
+const MY_CLASSES_STORAGE_KEY = "n5-my-classes";
+
+function getCourseLabelForLevelId(
+  levelId: AssessmentLevelId | null
+): CourseOption | null {
+  if (!levelId) return null;
+
+  const match = ASSESSMENT_LEVEL_OPTIONS.find((option) => option.id === levelId);
+  if (!match) return null;
+
+  return match.classCourseLabel as CourseOption;
+}
+
+function normaliseSavedClass(candidate: unknown): SchoolClass | null {
+  if (!candidate || typeof candidate !== "object") return null;
+
+  const item = candidate as Partial<SchoolClass>;
+
+  if (
+    typeof item.id !== "string" ||
+    typeof item.name !== "string" ||
+    typeof item.course !== "string" ||
+    typeof item.level !== "string" ||
+    typeof item.teacher !== "string" ||
+    typeof item.createdAt !== "number"
+  ) {
+    return null;
+  }
+
+  return {
+    id: item.id,
+    name: item.name,
+    course: item.course as CourseOption,
+    level: item.level,
+    teacher: item.teacher,
+    createdAt: item.createdAt,
+    updatedAt:
+      typeof item.updatedAt === "number" ? item.updatedAt : item.createdAt,
+    completedSkillIds: Array.isArray(item.completedSkillIds)
+      ? item.completedSkillIds.filter(
+          (skillId): skillId is string => typeof skillId === "string"
+        )
+      : [],
+  };
+}
+
+function loadSavedClasses(): SchoolClass[] {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const raw = window.localStorage.getItem(MY_CLASSES_STORAGE_KEY);
+    if (!raw) return [];
+
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map(normaliseSavedClass)
+      .filter((item): item is SchoolClass => item !== null);
+  } catch {
+    return [];
+  }
+}
+
+function getSharedCompletedSkillIds(selectedClasses: SchoolClass[]): string[] {
+  if (selectedClasses.length === 0) return [];
+
+  let sharedSkillIds = new Set(selectedClasses[0].completedSkillIds);
+
+  for (const schoolClass of selectedClasses.slice(1)) {
+    const classSkillIds = new Set(schoolClass.completedSkillIds);
+
+    sharedSkillIds = new Set(
+      [...sharedSkillIds].filter((skillId) => classSkillIds.has(skillId))
+    );
+  }
+
+  return [...sharedSkillIds];
+}
+
+function buildFilteredSkillsData(
+  allSkillsData: Record<string, Skill[]>,
+  allowedSkillIds: Set<string>
+): Record<string, Skill[]> {
+  const filteredEntries = Object.entries(allSkillsData)
+    .map(([categoryName, skills]) => {
+      const visibleSkills = skills.filter((skill) => allowedSkillIds.has(skill.id));
+      return [categoryName, visibleSkills] as const;
+    })
+    .filter(([, skills]) => skills.length > 0);
+
+  return Object.fromEntries(filteredEntries);
+}
 
 export default function CreateAssessmentBuilderPage() {
   const router = useRouter();
@@ -121,6 +227,17 @@ export default function CreateAssessmentBuilderPage() {
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>(
     {}
   );
+
+  const [savedClasses, setSavedClasses] = useState<SchoolClass[]>([]);
+  const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(
+    null
+  );
+  const [loadedSavedAssessment, setLoadedSavedAssessment] =
+    useState<SavedAssessment | null>(null);
+  const [hasLoadedSavedAssessment, setHasLoadedSavedAssessment] =
+    useState(false);
+
+  const savedAssessmentRef = useRef<SavedAssessment | null>(null);
 
   const previewPaneRef = useRef<HTMLDivElement | null>(null);
   const pageWrapperRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -316,10 +433,207 @@ export default function CreateAssessmentBuilderPage() {
     setMeasuredHeights,
   });
 
+  useEffect(() => {
+    setSavedClasses(loadSavedClasses());
+
+    const nextAssessmentId = getCurrentSavedAssessmentId();
+    setCurrentAssessmentId(nextAssessmentId);
+
+    if (!nextAssessmentId) {
+      setHasLoadedSavedAssessment(true);
+      return;
+    }
+
+    const savedAssessment = loadSavedAssessmentById(nextAssessmentId);
+    setLoadedSavedAssessment(savedAssessment);
+    savedAssessmentRef.current = savedAssessment;
+
+    if (!savedAssessment) {
+      setHasLoadedSavedAssessment(true);
+      return;
+    }
+
+    setCreatedAt(savedAssessment.createdAt);
+
+    setAssessmentName(savedAssessment.builder.assessmentName);
+    setClassName(savedAssessment.builder.className);
+    setAssessmentDate(savedAssessment.builder.assessmentDate);
+
+    setStandardFilter(savedAssessment.builder.standardFilter);
+    setThinkingTypeFilter(savedAssessment.builder.thinkingTypeFilter);
+    setTargetMarks(savedAssessment.builder.targetMarks);
+
+    setActivePaper(savedAssessment.builder.activePaper);
+    setViewPaper(savedAssessment.builder.viewPaper);
+
+    setP1Target(savedAssessment.builder.p1Target);
+    setP2Target(savedAssessment.builder.p2Target);
+
+    setQuestions(savedAssessment.builder.questions);
+    setDraftByPaper(savedAssessment.builder.draftByPaper);
+    setEditDraftByPaper(savedAssessment.builder.editDraftByPaper);
+
+    setIncludeCoverSheet(savedAssessment.builder.includeCoverSheet);
+    setIncludeFormulaSheet(savedAssessment.builder.includeFormulaSheet);
+    setShowCoverDateTime(savedAssessment.builder.showCoverDateTime);
+    setShowScottishCandidateNumberBox(
+      savedAssessment.builder.showScottishCandidateNumberBox
+    );
+
+    setP1StartTime(savedAssessment.builder.p1StartTime);
+    setP1EndTime(savedAssessment.builder.p1EndTime);
+    setP2CoverDate(savedAssessment.builder.p2CoverDate);
+    setP2StartTime(savedAssessment.builder.p2StartTime);
+    setP2EndTime(savedAssessment.builder.p2EndTime);
+    setP2DateCustom(savedAssessment.builder.p2DateCustom);
+
+    setP1EndTimeManuallyEdited(
+      savedAssessment.builder.p1EndTime.trim().length > 0
+    );
+    setP2EndTimeManuallyEdited(
+      savedAssessment.builder.p2EndTime.trim().length > 0
+    );
+
+    setHasLoadedSavedAssessment(true);
+  }, []);
+
+  useEffect(() => {
+    if (!currentAssessmentId || !savedAssessmentRef.current || !hasLoadedSavedAssessment) {
+      return;
+    }
+
+    const nextSavedAssessment: SavedAssessment = {
+      ...savedAssessmentRef.current,
+      updatedAt: Date.now(),
+      setup: {
+        ...savedAssessmentRef.current.setup,
+        assessmentName:
+          assessmentName.trim().length > 0
+            ? assessmentName.trim()
+            : "[Untitled file]",
+        className: className.trim(),
+        assessmentDate,
+        includeCoverSheet,
+        includeFormulaSheet,
+      },
+      builder: {
+        standardFilter,
+        thinkingTypeFilter,
+        targetMarks,
+        activePaper,
+        viewPaper,
+        p1Target,
+        p2Target,
+        questions,
+        draftByPaper,
+        editDraftByPaper,
+        includeCoverSheet,
+        includeFormulaSheet,
+        showCoverDateTime,
+        showScottishCandidateNumberBox,
+        assessmentName:
+          assessmentName.trim().length > 0
+            ? assessmentName.trim()
+            : "[Untitled file]",
+        className: className.trim(),
+        assessmentDate,
+        p1StartTime,
+        p1EndTime,
+        p2CoverDate,
+        p2StartTime,
+        p2EndTime,
+        p2DateCustom,
+      },
+    };
+
+    upsertSavedAssessment(nextSavedAssessment);
+    savedAssessmentRef.current = nextSavedAssessment;
+  }, [
+    currentAssessmentId,
+    hasLoadedSavedAssessment,
+    standardFilter,
+    thinkingTypeFilter,
+    targetMarks,
+    activePaper,
+    viewPaper,
+    p1Target,
+    p2Target,
+    questions,
+    draftByPaper,
+    editDraftByPaper,
+    includeCoverSheet,
+    includeFormulaSheet,
+    showCoverDateTime,
+    showScottishCandidateNumberBox,
+    assessmentName,
+    className,
+    assessmentDate,
+    p1StartTime,
+    p1EndTime,
+    p2CoverDate,
+    p2StartTime,
+    p2EndTime,
+    p2DateCustom,
+  ]);
+
   const editDraftRef = useRef<EditDraftByPaper>({ P1: null, P2: null });
   useEffect(() => {
     editDraftRef.current = editDraftByPaper;
   }, [editDraftByPaper]);
+
+  const selectedClassesForCoverage = useMemo(() => {
+    if (!loadedSavedAssessment) return [];
+
+    const expectedCourse = getCourseLabelForLevelId(
+      loadedSavedAssessment.setup.levelId
+    );
+
+    const selectedClasses = loadedSavedAssessment.setup.selectedClassIds
+      .map((classId) => savedClasses.find((schoolClass) => schoolClass.id === classId))
+      .filter((schoolClass): schoolClass is SchoolClass => schoolClass !== undefined);
+
+    if (!expectedCourse) return selectedClasses;
+
+    return selectedClasses.filter(
+      (schoolClass) => schoolClass.course === expectedCourse
+    );
+  }, [loadedSavedAssessment, savedClasses]);
+
+  const sharedCompletedSkillIds = useMemo(() => {
+    return getSharedCompletedSkillIds(selectedClassesForCoverage);
+  }, [selectedClassesForCoverage]);
+
+  const filteredSkillsData = useMemo<Record<string, Skill[]>>(() => {
+    if (!loadedSavedAssessment) {
+      return skillsData as Record<string, Skill[]>;
+    }
+
+    if (loadedSavedAssessment.setup.useCompleteCourseCoverage) {
+      return skillsData as Record<string, Skill[]>;
+    }
+
+    if (loadedSavedAssessment.setup.selectedClassIds.length === 0) {
+      return skillsData as Record<string, Skill[]>;
+    }
+
+    if (selectedClassesForCoverage.length === 0) {
+      return skillsData as Record<string, Skill[]>;
+    }
+
+    const allowedSkillIds = new Set(sharedCompletedSkillIds);
+
+    return buildFilteredSkillsData(
+      skillsData as Record<string, Skill[]>,
+      allowedSkillIds
+    );
+  }, [loadedSavedAssessment, selectedClassesForCoverage, sharedCompletedSkillIds]);
+
+  const totalSkillsCount = useMemo(() => {
+    return Object.values(filteredSkillsData).reduce<number>(
+      (acc, list) => acc + list.length,
+      0
+    );
+  }, [filteredSkillsData]);
 
   const restoreTreeForQuestion = useCallback(
     (question: Question) => {
@@ -357,7 +671,7 @@ export default function CreateAssessmentBuilderPage() {
       );
 
       setConceptIndex(skill.id, conceptIndex >= 0 ? conceptIndex : -1);
-      setDifficulty(skill.id, question.difficulty);
+      setDifficulty(question.skillId, question.difficulty);
     },
     [
       expandCategory,
@@ -400,13 +714,6 @@ export default function CreateAssessmentBuilderPage() {
     addQualityNote,
     restoreTreeForQuestion,
   });
-
-  const totalSkillsCount = useMemo(() => {
-    return Object.values(skillsData).reduce<number>(
-      (acc, list) => acc + (list as Skill[]).length,
-      0
-    );
-  }, []);
 
   const getConceptIndex = (skillId: string) => conceptIndexBySkill[skillId] ?? -1;
   const getDifficulty = (skillId: string) => difficultyBySkill[skillId] ?? 3;
@@ -567,7 +874,7 @@ export default function CreateAssessmentBuilderPage() {
           }}
         >
           <SkillsTree
-            skillsData={skillsData as any}
+            skillsData={filteredSkillsData}
             totalSkillsCount={totalSkillsCount}
             standardFilter={standardFilter}
             setStandardFilter={setStandardFilter}
