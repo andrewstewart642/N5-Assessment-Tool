@@ -1,19 +1,22 @@
 "use client";
 
+import type { AppTheme } from "@/ui/AppTheme";
+
 type Props = {
   onAddClass: () => void;
+  theme: AppTheme;
 };
 
-export default function Header({ onAddClass }: Props) {
+export default function Header({ onAddClass, theme }: Props) {
   return (
     <div
       style={{
         maxWidth: 1200,
         margin: "0 auto",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: `1px solid ${theme.borderSubtle}`,
         borderRadius: 22,
         padding: 24,
-        background: "rgba(255,255,255,0.03)",
+        background: theme.cardBg,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -28,7 +31,7 @@ export default function Header({ onAddClass }: Props) {
             fontSize: 30,
             lineHeight: 1.1,
             fontWeight: 700,
-            color: "#e5eef8",
+            color: theme.textPrimary,
           }}
         >
           My Classes
@@ -37,7 +40,7 @@ export default function Header({ onAddClass }: Props) {
         <p
           style={{
             margin: "8px 0 0 0",
-            color: "rgba(229,238,248,0.72)",
+            color: theme.textSecondary,
             fontSize: 15,
             lineHeight: 1.45,
           }}
@@ -50,16 +53,16 @@ export default function Header({ onAddClass }: Props) {
         type="button"
         onClick={onAddClass}
         style={{
-          border: "1px solid rgba(255,255,255,0.12)",
-          background: "rgba(255,255,255,0.06)",
-          color: "#e5eef8",
+          border: `1px solid ${theme.borderStandard}`,
+          background: theme.controlBg,
+          color: theme.textPrimary,
           borderRadius: 14,
           padding: "11px 16px",
           cursor: "pointer",
           fontSize: 14,
           fontWeight: 600,
           lineHeight: 1,
-          boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+          boxShadow: theme.shadow,
         }}
       >
         + Add Class

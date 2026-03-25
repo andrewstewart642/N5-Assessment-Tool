@@ -3,21 +3,23 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { SchoolClass } from "../types/Classes";
+import type { AppTheme } from "@/ui/AppTheme";
 
 type Props = {
   schoolClass: SchoolClass;
+  theme: AppTheme;
 };
 
-function getCourseAccent(course: SchoolClass["course"]) {
-  if (course === "National 5 Maths") return "rgba(96,165,250,0.95)";
-  if (course === "National 5 Applications") return "rgba(52,211,153,0.95)";
-  return "rgba(196,181,253,0.95)";
+function getCourseAccent(course: SchoolClass["course"], theme: AppTheme) {
+  if (course === "National 5 Maths") return theme.skillNumerical;
+  if (course === "National 5 Applications") return theme.skillGeometric;
+  return theme.skillAlgebraic;
 }
 
-export default function ClassTile({ schoolClass }: Props) {
+export default function ClassTile({ schoolClass, theme }: Props) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const accent = getCourseAccent(schoolClass.course);
+  const accent = getCourseAccent(schoolClass.course, theme);
   const metaParts = [schoolClass.level, schoolClass.teacher].filter(Boolean);
 
   return (
@@ -29,26 +31,23 @@ export default function ClassTile({ schoolClass }: Props) {
         textDecoration: "none",
         color: "inherit",
         display: "block",
-        transform: isHovered ? "translateY(-3px) scale(1.012)" : "translateY(0) scale(1)",
+        transform: isHovered
+          ? "translateY(-3px) scale(1.012)"
+          : "translateY(0) scale(1)",
         transition:
           "transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease",
       }}
     >
       <div
         style={{
-          position: "relative",
           minWidth: 0,
           border: `1px solid ${
-            isHovered ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.08)"
+            isHovered ? theme.borderStrong : theme.borderSubtle
           }`,
           borderRadius: 20,
-          background: isHovered
-            ? "rgba(255,255,255,0.055)"
-            : "rgba(255,255,255,0.035)",
+          background: isHovered ? theme.cardBgHover : theme.cardBg,
           padding: 18,
-          boxShadow: isHovered
-            ? "0 18px 36px rgba(0,0,0,0.24)"
-            : "0 14px 30px rgba(0,0,0,0.16)",
+          boxShadow: isHovered ? theme.shadowStrong : theme.shadow,
           display: "grid",
           gap: 14,
           minHeight: 176,
@@ -56,14 +55,11 @@ export default function ClassTile({ schoolClass }: Props) {
       >
         <div
           style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 4,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
+            width: 72,
+            height: 10,
+            borderRadius: 999,
             background: accent,
+            boxShadow: isHovered ? `0 0 0 1px ${theme.borderSubtle}` : "none",
           }}
         />
 
@@ -73,8 +69,7 @@ export default function ClassTile({ schoolClass }: Props) {
               fontSize: 22,
               lineHeight: 1.15,
               fontWeight: 700,
-              color: "#e5eef8",
-              paddingTop: 4,
+              color: theme.textPrimary,
             }}
           >
             {schoolClass.name}
@@ -84,7 +79,7 @@ export default function ClassTile({ schoolClass }: Props) {
             style={{
               fontSize: 14,
               lineHeight: 1.35,
-              color: "rgba(229,238,248,0.76)",
+              color: theme.textSecondary,
             }}
           >
             {schoolClass.course}
@@ -96,7 +91,7 @@ export default function ClassTile({ schoolClass }: Props) {
             minHeight: 20,
             fontSize: 13,
             lineHeight: 1.35,
-            color: "rgba(229,238,248,0.62)",
+            color: theme.textMuted,
           }}
         >
           {metaParts.length ? metaParts.join(" • ") : "No extra details yet"}
@@ -106,11 +101,11 @@ export default function ClassTile({ schoolClass }: Props) {
           style={{
             marginTop: "auto",
             fontSize: 13,
-            fontWeight: 600,
+            fontWeight: 700,
             lineHeight: 1.2,
-            color: isHovered
-              ? "rgba(229,238,248,0.92)"
-              : "rgba(229,238,248,0.56)",
+            color: accent,
+            opacity: isHovered ? 1 : 0.88,
+            transition: "opacity 160ms ease",
           }}
         >
           Open class →

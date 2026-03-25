@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import type { AppTheme } from "@/ui/AppTheme";
 import {
   getConceptBodyLines,
   getCoverageSkillById,
@@ -9,9 +10,13 @@ import {
 
 type Props = {
   selectedSkillId: string | null;
+  theme: AppTheme;
 };
 
-export default function CoverageDetails({ selectedSkillId }: Props) {
+export default function CoverageDetails({
+  selectedSkillId,
+  theme,
+}: Props) {
   const [expandedConceptCode, setExpandedConceptCode] = useState<string | null>(null);
 
   const selectedEntry = useMemo(
@@ -23,9 +28,9 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
     return (
       <div
         style={{
-          border: "1px solid rgba(255,255,255,0.08)",
+          border: `1px solid ${theme.borderSubtle}`,
           borderRadius: 22,
-          background: "rgba(255,255,255,0.03)",
+          background: theme.cardBg,
           padding: 24,
           minHeight: 320,
         }}
@@ -40,9 +45,9 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
   return (
     <div
       style={{
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: `1px solid ${theme.borderSubtle}`,
         borderRadius: 22,
-        background: "rgba(255,255,255,0.03)",
+        background: theme.cardBg,
         padding: 24,
         display: "grid",
         gap: 18,
@@ -55,7 +60,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
           display: "grid",
           gap: 8,
           paddingBottom: 16,
-          borderBottom: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: `1px solid ${theme.borderSubtle}`,
         }}
       >
         <div
@@ -63,7 +68,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
             fontSize: 24,
             fontWeight: 700,
             lineHeight: 1.15,
-            color: "#e5eef8",
+            color: theme.textPrimary,
           }}
         >
           Skill Details
@@ -74,7 +79,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
             fontSize: 18,
             fontWeight: 600,
             lineHeight: 1.35,
-            color: "rgba(229,238,248,0.90)",
+            color: theme.textSecondary,
           }}
         >
           {skillTitle}
@@ -87,7 +92,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
             fontSize: 15,
             fontWeight: 700,
             lineHeight: 1.2,
-            color: "rgba(229,238,248,0.84)",
+            color: theme.textSecondary,
           }}
         >
           Course Spec Guidance
@@ -118,9 +123,9 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
                 <div
                   key={`${code}-${index}`}
                   style={{
-                    border: "1px solid rgba(255,255,255,0.06)",
+                    border: `1px solid ${theme.borderSubtle}`,
                     borderRadius: 16,
-                    background: "rgba(255,255,255,0.025)",
+                    background: theme.bgSurfaceAlt,
                     overflow: "hidden",
                   }}
                 >
@@ -162,7 +167,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
                             fontSize: 15,
                             fontWeight: 700,
                             lineHeight: 1.2,
-                            color: "#e5eef8",
+                            color: theme.textPrimary,
                           }}
                         >
                           {code}
@@ -173,7 +178,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
                             fontSize: 15,
                             fontWeight: 600,
                             lineHeight: 1.35,
-                            color: "rgba(229,238,248,0.88)",
+                            color: theme.textSecondary,
                           }}
                         >
                           {title}
@@ -185,7 +190,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
                           fontSize: 15,
                           fontWeight: 700,
                           lineHeight: 1,
-                          color: "rgba(229,238,248,0.62)",
+                          color: theme.textMuted,
                           transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
                           transition: "transform 140ms ease",
                         }}
@@ -198,7 +203,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
                   {isExpanded ? (
                     <div
                       style={{
-                        borderTop: "1px solid rgba(255,255,255,0.06)",
+                        borderTop: `1px solid ${theme.borderSubtle}`,
                         padding: "14px 16px 16px 16px",
                         display: "grid",
                         gap: 10,
@@ -209,7 +214,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
                           fontSize: 13,
                           fontWeight: 700,
                           lineHeight: 1.2,
-                          color: "rgba(229,238,248,0.78)",
+                          color: theme.textSecondary,
                         }}
                       >
                         Example / expected forms
@@ -219,13 +224,13 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
                         <div
                           key={`${code}-line-${lineIndex}`}
                           style={{
-                            border: "1px solid rgba(255,255,255,0.06)",
+                            border: `1px solid ${theme.borderSubtle}`,
                             borderRadius: 12,
                             padding: "11px 12px",
-                            background: "rgba(255,255,255,0.02)",
+                            background: theme.controlBg,
                             fontSize: 13,
                             lineHeight: 1.45,
-                            color: "rgba(229,238,248,0.72)",
+                            color: theme.textSecondary,
                           }}
                         >
                           {line}
@@ -242,7 +247,7 @@ export default function CoverageDetails({ selectedSkillId }: Props) {
             style={{
               fontSize: 14,
               lineHeight: 1.45,
-              color: "rgba(229,238,248,0.62)",
+              color: theme.textMuted,
             }}
           >
             No extra concept detail is available for this skill yet.

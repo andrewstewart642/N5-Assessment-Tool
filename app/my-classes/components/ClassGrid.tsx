@@ -6,12 +6,14 @@ import {
   type CourseOption,
   type SchoolClass,
 } from "../types/Classes";
+import type { AppTheme } from "@/ui/AppTheme";
 
 type Props = {
   classesByCourse: Map<CourseOption, SchoolClass[]>;
+  theme: AppTheme;
 };
 
-export default function ClassGrid({ classesByCourse }: Props) {
+export default function ClassGrid({ classesByCourse, theme }: Props) {
   const totalClasses = COURSE_OPTIONS.reduce((count, course) => {
     return count + (classesByCourse.get(course)?.length ?? 0);
   }, 0);
@@ -22,11 +24,11 @@ export default function ClassGrid({ classesByCourse }: Props) {
         style={{
           maxWidth: 1200,
           margin: "24px auto 0 auto",
-          border: "1px solid rgba(255,255,255,0.08)",
+          border: `1px solid ${theme.borderSubtle}`,
           borderRadius: 22,
           padding: 28,
-          background: "rgba(255,255,255,0.03)",
-          color: "#e5eef8",
+          background: theme.cardBg,
+          color: theme.textPrimary,
         }}
       >
         <div
@@ -44,7 +46,7 @@ export default function ClassGrid({ classesByCourse }: Props) {
           style={{
             fontSize: 15,
             lineHeight: 1.45,
-            color: "rgba(229,238,248,0.72)",
+            color: theme.textSecondary,
           }}
         >
           Add your first class to start organising courses and coverage.
@@ -88,7 +90,7 @@ export default function ClassGrid({ classesByCourse }: Props) {
                   fontSize: 22,
                   fontWeight: 700,
                   lineHeight: 1.2,
-                  color: "#e5eef8",
+                  color: theme.textPrimary,
                 }}
               >
                 {course}
@@ -98,7 +100,7 @@ export default function ClassGrid({ classesByCourse }: Props) {
                 style={{
                   fontSize: 13,
                   lineHeight: 1.35,
-                  color: "rgba(229,238,248,0.58)",
+                  color: theme.textMuted,
                 }}
               >
                 {courseClasses.length} class{courseClasses.length === 1 ? "" : "es"}
@@ -113,7 +115,11 @@ export default function ClassGrid({ classesByCourse }: Props) {
               }}
             >
               {courseClasses.map((schoolClass) => (
-                <ClassTile key={schoolClass.id} schoolClass={schoolClass} />
+                <ClassTile
+                  key={schoolClass.id}
+                  schoolClass={schoolClass}
+                  theme={theme}
+                />
               ))}
             </div>
           </section>

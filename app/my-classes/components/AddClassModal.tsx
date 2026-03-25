@@ -7,6 +7,7 @@ import {
   type CourseOption,
   type LevelOption,
 } from "../types/Classes";
+import type { AppTheme } from "@/ui/AppTheme";
 
 type Props = {
   open: boolean;
@@ -20,6 +21,7 @@ type Props = {
   setTeacher: (value: string) => void;
   onClose: () => void;
   onCreate: () => void;
+  theme: AppTheme;
 };
 
 export default function AddClassModal({
@@ -34,6 +36,7 @@ export default function AddClassModal({
   setTeacher,
   onClose,
   onCreate,
+  theme,
 }: Props) {
   useEffect(() => {
     if (!open) return;
@@ -58,14 +61,14 @@ export default function AddClassModal({
     fontSize: 14,
     fontWeight: 600,
     lineHeight: 1.3,
-    color: "#e5eef8",
+    color: theme.textPrimary,
   };
 
   const inputStyle: React.CSSProperties = {
     width: "100%",
-    border: "1px solid rgba(255,255,255,0.10)",
-    background: "rgba(255,255,255,0.04)",
-    color: "#e5eef8",
+    border: `1px solid ${theme.inputBorder}`,
+    background: theme.inputBg,
+    color: theme.inputText,
     borderRadius: 14,
     padding: "12px 14px",
     fontSize: 14,
@@ -80,7 +83,7 @@ export default function AddClassModal({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(5,8,12,0.62)",
+        background: theme.modalOverlay,
         backdropFilter: "blur(6px)",
         display: "grid",
         placeItems: "center",
@@ -93,10 +96,10 @@ export default function AddClassModal({
         style={{
           width: "100%",
           maxWidth: 520,
-          border: "1px solid rgba(255,255,255,0.10)",
+          border: `1px solid ${theme.borderStandard}`,
           borderRadius: 24,
-          background: "#111821",
-          boxShadow: "0 28px 60px rgba(0,0,0,0.34)",
+          background: theme.bgElevated,
+          boxShadow: theme.shadowStrong,
           padding: 24,
           display: "grid",
           gap: 18,
@@ -108,7 +111,7 @@ export default function AddClassModal({
               fontSize: 28,
               fontWeight: 700,
               lineHeight: 1.1,
-              color: "#e5eef8",
+              color: theme.textPrimary,
             }}
           >
             Add Class
@@ -138,7 +141,7 @@ export default function AddClassModal({
                 <option
                   key={option}
                   value={option}
-                  style={{ background: "#111821", color: "#e5eef8" }}
+                  style={{ background: theme.bgElevated, color: theme.textPrimary }}
                 >
                   {option}
                 </option>
@@ -157,7 +160,7 @@ export default function AddClassModal({
                 <option
                   key={option || "blank"}
                   value={option}
-                  style={{ background: "#111821", color: "#e5eef8" }}
+                  style={{ background: theme.bgElevated, color: theme.textPrimary }}
                 >
                   {option || "Select level"}
                 </option>
@@ -188,9 +191,9 @@ export default function AddClassModal({
             type="button"
             onClick={onClose}
             style={{
-              border: "1px solid rgba(255,255,255,0.10)",
-              background: "rgba(255,255,255,0.04)",
-              color: "rgba(229,238,248,0.86)",
+              border: `1px solid ${theme.borderStandard}`,
+              background: theme.controlBg,
+              color: theme.textPrimary,
               borderRadius: 14,
               padding: "11px 14px",
               cursor: "pointer",
@@ -207,11 +210,9 @@ export default function AddClassModal({
             onClick={onCreate}
             disabled={!canCreate}
             style={{
-              border: "1px solid rgba(255,255,255,0.10)",
-              background: canCreate
-                ? "rgba(96,165,250,0.22)"
-                : "rgba(255,255,255,0.05)",
-              color: canCreate ? "#e5eef8" : "rgba(229,238,248,0.42)",
+              border: `1px solid ${canCreate ? theme.accentPrimary : theme.borderStandard}`,
+              background: canCreate ? theme.accentSoft : theme.controlBg,
+              color: canCreate ? theme.textPrimary : theme.textMuted,
               borderRadius: 14,
               padding: "11px 14px",
               cursor: canCreate ? "pointer" : "not-allowed",

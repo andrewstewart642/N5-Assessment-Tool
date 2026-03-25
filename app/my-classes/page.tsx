@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Header from "./components/Header";
 import ClassGrid from "./components/ClassGrid";
@@ -8,7 +8,52 @@ import AddClassModal from "./components/AddClassModal";
 import { UseClasses } from "./state/UseClasses";
 import type { CourseOption, LevelOption } from "./types/Classes";
 
+import { getTheme } from "@/ui/AppTheme";
+import {
+  getSystemPrefersDark,
+  isThemeModePreference,
+  resolveThemeMode,
+  THEME_MODE_STORAGE_KEY,
+  type ResolvedThemeMode,
+  type ThemeModePreference,
+} from "@/ui/ThemeMode";
+
 export default function MyClassesPage() {
+  const [resolvedMode, setResolvedMode] = useState<ResolvedThemeMode>("dark");
+
+  useEffect(() => {
+    function readResolvedMode(): ResolvedThemeMode {
+      if (typeof window === "undefined") return "dark";
+
+      const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
+      const preference: ThemeModePreference = isThemeModePreference(stored)
+        ? stored
+        : "system";
+
+      return resolveThemeMode(preference, getSystemPrefersDark());
+    }
+
+    setResolvedMode(readResolvedMode());
+
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function handleChange() {
+      setResolvedMode(readResolvedMode());
+    }
+
+    window.addEventListener("storage", handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      window.removeEventListener("storage", handleChange);
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  const theme = getTheme(resolvedMode);
+
   const { classesByCourse, hasLoaded, addClass } = UseClasses();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -46,27 +91,27 @@ export default function MyClassesPage() {
     <main
       style={{
         minHeight: "100%",
-        background: "#0b0f14",
-        color: "#e5eef8",
+        background: theme.bgPrimary,
+        color: theme.textPrimary,
         padding: 24,
         boxSizing: "border-box",
         fontFamily: "var(--app-ui-font-family)",
       }}
     >
-      <Header onAddClass={openAddModal} />
+      <Header onAddClass={openAddModal} theme={theme} />
 
       {hasLoaded ? (
-        <ClassGrid classesByCourse={classesByCourse} />
+        <ClassGrid classesByCourse={classesByCourse} theme={theme} />
       ) : (
         <div
           style={{
             maxWidth: 1200,
             margin: "24px auto 0 auto",
-            border: "1px solid rgba(255,255,255,0.08)",
+            border: `1px solid ${theme.borderSubtle}`,
             borderRadius: 22,
             padding: 24,
-            background: "rgba(255,255,255,0.03)",
-            color: "rgba(229,238,248,0.72)",
+            background: theme.cardBg,
+            color: theme.textMuted,
             fontSize: 15,
             lineHeight: 1.45,
           }}
@@ -87,6 +132,7 @@ export default function MyClassesPage() {
         setTeacher={setTeacher}
         onClose={closeAddModal}
         onCreate={handleCreateClass}
+        theme={theme}
       />
     </main>
   );

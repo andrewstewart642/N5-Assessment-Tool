@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { skillsData } from "@/course-data/N5-Skills";
+import type { AppTheme } from "@/ui/AppTheme";
 import {
   getCoverageSkillById,
   getSkillCode,
@@ -15,18 +16,19 @@ type Props = {
   onSelectSkillId: (skillId: string | null) => void;
   completedSkillIds: string[];
   onToggleSkillId: (skillId: string) => void;
+  theme: AppTheme;
 };
 
-function getCategoryAccent(categoryName: string): string {
+function getCategoryAccent(categoryName: string, theme: AppTheme): string {
   const name = categoryName.toLowerCase();
 
-  if (name.includes("numerical")) return "rgba(96,165,250,0.92)";
-  if (name.includes("algebra")) return "rgba(196,181,253,0.92)";
-  if (name.includes("geometric")) return "rgba(74,222,128,0.92)";
-  if (name.includes("trigon")) return "rgba(250,204,21,0.92)";
-  if (name.includes("stat")) return "rgba(244,114,182,0.92)";
+  if (name.includes("numerical")) return theme.skillNumerical;
+  if (name.includes("algebra")) return theme.skillAlgebraic;
+  if (name.includes("geometric")) return theme.skillGeometric;
+  if (name.includes("trigon")) return theme.skillTrigonometric;
+  if (name.includes("stat")) return theme.skillStatistical;
 
-  return "rgba(148,163,184,0.92)";
+  return theme.textMuted;
 }
 
 export default function CoverageTree({
@@ -34,6 +36,7 @@ export default function CoverageTree({
   onSelectSkillId,
   completedSkillIds,
   onToggleSkillId,
+  theme,
 }: Props) {
   const categoryEntries = useMemo(() => {
     return Object.entries(skillsData) as Array<[string, SkillLike[]]>;
@@ -68,7 +71,7 @@ export default function CoverageTree({
     >
       {categoryEntries.map(([categoryName, categorySkills]) => {
         const isCollapsed = collapsedByCategory[categoryName] ?? false;
-        const accent = getCategoryAccent(categoryName);
+        const accent = getCategoryAccent(categoryName, theme);
         const categoryCompletedCount = categorySkills.filter((skill) =>
           completedSkillIds.includes(skill.id)
         ).length;
@@ -77,9 +80,9 @@ export default function CoverageTree({
           <section
             key={categoryName}
             style={{
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: `1px solid ${theme.borderSubtle}`,
               borderRadius: 18,
-              background: "rgba(255,255,255,0.03)",
+              background: theme.cardBg,
               overflow: "hidden",
               position: "relative",
             }}
@@ -122,7 +125,7 @@ export default function CoverageTree({
                     fontSize: 18,
                     fontWeight: 700,
                     lineHeight: 1.2,
-                    color: "#e5eef8",
+                    color: theme.textPrimary,
                   }}
                 >
                   {isCollapsed ? "▸" : "▾"} {categoryName}
@@ -133,7 +136,7 @@ export default function CoverageTree({
                     fontSize: 14,
                     fontWeight: 700,
                     lineHeight: 1.2,
-                    color: "rgba(229,238,248,0.82)",
+                    color: theme.textSecondary,
                   }}
                 >
                   {categoryCompletedCount} / {categorySkills.length}
@@ -144,10 +147,10 @@ export default function CoverageTree({
             {!isCollapsed ? (
               <div
                 style={{
-                  borderTop: "1px solid rgba(255,255,255,0.06)",
+                  borderTop: `1px solid ${theme.borderSubtle}`,
                 }}
               >
-                {categorySkills.map((skill) => {
+                {categorySkills.map((skill, index) => {
                   const isSelected = selectedSkillId === skill.id;
                   const isCompleted = completedSkillIds.includes(skill.id);
                   const skillCode = getSkillCode(skill);
@@ -159,20 +162,19 @@ export default function CoverageTree({
                       key={skill.id}
                       type="button"
                       title={tooltipSummary}
-                      onClick={() =>
-                        onSelectSkillId(isSelected ? null : skill.id)
-                      }
+                      onClick={() => onSelectSkillId(isSelected ? null : skill.id)}
                       style={{
                         width: "100%",
                         border: "none",
-                        borderTop: "1px solid rgba(255,255,255,0.05)",
+                        borderTop:
+                          index === 0 ? "none" : `1px solid ${theme.borderSubtle}`,
                         background: isCompleted
                           ? isSelected
-                            ? "rgba(74,222,128,0.18)"
-                            : "rgba(74,222,128,0.11)"
+                            ? `${theme.success}2e`
+                            : `${theme.success}1c`
                           : isSelected
-                          ? "rgba(255,255,255,0.08)"
-                          : "transparent",
+                            ? theme.controlBgHover
+                            : "transparent",
                         padding: "0 18px",
                         textAlign: "left",
                         cursor: "pointer",
@@ -206,7 +208,7 @@ export default function CoverageTree({
                               width: 20,
                               height: 20,
                               cursor: "pointer",
-                              accentColor: "#60a5fa",
+                              accentColor: accent,
                             }}
                           />
                         </div>
@@ -227,9 +229,7 @@ export default function CoverageTree({
                                   fontSize: 14,
                                   fontWeight: 700,
                                   lineHeight: 1.2,
-                                  color: isCompleted
-                                    ? "rgba(220,252,231,0.92)"
-                                    : "rgba(229,238,248,0.78)",
+                                  color: isCompleted ? theme.success : theme.textSecondary,
                                 }}
                               >
                                 {skillCode}
@@ -242,10 +242,10 @@ export default function CoverageTree({
                                 fontWeight: 600,
                                 lineHeight: 1.35,
                                 color: isCompleted
-                                  ? "rgba(220,252,231,0.96)"
+                                  ? theme.textPrimary
                                   : isSelected
-                                  ? "#f4f8fc"
-                                  : "rgba(229,238,248,0.90)",
+                                    ? theme.textPrimary
+                                    : theme.textPrimary,
                               }}
                             >
                               {skillTitle}
@@ -256,9 +256,7 @@ export default function CoverageTree({
                             style={{
                               fontSize: 13,
                               lineHeight: 1.4,
-                              color: isCompleted
-                                ? "rgba(220,252,231,0.74)"
-                                : "rgba(229,238,248,0.56)",
+                              color: isCompleted ? theme.textSecondary : theme.textMuted,
                             }}
                           >
                             {isCompleted ? "Completed" : "Not completed yet"}
@@ -270,7 +268,7 @@ export default function CoverageTree({
                             fontSize: 14,
                             fontWeight: 700,
                             lineHeight: 1,
-                            color: "rgba(229,238,248,0.56)",
+                            color: theme.textMuted,
                           }}
                         >
                           ▸

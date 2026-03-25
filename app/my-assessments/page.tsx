@@ -12,6 +12,15 @@ import {
   upsertSavedAssessment,
 } from "./state/SavedAssessmentsStorage";
 import { ASSESSMENT_LEVEL_OPTIONS } from "@/app/create-assessment/setup/AssessmentClassCoverageStorage";
+import { getTheme } from "@/ui/AppTheme";
+import {
+  getSystemPrefersDark,
+  isThemeModePreference,
+  resolveThemeMode,
+  THEME_MODE_STORAGE_KEY,
+  type ResolvedThemeMode,
+  type ThemeModePreference,
+} from "@/ui/ThemeMode";
 
 function formatDateTime(timestamp: number): string {
   const date = new Date(timestamp);
@@ -132,8 +141,10 @@ function sortSavedAssessmentsForDisplay(
 
 function MarksSummary({
   savedAssessment,
+  theme,
 }: {
   savedAssessment: SavedAssessment;
+  theme: ReturnType<typeof getTheme>;
 }) {
   const assignedP1 = getAssignedMarksForPaper(savedAssessment, "P1");
   const assignedP2 = getAssignedMarksForPaper(savedAssessment, "P2");
@@ -150,8 +161,8 @@ function MarksSummary({
         gap: 8,
         padding: "12px 14px",
         borderRadius: 14,
-        background: "rgba(255,255,255,0.035)",
-        border: "1px solid rgba(255,255,255,0.06)",
+        background: theme.bgSurfaceAlt,
+        border: `1px solid ${theme.borderSubtle}`,
       }}
     >
       <div
@@ -160,7 +171,7 @@ function MarksSummary({
           fontWeight: 700,
           letterSpacing: 0.25,
           textTransform: "uppercase",
-          color: "rgba(229,238,248,0.52)",
+          color: theme.textMuted,
         }}
       >
         Marks progress
@@ -172,20 +183,20 @@ function MarksSummary({
           gap: 6,
           fontSize: 15,
           lineHeight: 1.35,
-          color: "rgba(229,238,248,0.88)",
+          color: theme.textSecondary,
         }}
       >
         {showP1 ? (
           <div>
-            <span style={{ color: "rgba(229,238,248,0.55)" }}>P1:</span>{" "}
-            {assignedP1} / {targetP1} marks
+            <span style={{ color: theme.textMuted }}>P1:</span> {assignedP1} /{" "}
+            {targetP1} marks
           </div>
         ) : null}
 
         {showP2 ? (
           <div>
-            <span style={{ color: "rgba(229,238,248,0.55)" }}>P2:</span>{" "}
-            {assignedP2} / {targetP2} marks
+            <span style={{ color: theme.textMuted }}>P2:</span> {assignedP2} /{" "}
+            {targetP2} marks
           </div>
         ) : null}
       </div>
@@ -197,10 +208,12 @@ function DeleteAssessmentModal({
   savedAssessment,
   onCancel,
   onConfirm,
+  theme,
 }: {
   savedAssessment: SavedAssessment | null;
   onCancel: () => void;
   onConfirm: () => void;
+  theme: ReturnType<typeof getTheme>;
 }) {
   if (!savedAssessment) return null;
 
@@ -209,7 +222,7 @@ function DeleteAssessmentModal({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.62)",
+        background: theme.modalOverlay,
         display: "grid",
         placeItems: "center",
         padding: 24,
@@ -220,10 +233,10 @@ function DeleteAssessmentModal({
         style={{
           width: "100%",
           maxWidth: 520,
-          border: "1px solid rgba(255,255,255,0.10)",
+          border: `1px solid ${theme.borderStandard}`,
           borderRadius: 24,
-          background: "#111821",
-          boxShadow: "0 30px 80px rgba(0,0,0,0.38)",
+          background: theme.bgElevated,
+          boxShadow: theme.shadowStrong,
           padding: 24,
           display: "grid",
           gap: 18,
@@ -235,7 +248,7 @@ function DeleteAssessmentModal({
               fontSize: 28,
               fontWeight: 700,
               lineHeight: 1.05,
-              color: "#e5eef8",
+              color: theme.textPrimary,
             }}
           >
             Delete assessment?
@@ -245,10 +258,10 @@ function DeleteAssessmentModal({
             style={{
               fontSize: 15,
               lineHeight: 1.5,
-              color: "rgba(229,238,248,0.72)",
+              color: theme.textSecondary,
             }}
           >
-            <strong style={{ color: "#f8fbff" }}>
+            <strong style={{ color: theme.textPrimary }}>
               {savedAssessment.setup.assessmentName || "[Untitled Assessment]"}
             </strong>{" "}
             will be permanently removed.
@@ -270,9 +283,9 @@ function DeleteAssessmentModal({
               height: 44,
               padding: "0 16px",
               borderRadius: 12,
-              border: "1px solid rgba(255,255,255,0.10)",
-              background: "rgba(255,255,255,0.04)",
-              color: "#e5eef8",
+              border: `1px solid ${theme.borderStandard}`,
+              background: theme.controlBg,
+              color: theme.textPrimary,
               fontSize: 15,
               fontWeight: 700,
               cursor: "pointer",
@@ -288,9 +301,9 @@ function DeleteAssessmentModal({
               height: 44,
               padding: "0 16px",
               borderRadius: 12,
-              border: "1px solid rgba(248,113,113,0.55)",
-              background: "rgba(127,29,29,0.35)",
-              color: "#fee2e2",
+              border: `1px solid ${theme.danger}`,
+              background: `${theme.danger}22`,
+              color: theme.textPrimary,
               fontSize: 15,
               fontWeight: 700,
               cursor: "pointer",
@@ -309,11 +322,13 @@ function AssessmentPreviewCard({
   onDuplicate,
   onDelete,
   onTogglePinned,
+  theme,
 }: {
   savedAssessment: SavedAssessment;
   onDuplicate: (savedAssessment: SavedAssessment) => void;
   onDelete: (savedAssessment: SavedAssessment) => void;
   onTogglePinned: (savedAssessment: SavedAssessment) => void;
+  theme: ReturnType<typeof getTheme>;
 }) {
   const paperLabel = getPaperStructureLabel(savedAssessment);
   const progressPct = getOverallProgressPct(savedAssessment);
@@ -325,35 +340,35 @@ function AssessmentPreviewCard({
   return (
     <article
       style={{
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: `1px solid ${theme.borderSubtle}`,
         borderRadius: 22,
-        background: "rgba(255,255,255,0.03)",
+        background: theme.cardBg,
         overflow: "hidden",
         display: "grid",
         gridTemplateRows: "8px auto",
         minHeight: 310,
         transition:
           "transform 160ms ease, background 160ms ease, border-color 160ms ease, box-shadow 160ms ease",
-        boxShadow: "0 10px 22px rgba(0,0,0,0.12)",
+        boxShadow: theme.shadow,
       }}
       onMouseEnter={(event) => {
         event.currentTarget.style.transform = "translateY(-2px) scale(1.008)";
-        event.currentTarget.style.background = "rgba(255,255,255,0.045)";
-        event.currentTarget.style.borderColor = "rgba(96,165,250,0.18)";
-        event.currentTarget.style.boxShadow = "0 18px 32px rgba(0,0,0,0.18)";
+        event.currentTarget.style.background = theme.cardBgHover;
+        event.currentTarget.style.borderColor = theme.accentPrimary;
+        event.currentTarget.style.boxShadow = theme.shadowStrong;
       }}
       onMouseLeave={(event) => {
         event.currentTarget.style.transform = "translateY(0) scale(1)";
-        event.currentTarget.style.background = "rgba(255,255,255,0.03)";
-        event.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-        event.currentTarget.style.boxShadow = "0 10px 22px rgba(0,0,0,0.12)";
+        event.currentTarget.style.background = theme.cardBg;
+        event.currentTarget.style.borderColor = theme.borderSubtle;
+        event.currentTarget.style.boxShadow = theme.shadow;
       }}
     >
       <div
         style={{
           width: `${progressPct}%`,
-          background: "rgba(74,222,128,0.92)",
-          boxShadow: "0 0 16px rgba(74,222,128,0.25)",
+          background: theme.success,
+          boxShadow: `0 0 16px ${theme.success}44`,
           transition: "width 220ms ease",
           minWidth: progressPct > 0 ? 10 : 0,
         }}
@@ -371,9 +386,8 @@ function AssessmentPreviewCard({
         <div
           style={{
             borderRadius: 16,
-            border: "1px solid rgba(255,255,255,0.08)",
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 100%)",
+            border: `1px solid ${theme.borderSubtle}`,
+            background: theme.bgSurfaceAlt,
             padding: 16,
             display: "grid",
             alignContent: "start",
@@ -387,7 +401,7 @@ function AssessmentPreviewCard({
               fontWeight: 700,
               letterSpacing: 0.4,
               textTransform: "uppercase",
-              color: "rgba(229,238,248,0.56)",
+              color: theme.textMuted,
             }}
           >
             Assessment preview
@@ -396,14 +410,14 @@ function AssessmentPreviewCard({
           <div
             style={{
               borderRadius: 12,
-              background: "rgba(255,255,255,0.92)",
+              background: theme.paper,
               minHeight: 170,
               padding: 14,
-              color: "#15202b",
+              color: theme.paperText,
               display: "grid",
               alignContent: "start",
               gap: 10,
-              boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+              boxShadow: theme.shadow,
             }}
           >
             <div
@@ -414,7 +428,7 @@ function AssessmentPreviewCard({
                 letterSpacing: 0.3,
               }}
             >
-              {savedAssessment.setup.assessmentName || "[Untitled Assessment]"}
+              {savedAssessment.setup.assessmentName || "[Untitled file]"}
             </div>
 
             <div
@@ -451,9 +465,7 @@ function AssessmentPreviewCard({
                     height: 8,
                     borderRadius: 999,
                     background:
-                      index === 0
-                        ? "rgba(37,99,235,0.22)"
-                        : "rgba(0,0,0,0.08)",
+                      index === 0 ? "rgba(37,99,235,0.22)" : "rgba(0,0,0,0.08)",
                     width:
                       index === 0
                         ? "82%"
@@ -501,18 +513,18 @@ function AssessmentPreviewCard({
                   fontSize: 28,
                   fontWeight: 700,
                   lineHeight: 1.05,
-                  color: "#e5eef8",
+                  color: theme.textPrimary,
                   wordBreak: "break-word",
                 }}
               >
-                {savedAssessment.setup.assessmentName || "[Untitled Assessment]"}
+                {savedAssessment.setup.assessmentName || "[Untitled file]"}
               </div>
 
               <div
                 style={{
                   fontSize: 15,
                   lineHeight: 1.35,
-                  color: "rgba(229,238,248,0.74)",
+                  color: theme.textSecondary,
                 }}
               >
                 {getLevelLabel(savedAssessment)} • {getCoverageLabel(savedAssessment)}
@@ -537,14 +549,12 @@ function AssessmentPreviewCard({
                   height: 36,
                   borderRadius: 999,
                   border: `1px solid ${
-                    savedAssessment.isPinned
-                      ? "rgba(250,204,21,0.40)"
-                      : "rgba(255,255,255,0.10)"
+                    savedAssessment.isPinned ? theme.warning : theme.borderStandard
                   }`,
                   background: savedAssessment.isPinned
-                    ? "rgba(250,204,21,0.12)"
-                    : "rgba(255,255,255,0.04)",
-                  color: savedAssessment.isPinned ? "#fde68a" : "rgba(229,238,248,0.76)",
+                    ? `${theme.warning}22`
+                    : theme.controlBg,
+                  color: savedAssessment.isPinned ? theme.warning : theme.textSecondary,
                   fontSize: 16,
                   cursor: "pointer",
                 }}
@@ -556,9 +566,9 @@ function AssessmentPreviewCard({
                 style={{
                   borderRadius: 999,
                   padding: "6px 12px",
-                  border: "1px solid rgba(96,165,250,0.22)",
-                  background: "rgba(37,99,235,0.16)",
-                  color: "#dbeafe",
+                  border: `1px solid ${theme.accentPrimary}`,
+                  background: theme.accentSoft,
+                  color: theme.accentSoftText,
                   fontSize: 12,
                   fontWeight: 700,
                   letterSpacing: 0.3,
@@ -576,7 +586,7 @@ function AssessmentPreviewCard({
               gap: 16,
             }}
           >
-            <MarksSummary savedAssessment={savedAssessment} />
+            <MarksSummary savedAssessment={savedAssessment} theme={theme} />
 
             <div
               style={{
@@ -584,21 +594,21 @@ function AssessmentPreviewCard({
                 gap: 8,
                 fontSize: 15,
                 lineHeight: 1.4,
-                color: "rgba(229,238,248,0.82)",
+                color: theme.textSecondary,
               }}
             >
               <div>
-                <span style={{ color: "rgba(229,238,248,0.55)" }}>Type:</span>{" "}
+                <span style={{ color: theme.textMuted }}>Type:</span>{" "}
                 {savedAssessment.setup.assessmentType.replaceAll("_", " ")}
               </div>
 
               <div>
-                <span style={{ color: "rgba(229,238,248,0.55)" }}>Assessment date:</span>{" "}
+                <span style={{ color: theme.textMuted }}>Assessment date:</span>{" "}
                 {savedAssessment.setup.assessmentDate}
               </div>
 
               <div>
-                <span style={{ color: "rgba(229,238,248,0.55)" }}>Last edited:</span>{" "}
+                <span style={{ color: theme.textMuted }}>Last edited:</span>{" "}
                 {formatDateTime(savedAssessment.updatedAt)}
               </div>
             </div>
@@ -609,7 +619,7 @@ function AssessmentPreviewCard({
               display: "grid",
               gap: 12,
               paddingTop: 12,
-              borderTop: "1px solid rgba(255,255,255,0.08)",
+              borderTop: `1px solid ${theme.borderSubtle}`,
             }}
           >
             <div
@@ -631,9 +641,9 @@ function AssessmentPreviewCard({
                   padding: "0 16px",
                   borderRadius: 12,
                   textDecoration: "none",
-                  background: "rgba(37,99,235,0.20)",
-                  border: "1px solid rgba(96,165,250,0.7)",
-                  color: "#f8fbff",
+                  background: theme.accentSoft,
+                  border: `1px solid ${theme.accentPrimary}`,
+                  color: theme.textPrimary,
                   fontSize: 15,
                   fontWeight: 700,
                 }}
@@ -652,9 +662,9 @@ function AssessmentPreviewCard({
                   height: 42,
                   padding: "0 14px",
                   borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  background: "rgba(255,255,255,0.04)",
-                  color: "#e5eef8",
+                  border: `1px solid ${theme.borderStandard}`,
+                  background: theme.controlBg,
+                  color: theme.textPrimary,
                   fontSize: 14,
                   fontWeight: 700,
                   cursor: "pointer",
@@ -674,9 +684,9 @@ function AssessmentPreviewCard({
                   height: 42,
                   padding: "0 14px",
                   borderRadius: 12,
-                  border: "1px solid rgba(255,255,255,0.10)",
-                  background: "rgba(255,255,255,0.04)",
-                  color: "rgba(229,238,248,0.82)",
+                  border: `1px solid ${theme.borderStandard}`,
+                  background: theme.controlBg,
+                  color: theme.textSecondary,
                   fontSize: 14,
                   fontWeight: 700,
                   cursor: "pointer",
@@ -692,7 +702,7 @@ function AssessmentPreviewCard({
               style={{
                 fontSize: 12,
                 lineHeight: 1.3,
-                color: "rgba(229,238,248,0.46)",
+                color: theme.textMuted,
               }}
             >
               Created on {formatDateTime(savedAssessment.createdAt)}
@@ -705,10 +715,44 @@ function AssessmentPreviewCard({
 }
 
 export default function MyAssessmentsPage() {
+  const [resolvedMode, setResolvedMode] = useState<ResolvedThemeMode>("dark");
   const [savedAssessments, setSavedAssessments] = useState<SavedAssessment[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [assessmentPendingDelete, setAssessmentPendingDelete] =
     useState<SavedAssessment | null>(null);
+
+  useEffect(() => {
+    function readResolvedMode(): ResolvedThemeMode {
+      if (typeof window === "undefined") return "dark";
+
+      const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
+      const preference: ThemeModePreference = isThemeModePreference(stored)
+        ? stored
+        : "system";
+
+      return resolveThemeMode(preference, getSystemPrefersDark());
+    }
+
+    setResolvedMode(readResolvedMode());
+
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function handleThemeChange() {
+      setResolvedMode(readResolvedMode());
+    }
+
+    window.addEventListener("storage", handleThemeChange);
+    mediaQuery.addEventListener("change", handleThemeChange);
+
+    return () => {
+      window.removeEventListener("storage", handleThemeChange);
+      mediaQuery.removeEventListener("change", handleThemeChange);
+    };
+  }, []);
+
+  const theme = getTheme(resolvedMode);
 
   useEffect(() => {
     const loaded = loadSavedAssessments().map((assessment) => ({
@@ -777,8 +821,8 @@ export default function MyAssessmentsPage() {
       <main
         style={{
           minHeight: "100%",
-          background: "#0b0f14",
-          color: "#e5eef8",
+          background: theme.bgPrimary,
+          color: theme.textPrimary,
           padding: 24,
           boxSizing: "border-box",
           fontFamily: "var(--app-ui-font-family)",
@@ -808,7 +852,7 @@ export default function MyAssessmentsPage() {
                   fontSize: 40,
                   lineHeight: 1.05,
                   fontWeight: 700,
-                  color: "#e5eef8",
+                  color: theme.textPrimary,
                 }}
               >
                 My Assessments
@@ -818,7 +862,7 @@ export default function MyAssessmentsPage() {
                 style={{
                   fontSize: 16,
                   lineHeight: 1.4,
-                  color: "rgba(229,238,248,0.70)",
+                  color: theme.textSecondary,
                 }}
               >
                 {hasLoaded ? assessmentCountText : "Loading assessments..."}
@@ -836,12 +880,12 @@ export default function MyAssessmentsPage() {
                 padding: "0 18px",
                 borderRadius: 14,
                 textDecoration: "none",
-                background: "rgba(37,99,235,0.20)",
-                border: "1px solid rgba(96,165,250,0.75)",
-                color: "#f8fbff",
+                background: theme.accentSoft,
+                border: `1px solid ${theme.accentPrimary}`,
+                color: theme.textPrimary,
                 fontSize: 16,
                 fontWeight: 700,
-                boxShadow: "0 12px 24px rgba(0,0,0,0.16)",
+                boxShadow: theme.shadow,
               }}
             >
               + Create New Assessment
@@ -851,12 +895,12 @@ export default function MyAssessmentsPage() {
           {!hasLoaded ? (
             <section
               style={{
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: `1px solid ${theme.borderSubtle}`,
                 borderRadius: 22,
                 padding: 24,
-                background: "rgba(255,255,255,0.03)",
+                background: theme.cardBg,
                 fontSize: 15,
-                color: "rgba(229,238,248,0.68)",
+                color: theme.textSecondary,
               }}
             >
               Loading saved assessments...
@@ -864,10 +908,10 @@ export default function MyAssessmentsPage() {
           ) : savedAssessments.length === 0 ? (
             <section
               style={{
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: `1px solid ${theme.borderSubtle}`,
                 borderRadius: 22,
                 padding: 28,
-                background: "rgba(255,255,255,0.03)",
+                background: theme.cardBg,
                 display: "grid",
                 gap: 12,
               }}
@@ -877,7 +921,7 @@ export default function MyAssessmentsPage() {
                   fontSize: 26,
                   fontWeight: 700,
                   lineHeight: 1.1,
-                  color: "#e5eef8",
+                  color: theme.textPrimary,
                 }}
               >
                 No assessments yet
@@ -887,7 +931,7 @@ export default function MyAssessmentsPage() {
                 style={{
                   fontSize: 15,
                   lineHeight: 1.5,
-                  color: "rgba(229,238,248,0.68)",
+                  color: theme.textSecondary,
                   maxWidth: 760,
                 }}
               >
@@ -911,6 +955,7 @@ export default function MyAssessmentsPage() {
                   onDuplicate={handleDuplicate}
                   onDelete={handleRequestDelete}
                   onTogglePinned={handleTogglePinned}
+                  theme={theme}
                 />
               ))}
             </section>
@@ -922,6 +967,7 @@ export default function MyAssessmentsPage() {
         savedAssessment={assessmentPendingDelete}
         onCancel={handleCancelDelete}
         onConfirm={handleConfirmDelete}
+        theme={theme}
       />
     </>
   );

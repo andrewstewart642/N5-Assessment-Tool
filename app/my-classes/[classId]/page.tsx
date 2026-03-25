@@ -1,11 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { use, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { getAllCoverageSkills } from "../components/coverage/CoverageHelpers";
 import { UseClasses } from "../state/UseClasses";
 import CoverageTree from "../components/coverage/CoverageTree";
 import CoverageDetails from "../components/coverage/CoverageDetails";
+import { getTheme } from "@/ui/AppTheme";
+import {
+  getSystemPrefersDark,
+  isThemeModePreference,
+  resolveThemeMode,
+  THEME_MODE_STORAGE_KEY,
+  type ResolvedThemeMode,
+  type ThemeModePreference,
+} from "@/ui/ThemeMode";
 
 type Props = {
   params: Promise<{
@@ -31,6 +40,41 @@ function formatLastUpdated(timestamp: number): string {
 }
 
 export default function ClassPage({ params }: Props) {
+  const [resolvedMode, setResolvedMode] = useState<ResolvedThemeMode>("dark");
+
+  useEffect(() => {
+    function readResolvedMode(): ResolvedThemeMode {
+      if (typeof window === "undefined") return "dark";
+
+      const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
+      const preference: ThemeModePreference = isThemeModePreference(stored)
+        ? stored
+        : "system";
+
+      return resolveThemeMode(preference, getSystemPrefersDark());
+    }
+
+    setResolvedMode(readResolvedMode());
+
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    function handleChange() {
+      setResolvedMode(readResolvedMode());
+    }
+
+    window.addEventListener("storage", handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      window.removeEventListener("storage", handleChange);
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
+
+  const theme = getTheme(resolvedMode);
+
   const { hasLoaded, getClassById, updateCompletedSkills } = UseClasses();
   const { classId } = use(params);
 
@@ -60,8 +104,8 @@ export default function ClassPage({ params }: Props) {
     <main
       style={{
         minHeight: "100%",
-        background: "#0b0f14",
-        color: "#e5eef8",
+        background: theme.bgPrimary,
+        color: theme.textPrimary,
         padding: 24,
         boxSizing: "border-box",
         fontFamily: "var(--app-ui-font-family)",
@@ -74,7 +118,7 @@ export default function ClassPage({ params }: Props) {
         }
 
         .coverage-scroll:hover {
-          scrollbar-color: rgba(140, 160, 180, 0.5) transparent;
+          scrollbar-color: ${theme.scrollbarThumb} transparent;
         }
 
         .coverage-scroll::-webkit-scrollbar {
@@ -92,7 +136,7 @@ export default function ClassPage({ params }: Props) {
         }
 
         .coverage-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(140, 160, 180, 0.45);
+          background: ${theme.scrollbarThumb};
         }
       `}</style>
 
@@ -112,7 +156,7 @@ export default function ClassPage({ params }: Props) {
               alignItems: "center",
               gap: 8,
               textDecoration: "none",
-              color: "rgba(229,238,248,0.76)",
+              color: theme.textSecondary,
               fontSize: 14,
               fontWeight: 600,
             }}
@@ -124,11 +168,11 @@ export default function ClassPage({ params }: Props) {
         {!hasLoaded ? (
           <div
             style={{
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: `1px solid ${theme.borderSubtle}`,
               borderRadius: 22,
               padding: 22,
-              background: "rgba(255,255,255,0.03)",
-              color: "rgba(229,238,248,0.72)",
+              background: theme.cardBg,
+              color: theme.textSecondary,
               fontSize: 15,
               lineHeight: 1.45,
             }}
@@ -138,10 +182,10 @@ export default function ClassPage({ params }: Props) {
         ) : !schoolClass ? (
           <div
             style={{
-              border: "1px solid rgba(255,255,255,0.08)",
+              border: `1px solid ${theme.borderSubtle}`,
               borderRadius: 22,
               padding: 22,
-              background: "rgba(255,255,255,0.03)",
+              background: theme.cardBg,
               display: "grid",
               gap: 10,
             }}
@@ -151,7 +195,7 @@ export default function ClassPage({ params }: Props) {
                 fontSize: 28,
                 fontWeight: 700,
                 lineHeight: 1.1,
-                color: "#e5eef8",
+                color: theme.textPrimary,
               }}
             >
               Class not found
@@ -161,7 +205,7 @@ export default function ClassPage({ params }: Props) {
               style={{
                 fontSize: 15,
                 lineHeight: 1.45,
-                color: "rgba(229,238,248,0.72)",
+                color: theme.textSecondary,
               }}
             >
               This class could not be found. It may have been removed or not
@@ -172,10 +216,10 @@ export default function ClassPage({ params }: Props) {
           <>
             <section
               style={{
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: `1px solid ${theme.borderSubtle}`,
                 borderRadius: 22,
                 padding: "18px 24px",
-                background: "rgba(255,255,255,0.03)",
+                background: theme.cardBg,
                 minHeight: 126,
               }}
             >
@@ -201,7 +245,7 @@ export default function ClassPage({ params }: Props) {
                       fontSize: 40,
                       fontWeight: 700,
                       lineHeight: 1,
-                      color: "#e5eef8",
+                      color: theme.textPrimary,
                     }}
                   >
                     {schoolClass.name}
@@ -211,7 +255,7 @@ export default function ClassPage({ params }: Props) {
                     style={{
                       fontSize: 15,
                       lineHeight: 1.3,
-                      color: "rgba(229,238,248,0.82)",
+                      color: theme.textSecondary,
                     }}
                   >
                     {schoolClass.course}
@@ -221,7 +265,7 @@ export default function ClassPage({ params }: Props) {
                     style={{
                       fontSize: 14,
                       lineHeight: 1.35,
-                      color: "rgba(229,238,248,0.62)",
+                      color: theme.textMuted,
                     }}
                   >
                     {[schoolClass.level, schoolClass.teacher]
@@ -247,9 +291,9 @@ export default function ClassPage({ params }: Props) {
                       height: 42,
                       borderRadius: 999,
                       overflow: "hidden",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      background: "rgba(255,255,255,0.05)",
-                      boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.02)",
+                      border: `1px solid ${theme.borderSubtle}`,
+                      background: theme.controlBg,
+                      boxShadow: `inset 0 0 0 1px ${theme.borderSubtle}`,
                     }}
                   >
                     <div
@@ -260,8 +304,8 @@ export default function ClassPage({ params }: Props) {
                         bottom: 0,
                         width: `${progressPct}%`,
                         borderRadius: 999,
-                        background: "rgba(74,222,128,0.22)",
-                        boxShadow: "0 0 18px rgba(74,222,128,0.14)",
+                        background: `${theme.success}33`,
+                        boxShadow: `0 0 18px ${theme.success}22`,
                         transition: "width 220ms ease",
                       }}
                     />
@@ -275,8 +319,11 @@ export default function ClassPage({ params }: Props) {
                         fontSize: 15,
                         fontWeight: 700,
                         lineHeight: 1.2,
-                        color: "#e5eef8",
-                        textShadow: "0 1px 0 rgba(0,0,0,0.22)",
+                        color: theme.textPrimary,
+                        textShadow:
+                          resolvedMode === "dark"
+                            ? "0 1px 0 rgba(0,0,0,0.22)"
+                            : "none",
                         whiteSpace: "nowrap",
                         pointerEvents: "none",
                       }}
@@ -289,7 +336,7 @@ export default function ClassPage({ params }: Props) {
                     style={{
                       fontSize: 12,
                       lineHeight: 1.25,
-                      color: "rgba(229,238,248,0.52)",
+                      color: theme.textMuted,
                       textAlign: "right",
                     }}
                   >
@@ -313,25 +360,26 @@ export default function ClassPage({ params }: Props) {
                 onSelectSkillId={setSelectedSkillId}
                 completedSkillIds={schoolClass.completedSkillIds}
                 onToggleSkillId={handleToggleSkill}
+                theme={theme}
               />
 
               <div
                 style={{
-                  background: "rgba(255,255,255,0.08)",
+                  background: theme.divider,
                   borderRadius: 999,
                   margin: "6px 10px",
                 }}
               />
 
-              <CoverageDetails selectedSkillId={selectedSkillId} />
+              <CoverageDetails selectedSkillId={selectedSkillId} theme={theme} />
             </section>
 
             <section
               style={{
-                border: "1px solid rgba(255,255,255,0.08)",
+                border: `1px solid ${theme.borderSubtle}`,
                 borderRadius: 22,
                 padding: 24,
-                background: "rgba(255,255,255,0.03)",
+                background: theme.cardBg,
                 display: "grid",
                 gap: 10,
               }}
@@ -341,7 +389,7 @@ export default function ClassPage({ params }: Props) {
                   fontSize: 20,
                   fontWeight: 700,
                   lineHeight: 1.15,
-                  color: "#e5eef8",
+                  color: theme.textPrimary,
                 }}
               >
                 Class Actions
@@ -351,7 +399,7 @@ export default function ClassPage({ params }: Props) {
                 style={{
                   fontSize: 14,
                   lineHeight: 1.45,
-                  color: "rgba(229,238,248,0.62)",
+                  color: theme.textMuted,
                 }}
               >
                 Safer class actions like delete can live here later, rather than
