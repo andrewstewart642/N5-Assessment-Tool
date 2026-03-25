@@ -3,7 +3,7 @@
 import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import { getTheme } from "@/app/ui/AppTheme";
+import type { AppTheme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import {
@@ -11,10 +11,8 @@ import {
   ViewingToggle,
 } from "@/app/create-assessment/builder/builder-logic/BuilderUiHelpers";
 
-type Theme = ReturnType<typeof getTheme>;
-
 type Props = {
-  theme: Theme;
+  theme: AppTheme;
   assessmentName: string;
   setAssessmentName: React.Dispatch<React.SetStateAction<string>>;
   assessmentDate: string;
@@ -54,12 +52,12 @@ function formatAssessmentDateDisplay(value: string): string {
   });
 }
 
-function fieldLabelStyle(): React.CSSProperties {
+function fieldLabelStyle(theme: AppTheme): React.CSSProperties {
   return {
     fontSize: 12,
     fontWeight: UI_TYPO.weightMedium,
     letterSpacing: 0,
-    color: "rgba(214,227,243,0.74)",
+    color: theme.subtleText,
     lineHeight: 1.2,
     whiteSpace: "nowrap",
   };
@@ -68,7 +66,7 @@ function fieldLabelStyle(): React.CSSProperties {
 function fixedFieldShellStyle(width: number): React.CSSProperties {
   return {
     display: "grid",
-    gap: 3,
+    gap: 4,
     minWidth: 0,
     width,
     fontFamily: UI_TYPO.family,
@@ -76,14 +74,14 @@ function fixedFieldShellStyle(width: number): React.CSSProperties {
   };
 }
 
-function sharedInputStyle(): React.CSSProperties {
+function sharedInputStyle(theme: AppTheme): React.CSSProperties {
   return {
     height: 30,
-    borderRadius: 9,
-    border: "1px solid rgba(255,255,255,0.08)",
-    background: "rgba(255,255,255,0.02)",
-    color: "#f7fbff",
-    padding: "0 30px 0 10px",
+    borderRadius: 10,
+    border: `1px solid ${theme.inputBorder}`,
+    background: theme.inputBg,
+    color: theme.inputText,
+    padding: "0 32px 0 10px",
     fontSize: 13,
     fontFamily: UI_TYPO.family,
     fontWeight: UI_TYPO.weightSemibold,
@@ -91,6 +89,7 @@ function sharedInputStyle(): React.CSSProperties {
     width: "100%",
     boxSizing: "border-box",
     outline: "none",
+    boxShadow: "none",
   };
 }
 
@@ -119,12 +118,12 @@ export default function BuilderTopBar({
   return (
     <div
       style={{
-        borderBottom: `1px solid ${theme.border}`,
-        background: theme.panelBg2,
+        borderBottom: `1px solid ${theme.borderSoft}`,
+        background: theme.headerBg,
         display: "flex",
         alignItems: "end",
-        gap: 8,
-        padding: "8px 10px 10px",
+        gap: 10,
+        padding: "8px 12px 10px",
         boxSizing: "border-box",
         minHeight: 0,
         position: "relative",
@@ -135,7 +134,7 @@ export default function BuilderTopBar({
         style={{
           display: "flex",
           alignItems: "end",
-          gap: 8,
+          gap: 10,
           flex: "1 1 auto",
           minWidth: 0,
         }}
@@ -153,6 +152,7 @@ export default function BuilderTopBar({
             onFocus={handleAssessmentNameFocus}
             onBlur={handleAssessmentNameBlur}
             width={undefined as never}
+            theme={theme}
           />
         </div>
 
@@ -178,6 +178,7 @@ export default function BuilderTopBar({
             width="100%"
             dropdownWidth={340}
             zIndex={320}
+            theme={theme}
           />
         </div>
       </div>
@@ -186,7 +187,7 @@ export default function BuilderTopBar({
         style={{
           display: "flex",
           alignItems: "end",
-          gap: 8,
+          gap: 10,
           flex: "0 0 auto",
           minWidth: 0,
         }}
@@ -194,12 +195,12 @@ export default function BuilderTopBar({
         <div
           ref={builderDateFieldRef}
           style={{
-            ...fixedFieldShellStyle(140),
+            ...fixedFieldShellStyle(150),
             position: "relative",
             zIndex: builderCalendarOpen ? 200 : "auto",
           }}
         >
-          <span style={fieldLabelStyle()}>Assessment Date</span>
+          <span style={fieldLabelStyle(theme)}>Assessment Date</span>
 
           <div style={{ position: "relative" }}>
             <input
@@ -209,7 +210,7 @@ export default function BuilderTopBar({
               onFocus={() => setBuilderCalendarOpen(true)}
               onClick={() => setBuilderCalendarOpen(true)}
               style={{
-                ...sharedInputStyle(),
+                ...sharedInputStyle(theme),
                 cursor: "pointer",
               }}
               aria-label="Assessment date"
@@ -226,9 +227,9 @@ export default function BuilderTopBar({
                 width: 22,
                 height: 22,
                 borderRadius: 7,
-                border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.03)",
-                color: "rgba(214,227,243,0.78)",
+                border: `1px solid ${theme.borderSoft}`,
+                background: theme.buttonGhostBg,
+                color: theme.subtleText,
                 cursor: "pointer",
                 display: "flex",
                 alignItems: "center",
@@ -281,16 +282,16 @@ export default function BuilderTopBar({
         <div
           style={{
             display: "grid",
-            gap: 3,
+            gap: 4,
             minWidth: 0,
             width: "fit-content",
             fontFamily: UI_TYPO.family,
             flex: "0 0 auto",
           }}
         >
-          <span style={fieldLabelStyle()}>Viewing</span>
+          <span style={fieldLabelStyle(theme)}>Viewing</span>
           <div style={{ height: 30, display: "flex", alignItems: "center" }}>
-            <ViewingToggle value={viewPaper} onChange={setViewPaper} />
+            <ViewingToggle value={viewPaper} onChange={setViewPaper} theme={theme} />
           </div>
         </div>
       </div>

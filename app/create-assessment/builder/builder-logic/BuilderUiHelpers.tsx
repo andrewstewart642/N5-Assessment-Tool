@@ -1,5 +1,6 @@
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import { UI_TYPO } from "@/app/ui/UiTypography";
+import type { AppTheme } from "@/ui/AppTheme";
 
 type BuilderMetaFieldProps = {
   label: string;
@@ -8,7 +9,39 @@ type BuilderMetaFieldProps = {
   onFocus?: () => void;
   onBlur?: () => void;
   width?: number;
+  theme?: AppTheme;
 };
+
+function getLabelStyle(theme?: AppTheme): React.CSSProperties {
+  return {
+    fontSize: 12,
+    fontWeight: UI_TYPO.weightMedium,
+    letterSpacing: 0,
+    color: theme ? theme.subtleText : "rgba(214,227,243,0.74)",
+    lineHeight: 1.2,
+    whiteSpace: "nowrap",
+  };
+}
+
+function getInputStyle(theme?: AppTheme): React.CSSProperties {
+  return {
+    height: 30,
+    borderRadius: 10,
+    border: theme
+      ? `1px solid ${theme.inputBorder}`
+      : "1px solid rgba(255,255,255,0.08)",
+    background: theme ? theme.inputBg : "rgba(255,255,255,0.02)",
+    color: theme ? theme.inputText : "#f7fbff",
+    padding: "0 9px",
+    fontSize: 13,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightSemibold,
+    minWidth: 0,
+    width: "100%",
+    boxSizing: "border-box",
+    outline: "none",
+  };
+}
 
 export function BuilderMetaField({
   label,
@@ -17,6 +50,7 @@ export function BuilderMetaField({
   onFocus,
   onBlur,
   width,
+  theme,
 }: BuilderMetaFieldProps) {
   return (
     <label
@@ -28,18 +62,7 @@ export function BuilderMetaField({
         fontFamily: UI_TYPO.family,
       }}
     >
-      <span
-        style={{
-          fontSize: 12,
-          fontWeight: UI_TYPO.weightMedium,
-          letterSpacing: 0,
-          color: "rgba(214,227,243,0.74)",
-          lineHeight: 1.2,
-          whiteSpace: "nowrap",
-        }}
-      >
-        {label}
-      </span>
+      <span style={getLabelStyle(theme)}>{label}</span>
 
       <input
         type="text"
@@ -47,21 +70,7 @@ export function BuilderMetaField({
         onChange={(e) => onChange(e.target.value)}
         onFocus={onFocus}
         onBlur={onBlur}
-        style={{
-          height: 30,
-          borderRadius: 9,
-          border: "1px solid rgba(255,255,255,0.08)",
-          background: "rgba(255,255,255,0.02)",
-          color: "#f7fbff",
-          padding: "0 9px",
-          fontSize: 13,
-          fontFamily: UI_TYPO.family,
-          fontWeight: UI_TYPO.weightSemibold,
-          minWidth: 0,
-          width: "100%",
-          boxSizing: "border-box",
-          outline: "none",
-        }}
+        style={getInputStyle(theme)}
       />
     </label>
   );
@@ -70,23 +79,24 @@ export function BuilderMetaField({
 type ViewingToggleProps = {
   value: Paper;
   onChange: (paper: Paper) => void;
+  theme?: AppTheme;
 };
 
 export function ViewingToggle({
   value,
   onChange,
-}: {
-  value: "P1" | "P2";
-  onChange: (next: "P1" | "P2") => void;
-}) {
+  theme,
+}: ViewingToggleProps) {
   return (
     <div
       style={{
         display: "inline-flex",
         height: 30,
-        borderRadius: 9,
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 10,
+        background: theme ? theme.controlBg : "rgba(255,255,255,0.04)",
+        border: theme
+          ? `1px solid ${theme.borderSoft}`
+          : "1px solid rgba(255,255,255,0.08)",
         padding: 2,
         boxSizing: "border-box",
       }}
@@ -101,21 +111,25 @@ export function ViewingToggle({
             style={{
               height: "100%",
               padding: "0 12px",
-              borderRadius: 7,
+              borderRadius: 8,
               border: "none",
               cursor: "pointer",
               fontSize: 13,
               fontWeight: 600,
               fontFamily: "inherit",
-              color: active ? "#ffffff" : "rgba(214,227,243,0.72)",
+              color: active
+                ? theme?.textPrimary ?? "#ffffff"
+                : theme?.textMuted ?? "rgba(214,227,243,0.72)",
               background: active
-                ? "rgba(96,165,250,0.18)"
+                ? theme?.controlSelectedBg ?? "rgba(96,165,250,0.18)"
                 : "transparent",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               lineHeight: 1,
               whiteSpace: "nowrap",
+              transition:
+                "background 0.15s ease, color 0.15s ease",
             }}
           >
             {paper === "P1" ? "Paper 1" : "Paper 2"}

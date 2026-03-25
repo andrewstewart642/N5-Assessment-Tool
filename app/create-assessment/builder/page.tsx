@@ -18,10 +18,11 @@ import { skillsData } from "@/course-data/N5-Skills";
 import { N5_MATH_COURSE_CONFIG } from "@/course-data/course-configs/N5MathsCourseConfig";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import {
-  APPEARANCE_STORAGE_KEY,
-  getTheme,
-  type AppearancePreference,
-} from "@/app/ui/AppTheme";
+  THEME_MODE_STORAGE_KEY,
+  resolveThemeMode,
+  type ThemeModePreference,
+} from "@/ui/ThemeMode";
+import { getTheme } from "@/ui/AppTheme";
 import type {
   Paper,
   Question,
@@ -294,7 +295,7 @@ export default function CreateAssessmentBuilderPage() {
   const [includeFormulaSheet, setIncludeFormulaSheet] = useState(false);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [appearance, setAppearance] = useState<AppearancePreference>("dark");
+  const [appearance, setAppearance] = useState<ThemeModePreference>("system");
   const [systemPrefersDark, setSystemPrefersDark] = useState(true);
 
   const [assessmentName, setAssessmentName] = useState("[Untitled file]");
@@ -333,14 +334,13 @@ export default function CreateAssessmentBuilderPage() {
     defaultHudHeight: DEFAULT_HUD_HEIGHT,
   });
 
-  const theme = useMemo(
-    () => getTheme(appearance, systemPrefersDark),
-    [appearance, systemPrefersDark]
-  );
+  const resolvedMode = resolveThemeMode(appearance, systemPrefersDark);
+
+  const theme = useMemo(() => getTheme(resolvedMode), [resolvedMode]);
 
   useBuilderInitialisation({
     defaultHudHeight: DEFAULT_HUD_HEIGHT,
-    appearanceStorageKey: APPEARANCE_STORAGE_KEY,
+    appearanceStorageKey: THEME_MODE_STORAGE_KEY,
     clampFn: clamp,
 
     setSystemPrefersDark,
@@ -390,7 +390,7 @@ export default function CreateAssessmentBuilderPage() {
 
   useBuilderPersistence({
     appearance,
-    appearanceStorageKey: APPEARANCE_STORAGE_KEY,
+    appearanceStorageKey: THEME_MODE_STORAGE_KEY,
 
     leftPaneRatio,
     hudHeight,

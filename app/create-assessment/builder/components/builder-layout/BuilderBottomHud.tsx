@@ -1,19 +1,20 @@
 "use client";
 
 import { UI_TEXT } from "@/app/ui/UiTypography";
-import { getTheme } from "@/app/ui/AppTheme";
+import type { AppTheme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import AssessmentProgressHud from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 
-type Theme = ReturnType<typeof getTheme>;
-
 type Props = {
-  theme: Theme;
+  theme: AppTheme;
   routerPushCompile: () => void;
   showProgressPanel: boolean;
   hudHeight: number;
-  hudResizeStartRef: React.MutableRefObject<{ startY: number; startHeight: number } | null>;
+  hudResizeStartRef: React.MutableRefObject<{
+    startY: number;
+    startHeight: number;
+  } | null>;
   setIsDraggingHud: React.Dispatch<React.SetStateAction<boolean>>;
   viewPaper: Paper;
   p1Marks: number;
@@ -72,13 +73,10 @@ export default function BuilderBottomHud({
               gap: 8,
               padding: "6px 10px",
               borderRadius: 999,
-              border: `1px solid ${theme.border}`,
-              background:
-                theme.pageBg === "#eef3f8"
-                  ? "rgba(255,255,255,0.88)"
-                  : "rgba(11,17,24,0.78)",
-              color: (theme as any).textMuted ?? theme.text,
-              boxShadow: "0 8px 18px rgba(0,0,0,0.14)",
+              border: `1px solid ${theme.borderSoft}`,
+              background: theme.bgElevated,
+              color: theme.textMuted,
+              boxShadow: theme.cardShadow,
               pointerEvents: "none",
               fontSize: 12,
               fontWeight: 700,
@@ -92,10 +90,10 @@ export default function BuilderBottomHud({
                 width: 7,
                 height: 7,
                 borderRadius: 999,
-                background: isSaving ? "#facc15" : "#4ade80",
+                background: isSaving ? theme.warning : theme.success,
                 boxShadow: isSaving
-                  ? "0 0 10px rgba(250,204,21,0.35)"
-                  : "0 0 10px rgba(74,222,128,0.35)",
+                  ? "0 0 10px rgba(245,158,11,0.35)"
+                  : "0 0 10px rgba(34,197,94,0.35)",
                 animation: isSaving
                   ? "builder-save-pulse 1s ease-in-out infinite"
                   : "none",
@@ -111,15 +109,14 @@ export default function BuilderBottomHud({
           onClick={routerPushCompile}
           style={{
             border: `1px solid ${theme.border}`,
-            background:
-              theme.pageBg === "#eef3f8"
-                ? "rgba(255,255,255,0.92)"
-                : "rgba(11,17,24,0.92)",
-            color: (theme as any).textMuted ?? theme.text,
+            background: theme.bgElevated,
+            color: theme.textSecondary,
             borderRadius: 16,
             padding: "10px 14px",
             cursor: "pointer",
-            boxShadow: "0 10px 20px rgba(0,0,0,0.18)",
+            boxShadow: theme.cardShadow,
+            transition:
+              "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease",
             ...UI_TEXT.buttonText,
           }}
           title="Compile assessment into printable pages"
@@ -131,15 +128,12 @@ export default function BuilderBottomHud({
       {showProgressPanel ? (
         <div
           style={{
-            borderTop: `1px solid ${theme.border}`,
+            borderTop: `1px solid ${theme.borderSoft}`,
             minHeight: 0,
             height: "100%",
             overflow: "hidden",
             position: "relative",
-            background:
-              theme.pageBg === "#eef3f8"
-                ? "rgba(255,255,255,0.72)"
-                : "rgba(15,22,32,0.92)",
+            background: theme.previewChromeBg,
           }}
         >
           <div
@@ -169,10 +163,7 @@ export default function BuilderBottomHud({
                 width: 54,
                 height: 4,
                 borderRadius: 999,
-                background:
-                  theme.pageBg === "#eef3f8"
-                    ? "rgba(80,97,116,0.28)"
-                    : "rgba(169,182,197,0.35)",
+                background: theme.borderStrong,
               }}
             />
           </div>

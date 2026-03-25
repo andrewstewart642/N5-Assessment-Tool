@@ -2,12 +2,12 @@
 
 import CategorySection from "@/app/create-assessment/builder/components/skills-tree/CategorySection";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { AppTheme } from "@/ui/AppTheme";
 import type {
   DifficultyLevel,
   Paper,
   Skill,
   StandardFilter,
-  Theme,
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
@@ -16,11 +16,10 @@ function CircleRadio(props: {
   label: string;
   checked: boolean;
   onClick: () => void;
-  theme: Theme;
+  theme: AppTheme;
   fontSize?: number;
 }) {
   const { label, checked, onClick, theme, fontSize = UI_TYPO.sizeMeta } = props;
-  const isLight = theme.pageBg === "#eef3f8";
 
   return (
     <button
@@ -35,9 +34,9 @@ function CircleRadio(props: {
         gap: 7,
         padding: "6px 12px",
         borderRadius: 999,
-        border: `1px solid ${checked ? theme.accentStrong : theme.border}`,
-        background: checked ? (isLight ? "#eff6ff" : "#0d1b2a") : theme.controlBg,
-        color: checked ? theme.accent : theme.textMuted,
+        border: `1px solid ${checked ? theme.controlSelectedBorder : theme.pillBorder}`,
+        background: checked ? theme.controlSelectedBg : theme.pillBg,
+        color: checked ? theme.textPrimary : theme.pillText,
         cursor: "pointer",
         fontFamily: UI_TYPO.family,
         fontWeight: UI_TYPO.weightSemibold,
@@ -48,6 +47,8 @@ function CircleRadio(props: {
         width: "fit-content",
         minWidth: 0,
         flex: "0 0 auto",
+        transition:
+          "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
       }}
       title={label}
     >
@@ -56,10 +57,14 @@ function CircleRadio(props: {
           width: 10,
           height: 10,
           borderRadius: 999,
-          border: `2px solid ${checked ? theme.accentStrong : theme.textDim}`,
-          background: checked ? theme.accentStrong : "transparent",
+          border: `2px solid ${
+            checked ? theme.controlSelectedBorder : theme.textDim
+          }`,
+          background: checked ? theme.controlSelectedBorder : "transparent",
           display: "inline-block",
           flex: "0 0 auto",
+          transition:
+            "background 0.15s ease, border-color 0.15s ease",
         }}
       />
       <span style={{ whiteSpace: "nowrap" }}>{label}</span>
@@ -70,7 +75,7 @@ function CircleRadio(props: {
 function MiniStepButton(props: {
   label: "Up" | "Down";
   onClick: () => void;
-  theme: Theme;
+  theme: AppTheme;
 }) {
   const { label, onClick, theme } = props;
 
@@ -94,6 +99,8 @@ function MiniStepButton(props: {
         placeItems: "center",
         padding: 0,
         fontSize: UI_TYPO.sizeSm,
+        transition:
+          "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
       }}
       title={label}
     >
@@ -148,7 +155,7 @@ type SkillsTreeProps = {
     paper: Paper
   ) => void;
 
-  theme: Theme;
+  theme: AppTheme;
 };
 
 export default function SkillsTree({
@@ -176,16 +183,10 @@ export default function SkillsTree({
   regenerateQuestionToPaper,
   theme,
 }: SkillsTreeProps) {
-  const isLight = theme.pageBg === "#eef3f8";
+  const headerGradient = `linear-gradient(180deg, ${theme.panelBg3} 0%, ${theme.panelBg2} 100%)`;
 
-  const headerGradient = isLight
-    ? "linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,248,252,0.98) 100%)"
-    : "linear-gradient(180deg, rgba(18,28,40,0.82) 0%, rgba(12,18,26,0.96) 100%)";
-
-  const helperColor = isLight ? "rgba(80,97,116,0.86)" : "rgba(127,144,164,0.78)";
-  const insetShadow = isLight
-    ? "inset 0 1px 0 rgba(255,255,255,0.55)"
-    : "inset 0 1px 0 rgba(255,255,255,0.03)";
+  const helperColor = theme.subtleText;
+  const insetShadow = `inset 0 1px 0 ${theme.buttonGhostBg}`;
 
   const decMarks = () => setTargetMarks(Math.max(minTargetMarks, targetMarks - 1));
   const incMarks = () => setTargetMarks(Math.min(maxTargetMarks, targetMarks + 1));
@@ -209,7 +210,7 @@ export default function SkillsTree({
   return (
     <section
       style={{
-        borderRight: `1px solid ${theme.border}`,
+        borderRight: `1px solid ${theme.borderSoft}`,
         background: theme.panelBg,
         minHeight: 0,
         display: "grid",
@@ -234,9 +235,9 @@ export default function SkillsTree({
             gap: 14,
             padding: 14,
             border: `1px solid ${theme.borderSoft}`,
-            borderRadius: 16,
+            borderRadius: 18,
             background: headerGradient,
-            boxShadow: isLight ? "0 8px 22px rgba(15,23,42,0.05)" : "none",
+            boxShadow: theme.cardShadow,
           }}
         >
           <div

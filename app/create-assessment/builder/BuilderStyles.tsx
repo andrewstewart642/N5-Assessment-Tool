@@ -1,9 +1,9 @@
 "use client";
 
-import type { Theme } from "@/shared-types/AssessmentTypes";
+import type { AppTheme } from "@/ui/AppTheme";
 
 type Props = {
-  theme: Theme;
+  theme: AppTheme;
 };
 
 export default function BuilderGlobalStyles({ theme }: Props) {
@@ -16,12 +16,12 @@ export default function BuilderGlobalStyles({ theme }: Props) {
       }
 
       .hover-scroll:hover {
-        scrollbar-color: ${theme.pageBg === "#eef3f8" ? "#c4cfdd #edf2f7" : "#2c3c50 #0b1118"};
+        scrollbar-color: ${theme.scrollbarThumb} ${theme.bgPrimary};
       }
 
       .hover-scroll::-webkit-scrollbar {
-        width: 4px;
-        height: 4px;
+        width: 6px;
+        height: 6px;
       }
 
       .hover-scroll::-webkit-scrollbar-track {
@@ -34,15 +34,15 @@ export default function BuilderGlobalStyles({ theme }: Props) {
       }
 
       .hover-scroll:hover::-webkit-scrollbar-track {
-        background: ${theme.pageBg === "#eef3f8" ? "#edf2f7" : "#0b1118"};
+        background: ${theme.bgPrimary};
       }
 
       .hover-scroll:hover::-webkit-scrollbar-thumb {
-        background: ${theme.pageBg === "#eef3f8" ? "#c4cfdd" : "#2c3c50"};
+        background: ${theme.scrollbarThumb};
       }
 
       .hover-scroll:hover::-webkit-scrollbar-thumb:hover {
-        background: ${theme.pageBg === "#eef3f8" ? "#aebdce" : "#3a4e66"};
+        background: ${theme.borderStrong};
       }
 
       .hover-scroll::-webkit-scrollbar-corner {
@@ -61,35 +61,68 @@ export default function BuilderGlobalStyles({ theme }: Props) {
       /* Zoom Overlay */
       .zoom-overlay {
         position: absolute;
-        top: 10px;
-        right: 10px;
-        background-color: rgba(255, 255, 255, 0.8);
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-        border-radius: 8px;
-        padding: 4px 8px;
-        display: flex;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 10px;
+        padding: 6px 10px;
+        min-height: 36px;
+
+        background: ${theme.overlay};
+        border: 1px solid ${theme.borderSoft};
+        border-radius: 999px;
+        box-shadow: ${theme.cardShadow};
+
+        color: ${theme.textSecondary};
+        font-family: Inter, Arial, sans-serif;
         font-size: 12px;
+        line-height: 1;
         z-index: 100;
-        font-family: Arial, sans-serif;
+
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
       }
 
       .zoom-overlay .zoom-text {
-        font-weight: bold;
-        font-size: 14px;
+        min-width: 42px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 12px;
+        color: ${theme.textPrimary};
+        letter-spacing: 0;
       }
 
       .zoom-overlay .zoom-btn {
-        font-size: 18px;
-        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        padding: 0;
+        margin: 0;
+
         background: transparent;
         border: none;
-        color: #333;
+        cursor: pointer;
+
+        color: ${theme.textSecondary};
+        font-size: 16px;
+        line-height: 1;
+
+        transition:
+          color 0.15s ease,
+          transform 0.15s ease,
+          opacity 0.15s ease;
       }
 
       .zoom-overlay .zoom-btn:hover {
-        color: #0078d4;
+        color: ${theme.textPrimary};
+      }
+
+      .zoom-overlay .zoom-btn:active {
+        transform: scale(0.96);
       }
     `}</style>
   );

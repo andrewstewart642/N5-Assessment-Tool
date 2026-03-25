@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AddQuestionButton from "@/app/create-assessment/builder/components/skills-tree/AddQuestionButton";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { AppTheme } from "@/ui/AppTheme";
 import {
   getEligibleDifficultiesForConcept,
   getAvailableDifficultiesForConcept,
@@ -25,7 +26,6 @@ import type {
   Skill,
   SkillPaperSuitability,
   StandardFilter,
-  Theme,
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 
@@ -63,7 +63,7 @@ type Props = {
     difficulty: DifficultyLevel
   ) => void;
 
-  theme: Theme;
+  theme: AppTheme;
 };
 
 function textPart(value: string): PaperPart {
@@ -232,7 +232,7 @@ function DifficultyStepper(props: {
   eligibleLevels: DifficultyLevel[];
   onDecrease: () => void;
   onIncrease: () => void;
-  theme: Theme;
+  theme: AppTheme;
 }) {
   const {
     value,
@@ -274,6 +274,8 @@ function DifficultyStepper(props: {
           fontSize: 18,
           lineHeight: 1,
           padding: 0,
+          transition:
+            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
         }}
         title="Decrease difficulty"
         aria-label="Decrease difficulty"
@@ -288,7 +290,7 @@ function DifficultyStepper(props: {
           border: `1px solid ${isEligible ? theme.border : theme.borderSoft}`,
           background: theme.controlBg,
           color: isEligible ? theme.text : theme.textDim,
-          opacity: isEligible ? 1 : 0.55,
+          opacity: isEligible ? 1 : 0.6,
           display: "grid",
           placeItems: "center",
           whiteSpace: "nowrap",
@@ -326,6 +328,8 @@ function DifficultyStepper(props: {
           fontSize: 18,
           lineHeight: 1,
           padding: 0,
+          transition:
+            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
         }}
         title="Increase difficulty"
         aria-label="Increase difficulty"
@@ -362,7 +366,7 @@ function SkillRow(props: {
     concept: string,
     difficulty: DifficultyLevel
   ) => void;
-  theme: Theme;
+  theme: AppTheme;
 }) {
   const {
     category,
@@ -444,7 +448,6 @@ function SkillRow(props: {
     }
   }, [isExpanded]);
 
-  // Only snap if the current stored difficulty is not supported by the concept at all.
   useEffect(() => {
     if (!selected) return;
     if (availableLevels.length === 0) return;
@@ -508,6 +511,7 @@ function SkillRow(props: {
           fontFamily: UI_TYPO.family,
           boxSizing: "border-box",
           minWidth: 0,
+          transition: "background 0.15s ease",
         }}
       >
         <span
@@ -545,7 +549,7 @@ function SkillRow(props: {
         <div
           style={{
             padding: "10px 12px 12px",
-            background: theme.panelBg,
+            background: theme.panelBg2,
             borderTop: `1px solid ${theme.borderSoft}`,
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr) auto",
@@ -629,6 +633,8 @@ function SkillRow(props: {
                     cursor: ranked.length === 0 ? "default" : "pointer",
                     opacity: ranked.length === 0 ? 0.6 : 1,
                     position: "relative",
+                    transition:
+                      "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
                   }}
                   title={selected ? conceptSelectionText(selected) : "Select skill concept"}
                 >
@@ -681,11 +687,8 @@ function SkillRow(props: {
                       overflowY: "auto",
                       borderRadius: 12,
                       border: `1px solid ${theme.border}`,
-                      background: theme.panelBg,
-                      boxShadow:
-                        theme.pageBg === "#eef3f8"
-                          ? "0 14px 32px rgba(15,23,42,0.12)"
-                          : "0 16px 36px rgba(0,0,0,0.34)",
+                      background: theme.bgElevated,
+                      boxShadow: theme.shadowStrong,
                     }}
                   >
                     <button
@@ -697,7 +700,9 @@ function SkillRow(props: {
                       style={{
                         width: "100%",
                         border: "none",
-                        borderBottom: ranked.length ? `1px solid ${theme.borderSoft}` : "none",
+                        borderBottom: ranked.length
+                          ? `1px solid ${theme.borderSoft}`
+                          : "none",
                         background: currentIndex === -1 ? theme.rowHover : "transparent",
                         color: theme.textMuted,
                         textAlign: "left",
@@ -742,7 +747,7 @@ function SkillRow(props: {
                                 : `1px solid ${theme.borderSoft}`,
                             background: active ? theme.rowHover : "transparent",
                             color: isDropdownEligible ? theme.text : theme.textMuted,
-                            opacity: isDropdownEligible ? 1 : 0.62,
+                            opacity: isDropdownEligible ? 1 : 0.64,
                             textAlign: "left",
                             padding: "10px 12px",
                             cursor: "pointer",
@@ -982,6 +987,7 @@ export default function CategorySection(props: Props) {
           borderRadius: 14,
           border: `1px solid ${theme.border}`,
           overflow: "hidden",
+          boxShadow: theme.cardShadow,
         }}
       >
         <button
@@ -1044,6 +1050,8 @@ export default function CategorySection(props: Props) {
               justifyContent: "center",
               textAlign: "center",
               ...UI_TEXT.buttonTextSmall,
+              transition:
+                "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
             }}
             title={`Collapse expanded skills in ${category}`}
           >
@@ -1059,9 +1067,10 @@ export default function CategorySection(props: Props) {
             border: `1px solid ${theme.borderSoft}`,
             borderRadius: 14,
             overflow: "visible",
-            background: theme.controlBg,
+            background: theme.bgSurfaceAlt,
             position: "relative",
             zIndex: 1,
+            boxShadow: theme.cardShadow,
           }}
         >
           {skills.map((skill, idx) => (

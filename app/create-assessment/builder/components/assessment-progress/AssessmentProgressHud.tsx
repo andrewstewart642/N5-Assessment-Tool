@@ -1,7 +1,8 @@
 "use client";
 
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { Paper, Theme } from "@/shared-types/AssessmentTypes";
+import type { AppTheme } from "@/ui/AppTheme";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 import type {
   BuilderNote,
   BuilderNoteSeverity,
@@ -26,7 +27,7 @@ type Props = {
   p2TimeMinutes: number;
 
   notes: Array<string | BuilderNote>;
-  theme: Theme;
+  theme: AppTheme;
 };
 
 function clampInt(n: number) {
@@ -93,7 +94,7 @@ function LightbulbIcon({ color }: { color: string }) {
 
 function getNotePalette(
   severity: BuilderNoteSeverity,
-  isLight: boolean
+  theme: AppTheme
 ): {
   icon: React.ReactNode;
   textColor: string;
@@ -101,33 +102,33 @@ function getNotePalette(
   borderColor: string;
 } {
   if (severity === "essential") {
-    const color = isLight ? "#d92d20" : "#ff6b6b";
-    const fill = isLight ? "#fde7e7" : "rgba(255,107,107,0.12)";
+    const color = theme.danger;
+    const fill = "rgba(239,68,68,0.12)";
     return {
       icon: <WarningTriangleIcon color={color} fill={fill} />,
       textColor: color,
-      background: isLight ? "rgba(217,45,32,0.04)" : "rgba(255,107,107,0.06)",
-      borderColor: isLight ? "rgba(217,45,32,0.16)" : "rgba(255,107,107,0.20)",
+      background: "rgba(239,68,68,0.05)",
+      borderColor: "rgba(239,68,68,0.18)",
     };
   }
 
   if (severity === "advised") {
-    const color = isLight ? "#b7791f" : "#f6c453";
-    const fill = isLight ? "#fff0cf" : "rgba(246,196,83,0.12)";
+    const color = theme.warning;
+    const fill = "rgba(245,158,11,0.12)";
     return {
       icon: <WarningDiamondIcon color={color} fill={fill} />,
       textColor: color,
-      background: isLight ? "rgba(183,121,31,0.04)" : "rgba(246,196,83,0.06)",
-      borderColor: isLight ? "rgba(183,121,31,0.16)" : "rgba(246,196,83,0.18)",
+      background: "rgba(245,158,11,0.05)",
+      borderColor: "rgba(245,158,11,0.16)",
     };
   }
 
-  const color = isLight ? "rgba(80,97,116,0.92)" : "rgba(169,182,197,0.92)";
+  const color = theme.textSecondary;
   return {
     icon: <LightbulbIcon color={color} />,
     textColor: color,
     background: "transparent",
-    borderColor: isLight ? "rgba(22,34,49,0.08)" : "rgba(255,255,255,0.08)",
+    borderColor: theme.borderSoft,
   };
 }
 
@@ -148,15 +149,6 @@ export default function AssessmentProgressHud(props: Props) {
   const p1t = clampInt(p1TargetMarks);
   const p2t = clampInt(p2TargetMarks);
 
-  const isLight = theme.pageBg === "#eef3f8";
-
-  const muted = isLight ? "rgba(22,34,49,0.92)" : "rgba(230,237,245,0.94)";
-  const dim = isLight ? "rgba(80,97,116,0.92)" : "rgba(127,144,164,0.96)";
-  const border = isLight ? "rgba(22,34,49,0.10)" : "rgba(255,255,255,0.10)";
-  const panelBg = isLight ? "rgba(255,255,255,0.82)" : "rgba(15,22,32,0.88)";
-  const notesBg = isLight ? "rgba(246,249,252,0.92)" : "rgba(11,17,24,0.70)";
-  const topBorder = isLight ? "rgba(22,34,49,0.06)" : "rgba(255,255,255,0.06)";
-
   const structuredNotes = limitBuilderNotes(
     notes.map((note, index) => toBuilderNote(note, index)),
     DEFAULT_BUILDER_NOTE_LIMITS
@@ -167,9 +159,8 @@ export default function AssessmentProgressHud(props: Props) {
       style={{
         width: "100%",
         height: "100%",
-        borderTop: `1px solid ${topBorder}`,
-        background: panelBg,
-        backdropFilter: "blur(10px)",
+        borderTop: `1px solid ${theme.borderSoft}`,
+        background: theme.previewChromeBg,
         display: "grid",
         gridTemplateColumns: "118px 132px minmax(0, 1fr)",
         minHeight: 0,
@@ -181,25 +172,57 @@ export default function AssessmentProgressHud(props: Props) {
         style={{
           minWidth: 0,
           padding: "10px 10px 10px 12px",
-          borderRight: `1px solid ${border}`,
+          borderRight: `1px solid ${theme.borderSoft}`,
           display: "grid",
           gridTemplateRows: "auto 1fr",
           gap: 10,
         }}
       >
-        <div style={{ ...UI_TEXT.sectionTitle, color: muted }}>Marks</div>
+        <div style={{ ...UI_TEXT.sectionTitle, color: theme.textSecondary }}>
+          Marks
+        </div>
 
         <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "26px 1fr", columnGap: 10, alignItems: "center" }}>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted }}>P1</div>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted, textAlign: "right" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "26px 1fr",
+              columnGap: 10,
+              alignItems: "center",
+            }}
+          >
+            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
+              P1
+            </div>
+            <div
+              style={{
+                ...UI_TEXT.controlTextStrong,
+                color: theme.textSecondary,
+                textAlign: "right",
+              }}
+            >
               {p1m}/{p1t}
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "26px 1fr", columnGap: 10, alignItems: "center" }}>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted }}>P2</div>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted, textAlign: "right" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "26px 1fr",
+              columnGap: 10,
+              alignItems: "center",
+            }}
+          >
+            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
+              P2
+            </div>
+            <div
+              style={{
+                ...UI_TEXT.controlTextStrong,
+                color: theme.textSecondary,
+                textAlign: "right",
+              }}
+            >
               {p2m}/{p2t}
             </div>
           </div>
@@ -210,25 +233,57 @@ export default function AssessmentProgressHud(props: Props) {
         style={{
           minWidth: 0,
           padding: "10px 10px",
-          borderRight: `1px solid ${border}`,
+          borderRight: `1px solid ${theme.borderSoft}`,
           display: "grid",
           gridTemplateRows: "auto 1fr",
           gap: 10,
         }}
       >
-        <div style={{ ...UI_TEXT.sectionTitle, color: muted }}>Time</div>
+        <div style={{ ...UI_TEXT.sectionTitle, color: theme.textSecondary }}>
+          Time
+        </div>
 
         <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "26px 1fr", columnGap: 10, alignItems: "center" }}>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted }}>P1</div>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted, textAlign: "right" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "26px 1fr",
+              columnGap: 10,
+              alignItems: "center",
+            }}
+          >
+            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
+              P1
+            </div>
+            <div
+              style={{
+                ...UI_TEXT.controlTextStrong,
+                color: theme.textSecondary,
+                textAlign: "right",
+              }}
+            >
               ~{formatMinutes(p1TimeMinutes)}
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "26px 1fr", columnGap: 10, alignItems: "center" }}>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted }}>P2</div>
-            <div style={{ ...UI_TEXT.controlTextStrong, color: muted, textAlign: "right" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "26px 1fr",
+              columnGap: 10,
+              alignItems: "center",
+            }}
+          >
+            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
+              P2
+            </div>
+            <div
+              style={{
+                ...UI_TEXT.controlTextStrong,
+                color: theme.textSecondary,
+                textAlign: "right",
+              }}
+            >
               ~{formatMinutes(p2TimeMinutes)}
             </div>
           </div>
@@ -244,19 +299,21 @@ export default function AssessmentProgressHud(props: Props) {
           gap: 8,
         }}
       >
-        <div style={{ ...UI_TEXT.sectionTitle, color: muted }}>Notes</div>
+        <div style={{ ...UI_TEXT.sectionTitle, color: theme.textSecondary }}>
+          Notes
+        </div>
 
         <div
           className="hover-scroll"
           style={{
             minHeight: 0,
             height: "100%",
-            border: `1px solid ${border}`,
-            background: notesBg,
-            borderRadius: 10,
+            border: `1px solid ${theme.borderSoft}`,
+            background: theme.bgSurfaceAlt,
+            borderRadius: 12,
             padding: "8px 10px",
             overflowY: "auto",
-            color: structuredNotes.length ? muted : dim,
+            color: structuredNotes.length ? theme.textSecondary : theme.textDim,
             lineHeight: 1.35,
             fontFamily: UI_TYPO.family,
             fontSize: UI_TYPO.sizeBase,
@@ -265,7 +322,7 @@ export default function AssessmentProgressHud(props: Props) {
           {structuredNotes.length ? (
             <div style={{ display: "grid", gap: 8 }}>
               {structuredNotes.map((note) => {
-                const palette = getNotePalette(note.severity, isLight);
+                const palette = getNotePalette(note.severity, theme);
 
                 return (
                   <div
@@ -296,15 +353,17 @@ export default function AssessmentProgressHud(props: Props) {
 
                     <div
                       style={{
-                      ...UI_TEXT.controlText,
-                      whiteSpace: "normal",
-                      overflowWrap: "anywhere",
-                      color: note.severity === "suggestion" ? muted : palette.textColor,
-                      fontWeight:
-                        note.severity === "essential"
-                          ? UI_TYPO.weightSemibold
-                          : UI_TYPO.weightMedium,
-                      
+                        ...UI_TEXT.controlText,
+                        whiteSpace: "normal",
+                        overflowWrap: "anywhere",
+                        color:
+                          note.severity === "suggestion"
+                            ? theme.textSecondary
+                            : palette.textColor,
+                        fontWeight:
+                          note.severity === "essential"
+                            ? UI_TYPO.weightSemibold
+                            : UI_TYPO.weightMedium,
                       }}
                     >
                       {note.message}
@@ -314,7 +373,9 @@ export default function AssessmentProgressHud(props: Props) {
               })}
             </div>
           ) : (
-            <div style={{ ...UI_TEXT.controlTextStrong }}>No notes yet.</div>
+            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
+              No notes yet.
+            </div>
           )}
         </div>
       </div>
