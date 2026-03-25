@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import {
-  APPEARANCE_STORAGE_KEY,
-  getTheme,
-  type AppearancePreference,
-} from "@/app/ui/AppTheme";
+import { getTheme } from "@/ui/AppTheme";
+
+const APPEARANCE_STORAGE_KEY = "n5-assessment-tool-appearance";
+type AppearancePreference = "light" | "dark" | "system";
 
 type HomeCard = {
   title: string;
@@ -65,10 +64,14 @@ export default function HomePage() {
     return () => media.removeListener(apply);
   }, []);
 
-  const theme = useMemo(
-    () => getTheme(appearance, systemPrefersDark),
-    [appearance, systemPrefersDark]
-  );
+  const resolvedAppearance =
+  appearance === "system"
+    ? systemPrefersDark
+      ? "dark"
+      : "light"
+    : appearance;
+
+const theme = getTheme(resolvedAppearance);
 
   return (
     <main

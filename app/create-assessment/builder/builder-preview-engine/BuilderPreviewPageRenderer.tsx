@@ -7,7 +7,7 @@ import PaperQuestionLocked from "@/app/create-assessment/builder/components/asse
 import PaperQuestionDraft from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionDraft";
 import MeasureBox from "@/app/create-assessment/builder/components/assessment-preview/MeasureBox";
 import { UI_TEXT } from "@/app/ui/UiTypography";
-import { getTheme } from "@/app/ui/AppTheme";
+import { getTheme } from "@/ui/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import {
   spacingBasePxFor,

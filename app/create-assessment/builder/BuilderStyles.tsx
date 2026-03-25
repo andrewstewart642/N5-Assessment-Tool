@@ -61,35 +61,37 @@ export default function BuilderGlobalStyles({ theme }: Props) {
       /* Zoom Overlay */
       .zoom-overlay {
         position: absolute;
-        top: 12px;
+        top: 8px;
         left: 50%;
         transform: translateX(-50%);
+
         display: inline-flex;
         align-items: center;
-        gap: 10px;
-        padding: 6px 10px;
-        min-height: 36px;
+        gap: 6px;
 
-        background: ${theme.overlay};
+        padding: 4px 8px;
+        min-height: 30px;
+
+        background: ${theme.bgElevated};
         border: 1px solid ${theme.borderSoft};
-        border-radius: 999px;
-        box-shadow: ${theme.cardShadow};
+        border-radius: 12px;
+        box-shadow: ${theme.shadow};
 
         color: ${theme.textSecondary};
         font-family: Inter, Arial, sans-serif;
-        font-size: 12px;
+        font-size: 11px;
         line-height: 1;
         z-index: 100;
 
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
       }
 
       .zoom-overlay .zoom-text {
-        min-width: 42px;
+        min-width: 38px;
         text-align: center;
-        font-weight: 600;
-        font-size: 12px;
+        font-weight: 700;
+        font-size: 13px;
         color: ${theme.textPrimary};
         letter-spacing: 0;
       }
@@ -98,9 +100,9 @@ export default function BuilderGlobalStyles({ theme }: Props) {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 18px;
-        height: 18px;
-        padding: 0;
+        width: 16px;
+        height: 16px;
+        padding: 0 3px;
         margin: 0;
 
         background: transparent;
@@ -108,17 +110,14 @@ export default function BuilderGlobalStyles({ theme }: Props) {
         cursor: pointer;
 
         color: ${theme.textSecondary};
-        font-size: 16px;
+        font-size: 14px;
         line-height: 1;
 
-        transition:
-          color 0.15s ease,
-          transform 0.15s ease,
-          opacity 0.15s ease;
+        transition: color 0.15s ease;
       }
 
       .zoom-overlay .zoom-btn:hover {
-        color: ${theme.textPrimary};
+        color: ${theme.accentPrimary};
       }
 
       .zoom-overlay .zoom-btn:active {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { AppTheme as Theme } from "@/app/ui/AppTheme";
+import type { AppTheme as Theme } from "@/ui/AppTheme";
 
 type Props = {
   theme: Theme;

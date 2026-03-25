@@ -1,7 +1,7 @@
 "use client";
 
 import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
-import { getTheme, type AppearancePreference } from "@/app/ui/AppTheme";
+import { getTheme, type AppearancePreference } from "@/ui/AppTheme";
 
 type Theme = ReturnType<typeof getTheme>;
 

@@ -14,6 +14,7 @@ export type Theme = {
   border: string;
   borderSoft: string;
   borderStrong: string;
+  viewerChromeBorder: string;
 
   text: string;
   subtleText: string;
@@ -56,6 +57,7 @@ const DARK_THEME: Theme = {
   border: "rgba(120,145,175,0.18)",
   borderSoft: "rgba(120,145,175,0.10)",
   borderStrong: "rgba(120,145,175,0.34)",
+  viewerChromeBorder: "rgba(227,235,248,0.06)",
 
   text: "#f3f7ff",
   subtleText: "rgba(227,235,248,0.78)",
@@ -96,6 +98,7 @@ const LIGHT_THEME: Theme = {
   border: "rgba(27,51,84,0.12)",
   borderSoft: "rgba(27,51,84,0.08)",
   borderStrong: "rgba(27,51,84,0.22)",
+  viewerChromeBorder: "rgba(20,33,51,0.08)",
 
   text: "#142133",
   subtleText: "rgba(20,33,51,0.76)",

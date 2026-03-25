@@ -4,11 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import {
-  APPEARANCE_STORAGE_KEY,
-  getTheme,
-  type AppearancePreference,
-} from "@/app/ui/AppTheme";
+import { getTheme } from "@/ui/AppTheme";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import LevelSelect from "./components/LevelSelect";
 import ClassCoverageSelect from "../components/ClassCoverageSelect";
@@ -28,6 +24,9 @@ import {
   createSavedAssessmentDraft,
   setCurrentSavedAssessmentId,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
+
+const APPEARANCE_STORAGE_KEY = "n5-assessment-tool-appearance";
+type AppearancePreference = "light" | "dark" | "system";
 
 type SetupCardProps = {
   title: string;
@@ -409,10 +408,14 @@ export default function CreateAssessmentSetupPage() {
     return () => media.removeListener(apply);
   }, []);
 
-  const theme = useMemo(
-    () => getTheme(appearance, systemPrefersDark),
-    [appearance, systemPrefersDark]
-  );
+  const resolvedAppearance =
+    appearance === "system"
+      ? systemPrefersDark
+        ? "dark"
+        : "light"
+      : appearance;
+
+  const theme = useMemo(() => getTheme(resolvedAppearance), [resolvedAppearance]);
 
   useEffect(() => {
     if (!buildPriority || !paperStructure) return;

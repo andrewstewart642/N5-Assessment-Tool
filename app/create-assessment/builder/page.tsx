@@ -1097,9 +1097,12 @@ export default function CreateAssessmentBuilderPage() {
               selectedClassIds={builderSelectedClassIds}
               useCompleteCourseCoverage={builderUseCompleteCourseCoverage}
               onToggleClass={handleBuilderToggleClass}
-              onSelectCompleteCourseCoverage={
-                handleBuilderSelectCompleteCourseCoverage
-              }
+              onSelectCompleteCourseCoverage={handleBuilderSelectCompleteCourseCoverage}
+              zoomPct={zoomPct}
+              zoomIn={zoomIn}
+              zoomOut={zoomOut}
+              currentViewerPage={currentViewerPage}
+              totalViewerPages={totalViewerPages}
             />
 
             <BuilderPreviewPane
@@ -1107,11 +1110,6 @@ export default function CreateAssessmentBuilderPage() {
               previewPaneRef={previewPaneRef}
               pageWrapperRefs={pageWrapperRefs}
               flashWarning={flashWarning}
-              currentViewerPage={currentViewerPage}
-              totalViewerPages={totalViewerPages}
-              zoomPct={zoomPct}
-              zoomIn={zoomIn}
-              zoomOut={zoomOut}
               previewPages={previewPages}
               viewPaper={viewPaper}
               viewerScale={viewerScale}

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
-import type { AppearancePreference } from "@/app/ui/AppTheme";
+import type { AppearancePreference } from "@/ui/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {

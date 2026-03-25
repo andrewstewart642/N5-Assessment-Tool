@@ -5,11 +5,11 @@ import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import {
-  APPEARANCE_STORAGE_KEY,
-  getTheme,
-  type AppearancePreference,
-} from "@/app/ui/AppTheme";
+import { getTheme } from "@/ui/AppTheme";
+
+const APPEARANCE_STORAGE_KEY = "n5-assessment-tool-appearance";
+
+type AppearancePreference = "light" | "dark" | "system";
 
 type NavItem = {
   label: string;
@@ -74,10 +74,14 @@ export default function AppShellTopBar() {
     return () => media.removeListener(apply);
   }, []);
 
-  const theme = useMemo(
-    () => getTheme(appearance, systemPrefersDark),
-    [appearance, systemPrefersDark]
-  );
+  const resolvedAppearance =
+    appearance === "system"
+      ? systemPrefersDark
+        ? "dark"
+        : "light"
+      : appearance;
+
+  const theme = useMemo(() => getTheme(resolvedAppearance), [resolvedAppearance]);
 
   function handleOpenSettings() {
     if (typeof window === "undefined") return;
@@ -128,7 +132,7 @@ export default function AppShellTopBar() {
             letterSpacing: 0.2,
           }}
         >
-          Reserved space
+          Reserved for logo
         </div>
       </div>
 
