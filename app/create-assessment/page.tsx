@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import { getTheme } from "@/ui/AppTheme";
+import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import LevelSelect from "./components/LevelSelect";
 import ClassCoverageSelect from "../components/ClassCoverageSelect";
@@ -25,22 +25,20 @@ import {
   setCurrentSavedAssessmentId,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 
-const APPEARANCE_STORAGE_KEY = "n5-assessment-tool-appearance";
-type AppearancePreference = "light" | "dark" | "system";
-
 type SetupCardProps = {
   title: string;
   children: React.ReactNode;
+  theme: ReturnType<typeof useSettings>["theme"];
 };
 
-function SetupCard({ title, children }: SetupCardProps) {
+function SetupCard({ title, children, theme }: SetupCardProps) {
   return (
     <section
       style={{
         minWidth: 0,
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: `1px solid ${theme.border}`,
         borderRadius: 22,
-        background: "rgba(255,255,255,0.03)",
+        background: theme.panelBg,
         padding: 18,
         boxSizing: "border-box",
       }}
@@ -50,7 +48,7 @@ function SetupCard({ title, children }: SetupCardProps) {
           fontSize: 18,
           fontWeight: 700,
           marginBottom: 14,
-          color: "#f7fbff",
+          color: theme.text,
         }}
       >
         {title}
@@ -66,9 +64,16 @@ type ChoiceRowProps = {
   selected: boolean;
   onClick: () => void;
   children?: React.ReactNode;
+  theme: ReturnType<typeof useSettings>["theme"];
 };
 
-function ChoiceRow({ label, selected, onClick, children }: ChoiceRowProps) {
+function ChoiceRow({
+  label,
+  selected,
+  onClick,
+  children,
+  theme,
+}: ChoiceRowProps) {
   return (
     <div style={{ display: "grid", gap: 10 }}>
       <button
@@ -80,12 +85,12 @@ function ChoiceRow({ label, selected, onClick, children }: ChoiceRowProps) {
           gap: 10,
           width: "100%",
           border: `1px solid ${
-            selected ? "rgba(96,165,250,0.95)" : "rgba(255,255,255,0.10)"
+            selected ? theme.accent : theme.border
           }`,
           background: selected
-            ? "rgba(37,99,235,0.18)"
-            : "rgba(255,255,255,0.02)",
-          color: selected ? "#eaf3ff" : "#d6e3f3",
+            ? theme.accentSoft
+            : theme.buttonGhostBg,
+          color: selected ? theme.text : theme.textSoft,
           borderRadius: 14,
           padding: "12px 14px",
           cursor: "pointer",
@@ -101,9 +106,9 @@ function ChoiceRow({ label, selected, onClick, children }: ChoiceRowProps) {
             height: 16,
             borderRadius: 999,
             border: `2px solid ${
-              selected ? "#93c5fd" : "rgba(214,227,243,0.50)"
+              selected ? theme.accent : theme.textMuted
             }`,
-            background: selected ? "#60a5fa" : "transparent",
+            background: selected ? theme.accent : "transparent",
             boxSizing: "border-box",
             flexShrink: 0,
           }}
@@ -117,8 +122,8 @@ function ChoiceRow({ label, selected, onClick, children }: ChoiceRowProps) {
             marginLeft: 14,
             padding: 12,
             borderRadius: 16,
-            border: "1px solid rgba(96,165,250,0.22)",
-            background: "rgba(255,255,255,0.035)",
+            border: `1px solid ${theme.border}`,
+            background: theme.buttonGhostBg,
             display: "grid",
             gap: 10,
           }}
@@ -134,9 +139,10 @@ type CheckRowProps = {
   label: string;
   checked: boolean;
   onToggle: () => void;
+  theme: ReturnType<typeof useSettings>["theme"];
 };
 
-function CheckRow({ label, checked, onToggle }: CheckRowProps) {
+function CheckRow({ label, checked, onToggle, theme }: CheckRowProps) {
   return (
     <button
       type="button"
@@ -147,12 +153,12 @@ function CheckRow({ label, checked, onToggle }: CheckRowProps) {
         gap: 10,
         width: "100%",
         border: `1px solid ${
-          checked ? "rgba(96,165,250,0.95)" : "rgba(255,255,255,0.10)"
+          checked ? theme.accent : theme.border
         }`,
         background: checked
-          ? "rgba(37,99,235,0.18)"
-          : "rgba(255,255,255,0.02)",
-        color: checked ? "#eaf3ff" : "#d6e3f3",
+          ? theme.accentSoft
+          : theme.buttonGhostBg,
+        color: checked ? theme.text : theme.textSoft,
         borderRadius: 14,
         padding: "12px 14px",
         cursor: "pointer",
@@ -168,9 +174,9 @@ function CheckRow({ label, checked, onToggle }: CheckRowProps) {
           height: 16,
           borderRadius: 4,
           border: `2px solid ${
-            checked ? "#93c5fd" : "rgba(214,227,243,0.50)"
+            checked ? theme.accent : theme.textMuted
           }`,
-          background: checked ? "#60a5fa" : "transparent",
+          background: checked ? theme.accent : "transparent",
           boxSizing: "border-box",
           flexShrink: 0,
         }}
@@ -185,15 +191,22 @@ type NumberFieldProps = {
   value: string;
   onChange: (value: string) => void;
   suffix: string;
+  theme: ReturnType<typeof useSettings>["theme"];
 };
 
-function NumberField({ label, value, onChange, suffix }: NumberFieldProps) {
+function NumberField({
+  label,
+  value,
+  onChange,
+  suffix,
+  theme,
+}: NumberFieldProps) {
   return (
     <label style={{ display: "grid", gap: 6 }}>
       <span
         style={{
           fontSize: 13,
-          color: "rgba(214,227,243,0.72)",
+          color: theme.textMuted,
           fontWeight: 600,
         }}
       >
@@ -206,9 +219,9 @@ function NumberField({ label, value, onChange, suffix }: NumberFieldProps) {
           gridTemplateColumns: "1fr auto",
           alignItems: "center",
           gap: 10,
-          border: "1px solid rgba(255,255,255,0.10)",
+          border: `1px solid ${theme.border}`,
           borderRadius: 14,
-          background: "rgba(255,255,255,0.02)",
+          background: theme.buttonGhostBg,
           padding: "10px 12px",
         }}
       >
@@ -222,7 +235,7 @@ function NumberField({ label, value, onChange, suffix }: NumberFieldProps) {
             border: "none",
             outline: "none",
             background: "transparent",
-            color: "#f7fbff",
+            color: theme.text,
             fontSize: 16,
             fontFamily: "inherit",
             minWidth: 0,
@@ -232,7 +245,7 @@ function NumberField({ label, value, onChange, suffix }: NumberFieldProps) {
         <span
           style={{
             fontSize: 13,
-            color: "rgba(214,227,243,0.70)",
+            color: theme.textMuted,
             whiteSpace: "nowrap",
           }}
         >
@@ -250,6 +263,7 @@ type TextFieldProps = {
   placeholder?: string;
   onFocus?: () => void;
   type?: "text" | "date";
+  theme: ReturnType<typeof useSettings>["theme"];
 };
 
 function TextField({
@@ -259,13 +273,14 @@ function TextField({
   placeholder,
   onFocus,
   type = "text",
+  theme,
 }: TextFieldProps) {
   return (
     <label style={{ display: "grid", gap: 6 }}>
       <span
         style={{
           fontSize: 13,
-          color: "rgba(214,227,243,0.72)",
+          color: theme.textMuted,
           fontWeight: 600,
         }}
       >
@@ -274,9 +289,9 @@ function TextField({
 
       <div
         style={{
-          border: "1px solid rgba(255,255,255,0.10)",
+          border: `1px solid ${theme.border}`,
           borderRadius: 14,
-          background: "rgba(255,255,255,0.02)",
+          background: theme.buttonGhostBg,
           padding: "10px 12px",
         }}
       >
@@ -291,7 +306,7 @@ function TextField({
             border: "none",
             outline: "none",
             background: "transparent",
-            color: "#f7fbff",
+            color: theme.text,
             fontSize: 16,
             fontFamily: "inherit",
           }}
@@ -343,9 +358,7 @@ function loadAllClasses(): SchoolClass[] {
 
 export default function CreateAssessmentSetupPage() {
   const router = useRouter();
-
-  const [appearance, setAppearance] = useState<AppearancePreference>("dark");
-  const [systemPrefersDark, setSystemPrefersDark] = useState(true);
+  const { theme } = useSettings();
 
   const [assessmentType, setAssessmentType] = useState<AssessmentType | null>(
     null
@@ -378,18 +391,6 @@ export default function CreateAssessmentSetupPage() {
   const [allClasses, setAllClasses] = useState<SchoolClass[]>([]);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => setSystemPrefersDark(media.matches);
-
-    apply();
-
-    const raw = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-    if (raw === "dark" || raw === "light" || raw === "system") {
-      setAppearance(raw);
-    }
-
     const savedCoverageBrief = loadAssessmentClassCoverageBrief();
     if (savedCoverageBrief) {
       setSelectedLevelId(savedCoverageBrief.levelId ?? "N5_MATHS");
@@ -398,24 +399,7 @@ export default function CreateAssessmentSetupPage() {
     }
 
     setAllClasses(loadAllClasses());
-
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", apply);
-      return () => media.removeEventListener("change", apply);
-    }
-
-    media.addListener(apply);
-    return () => media.removeListener(apply);
   }, []);
-
-  const resolvedAppearance =
-    appearance === "system"
-      ? systemPrefersDark
-        ? "dark"
-        : "light"
-      : appearance;
-
-  const theme = useMemo(() => getTheme(resolvedAppearance), [resolvedAppearance]);
 
   useEffect(() => {
     if (!buildPriority || !paperStructure) return;
@@ -779,6 +763,7 @@ export default function CreateAssessmentSetupPage() {
                 value={assessmentName}
                 onChange={setAssessmentName}
                 onFocus={handleAssessmentNameFocus}
+                theme={theme}
               />
             </div>
 
@@ -798,6 +783,7 @@ export default function CreateAssessmentSetupPage() {
               type="date"
               value={assessmentDate}
               onChange={setAssessmentDate}
+              theme={theme}
             />
           </div>
         </section>
@@ -810,39 +796,43 @@ export default function CreateAssessmentSetupPage() {
             alignItems: "start",
           }}
         >
-          <SetupCard title="1. Assessment Type">
+          <SetupCard title="1. Assessment Type" theme={theme}>
             <ChoiceRow
               label="Prelim Assessment (SQA)"
               selected={assessmentType === "PRELIM"}
               onClick={() => setAssessmentType("PRELIM")}
+              theme={theme}
             />
 
             <ChoiceRow
               label="Class Test"
               selected={assessmentType === "CLASS_TEST"}
               onClick={() => setAssessmentType("CLASS_TEST")}
+              theme={theme}
             />
 
             <ChoiceRow
               label="Homework"
               selected={assessmentType === "HOMEWORK"}
               onClick={() => setAssessmentType("HOMEWORK")}
+              theme={theme}
             />
           </SetupCard>
 
-          <SetupCard title="2. Paper Structure">
+          <SetupCard title="2. Paper Structure" theme={theme}>
             {showPaperStructure ? (
               <>
                 <ChoiceRow
                   label="Both Paper 1 & Paper 2"
                   selected={paperStructure === "BOTH"}
                   onClick={() => setPaperStructure("BOTH")}
+                  theme={theme}
                 >
                   <div
                     style={{
                       fontSize: 13,
                       fontWeight: 700,
-                      color: "rgba(214,227,243,0.76)",
+                      color: theme.textMuted,
                       marginBottom: 2,
                     }}
                   >
@@ -853,12 +843,14 @@ export default function CreateAssessmentSetupPage() {
                     label="Cover sheet"
                     checked={includeCoverSheet}
                     onToggle={() => setIncludeCoverSheet((prev) => !prev)}
+                    theme={theme}
                   />
 
                   <CheckRow
                     label="Formula sheet"
                     checked={includeFormulaSheet}
                     onToggle={() => setIncludeFormulaSheet((prev) => !prev)}
+                    theme={theme}
                   />
                 </ChoiceRow>
 
@@ -866,12 +858,13 @@ export default function CreateAssessmentSetupPage() {
                   label="Paper 1 only"
                   selected={paperStructure === "P1_ONLY"}
                   onClick={() => setPaperStructure("P1_ONLY")}
+                  theme={theme}
                 >
                   <div
                     style={{
                       fontSize: 13,
                       fontWeight: 700,
-                      color: "rgba(214,227,243,0.76)",
+                      color: theme.textMuted,
                       marginBottom: 2,
                     }}
                   >
@@ -882,12 +875,14 @@ export default function CreateAssessmentSetupPage() {
                     label="Cover sheet"
                     checked={includeCoverSheet}
                     onToggle={() => setIncludeCoverSheet((prev) => !prev)}
+                    theme={theme}
                   />
 
                   <CheckRow
                     label="Formula sheet"
                     checked={includeFormulaSheet}
                     onToggle={() => setIncludeFormulaSheet((prev) => !prev)}
+                    theme={theme}
                   />
                 </ChoiceRow>
 
@@ -895,12 +890,13 @@ export default function CreateAssessmentSetupPage() {
                   label="Paper 2 only"
                   selected={paperStructure === "P2_ONLY"}
                   onClick={() => setPaperStructure("P2_ONLY")}
+                  theme={theme}
                 >
                   <div
                     style={{
                       fontSize: 13,
                       fontWeight: 700,
-                      color: "rgba(214,227,243,0.76)",
+                      color: theme.textMuted,
                       marginBottom: 2,
                     }}
                   >
@@ -911,22 +907,24 @@ export default function CreateAssessmentSetupPage() {
                     label="Cover sheet"
                     checked={includeCoverSheet}
                     onToggle={() => setIncludeCoverSheet((prev) => !prev)}
+                    theme={theme}
                   />
 
                   <CheckRow
                     label="Formula sheet"
                     checked={includeFormulaSheet}
                     onToggle={() => setIncludeFormulaSheet((prev) => !prev)}
+                    theme={theme}
                   />
                 </ChoiceRow>
               </>
             ) : (
               <div
                 style={{
-                  border: "1px dashed rgba(255,255,255,0.10)",
+                  border: `1px dashed ${theme.border}`,
                   borderRadius: 14,
                   padding: "14px 16px",
-                  color: "rgba(214,227,243,0.58)",
+                  color: theme.textMuted,
                   fontSize: 14,
                   lineHeight: 1.5,
                 }}
@@ -936,19 +934,20 @@ export default function CreateAssessmentSetupPage() {
             )}
           </SetupCard>
 
-          <SetupCard title="3. Build Priority">
+          <SetupCard title="3. Build Priority" theme={theme}>
             {showBuildPriority ? (
               <>
                 <ChoiceRow
                   label="Marks-led"
                   selected={buildPriority === "MARKS"}
                   onClick={() => setBuildPriority("MARKS")}
+                  theme={theme}
                 >
                   <div
                     style={{
                       fontSize: 13,
                       fontWeight: 700,
-                      color: "rgba(214,227,243,0.76)",
+                      color: theme.textMuted,
                       marginBottom: 2,
                     }}
                   >
@@ -961,6 +960,7 @@ export default function CreateAssessmentSetupPage() {
                       value={marksTargetP1}
                       onChange={setMarksTargetP1}
                       suffix="marks"
+                      theme={theme}
                     />
                   ) : null}
 
@@ -970,6 +970,7 @@ export default function CreateAssessmentSetupPage() {
                       value={marksTargetP2}
                       onChange={setMarksTargetP2}
                       suffix="marks"
+                      theme={theme}
                     />
                   ) : null}
 
@@ -978,7 +979,7 @@ export default function CreateAssessmentSetupPage() {
                       display: "grid",
                       gap: 4,
                       fontSize: 13,
-                      color: "rgba(214,227,243,0.72)",
+                      color: theme.textMuted,
                     }}
                   >
                     {buildPriority === "MARKS"
@@ -991,12 +992,13 @@ export default function CreateAssessmentSetupPage() {
                   label="Time-led"
                   selected={buildPriority === "TIME"}
                   onClick={() => setBuildPriority("TIME")}
+                  theme={theme}
                 >
                   <div
                     style={{
                       fontSize: 13,
                       fontWeight: 700,
-                      color: "rgba(214,227,243,0.76)",
+                      color: theme.textMuted,
                       marginBottom: 2,
                     }}
                   >
@@ -1009,6 +1011,7 @@ export default function CreateAssessmentSetupPage() {
                       value={timeTargetP1}
                       onChange={setTimeTargetP1}
                       suffix="minutes"
+                      theme={theme}
                     />
                   ) : null}
 
@@ -1018,6 +1021,7 @@ export default function CreateAssessmentSetupPage() {
                       value={timeTargetP2}
                       onChange={setTimeTargetP2}
                       suffix="minutes"
+                      theme={theme}
                     />
                   ) : null}
 
@@ -1026,7 +1030,7 @@ export default function CreateAssessmentSetupPage() {
                       display: "grid",
                       gap: 4,
                       fontSize: 13,
-                      color: "rgba(214,227,243,0.72)",
+                      color: theme.textMuted,
                     }}
                   >
                     {buildPriority === "TIME"
@@ -1038,10 +1042,10 @@ export default function CreateAssessmentSetupPage() {
             ) : (
               <div
                 style={{
-                  border: "1px dashed rgba(255,255,255,0.10)",
+                  border: `1px dashed ${theme.border}`,
                   borderRadius: 14,
                   padding: "14px 16px",
-                  color: "rgba(214,227,243,0.58)",
+                  color: theme.textMuted,
                   fontSize: 14,
                   lineHeight: 1.5,
                 }}
@@ -1067,18 +1071,16 @@ export default function CreateAssessmentSetupPage() {
               height: 58,
               borderRadius: 18,
               border: `1px solid ${
-                showContinue && targetsValid
-                  ? "rgba(96,165,250,0.95)"
-                  : "rgba(255,255,255,0.10)"
+                showContinue && targetsValid ? theme.accent : theme.border
               }`,
               background:
                 showContinue && targetsValid
-                  ? "rgba(37,99,235,0.20)"
-                  : "rgba(255,255,255,0.03)",
+                  ? theme.accentSoft
+                  : theme.buttonGhostBg,
               color:
                 showContinue && targetsValid
-                  ? "#f7fbff"
-                  : "rgba(214,227,243,0.45)",
+                  ? theme.text
+                  : theme.textMuted,
               cursor:
                 showContinue && targetsValid ? "pointer" : "not-allowed",
               fontSize: 16,

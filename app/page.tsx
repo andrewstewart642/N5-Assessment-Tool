@@ -1,13 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import { getTheme } from "@/ui/AppTheme";
-
-const APPEARANCE_STORAGE_KEY = "n5-assessment-tool-appearance";
-type AppearancePreference = "light" | "dark" | "system";
+import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 
 type HomeCard = {
   title: string;
@@ -39,45 +35,18 @@ const CARDS: HomeCard[] = [
 ];
 
 export default function HomePage() {
-  const [appearance, setAppearance] = useState<AppearancePreference>("dark");
-  const [systemPrefersDark, setSystemPrefersDark] = useState(true);
+  const { theme } = useSettings();
+  const isLight = theme.inverseText === "#ffffff";
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => setSystemPrefersDark(media.matches);
-
-    apply();
-
-    const raw = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-    if (raw === "dark" || raw === "light" || raw === "system") {
-      setAppearance(raw);
-    }
-
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", apply);
-      return () => media.removeEventListener("change", apply);
-    }
-
-    media.addListener(apply);
-    return () => media.removeListener(apply);
-  }, []);
-
-  const resolvedAppearance =
-  appearance === "system"
-    ? systemPrefersDark
-      ? "dark"
-      : "light"
-    : appearance;
-
-const theme = getTheme(resolvedAppearance);
+  const lightPageBg = "#e3e6e8";
+  const lightSurface = "#eceff1";
+  const lightRaised = "#e7eaed";
 
   return (
     <main
       style={{
         minHeight: "100%",
-        background: theme.pageBg,
+        background: isLight ? lightPageBg : theme.pageBg,
         color: theme.text,
         padding: 24,
         boxSizing: "border-box",
@@ -94,9 +63,10 @@ const theme = getTheme(resolvedAppearance);
         <section
           style={{
             border: `1px solid ${theme.border}`,
-            background: theme.panelBg,
+            background: isLight ? lightSurface : theme.panelBg,
             borderRadius: 22,
             padding: "22px 24px",
+            boxShadow: "none",
           }}
         >
           <div
@@ -142,16 +112,13 @@ const theme = getTheme(resolvedAppearance);
                 color: "inherit",
                 minHeight: 220,
                 border: `1px solid ${theme.border}`,
-                background: theme.panelBg,
+                background: isLight ? lightSurface : theme.panelBg,
                 borderRadius: 24,
                 padding: 22,
                 display: "grid",
                 alignContent: "space-between",
                 boxSizing: "border-box",
-                boxShadow:
-                  theme.pageBg === "#eef3f8"
-                    ? "0 12px 24px rgba(15,23,42,0.06)"
-                    : "0 12px 24px rgba(0,0,0,0.18)",
+                boxShadow: "none",
               }}
             >
               <div
@@ -160,10 +127,7 @@ const theme = getTheme(resolvedAppearance);
                   height: 54,
                   borderRadius: 16,
                   border: `1px solid ${theme.border}`,
-                  background:
-                    theme.pageBg === "#eef3f8"
-                      ? "rgba(255,255,255,0.95)"
-                      : "rgba(255,255,255,0.04)",
+                  background: isLight ? lightRaised : "rgba(255,255,255,0.04)",
                 }}
               />
 

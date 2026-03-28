@@ -5,6 +5,8 @@ import "./globals.css";
 
 import AppShellTopBar from "@/page-sections/AppShellTopBar";
 import { getSQATypographyCssVars } from "@/app/paper-layout/SQA-Typography";
+import { SettingsProvider } from "@/app/settings-bar/GlobalSettingsContext";
+import SettingsBar from "@/app/settings-bar/GlobalSettingsBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,16 +51,20 @@ export default function RootLayout({
           } as React.CSSProperties
         }
       >
-        <div
-          style={{
-            minHeight: "100vh",
-            display: "grid",
-            gridTemplateRows: "56px 1fr",
-          }}
-        >
-          <AppShellTopBar />
-          <div style={{ minHeight: 0 }}>{children}</div>
-        </div>
+        <SettingsProvider>
+          <div
+            style={{
+              minHeight: "100vh",
+              display: "grid",
+              gridTemplateRows: "56px 1fr",
+            }}
+          >
+            <AppShellTopBar />
+            <div style={{ minHeight: 0 }}>{children}</div>
+          </div>
+
+          <SettingsBar />
+        </SettingsProvider>
       </body>
     </html>
   );

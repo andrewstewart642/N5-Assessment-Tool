@@ -2,14 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import { getTheme } from "@/ui/AppTheme";
-
-const APPEARANCE_STORAGE_KEY = "n5-assessment-tool-appearance";
-
-type AppearancePreference = "light" | "dark" | "system";
+import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 
 type NavItem = {
   label: string;
@@ -41,51 +36,26 @@ const NAV_ITEMS: NavItem[] = [
     label: "My Classes",
     href: "/my-classes",
     isActive: (pathname) =>
-      pathname === "/my-classes" ||
-      pathname.startsWith("/my-classes/"),
+      pathname === "/my-classes" || pathname.startsWith("/my-classes/"),
   },
 ];
 
 export default function AppShellTopBar() {
   const pathname = usePathname();
+  const { theme, openSettings } = useSettings();
 
-  const [appearance, setAppearance] = useState<AppearancePreference>("dark");
-  const [systemPrefersDark, setSystemPrefersDark] = useState(true);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => setSystemPrefersDark(media.matches);
-
-    apply();
-
-    const raw = window.localStorage.getItem(APPEARANCE_STORAGE_KEY);
-    if (raw === "dark" || raw === "light" || raw === "system") {
-      setAppearance(raw);
-    }
-
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", apply);
-      return () => media.removeEventListener("change", apply);
-    }
-
-    media.addListener(apply);
-    return () => media.removeListener(apply);
-  }, []);
-
-  const resolvedAppearance =
-    appearance === "system"
-      ? systemPrefersDark
-        ? "dark"
-        : "light"
-      : appearance;
-
-  const theme = useMemo(() => getTheme(resolvedAppearance), [resolvedAppearance]);
+  const isLight = theme.inverseText === "#ffffff";
+  const lightSurface = "#eceff1";
 
   function handleOpenSettings() {
-    if (typeof window === "undefined") return;
-    window.dispatchEvent(new Event("open-builder-settings"));
+    if (pathname.startsWith("/create-assessment/builder")) {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("open-builder-settings"));
+      }
+      return;
+    }
+
+    openSettings();
   }
 
   return (
@@ -93,7 +63,7 @@ export default function AppShellTopBar() {
       style={{
         height: 56,
         borderBottom: `1px solid ${theme.border}`,
-        background: theme.headerBg,
+        background: isLight ? lightSurface : theme.headerBg,
         display: "grid",
         gridTemplateColumns: "220px 1fr auto",
         alignItems: "center",
@@ -103,6 +73,7 @@ export default function AppShellTopBar() {
         position: "sticky",
         top: 0,
         zIndex: 100,
+        boxShadow: "none",
       }}
     >
       <div
@@ -119,10 +90,7 @@ export default function AppShellTopBar() {
             height: 30,
             borderRadius: 10,
             border: `1px dashed ${theme.border}`,
-            background:
-              theme.pageBg === "#eef3f8"
-                ? "rgba(255,255,255,0.72)"
-                : "rgba(255,255,255,0.03)",
+            background: isLight ? lightSurface : "rgba(255,255,255,0.03)",
             color: theme.textMuted,
             display: "grid",
             placeItems: "center",
@@ -156,8 +124,8 @@ export default function AppShellTopBar() {
                 textDecoration: "none",
                 color: active ? theme.text : theme.textMuted,
                 background: active
-                  ? theme.pageBg === "#eef3f8"
-                    ? "rgba(255,255,255,0.95)"
+                  ? isLight
+                    ? "#e7eaed"
                     : "rgba(255,255,255,0.06)"
                   : "transparent",
                 border: active
@@ -172,6 +140,7 @@ export default function AppShellTopBar() {
                 fontSize: 14,
                 lineHeight: 1,
                 whiteSpace: "nowrap",
+                boxShadow: "none",
               }}
             >
               {item.label}
@@ -187,15 +156,12 @@ export default function AppShellTopBar() {
           title="Settings"
           style={{
             border: `1px solid ${theme.border}`,
-            background:
-              theme.pageBg === "#eef3f8"
-                ? "rgba(255,255,255,0.92)"
-                : "rgba(11,17,24,0.92)",
+            background: isLight ? "#e7eaed" : "rgba(11,17,24,0.92)",
             color: theme.textMuted,
             borderRadius: 16,
             padding: "10px 14px",
             cursor: "pointer",
-            boxShadow: "0 10px 20px rgba(0,0,0,0.18)",
+            boxShadow: "none",
             fontFamily: UI_TYPO.family,
             fontWeight: UI_TYPO.weightSemibold,
             fontSize: 13,

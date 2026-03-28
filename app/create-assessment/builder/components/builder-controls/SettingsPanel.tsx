@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { AppTheme as Theme, AppearancePreference } from "@/ui/AppTheme";
+import type { AppTheme as Theme } from "@/ui/AppTheme";
+import AppSideTray from "@/app/ui/settings-bar/AppSideTray";
+import AppTrayHeader from "@/app/ui/settings-bar/AppTrayHeader";
+import AppTraySection from "@/app/ui/settings-bar/AppTraySection";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
+
+type AppearancePreference = "light" | "dark" | "system";
 
 type Props = {
   open: boolean;
@@ -93,7 +98,7 @@ function formatTimeText(draft: TimeDraft) {
 
 function getDialPointFromPointer(
   event: React.PointerEvent<HTMLDivElement>,
-  element: HTMLDivElement,
+  element: HTMLDivElement
 ) {
   const rect = element.getBoundingClientRect();
   const centerX = rect.left + rect.width / 2;
@@ -206,56 +211,6 @@ function ToggleRow({
   );
 }
 
-function SectionCard({
-  title,
-  subtitle,
-  children,
-  theme,
-}: {
-  title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-  theme: Theme;
-}) {
-  return (
-    <section
-      style={{
-        border: `1px solid ${theme.border}`,
-        borderRadius: 20,
-        padding: 18,
-        background: theme.panelBg2,
-        boxShadow: "0 10px 30px rgba(0,0,0,0.12) inset",
-      }}
-    >
-      <div style={{ marginBottom: subtitle ? 14 : 10 }}>
-        <div
-          style={{
-            color: theme.text,
-            fontSize: 16,
-            fontWeight: 800,
-            lineHeight: 1.2,
-          }}
-        >
-          {title}
-        </div>
-        {subtitle ? (
-          <div
-            style={{
-              marginTop: 6,
-              color: theme.subtleText,
-              fontSize: 14,
-              lineHeight: 1.45,
-            }}
-          >
-            {subtitle}
-          </div>
-        ) : null}
-      </div>
-      {children}
-    </section>
-  );
-}
-
 function AppearanceControl({
   appearance,
   onChange,
@@ -265,13 +220,13 @@ function AppearanceControl({
   onChange: (value: AppearancePreference) => void;
   theme: Theme;
 }) {
-  const options: AppearancePreference[] = ["light", "dark"];
+  const options: AppearancePreference[] = ["light", "dark", "system"];
 
   return (
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+        gridTemplateColumns: "repeat(3, minmax(0,1fr))",
         gap: 10,
       }}
     >
@@ -857,10 +812,9 @@ export default function SettingsPanel({
   p2EndTimeText,
   onChangeP2EndTimeText,
 }: Props) {
-  const drawerRef = useRef<HTMLDivElement | null>(null);
   const [activePicker, setActivePicker] = useState<ActivePicker>(null);
   const [paper2DateLinked, setPaper2DateLinked] = useState(
-    !p2CoverDateText || p2CoverDateText === p1CoverDateText,
+    !p2CoverDateText || p2CoverDateText === p1CoverDateText
   );
 
   useEffect(() => {
@@ -875,402 +829,304 @@ export default function SettingsPanel({
     }
   }, [paper2DateLinked, p1CoverDateText, onChangeP2CoverDateText]);
 
-  useEffect(() => {
-    function handleMouseDown(event: MouseEvent) {
-      if (!open) return;
-      if (!drawerRef.current) return;
-      if (drawerRef.current.contains(event.target as Node)) return;
-      onClose();
-    }
-
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-    };
-  }, [open, onClose]);
-
   return (
-    <div
-      aria-hidden={!open}
-      style={{
-        position: "fixed",
-        inset: 0,
-        pointerEvents: open ? "auto" : "none",
-        zIndex: 200,
-      }}
-    >
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: open ? theme.overlay : "transparent",
-          opacity: open ? 1 : 0,
-          transition: "opacity 180ms ease",
-        }}
+    <AppSideTray open={open} onClose={onClose} theme={theme}>
+      <style jsx>{`
+        .settings-scroll {
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: thin;
+          scrollbar-color: transparent transparent;
+        }
+
+        .settings-scroll:hover {
+          scrollbar-color: rgba(104, 168, 255, 0.45) transparent;
+        }
+
+        .settings-scroll::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .settings-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .settings-scroll::-webkit-scrollbar-thumb {
+          background: transparent;
+          border-radius: 999px;
+        }
+
+        .settings-scroll:hover::-webkit-scrollbar-thumb {
+          background: rgba(104, 168, 255, 0.45);
+        }
+      `}</style>
+
+      <AppTrayHeader
+        title="Settings"
+        subtitle="Viewer, layout and cover-sheet options"
+        onClose={onClose}
+        theme={theme}
       />
 
-      <aside
-        ref={drawerRef}
+      <div
+        className="settings-scroll"
         style={{
-          position: "fixed",
-          top: 0,
-          right: 0,
-          bottom: 0,
-          width: "min(460px, calc(100vw - 24px))",
-          maxWidth: "calc(100vw - 24px)",
-          borderLeft: `1px solid ${theme.border}`,
-          background: theme.panelBg,
-          boxShadow: theme.shadow,
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          transform: open ? "translateX(0)" : "translateX(104%)",
-          transition: "transform 220ms ease",
+          flex: 1,
+          minHeight: 0,
+          padding: 18,
+          display: "grid",
+          gap: 18,
+          alignContent: "start",
         }}
       >
-        <style jsx>{`
-          .settings-scroll {
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: transparent transparent;
-          }
-
-          .settings-scroll:hover {
-            scrollbar-color: rgba(104, 168, 255, 0.45) transparent;
-          }
-
-          .settings-scroll::-webkit-scrollbar {
-            width: 8px;
-          }
-
-          .settings-scroll::-webkit-scrollbar-track {
-            background: transparent;
-          }
-
-          .settings-scroll::-webkit-scrollbar-thumb {
-            background: transparent;
-            border-radius: 999px;
-          }
-
-          .settings-scroll:hover::-webkit-scrollbar-thumb {
-            background: rgba(104, 168, 255, 0.45);
-          }
-        `}</style>
-
-        <div
-          style={{
-            padding: "18px 18px 14px 18px",
-            borderBottom: `1px solid ${theme.border}`,
-            display: "grid",
-            gridTemplateColumns: "1fr auto",
-            gap: 14,
-            alignItems: "start",
-          }}
-        >
-          <div>
-            <div
-              style={{
-                color: theme.text,
-                fontSize: 18,
-                fontWeight: 900,
-                lineHeight: 1.15,
-              }}
-            >
-              Settings
-            </div>
-            <div
-              style={{
-                marginTop: 4,
-                color: theme.subtleText,
-                fontSize: 14,
-                lineHeight: 1.4,
-              }}
-            >
-              Viewer, layout and cover-sheet options
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: 34,
-              height: 34,
-              borderRadius: 12,
-              border: `1px solid ${theme.border}`,
-              background: theme.buttonGhostBg,
-              color: theme.subtleText,
-              fontSize: 18,
-              cursor: "pointer",
-            }}
-            aria-label="Close settings"
-          >
-            ×
-          </button>
-        </div>
-
-        <div
-          className="settings-scroll"
-          style={{
-            flex: 1,
-            minHeight: 0,
-            padding: 18,
-            display: "grid",
-            gap: 18,
-            alignContent: "start",
-          }}
-        >
-          <SectionCard title="Paper content" theme={theme}>
-            <ToggleRow
-              label="Include cover sheet"
-              checked={includeCoverSheet}
-              onChange={onToggleIncludeCoverSheet}
-              theme={theme}
-            />
-            <ToggleRow
-              label="Include formula sheet"
-              checked={includeFormulaSheet}
-              onChange={onToggleIncludeFormulaSheet}
-              theme={theme}
-            />
-            <ToggleRow
-              label="Show date and time on cover sheet"
-              checked={showCoverDateTime}
-              onChange={onToggleShowCoverDateTime}
-              theme={theme}
-            />
-            <ToggleRow
-              label="Show Scottish candidate number box"
-              checked={showScottishCandidateNumberBox}
-              onChange={onToggleShowScottishCandidateNumberBox}
-              theme={theme}
-            />
-          </SectionCard>
-
-          <SectionCard title="Workspace" theme={theme}>
-            <ToggleRow
-              label="Show progress panel"
-              checked={showProgressPanel}
-              onChange={onToggleShowProgressPanel}
-              theme={theme}
-            />
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 10,
-                paddingTop: 14,
-              }}
-            >
-              <button
-                type="button"
-                onClick={onResetLayout}
-                style={pickerGhostButtonStyle(theme)}
-              >
-                Reset layout
-              </button>
-              <button
-                type="button"
-                onClick={onResetZoom}
-                style={pickerGhostButtonStyle(theme)}
-              >
-                Reset zoom
-              </button>
-            </div>
-          </SectionCard>
-
-          <SectionCard
-            title="Paper 1 sitting details"
-            subtitle="Linked to the Assessment Date"
+        <AppTraySection title="Paper content" theme={theme}>
+          <ToggleRow
+            label="Include cover sheet"
+            checked={includeCoverSheet}
+            onChange={onToggleIncludeCoverSheet}
             theme={theme}
+          />
+          <ToggleRow
+            label="Include formula sheet"
+            checked={includeFormulaSheet}
+            onChange={onToggleIncludeFormulaSheet}
+            theme={theme}
+          />
+          <ToggleRow
+            label="Show date and time on cover sheet"
+            checked={showCoverDateTime}
+            onChange={onToggleShowCoverDateTime}
+            theme={theme}
+          />
+          <ToggleRow
+            label="Show Scottish candidate number box"
+            checked={showScottishCandidateNumberBox}
+            onChange={onToggleShowScottishCandidateNumberBox}
+            theme={theme}
+          />
+        </AppTraySection>
+
+        <AppTraySection title="Workspace" theme={theme}>
+          <ToggleRow
+            label="Show progress panel"
+            checked={showProgressPanel}
+            onChange={onToggleShowProgressPanel}
+            theme={theme}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              paddingTop: 14,
+            }}
           >
-            <div style={{ display: "grid", gap: 14 }}>
-              <div>
-                <FieldLabel theme={theme}>Paper 1 date</FieldLabel>
-                <IntegratedField
+            <button
+              type="button"
+              onClick={onResetLayout}
+              style={pickerGhostButtonStyle(theme)}
+            >
+              Reset layout
+            </button>
+            <button
+              type="button"
+              onClick={onResetZoom}
+              style={pickerGhostButtonStyle(theme)}
+            >
+              Reset zoom
+            </button>
+          </div>
+        </AppTraySection>
+
+        <AppTraySection
+          title="Paper 1 sitting details"
+          subtitle="Linked to the Assessment Date"
+          theme={theme}
+        >
+          <div style={{ display: "grid", gap: 14 }}>
+            <div>
+              <FieldLabel theme={theme}>Paper 1 date</FieldLabel>
+              <IntegratedField
+                value={p1CoverDateText}
+                onChange={onChangeP1CoverDateText}
+                onClick={() => setActivePicker("p1Date")}
+                icon="🗓️"
+                theme={theme}
+              />
+              {activePicker === "p1Date" ? (
+                <SharedCalendarPicker
+                  theme={theme}
                   value={p1CoverDateText}
-                  onChange={onChangeP1CoverDateText}
-                  onClick={() => setActivePicker("p1Date")}
-                  icon="🗓️"
-                  theme={theme}
-                />
-                {activePicker === "p1Date" ? (
-                  <SharedCalendarPicker
-                    theme={theme}
-                    value={p1CoverDateText}
-                    onCancel={() => setActivePicker(null)}
-                    onApply={(next) => {
-                      onChangeP1CoverDateText(next);
-                      setActivePicker(null);
-                    }}
-                  />
-                ) : null}
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                  gap: 12,
-                }}
-              >
-                <div>
-                  <FieldLabel theme={theme}>Paper 1 start</FieldLabel>
-                  <IntegratedField
-                    value={p1StartTimeText}
-                    onChange={onChangeP1StartTimeText}
-                    onClick={() => setActivePicker("p1Start")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel theme={theme}>Paper 1 end</FieldLabel>
-                  <IntegratedField
-                    value={p1EndTimeText}
-                    onChange={onChangeP1EndTimeText}
-                    onClick={() => setActivePicker("p1End")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-              </div>
-
-              {activePicker === "p1Start" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p1StartTimeText}
-                  label="Paper 1 start"
                   onCancel={() => setActivePicker(null)}
                   onApply={(next) => {
-                    onChangeP1StartTimeText(next);
-                    setActivePicker("p1End");
-                  }}
-                />
-              ) : null}
-
-              {activePicker === "p1End" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p1EndTimeText}
-                  label="Paper 1 end"
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP1EndTimeText(next);
+                    onChangeP1CoverDateText(next);
                     setActivePicker(null);
                   }}
                 />
               ) : null}
             </div>
-          </SectionCard>
 
-          <SectionCard
-            title="Paper 2 sitting details"
-            subtitle="Edit only if Paper 2 is sat on a different day to Paper 1."
-            theme={theme}
-          >
-            <div style={{ display: "grid", gap: 14 }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                gap: 12,
+              }}
+            >
               <div>
-                <FieldLabel theme={theme}>Paper 2 date</FieldLabel>
+                <FieldLabel theme={theme}>Paper 1 start</FieldLabel>
                 <IntegratedField
+                  value={p1StartTimeText}
+                  onChange={onChangeP1StartTimeText}
+                  onClick={() => setActivePicker("p1Start")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+
+              <div>
+                <FieldLabel theme={theme}>Paper 1 end</FieldLabel>
+                <IntegratedField
+                  value={p1EndTimeText}
+                  onChange={onChangeP1EndTimeText}
+                  onClick={() => setActivePicker("p1End")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+            </div>
+
+            {activePicker === "p1Start" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p1StartTimeText}
+                label="Paper 1 start"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP1StartTimeText(next);
+                  setActivePicker("p1End");
+                }}
+              />
+            ) : null}
+
+            {activePicker === "p1End" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p1EndTimeText}
+                label="Paper 1 end"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP1EndTimeText(next);
+                  setActivePicker(null);
+                }}
+              />
+            ) : null}
+          </div>
+        </AppTraySection>
+
+        <AppTraySection
+          title="Paper 2 sitting details"
+          subtitle="Edit only if Paper 2 is sat on a different day to Paper 1."
+          theme={theme}
+        >
+          <div style={{ display: "grid", gap: 14 }}>
+            <div>
+              <FieldLabel theme={theme}>Paper 2 date</FieldLabel>
+              <IntegratedField
+                value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
+                onChange={(next) => {
+                  setPaper2DateLinked(false);
+                  onChangeP2CoverDateText(next);
+                }}
+                onClick={() => {
+                  setPaper2DateLinked(false);
+                  setActivePicker("p2Date");
+                }}
+                icon="🗓️"
+                theme={theme}
+                muted={paper2DateLinked}
+              />
+              {activePicker === "p2Date" ? (
+                <SharedCalendarPicker
+                  theme={theme}
                   value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                  onChange={(next) => {
+                  onCancel={() => setActivePicker(null)}
+                  onApply={(next) => {
                     setPaper2DateLinked(false);
                     onChangeP2CoverDateText(next);
-                  }}
-                  onClick={() => {
-                    setPaper2DateLinked(false);
-                    setActivePicker("p2Date");
-                  }}
-                  icon="🗓️"
-                  theme={theme}
-                  muted={paper2DateLinked}
-                />
-                {activePicker === "p2Date" ? (
-                  <SharedCalendarPicker
-                    theme={theme}
-                    value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                    onCancel={() => setActivePicker(null)}
-                    onApply={(next) => {
-                      setPaper2DateLinked(false);
-                      onChangeP2CoverDateText(next);
-                      setActivePicker(null);
-                    }}
-                  />
-                ) : null}
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                  gap: 12,
-                }}
-              >
-                <div>
-                  <FieldLabel theme={theme}>Paper 2 start</FieldLabel>
-                  <IntegratedField
-                    value={p2StartTimeText}
-                    onChange={onChangeP2StartTimeText}
-                    onClick={() => setActivePicker("p2Start")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel theme={theme}>Paper 2 end</FieldLabel>
-                  <IntegratedField
-                    value={p2EndTimeText}
-                    onChange={onChangeP2EndTimeText}
-                    onClick={() => setActivePicker("p2End")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-              </div>
-
-              {activePicker === "p2Start" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p2StartTimeText}
-                  label="Paper 2 start"
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP2StartTimeText(next);
-                    setActivePicker("p2End");
-                  }}
-                />
-              ) : null}
-
-              {activePicker === "p2End" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p2EndTimeText}
-                  label="Paper 2 end"
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP2EndTimeText(next);
                     setActivePicker(null);
                   }}
                 />
               ) : null}
             </div>
-          </SectionCard>
 
-          <SectionCard title="Appearance" theme={theme}>
-            <AppearanceControl
-              appearance={appearance}
-              onChange={onChangeAppearance}
-              theme={theme}
-            />
-          </SectionCard>
-        </div>
-      </aside>
-    </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                gap: 12,
+              }}
+            >
+              <div>
+                <FieldLabel theme={theme}>Paper 2 start</FieldLabel>
+                <IntegratedField
+                  value={p2StartTimeText}
+                  onChange={onChangeP2StartTimeText}
+                  onClick={() => setActivePicker("p2Start")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+
+              <div>
+                <FieldLabel theme={theme}>Paper 2 end</FieldLabel>
+                <IntegratedField
+                  value={p2EndTimeText}
+                  onChange={onChangeP2EndTimeText}
+                  onClick={() => setActivePicker("p2End")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+            </div>
+
+            {activePicker === "p2Start" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p2StartTimeText}
+                label="Paper 2 start"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP2StartTimeText(next);
+                  setActivePicker("p2End");
+                }}
+              />
+            ) : null}
+
+            {activePicker === "p2End" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p2EndTimeText}
+                label="Paper 2 end"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP2EndTimeText(next);
+                  setActivePicker(null);
+                }}
+              />
+            ) : null}
+          </div>
+        </AppTraySection>
+
+        <AppTraySection title="Appearance" theme={theme}>
+          <AppearanceControl
+            appearance={appearance}
+            onChange={onChangeAppearance}
+            theme={theme}
+          />
+        </AppTraySection>
+      </div>
+    </AppSideTray>
   );
 }
