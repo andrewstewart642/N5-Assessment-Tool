@@ -336,7 +336,13 @@ export default function CreateAssessmentBuilderPage() {
 
   const resolvedMode = resolveThemeMode(appearance, systemPrefersDark);
 
-  const theme = useMemo(() => getTheme(resolvedMode), [resolvedMode]);
+  const theme = useMemo(
+    () =>
+      getTheme({
+        mode: resolvedMode,
+      }),
+    [resolvedMode]
+  );
 
   useBuilderInitialisation({
     defaultHudHeight: DEFAULT_HUD_HEIGHT,
@@ -989,6 +995,10 @@ export default function CreateAssessmentBuilderPage() {
     router.push("/compile-assessment");
   }, [router]);
 
+  const dividerColour = isDraggingDivider
+    ? theme.accentSoft
+    : theme.borderStandard;
+
   return (
     <>
       <BuilderGlobalStyles theme={theme} />
@@ -996,8 +1006,8 @@ export default function CreateAssessmentBuilderPage() {
       <main
         style={{
           height: "100vh",
-          background: theme.pageBg,
-          color: theme.text,
+          background: theme.bgPage,
+          color: theme.textPrimary,
           display: "grid",
           gridTemplateRows: "1fr",
           overflow: "hidden",
@@ -1047,11 +1057,7 @@ export default function CreateAssessmentBuilderPage() {
             onMouseUp={() => setIsDraggingDivider(false)}
             style={{
               width: dividerWidth,
-              background: isDraggingDivider
-                ? theme.pageBg === "#eef3f8"
-                  ? "#cfe0f5"
-                  : "#1e2b3b"
-                : (theme as any).borderSoft ?? theme.border,
+              background: dividerColour,
               cursor: "col-resize",
               position: "relative",
             }}
@@ -1063,14 +1069,14 @@ export default function CreateAssessmentBuilderPage() {
                 inset: 0,
                 background:
                   "linear-gradient(to right, transparent 0, transparent 2px, rgba(147,197,253,0.20) 2px, rgba(147,197,253,0.20) 6px, transparent 6px, transparent 100%)",
-                opacity: isDraggingDivider ? 1 : 0.4,
+                opacity: isDraggingDivider ? 1 : 0.3,
               }}
             />
           </div>
 
           <section
             style={{
-              background: theme.panelBg2,
+              background: theme.bgSurface,
               display: "grid",
               gridTemplateRows: `65px minmax(0, 1fr) ${viewerHudRow}`,
               minHeight: 0,

@@ -1,22 +1,21 @@
 "use client";
 
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
-  theme: AppTheme;
+  theme: Theme;
 };
 
 export default function BuilderGlobalStyles({ theme }: Props) {
   return (
     <style jsx global>{`
-      /* Side Scrollbars */
       .hover-scroll {
         scrollbar-width: thin;
         scrollbar-color: transparent transparent;
       }
 
       .hover-scroll:hover {
-        scrollbar-color: ${theme.scrollbarThumb} ${theme.bgPrimary};
+        scrollbar-color: ${theme.textMuted} ${theme.bgSurface};
       }
 
       .hover-scroll::-webkit-scrollbar {
@@ -34,22 +33,21 @@ export default function BuilderGlobalStyles({ theme }: Props) {
       }
 
       .hover-scroll:hover::-webkit-scrollbar-track {
-        background: ${theme.bgPrimary};
+        background: ${theme.bgSurface};
       }
 
       .hover-scroll:hover::-webkit-scrollbar-thumb {
-        background: ${theme.scrollbarThumb};
+        background: ${theme.textMuted};
       }
 
       .hover-scroll:hover::-webkit-scrollbar-thumb:hover {
-        background: ${theme.borderStrong};
+        background: ${theme.textSecondary};
       }
 
       .hover-scroll::-webkit-scrollbar-corner {
         background: transparent;
       }
 
-      /* PDF Header Padding */
       .pdf-header {
         padding: 14px;
         display: flex;
@@ -58,31 +56,25 @@ export default function BuilderGlobalStyles({ theme }: Props) {
         align-items: center;
       }
 
-      /* Zoom Overlay */
       .zoom-overlay {
         position: absolute;
         top: 8px;
         left: 50%;
         transform: translateX(-50%);
-
         display: inline-flex;
         align-items: center;
         gap: 6px;
-
         padding: 4px 8px;
         min-height: 30px;
-
         background: ${theme.bgElevated};
-        border: 1px solid ${theme.borderSoft};
+        border: 1px solid ${theme.borderStandard};
         border-radius: 12px;
         box-shadow: ${theme.shadow};
-
         color: ${theme.textSecondary};
         font-family: Inter, Arial, sans-serif;
         font-size: 11px;
         line-height: 1;
         z-index: 100;
-
         backdrop-filter: blur(6px);
         -webkit-backdrop-filter: blur(6px);
       }
@@ -104,16 +96,13 @@ export default function BuilderGlobalStyles({ theme }: Props) {
         height: 16px;
         padding: 0 3px;
         margin: 0;
-
         background: transparent;
         border: none;
         cursor: pointer;
-
         color: ${theme.textSecondary};
         font-size: 14px;
         line-height: 1;
-
-        transition: color 0.15s ease;
+        transition: color 0.15s ease, transform 0.15s ease;
       }
 
       .zoom-overlay .zoom-btn:hover {

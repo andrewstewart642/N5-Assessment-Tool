@@ -2,7 +2,7 @@
 
 import CategorySection from "@/app/create-assessment/builder/components/skills-tree/CategorySection";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 import type {
   DifficultyLevel,
   Paper,
@@ -16,7 +16,7 @@ function CircleRadio(props: {
   label: string;
   checked: boolean;
   onClick: () => void;
-  theme: AppTheme;
+  theme: Theme;
   fontSize?: number;
 }) {
   const { label, checked, onClick, theme, fontSize = UI_TYPO.sizeMeta } = props;
@@ -34,9 +34,11 @@ function CircleRadio(props: {
         gap: 7,
         padding: "6px 12px",
         borderRadius: 999,
-        border: `1px solid ${checked ? theme.controlSelectedBorder : theme.pillBorder}`,
-        background: checked ? theme.controlSelectedBg : theme.pillBg,
-        color: checked ? theme.textPrimary : theme.pillText,
+        border: `1px solid ${
+          checked ? theme.controlSelectedBorder : theme.borderStandard
+        }`,
+        background: checked ? theme.controlSelectedBg : theme.controlBg,
+        color: checked ? theme.textPrimary : theme.textSecondary,
         cursor: "pointer",
         fontFamily: UI_TYPO.family,
         fontWeight: UI_TYPO.weightSemibold,
@@ -58,13 +60,12 @@ function CircleRadio(props: {
           height: 10,
           borderRadius: 999,
           border: `2px solid ${
-            checked ? theme.controlSelectedBorder : theme.textDim
+            checked ? theme.controlSelectedBorder : theme.textMuted
           }`,
           background: checked ? theme.controlSelectedBorder : "transparent",
           display: "inline-block",
           flex: "0 0 auto",
-          transition:
-            "background 0.15s ease, border-color 0.15s ease",
+          transition: "background 0.15s ease, border-color 0.15s ease",
         }}
       />
       <span style={{ whiteSpace: "nowrap" }}>{label}</span>
@@ -75,7 +76,7 @@ function CircleRadio(props: {
 function MiniStepButton(props: {
   label: "Up" | "Down";
   onClick: () => void;
-  theme: AppTheme;
+  theme: Theme;
 }) {
   const { label, onClick, theme } = props;
 
@@ -86,7 +87,7 @@ function MiniStepButton(props: {
       onClick={onClick}
       style={{
         borderRadius: 10,
-        border: `1px solid ${theme.border}`,
+        border: `1px solid ${theme.borderStandard}`,
         background: theme.controlBg,
         color: theme.textMuted,
         cursor: "pointer",
@@ -155,7 +156,7 @@ type SkillsTreeProps = {
     paper: Paper
   ) => void;
 
-  theme: AppTheme;
+  theme: Theme;
 };
 
 export default function SkillsTree({
@@ -183,10 +184,10 @@ export default function SkillsTree({
   regenerateQuestionToPaper,
   theme,
 }: SkillsTreeProps) {
-  const headerGradient = `linear-gradient(180deg, ${theme.panelBg3} 0%, ${theme.panelBg2} 100%)`;
+  const headerGradient = `linear-gradient(180deg, ${theme.bgElevated} 0%, ${theme.bgSurface} 100%)`;
 
-  const helperColor = theme.subtleText;
-  const insetShadow = `inset 0 1px 0 ${theme.buttonGhostBg}`;
+  const helperColor = theme.textMuted;
+  const insetShadow = `inset 0 1px 0 rgba(255,255,255,0.04)`;
 
   const decMarks = () => setTargetMarks(Math.max(minTargetMarks, targetMarks - 1));
   const incMarks = () => setTargetMarks(Math.min(maxTargetMarks, targetMarks + 1));
@@ -210,8 +211,8 @@ export default function SkillsTree({
   return (
     <section
       style={{
-        borderRight: `1px solid ${theme.borderSoft}`,
-        background: theme.panelBg,
+        borderRight: `1px solid ${theme.borderStandard}`,
+        background: theme.bgPage,
         minHeight: 0,
         display: "grid",
         gridTemplateRows: "auto 1fr",
@@ -224,8 +225,8 @@ export default function SkillsTree({
           position: "sticky",
           top: 0,
           zIndex: 2,
-          background: theme.panelBg,
-          borderBottom: `1px solid ${theme.borderSoft}`,
+          background: theme.bgPage,
+          borderBottom: `1px solid ${theme.borderStandard}`,
           padding: "12px 14px 10px",
         }}
       >
@@ -234,10 +235,10 @@ export default function SkillsTree({
             display: "grid",
             gap: 14,
             padding: 14,
-            border: `1px solid ${theme.borderSoft}`,
+            border: `1px solid ${theme.borderStandard}`,
             borderRadius: 18,
             background: headerGradient,
-            boxShadow: theme.cardShadow,
+            boxShadow: theme.shadow,
           }}
         >
           <div
@@ -254,7 +255,7 @@ export default function SkillsTree({
                 margin: 0,
                 letterSpacing: 0.2,
                 whiteSpace: "nowrap",
-                color: theme.text,
+                color: theme.textPrimary,
               }}
             >
               Skills Tree
@@ -297,7 +298,7 @@ export default function SkillsTree({
               <div
                 style={{
                   ...UI_TEXT.sectionLabel,
-                  color: theme.textDim,
+                  color: theme.textMuted,
                 }}
               >
                 Standard
@@ -342,7 +343,7 @@ export default function SkillsTree({
               <div
                 style={{
                   ...UI_TEXT.sectionLabel,
-                  color: theme.textDim,
+                  color: theme.textMuted,
                 }}
               >
                 Thinking type
@@ -396,7 +397,7 @@ export default function SkillsTree({
                 <div
                   style={{
                     ...UI_TEXT.sectionLabel,
-                    color: theme.textDim,
+                    color: theme.textMuted,
                   }}
                 >
                   Target marks
@@ -418,7 +419,7 @@ export default function SkillsTree({
                       gap: 12,
                       padding: "0 14px",
                       borderRadius: 14,
-                      border: `1px solid ${theme.border}`,
+                      border: `1px solid ${theme.borderStandard}`,
                       background: theme.controlBg,
                       height: 38,
                       minWidth: 180,
@@ -429,7 +430,7 @@ export default function SkillsTree({
                     <div
                       style={{
                         ...UI_TEXT.valueText,
-                        color: theme.text,
+                        color: theme.textPrimary,
                         whiteSpace: "nowrap",
                       }}
                     >
@@ -455,7 +456,7 @@ export default function SkillsTree({
                 <div
                   style={{
                     ...UI_TEXT.sectionLabel,
-                    color: theme.textDim,
+                    color: theme.textMuted,
                   }}
                 >
                   Add questions to

@@ -84,7 +84,151 @@ export type AccentOption =
   | "grey-700"
   | "grey-800"
   | "black"
-  | "slate";
+  | "slate"
+  | "word-r1-c1"
+  | "word-r1-c2"
+  | "word-r1-c3"
+  | "word-r1-c4"
+  | "word-r1-c5"
+  | "word-r1-c6"
+  | "word-r1-c7"
+  | "word-r2-c1"
+  | "word-r2-c2"
+  | "word-r2-c3"
+  | "word-r2-c4"
+  | "word-r2-c5"
+  | "word-r2-c6"
+  | "word-r2-c7"
+  | "word-r2-c8"
+  | "word-r3-c1"
+  | "word-r3-c2"
+  | "word-r3-c3"
+  | "word-r3-c4"
+  | "word-r3-c5"
+  | "word-r3-c6"
+  | "word-r3-c7"
+  | "word-r3-c8"
+  | "word-r3-c9"
+  | "word-r4-c1"
+  | "word-r4-c2"
+  | "word-r4-c3"
+  | "word-r4-c4"
+  | "word-r4-c5"
+  | "word-r4-c6"
+  | "word-r4-c7"
+  | "word-r4-c8"
+  | "word-r4-c9"
+  | "word-r4-c10"
+  | "word-r5-c1"
+  | "word-r5-c2"
+  | "word-r5-c3"
+  | "word-r5-c4"
+  | "word-r5-c5"
+  | "word-r5-c6"
+  | "word-r5-c7"
+  | "word-r5-c8"
+  | "word-r5-c9"
+  | "word-r5-c10"
+  | "word-r5-c11"
+  | "word-r6-c1"
+  | "word-r6-c2"
+  | "word-r6-c3"
+  | "word-r6-c4"
+  | "word-r6-c5"
+  | "word-r6-c6"
+  | "word-r6-c7"
+  | "word-r6-c8"
+  | "word-r6-c9"
+  | "word-r6-c10"
+  | "word-r6-c11"
+  | "word-r6-c12"
+  | "word-r7-c1"
+  | "word-r7-c2"
+  | "word-r7-c3"
+  | "word-r7-c4"
+  | "word-r7-c5"
+  | "word-r7-c6"
+  | "word-r7-c7"
+  | "word-r7-c8"
+  | "word-r7-c9"
+  | "word-r7-c10"
+  | "word-r7-c11"
+  | "word-r7-c12"
+  | "word-r7-c13"
+  | "word-r8-c1"
+  | "word-r8-c2"
+  | "word-r8-c3"
+  | "word-r8-c4"
+  | "word-r8-c5"
+  | "word-r8-c6"
+  | "word-r8-c7"
+  | "word-r8-c8"
+  | "word-r8-c9"
+  | "word-r8-c10"
+  | "word-r8-c11"
+  | "word-r8-c12"
+  | "word-r8-c13"
+  | "word-r9-c1"
+  | "word-r9-c2"
+  | "word-r9-c3"
+  | "word-r9-c4"
+  | "word-r9-c5"
+  | "word-r9-c6"
+  | "word-r9-c7"
+  | "word-r9-c8"
+  | "word-r9-c9"
+  | "word-r9-c10"
+  | "word-r9-c11"
+  | "word-r10-c1"
+  | "word-r10-c2"
+  | "word-r10-c3"
+  | "word-r10-c4"
+  | "word-r10-c5"
+  | "word-r10-c6"
+  | "word-r10-c7"
+  | "word-r10-c8"
+  | "word-r10-c9"
+  | "word-r10-c10"
+  | "word-r11-c1"
+  | "word-r11-c2"
+  | "word-r11-c3"
+  | "word-r11-c4"
+  | "word-r11-c5"
+  | "word-r11-c6"
+  | "word-r11-c7"
+  | "word-r11-c8"
+  | "word-r11-c9"
+  | "word-r12-c1"
+  | "word-r12-c2"
+  | "word-r12-c3"
+  | "word-r12-c4"
+  | "word-r12-c5"
+  | "word-r12-c6"
+  | "word-r12-c7"
+  | "word-r12-c8"
+  | "word-r13-c1"
+  | "word-r13-c2"
+  | "word-r13-c3"
+  | "word-r13-c4"
+  | "word-r13-c5"
+  | "word-r13-c6"
+  | "word-r13-c7"
+  | "word-neutral-white"
+  | "word-neutral-t1"
+  | "word-neutral-t2"
+  | "word-neutral-t3"
+  | "word-neutral-t4"
+  | "word-neutral-t5"
+  | "word-neutral-t6"
+  | "word-neutral-t7"
+  | "word-neutral-b1"
+  | "word-neutral-b2"
+  | "word-neutral-b3"
+  | "word-neutral-b4"
+  | "word-neutral-b5"
+  | "word-neutral-b6"
+  | "word-neutral-b7"
+  | "word-neutral-black";
 
 export type AccentSwatch = {
   id: AccentOption;
@@ -135,7 +279,11 @@ export const ACCENT_OPTIONS: AccentSwatch[] = [
   { id: "green-900", label: "Green 900", hex: "#14532d" },
   { id: "green-600", label: "Green 600", hex: "#16a34a" },
   { id: "lime-500", label: "Lime 500", hex: "#a3e635" },
-  { id: "yellow-green-400", label: "Yellow Green 400", hex: "#bef264" },
+  {
+    id: "yellow-green-400",
+    label: "Yellow Green 400",
+    hex: "#bef264",
+  },
   { id: "lime-300", label: "Lime 300", hex: "#d9f99d" },
   { id: "cream-100", label: "Cream 100", hex: "#fef9c3" },
   { id: "blush-100", label: "Blush 100", hex: "#fce7f3" },
@@ -188,6 +336,167 @@ export const ACCENT_OPTIONS: AccentSwatch[] = [
   { id: "black", label: "Black", hex: "#000000" },
 
   { id: "slate", label: "Slate", hex: "#475569" },
+
+  // Word-style reconstructed palette, sampled to visually match the screenshot target.
+  { id: "word-r1-c1", label: "Word R1 C1", hex: "#08396a" },
+  { id: "word-r1-c2", label: "Word R1 C2", hex: "#3d6fa6" },
+  { id: "word-r1-c3", label: "Word R1 C3", hex: "#416dcb" },
+  { id: "word-r1-c4", label: "Word R1 C4", hex: "#133da0" },
+  { id: "word-r1-c5", label: "Word R1 C5", hex: "#0d06aa" },
+  { id: "word-r1-c6", label: "Word R1 C6", hex: "#150ad4" },
+  { id: "word-r1-c7", label: "Word R1 C7", hex: "#09007d" },
+
+  { id: "word-r2-c1", label: "Word R2 C1", hex: "#0b726d" },
+  { id: "word-r2-c2", label: "Word R2 C2", hex: "#1274a9" },
+  { id: "word-r2-c3", label: "Word R2 C3", hex: "#189ac7" },
+  { id: "word-r2-c4", label: "Word R2 C4", hex: "#166ac5" },
+  { id: "word-r2-c5", label: "Word R2 C5", hex: "#123bcf" },
+  { id: "word-r2-c6", label: "Word R2 C6", hex: "#1708f6" },
+  { id: "word-r2-c7", label: "Word R2 C7", hex: "#463ced" },
+  { id: "word-r2-c8", label: "Word R2 C8", hex: "#4040aa" },
+
+  { id: "word-r3-c1", label: "Word R3 C1", hex: "#0d8b8d" },
+  { id: "word-r3-c2", label: "Word R3 C2", hex: "#16a1a0" },
+  { id: "word-r3-c3", label: "Word R3 C3", hex: "#42c1c1" },
+  { id: "word-r3-c4", label: "Word R3 C4", hex: "#20bbe2" },
+  { id: "word-r3-c5", label: "Word R3 C5", hex: "#1b92ed" },
+  { id: "word-r3-c6", label: "Word R3 C6", hex: "#1a66eb" },
+  { id: "word-r3-c7", label: "Word R3 C7", hex: "#4168e8" },
+  { id: "word-r3-c8", label: "Word R3 C8", hex: "#4241cb" },
+  { id: "word-r3-c9", label: "Word R3 C9", hex: "#6d69a9" },
+
+  { id: "word-r4-c1", label: "Word R4 C1", hex: "#40a167" },
+  { id: "word-r4-c2", label: "Word R4 C2", hex: "#15cbab" },
+  { id: "word-r4-c3", label: "Word R4 C3", hex: "#1ce6cb" },
+  { id: "word-r4-c4", label: "Word R4 C4", hex: "#1fdde1" },
+  { id: "word-r4-c5", label: "Word R4 C5", hex: "#42bbed" },
+  { id: "word-r4-c6", label: "Word R4 C6", hex: "#4194ed" },
+  { id: "word-r4-c7", label: "Word R4 C7", hex: "#6d98ef" },
+  { id: "word-r4-c8", label: "Word R4 C8", hex: "#6c6eef" },
+  { id: "word-r4-c9", label: "Word R4 C9", hex: "#7909ef" },
+  { id: "word-r4-c10", label: "Word R4 C10", hex: "#7f0bcf" },
+
+  { id: "word-r5-c1", label: "Word R5 C1", hex: "#3aa12f" },
+  { id: "word-r5-c2", label: "Word R5 C2", hex: "#0cd05b" },
+  { id: "word-r5-c3", label: "Word R5 C3", hex: "#10ea9a" },
+  { id: "word-r5-c4", label: "Word R5 C4", hex: "#67dfb4" },
+  { id: "word-r5-c5", label: "Word R5 C5", hex: "#68dadc" },
+  { id: "word-r5-c6", label: "Word R5 C6", hex: "#68b4e8" },
+  { id: "word-r5-c7", label: "Word R5 C7", hex: "#8cb3e1" },
+  { id: "word-r5-c8", label: "Word R5 C8", hex: "#918edf" },
+  { id: "word-r5-c9", label: "Word R5 C9", hex: "#9568e7" },
+  { id: "word-r5-c10", label: "Word R5 C10", hex: "#a13feb" },
+  { id: "word-r5-c11", label: "Word R5 C11", hex: "#ac0bf0" },
+
+  { id: "word-r6-c1", label: "Word R6 C1", hex: "#007600" },
+  { id: "word-r6-c2", label: "Word R6 C2", hex: "#0ad600" },
+  { id: "word-r6-c3", label: "Word R6 C3", hex: "#18f700" },
+  { id: "word-r6-c4", label: "Word R6 C4", hex: "#69e68a" },
+  { id: "word-r6-c5", label: "Word R6 C5", hex: "#8ce1a4" },
+  { id: "word-r6-c6", label: "Word R6 C6", hex: "#acd6d8" },
+  { id: "word-r6-c7", label: "Word R6 C7", hex: "#adc8db" },
+  { id: "word-r6-c8", label: "Word R6 C8", hex: "#b3b1df" },
+  { id: "word-r6-c9", label: "Word R6 C9", hex: "#b78de7" },
+  { id: "word-r6-c10", label: "Word R6 C10", hex: "#c367eb" },
+  { id: "word-r6-c11", label: "Word R6 C11", hex: "#d90bf0" },
+  { id: "word-r6-c12", label: "Word R6 C12", hex: "#9c00b5" },
+
+  { id: "word-r7-c1", label: "Word R7 C1", hex: "#005000" },
+  { id: "word-r7-c2", label: "Word R7 C2", hex: "#089900" },
+  { id: "word-r7-c3", label: "Word R7 C3", hex: "#39cc2e" },
+  { id: "word-r7-c4", label: "Word R7 C4", hex: "#63ec59" },
+  { id: "word-r7-c5", label: "Word R7 C5", hex: "#90e680" },
+  { id: "word-r7-c6", label: "Word R7 C6", hex: "#bbe99d" },
+  { id: "word-r7-c7", label: "Word R7 C7", hex: "#f5f5f5" },
+  { id: "word-r7-c8", label: "Word R7 C8", hex: "#e2bee9" },
+  { id: "word-r7-c9", label: "Word R7 C9", hex: "#e790e8" },
+  { id: "word-r7-c10", label: "Word R7 C10", hex: "#e95ae8" },
+  { id: "word-r7-c11", label: "Word R7 C11", hex: "#f20bf1" },
+  { id: "word-r7-c12", label: "Word R7 C12", hex: "#cc0ccf" },
+  { id: "word-r7-c13", label: "Word R7 C13", hex: "#73007b" },
+
+  { id: "word-r8-c1", label: "Word R8 C1", hex: "#346f00" },
+  { id: "word-r8-c2", label: "Word R8 C2", hex: "#00ac00" },
+  { id: "word-r8-c3", label: "Word R8 C3", hex: "#60f72d" },
+  { id: "word-r8-c4", label: "Word R8 C4", hex: "#94e95c" },
+  { id: "word-r8-c5", label: "Word R8 C5", hex: "#bee690" },
+  { id: "word-r8-c6", label: "Word R8 C6", hex: "#e6e7aa" },
+  { id: "word-r8-c7", label: "Word R8 C7", hex: "#efc1c1" },
+  { id: "word-r8-c8", label: "Word R8 C8", hex: "#eb8ec0" },
+  { id: "word-r8-c9", label: "Word R8 C9", hex: "#ea5dc0" },
+  { id: "word-r8-c10", label: "Word R8 C10", hex: "#ef37b5" },
+  { id: "word-r8-c11", label: "Word R8 C11", hex: "#fd008b" },
+  { id: "word-r8-c12", label: "Word R8 C12", hex: "#d2069f" },
+  { id: "word-r8-c13", label: "Word R8 C13", hex: "#8c008a" },
+
+  { id: "word-r9-c1", label: "Word R9 C1", hex: "#4d4a00" },
+  { id: "word-r9-c2", label: "Word R9 C2", hex: "#79a600" },
+  { id: "word-r9-c3", label: "Word R9 C3", hex: "#97f327" },
+  { id: "word-r9-c4", label: "Word R9 C4", hex: "#c0ec59" },
+  { id: "word-r9-c5", label: "Word R9 C5", hex: "#ecee8b" },
+  { id: "word-r9-c6", label: "Word R9 C6", hex: "#f1c98d" },
+  { id: "word-r9-c7", label: "Word R9 C7", hex: "#f79b9a" },
+  { id: "word-r9-c8", label: "Word R9 C8", hex: "#fa689f" },
+  { id: "word-r9-c9", label: "Word R9 C9", hex: "#fc328f" },
+  { id: "word-r9-c10", label: "Word R9 C10", hex: "#cf39a1" },
+  { id: "word-r9-c11", label: "Word R9 C11", hex: "#ab09a7" },
+
+  { id: "word-r10-c1", label: "Word R10 C1", hex: "#74733c" },
+  { id: "word-r10-c2", label: "Word R10 C2", hex: "#9dd000" },
+  { id: "word-r10-c3", label: "Word R10 C3", hex: "#c4f324" },
+  { id: "word-r10-c4", label: "Word R10 C4", hex: "#eeef57" },
+  { id: "word-r10-c5", label: "Word R10 C5", hex: "#f2c866" },
+  { id: "word-r10-c6", label: "Word R10 C6", hex: "#f5975e" },
+  { id: "word-r10-c7", label: "Word R10 C7", hex: "#f47a7a" },
+  { id: "word-r10-c8", label: "Word R10 C8", hex: "#ff0080" },
+  { id: "word-r10-c9", label: "Word R10 C9", hex: "#dd08a2" },
+  { id: "word-r10-c10", label: "Word R10 C10", hex: "#a03778" },
+
+  { id: "word-r11-c1", label: "Word R11 C1", hex: "#807d00" },
+  { id: "word-r11-c2", label: "Word R11 C2", hex: "#d0cb00" },
+  { id: "word-r11-c3", label: "Word R11 C3", hex: "#fbf400" },
+  { id: "word-r11-c4", label: "Word R11 C4", hex: "#fdcc00" },
+  { id: "word-r11-c5", label: "Word R11 C5", hex: "#ff9a33" },
+  { id: "word-r11-c6", label: "Word R11 C6", hex: "#ff7300" },
+  { id: "word-r11-c7", label: "Word R11 C7", hex: "#ff4f4f" },
+  { id: "word-r11-c8", label: "Word R11 C8", hex: "#dd007f" },
+  { id: "word-r11-c9", label: "Word R11 C9", hex: "#840048" },
+
+  { id: "word-r12-c1", label: "Word R12 C1", hex: "#a37037" },
+  { id: "word-r12-c2", label: "Word R12 C2", hex: "#d69d00" },
+  { id: "word-r12-c3", label: "Word R12 C3", hex: "#ff9c00" },
+  { id: "word-r12-c4", label: "Word R12 C4", hex: "#d66d00" },
+  { id: "word-r12-c5", label: "Word R12 C5", hex: "#ff4f00" },
+  { id: "word-r12-c6", label: "Word R12 C6", hex: "#f41708" },
+  { id: "word-r12-c7", label: "Word R12 C7", hex: "#e40000" },
+  { id: "word-r12-c8", label: "Word R12 C8", hex: "#ba0044" },
+
+  { id: "word-r13-c1", label: "Word R13 C1", hex: "#7f4300" },
+  { id: "word-r13-c2", label: "Word R13 C2", hex: "#a87700" },
+  { id: "word-r13-c3", label: "Word R13 C3", hex: "#d93d00" },
+  { id: "word-r13-c4", label: "Word R13 C4", hex: "#ac3a00" },
+  { id: "word-r13-c5", label: "Word R13 C5", hex: "#c10000" },
+  { id: "word-r13-c6", label: "Word R13 C6", hex: "#9e0000" },
+  { id: "word-r13-c7", label: "Word R13 C7", hex: "#bf0030" },
+
+  { id: "word-neutral-white", label: "Word Neutral White", hex: "#f2f2f2" },
+  { id: "word-neutral-t1", label: "Word Neutral T1", hex: "#d9d9d9" },
+  { id: "word-neutral-t2", label: "Word Neutral T2", hex: "#bfbfbf" },
+  { id: "word-neutral-t3", label: "Word Neutral T3", hex: "#9f9f9f" },
+  { id: "word-neutral-t4", label: "Word Neutral T4", hex: "#6f6f6f" },
+  { id: "word-neutral-t5", label: "Word Neutral T5", hex: "#3e3e3e" },
+  { id: "word-neutral-t6", label: "Word Neutral T6", hex: "#1c1c1c" },
+  { id: "word-neutral-t7", label: "Word Neutral T7", hex: "#000000" },
+
+  { id: "word-neutral-b1", label: "Word Neutral B1", hex: "#d6d6d6" },
+  { id: "word-neutral-b2", label: "Word Neutral B2", hex: "#b8b8b8" },
+  { id: "word-neutral-b3", label: "Word Neutral B3", hex: "#9f9f9f" },
+  { id: "word-neutral-b4", label: "Word Neutral B4", hex: "#7f7f7f" },
+  { id: "word-neutral-b5", label: "Word Neutral B5", hex: "#5f5f5f" },
+  { id: "word-neutral-b6", label: "Word Neutral B6", hex: "#363636" },
+  { id: "word-neutral-b7", label: "Word Neutral B7", hex: "#141414" },
+
+  { id: "word-neutral-black", label: "Word Neutral Black", hex: "#000000" },
 ];
 
 export const ACCENT_MAP: Record<AccentOption, string> = ACCENT_OPTIONS.reduce(

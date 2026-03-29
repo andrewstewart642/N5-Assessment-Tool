@@ -6,11 +6,7 @@ import { useSettings } from "./GlobalSettingsContext";
 import AppTrayHeader from "../ui/settings-bar/AppTrayHeader";
 import AppTraySection from "../ui/settings-bar/AppTraySection";
 import type { ThemeModePreference } from "@/ui/ThemeMode";
-import {
-  ACCENT_OPTIONS,
-  ACCENT_MAP,
-  type AccentOption,
-} from "@/ui/AccentPalette";
+import { ACCENT_MAP, type AccentOption } from "@/ui/AccentPalette";
 
 const THEME_OPTIONS: Array<{
   value: ThemeModePreference;
@@ -28,112 +24,209 @@ const THEME_OPTIONS: Array<{
   },
 ];
 
-const COLOUR_ROWS: AccentOption[][] = [
+const WORD_COLOUR_ROWS: AccentOption[][] = [
   [
-    "navy-900",
-    "navy-800",
-    "blue-800",
-    "blue-700",
-    "blue-600",
-    "indigo-700",
-    "indigo-800",
+    "word-r1-c1",
+    "word-r1-c2",
+    "word-r1-c3",
+    "word-r1-c4",
+    "word-r1-c5",
+    "word-r1-c6",
+    "word-r1-c7",
   ],
   [
-    "teal-800",
-    "teal-700",
-    "cyan-600",
-    "sky-500",
-    "blue-500",
-    "indigo-500",
-    "violet-500",
-    "purple-600",
+    "word-r2-c1",
+    "word-r2-c2",
+    "word-r2-c3",
+    "word-r2-c4",
+    "word-r2-c5",
+    "word-r2-c6",
+    "word-r2-c7",
+    "word-r2-c8",
   ],
   [
-    "green-800",
-    "green-700",
-    "emerald-600",
-    "mint-500",
-    "cyan-400",
-    "sky-300",
-    "blue-300",
-    "indigo-300",
-    "purple-300",
-    "magenta-500",
+    "word-r3-c1",
+    "word-r3-c2",
+    "word-r3-c3",
+    "word-r3-c4",
+    "word-r3-c5",
+    "word-r3-c6",
+    "word-r3-c7",
+    "word-r3-c8",
+    "word-r3-c9",
   ],
   [
-    "lime-800",
-    "lime-700",
-    "green-500",
-    "lime-400",
-    "green-300",
-    "mint-300",
-    "aqua-200",
-    "lavender-200",
-    "pink-300",
-    "magenta-700",
+    "word-r4-c1",
+    "word-r4-c2",
+    "word-r4-c3",
+    "word-r4-c4",
+    "word-r4-c5",
+    "word-r4-c6",
+    "word-r4-c7",
+    "word-r4-c8",
+    "word-r4-c9",
+    "word-r4-c10",
   ],
   [
-    "green-900",
-    "green-600",
-    "lime-500",
-    "yellow-green-400",
-    "lime-300",
-    "cream-100",
-    "blush-100",
-    "pink-200",
-    "pink-500",
-    "purple-800",
+    "word-r5-c1",
+    "word-r5-c2",
+    "word-r5-c3",
+    "word-r5-c4",
+    "word-r5-c5",
+    "word-r5-c6",
+    "word-r5-c7",
+    "word-r5-c8",
+    "word-r5-c9",
+    "word-r5-c10",
+    "word-r5-c11",
   ],
   [
-    "olive-900",
-    "olive-700",
-    "yellow-500",
-    "yellow-300",
-    "cream-50",
-    "peach-100",
-    "peach-200",
-    "salmon-300",
-    "rose-500",
-    "plum-700",
+    "word-r6-c1",
+    "word-r6-c2",
+    "word-r6-c3",
+    "word-r6-c4",
+    "word-r6-c5",
+    "word-r6-c6",
+    "word-r6-c7",
+    "word-r6-c8",
+    "word-r6-c9",
+    "word-r6-c10",
+    "word-r6-c11",
+    "word-r6-c12",
   ],
   [
-    "brown-700",
-    "mustard-600",
-    "amber-500",
-    "orange-400",
-    "orange-300",
-    "peach-300",
-    "coral-300",
-    "rose-400",
-    "red-500",
-    "berry-700",
+    "word-r7-c1",
+    "word-r7-c2",
+    "word-r7-c3",
+    "word-r7-c4",
+    "word-r7-c5",
+    "word-r7-c6",
+    "word-r7-c7",
+    "word-r7-c8",
+    "word-r7-c9",
+    "word-r7-c10",
+    "word-r7-c11",
+    "word-r7-c12",
+    "word-r7-c13",
   ],
   [
-    "brown-800",
-    "amber-700",
-    "orange-600",
-    "orange-500",
-    "deep-orange-500",
-    "red-400",
-    "red-500-strong",
-    "crimson-600",
-    "crimson-700",
-    "red-800",
+    "word-r8-c1",
+    "word-r8-c2",
+    "word-r8-c3",
+    "word-r8-c4",
+    "word-r8-c5",
+    "word-r8-c6",
+    "word-r8-c7",
+    "word-r8-c8",
+    "word-r8-c9",
+    "word-r8-c10",
+    "word-r8-c11",
+    "word-r8-c12",
+    "word-r8-c13",
+  ],
+  [
+    "word-r9-c1",
+    "word-r9-c2",
+    "word-r9-c3",
+    "word-r9-c4",
+    "word-r9-c5",
+    "word-r9-c6",
+    "word-r9-c7",
+    "word-r9-c8",
+    "word-r9-c9",
+    "word-r9-c10",
+    "word-r9-c11",
+  ],
+  [
+    "word-r10-c1",
+    "word-r10-c2",
+    "word-r10-c3",
+    "word-r10-c4",
+    "word-r10-c5",
+    "word-r10-c6",
+    "word-r10-c7",
+    "word-r10-c8",
+    "word-r10-c9",
+    "word-r10-c10",
+  ],
+  [
+    "word-r11-c1",
+    "word-r11-c2",
+    "word-r11-c3",
+    "word-r11-c4",
+    "word-r11-c5",
+    "word-r11-c6",
+    "word-r11-c7",
+    "word-r11-c8",
+    "word-r11-c9",
+  ],
+  [
+    "word-r12-c1",
+    "word-r12-c2",
+    "word-r12-c3",
+    "word-r12-c4",
+    "word-r12-c5",
+    "word-r12-c6",
+    "word-r12-c7",
+    "word-r12-c8",
+  ],
+  [
+    "word-r13-c1",
+    "word-r13-c2",
+    "word-r13-c3",
+    "word-r13-c4",
+    "word-r13-c5",
+    "word-r13-c6",
+    "word-r13-c7",
   ],
 ];
 
-const NEUTRAL_ROW: AccentOption[] = [
-  "white",
-  "grey-100",
-  "grey-200",
-  "grey-300",
-  "grey-400",
-  "grey-500",
-  "grey-600",
-  "grey-700",
-  "grey-800",
-  "black",
+const WORD_NEUTRAL_TOP: AccentOption[] = [
+  "word-neutral-t1",
+  "word-neutral-t2",
+  "word-neutral-t3",
+  "word-neutral-t4",
+  "word-neutral-t5",
+  "word-neutral-t6",
+  "word-neutral-t7",
 ];
+
+const WORD_NEUTRAL_BOTTOM: AccentOption[] = [
+  "word-neutral-b1",
+  "word-neutral-b2",
+  "word-neutral-b3",
+  "word-neutral-b4",
+  "word-neutral-b5",
+  "word-neutral-b6",
+  "word-neutral-b7",
+];
+
+const WORD_NEUTRAL_WHITE: AccentOption = "word-neutral-white";
+const WORD_NEUTRAL_BLACK: AccentOption = "word-neutral-black";
+
+type HoneycombCell = {
+  id: AccentOption;
+  row: number;
+  col: number;
+};
+
+function getAccentLabel(id: AccentOption): string {
+  if (id === WORD_NEUTRAL_WHITE) return "White";
+  if (id === WORD_NEUTRAL_BLACK) return "Black";
+  if (id.startsWith("word-neutral")) return "Grey";
+  if (id.startsWith("word-r")) return "Word colour";
+  return id;
+}
+
+function buildHoneycombCells(rows: AccentOption[][]): HoneycombCell[] {
+  return rows.flatMap((row, rowIndex) =>
+    row.map((id, colIndex) => ({
+      id,
+      row: rowIndex,
+      col: colIndex,
+    }))
+  );
+}
 
 function HexSwatch({
   colour,
@@ -141,38 +234,257 @@ function HexSwatch({
   active,
   onClick,
   theme,
-  size = 34,
+  width,
+  height,
+  innerBorder = false,
 }: {
   colour: string;
   label: string;
   active: boolean;
   onClick: () => void;
   theme: ReturnType<typeof useSettings>["theme"];
-  size?: number;
+  width: number;
+  height: number;
+  innerBorder?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
+    <>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        title={label}
+        className="theme-hex-swatch"
+        style={{
+          width,
+          height,
+          padding: 0,
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          display: "grid",
+          placeItems: "center",
+          position: "relative",
+          zIndex: active ? 3 : 1,
+        }}
+      >
+        <span
+          style={{
+            width,
+            height,
+            display: "block",
+            background: colour,
+            clipPath:
+              "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+            border: active
+              ? `2px solid ${theme.textPrimary}`
+              : innerBorder
+                ? `1px solid ${theme.borderStandard}`
+                : `1px solid rgba(255,255,255,0.15)`,
+            outline: active ? `2px solid ${theme.paper}` : "none",
+            outlineOffset: active ? "-4px" : 0,
+            boxShadow: active
+              ? theme.shadowStrong
+              : "0 1px 2px rgba(0,0,0,0.06)",
+            transform: active ? "scale(1.02)" : "scale(1)",
+            transition:
+              "transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, outline 140ms ease, filter 140ms ease",
+          }}
+        />
+      </button>
+
+      <style jsx>{`
+        .theme-hex-swatch:hover {
+          z-index: 4;
+        }
+
+        .theme-hex-swatch:hover span {
+          transform: scale(1.05);
+          box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+          filter: brightness(1.04);
+          border-color: ${theme.textPrimary};
+        }
+
+        .theme-hex-swatch:focus-visible {
+          outline: 2px solid ${theme.accentPrimary};
+          outline-offset: 3px;
+          border-radius: 10px;
+        }
+      `}</style>
+    </>
+  );
+}
+
+function WordHoneycombPalette({
+  selectedColour,
+  onSelect,
+  theme,
+}: {
+  selectedColour: AccentOption;
+  onSelect: (colour: AccentOption) => void;
+  theme: ReturnType<typeof useSettings>["theme"];
+}) {
+  const cells = useMemo(() => buildHoneycombCells(WORD_COLOUR_ROWS), []);
+
+  const hexWidth = 24;
+  const hexHeight = 28;
+  const colStep = 20.9;
+  const rowStep = 21.2;
+  const maxCols = Math.max(...WORD_COLOUR_ROWS.map((row) => row.length));
+  const width = (maxCols - 1) * colStep + hexWidth;
+  const height = (WORD_COLOUR_ROWS.length - 1) * rowStep + hexHeight;
+
+  return (
+    <div
       style={{
-        width: size,
-        height: size,
-        background: colour,
-        clipPath:
-          "polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%)",
-        border: active
-          ? `3px solid ${theme.textPrimary}`
-          : `1px solid ${theme.borderStandard}`,
-        boxShadow: active ? theme.shadowStrong : "none",
-        transform: active ? "scale(1.08)" : "scale(1)",
-        transition:
-          "transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease",
-        cursor: "pointer",
-        flex: "0 0 auto",
+        width,
+        height,
+        position: "relative",
+        margin: "0 auto",
       }}
-    />
+    >
+      {cells.map((cell) => {
+        const rowLength = WORD_COLOUR_ROWS[cell.row].length;
+        const baseLeft = ((maxCols - rowLength) * colStep) / 2;
+        const left = baseLeft + cell.col * colStep;
+        const top = cell.row * rowStep;
+
+        return (
+          <div
+            key={`${cell.row}-${cell.col}-${cell.id}`}
+            style={{
+              position: "absolute",
+              left,
+              top,
+            }}
+          >
+            <HexSwatch
+              colour={ACCENT_MAP[cell.id]}
+              label={`${getAccentLabel(cell.id)} ${ACCENT_MAP[cell.id]}`}
+              active={cell.id === selectedColour}
+              onClick={() => onSelect(cell.id)}
+              theme={theme}
+              width={hexWidth}
+              height={hexHeight}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function WordNeutralPalette({
+  selectedColour,
+  onSelect,
+  theme,
+}: {
+  selectedColour: AccentOption;
+  onSelect: (colour: AccentOption) => void;
+  theme: ReturnType<typeof useSettings>["theme"];
+}) {
+  const smallHexWidth = 22;
+  const smallHexHeight = 26;
+  const largeHexWidth = 30;
+  const largeHexHeight = 34;
+  const colStep = 18.7;
+  const rowStep = 18.5;
+
+  const contentWidth = 290;
+  const topLeft = 53;
+  const bottomLeft = 43;
+  const blackLeft = contentWidth - largeHexWidth;
+  const whiteTop = 12;
+  const blackTop = 10;
+
+  return (
+    <div
+      style={{
+        width: contentWidth,
+        height: 52,
+        position: "relative",
+        margin: "0 auto",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: whiteTop,
+        }}
+      >
+        <HexSwatch
+          colour={ACCENT_MAP[WORD_NEUTRAL_WHITE]}
+          label="White"
+          active={selectedColour === WORD_NEUTRAL_WHITE}
+          onClick={() => onSelect(WORD_NEUTRAL_WHITE)}
+          theme={theme}
+          width={largeHexWidth}
+          height={largeHexHeight}
+          innerBorder
+        />
+      </div>
+
+      {WORD_NEUTRAL_TOP.map((id, index) => (
+        <div
+          key={id}
+          style={{
+            position: "absolute",
+            left: topLeft + index * colStep,
+            top: 0,
+          }}
+        >
+          <HexSwatch
+            colour={ACCENT_MAP[id]}
+            label={`${getAccentLabel(id)} ${ACCENT_MAP[id]}`}
+            active={selectedColour === id}
+            onClick={() => onSelect(id)}
+            theme={theme}
+            width={smallHexWidth}
+            height={smallHexHeight}
+          />
+        </div>
+      ))}
+
+      {WORD_NEUTRAL_BOTTOM.map((id, index) => (
+        <div
+          key={id}
+          style={{
+            position: "absolute",
+            left: bottomLeft + index * colStep,
+            top: rowStep,
+          }}
+        >
+          <HexSwatch
+            colour={ACCENT_MAP[id]}
+            label={`${getAccentLabel(id)} ${ACCENT_MAP[id]}`}
+            active={selectedColour === id}
+            onClick={() => onSelect(id)}
+            theme={theme}
+            width={smallHexWidth}
+            height={smallHexHeight}
+          />
+        </div>
+      ))}
+
+      <div
+        style={{
+          position: "absolute",
+          left: blackLeft,
+          top: blackTop,
+        }}
+      >
+        <HexSwatch
+          colour={ACCENT_MAP[WORD_NEUTRAL_BLACK]}
+          label="Black"
+          active={selectedColour === WORD_NEUTRAL_BLACK}
+          onClick={() => onSelect(WORD_NEUTRAL_BLACK)}
+          theme={theme}
+          width={largeHexWidth}
+          height={largeHexHeight}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -189,12 +501,11 @@ function CustomThemePaletteDialog({
   onClose: () => void;
   theme: ReturnType<typeof useSettings>["theme"];
 }) {
-  const selectedLabel = useMemo(() => {
-    return (
-      ACCENT_OPTIONS.find((option) => option.id === selectedColour)?.label ??
-      "Unknown"
-    );
-  }, [selectedColour]);
+  const selectedHex = ACCENT_MAP[selectedColour];
+  const selectedLabel = useMemo(
+    () => getAccentLabel(selectedColour),
+    [selectedColour]
+  );
 
   if (!open) return null;
 
@@ -206,7 +517,7 @@ function CustomThemePaletteDialog({
         background: theme.modalOverlay,
         display: "grid",
         placeItems: "center",
-        padding: 24,
+        padding: 16,
         zIndex: 2000,
       }}
       onClick={onClose}
@@ -215,8 +526,8 @@ function CustomThemePaletteDialog({
         onClick={(event) => event.stopPropagation()}
         style={{
           width: "100%",
-          maxWidth: 860,
-          borderRadius: 24,
+          maxWidth: 404,
+          borderRadius: 14,
           border: `1px solid ${theme.borderStandard}`,
           background: theme.bgSurface,
           boxShadow: theme.shadowStrong,
@@ -225,18 +536,18 @@ function CustomThemePaletteDialog({
       >
         <div
           style={{
-            padding: "18px 20px",
+            padding: "14px 16px 12px",
             borderBottom: `1px solid ${theme.borderStandard}`,
             display: "flex",
-            alignItems: "center",
+            alignItems: "flex-start",
             justifyContent: "space-between",
-            gap: 16,
+            gap: 12,
           }}
         >
-          <div style={{ display: "grid", gap: 4 }}>
+          <div style={{ display: "grid", gap: 6 }}>
             <div
               style={{
-                fontSize: 20,
+                fontSize: 15,
                 fontWeight: 700,
                 color: theme.textPrimary,
               }}
@@ -245,14 +556,14 @@ function CustomThemePaletteDialog({
             </div>
             <div
               style={{
-                fontSize: 13,
+                fontSize: 12.5,
                 color: theme.textMuted,
                 lineHeight: 1.45,
-                maxWidth: 560,
+                maxWidth: 290,
               }}
             >
-              Choose a curated base colour. The app will generate a full theme
-              from it rather than simply changing a single accent.
+              Choose a base colour from the palette below. The app will build a
+              full theme from it rather than simply changing a single accent.
             </div>
           </div>
 
@@ -260,15 +571,18 @@ function CustomThemePaletteDialog({
             type="button"
             onClick={onClose}
             style={{
-              width: 38,
-              height: 38,
-              borderRadius: 12,
+              width: 32,
+              height: 32,
+              borderRadius: 10,
               border: `1px solid ${theme.borderStandard}`,
               background: theme.controlBg,
               color: theme.textPrimary,
               cursor: "pointer",
-              fontSize: 18,
+              fontSize: 19,
               lineHeight: 1,
+              display: "grid",
+              placeItems: "center",
+              flex: "0 0 auto",
             }}
             aria-label="Close custom theme picker"
             title="Close"
@@ -279,147 +593,126 @@ function CustomThemePaletteDialog({
 
         <div
           style={{
-            padding: 24,
+            padding: "14px 14px 14px",
             display: "grid",
-            gap: 24,
+            gap: 14,
           }}
         >
-          <div
-            style={{
-              display: "grid",
-              gap: 0,
-              justifyItems: "center",
-            }}
-          >
-            {COLOUR_ROWS.map((row, rowIndex) => (
-              <div
-                key={row.join("-")}
-                style={{
-                  display: "flex",
-                  gap: 2,
-                  justifyContent: "center",
-                  marginTop: rowIndex === 0 ? 0 : -6,
-                  marginLeft: row.length === 7 ? 54 : row.length === 8 ? 36 : 0,
-                }}
-              >
-                {row.map((optionId) => (
-                  <HexSwatch
-                    key={optionId}
-                    colour={ACCENT_MAP[optionId]}
-                    label={
-                      ACCENT_OPTIONS.find((option) => option.id === optionId)
-                        ?.label ?? optionId
-                    }
-                    active={optionId === selectedColour}
-                    onClick={() => onSelect(optionId)}
-                    theme={theme}
-                    size={38}
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: 2,
-              justifyContent: "center",
-              marginTop: -4,
-              flexWrap: "nowrap",
-            }}
-          >
-            {NEUTRAL_ROW.map((optionId) => (
-              <HexSwatch
-                key={optionId}
-                colour={ACCENT_MAP[optionId]}
-                label={
-                  ACCENT_OPTIONS.find((option) => option.id === optionId)
-                    ?.label ?? optionId
-                }
-                active={optionId === selectedColour}
-                onClick={() => onSelect(optionId)}
-                theme={theme}
-                size={34}
-              />
-            ))}
-          </div>
+          <WordHoneycombPalette
+            selectedColour={selectedColour}
+            onSelect={onSelect}
+            theme={theme}
+          />
 
           <div
             style={{
               display: "grid",
               gap: 10,
+              justifyItems: "center",
             }}
           >
             <div
               style={{
-                fontSize: 12,
-                fontWeight: 700,
-                letterSpacing: 0.35,
-                textTransform: "uppercase",
-                color: theme.textMuted,
+                width: "100%",
+                maxWidth: 320,
+                borderTop: `1px solid ${theme.borderStandard}`,
               }}
-            >
-              Current selection
-            </div>
+            />
 
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 12,
-                padding: "12px 14px",
-                borderRadius: 16,
-                border: `1px solid ${theme.borderStandard}`,
-                background: theme.bgElevated,
-                justifySelf: "start",
-              }}
-            >
-              <span
-                style={{
-                  width: 24,
-                  height: 24,
-                  background: ACCENT_MAP[selectedColour],
-                  clipPath:
-                    "polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%)",
-                  border: `2px solid ${theme.paper}`,
-                  boxShadow: theme.shadow,
-                }}
-              />
-
-              <span
-                style={{
-                  fontSize: 14,
-                  color: theme.textSecondary,
-                }}
-              >
-                Base colour:{" "}
-                <strong style={{ color: theme.textPrimary }}>
-                  {selectedLabel}
-                </strong>
-              </span>
-            </div>
+            <WordNeutralPalette
+              selectedColour={selectedColour}
+              onSelect={onSelect}
+              theme={theme}
+            />
           </div>
 
           <div
             style={{
               display: "flex",
-              justifyContent: "flex-end",
+              alignItems: "end",
+              justifyContent: "space-between",
+              gap: 12,
             }}
           >
+            <div
+              style={{
+                display: "grid",
+                gap: 6,
+                minWidth: 0,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11.5,
+                  fontWeight: 700,
+                  letterSpacing: 0.6,
+                  textTransform: "uppercase",
+                  color: theme.textMuted,
+                }}
+              >
+                Current selection
+              </div>
+
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                  minHeight: 40,
+                  padding: "0 12px",
+                  borderRadius: 12,
+                  border: `1px solid ${theme.borderStandard}`,
+                  background: theme.bgElevated,
+                  maxWidth: 250,
+                }}
+              >
+                <span
+                  style={{
+                    width: 18,
+                    height: 21,
+                    background: selectedHex,
+                    clipPath:
+                      "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+                    border:
+                      selectedColour === WORD_NEUTRAL_WHITE
+                        ? `1px solid ${theme.borderStandard}`
+                        : `2px solid ${theme.paper}`,
+                    boxShadow: theme.shadow,
+                    flex: "0 0 auto",
+                  }}
+                />
+
+                <span
+                  style={{
+                    fontSize: 13,
+                    color: theme.textSecondary,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Base colour:{" "}
+                  <strong style={{ color: theme.textPrimary }}>
+                    {selectedLabel}
+                  </strong>
+                </span>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={onClose}
               style={{
-                height: 42,
+                height: 40,
                 padding: "0 16px",
-                borderRadius: 12,
+                borderRadius: 10,
                 border: `1px solid ${theme.borderStandard}`,
-                background: theme.bgElevated,
+                background: theme.controlBg,
                 color: theme.textPrimary,
                 fontSize: 14,
                 fontWeight: 700,
                 cursor: "pointer",
+                flex: "0 0 auto",
               }}
             >
               Done
@@ -443,12 +736,10 @@ export default function GlobalSettingsPanel() {
 
   const [openPalette, setOpenPalette] = useState(false);
 
-  const selectedLabel = useMemo(() => {
-    return (
-      ACCENT_OPTIONS.find((o) => o.id === customThemeColour)?.label ??
-      "Unknown"
-    );
-  }, [customThemeColour]);
+  const selectedLabel = useMemo(
+    () => getAccentLabel(customThemeColour),
+    [customThemeColour]
+  );
 
   return (
     <>
@@ -538,11 +829,15 @@ export default function GlobalSettingsPanel() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div
                 style={{
-                  width: 20,
-                  height: 20,
+                  width: 18,
+                  height: 21,
                   background: ACCENT_MAP[customThemeColour],
                   clipPath:
-                    "polygon(25% 6.7%, 75% 6.7%, 100% 50%, 75% 93.3%, 25% 93.3%, 0% 50%)",
+                    "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+                  border:
+                    customThemeColour === WORD_NEUTRAL_WHITE
+                      ? `1px solid ${theme.borderStandard}`
+                      : "none",
                 }}
               />
 

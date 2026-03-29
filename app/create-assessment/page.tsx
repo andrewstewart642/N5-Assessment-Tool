@@ -36,9 +36,9 @@ function SetupCard({ title, children, theme }: SetupCardProps) {
     <section
       style={{
         minWidth: 0,
-        border: `1px solid ${theme.border}`,
+        border: `1px solid ${theme.borderStandard}`,
         borderRadius: 22,
-        background: theme.panelBg,
+        background: theme.bgSurface,
         padding: 18,
         boxSizing: "border-box",
       }}
@@ -48,7 +48,7 @@ function SetupCard({ title, children, theme }: SetupCardProps) {
           fontSize: 18,
           fontWeight: 700,
           marginBottom: 14,
-          color: theme.text,
+          color: theme.textPrimary,
         }}
       >
         {title}
@@ -85,12 +85,10 @@ function ChoiceRow({
           gap: 10,
           width: "100%",
           border: `1px solid ${
-            selected ? theme.accent : theme.border
+            selected ? theme.controlSelectedBorder : theme.borderStandard
           }`,
-          background: selected
-            ? theme.accentSoft
-            : theme.buttonGhostBg,
-          color: selected ? theme.text : theme.textSoft,
+          background: selected ? theme.controlSelectedBg : theme.controlBg,
+          color: selected ? theme.textPrimary : theme.textSecondary,
           borderRadius: 14,
           padding: "12px 14px",
           cursor: "pointer",
@@ -106,9 +104,9 @@ function ChoiceRow({
             height: 16,
             borderRadius: 999,
             border: `2px solid ${
-              selected ? theme.accent : theme.textMuted
+              selected ? theme.accentPrimary : theme.textMuted
             }`,
-            background: selected ? theme.accent : "transparent",
+            background: selected ? theme.accentPrimary : "transparent",
             boxSizing: "border-box",
             flexShrink: 0,
           }}
@@ -122,8 +120,8 @@ function ChoiceRow({
             marginLeft: 14,
             padding: 12,
             borderRadius: 16,
-            border: `1px solid ${theme.border}`,
-            background: theme.buttonGhostBg,
+            border: `1px solid ${theme.borderStandard}`,
+            background: theme.bgElevated,
             display: "grid",
             gap: 10,
           }}
@@ -153,12 +151,10 @@ function CheckRow({ label, checked, onToggle, theme }: CheckRowProps) {
         gap: 10,
         width: "100%",
         border: `1px solid ${
-          checked ? theme.accent : theme.border
+          checked ? theme.controlSelectedBorder : theme.borderStandard
         }`,
-        background: checked
-          ? theme.accentSoft
-          : theme.buttonGhostBg,
-        color: checked ? theme.text : theme.textSoft,
+        background: checked ? theme.controlSelectedBg : theme.controlBg,
+        color: checked ? theme.textPrimary : theme.textSecondary,
         borderRadius: 14,
         padding: "12px 14px",
         cursor: "pointer",
@@ -174,9 +170,9 @@ function CheckRow({ label, checked, onToggle, theme }: CheckRowProps) {
           height: 16,
           borderRadius: 4,
           border: `2px solid ${
-            checked ? theme.accent : theme.textMuted
+            checked ? theme.accentPrimary : theme.textMuted
           }`,
-          background: checked ? theme.accent : "transparent",
+          background: checked ? theme.accentPrimary : "transparent",
           boxSizing: "border-box",
           flexShrink: 0,
         }}
@@ -219,9 +215,9 @@ function NumberField({
           gridTemplateColumns: "1fr auto",
           alignItems: "center",
           gap: 10,
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${theme.borderStandard}`,
           borderRadius: 14,
-          background: theme.buttonGhostBg,
+          background: theme.controlBg,
           padding: "10px 12px",
         }}
       >
@@ -235,7 +231,7 @@ function NumberField({
             border: "none",
             outline: "none",
             background: "transparent",
-            color: theme.text,
+            color: theme.textPrimary,
             fontSize: 16,
             fontFamily: "inherit",
             minWidth: 0,
@@ -289,9 +285,9 @@ function TextField({
 
       <div
         style={{
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${theme.borderStandard}`,
           borderRadius: 14,
-          background: theme.buttonGhostBg,
+          background: theme.controlBg,
           padding: "10px 12px",
         }}
       >
@@ -306,7 +302,7 @@ function TextField({
             border: "none",
             outline: "none",
             background: "transparent",
-            color: theme.text,
+            color: theme.textPrimary,
             fontSize: 16,
             fontFamily: "inherit",
           }}
@@ -381,9 +377,8 @@ export default function CreateAssessmentSetupPage() {
   const [assessmentName, setAssessmentName] = useState("[Untitled file]");
   const [assessmentDate, setAssessmentDate] = useState(todayIsoDate());
 
-  const [selectedLevelId, setSelectedLevelId] = useState<AssessmentLevelId | null>(
-    "N5_MATHS"
-  );
+  const [selectedLevelId, setSelectedLevelId] =
+    useState<AssessmentLevelId | null>("N5_MATHS");
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [useCompleteCourseCoverage, setUseCompleteCourseCoverage] =
     useState(false);
@@ -438,7 +433,8 @@ export default function CreateAssessmentSetupPage() {
 
   const themeLevel = useMemo(() => {
     return (
-      ASSESSMENT_LEVEL_OPTIONS.find((option) => option.id === selectedLevelId) ?? null
+      ASSESSMENT_LEVEL_OPTIONS.find((option) => option.id === selectedLevelId) ??
+      null
     );
   }, [selectedLevelId]);
 
@@ -679,8 +675,8 @@ export default function CreateAssessmentSetupPage() {
     <main
       style={{
         minHeight: "100%",
-        background: theme.pageBg,
-        color: theme.text,
+        background: theme.bgPage,
+        color: theme.textPrimary,
         padding: 24,
         boxSizing: "border-box",
       }}
@@ -695,8 +691,8 @@ export default function CreateAssessmentSetupPage() {
       >
         <section
           style={{
-            border: `1px solid ${theme.border}`,
-            background: theme.panelBg,
+            border: `1px solid ${theme.borderStandard}`,
+            background: theme.bgSurface,
             borderRadius: 22,
             padding: "22px 24px",
           }}
@@ -706,7 +702,7 @@ export default function CreateAssessmentSetupPage() {
               fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightBold,
               fontSize: 28,
-              color: theme.text,
+              color: theme.textPrimary,
               marginBottom: 8,
             }}
           >
@@ -730,8 +726,8 @@ export default function CreateAssessmentSetupPage() {
 
         <section
           style={{
-            border: `1px solid ${theme.border}`,
-            background: theme.panelBg,
+            border: `1px solid ${theme.borderStandard}`,
+            background: theme.bgSurface,
             borderRadius: 22,
             padding: "18px 20px",
           }}
@@ -741,7 +737,7 @@ export default function CreateAssessmentSetupPage() {
               fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightBold,
               fontSize: 18,
-              color: theme.text,
+              color: theme.textPrimary,
               marginBottom: 14,
             }}
           >
@@ -921,7 +917,7 @@ export default function CreateAssessmentSetupPage() {
             ) : (
               <div
                 style={{
-                  border: `1px dashed ${theme.border}`,
+                  border: `1px dashed ${theme.borderStandard}`,
                   borderRadius: 14,
                   padding: "14px 16px",
                   color: theme.textMuted,
@@ -1042,7 +1038,7 @@ export default function CreateAssessmentSetupPage() {
             ) : (
               <div
                 style={{
-                  border: `1px dashed ${theme.border}`,
+                  border: `1px dashed ${theme.borderStandard}`,
                   borderRadius: 14,
                   padding: "14px 16px",
                   color: theme.textMuted,
@@ -1071,15 +1067,17 @@ export default function CreateAssessmentSetupPage() {
               height: 58,
               borderRadius: 18,
               border: `1px solid ${
-                showContinue && targetsValid ? theme.accent : theme.border
+                showContinue && targetsValid
+                  ? theme.controlSelectedBorder
+                  : theme.borderStandard
               }`,
               background:
                 showContinue && targetsValid
-                  ? theme.accentSoft
-                  : theme.buttonGhostBg,
+                  ? theme.controlSelectedBg
+                  : theme.controlBg,
               color:
                 showContinue && targetsValid
-                  ? theme.text
+                  ? theme.textPrimary
                   : theme.textMuted,
               cursor:
                 showContinue && targetsValid ? "pointer" : "not-allowed",
