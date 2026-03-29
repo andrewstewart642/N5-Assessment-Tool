@@ -44,9 +44,6 @@ export default function AppShellTopBar() {
   const pathname = usePathname();
   const { theme, openSettings } = useSettings();
 
-  const isLight = theme.inverseText === "#ffffff";
-  const lightSurface = "#eceff1";
-
   function handleOpenSettings() {
     if (pathname.startsWith("/create-assessment/builder")) {
       if (typeof window !== "undefined") {
@@ -62,8 +59,8 @@ export default function AppShellTopBar() {
     <header
       style={{
         height: 56,
-        borderBottom: `1px solid ${theme.border}`,
-        background: isLight ? lightSurface : theme.headerBg,
+        borderBottom: `1px solid ${theme.borderStandard}`,
+        background: theme.bgSurface,
         display: "grid",
         gridTemplateColumns: "220px 1fr auto",
         alignItems: "center",
@@ -73,31 +70,22 @@ export default function AppShellTopBar() {
         position: "sticky",
         top: 0,
         zIndex: 100,
-        boxShadow: "none",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          minWidth: 0,
-        }}
-      >
+      <div style={{ display: "flex", alignItems: "center" }}>
         <div
-          title="Reserved for future name/logo"
           style={{
             width: 150,
             height: 30,
             borderRadius: 10,
-            border: `1px dashed ${theme.border}`,
-            background: isLight ? lightSurface : "rgba(255,255,255,0.03)",
+            border: `1px dashed ${theme.borderStandard}`,
+            background: theme.bgElevated,
             color: theme.textMuted,
             display: "grid",
             placeItems: "center",
-            fontFamily: UI_TYPO.family,
             fontSize: 12,
             fontWeight: UI_TYPO.weightMedium,
-            letterSpacing: 0.2,
+            lineHeight: 1,
           }}
         >
           Reserved for logo
@@ -105,12 +93,10 @@ export default function AppShellTopBar() {
       </div>
 
       <nav
-        aria-label="Primary"
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 8,
-          minWidth: 0,
+          gap: 6,
         }}
       >
         {NAV_ITEMS.map((item) => {
@@ -122,25 +108,37 @@ export default function AppShellTopBar() {
               href={item.href}
               style={{
                 textDecoration: "none",
-                color: active ? theme.text : theme.textMuted,
-                background: active
-                  ? isLight
-                    ? "#e7eaed"
-                    : "rgba(255,255,255,0.06)"
-                  : "transparent",
-                border: active
-                  ? `1px solid ${theme.border}`
-                  : "1px solid transparent",
+                color: active ? theme.textPrimary : theme.textMuted,
+                background: active ? theme.controlSelectedBg : "transparent",
+                border: `1px solid ${
+                  active ? theme.controlSelectedBorder : "transparent"
+                }`,
                 borderRadius: 12,
                 padding: "8px 12px",
-                fontFamily: UI_TYPO.family,
                 fontWeight: active
                   ? UI_TYPO.weightSemibold
                   : UI_TYPO.weightMedium,
                 fontSize: 14,
                 lineHeight: 1,
-                whiteSpace: "nowrap",
-                boxShadow: "none",
+                boxShadow: active
+                  ? `inset 0 0 0 1px ${theme.accentSoft}`
+                  : "none",
+                transition:
+                  "background 120ms ease, border-color 120ms ease, color 120ms ease, box-shadow 120ms ease",
+              }}
+              onMouseEnter={(event) => {
+                if (!active) {
+                  event.currentTarget.style.background = theme.controlBg;
+                  event.currentTarget.style.color = theme.textPrimary;
+                  event.currentTarget.style.borderColor = theme.borderStandard;
+                }
+              }}
+              onMouseLeave={(event) => {
+                if (!active) {
+                  event.currentTarget.style.background = "transparent";
+                  event.currentTarget.style.color = theme.textMuted;
+                  event.currentTarget.style.borderColor = "transparent";
+                }
               }}
             >
               {item.label}
@@ -153,28 +151,42 @@ export default function AppShellTopBar() {
         <button
           type="button"
           onClick={handleOpenSettings}
-          title="Settings"
           style={{
-            border: `1px solid ${theme.border}`,
-            background: isLight ? "#e7eaed" : "rgba(11,17,24,0.92)",
-            color: theme.textMuted,
-            borderRadius: 16,
-            padding: "10px 14px",
-            cursor: "pointer",
-            boxShadow: "none",
-            fontFamily: UI_TYPO.family,
-            fontWeight: UI_TYPO.weightSemibold,
-            fontSize: 13,
             display: "inline-flex",
             alignItems: "center",
             gap: 8,
-            lineHeight: 1,
+            padding: "10px 14px",
+            borderRadius: 14,
+            background: theme.bgElevated,
+            border: `1px solid ${theme.borderStandard}`,
+            color: theme.textPrimary,
+            fontSize: 13,
+            fontWeight: UI_TYPO.weightSemibold,
+            cursor: "pointer",
+            boxShadow: `inset 0 0 0 1px ${theme.accentSoft}`,
+            transition:
+              "background 120ms ease, border-color 120ms ease, transform 80ms ease, box-shadow 120ms ease",
+          }}
+          onMouseEnter={(event) => {
+            event.currentTarget.style.background = theme.controlSelectedBg;
+            event.currentTarget.style.borderColor = theme.controlSelectedBorder;
+            event.currentTarget.style.boxShadow = `inset 0 0 0 1px ${theme.accentSoft}`;
+          }}
+          onMouseLeave={(event) => {
+            event.currentTarget.style.background = theme.bgElevated;
+            event.currentTarget.style.borderColor = theme.borderStandard;
+            event.currentTarget.style.transform = "scale(1)";
+            event.currentTarget.style.boxShadow = `inset 0 0 0 1px ${theme.accentSoft}`;
+          }}
+          onMouseDown={(event) => {
+            event.currentTarget.style.transform = "scale(0.97)";
+          }}
+          onMouseUp={(event) => {
+            event.currentTarget.style.transform = "scale(1)";
           }}
         >
-          <span aria-hidden="true" style={{ fontSize: 14 }}>
-            ⚙
-          </span>
-          <span>Settings</span>
+          <span style={{ fontSize: 14, lineHeight: 1 }}>⚙</span>
+          <span style={{ lineHeight: 1 }}>Settings</span>
         </button>
       </div>
     </header>

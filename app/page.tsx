@@ -36,18 +36,13 @@ const CARDS: HomeCard[] = [
 
 export default function HomePage() {
   const { theme } = useSettings();
-  const isLight = theme.inverseText === "#ffffff";
-
-  const lightPageBg = "#e3e6e8";
-  const lightSurface = "#eceff1";
-  const lightRaised = "#e7eaed";
 
   return (
     <main
       style={{
         minHeight: "100%",
-        background: isLight ? lightPageBg : theme.pageBg,
-        color: theme.text,
+        background: theme.bgPage,
+        color: theme.textPrimary,
         padding: 24,
         boxSizing: "border-box",
       }}
@@ -62,19 +57,30 @@ export default function HomePage() {
       >
         <section
           style={{
-            border: `1px solid ${theme.border}`,
-            background: isLight ? lightSurface : theme.panelBg,
+            border: `1px solid ${theme.borderStandard}`,
+            background: theme.bgSurface,
             borderRadius: 22,
             padding: "22px 24px",
-            boxShadow: "none",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
+          <div
+            style={{
+              position: "absolute",
+              inset: "0 auto 0 0",
+              width: 4,
+              background: theme.accentPrimary,
+              opacity: 0.9,
+            }}
+          />
+
           <div
             style={{
               fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightBold,
               fontSize: 28,
-              color: theme.text,
+              color: theme.textPrimary,
               marginBottom: 8,
             }}
           >
@@ -111,14 +117,28 @@ export default function HomePage() {
                 textDecoration: "none",
                 color: "inherit",
                 minHeight: 220,
-                border: `1px solid ${theme.border}`,
-                background: isLight ? lightSurface : theme.panelBg,
+                border: `1px solid ${theme.borderStandard}`,
+                background: theme.bgSurface,
                 borderRadius: 24,
                 padding: 22,
                 display: "grid",
                 alignContent: "space-between",
                 boxSizing: "border-box",
-                boxShadow: "none",
+                transition:
+                  "background 140ms ease, border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease",
+              }}
+              onMouseEnter={(event) => {
+                event.currentTarget.style.background = theme.bgElevated;
+                event.currentTarget.style.borderColor =
+                  theme.controlSelectedBorder;
+                event.currentTarget.style.transform = "translateY(-1px)";
+                event.currentTarget.style.boxShadow = `inset 0 0 0 1px ${theme.accentSoft}`;
+              }}
+              onMouseLeave={(event) => {
+                event.currentTarget.style.background = theme.bgSurface;
+                event.currentTarget.style.borderColor = theme.borderStandard;
+                event.currentTarget.style.transform = "translateY(0)";
+                event.currentTarget.style.boxShadow = "none";
               }}
             >
               <div
@@ -126,8 +146,9 @@ export default function HomePage() {
                   width: 54,
                   height: 54,
                   borderRadius: 16,
-                  border: `1px solid ${theme.border}`,
-                  background: isLight ? lightRaised : "rgba(255,255,255,0.04)",
+                  border: `1px solid ${theme.controlSelectedBorder}`,
+                  background: theme.controlSelectedBg,
+                  boxShadow: `inset 0 0 0 1px ${theme.accentSoft}`,
                 }}
               />
 
@@ -137,7 +158,7 @@ export default function HomePage() {
                     fontFamily: UI_TYPO.family,
                     fontWeight: UI_TYPO.weightBold,
                     fontSize: 20,
-                    color: theme.text,
+                    color: theme.textPrimary,
                     marginBottom: 10,
                   }}
                 >

@@ -1,12 +1,28 @@
-export type ThemeModePreference = "system" | "light" | "dark";
-export type ResolvedThemeMode = "light" | "dark";
+export type ThemeModePreference =
+  | "system"
+  | "light"
+  | "soft-grey"
+  | "dark"
+  | "custom";
+
+export type ResolvedThemeMode =
+  | "light"
+  | "soft-grey"
+  | "dark"
+  | "custom";
 
 export const THEME_MODE_STORAGE_KEY = "app-theme-mode";
 
 export function isThemeModePreference(
   value: unknown
 ): value is ThemeModePreference {
-  return value === "system" || value === "light" || value === "dark";
+  return (
+    value === "system" ||
+    value === "light" ||
+    value === "soft-grey" ||
+    value === "dark" ||
+    value === "custom"
+  );
 }
 
 export function getSystemPrefersDark(): boolean {
@@ -19,6 +35,8 @@ export function resolveThemeMode(
   systemPrefersDark: boolean
 ): ResolvedThemeMode {
   if (preference === "light") return "light";
+  if (preference === "soft-grey") return "soft-grey";
   if (preference === "dark") return "dark";
+  if (preference === "custom") return "custom";
   return systemPrefersDark ? "dark" : "light";
 }

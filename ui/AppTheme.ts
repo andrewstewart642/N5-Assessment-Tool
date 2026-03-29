@@ -1,329 +1,173 @@
-import type { ResolvedThemeMode } from "./ThemeMode";
+import { ACCENT_MAP, type AccentOption } from "./AccentPalette";
 
-export type AppTheme = {
-  [key: string]: string;
-
-  // New semantic tokens
-  bgPrimary: string;
+/**
+ * Theme structure used across the app
+ */
+export type Theme = {
+  bgPage: string;
   bgSurface: string;
-  bgSurfaceAlt: string;
   bgElevated: string;
-  bgOverlay: string;
 
   textPrimary: string;
   textSecondary: string;
   textMuted: string;
-  textInverse: string;
 
-  borderSubtle: string;
   borderStandard: string;
-  borderStrong: string;
-  divider: string;
-
-  accentPrimary: string;
-  accentPrimaryHover: string;
-  accentSoft: string;
-  accentSoftText: string;
-
-  success: string;
-  warning: string;
-  danger: string;
-  info: string;
 
   controlBg: string;
   controlBgHover: string;
   controlSelectedBg: string;
   controlSelectedBorder: string;
 
-  inputBg: string;
-  inputBorder: string;
-  inputBorderFocus: string;
+  accentPrimary: string;
+  accentSoft: string;
 
-  panelBg: string;
-  sidebarBg: string;
-  toolbarBg: string;
-  cardBg: string;
-  cardBgHover: string;
-  previewChromeBg: string;
-
-  focusRing: string;
-  shadowColor: string;
-  scrollbarThumb: string;
-
-  skillNumerical: string;
-  skillAlgebraic: string;
-  skillGeometric: string;
-  skillTrigonometric: string;
-  skillStatistical: string;
-
-  // Legacy builder tokens kept for compatibility
-  pageBg: string;
-  panelBg2: string;
-  panelBg3: string;
-  headerBg: string;
-
-  text: string;
-  textSoft: string;
-  textMutedLegacy: string;
-
-  border: string;
-  borderSoft: string;
-
-  buttonBg: string;
-  buttonBgHover: string;
-  buttonText: string;
-
-  pillBg: string;
-  pillBorder: string;
-  pillActiveBg: string;
-  pillActiveBorder: string;
-  pillText: string;
-  pillActiveText: string;
-
-  inputText: string;
-  inputPlaceholder: string;
-
-  dividerStrong: string;
-
-  subtleText: string;
-  mutedText: string;
-  textDim: string;
-  inverseText: string;
-
-  rowHover: string;
-
-  accent: string;
-  accentStrong: string;
-  ctaBlueText: string;
-
-  // Final legacy keys still referenced
-  inputBgSoft: string;
-  buttonGhostBg: string;
-  overlay: string;
   shadow: string;
   shadowStrong: string;
+
   modalOverlay: string;
-  cardShadow: string;
 
   paper: string;
-  paperBorder: string;
-  paperText: string;
 };
 
-const darkTheme: AppTheme = {
-  // New semantic tokens
-  bgPrimary: "#212121",
-  bgSurface: "#262626",
-  bgSurfaceAlt: "#2b2b2b",
-  bgElevated: "#303030",
-  bgOverlay: "rgba(0,0,0,0.58)",
+/**
+ * ---------- UTILITIES ----------
+ */
 
-  textPrimary: "#f5f5f5",
-  textSecondary: "#d4d4d4",
-  textMuted: "#a3a3a3",
-  textInverse: "#171717",
+function hexToRgb(hex: string) {
+  const clean = hex.replace("#", "");
+  const bigint = parseInt(clean, 16);
+  return {
+    r: (bigint >> 16) & 255,
+    g: (bigint >> 8) & 255,
+    b: bigint & 255,
+  };
+}
 
-  borderSubtle: "#333333",
-  borderStandard: "#404040",
-  borderStrong: "#525252",
-  divider: "#333333",
+function rgbToHex(r: number, g: number, b: number) {
+  return (
+    "#" +
+    [r, g, b]
+      .map((x) => {
+        const hex = x.toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+      })
+      .join("")
+  );
+}
 
-  accentPrimary: "#4a90e2",
-  accentPrimaryHover: "#3f7fca",
-  accentSoft: "rgba(74,144,226,0.14)",
-  accentSoftText: "#a9cbf5",
+function mix(hex1: string, hex2: string, ratio: number) {
+  const c1 = hexToRgb(hex1);
+  const c2 = hexToRgb(hex2);
 
-  success: "#22c55e",
-  warning: "#f59e0b",
-  danger: "#ef4444",
-  info: "#38bdf8",
+  return rgbToHex(
+    Math.round(c1.r * (1 - ratio) + c2.r * ratio),
+    Math.round(c1.g * (1 - ratio) + c2.g * ratio),
+    Math.round(c1.b * (1 - ratio) + c2.b * ratio)
+  );
+}
 
-  controlBg: "#2b2b2b",
-  controlBgHover: "#323232",
-  controlSelectedBg: "rgba(74,144,226,0.18)",
-  controlSelectedBorder: "#4a90e2",
+function isLight(hex: string) {
+  const { r, g, b } = hexToRgb(hex);
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance > 160;
+}
 
-  inputBg: "#262626",
-  inputBorder: "#454545",
-  inputBorderFocus: "#4a90e2",
+/**
+ * ---------- CORE GENERATOR ----------
+ */
 
-  panelBg: "#262626",
-  sidebarBg: "#1f1f1f",
-  toolbarBg: "#1f1f1f",
-  cardBg: "#2b2b2b",
-  cardBgHover: "#323232",
-  previewChromeBg: "#212121",
+function generateThemeFromBase(base: string): Theme {
+  const light = isLight(base);
 
-  focusRing: "rgba(74,144,226,0.42)",
-  shadowColor: "rgba(0,0,0,0.45)",
-  scrollbarThumb: "#4a4a4a",
+  const bgPage = light ? mix(base, "#ffffff", 0.92) : mix(base, "#000000", 0.88);
+  const bgSurface = light
+    ? mix(base, "#ffffff", 0.96)
+    : mix(base, "#000000", 0.82);
+  const bgElevated = light
+    ? mix(base, "#ffffff", 0.98)
+    : mix(base, "#000000", 0.75);
 
-  skillNumerical: "#60a5fa",
-  skillAlgebraic: "#a78bfa",
-  skillGeometric: "#34d399",
-  skillTrigonometric: "#facc15",
-  skillStatistical: "#f472b6",
+  const textPrimary = light ? "#0f172a" : "#f8fafc";
+  const textSecondary = light ? "#334155" : "#cbd5f5";
+  const textMuted = light ? "#64748b" : "#94a3b8";
 
-  // Legacy builder tokens
-  pageBg: "#212121",
-  panelBg2: "#262626",
-  panelBg3: "#2b2b2b",
-  headerBg: "#1f1f1f",
+  const borderStandard = light
+    ? mix(base, "#000000", 0.08)
+    : mix(base, "#ffffff", 0.12);
 
-  text: "#f5f5f5",
-  textSoft: "#d4d4d4",
-  textMutedLegacy: "#a3a3a3",
+  const controlBg = light
+    ? mix(base, "#ffffff", 0.90)
+    : mix(base, "#000000", 0.75);
 
-  border: "#404040",
-  borderSoft: "#333333",
+  const controlBgHover = light
+    ? mix(base, "#ffffff", 0.82)
+    : mix(base, "#000000", 0.65);
 
-  buttonBg: "#2b2b2b",
-  buttonBgHover: "#323232",
-  buttonText: "#f5f5f5",
+  const controlSelectedBg = light
+    ? mix(base, "#ffffff", 0.70)
+    : mix(base, "#000000", 0.55);
 
-  pillBg: "#2b2b2b",
-  pillBorder: "#454545",
-  pillActiveBg: "rgba(74,144,226,0.18)",
-  pillActiveBorder: "#4a90e2",
-  pillText: "#d4d4d4",
-  pillActiveText: "#f5f5f5",
+  const controlSelectedBorder = base;
 
-  inputText: "#f5f5f5",
-  inputPlaceholder: "#8f8f8f",
+  const accentPrimary = base;
+  const accentSoft = light
+    ? mix(base, "#ffffff", 0.7)
+    : mix(base, "#000000", 0.4);
 
-  dividerStrong: "#525252",
+  return {
+    bgPage,
+    bgSurface,
+    bgElevated,
 
-  subtleText: "#d4d4d4",
-  mutedText: "#a3a3a3",
-  textDim: "#8f8f8f",
-  inverseText: "#171717",
+    textPrimary,
+    textSecondary,
+    textMuted,
 
-  rowHover: "rgba(255,255,255,0.035)",
+    borderStandard,
 
-  accent: "#4a90e2",
-  accentStrong: "#3f7fca",
-  ctaBlueText: "#a9cbf5",
+    controlBg,
+    controlBgHover,
+    controlSelectedBg,
+    controlSelectedBorder,
 
-  inputBgSoft: "#2b2b2b",
-  buttonGhostBg: "rgba(255,255,255,0.025)",
-  overlay: "rgba(0,0,0,0.52)",
-  shadow: "0 8px 24px rgba(0,0,0,0.28)",
-  shadowStrong: "0 16px 40px rgba(0,0,0,0.36)",
-  modalOverlay: "rgba(0,0,0,0.62)",
-  cardShadow: "0 6px 18px rgba(0,0,0,0.22)",
+    accentPrimary,
+    accentSoft,
 
-  paper: "#ffffff",
-  paperBorder: "#d1d5db",
-  paperText: "#111827",
-};
+    shadow: "0 6px 18px rgba(0,0,0,0.08)",
+    shadowStrong: "0 18px 40px rgba(0,0,0,0.18)",
 
-const lightTheme: AppTheme = {
-  // New semantic tokens
-  bgPrimary: "#E6E8EB",
-  bgSurface: "#ECEFF1",
-  bgSurfaceAlt: "#E9ECEF",
-  bgElevated: "#E4E7EB",
-  bgOverlay: "rgba(15,23,42,0.18)",
+    modalOverlay: "rgba(0,0,0,0.35)",
 
-  textPrimary: "#1F2937",
-  textSecondary: "rgba(31,41,55,0.78)",
-  textMuted: "rgba(31,41,55,0.58)",
-  textInverse: "#ffffff",
+    paper: light ? "#ffffff" : "#0b1220",
+  };
+}
 
-  borderSubtle: "rgba(31,41,55,0.08)",
-  borderStandard: "rgba(31,41,55,0.12)",
-  borderStrong: "rgba(31,41,55,0.18)",
-  divider: "rgba(31,41,55,0.10)",
+/**
+ * ---------- PRESETS ----------
+ */
 
-  accentPrimary: "#2563eb",
-  accentPrimaryHover: "#1d4ed8",
-  accentSoft: "rgba(37,99,235,0.10)",
-  accentSoftText: "#2563eb",
+const LIGHT_THEME = generateThemeFromBase("#3b82f6"); // blue baseline
+const DARK_THEME = generateThemeFromBase("#0f172a");
+const SOFT_GREY_THEME = generateThemeFromBase("#6b7280");
 
-  success: "#16a34a",
-  warning: "#d97706",
-  danger: "#dc2626",
-  info: "#0284c7",
+/**
+ * ---------- PUBLIC API ----------
+ */
 
-  controlBg: "rgba(31,41,55,0.035)",
-  controlBgHover: "rgba(31,41,55,0.055)",
-  controlSelectedBg: "rgba(37,99,235,0.10)",
-  controlSelectedBorder: "#2563eb",
+export function getTheme(options: {
+  mode: "light" | "dark" | "soft-grey" | "custom";
+  customColour?: AccentOption;
+}): Theme {
+  const { mode, customColour } = options;
 
-  inputBg: "rgba(31,41,55,0.05)",
-  inputBorder: "rgba(31,41,55,0.12)",
-  inputBorderFocus: "#2563eb",
+  if (mode === "custom" && customColour) {
+    const base = ACCENT_MAP[customColour];
+    return generateThemeFromBase(base);
+  }
 
-  panelBg: "#ECEFF1",
-  sidebarBg: "#E4E7EB",
-  toolbarBg: "#ECEFF1",
-  cardBg: "#ECEFF1",
-  cardBgHover: "#E9ECEF",
-  previewChromeBg: "#E4E7EB",
+  if (mode === "dark") return DARK_THEME;
+  if (mode === "soft-grey") return SOFT_GREY_THEME;
 
-  focusRing: "rgba(37,99,235,0.16)",
-  shadowColor: "rgba(15,23,42,0.06)",
-  scrollbarThumb: "#C8CDD3",
-
-  skillNumerical: "#3b82f6",
-  skillAlgebraic: "#8b5cf6",
-  skillGeometric: "#10b981",
-  skillTrigonometric: "#eab308",
-  skillStatistical: "#ec4899",
-
-  // Legacy builder tokens
-  pageBg: "#E6E8EB",
-  panelBg2: "#E9ECEF",
-  panelBg3: "#E4E7EB",
-  headerBg: "#ECEFF1",
-
-  text: "#1F2937",
-  textSoft: "rgba(31,41,55,0.78)",
-  textMutedLegacy: "rgba(31,41,55,0.58)",
-
-  border: "rgba(31,41,55,0.12)",
-  borderSoft: "rgba(31,41,55,0.08)",
-
-  buttonBg: "rgba(31,41,55,0.05)",
-  buttonBgHover: "rgba(31,41,55,0.08)",
-  buttonText: "#1F2937",
-
-  pillBg: "#ECEFF1",
-  pillBorder: "rgba(31,41,55,0.12)",
-  pillActiveBg: "#E4E7EB",
-  pillActiveBorder: "rgba(31,41,55,0.14)",
-  pillText: "rgba(31,41,55,0.68)",
-  pillActiveText: "#1F2937",
-
-  inputText: "#1F2937",
-  inputPlaceholder: "rgba(31,41,55,0.42)",
-
-  dividerStrong: "rgba(31,41,55,0.18)",
-
-  subtleText: "rgba(31,41,55,0.78)",
-  mutedText: "rgba(31,41,55,0.58)",
-  textDim: "rgba(31,41,55,0.42)",
-  inverseText: "#ffffff",
-
-  rowHover: "rgba(31,41,55,0.035)",
-
-  accent: "#2563eb",
-  accentStrong: "#1d4ed8",
-  ctaBlueText: "#2563eb",
-
-  inputBgSoft: "rgba(31,41,55,0.035)",
-  buttonGhostBg: "rgba(31,41,55,0.035)",
-  overlay: "rgba(15,23,42,0.18)",
-  shadow: "0 1px 2px rgba(15,23,42,0.04)",
-  shadowStrong: "0 4px 12px rgba(15,23,42,0.06)",
-  modalOverlay: "rgba(15,23,42,0.18)",
-  cardShadow: "0 1px 2px rgba(15,23,42,0.04)",
-
-  paper: "#ffffff",
-  paperBorder: "#d9dde4",
-  paperText: "#111111",
-};
-
-export function getTheme(mode: ResolvedThemeMode): AppTheme {
-  return mode === "dark" ? darkTheme : lightTheme;
+  return LIGHT_THEME;
 }

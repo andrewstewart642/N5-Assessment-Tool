@@ -1,19 +1,15 @@
 "use client";
 
-import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
-import AppSideTray from "@/app/ui/settings-bar/AppSideTray";
-import SettingsPanel from "@/app/settings-bar/GlobalSettingsPanel";
+import { useSettings } from "./GlobalSettingsContext";
+import AppSideTray from "../ui/settings-bar/AppSideTray";
+import GlobalSettingsPanel from "./GlobalSettingsPanel";
 
-export default function SettingsBar() {
+export default function GlobalSettingsBar() {
   const { isSettingsOpen, closeSettings, theme } = useSettings();
 
   return (
-    <AppSideTray
-      open={isSettingsOpen}
-      onClose={closeSettings}
-      theme={theme}
-    >
-      <SettingsPanel />
+    <AppSideTray open={isSettingsOpen} onClose={closeSettings} theme={theme}>
+      <GlobalSettingsPanel />
     </AppSideTray>
   );
 }

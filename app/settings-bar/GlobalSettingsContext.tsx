@@ -9,7 +9,8 @@ import {
   type ReactNode,
 } from "react";
 
-import { getTheme, type AppTheme } from "@/ui/AppTheme";
+import { getTheme, type Theme } from "@/ui/AppTheme";
+import type { AccentOption } from "@/ui/AccentPalette";
 import {
   getSystemPrefersDark,
   resolveThemeMode,
@@ -17,16 +18,20 @@ import {
   type ThemeModePreference,
 } from "@/ui/ThemeMode";
 import {
+  readStoredCustomThemeColour,
   readStoredThemePreference,
+  writeStoredCustomThemeColour,
   writeStoredThemePreference,
 } from "./GlobalSettingsStorage";
 
 type SettingsContextValue = {
   themePreference: ThemeModePreference;
   resolvedThemeMode: ResolvedThemeMode;
-  theme: AppTheme;
+  customThemeColour: AccentOption;
+  theme: Theme;
   isSettingsOpen: boolean;
   setThemePreference: (preference: ThemeModePreference) => void;
+  setCustomThemeColour: (colour: AccentOption) => void;
   openSettings: () => void;
   closeSettings: () => void;
   toggleSettings: () => void;
@@ -37,6 +42,8 @@ const SettingsContext = createContext<SettingsContextValue | null>(null);
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [themePreference, setThemePreferenceState] =
     useState<ThemeModePreference>("system");
+  const [customThemeColour, setCustomThemeColourState] =
+    useState<AccentOption>("blue-700");
   const [systemPrefersDark, setSystemPrefersDark] = useState<boolean>(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
 
@@ -48,6 +55,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     function syncFromEnvironment() {
       setSystemPrefersDark(mediaQuery.matches);
       setThemePreferenceState(readStoredThemePreference());
+      setCustomThemeColourState(readStoredCustomThemeColour());
     }
 
     syncFromEnvironment();
@@ -77,21 +85,29 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     return resolveThemeMode(themePreference, systemPrefersDark);
   }, [themePreference, systemPrefersDark]);
 
-  const theme = useMemo<AppTheme>(() => {
-    return getTheme(resolvedThemeMode);
-  }, [resolvedThemeMode]);
+  const theme = useMemo<Theme>(() => {
+    return getTheme({
+      mode: resolvedThemeMode,
+      customColour: customThemeColour,
+    });
+  }, [resolvedThemeMode, customThemeColour]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
 
     document.documentElement.dataset.themeMode = resolvedThemeMode;
-    document.body.style.background = theme.bgPrimary;
+    document.body.style.background = theme.bgPage;
     document.body.style.color = theme.textPrimary;
   }, [resolvedThemeMode, theme]);
 
   function setThemePreference(preference: ThemeModePreference) {
     setThemePreferenceState(preference);
     writeStoredThemePreference(preference);
+  }
+
+  function setCustomThemeColour(colour: AccentOption) {
+    setCustomThemeColourState(colour);
+    writeStoredCustomThemeColour(colour);
   }
 
   function openSettings() {
@@ -110,14 +126,22 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     () => ({
       themePreference,
       resolvedThemeMode,
+      customThemeColour,
       theme,
       isSettingsOpen,
       setThemePreference,
+      setCustomThemeColour,
       openSettings,
       closeSettings,
       toggleSettings,
     }),
-    [themePreference, resolvedThemeMode, theme, isSettingsOpen]
+    [
+      themePreference,
+      resolvedThemeMode,
+      customThemeColour,
+      theme,
+      isSettingsOpen,
+    ]
   );
 
   return (
