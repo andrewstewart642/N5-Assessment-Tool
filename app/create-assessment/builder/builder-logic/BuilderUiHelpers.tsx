@@ -1,6 +1,6 @@
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type BuilderMetaFieldProps = {
   label: string;
@@ -9,29 +9,29 @@ type BuilderMetaFieldProps = {
   onFocus?: () => void;
   onBlur?: () => void;
   width?: number;
-  theme?: AppTheme;
+  theme?: Theme;
 };
 
-function getLabelStyle(theme?: AppTheme): React.CSSProperties {
+function getLabelStyle(theme?: Theme): React.CSSProperties {
   return {
     fontSize: 12,
     fontWeight: UI_TYPO.weightMedium,
     letterSpacing: 0,
-    color: theme ? theme.subtleText : "rgba(214,227,243,0.74)",
+    color: theme ? theme.textMuted : "rgba(214,227,243,0.74)",
     lineHeight: 1.2,
     whiteSpace: "nowrap",
   };
 }
 
-function getInputStyle(theme?: AppTheme): React.CSSProperties {
+function getInputStyle(theme?: Theme): React.CSSProperties {
   return {
     height: 30,
     borderRadius: 10,
     border: theme
-      ? `1px solid ${theme.inputBorder}`
+      ? `1px solid ${theme.borderStandard}`
       : "1px solid rgba(255,255,255,0.08)",
-    background: theme ? theme.inputBg : "rgba(255,255,255,0.02)",
-    color: theme ? theme.inputText : "#f7fbff",
+    background: theme ? theme.bgElevated : "rgba(255,255,255,0.02)",
+    color: theme ? theme.textPrimary : "#f7fbff",
     padding: "0 9px",
     fontSize: 13,
     fontFamily: UI_TYPO.family,
@@ -40,6 +40,7 @@ function getInputStyle(theme?: AppTheme): React.CSSProperties {
     width: "100%",
     boxSizing: "border-box",
     outline: "none",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
   };
 }
 
@@ -79,7 +80,7 @@ export function BuilderMetaField({
 type ViewingToggleProps = {
   value: Paper;
   onChange: (paper: Paper) => void;
-  theme?: AppTheme;
+  theme?: Theme;
 };
 
 export function ViewingToggle({
@@ -95,7 +96,7 @@ export function ViewingToggle({
         borderRadius: 10,
         background: theme ? theme.controlBg : "rgba(255,255,255,0.04)",
         border: theme
-          ? `1px solid ${theme.borderSoft}`
+          ? `1px solid ${theme.borderStandard}`
           : "1px solid rgba(255,255,255,0.08)",
         padding: 2,
         boxSizing: "border-box",
@@ -128,8 +129,7 @@ export function ViewingToggle({
               justifyContent: "center",
               lineHeight: 1,
               whiteSpace: "nowrap",
-              transition:
-                "background 0.15s ease, color 0.15s ease",
+              transition: "background 0.15s ease, color 0.15s ease",
             }}
           >
             {paper === "P1" ? "Paper 1" : "Paper 2"}

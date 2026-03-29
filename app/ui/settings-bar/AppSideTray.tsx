@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  theme: AppTheme;
+  theme: Theme;
   children: React.ReactNode;
 };
 
@@ -18,7 +18,6 @@ export default function AppSideTray({
 }: Props) {
   const trayRef = useRef<HTMLDivElement | null>(null);
 
-  // Close on outside click
   useEffect(() => {
     function handleMouseDown(event: MouseEvent) {
       if (!open) return;
@@ -43,19 +42,17 @@ export default function AppSideTray({
         zIndex: 1000,
       }}
     >
-      {/* Overlay */}
       <div
         onClick={onClose}
         style={{
           position: "fixed",
           inset: 0,
-          background: open ? theme.overlay : "transparent",
+          background: open ? theme.modalOverlay : "transparent",
           opacity: open ? 1 : 0,
           transition: "opacity 180ms ease",
         }}
       />
 
-      {/* Tray */}
       <aside
         ref={trayRef}
         style={{
@@ -65,9 +62,9 @@ export default function AppSideTray({
           bottom: 0,
           width: "min(460px, calc(100vw - 24px))",
           maxWidth: "calc(100vw - 24px)",
-          borderLeft: `1px solid ${theme.border}`,
-          background: theme.panelBg,
-          boxShadow: theme.shadow,
+          borderLeft: `1px solid ${theme.borderStandard}`,
+          background: theme.bgSurface,
+          boxShadow: theme.shadowStrong,
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",

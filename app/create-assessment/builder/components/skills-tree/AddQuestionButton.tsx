@@ -1,9 +1,9 @@
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
   onClick: () => void;
-  theme: AppTheme;
+  theme: Theme;
   label?: string;
   title?: string;
   variant?: "primary" | "secondary";
@@ -30,13 +30,13 @@ export default function AddQuestionButton(props: Props) {
         color: isSecondary ? theme.textSecondary : theme.textPrimary,
         borderRadius: 10,
         border: `1px solid ${
-          isSecondary ? theme.border : theme.controlSelectedBorder
+          isSecondary ? theme.borderStandard : theme.controlSelectedBorder
         }`,
         cursor: "pointer",
         width: "100%",
         minWidth: 140,
         height: 40,
-        boxShadow: isSecondary ? "none" : theme.cardShadow,
+        boxShadow: isSecondary ? "none" : theme.shadow,
         transition:
           "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease",
         ...UI_TEXT.buttonText,

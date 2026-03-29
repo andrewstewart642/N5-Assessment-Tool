@@ -12,9 +12,6 @@ import {
 } from "../BuilderStorageKeys";
 
 type UseBuilderPersistenceArgs = {
-  appearance: "light" | "dark" | "system";
-  appearanceStorageKey: string;
-
   leftPaneRatio: number;
   hudHeight: number;
   showProgressPanel: boolean;
@@ -48,9 +45,6 @@ type UseBuilderPersistenceArgs = {
 };
 
 export function useBuilderPersistence({
-  appearance,
-  appearanceStorageKey,
-
   leftPaneRatio,
   hudHeight,
   showProgressPanel,
@@ -84,14 +78,6 @@ export function useBuilderPersistence({
 }: UseBuilderPersistenceArgs) {
   useEffect(() => {
     try {
-      window.localStorage.setItem(appearanceStorageKey, appearance);
-    } catch {
-      // ignore
-    }
-  }, [appearance, appearanceStorageKey]);
-
-  useEffect(() => {
-    try {
       window.localStorage.setItem(PANE_RATIO_KEY, String(leftPaneRatio));
     } catch {
       // ignore
@@ -108,7 +94,10 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(SHOW_PROGRESS_PANEL_KEY, String(showProgressPanel));
+      window.localStorage.setItem(
+        SHOW_PROGRESS_PANEL_KEY,
+        String(showProgressPanel)
+      );
     } catch {
       // ignore
     }
@@ -116,7 +105,10 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(INCLUDE_COVER_SHEET_KEY, String(includeCoverSheet));
+      window.localStorage.setItem(
+        INCLUDE_COVER_SHEET_KEY,
+        String(includeCoverSheet)
+      );
     } catch {
       // ignore
     }
@@ -124,7 +116,10 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(SHOW_COVER_DATE_TIME_KEY, String(showCoverDateTime));
+      window.localStorage.setItem(
+        SHOW_COVER_DATE_TIME_KEY,
+        String(showCoverDateTime)
+      );
     } catch {
       // ignore
     }
@@ -132,7 +127,10 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(SHOW_SCN_BOX_KEY, String(showScottishCandidateNumberBox));
+      window.localStorage.setItem(
+        SHOW_SCN_BOX_KEY,
+        String(showScottishCandidateNumberBox)
+      );
     } catch {
       // ignore
     }
@@ -140,7 +138,10 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(INCLUDE_FORMULA_SHEET_KEY, String(includeFormulaSheet));
+      window.localStorage.setItem(
+        INCLUDE_FORMULA_SHEET_KEY,
+        String(includeFormulaSheet)
+      );
     } catch {
       // ignore
     }

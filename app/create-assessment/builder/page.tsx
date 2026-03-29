@@ -17,12 +17,6 @@ import {
 import { skillsData } from "@/course-data/N5-Skills";
 import { N5_MATH_COURSE_CONFIG } from "@/course-data/course-configs/N5MathsCourseConfig";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import {
-  THEME_MODE_STORAGE_KEY,
-  resolveThemeMode,
-  type ThemeModePreference,
-} from "@/ui/ThemeMode";
-import { getTheme } from "@/ui/AppTheme";
 import type {
   Paper,
   Question,
@@ -78,6 +72,7 @@ import {
   loadSavedAssessmentById,
   upsertSavedAssessment,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
+import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 
 const META_NAME_KEY = "n5-builder-meta-name";
 const META_CLASS_KEY = "n5-builder-meta-class";
@@ -219,6 +214,7 @@ function buildClassCoverageSummary(args: {
 
 export default function CreateAssessmentBuilderPage() {
   const router = useRouter();
+  const { theme } = useSettings();
 
   const [standardFilter, setStandardFilter] = useState<StandardFilter>("C+A");
   const [thinkingTypeFilter, setThinkingTypeFilter] =
@@ -295,8 +291,6 @@ export default function CreateAssessmentBuilderPage() {
   const [includeFormulaSheet, setIncludeFormulaSheet] = useState(false);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [appearance, setAppearance] = useState<ThemeModePreference>("system");
-  const [systemPrefersDark, setSystemPrefersDark] = useState(true);
 
   const [assessmentName, setAssessmentName] = useState("[Untitled file]");
   const [className, setClassName] = useState("");
@@ -334,23 +328,9 @@ export default function CreateAssessmentBuilderPage() {
     defaultHudHeight: DEFAULT_HUD_HEIGHT,
   });
 
-  const resolvedMode = resolveThemeMode(appearance, systemPrefersDark);
-
-  const theme = useMemo(
-    () =>
-      getTheme({
-        mode: resolvedMode,
-      }),
-    [resolvedMode]
-  );
-
   useBuilderInitialisation({
     defaultHudHeight: DEFAULT_HUD_HEIGHT,
-    appearanceStorageKey: THEME_MODE_STORAGE_KEY,
     clampFn: clamp,
-
-    setSystemPrefersDark,
-    setAppearance,
 
     setLeftPaneRatio,
     setHudHeight,
@@ -395,9 +375,6 @@ export default function CreateAssessmentBuilderPage() {
   });
 
   useBuilderPersistence({
-    appearance,
-    appearanceStorageKey: THEME_MODE_STORAGE_KEY,
-
     leftPaneRatio,
     hudHeight,
     showProgressPanel,
@@ -592,7 +569,11 @@ export default function CreateAssessmentBuilderPage() {
   }, [computedClassSummary]);
 
   useEffect(() => {
-    if (!currentAssessmentId || !savedAssessmentRef.current || !hasLoadedSavedAssessment) {
+    if (
+      !currentAssessmentId ||
+      !savedAssessmentRef.current ||
+      !hasLoadedSavedAssessment
+    ) {
       return;
     }
 
@@ -713,7 +694,9 @@ export default function CreateAssessmentBuilderPage() {
     );
 
     const selectedClasses = builderSelectedClassIds
-      .map((classId) => savedClasses.find((schoolClass) => schoolClass.id === classId))
+      .map((classId) =>
+        savedClasses.find((schoolClass) => schoolClass.id === classId)
+      )
       .filter((schoolClass): schoolClass is SchoolClass => schoolClass !== undefined);
 
     if (!expectedCourse) return selectedClasses;
@@ -1164,8 +1147,6 @@ export default function CreateAssessmentBuilderPage() {
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           theme={theme}
-          appearance={appearance}
-          setAppearance={setAppearance}
           includeCoverSheet={includeCoverSheet}
           setIncludeCoverSheet={setIncludeCoverSheet}
           showCoverDateTime={showCoverDateTime}

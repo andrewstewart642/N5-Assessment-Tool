@@ -1,13 +1,13 @@
 "use client";
 
 import { UI_TEXT } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import AssessmentProgressHud from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 
 type Props = {
-  theme: AppTheme;
+  theme: Theme;
   routerPushCompile: () => void;
   showProgressPanel: boolean;
   hudHeight: number;
@@ -73,10 +73,10 @@ export default function BuilderBottomHud({
               gap: 8,
               padding: "6px 10px",
               borderRadius: 999,
-              border: `1px solid ${theme.borderSoft}`,
+              border: `1px solid ${theme.borderStandard}`,
               background: theme.bgElevated,
               color: theme.textMuted,
-              boxShadow: theme.cardShadow,
+              boxShadow: theme.shadow,
               pointerEvents: "none",
               fontSize: 12,
               fontWeight: 700,
@@ -90,10 +90,10 @@ export default function BuilderBottomHud({
                 width: 7,
                 height: 7,
                 borderRadius: 999,
-                background: isSaving ? theme.warning : theme.success,
+                background: isSaving ? theme.accentPrimary : theme.textMuted,
                 boxShadow: isSaving
-                  ? "0 0 10px rgba(245,158,11,0.35)"
-                  : "0 0 10px rgba(34,197,94,0.35)",
+                  ? `0 0 10px ${theme.accentSoft}`
+                  : "0 0 10px rgba(148,163,184,0.28)",
                 animation: isSaving
                   ? "builder-save-pulse 1s ease-in-out infinite"
                   : "none",
@@ -108,13 +108,13 @@ export default function BuilderBottomHud({
           type="button"
           onClick={routerPushCompile}
           style={{
-            border: `1px solid ${theme.border}`,
+            border: `1px solid ${theme.borderStandard}`,
             background: theme.bgElevated,
             color: theme.textSecondary,
             borderRadius: 16,
             padding: "10px 14px",
             cursor: "pointer",
-            boxShadow: theme.cardShadow,
+            boxShadow: theme.shadow,
             transition:
               "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease",
             ...UI_TEXT.buttonText,
@@ -128,12 +128,12 @@ export default function BuilderBottomHud({
       {showProgressPanel ? (
         <div
           style={{
-            borderTop: `1px solid ${theme.borderSoft}`,
+            borderTop: `1px solid ${theme.borderStandard}`,
             minHeight: 0,
             height: "100%",
             overflow: "hidden",
             position: "relative",
-            background: theme.previewChromeBg,
+            background: theme.bgSurface,
           }}
         >
           <div
@@ -163,7 +163,7 @@ export default function BuilderBottomHud({
                 width: 54,
                 height: 4,
                 borderRadius: 999,
-                background: theme.borderStrong,
+                background: theme.borderStandard,
               }}
             />
           </div>

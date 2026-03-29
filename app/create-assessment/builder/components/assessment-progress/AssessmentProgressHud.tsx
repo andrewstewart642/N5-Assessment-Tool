@@ -1,7 +1,7 @@
 "use client";
 
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import type {
   BuilderNote,
@@ -27,7 +27,7 @@ type Props = {
   p2TimeMinutes: number;
 
   notes: Array<string | BuilderNote>;
-  theme: AppTheme;
+  theme: Theme;
 };
 
 function clampInt(n: number) {
@@ -94,7 +94,7 @@ function LightbulbIcon({ color }: { color: string }) {
 
 function getNotePalette(
   severity: BuilderNoteSeverity,
-  theme: AppTheme
+  theme: Theme
 ): {
   icon: React.ReactNode;
   textColor: string;
@@ -102,33 +102,38 @@ function getNotePalette(
   borderColor: string;
 } {
   if (severity === "essential") {
-    const color = theme.danger;
-    const fill = "rgba(239,68,68,0.12)";
     return {
-      icon: <WarningTriangleIcon color={color} fill={fill} />,
-      textColor: color,
-      background: "rgba(239,68,68,0.05)",
-      borderColor: "rgba(239,68,68,0.18)",
+      icon: (
+        <WarningTriangleIcon
+          color={theme.accentPrimary}
+          fill={theme.accentSoft}
+        />
+      ),
+      textColor: theme.textPrimary,
+      background: theme.bgElevated,
+      borderColor: theme.borderStandard,
     };
   }
 
   if (severity === "advised") {
-    const color = theme.warning;
-    const fill = "rgba(245,158,11,0.12)";
     return {
-      icon: <WarningDiamondIcon color={color} fill={fill} />,
-      textColor: color,
-      background: "rgba(245,158,11,0.05)",
-      borderColor: "rgba(245,158,11,0.16)",
+      icon: (
+        <WarningDiamondIcon
+          color={theme.textSecondary}
+          fill={theme.controlBg}
+        />
+      ),
+      textColor: theme.textSecondary,
+      background: theme.bgElevated,
+      borderColor: theme.borderStandard,
     };
   }
 
-  const color = theme.textSecondary;
   return {
-    icon: <LightbulbIcon color={color} />,
-    textColor: color,
+    icon: <LightbulbIcon color={theme.textSecondary} />,
+    textColor: theme.textSecondary,
     background: "transparent",
-    borderColor: theme.borderSoft,
+    borderColor: theme.borderStandard,
   };
 }
 
@@ -159,8 +164,8 @@ export default function AssessmentProgressHud(props: Props) {
       style={{
         width: "100%",
         height: "100%",
-        borderTop: `1px solid ${theme.borderSoft}`,
-        background: theme.previewChromeBg,
+        borderTop: `1px solid ${theme.borderStandard}`,
+        background: theme.bgSurface,
         display: "grid",
         gridTemplateColumns: "118px 132px minmax(0, 1fr)",
         minHeight: 0,
@@ -172,7 +177,7 @@ export default function AssessmentProgressHud(props: Props) {
         style={{
           minWidth: 0,
           padding: "10px 10px 10px 12px",
-          borderRight: `1px solid ${theme.borderSoft}`,
+          borderRight: `1px solid ${theme.borderStandard}`,
           display: "grid",
           gridTemplateRows: "auto 1fr",
           gap: 10,
@@ -233,7 +238,7 @@ export default function AssessmentProgressHud(props: Props) {
         style={{
           minWidth: 0,
           padding: "10px 10px",
-          borderRight: `1px solid ${theme.borderSoft}`,
+          borderRight: `1px solid ${theme.borderStandard}`,
           display: "grid",
           gridTemplateRows: "auto 1fr",
           gap: 10,
@@ -308,12 +313,12 @@ export default function AssessmentProgressHud(props: Props) {
           style={{
             minHeight: 0,
             height: "100%",
-            border: `1px solid ${theme.borderSoft}`,
-            background: theme.bgSurfaceAlt,
+            border: `1px solid ${theme.borderStandard}`,
+            background: theme.bgElevated,
             borderRadius: 12,
             padding: "8px 10px",
             overflowY: "auto",
-            color: structuredNotes.length ? theme.textSecondary : theme.textDim,
+            color: structuredNotes.length ? theme.textSecondary : theme.textMuted,
             lineHeight: 1.35,
             fontFamily: UI_TYPO.family,
             fontSize: UI_TYPO.sizeBase,

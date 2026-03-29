@@ -1,17 +1,12 @@
 "use client";
 
 import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
-import { getTheme, type AppearancePreference } from "@/ui/AppTheme";
-
-type Theme = ReturnType<typeof getTheme>;
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   theme: Theme;
-
-  appearance: AppearancePreference;
-  setAppearance: React.Dispatch<React.SetStateAction<AppearancePreference>>;
 
   includeCoverSheet: boolean;
   setIncludeCoverSheet: React.Dispatch<React.SetStateAction<boolean>>;
@@ -56,8 +51,6 @@ export default function BuilderSettingsPanel({
   open,
   onClose,
   theme,
-  appearance,
-  setAppearance,
   includeCoverSheet,
   setIncludeCoverSheet,
   showCoverDateTime,
@@ -92,8 +85,6 @@ export default function BuilderSettingsPanel({
       open={open}
       onClose={onClose}
       theme={theme}
-      appearance={appearance}
-      onChangeAppearance={setAppearance}
       includeCoverSheet={includeCoverSheet}
       onToggleIncludeCoverSheet={setIncludeCoverSheet}
       showCoverDateTime={showCoverDateTime}

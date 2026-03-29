@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
-import type { AppearancePreference } from "@/ui/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
@@ -15,16 +14,15 @@ import {
   STORAGE_KEY,
 } from "../BuilderStorageKeys";
 import { loadAssessmentSetupBrief } from "../../setup/AssessmentSetupStorage";
-import { normaliseDisplayDate, todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
+import {
+  normaliseDisplayDate,
+  todayDisplayDate,
+} from "../builder-logic/BuilderDateHelpers";
 import type { clamp } from "../BuilderUtils";
 
 type UseBuilderInitialisationArgs = {
   defaultHudHeight: number;
-  appearanceStorageKey: string;
   clampFn: typeof clamp;
-
-  setSystemPrefersDark: (value: boolean) => void;
-  setAppearance: (value: AppearancePreference) => void;
 
   setLeftPaneRatio: (value: number) => void;
   setHudHeight: (value: number) => void;
@@ -69,24 +67,25 @@ type UseBuilderInitialisationArgs = {
 };
 
 function withSpacingBase(question: Question): Question {
-  if (typeof question.spacingBasePx === "number" && Number.isFinite(question.spacingBasePx)) {
+  if (
+    typeof question.spacingBasePx === "number" &&
+    Number.isFinite(question.spacingBasePx)
+  ) {
     return question;
   }
 
   const code = question.questionCode;
   return {
     ...question,
-    spacingBasePx: code ? getSpacingBasePx(code) : DEFAULT_QUESTION_SPACING_BASE_PX,
+    spacingBasePx: code
+      ? getSpacingBasePx(code)
+      : DEFAULT_QUESTION_SPACING_BASE_PX,
   };
 }
 
 export function useBuilderInitialisation({
   defaultHudHeight,
-  appearanceStorageKey,
   clampFn,
-
-  setSystemPrefersDark,
-  setAppearance,
 
   setLeftPaneRatio,
   setHudHeight,
@@ -130,28 +129,6 @@ export function useBuilderInitialisation({
   p2DateCustomKey,
 }: UseBuilderInitialisationArgs) {
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => setSystemPrefersDark(media.matches);
-
-    apply();
-
-    const raw = window.localStorage.getItem(appearanceStorageKey);
-    if (raw === "dark" || raw === "light" || raw === "system") {
-      setAppearance(raw as AppearancePreference);
-    }
-
-    if (typeof media.addEventListener === "function") {
-      media.addEventListener("change", apply);
-      return () => media.removeEventListener("change", apply);
-    }
-
-    media.addListener(apply);
-    return () => media.removeListener(apply);
-  }, [appearanceStorageKey, setAppearance, setSystemPrefersDark]);
-
-  useEffect(() => {
     try {
       const raw = window.localStorage.getItem(PANE_RATIO_KEY);
       if (raw) {
@@ -177,7 +154,9 @@ export function useBuilderInitialisation({
       if (rawIncludeCover === "true") setIncludeCoverSheet(true);
       if (rawIncludeCover === "false") setIncludeCoverSheet(false);
 
-      const rawShowDateTime = window.localStorage.getItem(SHOW_COVER_DATE_TIME_KEY);
+      const rawShowDateTime = window.localStorage.getItem(
+        SHOW_COVER_DATE_TIME_KEY
+      );
       if (rawShowDateTime === "true") setShowCoverDateTime(true);
       if (rawShowDateTime === "false") setShowCoverDateTime(false);
 
@@ -191,7 +170,9 @@ export function useBuilderInitialisation({
 
       const storedName = window.localStorage.getItem(metaNameKey);
       const storedClass = window.localStorage.getItem(metaClassKey);
-      const storedAssessmentDate = window.localStorage.getItem(metaAssessmentDateKey);
+      const storedAssessmentDate = window.localStorage.getItem(
+        metaAssessmentDateKey
+      );
       const storedP1Date = window.localStorage.getItem(p1CoverDateKey);
       const storedP2Date = window.localStorage.getItem(p2CoverDateKey);
 
@@ -232,7 +213,38 @@ export function useBuilderInitialisation({
     } catch {
       // ignore
     }
-  }, []);
+  }, [
+    clampFn,
+    defaultHudHeight,
+    metaAssessmentDateKey,
+    metaClassKey,
+    metaNameKey,
+    p1CoverDateKey,
+    p1EndTimeKey,
+    p1StartTimeKey,
+    p2CoverDateKey,
+    p2DateCustomKey,
+    p2EndTimeKey,
+    p2StartTimeKey,
+    setAssessmentDate,
+    setAssessmentName,
+    setClassName,
+    setHudHeight,
+    setIncludeCoverSheet,
+    setIncludeFormulaSheet,
+    setLeftPaneRatio,
+    setP1EndTime,
+    setP1EndTimeManuallyEdited,
+    setP1StartTime,
+    setP2CoverDate,
+    setP2DateCustom,
+    setP2EndTime,
+    setP2EndTimeManuallyEdited,
+    setP2StartTime,
+    setShowCoverDateTime,
+    setShowProgressPanel,
+    setShowScottishCandidateNumberBox,
+  ]);
 
   useEffect(() => {
     const brief = loadAssessmentSetupBrief();
@@ -291,7 +303,19 @@ export function useBuilderInitialisation({
     if (typeof brief.timeTargetP2 === "number" && brief.timeTargetP2 > 0) {
       setP2Target(Math.max(1, Math.floor(brief.timeTargetP2 / 1.8)));
     }
-  }, []);
+  }, [
+    setActivePaper,
+    setAssessmentDate,
+    setAssessmentName,
+    setClassName,
+    setCreatedAt,
+    setIncludeCoverSheet,
+    setIncludeFormulaSheet,
+    setP1Target,
+    setP2CoverDate,
+    setP2Target,
+    setViewPaper,
+  ]);
 
   useEffect(() => {
     try {
@@ -305,5 +329,5 @@ export function useBuilderInitialisation({
     } catch {
       // ignore
     }
-  }, []);
+  }, [setQuestions]);
 }

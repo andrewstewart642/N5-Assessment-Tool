@@ -1,12 +1,12 @@
 "use client";
 
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
-  theme: AppTheme;
+  theme: Theme;
 };
 
 export default function AppTraySection({
@@ -18,17 +18,17 @@ export default function AppTraySection({
   return (
     <section
       style={{
-        border: `1px solid ${theme.border}`,
-        borderRadius: 20,
-        padding: 18,
-        background: theme.panelBg2,
-        boxShadow: "0 10px 30px rgba(0,0,0,0.12) inset",
+        border: `1px solid ${theme.borderStandard}`,
+        borderRadius: 16,
+        padding: 16,
+        background: theme.bgElevated,
+        boxShadow: theme.shadow,
       }}
     >
-      <div style={{ marginBottom: subtitle ? 14 : 10 }}>
+      <div style={{ marginBottom: subtitle ? 12 : 8 }}>
         <div
           style={{
-            color: theme.text,
+            color: theme.textPrimary,
             fontSize: 16,
             fontWeight: 800,
             lineHeight: 1.2,
@@ -40,10 +40,10 @@ export default function AppTraySection({
         {subtitle ? (
           <div
             style={{
-              marginTop: 6,
-              color: theme.subtleText,
+              marginTop: 4,
+              color: theme.textMuted,
               fontSize: 14,
-              lineHeight: 1.45,
+              lineHeight: 1.4,
             }}
           >
             {subtitle}

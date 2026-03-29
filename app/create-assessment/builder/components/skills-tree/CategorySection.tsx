@@ -8,7 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import AddQuestionButton from "@/app/create-assessment/builder/components/skills-tree/AddQuestionButton";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 import {
   getEligibleDifficultiesForConcept,
   getAvailableDifficultiesForConcept,
@@ -63,7 +63,7 @@ type Props = {
     difficulty: DifficultyLevel
   ) => void;
 
-  theme: AppTheme;
+  theme: Theme;
 };
 
 function textPart(value: string): PaperPart {
@@ -232,7 +232,7 @@ function DifficultyStepper(props: {
   eligibleLevels: DifficultyLevel[];
   onDecrease: () => void;
   onIncrease: () => void;
-  theme: AppTheme;
+  theme: Theme;
 }) {
   const {
     value,
@@ -262,7 +262,7 @@ function DifficultyStepper(props: {
           height: 34,
           width: 30,
           borderRadius: 10,
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${theme.borderStandard}`,
           background: theme.controlBg,
           color: theme.textMuted,
           cursor: availableLevels.length === 0 ? "default" : "pointer",
@@ -287,9 +287,9 @@ function DifficultyStepper(props: {
         style={{
           height: 34,
           borderRadius: 10,
-          border: `1px solid ${isEligible ? theme.border : theme.borderSoft}`,
+          border: `1px solid ${theme.borderStandard}`,
           background: theme.controlBg,
-          color: isEligible ? theme.text : theme.textDim,
+          color: isEligible ? theme.textPrimary : theme.textMuted,
           opacity: isEligible ? 1 : 0.6,
           display: "grid",
           placeItems: "center",
@@ -316,7 +316,7 @@ function DifficultyStepper(props: {
           height: 34,
           width: 30,
           borderRadius: 10,
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${theme.borderStandard}`,
           background: theme.controlBg,
           color: theme.textMuted,
           cursor: availableLevels.length === 0 ? "default" : "pointer",
@@ -366,7 +366,7 @@ function SkillRow(props: {
     concept: string,
     difficulty: DifficultyLevel
   ) => void;
-  theme: AppTheme;
+  theme: Theme;
 }) {
   const {
     category,
@@ -488,7 +488,8 @@ function SkillRow(props: {
   return (
     <div
       style={{
-        borderTop: index === 0 ? "none" : `1px solid ${theme.borderSoft}`,
+        borderTop:
+          index === 0 ? "none" : `1px solid ${theme.borderStandard}`,
         position: "relative",
         zIndex: dropdownOpen ? 50 : 1,
       }}
@@ -504,8 +505,8 @@ function SkillRow(props: {
           gridTemplateColumns: "64px 1fr 24px",
           gap: 10,
           padding: "10px 12px 10px 22px",
-          background: isExpanded ? theme.rowHover : "transparent",
-          color: theme.text,
+          background: isExpanded ? theme.controlBgHover : "transparent",
+          color: theme.textPrimary,
           border: "none",
           cursor: "pointer",
           fontFamily: UI_TYPO.family,
@@ -526,6 +527,7 @@ function SkillRow(props: {
         <span
           style={{
             ...UI_TEXT.controlText,
+            color: theme.textPrimary,
             minWidth: 0,
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -549,8 +551,8 @@ function SkillRow(props: {
         <div
           style={{
             padding: "10px 12px 12px",
-            background: theme.panelBg2,
-            borderTop: `1px solid ${theme.borderSoft}`,
+            background: theme.bgElevated,
+            borderTop: `1px solid ${theme.borderStandard}`,
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr) auto",
             columnGap: 14,
@@ -584,7 +586,7 @@ function SkillRow(props: {
                 <div
                   style={{
                     ...UI_TEXT.sectionLabel,
-                    color: theme.textDim,
+                    color: theme.textSecondary,
                     minWidth: 0,
                   }}
                 >
@@ -615,15 +617,17 @@ function SkillRow(props: {
               >
                 <button
                   type="button"
-                  onClick={() => ranked.length > 0 && setDropdownOpen((prev) => !prev)}
+                  onClick={() =>
+                    ranked.length > 0 && setDropdownOpen((prev) => !prev)
+                  }
                   disabled={ranked.length === 0}
                   style={{
                     width: "100%",
                     height: 34,
                     borderRadius: 10,
-                    border: `1px solid ${theme.border}`,
+                    border: `1px solid ${theme.borderStandard}`,
                     background: theme.controlBg,
-                    color: theme.text,
+                    color: theme.textPrimary,
                     boxSizing: "border-box",
                     padding: "0 34px 0 10px",
                     display: "flex",
@@ -636,7 +640,9 @@ function SkillRow(props: {
                     transition:
                       "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
                   }}
-                  title={selected ? conceptSelectionText(selected) : "Select skill concept"}
+                  title={
+                    selected ? conceptSelectionText(selected) : "Select skill concept"
+                  }
                 >
                   <span
                     style={{
@@ -652,7 +658,9 @@ function SkillRow(props: {
                     {selected ? (
                       <PaperContent parts={conceptInlineParts(selected)} />
                     ) : (
-                      <span style={{ color: theme.textMuted }}>Select skill concept</span>
+                      <span style={{ color: theme.textMuted }}>
+                        Select skill concept
+                      </span>
                     )}
                   </span>
 
@@ -675,6 +683,7 @@ function SkillRow(props: {
 
                 {dropdownOpen ? (
                   <div
+                    className="hover-scroll"
                     style={{
                       position: "absolute",
                       top: "calc(100% + 6px)",
@@ -686,7 +695,7 @@ function SkillRow(props: {
                       maxHeight: 240,
                       overflowY: "auto",
                       borderRadius: 12,
-                      border: `1px solid ${theme.border}`,
+                      border: `1px solid ${theme.borderStandard}`,
                       background: theme.bgElevated,
                       boxShadow: theme.shadowStrong,
                     }}
@@ -701,9 +710,10 @@ function SkillRow(props: {
                         width: "100%",
                         border: "none",
                         borderBottom: ranked.length
-                          ? `1px solid ${theme.borderSoft}`
+                          ? `1px solid ${theme.borderStandard}`
                           : "none",
-                        background: currentIndex === -1 ? theme.rowHover : "transparent",
+                        background:
+                          currentIndex === -1 ? theme.controlBgHover : "transparent",
                         color: theme.textMuted,
                         textAlign: "left",
                         padding: "10px 12px",
@@ -744,9 +754,13 @@ function SkillRow(props: {
                             borderBottom:
                               conceptIdx === ranked.length - 1
                                 ? "none"
-                                : `1px solid ${theme.borderSoft}`,
-                            background: active ? theme.rowHover : "transparent",
-                            color: isDropdownEligible ? theme.text : theme.textMuted,
+                                : `1px solid ${theme.borderStandard}`,
+                            background: active
+                              ? theme.controlBgHover
+                              : "transparent",
+                            color: isDropdownEligible
+                              ? theme.textPrimary
+                              : theme.textMuted,
                             opacity: isDropdownEligible ? 1 : 0.64,
                             textAlign: "left",
                             padding: "10px 12px",
@@ -781,9 +795,9 @@ function SkillRow(props: {
                               style={{
                                 fontSize: UI_TYPO.sizeXs,
                                 lineHeight: 1,
-                                color: theme.textDim,
+                                color: theme.textSecondary,
                                 whiteSpace: "nowrap",
-                                border: `1px solid ${theme.borderSoft}`,
+                                border: `1px solid ${theme.borderStandard}`,
                                 borderRadius: 999,
                                 padding: "4px 8px",
                                 background: theme.controlBg,
@@ -813,7 +827,7 @@ function SkillRow(props: {
                 <div
                   style={{
                     ...UI_TEXT.sectionLabel,
-                    color: theme.textDim,
+                    color: theme.textSecondary,
                     whiteSpace: "nowrap",
                   }}
                 >
@@ -892,7 +906,9 @@ function SkillRow(props: {
                 }}
                 theme={theme}
                 label="Add Question"
-                title={canAdd ? "Add this question to the assessment" : primaryBlockReason}
+                title={
+                  canAdd ? "Add this question to the assessment" : primaryBlockReason
+                }
                 variant="primary"
               />
             </div>
@@ -981,13 +997,13 @@ export default function CategorySection(props: Props) {
           gridTemplateColumns: "1fr auto",
           gap: 10,
           alignItems: "center",
-          background: theme.headerBg,
-          color: theme.text,
+          background: theme.bgElevated,
+          color: theme.textPrimary,
           padding: "10px 12px",
           borderRadius: 14,
-          border: `1px solid ${theme.border}`,
+          border: `1px solid ${theme.borderStandard}`,
           overflow: "hidden",
-          boxShadow: theme.cardShadow,
+          boxShadow: theme.shadow,
         }}
       >
         <button
@@ -998,7 +1014,7 @@ export default function CategorySection(props: Props) {
             textAlign: "left",
             cursor: "pointer",
             background: "transparent",
-            color: theme.text,
+            color: theme.textPrimary,
             border: "none",
             padding: 0,
             display: "flex",
@@ -1022,6 +1038,7 @@ export default function CategorySection(props: Props) {
           <span
             style={{
               ...UI_TEXT.sectionTitle,
+              color: theme.textPrimary,
               whiteSpace: "nowrap",
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -1039,7 +1056,7 @@ export default function CategorySection(props: Props) {
             style={{
               padding: "6px 12px",
               borderRadius: 12,
-              border: `1px solid ${theme.border}`,
+              border: `1px solid ${theme.borderStandard}`,
               background: theme.controlBg,
               color: theme.textMuted,
               cursor: "pointer",
@@ -1064,13 +1081,13 @@ export default function CategorySection(props: Props) {
         <div
           style={{
             marginTop: 8,
-            border: `1px solid ${theme.borderSoft}`,
+            border: `1px solid ${theme.borderStandard}`,
             borderRadius: 14,
             overflow: "visible",
-            background: theme.bgSurfaceAlt,
+            background: theme.bgSurface,
             position: "relative",
             zIndex: 1,
-            boxShadow: theme.cardShadow,
+            boxShadow: theme.shadow,
           }}
         >
           {skills.map((skill, idx) => (

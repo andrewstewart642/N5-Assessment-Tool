@@ -1,21 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { AppTheme as Theme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
+import type { ThemeModePreference } from "@/ui/ThemeMode";
+import { ACCENT_MAP, type AccentOption } from "@/ui/AccentPalette";
+import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 import AppSideTray from "@/app/ui/settings-bar/AppSideTray";
 import AppTrayHeader from "@/app/ui/settings-bar/AppTrayHeader";
 import AppTraySection from "@/app/ui/settings-bar/AppTraySection";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 
-type AppearancePreference = "light" | "dark" | "system";
-
 type Props = {
   open: boolean;
   onClose: () => void;
   theme: Theme;
-
-  appearance: AppearancePreference;
-  onChangeAppearance: (value: AppearancePreference) => void;
 
   includeCoverSheet: boolean;
   onToggleIncludeCoverSheet: (next: boolean) => void;
@@ -63,6 +61,208 @@ type TimeDraft = {
   hour12: number;
   minute: number;
   meridiem: "AM" | "PM";
+};
+
+const THEME_OPTIONS: Array<{
+  value: ThemeModePreference;
+  label: string;
+  helper: string;
+}> = [
+  { value: "system", label: "System", helper: "Match your device setting." },
+  { value: "light", label: "Light", helper: "Use the light interface." },
+  { value: "soft-grey", label: "Soft Grey", helper: "Lower contrast UI." },
+  { value: "dark", label: "Dark", helper: "Use dark interface." },
+  {
+    value: "custom",
+    label: "Custom",
+    helper: "Generate a full theme from a base colour.",
+  },
+];
+
+const WORD_COLOUR_ROWS: AccentOption[][] = [
+  [
+    "word-r1-c1",
+    "word-r1-c2",
+    "word-r1-c3",
+    "word-r1-c4",
+    "word-r1-c5",
+    "word-r1-c6",
+    "word-r1-c7",
+  ],
+  [
+    "word-r2-c1",
+    "word-r2-c2",
+    "word-r2-c3",
+    "word-r2-c4",
+    "word-r2-c5",
+    "word-r2-c6",
+    "word-r2-c7",
+    "word-r2-c8",
+  ],
+  [
+    "word-r3-c1",
+    "word-r3-c2",
+    "word-r3-c3",
+    "word-r3-c4",
+    "word-r3-c5",
+    "word-r3-c6",
+    "word-r3-c7",
+    "word-r3-c8",
+    "word-r3-c9",
+  ],
+  [
+    "word-r4-c1",
+    "word-r4-c2",
+    "word-r4-c3",
+    "word-r4-c4",
+    "word-r4-c5",
+    "word-r4-c6",
+    "word-r4-c7",
+    "word-r4-c8",
+    "word-r4-c9",
+    "word-r4-c10",
+  ],
+  [
+    "word-r5-c1",
+    "word-r5-c2",
+    "word-r5-c3",
+    "word-r5-c4",
+    "word-r5-c5",
+    "word-r5-c6",
+    "word-r5-c7",
+    "word-r5-c8",
+    "word-r5-c9",
+    "word-r5-c10",
+    "word-r5-c11",
+  ],
+  [
+    "word-r6-c1",
+    "word-r6-c2",
+    "word-r6-c3",
+    "word-r6-c4",
+    "word-r6-c5",
+    "word-r6-c6",
+    "word-r6-c7",
+    "word-r6-c8",
+    "word-r6-c9",
+    "word-r6-c10",
+    "word-r6-c11",
+    "word-r6-c12",
+  ],
+  [
+    "word-r7-c1",
+    "word-r7-c2",
+    "word-r7-c3",
+    "word-r7-c4",
+    "word-r7-c5",
+    "word-r7-c6",
+    "word-r7-c7",
+    "word-r7-c8",
+    "word-r7-c9",
+    "word-r7-c10",
+    "word-r7-c11",
+    "word-r7-c12",
+    "word-r7-c13",
+  ],
+  [
+    "word-r8-c1",
+    "word-r8-c2",
+    "word-r8-c3",
+    "word-r8-c4",
+    "word-r8-c5",
+    "word-r8-c6",
+    "word-r8-c7",
+    "word-r8-c8",
+    "word-r8-c9",
+    "word-r8-c10",
+    "word-r8-c11",
+    "word-r8-c12",
+    "word-r8-c13",
+  ],
+  [
+    "word-r9-c1",
+    "word-r9-c2",
+    "word-r9-c3",
+    "word-r9-c4",
+    "word-r9-c5",
+    "word-r9-c6",
+    "word-r9-c7",
+    "word-r9-c8",
+    "word-r9-c9",
+    "word-r9-c10",
+    "word-r9-c11",
+  ],
+  [
+    "word-r10-c1",
+    "word-r10-c2",
+    "word-r10-c3",
+    "word-r10-c4",
+    "word-r10-c5",
+    "word-r10-c6",
+    "word-r10-c7",
+    "word-r10-c8",
+    "word-r10-c9",
+    "word-r10-c10",
+  ],
+  [
+    "word-r11-c1",
+    "word-r11-c2",
+    "word-r11-c3",
+    "word-r11-c4",
+    "word-r11-c5",
+    "word-r11-c6",
+    "word-r11-c7",
+    "word-r11-c8",
+    "word-r11-c9",
+  ],
+  [
+    "word-r12-c1",
+    "word-r12-c2",
+    "word-r12-c3",
+    "word-r12-c4",
+    "word-r12-c5",
+    "word-r12-c6",
+    "word-r12-c7",
+    "word-r12-c8",
+  ],
+  [
+    "word-r13-c1",
+    "word-r13-c2",
+    "word-r13-c3",
+    "word-r13-c4",
+    "word-r13-c5",
+    "word-r13-c6",
+    "word-r13-c7",
+  ],
+];
+
+const WORD_NEUTRAL_TOP: AccentOption[] = [
+  "word-neutral-t1",
+  "word-neutral-t2",
+  "word-neutral-t3",
+  "word-neutral-t4",
+  "word-neutral-t5",
+  "word-neutral-t6",
+  "word-neutral-t7",
+];
+
+const WORD_NEUTRAL_BOTTOM: AccentOption[] = [
+  "word-neutral-b1",
+  "word-neutral-b2",
+  "word-neutral-b3",
+  "word-neutral-b4",
+  "word-neutral-b5",
+  "word-neutral-b6",
+  "word-neutral-b7",
+];
+
+const WORD_NEUTRAL_WHITE: AccentOption = "word-neutral-white";
+const WORD_NEUTRAL_BLACK: AccentOption = "word-neutral-black";
+
+type HoneycombCell = {
+  id: AccentOption;
+  row: number;
+  col: number;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -141,6 +341,24 @@ function angleFromHour(hour12: number) {
   return (hour12 % 12) * 30;
 }
 
+function getAccentLabel(id: AccentOption): string {
+  if (id === WORD_NEUTRAL_WHITE) return "White";
+  if (id === WORD_NEUTRAL_BLACK) return "Black";
+  if (id.startsWith("word-neutral")) return "Grey";
+  if (id.startsWith("word-r")) return "Word colour";
+  return id;
+}
+
+function buildHoneycombCells(rows: AccentOption[][]): HoneycombCell[] {
+  return rows.flatMap((row, rowIndex) =>
+    row.map((id, colIndex) => ({
+      id,
+      row: rowIndex,
+      col: colIndex,
+    }))
+  );
+}
+
 function ToggleRow({
   label,
   checked,
@@ -161,12 +379,12 @@ function ToggleRow({
         gap: 16,
         minWidth: 0,
         padding: "14px 0",
-        borderBottom: `1px solid ${theme.border}`,
+        borderBottom: `1px solid ${theme.borderStandard}`,
       }}
     >
       <div
         style={{
-          color: theme.text,
+          color: theme.textPrimary,
           fontSize: 15,
           fontWeight: 600,
           lineHeight: 1.35,
@@ -186,8 +404,10 @@ function ToggleRow({
           width: 52,
           height: 30,
           borderRadius: 999,
-          border: `1px solid ${checked ? theme.accent : theme.border}`,
-          background: checked ? theme.accentSoft : theme.buttonGhostBg,
+          border: `1px solid ${
+            checked ? theme.controlSelectedBorder : theme.borderStandard
+          }`,
+          background: checked ? theme.controlSelectedBg : theme.controlBg,
           transition: "all 140ms ease",
           cursor: "pointer",
           flexShrink: 0,
@@ -201,59 +421,12 @@ function ToggleRow({
             width: 22,
             height: 22,
             borderRadius: "50%",
-            background: checked ? theme.accent : "#ffffff",
+            background: checked ? theme.accentPrimary : theme.bgElevated,
             transition: "all 140ms ease",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.24)",
+            boxShadow: theme.shadow,
           }}
         />
       </button>
-    </div>
-  );
-}
-
-function AppearanceControl({
-  appearance,
-  onChange,
-  theme,
-}: {
-  appearance: AppearancePreference;
-  onChange: (value: AppearancePreference) => void;
-  theme: Theme;
-}) {
-  const options: AppearancePreference[] = ["light", "dark", "system"];
-
-  return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0,1fr))",
-        gap: 10,
-      }}
-    >
-      {options.map((option) => {
-        const active = appearance === option;
-
-        return (
-          <button
-            key={option}
-            type="button"
-            onClick={() => onChange(option)}
-            style={{
-              minHeight: 42,
-              borderRadius: 14,
-              border: `1px solid ${active ? theme.accent : theme.border}`,
-              background: active ? theme.accentSoft : theme.buttonGhostBg,
-              color: theme.text,
-              fontSize: 14,
-              fontWeight: 700,
-              textTransform: "capitalize",
-              cursor: "pointer",
-            }}
-          >
-            {option}
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -269,7 +442,7 @@ function FieldLabel({
     <div
       style={{
         marginBottom: 8,
-        color: theme.subtleText,
+        color: theme.textMuted,
         fontSize: 13,
         fontWeight: 700,
       }}
@@ -308,9 +481,9 @@ function IntegratedField({
           width: "100%",
           height: 40,
           borderRadius: 14,
-          border: `1px solid ${theme.border}`,
-          background: muted ? theme.inputBgSoft : theme.inputBg,
-          color: muted ? theme.subtleText : theme.text,
+          border: `1px solid ${theme.borderStandard}`,
+          background: muted ? theme.controlBg : theme.bgElevated,
+          color: muted ? theme.textMuted : theme.textPrimary,
           padding: "0 42px 0 14px",
           fontSize: 15,
           fontWeight: 700,
@@ -328,9 +501,9 @@ function IntegratedField({
           width: 28,
           height: 28,
           borderRadius: 10,
-          border: `1px solid ${theme.border}`,
-          background: theme.buttonGhostBg,
-          color: theme.subtleText,
+          border: `1px solid ${theme.borderStandard}`,
+          background: theme.controlBg,
+          color: theme.textMuted,
           fontSize: 14,
           cursor: "pointer",
           display: "grid",
@@ -415,15 +588,15 @@ function TimePickerInline({
       style={{
         marginTop: 10,
         borderRadius: 18,
-        border: `1px solid ${theme.border}`,
-        background: theme.panelBg,
+        border: `1px solid ${theme.borderStandard}`,
+        background: theme.bgSurface,
         padding: 14,
         boxShadow: theme.shadow,
       }}
     >
       <div
         style={{
-          color: theme.text,
+          color: theme.textPrimary,
           fontSize: 15,
           fontWeight: 800,
           marginBottom: 12,
@@ -450,7 +623,7 @@ function TimePickerInline({
         <div
           style={{
             textAlign: "center",
-            color: theme.subtleText,
+            color: theme.textMuted,
             fontWeight: 800,
             fontSize: 18,
           }}
@@ -507,8 +680,8 @@ function TimePickerInline({
           margin: "0 auto 16px auto",
           position: "relative",
           borderRadius: "50%",
-          border: `1px solid ${theme.border}`,
-          background: theme.panelBg2,
+          border: `1px solid ${theme.borderStandard}`,
+          background: theme.bgElevated,
           cursor: "grab",
           touchAction: "none",
           userSelect: "none",
@@ -552,7 +725,7 @@ function TimePickerInline({
                   y1={y1 - Math.min(y1, y2)}
                   x2={x2 - Math.min(x1, x2)}
                   y2={y2 - Math.min(y1, y2)}
-                  stroke={isMajor ? theme.subtleText : theme.mutedText}
+                  stroke={isMajor ? theme.textMuted : theme.textSecondary}
                   strokeWidth={isMajor ? 1.8 : 1}
                   strokeLinecap="round"
                 />
@@ -571,11 +744,11 @@ function TimePickerInline({
             y1={center}
             x2={handX}
             y2={handY}
-            stroke={theme.accent}
+            stroke={theme.accentPrimary}
             strokeWidth="5"
             strokeLinecap="round"
           />
-          <circle cx={center} cy={center} r="8" fill={theme.accent} />
+          <circle cx={center} cy={center} r="8" fill={theme.accentPrimary} />
         </svg>
 
         {hourPositions.map((point) => {
@@ -600,8 +773,8 @@ function TimePickerInline({
                 height: 36,
                 borderRadius: "50%",
                 border: "none",
-                background: isActive ? theme.accentSoft : "transparent",
-                color: theme.text,
+                background: isActive ? theme.controlSelectedBg : "transparent",
+                color: theme.textPrimary,
                 fontSize: 14,
                 fontWeight: 800,
                 cursor: "pointer",
@@ -689,9 +862,11 @@ function PickerNumberButton({
       style={{
         height: 36,
         borderRadius: 12,
-        border: `1px solid ${active ? theme.accent : theme.border}`,
-        background: active ? theme.accentSoft : theme.buttonGhostBg,
-        color: theme.text,
+        border: `1px solid ${
+          active ? theme.controlSelectedBorder : theme.borderStandard
+        }`,
+        background: active ? theme.controlSelectedBg : theme.controlBg,
+        color: theme.textPrimary,
         fontWeight: 800,
         fontSize: 16,
         cursor: "pointer",
@@ -722,9 +897,11 @@ function PickerAmPmButton({
         minWidth: 48,
         padding: "0 12px",
         borderRadius: 12,
-        border: `1px solid ${active ? theme.accent : theme.border}`,
-        background: active ? theme.accentSoft : theme.buttonGhostBg,
-        color: theme.text,
+        border: `1px solid ${
+          active ? theme.controlSelectedBorder : theme.borderStandard
+        }`,
+        background: active ? theme.controlSelectedBg : theme.controlBg,
+        color: theme.textPrimary,
         fontWeight: 800,
         fontSize: 14,
         cursor: "pointer",
@@ -740,9 +917,9 @@ function pickerTextInputStyle(theme: Theme): React.CSSProperties {
     width: "100%",
     height: 38,
     borderRadius: 12,
-    border: `1px solid ${theme.border}`,
-    background: theme.inputBg,
-    color: theme.text,
+    border: `1px solid ${theme.borderStandard}`,
+    background: theme.bgElevated,
+    color: theme.textPrimary,
     padding: "0 12px",
     fontSize: 14,
     fontWeight: 700,
@@ -757,9 +934,9 @@ function pickerGhostButtonStyle(theme: Theme): React.CSSProperties {
     minWidth: 84,
     padding: "0 16px",
     borderRadius: 12,
-    border: `1px solid ${theme.border}`,
-    background: theme.buttonGhostBg,
-    color: theme.text,
+    border: `1px solid ${theme.borderStandard}`,
+    background: theme.controlBg,
+    color: theme.textPrimary,
     fontSize: 14,
     fontWeight: 700,
     cursor: "pointer",
@@ -772,21 +949,515 @@ function pickerPrimaryButtonStyle(theme: Theme): React.CSSProperties {
     minWidth: 72,
     padding: "0 16px",
     borderRadius: 12,
-    border: `1px solid ${theme.accent}`,
-    background: theme.accentSoft,
-    color: theme.text,
+    border: `1px solid ${theme.controlSelectedBorder}`,
+    background: theme.controlSelectedBg,
+    color: theme.textPrimary,
     fontSize: 14,
     fontWeight: 800,
     cursor: "pointer",
   };
 }
 
+function HexSwatch({
+  colour,
+  label,
+  active,
+  onClick,
+  theme,
+  width,
+  height,
+  innerBorder = false,
+}: {
+  colour: string;
+  label: string;
+  active: boolean;
+  onClick: () => void;
+  theme: Theme;
+  width: number;
+  height: number;
+  innerBorder?: boolean;
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        title={label}
+        className="theme-hex-swatch"
+        style={{
+          width,
+          height,
+          padding: 0,
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          display: "grid",
+          placeItems: "center",
+          position: "relative",
+          zIndex: active ? 3 : 1,
+        }}
+      >
+        <span
+          style={{
+            width,
+            height,
+            display: "block",
+            background: colour,
+            clipPath:
+              "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+            border: active
+              ? `2px solid ${theme.textPrimary}`
+              : innerBorder
+                ? `1px solid ${theme.borderStandard}`
+                : `1px solid rgba(255,255,255,0.15)`,
+            outline: active ? `2px solid ${theme.paper}` : "none",
+            outlineOffset: active ? "-4px" : 0,
+            boxShadow: active
+              ? theme.shadowStrong
+              : "0 1px 2px rgba(0,0,0,0.06)",
+            transform: active ? "scale(1.02)" : "scale(1)",
+            transition:
+              "transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, outline 140ms ease, filter 140ms ease",
+          }}
+        />
+      </button>
+
+      <style jsx>{`
+        .theme-hex-swatch:hover {
+          z-index: 4;
+        }
+
+        .theme-hex-swatch:hover span {
+          transform: scale(1.05);
+          box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+          filter: brightness(1.04);
+          border-color: ${theme.textPrimary};
+        }
+
+        .theme-hex-swatch:focus-visible {
+          outline: 2px solid ${theme.accentPrimary};
+          outline-offset: 3px;
+          border-radius: 10px;
+        }
+      `}</style>
+    </>
+  );
+}
+
+function WordHoneycombPalette({
+  selectedColour,
+  onSelect,
+  theme,
+}: {
+  selectedColour: AccentOption;
+  onSelect: (colour: AccentOption) => void;
+  theme: Theme;
+}) {
+  const cells = useMemo(() => buildHoneycombCells(WORD_COLOUR_ROWS), []);
+
+  const hexWidth = 24;
+  const hexHeight = 28;
+  const colStep = 20.9;
+  const rowStep = 21.2;
+  const maxCols = Math.max(...WORD_COLOUR_ROWS.map((row) => row.length));
+  const width = (maxCols - 1) * colStep + hexWidth;
+  const height = (WORD_COLOUR_ROWS.length - 1) * rowStep + hexHeight;
+
+  return (
+    <div
+      style={{
+        width,
+        height,
+        position: "relative",
+        margin: "0 auto",
+      }}
+    >
+      {cells.map((cell) => {
+        const rowLength = WORD_COLOUR_ROWS[cell.row].length;
+        const baseLeft = ((maxCols - rowLength) * colStep) / 2;
+        const left = baseLeft + cell.col * colStep;
+        const top = cell.row * rowStep;
+
+        return (
+          <div
+            key={`${cell.row}-${cell.col}-${cell.id}`}
+            style={{
+              position: "absolute",
+              left,
+              top,
+            }}
+          >
+            <HexSwatch
+              colour={ACCENT_MAP[cell.id]}
+              label={`${getAccentLabel(cell.id)} ${ACCENT_MAP[cell.id]}`}
+              active={cell.id === selectedColour}
+              onClick={() => onSelect(cell.id)}
+              theme={theme}
+              width={hexWidth}
+              height={hexHeight}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function WordNeutralPalette({
+  selectedColour,
+  onSelect,
+  theme,
+}: {
+  selectedColour: AccentOption;
+  onSelect: (colour: AccentOption) => void;
+  theme: Theme;
+}) {
+  const smallHexWidth = 22;
+  const smallHexHeight = 26;
+  const largeHexWidth = 30;
+  const largeHexHeight = 34;
+  const colStep = 18.7;
+  const rowStep = 18.5;
+
+  const contentWidth = 290;
+  const topLeft = 53;
+  const bottomLeft = 43;
+  const blackLeft = contentWidth - largeHexWidth;
+  const whiteTop = 12;
+  const blackTop = 10;
+
+  return (
+    <div
+      style={{
+        width: contentWidth,
+        height: 52,
+        position: "relative",
+        margin: "0 auto",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: 0,
+          top: whiteTop,
+        }}
+      >
+        <HexSwatch
+          colour={ACCENT_MAP[WORD_NEUTRAL_WHITE]}
+          label="White"
+          active={selectedColour === WORD_NEUTRAL_WHITE}
+          onClick={() => onSelect(WORD_NEUTRAL_WHITE)}
+          theme={theme}
+          width={largeHexWidth}
+          height={largeHexHeight}
+          innerBorder
+        />
+      </div>
+
+      {WORD_NEUTRAL_TOP.map((id, index) => (
+        <div
+          key={id}
+          style={{
+            position: "absolute",
+            left: topLeft + index * colStep,
+            top: 0,
+          }}
+        >
+          <HexSwatch
+            colour={ACCENT_MAP[id]}
+            label={`${getAccentLabel(id)} ${ACCENT_MAP[id]}`}
+            active={selectedColour === id}
+            onClick={() => onSelect(id)}
+            theme={theme}
+            width={smallHexWidth}
+            height={smallHexHeight}
+          />
+        </div>
+      ))}
+
+      {WORD_NEUTRAL_BOTTOM.map((id, index) => (
+        <div
+          key={id}
+          style={{
+            position: "absolute",
+            left: bottomLeft + index * colStep,
+            top: rowStep,
+          }}
+        >
+          <HexSwatch
+            colour={ACCENT_MAP[id]}
+            label={`${getAccentLabel(id)} ${ACCENT_MAP[id]}`}
+            active={selectedColour === id}
+            onClick={() => onSelect(id)}
+            theme={theme}
+            width={smallHexWidth}
+            height={smallHexHeight}
+          />
+        </div>
+      ))}
+
+      <div
+        style={{
+          position: "absolute",
+          left: blackLeft,
+          top: blackTop,
+        }}
+      >
+        <HexSwatch
+          colour={ACCENT_MAP[WORD_NEUTRAL_BLACK]}
+          label="Black"
+          active={selectedColour === WORD_NEUTRAL_BLACK}
+          onClick={() => onSelect(WORD_NEUTRAL_BLACK)}
+          theme={theme}
+          width={largeHexWidth}
+          height={largeHexHeight}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CustomThemePaletteDialog({
+  open,
+  selectedColour,
+  onSelect,
+  onClose,
+  theme,
+}: {
+  open: boolean;
+  selectedColour: AccentOption;
+  onSelect: (colour: AccentOption) => void;
+  onClose: () => void;
+  theme: Theme;
+}) {
+  const selectedHex = ACCENT_MAP[selectedColour];
+  const selectedLabel = useMemo(
+    () => getAccentLabel(selectedColour),
+    [selectedColour]
+  );
+
+  if (!open) return null;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: theme.modalOverlay,
+        display: "grid",
+        placeItems: "center",
+        padding: 16,
+        zIndex: 2000,
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(event) => event.stopPropagation()}
+        style={{
+          width: "100%",
+          maxWidth: 404,
+          borderRadius: 14,
+          border: `1px solid ${theme.borderStandard}`,
+          background: theme.bgSurface,
+          boxShadow: theme.shadowStrong,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            padding: "14px 16px 12px",
+            borderBottom: `1px solid ${theme.borderStandard}`,
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            gap: 12,
+          }}
+        >
+          <div style={{ display: "grid", gap: 6 }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: theme.textPrimary,
+              }}
+            >
+              Custom theme colour
+            </div>
+            <div
+              style={{
+                fontSize: 12.5,
+                color: theme.textMuted,
+                lineHeight: 1.45,
+                maxWidth: 290,
+              }}
+            >
+              Choose a base colour from the palette below. The app will build a
+              full theme from it rather than simply changing a single accent.
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 10,
+              border: `1px solid ${theme.borderStandard}`,
+              background: theme.controlBg,
+              color: theme.textPrimary,
+              cursor: "pointer",
+              fontSize: 19,
+              lineHeight: 1,
+              display: "grid",
+              placeItems: "center",
+              flex: "0 0 auto",
+            }}
+            aria-label="Close custom theme picker"
+            title="Close"
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            padding: "14px 14px 14px",
+            display: "grid",
+            gap: 14,
+          }}
+        >
+          <WordHoneycombPalette
+            selectedColour={selectedColour}
+            onSelect={onSelect}
+            theme={theme}
+          />
+
+          <div
+            style={{
+              display: "grid",
+              gap: 10,
+              justifyItems: "center",
+            }}
+          >
+            <div
+              style={{
+                width: "100%",
+                maxWidth: 320,
+                borderTop: `1px solid ${theme.borderStandard}`,
+              }}
+            />
+
+            <WordNeutralPalette
+              selectedColour={selectedColour}
+              onSelect={onSelect}
+              theme={theme}
+            />
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "end",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gap: 6,
+                minWidth: 0,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11.5,
+                  fontWeight: 700,
+                  letterSpacing: 0.6,
+                  textTransform: "uppercase",
+                  color: theme.textMuted,
+                }}
+              >
+                Current selection
+              </div>
+
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                  minHeight: 40,
+                  padding: "0 12px",
+                  borderRadius: 12,
+                  border: `1px solid ${theme.borderStandard}`,
+                  background: theme.bgElevated,
+                  maxWidth: 250,
+                }}
+              >
+                <span
+                  style={{
+                    width: 18,
+                    height: 21,
+                    background: selectedHex,
+                    clipPath:
+                      "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+                    border:
+                      selectedColour === WORD_NEUTRAL_WHITE
+                        ? `1px solid ${theme.borderStandard}`
+                        : `2px solid ${theme.paper}`,
+                    boxShadow: theme.shadow,
+                    flex: "0 0 auto",
+                  }}
+                />
+
+                <span
+                  style={{
+                    fontSize: 13,
+                    color: theme.textSecondary,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Base colour:{" "}
+                  <strong style={{ color: theme.textPrimary }}>
+                    {selectedLabel}
+                  </strong>
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              style={{
+                height: 40,
+                padding: "0 16px",
+                borderRadius: 10,
+                border: `1px solid ${theme.borderStandard}`,
+                background: theme.controlBg,
+                color: theme.textPrimary,
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: "pointer",
+                flex: "0 0 auto",
+              }}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function SettingsPanel({
   open,
   onClose,
   theme,
-  appearance,
-  onChangeAppearance,
   includeCoverSheet,
   onToggleIncludeCoverSheet,
   includeFormulaSheet,
@@ -812,14 +1483,28 @@ export default function SettingsPanel({
   p2EndTimeText,
   onChangeP2EndTimeText,
 }: Props) {
+  const {
+    themePreference,
+    setThemePreference,
+    customThemeColour,
+    setCustomThemeColour,
+  } = useSettings();
+
   const [activePicker, setActivePicker] = useState<ActivePicker>(null);
   const [paper2DateLinked, setPaper2DateLinked] = useState(
     !p2CoverDateText || p2CoverDateText === p1CoverDateText
+  );
+  const [openPalette, setOpenPalette] = useState(false);
+
+  const selectedLabel = useMemo(
+    () => getAccentLabel(customThemeColour),
+    [customThemeColour]
   );
 
   useEffect(() => {
     if (!open) {
       setActivePicker(null);
+      setOpenPalette(false);
     }
   }, [open]);
 
@@ -830,303 +1515,418 @@ export default function SettingsPanel({
   }, [paper2DateLinked, p1CoverDateText, onChangeP2CoverDateText]);
 
   return (
-    <AppSideTray open={open} onClose={onClose} theme={theme}>
-      <style jsx>{`
-        .settings-scroll {
-          overflow-y: auto;
-          overflow-x: hidden;
-          scrollbar-width: thin;
-          scrollbar-color: transparent transparent;
-        }
+    <>
+      <AppSideTray open={open} onClose={onClose} theme={theme}>
+        <style jsx>{`
+          .settings-scroll {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+          }
 
-        .settings-scroll:hover {
-          scrollbar-color: rgba(104, 168, 255, 0.45) transparent;
-        }
+          .settings-scroll:hover {
+            scrollbar-color: ${theme.textMuted} transparent;
+          }
 
-        .settings-scroll::-webkit-scrollbar {
-          width: 8px;
-        }
+          .settings-scroll::-webkit-scrollbar {
+            width: 8px;
+          }
 
-        .settings-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
+          .settings-scroll::-webkit-scrollbar-track {
+            background: transparent;
+          }
 
-        .settings-scroll::-webkit-scrollbar-thumb {
-          background: transparent;
-          border-radius: 999px;
-        }
+          .settings-scroll::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 999px;
+          }
 
-        .settings-scroll:hover::-webkit-scrollbar-thumb {
-          background: rgba(104, 168, 255, 0.45);
-        }
-      `}</style>
+          .settings-scroll:hover::-webkit-scrollbar-thumb {
+            background: ${theme.textMuted};
+          }
+        `}</style>
 
-      <AppTrayHeader
-        title="Settings"
-        subtitle="Viewer, layout and cover-sheet options"
-        onClose={onClose}
-        theme={theme}
-      />
-
-      <div
-        className="settings-scroll"
-        style={{
-          flex: 1,
-          minHeight: 0,
-          padding: 18,
-          display: "grid",
-          gap: 18,
-          alignContent: "start",
-        }}
-      >
-        <AppTraySection title="Paper content" theme={theme}>
-          <ToggleRow
-            label="Include cover sheet"
-            checked={includeCoverSheet}
-            onChange={onToggleIncludeCoverSheet}
-            theme={theme}
-          />
-          <ToggleRow
-            label="Include formula sheet"
-            checked={includeFormulaSheet}
-            onChange={onToggleIncludeFormulaSheet}
-            theme={theme}
-          />
-          <ToggleRow
-            label="Show date and time on cover sheet"
-            checked={showCoverDateTime}
-            onChange={onToggleShowCoverDateTime}
-            theme={theme}
-          />
-          <ToggleRow
-            label="Show Scottish candidate number box"
-            checked={showScottishCandidateNumberBox}
-            onChange={onToggleShowScottishCandidateNumberBox}
-            theme={theme}
-          />
-        </AppTraySection>
-
-        <AppTraySection title="Workspace" theme={theme}>
-          <ToggleRow
-            label="Show progress panel"
-            checked={showProgressPanel}
-            onChange={onToggleShowProgressPanel}
-            theme={theme}
-          />
-
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 10,
-              paddingTop: 14,
-            }}
-          >
-            <button
-              type="button"
-              onClick={onResetLayout}
-              style={pickerGhostButtonStyle(theme)}
-            >
-              Reset layout
-            </button>
-            <button
-              type="button"
-              onClick={onResetZoom}
-              style={pickerGhostButtonStyle(theme)}
-            >
-              Reset zoom
-            </button>
-          </div>
-        </AppTraySection>
-
-        <AppTraySection
-          title="Paper 1 sitting details"
-          subtitle="Linked to the Assessment Date"
+        <AppTrayHeader
+          title="Settings"
+          subtitle="Viewer, layout and cover-sheet options"
+          onClose={onClose}
           theme={theme}
+        />
+
+        <div
+          className="settings-scroll"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            padding: 18,
+            display: "grid",
+            gap: 18,
+            alignContent: "start",
+          }}
         >
-          <div style={{ display: "grid", gap: 14 }}>
-            <div>
-              <FieldLabel theme={theme}>Paper 1 date</FieldLabel>
-              <IntegratedField
-                value={p1CoverDateText}
-                onChange={onChangeP1CoverDateText}
-                onClick={() => setActivePicker("p1Date")}
-                icon="🗓️"
-                theme={theme}
-              />
-              {activePicker === "p1Date" ? (
-                <SharedCalendarPicker
-                  theme={theme}
+          <AppTraySection title="Paper content" theme={theme}>
+            <ToggleRow
+              label="Include cover sheet"
+              checked={includeCoverSheet}
+              onChange={onToggleIncludeCoverSheet}
+              theme={theme}
+            />
+            <ToggleRow
+              label="Include formula sheet"
+              checked={includeFormulaSheet}
+              onChange={onToggleIncludeFormulaSheet}
+              theme={theme}
+            />
+            <ToggleRow
+              label="Show date and time on cover sheet"
+              checked={showCoverDateTime}
+              onChange={onToggleShowCoverDateTime}
+              theme={theme}
+            />
+            <ToggleRow
+              label="Show Scottish candidate number box"
+              checked={showScottishCandidateNumberBox}
+              onChange={onToggleShowScottishCandidateNumberBox}
+              theme={theme}
+            />
+          </AppTraySection>
+
+          <AppTraySection title="Workspace" theme={theme}>
+            <ToggleRow
+              label="Show progress panel"
+              checked={showProgressPanel}
+              onChange={onToggleShowProgressPanel}
+              theme={theme}
+            />
+
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+                paddingTop: 14,
+              }}
+            >
+              <button
+                type="button"
+                onClick={onResetLayout}
+                style={pickerGhostButtonStyle(theme)}
+              >
+                Reset layout
+              </button>
+              <button
+                type="button"
+                onClick={onResetZoom}
+                style={pickerGhostButtonStyle(theme)}
+              >
+                Reset zoom
+              </button>
+            </div>
+          </AppTraySection>
+
+          <AppTraySection
+            title="Paper 1 sitting details"
+            subtitle="Linked to the Assessment Date"
+            theme={theme}
+          >
+            <div style={{ display: "grid", gap: 14 }}>
+              <div>
+                <FieldLabel theme={theme}>Paper 1 date</FieldLabel>
+                <IntegratedField
                   value={p1CoverDateText}
+                  onChange={onChangeP1CoverDateText}
+                  onClick={() => setActivePicker("p1Date")}
+                  icon="🗓️"
+                  theme={theme}
+                />
+                {activePicker === "p1Date" ? (
+                  <SharedCalendarPicker
+                    theme={theme}
+                    value={p1CoverDateText}
+                    onCancel={() => setActivePicker(null)}
+                    onApply={(next) => {
+                      onChangeP1CoverDateText(next);
+                      setActivePicker(null);
+                    }}
+                  />
+                ) : null}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <FieldLabel theme={theme}>Paper 1 start</FieldLabel>
+                  <IntegratedField
+                    value={p1StartTimeText}
+                    onChange={onChangeP1StartTimeText}
+                    onClick={() => setActivePicker("p1Start")}
+                    icon="🕘"
+                    theme={theme}
+                  />
+                </div>
+
+                <div>
+                  <FieldLabel theme={theme}>Paper 1 end</FieldLabel>
+                  <IntegratedField
+                    value={p1EndTimeText}
+                    onChange={onChangeP1EndTimeText}
+                    onClick={() => setActivePicker("p1End")}
+                    icon="🕘"
+                    theme={theme}
+                  />
+                </div>
+              </div>
+
+              {activePicker === "p1Start" ? (
+                <TimePickerInline
+                  theme={theme}
+                  value={p1StartTimeText}
+                  label="Paper 1 start"
                   onCancel={() => setActivePicker(null)}
                   onApply={(next) => {
-                    onChangeP1CoverDateText(next);
+                    onChangeP1StartTimeText(next);
+                    setActivePicker("p1End");
+                  }}
+                />
+              ) : null}
+
+              {activePicker === "p1End" ? (
+                <TimePickerInline
+                  theme={theme}
+                  value={p1EndTimeText}
+                  label="Paper 1 end"
+                  onCancel={() => setActivePicker(null)}
+                  onApply={(next) => {
+                    onChangeP1EndTimeText(next);
                     setActivePicker(null);
                   }}
                 />
               ) : null}
             </div>
+          </AppTraySection>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                gap: 12,
-              }}
-            >
+          <AppTraySection
+            title="Paper 2 sitting details"
+            subtitle="Edit only if Paper 2 is sat on a different day to Paper 1."
+            theme={theme}
+          >
+            <div style={{ display: "grid", gap: 14 }}>
               <div>
-                <FieldLabel theme={theme}>Paper 1 start</FieldLabel>
+                <FieldLabel theme={theme}>Paper 2 date</FieldLabel>
                 <IntegratedField
-                  value={p1StartTimeText}
-                  onChange={onChangeP1StartTimeText}
-                  onClick={() => setActivePicker("p1Start")}
-                  icon="🕘"
-                  theme={theme}
-                />
-              </div>
-
-              <div>
-                <FieldLabel theme={theme}>Paper 1 end</FieldLabel>
-                <IntegratedField
-                  value={p1EndTimeText}
-                  onChange={onChangeP1EndTimeText}
-                  onClick={() => setActivePicker("p1End")}
-                  icon="🕘"
-                  theme={theme}
-                />
-              </div>
-            </div>
-
-            {activePicker === "p1Start" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p1StartTimeText}
-                label="Paper 1 start"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP1StartTimeText(next);
-                  setActivePicker("p1End");
-                }}
-              />
-            ) : null}
-
-            {activePicker === "p1End" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p1EndTimeText}
-                label="Paper 1 end"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP1EndTimeText(next);
-                  setActivePicker(null);
-                }}
-              />
-            ) : null}
-          </div>
-        </AppTraySection>
-
-        <AppTraySection
-          title="Paper 2 sitting details"
-          subtitle="Edit only if Paper 2 is sat on a different day to Paper 1."
-          theme={theme}
-        >
-          <div style={{ display: "grid", gap: 14 }}>
-            <div>
-              <FieldLabel theme={theme}>Paper 2 date</FieldLabel>
-              <IntegratedField
-                value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                onChange={(next) => {
-                  setPaper2DateLinked(false);
-                  onChangeP2CoverDateText(next);
-                }}
-                onClick={() => {
-                  setPaper2DateLinked(false);
-                  setActivePicker("p2Date");
-                }}
-                icon="🗓️"
-                theme={theme}
-                muted={paper2DateLinked}
-              />
-              {activePicker === "p2Date" ? (
-                <SharedCalendarPicker
-                  theme={theme}
                   value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
+                  onChange={(next) => {
                     setPaper2DateLinked(false);
                     onChangeP2CoverDateText(next);
+                  }}
+                  onClick={() => {
+                    setPaper2DateLinked(false);
+                    setActivePicker("p2Date");
+                  }}
+                  icon="🗓️"
+                  theme={theme}
+                  muted={paper2DateLinked}
+                />
+                {activePicker === "p2Date" ? (
+                  <SharedCalendarPicker
+                    theme={theme}
+                    value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
+                    onCancel={() => setActivePicker(null)}
+                    onApply={(next) => {
+                      setPaper2DateLinked(false);
+                      onChangeP2CoverDateText(next);
+                      setActivePicker(null);
+                    }}
+                  />
+                ) : null}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <FieldLabel theme={theme}>Paper 2 start</FieldLabel>
+                  <IntegratedField
+                    value={p2StartTimeText}
+                    onChange={onChangeP2StartTimeText}
+                    onClick={() => setActivePicker("p2Start")}
+                    icon="🕘"
+                    theme={theme}
+                  />
+                </div>
+
+                <div>
+                  <FieldLabel theme={theme}>Paper 2 end</FieldLabel>
+                  <IntegratedField
+                    value={p2EndTimeText}
+                    onChange={onChangeP2EndTimeText}
+                    onClick={() => setActivePicker("p2End")}
+                    icon="🕘"
+                    theme={theme}
+                  />
+                </div>
+              </div>
+
+              {activePicker === "p2Start" ? (
+                <TimePickerInline
+                  theme={theme}
+                  value={p2StartTimeText}
+                  label="Paper 2 start"
+                  onCancel={() => setActivePicker(null)}
+                  onApply={(next) => {
+                    onChangeP2StartTimeText(next);
+                    setActivePicker("p2End");
+                  }}
+                />
+              ) : null}
+
+              {activePicker === "p2End" ? (
+                <TimePickerInline
+                  theme={theme}
+                  value={p2EndTimeText}
+                  label="Paper 2 end"
+                  onCancel={() => setActivePicker(null)}
+                  onApply={(next) => {
+                    onChangeP2EndTimeText(next);
                     setActivePicker(null);
                   }}
                 />
               ) : null}
             </div>
+          </AppTraySection>
 
+          <AppTraySection
+            title="Appearance"
+            subtitle="Choose how the app looks."
+            theme={theme}
+          >
+            <div style={{ display: "grid", gap: 10 }}>
+              {THEME_OPTIONS.map((opt) => {
+                const active = themePreference === opt.value;
+
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setThemePreference(opt.value)}
+                    style={{
+                      padding: 14,
+                      borderRadius: 14,
+                      border: `1px solid ${
+                        active
+                          ? theme.controlSelectedBorder
+                          : theme.borderStandard
+                      }`,
+                      background: active
+                        ? theme.controlSelectedBg
+                        : theme.bgSurface,
+                      textAlign: "left",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontWeight: 700,
+                        color: theme.textPrimary,
+                      }}
+                    >
+                      {opt.label}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 13,
+                        color: theme.textMuted,
+                      }}
+                    >
+                      {opt.helper}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </AppTraySection>
+
+          <AppTraySection
+            title="Custom theme"
+            subtitle="Choose your base colour."
+            theme={theme}
+          >
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: 14,
+                borderRadius: 14,
+                border: `1px solid ${theme.borderStandard}`,
+                background: theme.bgSurface,
                 gap: 12,
+                flexWrap: "wrap",
               }}
             >
-              <div>
-                <FieldLabel theme={theme}>Paper 2 start</FieldLabel>
-                <IntegratedField
-                  value={p2StartTimeText}
-                  onChange={onChangeP2StartTimeText}
-                  onClick={() => setActivePicker("p2Start")}
-                  icon="🕘"
-                  theme={theme}
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div
+                  style={{
+                    width: 18,
+                    height: 21,
+                    background: ACCENT_MAP[customThemeColour],
+                    clipPath:
+                      "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+                    border:
+                      customThemeColour === WORD_NEUTRAL_WHITE
+                        ? `1px solid ${theme.borderStandard}`
+                        : "none",
+                  }}
                 />
+
+                <div>
+                  <div style={{ fontWeight: 700, color: theme.textPrimary }}>
+                    {selectedLabel}
+                  </div>
+                  <div style={{ fontSize: 12, color: theme.textMuted }}>
+                    Base colour
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <FieldLabel theme={theme}>Paper 2 end</FieldLabel>
-                <IntegratedField
-                  value={p2EndTimeText}
-                  onChange={onChangeP2EndTimeText}
-                  onClick={() => setActivePicker("p2End")}
-                  icon="🕘"
-                  theme={theme}
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => setOpenPalette(true)}
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: 10,
+                  border: `1px solid ${theme.borderStandard}`,
+                  background: theme.bgElevated,
+                  color: theme.textPrimary,
+                  cursor: "pointer",
+                  fontWeight: 600,
+                }}
+              >
+                Choose colour
+              </button>
             </div>
+          </AppTraySection>
+        </div>
+      </AppSideTray>
 
-            {activePicker === "p2Start" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p2StartTimeText}
-                label="Paper 2 start"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP2StartTimeText(next);
-                  setActivePicker("p2End");
-                }}
-              />
-            ) : null}
-
-            {activePicker === "p2End" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p2EndTimeText}
-                label="Paper 2 end"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP2EndTimeText(next);
-                  setActivePicker(null);
-                }}
-              />
-            ) : null}
-          </div>
-        </AppTraySection>
-
-        <AppTraySection title="Appearance" theme={theme}>
-          <AppearanceControl
-            appearance={appearance}
-            onChange={onChangeAppearance}
-            theme={theme}
-          />
-        </AppTraySection>
-      </div>
-    </AppSideTray>
+      <CustomThemePaletteDialog
+        open={openPalette}
+        selectedColour={customThemeColour}
+        onSelect={setCustomThemeColour}
+        onClose={() => setOpenPalette(false)}
+        theme={theme}
+      />
+    </>
   );
 }

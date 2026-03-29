@@ -1,12 +1,12 @@
 "use client";
 
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
   title: string;
   subtitle?: string;
   onClose: () => void;
-  theme: AppTheme;
+  theme: Theme;
 };
 
 export default function AppTrayHeader({
@@ -19,17 +19,18 @@ export default function AppTrayHeader({
     <div
       style={{
         padding: "18px 18px 14px 18px",
-        borderBottom: `1px solid ${theme.border}`,
+        borderBottom: `1px solid ${theme.borderStandard}`,
         display: "grid",
         gridTemplateColumns: "1fr auto",
         gap: 14,
         alignItems: "start",
+        background: theme.bgSurface,
       }}
     >
       <div>
         <div
           style={{
-            color: theme.text,
+            color: theme.textPrimary,
             fontSize: 18,
             fontWeight: 900,
             lineHeight: 1.15,
@@ -42,7 +43,7 @@ export default function AppTrayHeader({
           <div
             style={{
               marginTop: 4,
-              color: theme.subtleText,
+              color: theme.textMuted,
               fontSize: 14,
               lineHeight: 1.4,
             }}
@@ -60,11 +61,12 @@ export default function AppTrayHeader({
           width: 34,
           height: 34,
           borderRadius: 12,
-          border: `1px solid ${theme.border}`,
-          background: theme.buttonGhostBg,
-          color: theme.subtleText,
+          border: `1px solid ${theme.borderStandard}`,
+          background: theme.controlBg,
+          color: theme.textMuted,
           fontSize: 18,
           cursor: "pointer",
+          transition: "all 0.15s ease",
         }}
       >
         ×

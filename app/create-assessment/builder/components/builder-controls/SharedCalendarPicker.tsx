@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { AppTheme as Theme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
   theme: Theme;
@@ -58,7 +58,9 @@ function parseDateText(text: string): Date | null {
 }
 
 function formatDateIso(date: Date) {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(
+    date.getDate()
+  )}`;
 }
 
 function getMonthMatrix(viewDate: Date) {
@@ -66,7 +68,7 @@ function getMonthMatrix(viewDate: Date) {
   const month = viewDate.getMonth();
 
   const firstDay = new Date(year, month, 1);
-  const startWeekday = (firstDay.getDay() + 6) % 7; // Monday-first
+  const startWeekday = (firstDay.getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const prevMonthDays = new Date(year, month, 0).getDate();
 
@@ -121,9 +123,9 @@ function pickerGhostButtonStyle(theme: Theme): React.CSSProperties {
     minWidth: 84,
     padding: "0 16px",
     borderRadius: 12,
-    border: `1px solid ${theme.border}`,
-    background: theme.buttonGhostBg,
-    color: theme.text,
+    border: `1px solid ${theme.borderStandard}`,
+    background: theme.controlBg,
+    color: theme.textPrimary,
     fontSize: 14,
     fontWeight: 700,
     cursor: "pointer",
@@ -136,9 +138,9 @@ function pickerPrimaryButtonStyle(theme: Theme): React.CSSProperties {
     minWidth: 72,
     padding: "0 16px",
     borderRadius: 12,
-    border: `1px solid ${theme.accent}`,
-    background: theme.accentSoft,
-    color: theme.text,
+    border: `1px solid ${theme.controlSelectedBorder}`,
+    background: theme.controlSelectedBg,
+    color: theme.textPrimary,
     fontSize: 14,
     fontWeight: 800,
     cursor: "pointer",
@@ -150,9 +152,9 @@ function pickerNavButtonStyle(theme: Theme): React.CSSProperties {
     width: 36,
     height: 36,
     borderRadius: 12,
-    border: `1px solid ${theme.border}`,
-    background: theme.buttonGhostBg,
-    color: theme.text,
+    border: `1px solid ${theme.borderStandard}`,
+    background: theme.controlBg,
+    color: theme.textPrimary,
     fontSize: 18,
     fontWeight: 800,
     cursor: "pointer",
@@ -168,7 +170,7 @@ export default function SharedCalendarPicker({
   const parsed = parseDateText(value) ?? new Date();
 
   const [viewDate, setViewDate] = useState(
-    new Date(parsed.getFullYear(), parsed.getMonth(), 1),
+    new Date(parsed.getFullYear(), parsed.getMonth(), 1)
   );
   const [selectedDate, setSelectedDate] = useState<Date>(parsed);
 
@@ -184,8 +186,8 @@ export default function SharedCalendarPicker({
       style={{
         marginTop: 10,
         borderRadius: 18,
-        border: `1px solid ${theme.border}`,
-        background: theme.panelBg,
+        border: `1px solid ${theme.borderStandard}`,
+        background: theme.bgSurface,
         padding: 14,
         boxShadow: theme.shadow,
         position: "relative",
@@ -205,7 +207,7 @@ export default function SharedCalendarPicker({
           type="button"
           onClick={() =>
             setViewDate(
-              new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1),
+              new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1)
             )
           }
           style={pickerNavButtonStyle(theme)}
@@ -216,7 +218,7 @@ export default function SharedCalendarPicker({
         <div
           style={{
             textAlign: "center",
-            color: theme.text,
+            color: theme.textPrimary,
             fontWeight: 800,
             fontSize: 15,
           }}
@@ -228,7 +230,7 @@ export default function SharedCalendarPicker({
           type="button"
           onClick={() =>
             setViewDate(
-              new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1),
+              new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1)
             )
           }
           style={pickerNavButtonStyle(theme)}
@@ -250,7 +252,7 @@ export default function SharedCalendarPicker({
             key={`${label}-${index}`}
             style={{
               textAlign: "center",
-              color: theme.subtleText,
+              color: theme.textMuted,
               fontSize: 12,
               fontWeight: 700,
               paddingBottom: 4,
@@ -282,9 +284,17 @@ export default function SharedCalendarPicker({
                   style={{
                     height: 34,
                     borderRadius: 10,
-                    border: `1px solid ${selected ? theme.accent : theme.border}`,
-                    background: selected ? theme.accentSoft : theme.buttonGhostBg,
-                    color: cell.inCurrentMonth ? theme.text : theme.mutedText,
+                    border: `1px solid ${
+                      selected
+                        ? theme.controlSelectedBorder
+                        : theme.borderStandard
+                    }`,
+                    background: selected
+                      ? theme.controlSelectedBg
+                      : theme.controlBg,
+                    color: cell.inCurrentMonth
+                      ? theme.textPrimary
+                      : theme.textMuted,
                     fontSize: 13,
                     fontWeight: selected ? 800 : 600,
                     cursor: "pointer",
@@ -306,7 +316,11 @@ export default function SharedCalendarPicker({
           marginTop: 14,
         }}
       >
-        <button type="button" onClick={onCancel} style={pickerGhostButtonStyle(theme)}>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={pickerGhostButtonStyle(theme)}
+        >
           Cancel
         </button>
         <button

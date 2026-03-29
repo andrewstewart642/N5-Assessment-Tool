@@ -3,7 +3,7 @@
 import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/app/create-assessment/builder/builder-logic/BuilderUiHelpers";
 
 type Props = {
-  theme: AppTheme;
+  theme: Theme;
   assessmentName: string;
   setAssessmentName: React.Dispatch<React.SetStateAction<string>>;
   assessmentDate: string;
@@ -46,7 +46,9 @@ function formatAssessmentDateDisplay(value: string): string {
   if (!isoMatch) return value;
 
   const [, year, month, day] = isoMatch;
-  const utcDate = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+  const utcDate = new Date(
+    Date.UTC(Number(year), Number(month) - 1, Number(day))
+  );
 
   if (Number.isNaN(utcDate.getTime())) return value;
 
@@ -58,12 +60,12 @@ function formatAssessmentDateDisplay(value: string): string {
   });
 }
 
-function fieldLabelStyle(theme: AppTheme): React.CSSProperties {
+function fieldLabelStyle(theme: Theme): React.CSSProperties {
   return {
     fontSize: 12,
     fontWeight: UI_TYPO.weightMedium,
     letterSpacing: 0,
-    color: theme.subtleText,
+    color: theme.textMuted,
     lineHeight: 1.2,
     whiteSpace: "nowrap",
   };
@@ -80,11 +82,11 @@ function fixedFieldShellStyle(width: number): React.CSSProperties {
   };
 }
 
-function sharedInputStyle(theme: AppTheme): React.CSSProperties {
+function sharedInputStyle(theme: Theme): React.CSSProperties {
   return {
     height: 32,
     borderRadius: 10,
-    border: `1px solid ${theme.viewerChromeBorder}`,
+    border: `1px solid ${theme.borderStandard}`,
     background: theme.bgSurface,
     color: theme.textPrimary,
     padding: "0 34px 0 10px",
@@ -129,8 +131,8 @@ export default function BuilderTopBar({
   return (
     <div
       style={{
-        border: `1px solid ${theme.viewerChromeBorder}`,
-        background: theme.headerBg,
+        borderBottom: `1px solid ${theme.borderStandard}`,
+        background: theme.bgSurface,
         display: "grid",
         gridTemplateRows: "auto auto",
         rowGap: 12,
@@ -246,9 +248,9 @@ export default function BuilderTopBar({
                   width: 22,
                   height: 22,
                   borderRadius: 7,
-                  border: `1px solid ${theme.viewerChromeBorder}`,
-                  background: theme.buttonGhostBg,
-                  color: theme.subtleText,
+                  border: `1px solid ${theme.borderStandard}`,
+                  background: theme.controlBg,
+                  color: theme.textMuted,
                   cursor: "pointer",
                   display: "flex",
                   alignItems: "center",
@@ -310,7 +312,11 @@ export default function BuilderTopBar({
           >
             <span style={fieldLabelStyle(theme)}>Viewing</span>
             <div style={{ height: 32, display: "flex", alignItems: "center" }}>
-              <ViewingToggle value={viewPaper} onChange={setViewPaper} theme={theme} />
+              <ViewingToggle
+                value={viewPaper}
+                onChange={setViewPaper}
+                theme={theme}
+              />
             </div>
           </div>
         </div>
@@ -333,11 +339,11 @@ export default function BuilderTopBar({
             gap: 10,
             minHeight: 10,
             padding: "4px 12px",
-            borderRadius: 6,
-            background: theme.bgSurface,
-            opacity: 0.88,
-            border: `1px solid ${theme.viewerChromeBorder}`,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+            borderRadius: 8,
+            background: theme.bgElevated,
+            opacity: 0.92,
+            border: `1px solid ${theme.borderStandard}`,
+            boxShadow: theme.shadow,
             backdropFilter: "blur(4px)",
           }}
         >
@@ -345,7 +351,7 @@ export default function BuilderTopBar({
             style={{
               minWidth: 34,
               textAlign: "center",
-              color: theme.subtleText,
+              color: theme.textMuted,
               fontSize: 12,
               fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightMedium,
@@ -360,7 +366,7 @@ export default function BuilderTopBar({
             style={{
               width: 1,
               height: 14,
-              background: theme.borderSoft,
+              background: theme.borderStandard,
             }}
           />
 
@@ -372,7 +378,7 @@ export default function BuilderTopBar({
               height: 16,
               border: "none",
               background: "transparent",
-              color: theme.text,
+              color: theme.textSecondary,
               cursor: "pointer",
               fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightMedium,
@@ -391,7 +397,7 @@ export default function BuilderTopBar({
             style={{
               minWidth: 42,
               textAlign: "center",
-              color: theme.text,
+              color: theme.textPrimary,
               fontSize: 12,
               fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightSemibold,
@@ -410,7 +416,7 @@ export default function BuilderTopBar({
               height: 16,
               border: "none",
               background: "transparent",
-              color: theme.text,
+              color: theme.textSecondary,
               cursor: "pointer",
               fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightMedium,
