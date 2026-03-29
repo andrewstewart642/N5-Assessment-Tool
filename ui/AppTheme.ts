@@ -75,45 +75,46 @@ function isLight(hex: string) {
 
 /**
  * ---------- CORE GENERATOR ----------
+ * Used for custom themes generated from a selected base colour.
  */
 
 function generateThemeFromBase(base: string): Theme {
   const light = isLight(base);
 
-  const bgPage = light ? mix(base, "#ffffff", 0.92) : mix(base, "#000000", 0.88);
+  const bgPage = light ? mix(base, "#ffffff", 0.94) : mix(base, "#000000", 0.9);
   const bgSurface = light
-    ? mix(base, "#ffffff", 0.96)
-    : mix(base, "#000000", 0.82);
+    ? mix(base, "#ffffff", 0.975)
+    : mix(base, "#000000", 0.84);
   const bgElevated = light
-    ? mix(base, "#ffffff", 0.98)
-    : mix(base, "#000000", 0.75);
+    ? mix(base, "#ffffff", 0.99)
+    : mix(base, "#000000", 0.78);
 
-  const textPrimary = light ? "#0f172a" : "#f8fafc";
-  const textSecondary = light ? "#334155" : "#cbd5f5";
-  const textMuted = light ? "#64748b" : "#94a3b8";
+  const textPrimary = light ? "#0f172a" : "#f5f5f5";
+  const textSecondary = light ? "#334155" : "#c4c7cf";
+  const textMuted = light ? "#64748b" : "#9aa0aa";
 
   const borderStandard = light
-    ? mix(base, "#000000", 0.08)
-    : mix(base, "#ffffff", 0.12);
+    ? mix(base, "#0f172a", 0.14)
+    : mix(base, "#ffffff", 0.14);
 
   const controlBg = light
-    ? mix(base, "#ffffff", 0.90)
-    : mix(base, "#000000", 0.75);
+    ? mix(base, "#ffffff", 0.92)
+    : mix(base, "#000000", 0.72);
 
   const controlBgHover = light
-    ? mix(base, "#ffffff", 0.82)
-    : mix(base, "#000000", 0.65);
+    ? mix(base, "#ffffff", 0.84)
+    : mix(base, "#000000", 0.62);
 
   const controlSelectedBg = light
-    ? mix(base, "#ffffff", 0.70)
-    : mix(base, "#000000", 0.55);
+    ? mix(base, "#ffffff", 0.74)
+    : mix(base, "#000000", 0.5);
 
   const controlSelectedBorder = base;
 
   const accentPrimary = base;
   const accentSoft = light
-    ? mix(base, "#ffffff", 0.7)
-    : mix(base, "#000000", 0.4);
+    ? mix(base, "#ffffff", 0.78)
+    : mix(base, "#000000", 0.42);
 
   return {
     bgPage,
@@ -134,22 +135,105 @@ function generateThemeFromBase(base: string): Theme {
     accentPrimary,
     accentSoft,
 
-    shadow: "0 6px 18px rgba(0,0,0,0.08)",
-    shadowStrong: "0 18px 40px rgba(0,0,0,0.18)",
+    shadow: light
+      ? "0 6px 18px rgba(15,23,42,0.06)"
+      : "0 6px 18px rgba(0,0,0,0.24)",
+    shadowStrong: light
+      ? "0 18px 40px rgba(15,23,42,0.12)"
+      : "0 18px 40px rgba(0,0,0,0.42)",
 
-    modalOverlay: "rgba(0,0,0,0.35)",
+    modalOverlay: light ? "rgba(15,23,42,0.18)" : "rgba(0,0,0,0.48)",
 
-    paper: light ? "#ffffff" : "#0b1220",
+    paper: "#ffffff",
   };
 }
 
 /**
  * ---------- PRESETS ----------
+ * These are intentionally hand-tuned rather than derived,
+ * so Light / Soft Grey / Dark land exactly where you want them.
  */
 
-const LIGHT_THEME = generateThemeFromBase("#3b82f6"); // blue baseline
-const DARK_THEME = generateThemeFromBase("#0f172a");
-const SOFT_GREY_THEME = generateThemeFromBase("#6b7280");
+const LIGHT_THEME: Theme = {
+  bgPage: "#f8fafc",
+  bgSurface: "#fcfdff",
+  bgElevated: "#ffffff",
+
+  textPrimary: "#0f172a",
+  textSecondary: "#334155",
+  textMuted: "#64748b",
+
+  borderStandard: "#d7e3f0",
+
+  controlBg: "#f8fbff",
+  controlBgHover: "#eef4fb",
+  controlSelectedBg: "#dbeafe",
+  controlSelectedBorder: "#60a5fa",
+
+  accentPrimary: "#60a5fa",
+  accentSoft: "#dbeafe",
+
+  shadow: "0 6px 18px rgba(15,23,42,0.06)",
+  shadowStrong: "0 18px 40px rgba(15,23,42,0.12)",
+
+  modalOverlay: "rgba(15,23,42,0.16)",
+
+  paper: "#ffffff",
+};
+
+const SOFT_GREY_THEME: Theme = {
+  bgPage: "#eef1f4",
+  bgSurface: "#f5f6f8",
+  bgElevated: "#fbfcfd",
+
+  textPrimary: "#1f2937",
+  textSecondary: "#4b5563",
+  textMuted: "#6b7280",
+
+  borderStandard: "#c7d0db",
+
+  controlBg: "#f2f4f7",
+  controlBgHover: "#e7ebf0",
+  controlSelectedBg: "#d9dee7",
+  controlSelectedBorder: "#8b95a7",
+
+  accentPrimary: "#8b95a7",
+  accentSoft: "#d9dee7",
+
+  shadow: "0 6px 18px rgba(15,23,42,0.05)",
+  shadowStrong: "0 18px 40px rgba(15,23,42,0.1)",
+
+  modalOverlay: "rgba(15,23,42,0.18)",
+
+  paper: "#ffffff",
+};
+
+const DARK_THEME: Theme = {
+  bgPage: "#0d0d0d",
+  bgSurface: "#171717",
+  bgElevated: "#1f1f1f",
+
+  textPrimary: "#ececec",
+  textSecondary: "#c5c5d2",
+  textMuted: "#a1a1aa",
+
+  borderStandard: "#3a3a3a",
+
+  controlBg: "#212121",
+  controlBgHover: "#2a2a2a",
+  controlSelectedBg: "#1f3a68",
+  controlSelectedBorder: "#3b82f6",
+
+  accentPrimary: "#3b82f6",
+  accentSoft: "#1f3a68",
+
+  shadow: "0 6px 18px rgba(0,0,0,0.28)",
+  shadowStrong: "0 18px 40px rgba(0,0,0,0.48)",
+
+  modalOverlay: "rgba(0,0,0,0.52)",
+
+  paper: "#ffffff",
+};
 
 /**
  * ---------- PUBLIC API ----------

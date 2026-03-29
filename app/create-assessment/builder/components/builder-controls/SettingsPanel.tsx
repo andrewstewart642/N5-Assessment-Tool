@@ -1218,14 +1218,12 @@ function WordNeutralPalette({
   );
 }
 
-function CustomThemePaletteDialog({
-  open,
+function InlineCustomThemePalette({
   selectedColour,
   onSelect,
   onClose,
   theme,
 }: {
-  open: boolean;
   selectedColour: AccentOption;
   onSelect: (colour: AccentOption) => void;
   onClose: () => void;
@@ -1237,218 +1235,136 @@ function CustomThemePaletteDialog({
     [selectedColour]
   );
 
-  if (!open) return null;
-
   return (
     <div
       style={{
-        position: "fixed",
-        inset: 0,
-        background: theme.modalOverlay,
         display: "grid",
-        placeItems: "center",
-        padding: 16,
-        zIndex: 2000,
+        gap: 14,
+        marginTop: 12,
+        padding: 14,
+        borderRadius: 14,
+        border: `1px solid ${theme.borderStandard}`,
+        background: theme.bgSurface,
       }}
-      onClick={onClose}
     >
+      <WordHoneycombPalette
+        selectedColour={selectedColour}
+        onSelect={onSelect}
+        theme={theme}
+      />
+
       <div
-        onClick={(event) => event.stopPropagation()}
         style={{
-          width: "100%",
-          maxWidth: 404,
-          borderRadius: 14,
-          border: `1px solid ${theme.borderStandard}`,
-          background: theme.bgSurface,
-          boxShadow: theme.shadowStrong,
-          overflow: "hidden",
+          display: "grid",
+          gap: 10,
+          justifyItems: "center",
         }}
       >
         <div
           style={{
-            padding: "14px 16px 12px",
-            borderBottom: `1px solid ${theme.borderStandard}`,
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            gap: 12,
+            width: "100%",
+            maxWidth: 320,
+            borderTop: `1px solid ${theme.borderStandard}`,
           }}
-        >
-          <div style={{ display: "grid", gap: 6 }}>
-            <div
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                color: theme.textPrimary,
-              }}
-            >
-              Custom theme colour
-            </div>
-            <div
-              style={{
-                fontSize: 12.5,
-                color: theme.textMuted,
-                lineHeight: 1.45,
-                maxWidth: 290,
-              }}
-            >
-              Choose a base colour from the palette below. The app will build a
-              full theme from it rather than simply changing a single accent.
-            </div>
-          </div>
+        />
 
-          <button
-            type="button"
-            onClick={onClose}
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 10,
-              border: `1px solid ${theme.borderStandard}`,
-              background: theme.controlBg,
-              color: theme.textPrimary,
-              cursor: "pointer",
-              fontSize: 19,
-              lineHeight: 1,
-              display: "grid",
-              placeItems: "center",
-              flex: "0 0 auto",
-            }}
-            aria-label="Close custom theme picker"
-            title="Close"
-          >
-            ×
-          </button>
-        </div>
+        <WordNeutralPalette
+          selectedColour={selectedColour}
+          onSelect={onSelect}
+          theme={theme}
+        />
+      </div>
 
+      <div
+        style={{
+          display: "flex",
+          alignItems: "end",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+        }}
+      >
         <div
           style={{
-            padding: "14px 14px 14px",
             display: "grid",
-            gap: 14,
+            gap: 6,
+            minWidth: 0,
           }}
         >
-          <WordHoneycombPalette
-            selectedColour={selectedColour}
-            onSelect={onSelect}
-            theme={theme}
-          />
-
           <div
             style={{
-              display: "grid",
-              gap: 10,
-              justifyItems: "center",
+              fontSize: 11.5,
+              fontWeight: 700,
+              letterSpacing: 0.6,
+              textTransform: "uppercase",
+              color: theme.textMuted,
             }}
           >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: 320,
-                borderTop: `1px solid ${theme.borderStandard}`,
-              }}
-            />
-
-            <WordNeutralPalette
-              selectedColour={selectedColour}
-              onSelect={onSelect}
-              theme={theme}
-            />
+            Current selection
           </div>
 
           <div
             style={{
-              display: "flex",
-              alignItems: "end",
-              justifyContent: "space-between",
-              gap: 12,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              minHeight: 40,
+              padding: "0 12px",
+              borderRadius: 12,
+              border: `1px solid ${theme.borderStandard}`,
+              background: theme.bgElevated,
+              maxWidth: 250,
             }}
           >
-            <div
+            <span
               style={{
-                display: "grid",
-                gap: 6,
-                minWidth: 0,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11.5,
-                  fontWeight: 700,
-                  letterSpacing: 0.6,
-                  textTransform: "uppercase",
-                  color: theme.textMuted,
-                }}
-              >
-                Current selection
-              </div>
-
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 10,
-                  minHeight: 40,
-                  padding: "0 12px",
-                  borderRadius: 12,
-                  border: `1px solid ${theme.borderStandard}`,
-                  background: theme.bgElevated,
-                  maxWidth: 250,
-                }}
-              >
-                <span
-                  style={{
-                    width: 18,
-                    height: 21,
-                    background: selectedHex,
-                    clipPath:
-                      "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
-                    border:
-                      selectedColour === WORD_NEUTRAL_WHITE
-                        ? `1px solid ${theme.borderStandard}`
-                        : `2px solid ${theme.paper}`,
-                    boxShadow: theme.shadow,
-                    flex: "0 0 auto",
-                  }}
-                />
-
-                <span
-                  style={{
-                    fontSize: 13,
-                    color: theme.textSecondary,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Base colour:{" "}
-                  <strong style={{ color: theme.textPrimary }}>
-                    {selectedLabel}
-                  </strong>
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                height: 40,
-                padding: "0 16px",
-                borderRadius: 10,
-                border: `1px solid ${theme.borderStandard}`,
-                background: theme.controlBg,
-                color: theme.textPrimary,
-                fontSize: 14,
-                fontWeight: 700,
-                cursor: "pointer",
+                width: 18,
+                height: 21,
+                background: selectedHex,
+                clipPath:
+                  "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+                border:
+                  selectedColour === WORD_NEUTRAL_WHITE
+                    ? `1px solid ${theme.borderStandard}`
+                    : `2px solid ${theme.paper}`,
+                boxShadow: theme.shadow,
                 flex: "0 0 auto",
               }}
+            />
+
+            <span
+              style={{
+                fontSize: 13,
+                color: theme.textSecondary,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
             >
-              Done
-            </button>
+              Base colour:{" "}
+              <strong style={{ color: theme.textPrimary }}>{selectedLabel}</strong>
+            </span>
           </div>
         </div>
+
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            height: 40,
+            padding: "0 16px",
+            borderRadius: 10,
+            border: `1px solid ${theme.borderStandard}`,
+            background: theme.controlBg,
+            color: theme.textPrimary,
+            fontSize: 14,
+            fontWeight: 700,
+            cursor: "pointer",
+            flex: "0 0 auto",
+          }}
+        >
+          Done
+        </button>
       </div>
     </div>
   );
@@ -1514,419 +1430,426 @@ export default function SettingsPanel({
     }
   }, [paper2DateLinked, p1CoverDateText, onChangeP2CoverDateText]);
 
+  function handleSelectCustomColour(colour: AccentOption) {
+    setCustomThemeColour(colour);
+    setThemePreference("custom");
+  }
+
   return (
-    <>
-      <AppSideTray open={open} onClose={onClose} theme={theme}>
-        <style jsx>{`
-          .settings-scroll {
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            scrollbar-color: transparent transparent;
-          }
+    <AppSideTray open={open} onClose={onClose} theme={theme}>
+      <style jsx>{`
+        .settings-scroll {
+          overflow-y: auto;
+          overflow-x: hidden;
+          scrollbar-width: thin;
+          scrollbar-color: transparent transparent;
+        }
 
-          .settings-scroll:hover {
-            scrollbar-color: ${theme.textMuted} transparent;
-          }
+        .settings-scroll:hover {
+          scrollbar-color: ${theme.textMuted} transparent;
+        }
 
-          .settings-scroll::-webkit-scrollbar {
-            width: 8px;
-          }
+        .settings-scroll::-webkit-scrollbar {
+          width: 8px;
+        }
 
-          .settings-scroll::-webkit-scrollbar-track {
-            background: transparent;
-          }
+        .settings-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
 
-          .settings-scroll::-webkit-scrollbar-thumb {
-            background: transparent;
-            border-radius: 999px;
-          }
+        .settings-scroll::-webkit-scrollbar-thumb {
+          background: transparent;
+          border-radius: 999px;
+        }
 
-          .settings-scroll:hover::-webkit-scrollbar-thumb {
-            background: ${theme.textMuted};
-          }
-        `}</style>
+        .settings-scroll:hover::-webkit-scrollbar-thumb {
+          background: ${theme.textMuted};
+        }
+      `}</style>
 
-        <AppTrayHeader
-          title="Settings"
-          subtitle="Viewer, layout and cover-sheet options"
-          onClose={onClose}
-          theme={theme}
-        />
-
-        <div
-          className="settings-scroll"
-          style={{
-            flex: 1,
-            minHeight: 0,
-            padding: 18,
-            display: "grid",
-            gap: 18,
-            alignContent: "start",
-          }}
-        >
-          <AppTraySection title="Paper content" theme={theme}>
-            <ToggleRow
-              label="Include cover sheet"
-              checked={includeCoverSheet}
-              onChange={onToggleIncludeCoverSheet}
-              theme={theme}
-            />
-            <ToggleRow
-              label="Include formula sheet"
-              checked={includeFormulaSheet}
-              onChange={onToggleIncludeFormulaSheet}
-              theme={theme}
-            />
-            <ToggleRow
-              label="Show date and time on cover sheet"
-              checked={showCoverDateTime}
-              onChange={onToggleShowCoverDateTime}
-              theme={theme}
-            />
-            <ToggleRow
-              label="Show Scottish candidate number box"
-              checked={showScottishCandidateNumberBox}
-              onChange={onToggleShowScottishCandidateNumberBox}
-              theme={theme}
-            />
-          </AppTraySection>
-
-          <AppTraySection title="Workspace" theme={theme}>
-            <ToggleRow
-              label="Show progress panel"
-              checked={showProgressPanel}
-              onChange={onToggleShowProgressPanel}
-              theme={theme}
-            />
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 10,
-                paddingTop: 14,
-              }}
-            >
-              <button
-                type="button"
-                onClick={onResetLayout}
-                style={pickerGhostButtonStyle(theme)}
-              >
-                Reset layout
-              </button>
-              <button
-                type="button"
-                onClick={onResetZoom}
-                style={pickerGhostButtonStyle(theme)}
-              >
-                Reset zoom
-              </button>
-            </div>
-          </AppTraySection>
-
-          <AppTraySection
-            title="Paper 1 sitting details"
-            subtitle="Linked to the Assessment Date"
-            theme={theme}
-          >
-            <div style={{ display: "grid", gap: 14 }}>
-              <div>
-                <FieldLabel theme={theme}>Paper 1 date</FieldLabel>
-                <IntegratedField
-                  value={p1CoverDateText}
-                  onChange={onChangeP1CoverDateText}
-                  onClick={() => setActivePicker("p1Date")}
-                  icon="🗓️"
-                  theme={theme}
-                />
-                {activePicker === "p1Date" ? (
-                  <SharedCalendarPicker
-                    theme={theme}
-                    value={p1CoverDateText}
-                    onCancel={() => setActivePicker(null)}
-                    onApply={(next) => {
-                      onChangeP1CoverDateText(next);
-                      setActivePicker(null);
-                    }}
-                  />
-                ) : null}
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                  gap: 12,
-                }}
-              >
-                <div>
-                  <FieldLabel theme={theme}>Paper 1 start</FieldLabel>
-                  <IntegratedField
-                    value={p1StartTimeText}
-                    onChange={onChangeP1StartTimeText}
-                    onClick={() => setActivePicker("p1Start")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel theme={theme}>Paper 1 end</FieldLabel>
-                  <IntegratedField
-                    value={p1EndTimeText}
-                    onChange={onChangeP1EndTimeText}
-                    onClick={() => setActivePicker("p1End")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-              </div>
-
-              {activePicker === "p1Start" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p1StartTimeText}
-                  label="Paper 1 start"
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP1StartTimeText(next);
-                    setActivePicker("p1End");
-                  }}
-                />
-              ) : null}
-
-              {activePicker === "p1End" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p1EndTimeText}
-                  label="Paper 1 end"
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP1EndTimeText(next);
-                    setActivePicker(null);
-                  }}
-                />
-              ) : null}
-            </div>
-          </AppTraySection>
-
-          <AppTraySection
-            title="Paper 2 sitting details"
-            subtitle="Edit only if Paper 2 is sat on a different day to Paper 1."
-            theme={theme}
-          >
-            <div style={{ display: "grid", gap: 14 }}>
-              <div>
-                <FieldLabel theme={theme}>Paper 2 date</FieldLabel>
-                <IntegratedField
-                  value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                  onChange={(next) => {
-                    setPaper2DateLinked(false);
-                    onChangeP2CoverDateText(next);
-                  }}
-                  onClick={() => {
-                    setPaper2DateLinked(false);
-                    setActivePicker("p2Date");
-                  }}
-                  icon="🗓️"
-                  theme={theme}
-                  muted={paper2DateLinked}
-                />
-                {activePicker === "p2Date" ? (
-                  <SharedCalendarPicker
-                    theme={theme}
-                    value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                    onCancel={() => setActivePicker(null)}
-                    onApply={(next) => {
-                      setPaper2DateLinked(false);
-                      onChangeP2CoverDateText(next);
-                      setActivePicker(null);
-                    }}
-                  />
-                ) : null}
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                  gap: 12,
-                }}
-              >
-                <div>
-                  <FieldLabel theme={theme}>Paper 2 start</FieldLabel>
-                  <IntegratedField
-                    value={p2StartTimeText}
-                    onChange={onChangeP2StartTimeText}
-                    onClick={() => setActivePicker("p2Start")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel theme={theme}>Paper 2 end</FieldLabel>
-                  <IntegratedField
-                    value={p2EndTimeText}
-                    onChange={onChangeP2EndTimeText}
-                    onClick={() => setActivePicker("p2End")}
-                    icon="🕘"
-                    theme={theme}
-                  />
-                </div>
-              </div>
-
-              {activePicker === "p2Start" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p2StartTimeText}
-                  label="Paper 2 start"
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP2StartTimeText(next);
-                    setActivePicker("p2End");
-                  }}
-                />
-              ) : null}
-
-              {activePicker === "p2End" ? (
-                <TimePickerInline
-                  theme={theme}
-                  value={p2EndTimeText}
-                  label="Paper 2 end"
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP2EndTimeText(next);
-                    setActivePicker(null);
-                  }}
-                />
-              ) : null}
-            </div>
-          </AppTraySection>
-
-          <AppTraySection
-            title="Appearance"
-            subtitle="Choose how the app looks."
-            theme={theme}
-          >
-            <div style={{ display: "grid", gap: 10 }}>
-              {THEME_OPTIONS.map((opt) => {
-                const active = themePreference === opt.value;
-
-                return (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setThemePreference(opt.value)}
-                    style={{
-                      padding: 14,
-                      borderRadius: 14,
-                      border: `1px solid ${
-                        active
-                          ? theme.controlSelectedBorder
-                          : theme.borderStandard
-                      }`,
-                      background: active
-                        ? theme.controlSelectedBg
-                        : theme.bgSurface,
-                      textAlign: "left",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        color: theme.textPrimary,
-                      }}
-                    >
-                      {opt.label}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: theme.textMuted,
-                      }}
-                    >
-                      {opt.helper}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </AppTraySection>
-
-          <AppTraySection
-            title="Custom theme"
-            subtitle="Choose your base colour."
-            theme={theme}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: 14,
-                borderRadius: 14,
-                border: `1px solid ${theme.borderStandard}`,
-                background: theme.bgSurface,
-                gap: 12,
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <div
-                  style={{
-                    width: 18,
-                    height: 21,
-                    background: ACCENT_MAP[customThemeColour],
-                    clipPath:
-                      "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
-                    border:
-                      customThemeColour === WORD_NEUTRAL_WHITE
-                        ? `1px solid ${theme.borderStandard}`
-                        : "none",
-                  }}
-                />
-
-                <div>
-                  <div style={{ fontWeight: 700, color: theme.textPrimary }}>
-                    {selectedLabel}
-                  </div>
-                  <div style={{ fontSize: 12, color: theme.textMuted }}>
-                    Base colour
-                  </div>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setOpenPalette(true)}
-                style={{
-                  padding: "8px 12px",
-                  borderRadius: 10,
-                  border: `1px solid ${theme.borderStandard}`,
-                  background: theme.bgElevated,
-                  color: theme.textPrimary,
-                  cursor: "pointer",
-                  fontWeight: 600,
-                }}
-              >
-                Choose colour
-              </button>
-            </div>
-          </AppTraySection>
-        </div>
-      </AppSideTray>
-
-      <CustomThemePaletteDialog
-        open={openPalette}
-        selectedColour={customThemeColour}
-        onSelect={setCustomThemeColour}
-        onClose={() => setOpenPalette(false)}
+      <AppTrayHeader
+        title="Settings"
+        subtitle="Viewer, layout and cover-sheet options"
+        onClose={onClose}
         theme={theme}
       />
-    </>
+
+      <div
+        className="settings-scroll"
+        style={{
+          flex: 1,
+          minHeight: 0,
+          padding: 18,
+          display: "grid",
+          gap: 18,
+          alignContent: "start",
+        }}
+      >
+        <AppTraySection title="Paper content" theme={theme}>
+          <ToggleRow
+            label="Include cover sheet"
+            checked={includeCoverSheet}
+            onChange={onToggleIncludeCoverSheet}
+            theme={theme}
+          />
+          <ToggleRow
+            label="Include formula sheet"
+            checked={includeFormulaSheet}
+            onChange={onToggleIncludeFormulaSheet}
+            theme={theme}
+          />
+          <ToggleRow
+            label="Show date and time on cover sheet"
+            checked={showCoverDateTime}
+            onChange={onToggleShowCoverDateTime}
+            theme={theme}
+          />
+          <ToggleRow
+            label="Show Scottish candidate number box"
+            checked={showScottishCandidateNumberBox}
+            onChange={onToggleShowScottishCandidateNumberBox}
+            theme={theme}
+          />
+        </AppTraySection>
+
+        <AppTraySection title="Workspace" theme={theme}>
+          <ToggleRow
+            label="Show progress panel"
+            checked={showProgressPanel}
+            onChange={onToggleShowProgressPanel}
+            theme={theme}
+          />
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              paddingTop: 14,
+            }}
+          >
+            <button
+              type="button"
+              onClick={onResetLayout}
+              style={pickerGhostButtonStyle(theme)}
+            >
+              Reset layout
+            </button>
+            <button
+              type="button"
+              onClick={onResetZoom}
+              style={pickerGhostButtonStyle(theme)}
+            >
+              Reset zoom
+            </button>
+          </div>
+        </AppTraySection>
+
+        <AppTraySection
+          title="Paper 1 sitting details"
+          subtitle="Linked to the Assessment Date"
+          theme={theme}
+        >
+          <div style={{ display: "grid", gap: 14 }}>
+            <div>
+              <FieldLabel theme={theme}>Paper 1 date</FieldLabel>
+              <IntegratedField
+                value={p1CoverDateText}
+                onChange={onChangeP1CoverDateText}
+                onClick={() => setActivePicker("p1Date")}
+                icon="🗓️"
+                theme={theme}
+              />
+              {activePicker === "p1Date" ? (
+                <SharedCalendarPicker
+                  theme={theme}
+                  value={p1CoverDateText}
+                  onCancel={() => setActivePicker(null)}
+                  onApply={(next) => {
+                    onChangeP1CoverDateText(next);
+                    setActivePicker(null);
+                  }}
+                />
+              ) : null}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                gap: 12,
+              }}
+            >
+              <div>
+                <FieldLabel theme={theme}>Paper 1 start</FieldLabel>
+                <IntegratedField
+                  value={p1StartTimeText}
+                  onChange={onChangeP1StartTimeText}
+                  onClick={() => setActivePicker("p1Start")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+
+              <div>
+                <FieldLabel theme={theme}>Paper 1 end</FieldLabel>
+                <IntegratedField
+                  value={p1EndTimeText}
+                  onChange={onChangeP1EndTimeText}
+                  onClick={() => setActivePicker("p1End")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+            </div>
+
+            {activePicker === "p1Start" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p1StartTimeText}
+                label="Paper 1 start"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP1StartTimeText(next);
+                  setActivePicker("p1End");
+                }}
+              />
+            ) : null}
+
+            {activePicker === "p1End" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p1EndTimeText}
+                label="Paper 1 end"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP1EndTimeText(next);
+                  setActivePicker(null);
+                }}
+              />
+            ) : null}
+          </div>
+        </AppTraySection>
+
+        <AppTraySection
+          title="Paper 2 sitting details"
+          subtitle="Edit only if Paper 2 is sat on a different day to Paper 1."
+          theme={theme}
+        >
+          <div style={{ display: "grid", gap: 14 }}>
+            <div>
+              <FieldLabel theme={theme}>Paper 2 date</FieldLabel>
+              <IntegratedField
+                value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
+                onChange={(next) => {
+                  setPaper2DateLinked(false);
+                  onChangeP2CoverDateText(next);
+                }}
+                onClick={() => {
+                  setPaper2DateLinked(false);
+                  setActivePicker("p2Date");
+                }}
+                icon="🗓️"
+                theme={theme}
+                muted={paper2DateLinked}
+              />
+              {activePicker === "p2Date" ? (
+                <SharedCalendarPicker
+                  theme={theme}
+                  value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
+                  onCancel={() => setActivePicker(null)}
+                  onApply={(next) => {
+                    setPaper2DateLinked(false);
+                    onChangeP2CoverDateText(next);
+                    setActivePicker(null);
+                  }}
+                />
+              ) : null}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
+                gap: 12,
+              }}
+            >
+              <div>
+                <FieldLabel theme={theme}>Paper 2 start</FieldLabel>
+                <IntegratedField
+                  value={p2StartTimeText}
+                  onChange={onChangeP2StartTimeText}
+                  onClick={() => setActivePicker("p2Start")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+
+              <div>
+                <FieldLabel theme={theme}>Paper 2 end</FieldLabel>
+                <IntegratedField
+                  value={p2EndTimeText}
+                  onChange={onChangeP2EndTimeText}
+                  onClick={() => setActivePicker("p2End")}
+                  icon="🕘"
+                  theme={theme}
+                />
+              </div>
+            </div>
+
+            {activePicker === "p2Start" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p2StartTimeText}
+                label="Paper 2 start"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP2StartTimeText(next);
+                  setActivePicker("p2End");
+                }}
+              />
+            ) : null}
+
+            {activePicker === "p2End" ? (
+              <TimePickerInline
+                theme={theme}
+                value={p2EndTimeText}
+                label="Paper 2 end"
+                onCancel={() => setActivePicker(null)}
+                onApply={(next) => {
+                  onChangeP2EndTimeText(next);
+                  setActivePicker(null);
+                }}
+              />
+            ) : null}
+          </div>
+        </AppTraySection>
+
+        <AppTraySection
+          title="Appearance"
+          subtitle="Choose how the app looks."
+          theme={theme}
+        >
+          <div style={{ display: "grid", gap: 10 }}>
+            {THEME_OPTIONS.map((opt) => {
+              const active = themePreference === opt.value;
+
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setThemePreference(opt.value)}
+                  style={{
+                    padding: 14,
+                    borderRadius: 14,
+                    border: `1px solid ${
+                      active
+                        ? theme.controlSelectedBorder
+                        : theme.borderStandard
+                    }`,
+                    background: active
+                      ? theme.controlSelectedBg
+                      : theme.bgSurface,
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontWeight: 700,
+                      color: theme.textPrimary,
+                    }}
+                  >
+                    {opt.label}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 13,
+                      color: theme.textMuted,
+                    }}
+                  >
+                    {opt.helper}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </AppTraySection>
+
+        <AppTraySection
+          title="Custom theme"
+          subtitle="Choose your base colour."
+          theme={theme}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: 14,
+              borderRadius: 14,
+              border: `1px solid ${theme.borderStandard}`,
+              background: theme.bgSurface,
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div
+                style={{
+                  width: 18,
+                  height: 21,
+                  background: ACCENT_MAP[customThemeColour],
+                  clipPath:
+                    "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+                  border:
+                    customThemeColour === WORD_NEUTRAL_WHITE
+                      ? `1px solid ${theme.borderStandard}`
+                      : "none",
+                }}
+              />
+
+              <div>
+                <div style={{ fontWeight: 700, color: theme.textPrimary }}>
+                  {selectedLabel}
+                </div>
+                <div style={{ fontSize: 12, color: theme.textMuted }}>
+                  Base colour
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setOpenPalette((prev) => !prev);
+                setThemePreference("custom");
+              }}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: `1px solid ${theme.borderStandard}`,
+                background: theme.bgElevated,
+                color: theme.textPrimary,
+                cursor: "pointer",
+                fontWeight: 600,
+              }}
+            >
+              {openPalette ? "Hide palette" : "Choose colour"}
+            </button>
+          </div>
+
+          {openPalette ? (
+            <InlineCustomThemePalette
+              selectedColour={customThemeColour}
+              onSelect={handleSelectCustomColour}
+              onClose={() => setOpenPalette(false)}
+              theme={theme}
+            />
+          ) : null}
+        </AppTraySection>
+      </div>
+    </AppSideTray>
   );
 }
