@@ -29,6 +29,10 @@ import type {
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 
+const CATEGORY_STRIPE_HEIGHT = 5;
+const CATEGORY_HEADER_HEIGHT = 58;
+const CATEGORY_ACTION_SLOT_WIDTH = 112;
+
 type Props = {
   category: string;
   skills: Skill[];
@@ -226,6 +230,18 @@ function buildPrimaryBlockReason(args: {
   return "This concept is not available under the current filters.";
 }
 
+function getCategoryStripeColour(category: string, theme: Theme): string {
+  const normalised = category.trim().toLowerCase();
+
+  if (normalised.includes("numer")) return theme.categoryStripes.numerical;
+  if (normalised.includes("algebra")) return theme.categoryStripes.algebraic;
+  if (normalised.includes("geometr")) return theme.categoryStripes.geometric;
+  if (normalised.includes("trig")) return theme.categoryStripes.trigonometric;
+  if (normalised.includes("stat")) return theme.categoryStripes.statistical;
+
+  return theme.categoryStripes.default;
+}
+
 function DifficultyStepper(props: {
   value: DifficultyLevel;
   availableLevels: DifficultyLevel[];
@@ -290,7 +306,7 @@ function DifficultyStepper(props: {
           border: `1px solid ${theme.borderStandard}`,
           background: theme.controlBg,
           color: isEligible ? theme.textPrimary : theme.textMuted,
-          opacity: isEligible ? 1 : 0.6,
+          opacity: isEligible ? 1 : 0.72,
           display: "grid",
           placeItems: "center",
           whiteSpace: "nowrap",
@@ -388,6 +404,7 @@ function SkillRow(props: {
   } = props;
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [rowHovered, setRowHovered] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const filtered = useMemo(
@@ -469,9 +486,9 @@ function SkillRow(props: {
     currentDifficultyIsEligible;
 
   const difficultyRangeText =
-    availableLevels.length === 0
-      ? "Select concept"
-      : `${availableLevels[0]}–${availableLevels[availableLevels.length - 1]}`;
+    selected && availableLevels.length > 0
+      ? `${availableLevels[0]}–${availableLevels[availableLevels.length - 1]}`
+      : null;
 
   const primaryBlockReason = buildPrimaryBlockReason({
     selected,
@@ -483,7 +500,7 @@ function SkillRow(props: {
     currentDifficultyIsEligible,
   });
 
-  const showBlockReason = !canAdd;
+  const showBlockReason = !!selected && !canAdd;
 
   return (
     <div
@@ -492,20 +509,25 @@ function SkillRow(props: {
           index === 0 ? "none" : `1px solid ${theme.borderStandard}`,
         position: "relative",
         zIndex: dropdownOpen ? 50 : 1,
+        background: isExpanded ? theme.bgSurface : "transparent",
+        transition: "background 0.15s ease",
       }}
     >
       <button
         type="button"
         onClick={() => onToggleSkill(skill.id)}
         aria-expanded={isExpanded}
+        onMouseEnter={() => setRowHovered(true)}
+        onMouseLeave={() => setRowHovered(false)}
         style={{
           width: "100%",
           textAlign: "left",
           display: "grid",
           gridTemplateColumns: "64px 1fr 24px",
           gap: 10,
-          padding: "10px 12px 10px 22px",
-          background: isExpanded ? theme.controlBgHover : "transparent",
+          padding: "12px 14px 12px 22px",
+          background:
+            isExpanded || rowHovered ? theme.controlBgHover : "transparent",
           color: theme.textPrimary,
           border: "none",
           cursor: "pointer",
@@ -519,6 +541,7 @@ function SkillRow(props: {
           style={{
             color: theme.textMuted,
             ...UI_TEXT.controlTextStrong,
+            letterSpacing: 0.2,
           }}
         >
           {skill.code}
@@ -528,6 +551,7 @@ function SkillRow(props: {
           style={{
             ...UI_TEXT.controlText,
             color: theme.textPrimary,
+            fontWeight: UI_TYPO.weightSemibold,
             minWidth: 0,
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -539,8 +563,10 @@ function SkillRow(props: {
 
         <span
           style={{
-            color: theme.textMuted,
+            color:
+              isExpanded || rowHovered ? theme.textSecondary : theme.textMuted,
             ...UI_TEXT.controlTextStrong,
+            transition: "color 0.15s ease",
           }}
         >
           {isExpanded ? "▾" : "▸"}
@@ -550,24 +576,21 @@ function SkillRow(props: {
       {isExpanded && (
         <div
           style={{
-            padding: "10px 12px 12px",
-            background: theme.bgElevated,
+            padding: "12px 14px 14px",
+            background: theme.bgSurface,
             borderTop: `1px solid ${theme.borderStandard}`,
             display: "grid",
-            gridTemplateColumns: "minmax(0, 1fr) auto",
-            columnGap: 14,
-            rowGap: 10,
-            alignItems: "end",
+            gridTemplateColumns: "minmax(0, 1fr)",
+            rowGap: 12,
             position: "relative",
             overflow: "visible",
           }}
         >
           <div
             style={{
-              gridColumn: "1 / -1",
               display: "grid",
               gridTemplateColumns: "minmax(0, 1fr) auto",
-              columnGap: 14,
+              columnGap: 20,
               rowGap: 8,
               alignItems: "end",
               overflow: "visible",
@@ -577,33 +600,29 @@ function SkillRow(props: {
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
+                  alignItems: "baseline",
+                  gap: 8,
                   marginBottom: 6,
+                  minWidth: 0,
                 }}
               >
                 <div
                   style={{
                     ...UI_TEXT.sectionLabel,
                     color: theme.textSecondary,
-                    minWidth: 0,
                   }}
                 >
-                  Concept (filtered: {standardFilter})
+                  Concept
                 </div>
 
                 <div
                   style={{
                     ...UI_TEXT.metadata,
                     color: theme.textMuted,
-                    whiteSpace: "nowrap",
-                    flex: "0 0 auto",
+                    fontWeight: UI_TYPO.weightRegular,
                   }}
                 >
-                  {ranked.length
-                    ? `${hasSelection ? currentIndex + 1 : 0}/${ranked.length}`
-                    : "0/0"}
+                  filtered: {standardFilter}
                 </div>
               </div>
 
@@ -623,7 +642,7 @@ function SkillRow(props: {
                   disabled={ranked.length === 0}
                   style={{
                     width: "100%",
-                    height: 34,
+                    height: 36,
                     borderRadius: 10,
                     border: `1px solid ${theme.borderStandard}`,
                     background: theme.controlBg,
@@ -635,10 +654,11 @@ function SkillRow(props: {
                     minWidth: 0,
                     overflow: "hidden",
                     cursor: ranked.length === 0 ? "default" : "pointer",
-                    opacity: ranked.length === 0 ? 0.6 : 1,
+                    opacity: ranked.length === 0 ? 0.62 : 1,
                     position: "relative",
                     transition:
-                      "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+                      "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease",
+                    boxShadow: dropdownOpen ? theme.shadow : "none",
                   }}
                   title={
                     selected ? conceptSelectionText(selected) : "Select skill concept"
@@ -761,7 +781,7 @@ function SkillRow(props: {
                             color: isDropdownEligible
                               ? theme.textPrimary
                               : theme.textMuted,
-                            opacity: isDropdownEligible ? 1 : 0.64,
+                            opacity: isDropdownEligible ? 1 : 0.7,
                             textAlign: "left",
                             padding: "10px 12px",
                             cursor: "pointer",
@@ -814,11 +834,17 @@ function SkillRow(props: {
               </div>
             </div>
 
-            <div style={{ width: "fit-content" }}>
+            <div
+              style={{
+                width: "fit-content",
+                justifySelf: "end",
+                marginLeft: 10,
+              }}
+            >
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "baseline",
                   justifyContent: "space-between",
                   gap: 12,
                   marginBottom: 6,
@@ -834,15 +860,17 @@ function SkillRow(props: {
                   Difficulty
                 </div>
 
-                <div
-                  style={{
-                    ...UI_TEXT.metadata,
-                    color: theme.textMuted,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {difficultyRangeText}
-                </div>
+                {difficultyRangeText ? (
+                  <div
+                    style={{
+                      ...UI_TEXT.metadata,
+                      color: theme.textMuted,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {difficultyRangeText}
+                  </div>
+                ) : null}
               </div>
 
               <DifficultyStepper
@@ -869,9 +897,9 @@ function SkillRow(props: {
           {showBlockReason ? (
             <div
               style={{
-                gridColumn: "1 / -1",
                 ...UI_TEXT.metadata,
                 color: theme.textMuted,
+                marginTop: -2,
               }}
             >
               {primaryBlockReason}
@@ -880,17 +908,16 @@ function SkillRow(props: {
 
           <div
             style={{
-              gridColumn: 2,
               display: "grid",
               gridTemplateColumns: "1fr 1fr",
               gap: 10,
-              width: "100%",
+              width: "fit-content",
               justifySelf: "end",
             }}
           >
             <div
               style={{
-                opacity: canAdd ? 1 : 0.48,
+                opacity: canAdd ? 1 : 0.62,
                 pointerEvents: canAdd ? "auto" : "none",
               }}
             >
@@ -915,7 +942,7 @@ function SkillRow(props: {
 
             <div
               style={{
-                opacity: canRegenerate ? 1 : 0.48,
+                opacity: canRegenerate ? 1 : 0.62,
                 pointerEvents: canRegenerate ? "auto" : "none",
               }}
             >
@@ -968,6 +995,8 @@ export default function CategorySection(props: Props) {
     theme,
   } = props;
 
+  const stripeColour = getCategoryStripeColour(category, theme);
+
   function handleToggleCategory() {
     if (!collapsed) {
       skills.forEach((skill) => {
@@ -980,114 +1009,153 @@ export default function CategorySection(props: Props) {
   return (
     <div
       style={{
-        marginBottom: 14,
+        marginBottom: 16,
         position: "relative",
         zIndex: 1,
         minWidth: 0,
         maxWidth: "100%",
+        marginLeft: -14,
+        marginRight: -14,
       }}
     >
       <div
         style={{
-          width: "100%",
-          maxWidth: "100%",
-          minWidth: 0,
+          width: "auto",
           boxSizing: "border-box",
-          display: "grid",
-          gridTemplateColumns: "1fr auto",
-          gap: 10,
-          alignItems: "center",
           background: theme.bgElevated,
           color: theme.textPrimary,
-          padding: "10px 12px",
-          borderRadius: 14,
-          border: `1px solid ${theme.borderStandard}`,
+          borderTop: `1px solid ${theme.borderStandard}`,
+          borderBottom: `1px solid ${theme.borderStandard}`,
+          borderLeft: "none",
+          borderRight: "none",
           overflow: "hidden",
-          boxShadow: theme.shadow,
+          boxShadow: "none",
+          transition: "background 0.18s ease",
         }}
       >
-        <button
-          onClick={handleToggleCategory}
-          type="button"
-          aria-expanded={!collapsed}
+        <div
+          aria-hidden="true"
           style={{
-            textAlign: "left",
-            cursor: "pointer",
-            background: "transparent",
-            color: theme.textPrimary,
-            border: "none",
-            padding: 0,
-            display: "flex",
+            height: CATEGORY_STRIPE_HEIGHT,
+            width: "100%",
+            background: stripeColour,
+            transition: "filter 0.18s ease",
+            filter: "brightness(1)",
+          }}
+        />
+
+        <div
+          onClick={handleToggleCategory}
+          role="button"
+          aria-expanded={!collapsed}
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleToggleCategory();
+            }
+          }}
+          style={{
+            display: "grid",
+            gridTemplateColumns: `1fr ${CATEGORY_ACTION_SLOT_WIDTH}px`,
+            gap: 14,
             alignItems: "center",
-            minWidth: 0,
-            fontFamily: UI_TYPO.family,
+            height: CATEGORY_HEADER_HEIGHT,
+            minHeight: CATEGORY_HEADER_HEIGHT,
+            maxHeight: CATEGORY_HEADER_HEIGHT,
+            padding: "0 14px",
+            cursor: "pointer",
+            boxSizing: "border-box",
           }}
         >
-          <span
+          <div
             style={{
-              display: "inline-block",
-              width: 18,
-              color: theme.textMuted,
-              flex: "0 0 auto",
-              ...UI_TEXT.controlTextStrong,
-            }}
-          >
-            {collapsed ? "▶" : "▼"}
-          </span>
-
-          <span
-            style={{
-              ...UI_TEXT.sectionTitle,
-              color: theme.textPrimary,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              minWidth: 0,
-            }}
-          >
-            {category}
-          </span>
-        </button>
-
-        {!collapsed ? (
-          <button
-            type="button"
-            onClick={onCollapseCategorySkills}
-            style={{
-              padding: "6px 12px",
-              borderRadius: 12,
-              border: `1px solid ${theme.borderStandard}`,
-              background: theme.controlBg,
-              color: theme.textMuted,
-              cursor: "pointer",
-              height: 30,
-              whiteSpace: "nowrap",
-              display: "inline-flex",
+              display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              ...UI_TEXT.buttonTextSmall,
-              transition:
-                "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+              minWidth: 0,
+              fontFamily: UI_TYPO.family,
             }}
-            title={`Collapse expanded skills in ${category}`}
           >
-            Collapse
-          </button>
-        ) : null}
+            <span
+              style={{
+                display: "inline-block",
+                width: 18,
+                color: theme.textMuted,
+                flex: "0 0 auto",
+                ...UI_TEXT.controlTextStrong,
+              }}
+            >
+              {collapsed ? "▶" : "▼"}
+            </span>
+
+            <span
+              style={{
+                ...UI_TEXT.sectionTitle,
+                color: theme.textPrimary,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                minWidth: 0,
+                letterSpacing: 0.2,
+                fontWeight: UI_TYPO.weightBold,
+              }}
+            >
+              {category}
+            </span>
+          </div>
+
+          <div
+            style={{
+              width: CATEGORY_ACTION_SLOT_WIDTH,
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!collapsed) {
+                  onCollapseCategorySkills();
+                }
+              }}
+              style={{
+                padding: "0 12px",
+                borderRadius: 999,
+                border: `1px solid ${theme.borderStandard}`,
+                background: theme.controlBg,
+                color: theme.textMuted,
+                cursor: collapsed ? "default" : "pointer",
+                height: 30,
+                whiteSpace: "nowrap",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                opacity: collapsed ? 0 : 1,
+                pointerEvents: collapsed ? "none" : "auto",
+                ...UI_TEXT.buttonTextSmall,
+                transition:
+                  "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease",
+              }}
+              title={`Collapse expanded skills in ${category}`}
+              aria-hidden={collapsed}
+              tabIndex={collapsed ? -1 : 0}
+            >
+              Collapse
+            </button>
+          </div>
+        </div>
       </div>
 
       {!collapsed && (
         <div
           style={{
-            marginTop: 8,
-            border: `1px solid ${theme.borderStandard}`,
-            borderRadius: 14,
-            overflow: "visible",
+            borderBottom: `1px solid ${theme.borderStandard}`,
             background: theme.bgSurface,
             position: "relative",
             zIndex: 1,
-            boxShadow: theme.shadow,
           }}
         >
           {skills.map((skill, idx) => (

@@ -418,6 +418,37 @@ export default function CreateAssessmentBuilderPage() {
     setSettingsOpen,
   });
 
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+
+    const previousHtmlOverflow = html.style.overflow;
+    const previousHtmlHeight = html.style.height;
+    const previousHtmlOverscroll = html.style.overscrollBehavior;
+
+    const previousBodyOverflow = body.style.overflow;
+    const previousBodyHeight = body.style.height;
+    const previousBodyOverscroll = body.style.overscrollBehavior;
+
+    html.style.overflow = "hidden";
+    html.style.height = "100%";
+    html.style.overscrollBehavior = "none";
+
+    body.style.overflow = "hidden";
+    body.style.height = "100%";
+    body.style.overscrollBehavior = "none";
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow;
+      html.style.height = previousHtmlHeight;
+      html.style.overscrollBehavior = previousHtmlOverscroll;
+
+      body.style.overflow = previousBodyOverflow;
+      body.style.height = previousBodyHeight;
+      body.style.overscrollBehavior = previousBodyOverscroll;
+    };
+  }, []);
+
   const {
     assignedForView,
     p1Marks,
@@ -989,6 +1020,7 @@ export default function CreateAssessmentBuilderPage() {
       <main
         style={{
           height: "100vh",
+          maxHeight: "100vh",
           background: theme.bgPage,
           color: theme.textPrimary,
           display: "grid",
@@ -1004,6 +1036,7 @@ export default function CreateAssessmentBuilderPage() {
             display: "grid",
             gridTemplateColumns: bodyGridColumns,
             minHeight: 0,
+            height: "100%",
             overflow: "hidden",
             fontFamily: UI_TYPO.family,
           }}
@@ -1063,6 +1096,7 @@ export default function CreateAssessmentBuilderPage() {
               display: "grid",
               gridTemplateRows: `65px minmax(0, 1fr) ${viewerHudRow}`,
               minHeight: 0,
+              height: "100%",
               overflow: "hidden",
               position: "relative",
               fontFamily: UI_TYPO.family,

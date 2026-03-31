@@ -28,6 +28,15 @@ export type Theme = {
   modalOverlay: string;
 
   paper: string;
+
+  categoryStripes: {
+    numerical: string;
+    algebraic: string;
+    geometric: string;
+    trigonometric: string;
+    statistical: string;
+    default: string;
+  };
 };
 
 /**
@@ -71,6 +80,58 @@ function isLight(hex: string) {
   const { r, g, b } = hexToRgb(hex);
   const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
   return luminance > 160;
+}
+
+function buildCategoryStripes(args: {
+  mode: "light" | "dark" | "soft-grey" | "custom";
+  base?: string;
+}) {
+  const { mode, base } = args;
+
+  if (mode === "custom" && base) {
+    const light = isLight(base);
+    const mixTarget = light ? "#0f172a" : "#ffffff";
+
+    return {
+      numerical: mix("#4f8ff7", mixTarget, light ? 0.12 : 0.18),
+      algebraic: mix("#c85a5a", mixTarget, light ? 0.1 : 0.18),
+      geometric: mix("#d7a93d", mixTarget, light ? 0.08 : 0.16),
+      trigonometric: mix("#2fa39a", mixTarget, light ? 0.1 : 0.18),
+      statistical: mix("#8b6fd6", mixTarget, light ? 0.1 : 0.18),
+      default: mix(base, mixTarget, light ? 0.12 : 0.18),
+    };
+  }
+
+  if (mode === "dark") {
+    return {
+      numerical: "#6ea8ff",
+      algebraic: "#d97878",
+      geometric: "#e2bb62",
+      trigonometric: "#57b8b0",
+      statistical: "#9d86e8",
+      default: "#6b7280",
+    };
+  }
+
+  if (mode === "soft-grey") {
+    return {
+      numerical: "#5d8ee6",
+      algebraic: "#c56a6a",
+      geometric: "#d4ad57",
+      trigonometric: "#459e96",
+      statistical: "#8b72d1",
+      default: "#8b95a7",
+    };
+  }
+
+  return {
+    numerical: "#4f8ff7",
+    algebraic: "#c85a5a",
+    geometric: "#d7a93d",
+    trigonometric: "#2fa39a",
+    statistical: "#8b6fd6",
+    default: "#94a3b8",
+  };
 }
 
 /**
@@ -145,6 +206,11 @@ function generateThemeFromBase(base: string): Theme {
     modalOverlay: light ? "rgba(15,23,42,0.18)" : "rgba(0,0,0,0.48)",
 
     paper: "#ffffff",
+
+    categoryStripes: buildCategoryStripes({
+      mode: "custom",
+      base,
+    }),
   };
 }
 
@@ -179,6 +245,8 @@ const LIGHT_THEME: Theme = {
   modalOverlay: "rgba(15,23,42,0.16)",
 
   paper: "#ffffff",
+
+  categoryStripes: buildCategoryStripes({ mode: "light" }),
 };
 
 const SOFT_GREY_THEME: Theme = {
@@ -206,6 +274,8 @@ const SOFT_GREY_THEME: Theme = {
   modalOverlay: "rgba(15,23,42,0.18)",
 
   paper: "#ffffff",
+
+  categoryStripes: buildCategoryStripes({ mode: "soft-grey" }),
 };
 
 const DARK_THEME: Theme = {
@@ -233,6 +303,8 @@ const DARK_THEME: Theme = {
   modalOverlay: "rgba(0,0,0,0.52)",
 
   paper: "#ffffff",
+
+  categoryStripes: buildCategoryStripes({ mode: "dark" }),
 };
 
 /**

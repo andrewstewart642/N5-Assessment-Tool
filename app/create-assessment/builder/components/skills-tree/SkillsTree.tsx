@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import CategorySection from "@/app/create-assessment/builder/components/skills-tree/CategorySection";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
@@ -16,6 +16,10 @@ import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionT
 const CONTROL_HEIGHT = 40;
 const SEGMENT_INSET = 5;
 const SEGMENT_INNER_HEIGHT = CONTROL_HEIGHT - SEGMENT_INSET * 2;
+
+const OVERLAY_SCROLLBAR_WIDTH = 5;
+const OVERLAY_SCROLLBAR_INSET = 2;
+const OVERLAY_SCROLLBAR_MIN_THUMB = 36;
 
 function SegmentedControl<Option extends string>(props: {
   ariaLabel: string;
@@ -208,7 +212,23 @@ export default function SkillsTree({
   const [helperHidden, setHelperHidden] = useState(false);
   const [targetMarksText, setTargetMarksText] = useState(`${targetMarks} marks`);
 
+  const [scrollMetrics, setScrollMetrics] = useState({
+    isScrollable: false,
+    thumbHeight: OVERLAY_SCROLLBAR_MIN_THUMB,
+    thumbTop: 0,
+  });
+  const [trackHovered, setTrackHovered] = useState(false);
+  const [thumbHovered, setThumbHovered] = useState(false);
+  const [draggingThumb, setDraggingThumb] = useState(false);
+
   const helperColor = theme.textMuted;
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const dragStateRef = useRef<{
+    startY: number;
+    startScrollTop: number;
+    scrollTopMax: number;
+    travelMax: number;
+  } | null>(null);
 
   useEffect(() => {
     setTargetMarksText(`${targetMarks} marks`);
@@ -253,9 +273,114 @@ export default function SkillsTree({
     setTargetMarksText(`${clamped} marks`);
   }
 
+  function updateOverlayScrollbar() {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    const { scrollHeight, clientHeight, scrollTop } = el;
+    const isScrollable = scrollHeight > clientHeight + 1;
+
+    if (!isScrollable) {
+      setScrollMetrics({
+        isScrollable: false,
+        thumbHeight: OVERLAY_SCROLLBAR_MIN_THUMB,
+        thumbTop: 0,
+      });
+      return;
+    }
+
+    const ratio = clientHeight / scrollHeight;
+    const thumbHeight = Math.max(
+      OVERLAY_SCROLLBAR_MIN_THUMB,
+      Math.round(clientHeight * ratio)
+    );
+    const scrollTopMax = Math.max(1, scrollHeight - clientHeight);
+    const travelMax = Math.max(0, clientHeight - thumbHeight);
+    const thumbTop = Math.round((scrollTop / scrollTopMax) * travelMax);
+
+    setScrollMetrics({
+      isScrollable: true,
+      thumbHeight,
+      thumbTop,
+    });
+  }
+
+  useLayoutEffect(() => {
+    updateOverlayScrollbar();
+  }, [skillsData, collapsedCategories, expandedSkillIds]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    updateOverlayScrollbar();
+
+    const handleScroll = () => updateOverlayScrollbar();
+    el.addEventListener("scroll", handleScroll, { passive: true });
+
+    const resizeObserver = new ResizeObserver(() => {
+      updateOverlayScrollbar();
+    });
+    resizeObserver.observe(el);
+
+    const contentObserver = new MutationObserver(() => {
+      updateOverlayScrollbar();
+    });
+    contentObserver.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
+
+    window.addEventListener("resize", updateOverlayScrollbar);
+
+    return () => {
+      el.removeEventListener("scroll", handleScroll);
+      resizeObserver.disconnect();
+      contentObserver.disconnect();
+      window.removeEventListener("resize", updateOverlayScrollbar);
+    };
+  }, [skillsData, collapsedCategories, expandedSkillIds]);
+
+  useEffect(() => {
+    if (!draggingThumb) return;
+
+    function handlePointerMove(event: PointerEvent) {
+      const el = scrollRef.current;
+      const dragState = dragStateRef.current;
+      if (!el || !dragState) return;
+
+      const deltaY = event.clientY - dragState.startY;
+      const scrollRatio =
+        dragState.travelMax > 0 ? deltaY / dragState.travelMax : 0;
+      el.scrollTop =
+        dragState.startScrollTop + scrollRatio * dragState.scrollTopMax;
+    }
+
+    function handlePointerUp() {
+      setDraggingThumb(false);
+      dragStateRef.current = null;
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, [draggingThumb]);
+
+  const overlayThumbColor = useMemo(() => {
+    if (draggingThumb || thumbHovered) return theme.textSecondary;
+    if (trackHovered) return theme.textMuted;
+    return theme.textMuted;
+  }, [draggingThumb, thumbHovered, trackHovered, theme.textMuted, theme.textSecondary]);
+
   return (
     <section
       style={{
+        position: "relative",
         borderRight: `1px solid ${theme.borderStandard}`,
         background: theme.bgPage,
         minHeight: 0,
@@ -265,6 +390,30 @@ export default function SkillsTree({
         ...UI_TEXT.appRoot,
       }}
     >
+      <style jsx global>{`
+        .skills-tree-overlay-scroll {
+          scrollbar-width: none !important;
+          -ms-overflow-style: none !important;
+        }
+
+        .skills-tree-overlay-scroll::-webkit-scrollbar {
+          width: 0 !important;
+          height: 0 !important;
+          display: none !important;
+          background: transparent !important;
+        }
+
+        .skills-tree-overlay-scroll::-webkit-scrollbar-track {
+          display: none !important;
+          background: transparent !important;
+        }
+
+        .skills-tree-overlay-scroll::-webkit-scrollbar-thumb {
+          display: none !important;
+          background: transparent !important;
+        }
+      `}</style>
+
       <div
         style={{
           position: "sticky",
@@ -560,57 +709,153 @@ export default function SkillsTree({
         </div>
       </div>
 
-      <div
-        className="hover-scroll"
-        style={{
-          minHeight: 0,
-          overflowY: "auto",
-          padding: "10px 14px 14px",
-        }}
-      >
-        {Object.entries(skillsData).map(([category, skillsUnknown]) => {
-          const skills = skillsUnknown as Skill[];
+      <div style={{ position: "relative", minHeight: 0, height: "100%" }}>
+        <div
+          ref={scrollRef}
+          className="hover-scroll skills-tree-overlay-scroll"
+          style={{
+            minHeight: 0,
+            height: "100%",
+            overflowY: "auto",
+            padding: "10px 0 14px 14px",
+            boxSizing: "border-box",
+          }}
+        >
+          {Object.entries(skillsData).map(([category, skillsUnknown]) => {
+            const skills = skillsUnknown as Skill[];
 
-          return (
-            <CategorySection
-              key={category}
-              category={category}
-              skills={skills}
-              collapsed={collapsedCategories[category] ?? false}
-              onToggleCategory={() => toggleCategory(category)}
-              onCollapseCategorySkills={() => collapseSkillsInCategory(skills)}
-              expandedSkillIds={expandedSkillIds}
-              onToggleSkill={toggleSkillRow}
-              standardFilter={standardFilter}
-              thinkingTypeFilter={thinkingTypeFilter}
-              targetMarks={targetMarks}
-              selectionFilters={selectionFilters}
-              getConceptIndex={getConceptIndex}
-              setConceptIndex={setConceptIndex}
-              getDifficulty={getDifficulty}
-              setDifficulty={setDifficulty}
-              onAddQuestion={(categoryName, skill, concept, difficulty) =>
-                addQuestionToPaper(
-                  categoryName,
-                  skill,
-                  concept,
-                  difficulty,
-                  activePaper
-                )
+            return (
+              <CategorySection
+                key={category}
+                category={category}
+                skills={skills}
+                collapsed={collapsedCategories[category] ?? false}
+                onToggleCategory={() => toggleCategory(category)}
+                onCollapseCategorySkills={() => collapseSkillsInCategory(skills)}
+                expandedSkillIds={expandedSkillIds}
+                onToggleSkill={toggleSkillRow}
+                standardFilter={standardFilter}
+                thinkingTypeFilter={thinkingTypeFilter}
+                targetMarks={targetMarks}
+                selectionFilters={selectionFilters}
+                getConceptIndex={getConceptIndex}
+                setConceptIndex={setConceptIndex}
+                getDifficulty={getDifficulty}
+                setDifficulty={setDifficulty}
+                onAddQuestion={(categoryName, skill, concept, difficulty) =>
+                  addQuestionToPaper(
+                    categoryName,
+                    skill,
+                    concept,
+                    difficulty,
+                    activePaper
+                  )
+                }
+                onRegenerateQuestion={(categoryName, skill, concept, difficulty) =>
+                  regenerateQuestionToPaper(
+                    categoryName,
+                    skill,
+                    concept,
+                    difficulty,
+                    activePaper
+                  )
+                }
+                theme={theme}
+              />
+            );
+          })}
+        </div>
+
+        {scrollMetrics.isScrollable ? (
+          <div
+            aria-hidden="true"
+            onMouseEnter={() => setTrackHovered(true)}
+            onMouseLeave={() => {
+              setTrackHovered(false);
+              if (!draggingThumb) setThumbHovered(false);
+            }}
+            onPointerDown={(event) => {
+              const el = scrollRef.current;
+              if (!el) return;
+
+              const track = event.currentTarget.getBoundingClientRect();
+              const clickY = event.clientY - track.top;
+              const clientHeight = el.clientHeight;
+              const scrollTopMax = Math.max(0, el.scrollHeight - clientHeight);
+              const travelMax = Math.max(1, clientHeight - scrollMetrics.thumbHeight);
+
+              const nextThumbTop = Math.max(
+                0,
+                Math.min(travelMax, clickY - scrollMetrics.thumbHeight / 2)
+              );
+
+              el.scrollTop = (nextThumbTop / travelMax) * scrollTopMax;
+
+              if (
+                event.target instanceof HTMLElement &&
+                event.target.dataset.role === "skills-tree-scroll-thumb"
+              ) {
+                return;
               }
-              onRegenerateQuestion={(categoryName, skill, concept, difficulty) =>
-                regenerateQuestionToPaper(
-                  categoryName,
-                  skill,
-                  concept,
-                  difficulty,
-                  activePaper
-                )
-              }
-              theme={theme}
+            }}
+            style={{
+              position: "absolute",
+              top: 0,
+              right: OVERLAY_SCROLLBAR_INSET,
+              bottom: 0,
+              width: OVERLAY_SCROLLBAR_WIDTH,
+              borderRadius: 999,
+              background:
+                trackHovered || draggingThumb
+                  ? "rgba(15,23,42,0.06)"
+                  : "transparent",
+              transition: "background 0.15s ease",
+              zIndex: 4,
+            }}
+          >
+            <div
+              data-role="skills-tree-scroll-thumb"
+              onMouseEnter={() => setThumbHovered(true)}
+              onMouseLeave={() => {
+                if (!draggingThumb) setThumbHovered(false);
+              }}
+              onPointerDown={(event) => {
+                const el = scrollRef.current;
+                if (!el) return;
+
+                event.preventDefault();
+                event.stopPropagation();
+
+                const scrollTopMax = Math.max(0, el.scrollHeight - el.clientHeight);
+                const travelMax = Math.max(0, el.clientHeight - scrollMetrics.thumbHeight);
+
+                dragStateRef.current = {
+                  startY: event.clientY,
+                  startScrollTop: el.scrollTop,
+                  scrollTopMax,
+                  travelMax,
+                };
+
+                setDraggingThumb(true);
+              }}
+              style={{
+                position: "absolute",
+                top: scrollMetrics.thumbTop,
+                right: 0,
+                width: OVERLAY_SCROLLBAR_WIDTH,
+                height: scrollMetrics.thumbHeight,
+                borderRadius: 999,
+                background: overlayThumbColor,
+                opacity: draggingThumb || thumbHovered || trackHovered ? 0.82 : 0.52,
+                cursor: "grab",
+                transition:
+                  draggingThumb
+                    ? "none"
+                    : "background 0.15s ease, opacity 0.15s ease",
+              }}
             />
-          );
-        })}
+          </div>
+        ) : null}
       </div>
     </section>
   );
