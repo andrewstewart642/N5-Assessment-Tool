@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import type { Theme } from "@/ui/AppTheme";
+import { UI_TYPO } from "@/app/ui/UiTypography";
 
 type Props = {
   levelLabel: string | null;
@@ -24,6 +25,10 @@ type Props = {
   theme?: Theme;
 };
 
+const TOP_BAR_CONTROL_HEIGHT = 32;
+const TOP_BAR_LABEL_GAP = 4;
+const TOP_BAR_RADIUS = 10;
+
 function getSummaryText(args: {
   classes: SchoolClass[];
   selectedClassIds: string[];
@@ -37,25 +42,16 @@ function getSummaryText(args: {
     completeCoverageSummaryText,
   } = args;
 
-  if (useCompleteCourseCoverage) {
-    return completeCoverageSummaryText;
-  }
-
-  if (selectedClassIds.length === 0) {
-    return "Select classes";
-  }
+  if (useCompleteCourseCoverage) return completeCoverageSummaryText;
+  if (selectedClassIds.length === 0) return "Select classes";
 
   const selectedClasses = classes.filter((item) =>
     selectedClassIds.includes(item.id)
   );
 
-  if (selectedClasses.length === 1) {
-    return selectedClasses[0].name;
-  }
-
-  if (selectedClasses.length === 2) {
+  if (selectedClasses.length === 1) return selectedClasses[0].name;
+  if (selectedClasses.length === 2)
     return `${selectedClasses[0].name}, ${selectedClasses[1].name}`;
-  }
 
   return `${selectedClasses.length} classes selected`;
 }
@@ -137,9 +133,9 @@ export default function ClassCoverageSelect({
   }, [levelLabel, selectedClassIds.length, useCompleteCourseCoverage]);
 
   const labelStyle: React.CSSProperties = {
-    fontSize: compact ? 12 : 13,
+    fontSize: 12,
+    fontWeight: UI_TYPO.weightMedium,
     color: theme ? theme.textMuted : "rgba(214,227,243,0.72)",
-    fontWeight: 600,
     lineHeight: 1.2,
     whiteSpace: "nowrap",
   };
@@ -155,18 +151,17 @@ export default function ClassCoverageSelect({
     border: theme
       ? `1px solid ${theme.borderStandard}`
       : "1px solid rgba(255,255,255,0.10)",
-    borderRadius: compact ? 10 : 14,
+    borderRadius: TOP_BAR_RADIUS,
     background: theme ? theme.controlBg : "rgba(255,255,255,0.02)",
-    padding: compact ? "0 10px" : "10px 12px",
-    minHeight: compact ? 30 : 48,
-    height: compact ? 30 : undefined,
+    padding: "0 10px",
+    height: TOP_BAR_CONTROL_HEIGHT,
     cursor: levelLabel ? "pointer" : "not-allowed",
     color: levelLabel
       ? theme?.textPrimary ?? "#f7fbff"
       : theme?.textMuted ?? "rgba(214,227,243,0.45)",
-    fontSize: compact ? 13 : 16,
-    fontFamily: "inherit",
-    fontWeight: compact ? 600 : undefined,
+    fontSize: 13,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightSemibold,
     textAlign: "left",
     boxSizing: "border-box",
     transition:
@@ -178,10 +173,11 @@ export default function ClassCoverageSelect({
       ref={wrapperRef}
       style={{
         display: "grid",
-        gap: hideHelperText ? 3 : 6,
+        gap: hideHelperText ? TOP_BAR_LABEL_GAP : 6,
         position: "relative",
         width,
         minWidth: 0,
+        fontFamily: UI_TYPO.family,
       }}
     >
       <span style={labelStyle}>{label}</span>
@@ -211,7 +207,7 @@ export default function ClassCoverageSelect({
         <span
           style={{
             color: theme ? theme.textMuted : "rgba(214,227,243,0.72)",
-            fontSize: compact ? 11 : 14,
+            fontSize: 11,
             transform: open ? "rotate(180deg)" : "rotate(0deg)",
             transition: "transform 140ms ease",
             flexShrink: 0,
@@ -282,17 +278,17 @@ export default function ClassCoverageSelect({
                       border: `1px solid ${
                         checked
                           ? theme?.controlSelectedBorder ?? "#60a5fa"
-                          : theme?.borderStandard ?? "rgba(255,255,255,0.08)"
+                          : theme?.borderStandard ??
+                            "rgba(255,255,255,0.08)"
                       }`,
                       borderRadius: 12,
                       background: checked
-                        ? theme?.controlSelectedBg ?? "rgba(37,99,235,0.16)"
+                        ? theme?.controlSelectedBg ??
+                          "rgba(37,99,235,0.16)"
                         : theme?.controlBg ?? "rgba(255,255,255,0.03)",
                       padding: "10px 12px",
                       cursor: "pointer",
                       textAlign: "left",
-                      transition:
-                        "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
                     }}
                   >
                     <span
@@ -304,7 +300,8 @@ export default function ClassCoverageSelect({
                         border: `2px solid ${
                           checked
                             ? theme?.controlSelectedBorder ?? "#93c5fd"
-                            : theme?.textMuted ?? "rgba(214,227,243,0.50)"
+                            : theme?.textMuted ??
+                              "rgba(214,227,243,0.50)"
                         }`,
                         background: checked
                           ? theme?.controlSelectedBorder ?? "#60a5fa"
@@ -332,7 +329,9 @@ export default function ClassCoverageSelect({
                         style={{
                           fontSize: 12,
                           lineHeight: 1.35,
-                          color: theme?.textMuted ?? "rgba(214,227,243,0.60)",
+                          color:
+                            theme?.textMuted ??
+                            "rgba(214,227,243,0.60)",
                         }}
                       >
                         {[schoolClass.level, schoolClass.teacher]
@@ -353,7 +352,9 @@ export default function ClassCoverageSelect({
                   padding: "12px 14px",
                   fontSize: 13,
                   lineHeight: 1.45,
-                  color: theme?.textMuted ?? "rgba(214,227,243,0.58)",
+                  color:
+                    theme?.textMuted ??
+                    "rgba(214,227,243,0.58)",
                 }}
               >
                 No classes found for this level yet.
@@ -381,17 +382,17 @@ export default function ClassCoverageSelect({
                 border: `1px solid ${
                   useCompleteCourseCoverage
                     ? theme?.controlSelectedBorder ?? "#60a5fa"
-                    : theme?.borderStandard ?? "rgba(255,255,255,0.08)"
+                    : theme?.borderStandard ??
+                      "rgba(255,255,255,0.08)"
                 }`,
                 borderRadius: 12,
                 background: useCompleteCourseCoverage
-                  ? theme?.controlSelectedBg ?? "rgba(37,99,235,0.16)"
+                  ? theme?.controlSelectedBg ??
+                    "rgba(37,99,235,0.16)"
                   : theme?.controlBg ?? "rgba(255,255,255,0.03)",
                 padding: "10px 12px",
                 cursor: "pointer",
                 textAlign: "left",
-                transition:
-                  "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
               }}
             >
               <span
@@ -403,7 +404,8 @@ export default function ClassCoverageSelect({
                   border: `2px solid ${
                     useCompleteCourseCoverage
                       ? theme?.controlSelectedBorder ?? "#93c5fd"
-                      : theme?.textMuted ?? "rgba(214,227,243,0.50)"
+                      : theme?.textMuted ??
+                        "rgba(214,227,243,0.50)"
                   }`,
                   background: useCompleteCourseCoverage
                     ? theme?.controlSelectedBorder ?? "#60a5fa"
@@ -431,7 +433,9 @@ export default function ClassCoverageSelect({
                   style={{
                     fontSize: 12,
                     lineHeight: 1.35,
-                    color: theme?.textMuted ?? "rgba(214,227,243,0.60)",
+                    color:
+                      theme?.textMuted ??
+                      "rgba(214,227,243,0.60)",
                   }}
                 >
                   Ignore class coverage filters and show the full course tree.

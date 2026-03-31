@@ -12,6 +12,10 @@ type BuilderMetaFieldProps = {
   theme?: Theme;
 };
 
+const TOP_BAR_CONTROL_HEIGHT = 32;
+const TOP_BAR_LABEL_GAP = 4;
+const TOP_BAR_RADIUS = 10;
+
 function getLabelStyle(theme?: Theme): React.CSSProperties {
   return {
     fontSize: 12,
@@ -25,14 +29,14 @@ function getLabelStyle(theme?: Theme): React.CSSProperties {
 
 function getInputStyle(theme?: Theme): React.CSSProperties {
   return {
-    height: 30,
-    borderRadius: 10,
+    height: TOP_BAR_CONTROL_HEIGHT,
+    borderRadius: TOP_BAR_RADIUS,
     border: theme
       ? `1px solid ${theme.borderStandard}`
       : "1px solid rgba(255,255,255,0.08)",
     background: theme ? theme.bgElevated : "rgba(255,255,255,0.02)",
     color: theme ? theme.textPrimary : "#f7fbff",
-    padding: "0 9px",
+    padding: "0 10px",
     fontSize: 13,
     fontFamily: UI_TYPO.family,
     fontWeight: UI_TYPO.weightSemibold,
@@ -57,7 +61,7 @@ export function BuilderMetaField({
     <label
       style={{
         display: "grid",
-        gap: 3,
+        gap: TOP_BAR_LABEL_GAP,
         minWidth: 0,
         width: width ?? "auto",
         fontFamily: UI_TYPO.family,
@@ -92,8 +96,8 @@ export function ViewingToggle({
     <div
       style={{
         display: "inline-flex",
-        height: 30,
-        borderRadius: 10,
+        height: TOP_BAR_CONTROL_HEIGHT,
+        borderRadius: TOP_BAR_RADIUS,
         background: theme ? theme.controlBg : "rgba(255,255,255,0.04)",
         border: theme
           ? `1px solid ${theme.borderStandard}`
@@ -108,6 +112,7 @@ export function ViewingToggle({
         return (
           <button
             key={paper}
+            type="button"
             onClick={() => onChange(paper)}
             style={{
               height: "100%",

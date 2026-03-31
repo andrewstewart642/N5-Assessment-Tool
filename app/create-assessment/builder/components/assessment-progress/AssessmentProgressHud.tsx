@@ -98,8 +98,6 @@ function getNotePalette(
 ): {
   icon: React.ReactNode;
   textColor: string;
-  background: string;
-  borderColor: string;
 } {
   if (severity === "essential") {
     return {
@@ -110,8 +108,6 @@ function getNotePalette(
         />
       ),
       textColor: theme.textPrimary,
-      background: theme.bgElevated,
-      borderColor: theme.borderStandard,
     };
   }
 
@@ -124,17 +120,71 @@ function getNotePalette(
         />
       ),
       textColor: theme.textSecondary,
-      background: theme.bgElevated,
-      borderColor: theme.borderStandard,
     };
   }
 
   return {
     icon: <LightbulbIcon color={theme.textSecondary} />,
     textColor: theme.textSecondary,
-    background: "transparent",
-    borderColor: theme.borderStandard,
   };
+}
+
+function HudDataRow({
+  paperLabel,
+  marksValue,
+  timeValue,
+  theme,
+}: {
+  paperLabel: "P1" | "P2";
+  marksValue: string;
+  timeValue: string;
+  theme: Theme;
+}) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "26px 58px 68px",
+        columnGap: 8,
+        alignItems: "center",
+      }}
+    >
+      <div
+        style={{
+          ...UI_TEXT.controlTextStrong,
+          color: theme.textSecondary,
+        }}
+      >
+        {paperLabel}
+      </div>
+
+      <div
+        style={{
+          ...UI_TEXT.controlTextStrong,
+          color: theme.textSecondary,
+          textAlign: "right",
+          fontVariantNumeric: "tabular-nums",
+          fontFeatureSettings: '"tnum" 1',
+          whiteSpace: "nowrap",
+        }}
+      >
+        {marksValue}
+      </div>
+
+      <div
+        style={{
+          ...UI_TEXT.controlTextStrong,
+          color: theme.textSecondary,
+          textAlign: "right",
+          fontVariantNumeric: "tabular-nums",
+          fontFeatureSettings: '"tnum" 1',
+          whiteSpace: "nowrap",
+        }}
+      >
+        {timeValue}
+      </div>
+    </div>
+  );
 }
 
 export default function AssessmentProgressHud(props: Props) {
@@ -167,7 +217,7 @@ export default function AssessmentProgressHud(props: Props) {
         borderTop: `1px solid ${theme.borderStandard}`,
         background: theme.bgSurface,
         display: "grid",
-        gridTemplateColumns: "118px 132px minmax(0, 1fr)",
+        gridTemplateColumns: "188px minmax(0, 1fr)",
         minHeight: 0,
         overflow: "hidden",
         fontFamily: UI_TYPO.family,
@@ -176,7 +226,7 @@ export default function AssessmentProgressHud(props: Props) {
       <div
         style={{
           minWidth: 0,
-          padding: "10px 10px 10px 12px",
+          padding: "10px 12px 10px 12px",
           borderRight: `1px solid ${theme.borderStandard}`,
           display: "grid",
           gridTemplateRows: "auto 1fr",
@@ -184,114 +234,23 @@ export default function AssessmentProgressHud(props: Props) {
         }}
       >
         <div style={{ ...UI_TEXT.sectionTitle, color: theme.textSecondary }}>
-          Marks
+          Marks & Timings
         </div>
 
         <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "26px 1fr",
-              columnGap: 10,
-              alignItems: "center",
-            }}
-          >
-            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
-              P1
-            </div>
-            <div
-              style={{
-                ...UI_TEXT.controlTextStrong,
-                color: theme.textSecondary,
-                textAlign: "right",
-              }}
-            >
-              {p1m}/{p1t}
-            </div>
-          </div>
+          <HudDataRow
+            paperLabel="P1"
+            marksValue={`${p1m}/${p1t}`}
+            timeValue={`~${formatMinutes(p1TimeMinutes)}`}
+            theme={theme}
+          />
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "26px 1fr",
-              columnGap: 10,
-              alignItems: "center",
-            }}
-          >
-            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
-              P2
-            </div>
-            <div
-              style={{
-                ...UI_TEXT.controlTextStrong,
-                color: theme.textSecondary,
-                textAlign: "right",
-              }}
-            >
-              {p2m}/{p2t}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div
-        style={{
-          minWidth: 0,
-          padding: "10px 10px",
-          borderRight: `1px solid ${theme.borderStandard}`,
-          display: "grid",
-          gridTemplateRows: "auto 1fr",
-          gap: 10,
-        }}
-      >
-        <div style={{ ...UI_TEXT.sectionTitle, color: theme.textSecondary }}>
-          Time
-        </div>
-
-        <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "26px 1fr",
-              columnGap: 10,
-              alignItems: "center",
-            }}
-          >
-            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
-              P1
-            </div>
-            <div
-              style={{
-                ...UI_TEXT.controlTextStrong,
-                color: theme.textSecondary,
-                textAlign: "right",
-              }}
-            >
-              ~{formatMinutes(p1TimeMinutes)}
-            </div>
-          </div>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "26px 1fr",
-              columnGap: 10,
-              alignItems: "center",
-            }}
-          >
-            <div style={{ ...UI_TEXT.controlTextStrong, color: theme.textSecondary }}>
-              P2
-            </div>
-            <div
-              style={{
-                ...UI_TEXT.controlTextStrong,
-                color: theme.textSecondary,
-                textAlign: "right",
-              }}
-            >
-              ~{formatMinutes(p2TimeMinutes)}
-            </div>
-          </div>
+          <HudDataRow
+            paperLabel="P2"
+            marksValue={`${p2m}/${p2t}`}
+            timeValue={`~${formatMinutes(p2TimeMinutes)}`}
+            theme={theme}
+          />
         </div>
       </div>
 
@@ -316,7 +275,7 @@ export default function AssessmentProgressHud(props: Props) {
             border: `1px solid ${theme.borderStandard}`,
             background: theme.bgElevated,
             borderRadius: 12,
-            padding: "8px 10px",
+            padding: "10px 12px",
             overflowY: "auto",
             color: structuredNotes.length ? theme.textSecondary : theme.textMuted,
             lineHeight: 1.35,
@@ -325,7 +284,7 @@ export default function AssessmentProgressHud(props: Props) {
           }}
         >
           {structuredNotes.length ? (
-            <div style={{ display: "grid", gap: 8 }}>
+            <div style={{ display: "grid", gap: 10 }}>
               {structuredNotes.map((note) => {
                 const palette = getNotePalette(note.severity, theme);
 
@@ -338,10 +297,6 @@ export default function AssessmentProgressHud(props: Props) {
                       gridTemplateColumns: "20px minmax(0, 1fr)",
                       columnGap: 10,
                       alignItems: "start",
-                      padding: "8px 10px",
-                      borderRadius: 10,
-                      background: palette.background,
-                      border: `1px solid ${palette.borderColor}`,
                     }}
                   >
                     <div

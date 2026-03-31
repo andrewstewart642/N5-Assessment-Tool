@@ -7,8 +7,8 @@ import { ACCENT_MAP, type AccentOption } from "@/ui/AccentPalette";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 import AppSideTray from "@/app/ui/settings-bar/AppSideTray";
 import AppTrayHeader from "@/app/ui/settings-bar/AppTrayHeader";
-import AppTraySection from "@/app/ui/settings-bar/AppTraySection";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
+import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 
 type Props = {
   open: boolean;
@@ -57,11 +57,20 @@ type ActivePicker =
   | "p2Start"
   | "p2End";
 
+type ActivePaperTab = "P1" | "P2";
+
 type TimeDraft = {
   hour12: number;
   minute: number;
   meridiem: "AM" | "PM";
 };
+
+type SettingsSectionId =
+  | "paper-content"
+  | "workspace"
+  | "paper-sitting"
+  | "appearance"
+  | "custom-theme";
 
 const THEME_OPTIONS: Array<{
   value: ThemeModePreference;
@@ -80,160 +89,19 @@ const THEME_OPTIONS: Array<{
 ];
 
 const WORD_COLOUR_ROWS: AccentOption[][] = [
-  [
-    "word-r1-c1",
-    "word-r1-c2",
-    "word-r1-c3",
-    "word-r1-c4",
-    "word-r1-c5",
-    "word-r1-c6",
-    "word-r1-c7",
-  ],
-  [
-    "word-r2-c1",
-    "word-r2-c2",
-    "word-r2-c3",
-    "word-r2-c4",
-    "word-r2-c5",
-    "word-r2-c6",
-    "word-r2-c7",
-    "word-r2-c8",
-  ],
-  [
-    "word-r3-c1",
-    "word-r3-c2",
-    "word-r3-c3",
-    "word-r3-c4",
-    "word-r3-c5",
-    "word-r3-c6",
-    "word-r3-c7",
-    "word-r3-c8",
-    "word-r3-c9",
-  ],
-  [
-    "word-r4-c1",
-    "word-r4-c2",
-    "word-r4-c3",
-    "word-r4-c4",
-    "word-r4-c5",
-    "word-r4-c6",
-    "word-r4-c7",
-    "word-r4-c8",
-    "word-r4-c9",
-    "word-r4-c10",
-  ],
-  [
-    "word-r5-c1",
-    "word-r5-c2",
-    "word-r5-c3",
-    "word-r5-c4",
-    "word-r5-c5",
-    "word-r5-c6",
-    "word-r5-c7",
-    "word-r5-c8",
-    "word-r5-c9",
-    "word-r5-c10",
-    "word-r5-c11",
-  ],
-  [
-    "word-r6-c1",
-    "word-r6-c2",
-    "word-r6-c3",
-    "word-r6-c4",
-    "word-r6-c5",
-    "word-r6-c6",
-    "word-r6-c7",
-    "word-r6-c8",
-    "word-r6-c9",
-    "word-r6-c10",
-    "word-r6-c11",
-    "word-r6-c12",
-  ],
-  [
-    "word-r7-c1",
-    "word-r7-c2",
-    "word-r7-c3",
-    "word-r7-c4",
-    "word-r7-c5",
-    "word-r7-c6",
-    "word-r7-c7",
-    "word-r7-c8",
-    "word-r7-c9",
-    "word-r7-c10",
-    "word-r7-c11",
-    "word-r7-c12",
-    "word-r7-c13",
-  ],
-  [
-    "word-r8-c1",
-    "word-r8-c2",
-    "word-r8-c3",
-    "word-r8-c4",
-    "word-r8-c5",
-    "word-r8-c6",
-    "word-r8-c7",
-    "word-r8-c8",
-    "word-r8-c9",
-    "word-r8-c10",
-    "word-r8-c11",
-    "word-r8-c12",
-    "word-r8-c13",
-  ],
-  [
-    "word-r9-c1",
-    "word-r9-c2",
-    "word-r9-c3",
-    "word-r9-c4",
-    "word-r9-c5",
-    "word-r9-c6",
-    "word-r9-c7",
-    "word-r9-c8",
-    "word-r9-c9",
-    "word-r9-c10",
-    "word-r9-c11",
-  ],
-  [
-    "word-r10-c1",
-    "word-r10-c2",
-    "word-r10-c3",
-    "word-r10-c4",
-    "word-r10-c5",
-    "word-r10-c6",
-    "word-r10-c7",
-    "word-r10-c8",
-    "word-r10-c9",
-    "word-r10-c10",
-  ],
-  [
-    "word-r11-c1",
-    "word-r11-c2",
-    "word-r11-c3",
-    "word-r11-c4",
-    "word-r11-c5",
-    "word-r11-c6",
-    "word-r11-c7",
-    "word-r11-c8",
-    "word-r11-c9",
-  ],
-  [
-    "word-r12-c1",
-    "word-r12-c2",
-    "word-r12-c3",
-    "word-r12-c4",
-    "word-r12-c5",
-    "word-r12-c6",
-    "word-r12-c7",
-    "word-r12-c8",
-  ],
-  [
-    "word-r13-c1",
-    "word-r13-c2",
-    "word-r13-c3",
-    "word-r13-c4",
-    "word-r13-c5",
-    "word-r13-c6",
-    "word-r13-c7",
-  ],
+  ["word-r1-c1", "word-r1-c2", "word-r1-c3", "word-r1-c4", "word-r1-c5", "word-r1-c6", "word-r1-c7"],
+  ["word-r2-c1", "word-r2-c2", "word-r2-c3", "word-r2-c4", "word-r2-c5", "word-r2-c6", "word-r2-c7", "word-r2-c8"],
+  ["word-r3-c1", "word-r3-c2", "word-r3-c3", "word-r3-c4", "word-r3-c5", "word-r3-c6", "word-r3-c7", "word-r3-c8", "word-r3-c9"],
+  ["word-r4-c1", "word-r4-c2", "word-r4-c3", "word-r4-c4", "word-r4-c5", "word-r4-c6", "word-r4-c7", "word-r4-c8", "word-r4-c9", "word-r4-c10"],
+  ["word-r5-c1", "word-r5-c2", "word-r5-c3", "word-r5-c4", "word-r5-c5", "word-r5-c6", "word-r5-c7", "word-r5-c8", "word-r5-c9", "word-r5-c10", "word-r5-c11"],
+  ["word-r6-c1", "word-r6-c2", "word-r6-c3", "word-r6-c4", "word-r6-c5", "word-r6-c6", "word-r6-c7", "word-r6-c8", "word-r6-c9", "word-r6-c10", "word-r6-c11", "word-r6-c12"],
+  ["word-r7-c1", "word-r7-c2", "word-r7-c3", "word-r7-c4", "word-r7-c5", "word-r7-c6", "word-r7-c7", "word-r7-c8", "word-r7-c9", "word-r7-c10", "word-r7-c11", "word-r7-c12", "word-r7-c13"],
+  ["word-r8-c1", "word-r8-c2", "word-r8-c3", "word-r8-c4", "word-r8-c5", "word-r8-c6", "word-r8-c7", "word-r8-c8", "word-r8-c9", "word-r8-c10", "word-r8-c11", "word-r8-c12", "word-r8-c13"],
+  ["word-r9-c1", "word-r9-c2", "word-r9-c3", "word-r9-c4", "word-r9-c5", "word-r9-c6", "word-r9-c7", "word-r9-c8", "word-r9-c9", "word-r9-c10", "word-r9-c11"],
+  ["word-r10-c1", "word-r10-c2", "word-r10-c3", "word-r10-c4", "word-r10-c5", "word-r10-c6", "word-r10-c7", "word-r10-c8", "word-r10-c9", "word-r10-c10"],
+  ["word-r11-c1", "word-r11-c2", "word-r11-c3", "word-r11-c4", "word-r11-c5", "word-r11-c6", "word-r11-c7", "word-r11-c8", "word-r11-c9"],
+  ["word-r12-c1", "word-r12-c2", "word-r12-c3", "word-r12-c4", "word-r12-c5", "word-r12-c6", "word-r12-c7", "word-r12-c8"],
+  ["word-r13-c1", "word-r13-c2", "word-r13-c3", "word-r13-c4", "word-r13-c5", "word-r13-c6", "word-r13-c7"],
 ];
 
 const WORD_NEUTRAL_TOP: AccentOption[] = [
@@ -265,6 +133,14 @@ type HoneycombCell = {
   col: number;
 };
 
+const DEFAULT_OPEN_SECTIONS: Record<SettingsSectionId, boolean> = {
+  "paper-content": true,
+  workspace: true,
+  "paper-sitting": true,
+  appearance: false,
+  "custom-theme": false,
+};
+
 function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
@@ -273,16 +149,32 @@ function pad2(value: number) {
   return value.toString().padStart(2, "0");
 }
 
+function formatDisplayDate(value: string): string {
+  if (!value) return "";
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!isoMatch) return value;
+
+  const [, year, month, day] = isoMatch;
+  const utcDate = new Date(
+    Date.UTC(Number(year), Number(month) - 1, Number(day))
+  );
+
+  if (Number.isNaN(utcDate.getTime())) return value;
+
+  return utcDate.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 function parseTimeText(text: string): TimeDraft {
   const trimmed = text.trim().toUpperCase();
   const match = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
 
   if (!match) {
-    return {
-      hour12: 9,
-      minute: 0,
-      meridiem: "AM",
-    };
+    return { hour12: 9, minute: 0, meridiem: "AM" };
   }
 
   const hour12 = clamp(Number(match[1]) || 9, 1, 12);
@@ -319,10 +211,7 @@ function getMinuteFromAngle(angle: number) {
   const wrappedSnappedFive = ((snappedFive % 60) + 60) % 60;
   const distanceToFive = Math.abs(exactMinute - snappedFive);
 
-  if (distanceToFive <= 1.15) {
-    return wrappedSnappedFive;
-  }
-
+  if (distanceToFive <= 1.15) return wrappedSnappedFive;
   return ((Math.round(exactMinute) % 60) + 60) % 60;
 }
 
@@ -351,11 +240,74 @@ function getAccentLabel(id: AccentOption): string {
 
 function buildHoneycombCells(rows: AccentOption[][]): HoneycombCell[] {
   return rows.flatMap((row, rowIndex) =>
-    row.map((id, colIndex) => ({
-      id,
-      row: rowIndex,
-      col: colIndex,
-    }))
+    row.map((id, colIndex) => ({ id, row: rowIndex, col: colIndex }))
+  );
+}
+
+function SectionBar({
+  title,
+  theme,
+  open,
+  onToggle,
+}: {
+  title: string;
+  theme: Theme;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className="settings-section-bar"
+      style={{
+        width: "calc(100% + 36px)",
+        marginLeft: -18,
+        marginRight: -18,
+        display: "grid",
+        gridTemplateColumns: "minmax(0, 1fr) auto",
+        alignItems: "center",
+        gap: 14,
+        minHeight: 44,
+        padding: "0 16px",
+        border: "none",
+        borderTop: `1px solid ${theme.borderStandard}`,
+        borderBottom: `1px solid ${theme.borderStandard}`,
+        background: theme.bgElevated,
+        cursor: "pointer",
+        textAlign: "left",
+        transition:
+          "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, color 0.18s ease",
+        fontFamily: UI_TYPO.family,
+        boxShadow: "0 0 0 rgba(0,0,0,0)",
+        transform: "scale(1)",
+        transformOrigin: "center center",
+      }}
+    >
+      <span
+        style={{
+          ...UI_TEXT.controlTextStrong,
+          color: theme.textPrimary,
+          fontSize: 14,
+          fontWeight: UI_TYPO.weightSemibold,
+          lineHeight: 1.2,
+        }}
+      >
+        {title}
+      </span>
+
+      <span
+        style={{
+          color: theme.textMuted,
+          fontSize: 12,
+          lineHeight: 1,
+          transform: open ? "rotate(180deg)" : "rotate(0deg)",
+          transition: "transform 140ms ease",
+        }}
+      >
+        ▾
+      </span>
+    </button>
   );
 }
 
@@ -364,30 +316,51 @@ function ToggleRow({
   checked,
   onChange,
   theme,
+  compact = false,
 }: {
   label: string;
   checked: boolean;
   onChange: (next: boolean) => void;
   theme: Theme;
+  compact?: boolean;
 }) {
+  const rowHeight = compact ? 38 : 42;
+  const textSize = compact ? 12.5 : 13;
+  const toggleWidth = compact ? 38 : 42;
+  const toggleHeight = compact ? 22 : 24;
+  const knobSize = compact ? 16 : 18;
+  const knobTop = 2;
+
   return (
-    <div
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      className="settings-row-button"
       style={{
+        width: "100%",
         display: "grid",
         gridTemplateColumns: "minmax(0, 1fr) auto",
         alignItems: "center",
-        gap: 16,
+        gap: 14,
         minWidth: 0,
-        padding: "14px 0",
+        minHeight: rowHeight,
+        padding: "8px 0",
+        background: "transparent",
+        border: "none",
         borderBottom: `1px solid ${theme.borderStandard}`,
+        cursor: "pointer",
+        textAlign: "left",
+        transition: "background 0.15s ease",
+        fontFamily: UI_TYPO.family,
       }}
     >
       <div
         style={{
-          color: theme.textPrimary,
-          fontSize: 15,
-          fontWeight: 600,
-          lineHeight: 1.35,
+          ...UI_TEXT.controlText,
+          color: theme.textSecondary,
+          fontSize: textSize,
+          fontWeight: UI_TYPO.weightSemibold,
+          lineHeight: 1.3,
           minWidth: 0,
           wordBreak: "break-word",
         }}
@@ -395,39 +368,36 @@ function ToggleRow({
         {label}
       </div>
 
-      <button
-        type="button"
-        aria-pressed={checked}
-        onClick={() => onChange(!checked)}
+      <span
         style={{
           position: "relative",
-          width: 52,
-          height: 30,
+          width: toggleWidth,
+          height: toggleHeight,
           borderRadius: 999,
           border: `1px solid ${
             checked ? theme.controlSelectedBorder : theme.borderStandard
           }`,
           background: checked ? theme.controlSelectedBg : theme.controlBg,
           transition: "all 140ms ease",
-          cursor: "pointer",
           flexShrink: 0,
+          alignSelf: "center",
         }}
       >
         <span
           style={{
             position: "absolute",
-            top: 3,
-            left: checked ? 25 : 3,
-            width: 22,
-            height: 22,
+            top: knobTop,
+            left: checked ? toggleWidth - knobSize - 3 : 2,
+            width: knobSize,
+            height: knobSize,
             borderRadius: "50%",
             background: checked ? theme.accentPrimary : theme.bgElevated,
             transition: "all 140ms ease",
             boxShadow: theme.shadow,
           }}
         />
-      </button>
-    </div>
+      </span>
+    </button>
   );
 }
 
@@ -441,13 +411,68 @@ function FieldLabel({
   return (
     <div
       style={{
-        marginBottom: 8,
+        ...UI_TEXT.controlTextStrong,
+        marginBottom: 7,
         color: theme.textMuted,
-        fontSize: 13,
-        fontWeight: 700,
+        fontSize: 12,
+        fontWeight: UI_TYPO.weightSemibold,
+        lineHeight: 1.2,
       }}
     >
       {children}
+    </div>
+  );
+}
+
+function TabToggle({
+  value,
+  onChange,
+  theme,
+}: {
+  value: ActivePaperTab;
+  onChange: (value: ActivePaperTab) => void;
+  theme: Theme;
+}) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "1fr 1fr",
+        width: "100%",
+        height: 34,
+        borderRadius: 10,
+        background: theme.controlBg,
+        border: `1px solid ${theme.borderStandard}`,
+        padding: 2,
+        boxSizing: "border-box",
+        fontFamily: UI_TYPO.family,
+      }}
+    >
+      {(["P1", "P2"] as const).map((paper) => {
+        const active = value === paper;
+
+        return (
+          <button
+            key={paper}
+            type="button"
+            onClick={() => onChange(paper)}
+            style={{
+              height: "100%",
+              width: "100%",
+              borderRadius: 8,
+              border: "none",
+              background: active ? theme.controlSelectedBg : "transparent",
+              color: active ? theme.textPrimary : theme.textMuted,
+              fontSize: 13,
+              fontWeight: UI_TYPO.weightSemibold,
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {paper === "P1" ? "Paper 1" : "Paper 2"}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -460,6 +485,8 @@ function IntegratedField({
   onChange,
   theme,
   muted = false,
+  disabled = false,
+  readOnly = false,
 }: {
   value: string;
   placeholder?: string;
@@ -468,32 +495,48 @@ function IntegratedField({
   onChange: (next: string) => void;
   theme: Theme;
   muted?: boolean;
+  disabled?: boolean;
+  readOnly?: boolean;
 }) {
   return (
     <div style={{ position: "relative" }}>
       <input
         value={value}
         placeholder={placeholder}
-        onFocus={onClick}
-        onClick={onClick}
-        onChange={(e) => onChange(e.target.value)}
+        readOnly={readOnly}
+        disabled={disabled}
+        onFocus={() => {
+          if (!disabled) onClick();
+        }}
+        onClick={() => {
+          if (!disabled) onClick();
+        }}
+        onChange={(e) => {
+          if (!disabled && !readOnly) onChange(e.target.value);
+        }}
         style={{
           width: "100%",
           height: 40,
-          borderRadius: 14,
+          borderRadius: 12,
           border: `1px solid ${theme.borderStandard}`,
-          background: muted ? theme.controlBg : theme.bgElevated,
-          color: muted ? theme.textMuted : theme.textPrimary,
+          background: muted || disabled ? theme.controlBg : theme.bgElevated,
+          color: muted || disabled ? theme.textMuted : theme.textPrimary,
           padding: "0 42px 0 14px",
-          fontSize: 15,
-          fontWeight: 700,
+          fontSize: 14,
+          fontFamily: UI_TYPO.family,
+          fontWeight: UI_TYPO.weightSemibold,
           outline: "none",
           boxSizing: "border-box",
+          opacity: disabled ? 0.72 : 1,
+          cursor: disabled ? "not-allowed" : "pointer",
         }}
       />
       <button
         type="button"
-        onClick={onClick}
+        disabled={disabled}
+        onClick={() => {
+          if (!disabled) onClick();
+        }}
         style={{
           position: "absolute",
           right: 6,
@@ -505,14 +548,55 @@ function IntegratedField({
           background: theme.controlBg,
           color: theme.textMuted,
           fontSize: 14,
-          cursor: "pointer",
+          cursor: disabled ? "not-allowed" : "pointer",
           display: "grid",
           placeItems: "center",
+          lineHeight: 1,
+          padding: 0,
+          opacity: disabled ? 0.72 : 1,
         }}
         aria-label="Open picker"
       >
-        {icon}
+        <span
+          style={{
+            display: "grid",
+            placeItems: "center",
+            width: "100%",
+            height: "100%",
+            lineHeight: 1,
+            transform: "translateY(-0.5px)",
+          }}
+        >
+          {icon}
+        </span>
       </button>
+    </div>
+  );
+}
+
+function PickerOverlay({
+  children,
+  theme,
+  fullWidth = false,
+}: {
+  children: React.ReactNode;
+  theme: Theme;
+  fullWidth?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: "calc(100% + 10px)",
+        left: fullWidth ? -12 : 0,
+        right: fullWidth ? -12 : 0,
+        zIndex: 40,
+        padding: 0,
+        borderRadius: 16,
+        background: theme.bgSurface,
+      }}
+    >
+      {children}
     </div>
   );
 }
@@ -554,7 +638,6 @@ function TimePickerInline({
       const valueNumber = index === 0 ? 12 : index;
       const angle = valueNumber * 30;
       const angleRad = ((angle - 90) * Math.PI) / 180;
-
       return {
         valueNumber,
         x: center + radius * Math.cos(angleRad),
@@ -570,35 +653,30 @@ function TimePickerInline({
 
     if (mode === "hour") {
       const nextHour = getHourFromAngle(angle);
-      setDraft((prev) => ({
-        ...prev,
-        hour12: nextHour,
-      }));
+      setDraft((prev) => ({ ...prev, hour12: nextHour }));
     } else {
       const nextMinute = getMinuteFromAngle(angle);
-      setDraft((prev) => ({
-        ...prev,
-        minute: nextMinute,
-      }));
+      setDraft((prev) => ({ ...prev, minute: nextMinute }));
     }
   }
 
   return (
     <div
       style={{
-        marginTop: 10,
         borderRadius: 18,
         border: `1px solid ${theme.borderStandard}`,
         background: theme.bgSurface,
         padding: 14,
-        boxShadow: theme.shadow,
+        boxShadow: theme.shadowStrong,
+        fontFamily: UI_TYPO.family,
       }}
     >
       <div
         style={{
+          ...UI_TEXT.sectionTitle,
           color: theme.textPrimary,
           fontSize: 15,
-          fontWeight: 800,
+          fontWeight: UI_TYPO.weightBold,
           marginBottom: 12,
         }}
       >
@@ -624,7 +702,7 @@ function TimePickerInline({
           style={{
             textAlign: "center",
             color: theme.textMuted,
-            fontWeight: 800,
+            fontWeight: UI_TYPO.weightBold,
             fontSize: 18,
           }}
         >
@@ -714,11 +792,7 @@ function TimePickerInline({
               <svg
                 width={Math.abs(x2 - x1) || 2}
                 height={Math.abs(y2 - y1) || 2}
-                style={{
-                  overflow: "visible",
-                  position: "absolute",
-                  inset: 0,
-                }}
+                style={{ overflow: "visible", position: "absolute", inset: 0 }}
               >
                 <line
                   x1={x1 - Math.min(x1, x2)}
@@ -760,10 +834,7 @@ function TimePickerInline({
               type="button"
               onClick={() => {
                 setMode("hour");
-                setDraft((prev) => ({
-                  ...prev,
-                  hour12: point.valueNumber,
-                }));
+                setDraft((prev) => ({ ...prev, hour12: point.valueNumber }));
               }}
               style={{
                 position: "absolute",
@@ -776,7 +847,8 @@ function TimePickerInline({
                 background: isActive ? theme.controlSelectedBg : "transparent",
                 color: theme.textPrimary,
                 fontSize: 14,
-                fontWeight: 800,
+                fontFamily: UI_TYPO.family,
+                fontWeight: UI_TYPO.weightBold,
                 cursor: "pointer",
               }}
             >
@@ -867,7 +939,8 @@ function PickerNumberButton({
         }`,
         background: active ? theme.controlSelectedBg : theme.controlBg,
         color: theme.textPrimary,
-        fontWeight: 800,
+        fontWeight: UI_TYPO.weightBold,
+        fontFamily: UI_TYPO.family,
         fontSize: 16,
         cursor: "pointer",
       }}
@@ -902,7 +975,8 @@ function PickerAmPmButton({
         }`,
         background: active ? theme.controlSelectedBg : theme.controlBg,
         color: theme.textPrimary,
-        fontWeight: 800,
+        fontWeight: UI_TYPO.weightBold,
+        fontFamily: UI_TYPO.family,
         fontSize: 14,
         cursor: "pointer",
       }}
@@ -922,7 +996,8 @@ function pickerTextInputStyle(theme: Theme): React.CSSProperties {
     color: theme.textPrimary,
     padding: "0 12px",
     fontSize: 14,
-    fontWeight: 700,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightSemibold,
     outline: "none",
     boxSizing: "border-box",
   };
@@ -930,16 +1005,20 @@ function pickerTextInputStyle(theme: Theme): React.CSSProperties {
 
 function pickerGhostButtonStyle(theme: Theme): React.CSSProperties {
   return {
-    height: 36,
-    minWidth: 84,
-    padding: "0 16px",
+    height: 40,
+    width: "100%",
+    minWidth: 0,
+    padding: "0 18px",
     borderRadius: 12,
-    border: `1px solid ${theme.borderStandard}`,
-    background: theme.controlBg,
+    border: `1px solid ${theme.controlSelectedBorder}`,
+    background: theme.controlSelectedBg,
     color: theme.textPrimary,
     fontSize: 14,
-    fontWeight: 700,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightBold,
     cursor: "pointer",
+    transition:
+      "background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
   };
 }
 
@@ -953,7 +1032,8 @@ function pickerPrimaryButtonStyle(theme: Theme): React.CSSProperties {
     background: theme.controlSelectedBg,
     color: theme.textPrimary,
     fontSize: 14,
-    fontWeight: 800,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightBold,
     cursor: "pointer",
   };
 }
@@ -1065,14 +1145,7 @@ function WordHoneycombPalette({
   const height = (WORD_COLOUR_ROWS.length - 1) * rowStep + hexHeight;
 
   return (
-    <div
-      style={{
-        width,
-        height,
-        position: "relative",
-        margin: "0 auto",
-      }}
-    >
+    <div style={{ width, height, position: "relative", margin: "0 auto" }}>
       {cells.map((cell) => {
         const rowLength = WORD_COLOUR_ROWS[cell.row].length;
         const baseLeft = ((maxCols - rowLength) * colStep) / 2;
@@ -1082,11 +1155,7 @@ function WordHoneycombPalette({
         return (
           <div
             key={`${cell.row}-${cell.col}-${cell.id}`}
-            style={{
-              position: "absolute",
-              left,
-              top,
-            }}
+            style={{ position: "absolute", left, top }}
           >
             <HexSwatch
               colour={ACCENT_MAP[cell.id]}
@@ -1136,13 +1205,7 @@ function WordNeutralPalette({
         margin: "0 auto",
       }}
     >
-      <div
-        style={{
-          position: "absolute",
-          left: 0,
-          top: whiteTop,
-        }}
-      >
+      <div style={{ position: "absolute", left: 0, top: whiteTop }}>
         <HexSwatch
           colour={ACCENT_MAP[WORD_NEUTRAL_WHITE]}
           label="White"
@@ -1158,11 +1221,7 @@ function WordNeutralPalette({
       {WORD_NEUTRAL_TOP.map((id, index) => (
         <div
           key={id}
-          style={{
-            position: "absolute",
-            left: topLeft + index * colStep,
-            top: 0,
-          }}
+          style={{ position: "absolute", left: topLeft + index * colStep, top: 0 }}
         >
           <HexSwatch
             colour={ACCENT_MAP[id]}
@@ -1197,13 +1256,7 @@ function WordNeutralPalette({
         </div>
       ))}
 
-      <div
-        style={{
-          position: "absolute",
-          left: blackLeft,
-          top: blackTop,
-        }}
-      >
+      <div style={{ position: "absolute", left: blackLeft, top: blackTop }}>
         <HexSwatch
           colour={ACCENT_MAP[WORD_NEUTRAL_BLACK]}
           label="Black"
@@ -1230,10 +1283,7 @@ function InlineCustomThemePalette({
   theme: Theme;
 }) {
   const selectedHex = ACCENT_MAP[selectedColour];
-  const selectedLabel = useMemo(
-    () => getAccentLabel(selectedColour),
-    [selectedColour]
-  );
+  const selectedLabel = useMemo(() => getAccentLabel(selectedColour), [selectedColour]);
 
   return (
     <div
@@ -1245,6 +1295,7 @@ function InlineCustomThemePalette({
         borderRadius: 14,
         border: `1px solid ${theme.borderStandard}`,
         background: theme.bgSurface,
+        fontFamily: UI_TYPO.family,
       }}
     >
       <WordHoneycombPalette
@@ -1253,13 +1304,7 @@ function InlineCustomThemePalette({
         theme={theme}
       />
 
-      <div
-        style={{
-          display: "grid",
-          gap: 10,
-          justifyItems: "center",
-        }}
-      >
+      <div style={{ display: "grid", gap: 10, justifyItems: "center" }}>
         <div
           style={{
             width: "100%",
@@ -1284,17 +1329,11 @@ function InlineCustomThemePalette({
           flexWrap: "wrap",
         }}
       >
-        <div
-          style={{
-            display: "grid",
-            gap: 6,
-            minWidth: 0,
-          }}
-        >
+        <div style={{ display: "grid", gap: 6, minWidth: 0 }}>
           <div
             style={{
               fontSize: 11.5,
-              fontWeight: 700,
+              fontWeight: UI_TYPO.weightBold,
               letterSpacing: 0.6,
               textTransform: "uppercase",
               color: theme.textMuted,
@@ -1334,6 +1373,7 @@ function InlineCustomThemePalette({
 
             <span
               style={{
+                ...UI_TEXT.controlText,
                 fontSize: 13,
                 color: theme.textSecondary,
                 overflow: "hidden",
@@ -1358,7 +1398,8 @@ function InlineCustomThemePalette({
             background: theme.controlBg,
             color: theme.textPrimary,
             fontSize: 14,
-            fontWeight: 700,
+            fontFamily: UI_TYPO.family,
+            fontWeight: UI_TYPO.weightBold,
             cursor: "pointer",
             flex: "0 0 auto",
           }}
@@ -1367,6 +1408,87 @@ function InlineCustomThemePalette({
         </button>
       </div>
     </div>
+  );
+}
+
+function AppearanceOptionRow({
+  active,
+  label,
+  helper,
+  onClick,
+  theme,
+}: {
+  active: boolean;
+  label: string;
+  helper: string;
+  onClick: () => void;
+  theme: Theme;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="settings-row-button"
+      style={{
+        width: "100%",
+        display: "grid",
+        gridTemplateColumns: "16px minmax(0, 1fr)",
+        alignItems: "start",
+        gap: 12,
+        minHeight: 42,
+        padding: "10px 0",
+        background: "transparent",
+        border: "none",
+        borderBottom: `1px solid ${theme.borderStandard}`,
+        cursor: "pointer",
+        textAlign: "left",
+        transition: "background 0.15s ease",
+        fontFamily: UI_TYPO.family,
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: 14,
+          height: 14,
+          marginTop: 2,
+          borderRadius: 999,
+          border: `2px solid ${
+            active ? theme.controlSelectedBorder : theme.textMuted
+          }`,
+          background: active ? theme.controlSelectedBorder : "transparent",
+          boxSizing: "border-box",
+        }}
+      />
+
+      <span style={{ minWidth: 0 }}>
+        <span
+          style={{
+            ...UI_TEXT.controlText,
+            display: "block",
+            color: theme.textSecondary,
+            fontSize: 13,
+            fontWeight: UI_TYPO.weightSemibold,
+            lineHeight: 1.25,
+          }}
+        >
+          {label}
+        </span>
+
+        <span
+          style={{
+            ...UI_TEXT.controlText,
+            display: "block",
+            marginTop: 3,
+            color: theme.textMuted,
+            fontSize: 12,
+            lineHeight: 1.35,
+          }}
+        >
+          {helper}
+        </span>
+      </span>
+    </button>
   );
 }
 
@@ -1411,16 +1533,18 @@ export default function SettingsPanel({
     !p2CoverDateText || p2CoverDateText === p1CoverDateText
   );
   const [openPalette, setOpenPalette] = useState(false);
+  const [activePaperTab, setActivePaperTab] = useState<ActivePaperTab>("P1");
+  const [openSections, setOpenSections] =
+    useState<Record<SettingsSectionId, boolean>>(DEFAULT_OPEN_SECTIONS);
 
-  const selectedLabel = useMemo(
-    () => getAccentLabel(customThemeColour),
-    [customThemeColour]
-  );
+  const selectedLabel = useMemo(() => getAccentLabel(customThemeColour), [customThemeColour]);
 
   useEffect(() => {
     if (!open) {
       setActivePicker(null);
       setOpenPalette(false);
+      setActivePaperTab("P1");
+      setOpenSections(DEFAULT_OPEN_SECTIONS);
     }
   }, [open]);
 
@@ -1434,6 +1558,38 @@ export default function SettingsPanel({
     setCustomThemeColour(colour);
     setThemePreference("custom");
   }
+
+  function toggleSection(sectionId: SettingsSectionId) {
+    setOpenSections((prev) => ({
+      ...prev,
+      [sectionId]: !prev[sectionId],
+    }));
+  }
+
+  function togglePicker(target: ActivePicker) {
+    setActivePicker((prev) => (prev === target ? null : target));
+  }
+
+  const isEditingPaper1 = activePaperTab === "P1";
+  const isEditingPaper2 = activePaperTab === "P2";
+  const paper2FieldsDisabled = isEditingPaper2 && paper2DateLinked;
+
+  const activeDateValueRaw = isEditingPaper1
+    ? p1CoverDateText
+    : paper2DateLinked
+      ? p1CoverDateText
+      : p2CoverDateText;
+
+  const activeDateValue = formatDisplayDate(activeDateValueRaw);
+  const activeStartValue = isEditingPaper1 ? p1StartTimeText : p2StartTimeText;
+  const activeEndValue = isEditingPaper1 ? p1EndTimeText : p2EndTimeText;
+
+  const activeDatePicker =
+    activePaperTab === "P1" ? activePicker === "p1Date" : activePicker === "p2Date";
+  const activeStartPicker =
+    activePaperTab === "P1" ? activePicker === "p1Start" : activePicker === "p2Start";
+  const activeEndPicker =
+    activePaperTab === "P1" ? activePicker === "p1End" : activePicker === "p2End";
 
   return (
     <AppSideTray open={open} onClose={onClose} theme={theme}>
@@ -1465,6 +1621,16 @@ export default function SettingsPanel({
         .settings-scroll:hover::-webkit-scrollbar-thumb {
           background: ${theme.textMuted};
         }
+
+        .settings-section-bar:hover {
+          background: ${theme.controlBgHover} !important;
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
+          transform: scale(1.004);
+        }
+
+        .settings-row-button:hover {
+          background: ${theme.controlBg};
+        }
       `}</style>
 
       <AppTrayHeader
@@ -1481,51 +1647,74 @@ export default function SettingsPanel({
           minHeight: 0,
           padding: 18,
           display: "grid",
-          gap: 18,
+          gap: 0,
           alignContent: "start",
+          fontFamily: UI_TYPO.family,
         }}
       >
-        <AppTraySection title="Paper content" theme={theme}>
-          <ToggleRow
-            label="Include cover sheet"
-            checked={includeCoverSheet}
-            onChange={onToggleIncludeCoverSheet}
+        <div style={{ display: "grid", gap: 0 }}>
+          <SectionBar
+            title="Paper content"
             theme={theme}
+            open={openSections["paper-content"]}
+            onToggle={() => toggleSection("paper-content")}
           />
-          <ToggleRow
-            label="Include formula sheet"
-            checked={includeFormulaSheet}
-            onChange={onToggleIncludeFormulaSheet}
-            theme={theme}
-          />
-          <ToggleRow
-            label="Show date and time on cover sheet"
-            checked={showCoverDateTime}
-            onChange={onToggleShowCoverDateTime}
-            theme={theme}
-          />
-          <ToggleRow
-            label="Show Scottish candidate number box"
-            checked={showScottishCandidateNumberBox}
-            onChange={onToggleShowScottishCandidateNumberBox}
-            theme={theme}
-          />
-        </AppTraySection>
 
-        <AppTraySection title="Workspace" theme={theme}>
-          <ToggleRow
-            label="Show progress panel"
-            checked={showProgressPanel}
-            onChange={onToggleShowProgressPanel}
+          {openSections["paper-content"] ? (
+            <div style={{ display: "grid", padding: "0 2px" }}>
+              <ToggleRow
+                label="Include cover sheet"
+                checked={includeCoverSheet}
+                onChange={onToggleIncludeCoverSheet}
+                theme={theme}
+              />
+              <ToggleRow
+                label="Include formula sheet"
+                checked={includeFormulaSheet}
+                onChange={onToggleIncludeFormulaSheet}
+                theme={theme}
+              />
+              <ToggleRow
+                label="Show date and time on cover sheet"
+                checked={showCoverDateTime}
+                onChange={onToggleShowCoverDateTime}
+                theme={theme}
+              />
+              <ToggleRow
+                label="Show Scottish candidate number box"
+                checked={showScottishCandidateNumberBox}
+                onChange={onToggleShowScottishCandidateNumberBox}
+                theme={theme}
+              />
+            </div>
+          ) : null}
+        </div>
+
+        <div style={{ display: "grid", gap: 0 }}>
+          <SectionBar
+            title="Workspace"
             theme={theme}
+            open={openSections.workspace}
+            onToggle={() => toggleSection("workspace")}
           />
+
+          {openSections.workspace ? (
+            <div style={{ display: "grid", padding: "0 2px" }}>
+              <ToggleRow
+                label="Show progress panel"
+                checked={showProgressPanel}
+                onChange={onToggleShowProgressPanel}
+                theme={theme}
+              />
+            </div>
+          ) : null}
 
           <div
             style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 10,
-              paddingTop: 14,
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 12,
+              padding: "10px 0 16px",
             }}
           >
             <button
@@ -1543,312 +1732,331 @@ export default function SettingsPanel({
               Reset zoom
             </button>
           </div>
-        </AppTraySection>
+        </div>
 
-        <AppTraySection
-          title="Paper 1 sitting details"
-          subtitle="Linked to the Assessment Date"
-          theme={theme}
-        >
-          <div style={{ display: "grid", gap: 14 }}>
-            <div>
-              <FieldLabel theme={theme}>Paper 1 date</FieldLabel>
-              <IntegratedField
-                value={p1CoverDateText}
-                onChange={onChangeP1CoverDateText}
-                onClick={() => setActivePicker("p1Date")}
-                icon="🗓️"
+        <div style={{ display: "grid", gap: 0 }}>
+          <SectionBar
+            title="Paper sitting details"
+            theme={theme}
+            open={openSections["paper-sitting"]}
+            onToggle={() => toggleSection("paper-sitting")}
+          />
+
+          {openSections["paper-sitting"] ? (
+            <div style={{ display: "grid", gap: 12, padding: "12px 0 14px" }}>
+              <TabToggle
+                value={activePaperTab}
+                onChange={setActivePaperTab}
                 theme={theme}
               />
-              {activePicker === "p1Date" ? (
-                <SharedCalendarPicker
-                  theme={theme}
-                  value={p1CoverDateText}
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    onChangeP1CoverDateText(next);
-                    setActivePicker(null);
-                  }}
-                />
-              ) : null}
-            </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                gap: 12,
-              }}
-            >
-              <div>
-                <FieldLabel theme={theme}>Paper 1 start</FieldLabel>
-                <IntegratedField
-                  value={p1StartTimeText}
-                  onChange={onChangeP1StartTimeText}
-                  onClick={() => setActivePicker("p1Start")}
-                  icon="🕘"
-                  theme={theme}
-                />
-              </div>
+              <div style={{ display: "grid", gap: 12 }}>
+                <div style={{ position: "relative" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr auto",
+                      alignItems: "center",
+                      marginBottom: 6,
+                    }}
+                  >
+                    <FieldLabel theme={theme}>Date</FieldLabel>
 
-              <div>
-                <FieldLabel theme={theme}>Paper 1 end</FieldLabel>
-                <IntegratedField
-                  value={p1EndTimeText}
-                  onChange={onChangeP1EndTimeText}
-                  onClick={() => setActivePicker("p1End")}
-                  icon="🕘"
-                  theme={theme}
-                />
-              </div>
-            </div>
+                    {isEditingPaper2 ? (
+                      <button
+                        type="button"
+                        onClick={() => setPaper2DateLinked((prev) => !prev)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 6,
+                          background: "transparent",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0,
+                          fontFamily: UI_TYPO.family,
+                        }}
+                      >
+                        <span
+                          style={{
+                            ...UI_TEXT.controlText,
+                            fontSize: 11.5,
+                            color: theme.textMuted,
+                            fontWeight: UI_TYPO.weightMedium,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Different day
+                        </span>
 
-            {activePicker === "p1Start" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p1StartTimeText}
-                label="Paper 1 start"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP1StartTimeText(next);
-                  setActivePicker("p1End");
-                }}
-              />
-            ) : null}
+                        <span
+                          style={{
+                            width: 13,
+                            height: 13,
+                            borderRadius: 3,
+                            border: `1px solid ${
+                              !paper2DateLinked
+                                ? theme.controlSelectedBorder
+                                : theme.borderStandard
+                            }`,
+                            background: !paper2DateLinked
+                              ? theme.controlSelectedBg
+                              : theme.controlBg,
+                            display: "grid",
+                            placeItems: "center",
+                          }}
+                        >
+                          {!paper2DateLinked ? (
+                            <span
+                              style={{
+                                fontSize: 10,
+                                color: theme.accentPrimary,
+                                lineHeight: 1,
+                              }}
+                            >
+                              ✓
+                            </span>
+                          ) : null}
+                        </span>
+                      </button>
+                    ) : null}
+                  </div>
 
-            {activePicker === "p1End" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p1EndTimeText}
-                label="Paper 1 end"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP1EndTimeText(next);
-                  setActivePicker(null);
-                }}
-              />
-            ) : null}
-          </div>
-        </AppTraySection>
+                  <IntegratedField
+                    value={activeDateValue}
+                    onChange={(next) => {
+                      if (isEditingPaper1) {
+                        onChangeP1CoverDateText(next);
+                      } else {
+                        setPaper2DateLinked(false);
+                        onChangeP2CoverDateText(next);
+                      }
+                    }}
+                    onClick={() => {
+                      if (isEditingPaper1) {
+                        togglePicker("p1Date");
+                      } else if (!paper2FieldsDisabled) {
+                        setPaper2DateLinked(false);
+                        togglePicker("p2Date");
+                      }
+                    }}
+                    icon="🗓️"
+                    theme={theme}
+                    muted={paper2FieldsDisabled}
+                    disabled={paper2FieldsDisabled}
+                    readOnly
+                  />
 
-        <AppTraySection
-          title="Paper 2 sitting details"
-          subtitle="Edit only if Paper 2 is sat on a different day to Paper 1."
-          theme={theme}
-        >
-          <div style={{ display: "grid", gap: 14 }}>
-            <div>
-              <FieldLabel theme={theme}>Paper 2 date</FieldLabel>
-              <IntegratedField
-                value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                onChange={(next) => {
-                  setPaper2DateLinked(false);
-                  onChangeP2CoverDateText(next);
-                }}
-                onClick={() => {
-                  setPaper2DateLinked(false);
-                  setActivePicker("p2Date");
-                }}
-                icon="🗓️"
-                theme={theme}
-                muted={paper2DateLinked}
-              />
-              {activePicker === "p2Date" ? (
-                <SharedCalendarPicker
-                  theme={theme}
-                  value={paper2DateLinked ? p1CoverDateText : p2CoverDateText}
-                  onCancel={() => setActivePicker(null)}
-                  onApply={(next) => {
-                    setPaper2DateLinked(false);
-                    onChangeP2CoverDateText(next);
-                    setActivePicker(null);
-                  }}
-                />
-              ) : null}
-            </div>
+                  {activeDatePicker ? (
+                    <PickerOverlay theme={theme}>
+                      <SharedCalendarPicker
+                        theme={theme}
+                        value={activeDateValueRaw}
+                        onCancel={() => setActivePicker(null)}
+                        onApply={(next) => {
+                          if (isEditingPaper1) {
+                            onChangeP1CoverDateText(next);
+                          } else {
+                            setPaper2DateLinked(false);
+                            onChangeP2CoverDateText(next);
+                          }
+                          setActivePicker(null);
+                        }}
+                      />
+                    </PickerOverlay>
+                  ) : null}
+                </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(0,1fr))",
-                gap: 12,
-              }}
-            >
-              <div>
-                <FieldLabel theme={theme}>Paper 2 start</FieldLabel>
-                <IntegratedField
-                  value={p2StartTimeText}
-                  onChange={onChangeP2StartTimeText}
-                  onClick={() => setActivePicker("p2Start")}
-                  icon="🕘"
-                  theme={theme}
-                />
-              </div>
-
-              <div>
-                <FieldLabel theme={theme}>Paper 2 end</FieldLabel>
-                <IntegratedField
-                  value={p2EndTimeText}
-                  onChange={onChangeP2EndTimeText}
-                  onClick={() => setActivePicker("p2End")}
-                  icon="🕘"
-                  theme={theme}
-                />
-              </div>
-            </div>
-
-            {activePicker === "p2Start" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p2StartTimeText}
-                label="Paper 2 start"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP2StartTimeText(next);
-                  setActivePicker("p2End");
-                }}
-              />
-            ) : null}
-
-            {activePicker === "p2End" ? (
-              <TimePickerInline
-                theme={theme}
-                value={p2EndTimeText}
-                label="Paper 2 end"
-                onCancel={() => setActivePicker(null)}
-                onApply={(next) => {
-                  onChangeP2EndTimeText(next);
-                  setActivePicker(null);
-                }}
-              />
-            ) : null}
-          </div>
-        </AppTraySection>
-
-        <AppTraySection
-          title="Appearance"
-          subtitle="Choose how the app looks."
-          theme={theme}
-        >
-          <div style={{ display: "grid", gap: 10 }}>
-            {THEME_OPTIONS.map((opt) => {
-              const active = themePreference === opt.value;
-
-              return (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setThemePreference(opt.value)}
+                <div
                   style={{
-                    padding: 14,
-                    borderRadius: 14,
-                    border: `1px solid ${
-                      active
-                        ? theme.controlSelectedBorder
-                        : theme.borderStandard
-                    }`,
-                    background: active
-                      ? theme.controlSelectedBg
-                      : theme.bgSurface,
-                    textAlign: "left",
-                    cursor: "pointer",
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                    gap: 12,
                   }}
                 >
-                  <div
-                    style={{
-                      fontWeight: 700,
-                      color: theme.textPrimary,
-                    }}
-                  >
-                    {opt.label}
+                  <div style={{ position: "relative" }}>
+                    <FieldLabel theme={theme}>Start</FieldLabel>
+                    <IntegratedField
+                      value={activeStartValue}
+                      onChange={(next) => {
+                        if (isEditingPaper1) {
+                          onChangeP1StartTimeText(next);
+                        } else {
+                          onChangeP2StartTimeText(next);
+                        }
+                      }}
+                      onClick={() =>
+                        togglePicker(isEditingPaper1 ? "p1Start" : "p2Start")
+                      }
+                      icon="🕘"
+                      theme={theme}
+                      readOnly
+                    />
                   </div>
 
-                  <div
-                    style={{
-                      fontSize: 13,
-                      color: theme.textMuted,
-                    }}
-                  >
-                    {opt.helper}
+                  <div style={{ position: "relative" }}>
+                    <FieldLabel theme={theme}>End</FieldLabel>
+                    <IntegratedField
+                      value={activeEndValue}
+                      onChange={(next) => {
+                        if (isEditingPaper1) {
+                          onChangeP1EndTimeText(next);
+                        } else {
+                          onChangeP2EndTimeText(next);
+                        }
+                      }}
+                      onClick={() =>
+                        togglePicker(isEditingPaper1 ? "p1End" : "p2End")
+                      }
+                      icon="🕘"
+                      theme={theme}
+                      readOnly
+                    />
                   </div>
-                </button>
-              );
-            })}
-          </div>
-        </AppTraySection>
-
-        <AppTraySection
-          title="Custom theme"
-          subtitle="Choose your base colour."
-          theme={theme}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              padding: 14,
-              borderRadius: 14,
-              border: `1px solid ${theme.borderStandard}`,
-              background: theme.bgSurface,
-              gap: 12,
-              flexWrap: "wrap",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div
-                style={{
-                  width: 18,
-                  height: 21,
-                  background: ACCENT_MAP[customThemeColour],
-                  clipPath:
-                    "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
-                  border:
-                    customThemeColour === WORD_NEUTRAL_WHITE
-                      ? `1px solid ${theme.borderStandard}`
-                      : "none",
-                }}
-              />
-
-              <div>
-                <div style={{ fontWeight: 700, color: theme.textPrimary }}>
-                  {selectedLabel}
                 </div>
-                <div style={{ fontSize: 12, color: theme.textMuted }}>
-                  Base colour
-                </div>
+
+                {activeStartPicker || activeEndPicker ? (
+                  <div style={{ position: "relative" }}>
+                    <PickerOverlay theme={theme} fullWidth>
+                      <TimePickerInline
+                        theme={theme}
+                        value={activeStartPicker ? activeStartValue : activeEndValue}
+                        label={
+                          activeStartPicker
+                            ? `${activePaperTab === "P1" ? "Paper 1" : "Paper 2"} start`
+                            : `${activePaperTab === "P1" ? "Paper 1" : "Paper 2"} end`
+                        }
+                        onCancel={() => setActivePicker(null)}
+                        onApply={(next) => {
+                          if (activeStartPicker) {
+                            if (isEditingPaper1) {
+                              onChangeP1StartTimeText(next);
+                            } else {
+                              onChangeP2StartTimeText(next);
+                            }
+                          } else {
+                            if (isEditingPaper1) {
+                              onChangeP1EndTimeText(next);
+                            } else {
+                              onChangeP2EndTimeText(next);
+                            }
+                          }
+                          setActivePicker(null);
+                        }}
+                      />
+                    </PickerOverlay>
+                  </div>
+                ) : null}
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                setOpenPalette((prev) => !prev);
-                setThemePreference("custom");
-              }}
-              style={{
-                padding: "8px 12px",
-                borderRadius: 10,
-                border: `1px solid ${theme.borderStandard}`,
-                background: theme.bgElevated,
-                color: theme.textPrimary,
-                cursor: "pointer",
-                fontWeight: 600,
-              }}
-            >
-              {openPalette ? "Hide palette" : "Choose colour"}
-            </button>
-          </div>
-
-          {openPalette ? (
-            <InlineCustomThemePalette
-              selectedColour={customThemeColour}
-              onSelect={handleSelectCustomColour}
-              onClose={() => setOpenPalette(false)}
-              theme={theme}
-            />
           ) : null}
-        </AppTraySection>
+        </div>
+
+        <div style={{ display: "grid", gap: 0 }}>
+          <SectionBar
+            title="Appearance"
+            theme={theme}
+            open={openSections.appearance}
+            onToggle={() => toggleSection("appearance")}
+          />
+
+          {openSections.appearance ? (
+            <div style={{ display: "grid", padding: "0 2px" }}>
+              {THEME_OPTIONS.map((opt) => (
+                <AppearanceOptionRow
+                  key={opt.value}
+                  active={themePreference === opt.value}
+                  label={opt.label}
+                  helper={opt.helper}
+                  onClick={() => setThemePreference(opt.value)}
+                  theme={theme}
+                />
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div style={{ display: "grid", gap: 0 }}>
+          <SectionBar
+            title="Custom theme"
+            theme={theme}
+            open={openSections["custom-theme"]}
+            onToggle={() => toggleSection("custom-theme")}
+          />
+
+          {openSections["custom-theme"] ? (
+            <div style={{ display: "grid", gap: 10, padding: "12px 0 0" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  flexWrap: "wrap",
+                  padding: "2px 0",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div
+                    style={{
+                      width: 18,
+                      height: 21,
+                      background: ACCENT_MAP[customThemeColour],
+                      clipPath:
+                        "polygon(50% 0%, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%)",
+                      border:
+                        customThemeColour === WORD_NEUTRAL_WHITE
+                          ? `1px solid ${theme.borderStandard}`
+                          : "none",
+                    }}
+                  />
+
+                  <div>
+                    <div
+                      style={{
+                        ...UI_TEXT.controlTextStrong,
+                        fontSize: 14,
+                        color: theme.textPrimary,
+                        fontWeight: UI_TYPO.weightBold,
+                      }}
+                    >
+                      {selectedLabel}
+                    </div>
+                    <div
+                      style={{
+                        ...UI_TEXT.controlText,
+                        fontSize: 12,
+                        color: theme.textMuted,
+                      }}
+                    >
+                      Base colour
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpenPalette((prev) => !prev);
+                    setThemePreference("custom");
+                  }}
+                  style={pickerGhostButtonStyle(theme)}
+                >
+                  {openPalette ? "Hide palette" : "Choose colour"}
+                </button>
+              </div>
+
+              {openPalette ? (
+                <InlineCustomThemePalette
+                  selectedColour={customThemeColour}
+                  onSelect={handleSelectCustomColour}
+                  onClose={() => setOpenPalette(false)}
+                  theme={theme}
+                />
+              ) : null}
+            </div>
+          ) : null}
+        </div>
       </div>
     </AppSideTray>
   );

@@ -1,8 +1,9 @@
 "use client";
 
+import type { RefObject } from "react";
 import BuilderPreviewPageRenderer from "./BuilderPreviewPageRenderer";
 import { UI_TEXT } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import type { PreviewPage } from "@/app/create-assessment/builder/BuilderUtils";
 
@@ -15,9 +16,9 @@ type EditForView =
   | null;
 
 type Props = {
-  theme: AppTheme;
-  previewPaneRef: React.RefObject<HTMLDivElement | null>;
-  pageWrapperRefs: React.RefObject<Array<HTMLDivElement | null>>;
+  theme: Theme;
+  previewPaneRef: RefObject<HTMLDivElement | null>;
+  pageWrapperRefs: RefObject<Array<HTMLDivElement | null>>;
   flashWarning: string | null;
   previewPages: PreviewPage[];
   viewPaper: Paper;
@@ -79,7 +80,7 @@ export default function BuilderPreviewPane({
         overflowY: "auto",
         overflowX: "auto",
         padding: "24px 18px 18px",
-        background: theme.previewChromeBg,
+        background: theme.bgPage,
       }}
     >
       <div
@@ -96,9 +97,9 @@ export default function BuilderPreviewPane({
           <div
             style={{
               width: "min(100%, 760px)",
-              border: `1px solid ${theme.border}`,
-              background: "rgba(245,158,11,0.08)",
-              color: theme.warning,
+              border: `1px solid ${theme.borderStandard}`,
+              background: theme.accentSoft,
+              color: theme.textPrimary,
               borderRadius: 12,
               padding: "10px 12px",
               ...UI_TEXT.controlTextStrong,

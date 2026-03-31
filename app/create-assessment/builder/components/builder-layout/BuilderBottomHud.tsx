@@ -138,6 +138,9 @@ export default function BuilderBottomHud({
         >
           <div
             onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+
               hudResizeStartRef.current = {
                 startY: e.clientY,
                 startHeight: hudHeight,
@@ -156,6 +159,8 @@ export default function BuilderBottomHud({
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              userSelect: "none",
+              WebkitUserSelect: "none",
             }}
           >
             <div

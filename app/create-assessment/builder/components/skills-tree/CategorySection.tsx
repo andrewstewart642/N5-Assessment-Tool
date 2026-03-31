@@ -996,6 +996,7 @@ export default function CategorySection(props: Props) {
   } = props;
 
   const stripeColour = getCategoryStripeColour(category, theme);
+  const [categoryHovered, setCategoryHovered] = useState(false);
 
   function handleToggleCategory() {
     if (!collapsed) {
@@ -1022,15 +1023,20 @@ export default function CategorySection(props: Props) {
         style={{
           width: "auto",
           boxSizing: "border-box",
-          background: theme.bgElevated,
+          background: categoryHovered ? theme.controlBgHover : theme.bgElevated,
           color: theme.textPrimary,
           borderTop: `1px solid ${theme.borderStandard}`,
           borderBottom: `1px solid ${theme.borderStandard}`,
           borderLeft: "none",
           borderRight: "none",
           overflow: "hidden",
-          boxShadow: "none",
-          transition: "background 0.18s ease",
+          boxShadow: categoryHovered
+            ? "0 10px 22px rgba(15,23,42,0.10)"
+            : "0 0 0 rgba(0,0,0,0)",
+          transform: categoryHovered ? "scale(1.004)" : "scale(1)",
+          transformOrigin: "center center",
+          transition:
+            "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
         }}
       >
         <div
@@ -1040,7 +1046,7 @@ export default function CategorySection(props: Props) {
             width: "100%",
             background: stripeColour,
             transition: "filter 0.18s ease",
-            filter: "brightness(1)",
+            filter: categoryHovered ? "brightness(1.08)" : "brightness(1)",
           }}
         />
 
@@ -1049,6 +1055,8 @@ export default function CategorySection(props: Props) {
           role="button"
           aria-expanded={!collapsed}
           tabIndex={0}
+          onMouseEnter={() => setCategoryHovered(true)}
+          onMouseLeave={() => setCategoryHovered(false)}
           onKeyDown={(e) => {
             if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
@@ -1080,9 +1088,10 @@ export default function CategorySection(props: Props) {
               style={{
                 display: "inline-block",
                 width: 18,
-                color: theme.textMuted,
+                color: categoryHovered ? theme.textSecondary : theme.textMuted,
                 flex: "0 0 auto",
                 ...UI_TEXT.controlTextStrong,
+                transition: "color 0.18s ease",
               }}
             >
               {collapsed ? "▶" : "▼"}
@@ -1090,14 +1099,14 @@ export default function CategorySection(props: Props) {
 
             <span
               style={{
-                ...UI_TEXT.sectionTitle,
+                ...UI_TEXT.controlTextStrong,
                 color: theme.textPrimary,
                 whiteSpace: "nowrap",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 minWidth: 0,
                 letterSpacing: 0.2,
-                fontWeight: UI_TYPO.weightBold,
+                fontWeight: UI_TYPO.weightSemibold,
               }}
             >
               {category}
@@ -1124,8 +1133,8 @@ export default function CategorySection(props: Props) {
                 padding: "0 12px",
                 borderRadius: 999,
                 border: `1px solid ${theme.borderStandard}`,
-                background: theme.controlBg,
-                color: theme.textMuted,
+                background: categoryHovered ? theme.controlBgHover : theme.controlBg,
+                color: categoryHovered ? theme.textSecondary : theme.textMuted,
                 cursor: collapsed ? "default" : "pointer",
                 height: 30,
                 whiteSpace: "nowrap",
@@ -1136,8 +1145,11 @@ export default function CategorySection(props: Props) {
                 opacity: collapsed ? 0 : 1,
                 pointerEvents: collapsed ? "none" : "auto",
                 ...UI_TEXT.buttonTextSmall,
+                boxShadow: categoryHovered
+                  ? "0 4px 12px rgba(15,23,42,0.08)"
+                  : "none",
                 transition:
-                  "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease",
+                  "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, box-shadow 0.18s ease",
               }}
               title={`Collapse expanded skills in ${category}`}
               aria-hidden={collapsed}

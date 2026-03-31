@@ -39,6 +39,10 @@ type Props = {
   totalViewerPages: number;
 };
 
+const TOP_BAR_CONTROL_HEIGHT = 32;
+const TOP_BAR_LABEL_GAP = 4;
+const TOP_BAR_RADIUS = 10;
+
 function formatAssessmentDateDisplay(value: string): string {
   if (!value) return "";
 
@@ -64,7 +68,6 @@ function fieldLabelStyle(theme: Theme): React.CSSProperties {
   return {
     fontSize: 12,
     fontWeight: UI_TYPO.weightMedium,
-    letterSpacing: 0,
     color: theme.textMuted,
     lineHeight: 1.2,
     whiteSpace: "nowrap",
@@ -74,7 +77,7 @@ function fieldLabelStyle(theme: Theme): React.CSSProperties {
 function fixedFieldShellStyle(width: number): React.CSSProperties {
   return {
     display: "grid",
-    gap: 4,
+    gap: TOP_BAR_LABEL_GAP,
     minWidth: 0,
     width,
     fontFamily: UI_TYPO.family,
@@ -84,8 +87,8 @@ function fixedFieldShellStyle(width: number): React.CSSProperties {
 
 function sharedInputStyle(theme: Theme): React.CSSProperties {
   return {
-    height: 32,
-    borderRadius: 10,
+    height: TOP_BAR_CONTROL_HEIGHT,
+    borderRadius: TOP_BAR_RADIUS,
     border: `1px solid ${theme.borderStandard}`,
     background: theme.bgSurface,
     color: theme.textPrimary,
@@ -135,37 +138,34 @@ export default function BuilderTopBar({
         background: theme.bgSurface,
         display: "grid",
         gridTemplateRows: "auto auto",
-        rowGap: 12,
-        padding: "8px 12px 65px",
+        rowGap: 10,
+        padding: "8px 12px 60px",
         boxSizing: "border-box",
         minHeight: 0,
         position: "relative",
         zIndex: 5,
       }}
     >
+      {/* TOP ROW */}
       <div
         style={{
           display: "flex",
-          alignItems: "end",
-          gap: 10,
+          alignItems: "flex-start", // 🔑 FIX: align stacks, not bottoms
+          gap: 12,
           minWidth: 0,
         }}
       >
+        {/* LEFT GROUP */}
         <div
           style={{
             display: "flex",
-            alignItems: "end",
-            gap: 10,
+            alignItems: "flex-start",
+            gap: 12,
             flex: "1 1 auto",
             minWidth: 0,
           }}
         >
-          <div
-            style={{
-              flex: "1.2 1 0",
-              minWidth: 0,
-            }}
-          >
+          <div style={{ flex: "1.2 1 0", minWidth: 0 }}>
             <BuilderMetaField
               label="Name"
               value={assessmentName}
@@ -177,12 +177,7 @@ export default function BuilderTopBar({
             />
           </div>
 
-          <div
-            style={{
-              flex: "1 1 0",
-              minWidth: 0,
-            }}
-          >
+          <div style={{ flex: "1 1 0", minWidth: 0 }}>
             <ClassCoverageSelect
               levelLabel={classLevelLabel}
               classes={availableClasses}
@@ -204,15 +199,17 @@ export default function BuilderTopBar({
           </div>
         </div>
 
+        {/* RIGHT GROUP */}
         <div
           style={{
             display: "flex",
-            alignItems: "end",
-            gap: 10,
+            alignItems: "flex-start",
+            gap: 12,
             flex: "0 0 auto",
             minWidth: 0,
           }}
         >
+          {/* DATE */}
           <div
             ref={builderDateFieldRef}
             style={{
@@ -234,7 +231,6 @@ export default function BuilderTopBar({
                   ...sharedInputStyle(theme),
                   cursor: "pointer",
                 }}
-                aria-label="Assessment date"
               />
 
               <button
@@ -256,28 +252,13 @@ export default function BuilderTopBar({
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: 12,
-                  lineHeight: 1,
-                  padding: 0,
                 }}
-                aria-label="Open assessment date calendar"
               >
-                <span
-                  aria-hidden="true"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                    height: "100%",
-                    transform: "translateY(-0.5px)",
-                  }}
-                >
-                  🗓️
-                </span>
+                🗓️
               </button>
             </div>
 
-            {builderCalendarOpen ? (
+            {builderCalendarOpen && (
               <div
                 style={{
                   position: "absolute",
@@ -297,21 +278,26 @@ export default function BuilderTopBar({
                   }}
                 />
               </div>
-            ) : null}
+            )}
           </div>
 
+          {/* VIEWING */}
           <div
             style={{
               display: "grid",
-              gap: 4,
-              minWidth: 0,
+              gap: TOP_BAR_LABEL_GAP,
               width: "fit-content",
               fontFamily: UI_TYPO.family,
-              flex: "0 0 auto",
             }}
           >
             <span style={fieldLabelStyle(theme)}>Viewing</span>
-            <div style={{ height: 32, display: "flex", alignItems: "center" }}>
+            <div
+              style={{
+                height: TOP_BAR_CONTROL_HEIGHT,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               <ViewingToggle
                 value={viewPaper}
                 onChange={setViewPaper}
@@ -322,6 +308,7 @@ export default function BuilderTopBar({
         </div>
       </div>
 
+      {/* ZOOM HUD */}
       <div
         style={{
           display: "flex",
@@ -337,14 +324,12 @@ export default function BuilderTopBar({
             display: "inline-flex",
             alignItems: "center",
             gap: 10,
-            minHeight: 10,
             padding: "4px 12px",
             borderRadius: 8,
             background: theme.bgElevated,
             opacity: 0.92,
             border: `1px solid ${theme.borderStandard}`,
             boxShadow: theme.shadow,
-            backdropFilter: "blur(4px)",
           }}
         >
           <div
@@ -353,11 +338,8 @@ export default function BuilderTopBar({
               textAlign: "center",
               color: theme.textMuted,
               fontSize: 12,
-              fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightMedium,
-              lineHeight: 1,
             }}
-            title={`Page ${currentViewerPage} of ${totalViewerPages}`}
           >
             {currentViewerPage}/{totalViewerPages}
           </div>
@@ -380,15 +362,10 @@ export default function BuilderTopBar({
               background: "transparent",
               color: theme.textSecondary,
               cursor: "pointer",
-              fontFamily: UI_TYPO.family,
-              fontWeight: UI_TYPO.weightMedium,
               fontSize: 16,
-              lineHeight: "16px",
               display: "grid",
               placeItems: "center",
-              padding: 0,
             }}
-            title="Zoom out"
           >
             −
           </button>
@@ -399,11 +376,8 @@ export default function BuilderTopBar({
               textAlign: "center",
               color: theme.textPrimary,
               fontSize: 12,
-              fontFamily: UI_TYPO.family,
               fontWeight: UI_TYPO.weightSemibold,
-              lineHeight: 1,
             }}
-            title="Current zoom"
           >
             {zoomPct}%
           </div>
@@ -418,15 +392,10 @@ export default function BuilderTopBar({
               background: "transparent",
               color: theme.textSecondary,
               cursor: "pointer",
-              fontFamily: UI_TYPO.family,
-              fontWeight: UI_TYPO.weightMedium,
               fontSize: 16,
-              lineHeight: "16px",
               display: "grid",
               placeItems: "center",
-              padding: 0,
             }}
-            title="Zoom in"
           >
             +
           </button>

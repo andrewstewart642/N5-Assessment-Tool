@@ -21,7 +21,7 @@ export function usePreviewViewport({
   viewPaper,
 }: UsePreviewViewportArgs) {
   const [fitWidthScale, setFitWidthScale] = useState<number>(1);
-  const [zoomPct, setZoomPct] = useState<number>(90);
+  const [zoomPct, setZoomPct] = useState<number>(100);
   const [currentViewerPage, setCurrentViewerPage] = useState<number>(1);
 
   const pageCheckFrameRef = useRef<number | null>(null);

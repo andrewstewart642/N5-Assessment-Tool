@@ -4,8 +4,18 @@ import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
 type ConceptIndexBySkill = Record<string, number>;
 type DifficultyBySkill = Record<string, DifficultyLevel>;
 
+const DEFAULT_COLLAPSED_CATEGORIES: Record<string, boolean> = {
+  "Numerical Skills": true,
+  "Algebraic Skills": true,
+  "Geometric Skills": true,
+  "Trigonometric Skills": true,
+  "Statistical Skills": true,
+};
+
 export function useSkillsTreeState() {
-  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>(
+    DEFAULT_COLLAPSED_CATEGORIES
+  );
   const [expandedSkillIds, setExpandedSkillIds] = useState<string[]>([]);
 
   const [conceptIndexBySkill, setConceptIndexBySkill] =
