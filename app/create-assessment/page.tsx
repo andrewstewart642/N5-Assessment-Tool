@@ -763,7 +763,11 @@ export default function CreateAssessmentSetupPage() {
               />
             </div>
 
-            <LevelSelect value={selectedLevelId} onChange={setSelectedLevelId} />
+            <LevelSelect
+              value={selectedLevelId}
+              onChange={setSelectedLevelId}
+              theme={theme}
+            />
 
             <ClassCoverageSelect
               levelLabel={themeLevel?.label ?? null}
@@ -772,6 +776,7 @@ export default function CreateAssessmentSetupPage() {
               useCompleteCourseCoverage={useCompleteCourseCoverage}
               onToggleClass={handleToggleClass}
               onSelectCompleteCourseCoverage={handleSelectCompleteCourseCoverage}
+              theme={theme}
             />
 
             <TextField

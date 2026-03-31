@@ -1,5 +1,6 @@
 "use client";
 
+import type { Theme } from "@/ui/AppTheme";
 import {
   ASSESSMENT_LEVEL_OPTIONS,
   type AssessmentLevelId,
@@ -8,15 +9,16 @@ import {
 type Props = {
   value: AssessmentLevelId | null;
   onChange: (value: AssessmentLevelId) => void;
+  theme: Theme;
 };
 
-export default function LevelSelect({ value, onChange }: Props) {
+export default function LevelSelect({ value, onChange, theme }: Props) {
   return (
     <label style={{ display: "grid", gap: 6 }}>
       <span
         style={{
           fontSize: 13,
-          color: "rgba(214,227,243,0.72)",
+          color: theme.textMuted,
           fontWeight: 600,
         }}
       >
@@ -25,9 +27,9 @@ export default function LevelSelect({ value, onChange }: Props) {
 
       <div
         style={{
-          border: "1px solid rgba(255,255,255,0.10)",
+          border: `1px solid ${theme.borderStandard}`,
           borderRadius: 14,
-          background: "rgba(255,255,255,0.02)",
+          background: theme.controlBg,
           padding: "10px 12px",
         }}
       >
@@ -39,22 +41,18 @@ export default function LevelSelect({ value, onChange }: Props) {
             border: "none",
             outline: "none",
             background: "transparent",
-            color: "#f7fbff",
+            color: theme.textPrimary,
             fontSize: 16,
             fontFamily: "inherit",
             cursor: "pointer",
           }}
         >
-          <option value="" disabled style={{ color: "#0b0f14" }}>
+          <option value="" disabled style={{ color: "#0f172a" }}>
             Select level
           </option>
 
           {ASSESSMENT_LEVEL_OPTIONS.map((option) => (
-            <option
-              key={option.id}
-              value={option.id}
-              style={{ color: "#0b0f14" }}
-            >
+            <option key={option.id} value={option.id} style={{ color: "#0f172a" }}>
               {option.label}
             </option>
           ))}

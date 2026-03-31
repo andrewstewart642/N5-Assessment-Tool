@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import CategorySection from "@/app/create-assessment/builder/components/skills-tree/CategorySection";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
@@ -12,64 +13,76 @@ import type {
 } from "@/shared-types/AssessmentTypes";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
 
-function CircleRadio(props: {
-  label: string;
-  checked: boolean;
-  onClick: () => void;
+const CONTROL_HEIGHT = 40;
+const SEGMENT_INSET = 5;
+const SEGMENT_INNER_HEIGHT = CONTROL_HEIGHT - SEGMENT_INSET * 2;
+
+function SegmentedControl<Option extends string>(props: {
+  ariaLabel: string;
+  options: Array<{ value: Option; label: string }>;
+  value: Option;
+  onChange: (value: Option) => void;
   theme: Theme;
-  fontSize?: number;
+  size?: "sm" | "md";
 }) {
-  const { label, checked, onClick, theme, fontSize = UI_TYPO.sizeMeta } = props;
+  const { ariaLabel, options, value, onChange, theme, size = "md" } = props;
 
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={checked}
-      onClick={onClick}
+    <div
+      role="radiogroup"
+      aria-label={ariaLabel}
       style={{
         display: "inline-flex",
         alignItems: "center",
-        justifyContent: "center",
-        gap: 7,
-        padding: "6px 12px",
-        borderRadius: 999,
-        border: `1px solid ${
-          checked ? theme.controlSelectedBorder : theme.borderStandard
-        }`,
-        background: checked ? theme.controlSelectedBg : theme.controlBg,
-        color: checked ? theme.textPrimary : theme.textSecondary,
-        cursor: "pointer",
-        fontFamily: UI_TYPO.family,
-        fontWeight: UI_TYPO.weightSemibold,
-        fontSize,
-        height: 30,
-        lineHeight: 1,
-        whiteSpace: "nowrap",
+        gap: 6,
         width: "fit-content",
+        maxWidth: "100%",
         minWidth: 0,
-        flex: "0 0 auto",
-        transition:
-          "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+        padding: SEGMENT_INSET,
+        height: CONTROL_HEIGHT,
+        borderRadius: 14,
+        border: `1px solid ${theme.borderStandard}`,
+        background: theme.controlBg,
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+        boxSizing: "border-box",
       }}
-      title={label}
     >
-      <span
-        style={{
-          width: 10,
-          height: 10,
-          borderRadius: 999,
-          border: `2px solid ${
-            checked ? theme.controlSelectedBorder : theme.textMuted
-          }`,
-          background: checked ? theme.controlSelectedBorder : "transparent",
-          display: "inline-block",
-          flex: "0 0 auto",
-          transition: "background 0.15s ease, border-color 0.15s ease",
-        }}
-      />
-      <span style={{ whiteSpace: "nowrap" }}>{label}</span>
-    </button>
+      {options.map((option) => {
+        const selected = option.value === value;
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() => onChange(option.value)}
+            style={{
+              flex: "0 0 auto",
+              height: SEGMENT_INNER_HEIGHT,
+              border: "none",
+              borderRadius: 10,
+              background: selected ? theme.controlSelectedBg : "transparent",
+              color: selected ? theme.textPrimary : theme.textSecondary,
+              cursor: "pointer",
+              fontFamily: UI_TYPO.family,
+              fontWeight: UI_TYPO.weightSemibold,
+              fontSize: size === "sm" ? UI_TYPO.sizeSm : UI_TYPO.sizeMeta,
+              lineHeight: 1,
+              whiteSpace: "nowrap",
+              padding: "0 10px",
+              boxShadow: selected ? "0 2px 8px rgba(15,23,42,0.10)" : "none",
+              transform: selected ? "scale(1.01)" : "scale(1)",
+              transition:
+                "background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease",
+            }}
+            title={option.label}
+          >
+            {option.label}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -86,7 +99,7 @@ function MiniStepButton(props: {
       aria-label={label}
       onClick={onClick}
       style={{
-        borderRadius: 10,
+        borderRadius: 9,
         border: `1px solid ${theme.borderStandard}`,
         background: theme.controlBg,
         color: theme.textMuted,
@@ -94,18 +107,26 @@ function MiniStepButton(props: {
         fontFamily: UI_TYPO.family,
         fontWeight: UI_TYPO.weightHeavy,
         width: 30,
-        height: 14,
-        lineHeight: "14px",
+        height: 18,
         display: "grid",
         placeItems: "center",
         padding: 0,
-        fontSize: UI_TYPO.sizeSm,
+        lineHeight: 1,
+        fontSize: 9,
         transition:
           "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
       }}
       title={label}
     >
-      {label === "Up" ? "▲" : "▼"}
+      <span
+        style={{
+          display: "block",
+          lineHeight: 1,
+          transform: label === "Up" ? "translateY(-0.5px)" : "translateY(0.5px)",
+        }}
+      >
+        {label === "Up" ? "▲" : "▼"}
+      </span>
     </button>
   );
 }
@@ -184,10 +205,14 @@ export default function SkillsTree({
   regenerateQuestionToPaper,
   theme,
 }: SkillsTreeProps) {
-  const headerGradient = `linear-gradient(180deg, ${theme.bgElevated} 0%, ${theme.bgSurface} 100%)`;
+  const [helperHidden, setHelperHidden] = useState(false);
+  const [targetMarksText, setTargetMarksText] = useState(`${targetMarks} marks`);
 
   const helperColor = theme.textMuted;
-  const insetShadow = `inset 0 1px 0 rgba(255,255,255,0.04)`;
+
+  useEffect(() => {
+    setTargetMarksText(`${targetMarks} marks`);
+  }, [targetMarks]);
 
   const decMarks = () => setTargetMarks(Math.max(minTargetMarks, targetMarks - 1));
   const incMarks = () => setTargetMarks(Math.min(maxTargetMarks, targetMarks + 1));
@@ -208,6 +233,26 @@ export default function SkillsTree({
     targetPaper: activePaper,
   };
 
+  function commitTargetMarksInput(rawValue: string) {
+    const digitsOnly = rawValue.replace(/\D/g, "");
+
+    if (!digitsOnly.length) {
+      setTargetMarks(minTargetMarks);
+      setTargetMarksText(`${minTargetMarks} marks`);
+      return;
+    }
+
+    const parsed = Number(digitsOnly);
+    if (!Number.isFinite(parsed)) {
+      setTargetMarksText(`${targetMarks} marks`);
+      return;
+    }
+
+    const clamped = Math.max(minTargetMarks, Math.min(maxTargetMarks, parsed));
+    setTargetMarks(clamped);
+    setTargetMarksText(`${clamped} marks`);
+  }
+
   return (
     <section
       style={{
@@ -227,18 +272,13 @@ export default function SkillsTree({
           zIndex: 2,
           background: theme.bgPage,
           borderBottom: `1px solid ${theme.borderStandard}`,
-          padding: "12px 14px 10px",
+          padding: "14px 14px 10px",
         }}
       >
         <div
           style={{
             display: "grid",
-            gap: 14,
-            padding: 14,
-            border: `1px solid ${theme.borderStandard}`,
-            borderRadius: 18,
-            background: headerGradient,
-            boxShadow: theme.shadow,
+            gap: 12,
           }}
         >
           <div
@@ -275,26 +315,83 @@ export default function SkillsTree({
 
           <div
             style={{
-              ...UI_TEXT.helper,
-              color: helperColor,
-              textAlign: "left",
-              maxWidth: 520,
+              display: "grid",
+              gap: 6,
+              paddingBottom: 10,
+              borderBottom: `1px solid ${theme.borderStandard}`,
             }}
           >
-            Filter by standard, choose a thinking type, select a paper to add to,
-            and generate questions for your assessment. View them in the PDF builder
-            in the right pane.
+            {!helperHidden ? (
+              <div
+                style={{
+                  ...UI_TEXT.helper,
+                  color: helperColor,
+                  textAlign: "left",
+                  maxWidth: 520,
+                }}
+              >
+                Filter by standard, choose a thinking type, select a paper to add to,
+                and generate questions for your assessment. View them in the PDF builder
+                in the right pane.{" "}
+                <button
+                  type="button"
+                  onClick={() => setHelperHidden(true)}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: theme.textSecondary,
+                    cursor: "pointer",
+                    padding: 0,
+                    font: "inherit",
+                    fontWeight: UI_TYPO.weightSemibold,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                  }}
+                >
+                  Hide
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", justifyContent: "flex-start" }}>
+                <button
+                  type="button"
+                  onClick={() => setHelperHidden(false)}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    color: theme.textSecondary,
+                    cursor: "pointer",
+                    padding: 0,
+                    fontFamily: UI_TYPO.family,
+                    fontSize: UI_TYPO.sizeMeta,
+                    fontWeight: UI_TYPO.weightSemibold,
+                    textDecoration: "underline",
+                    textUnderlineOffset: 2,
+                  }}
+                >
+                  Show guidance
+                </button>
+              </div>
+            )}
           </div>
 
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr",
-              rowGap: 14,
+              gridTemplateColumns: "minmax(0, 1fr) auto",
+              columnGap: 14,
+              rowGap: 12,
               alignItems: "end",
             }}
           >
-            <div style={{ display: "grid", gap: 6 }}>
+            <div
+              style={{
+                display: "grid",
+                gap: 6,
+                justifyItems: "start",
+                minWidth: 0,
+              }}
+            >
               <div
                 style={{
                   ...UI_TEXT.sectionLabel,
@@ -304,42 +401,108 @@ export default function SkillsTree({
                 Standard
               </div>
 
-              <div
-                role="radiogroup"
-                aria-label="Standard filter"
-                style={{
-                  display: "flex",
-                  gap: 8,
-                  flexWrap: "nowrap",
-                  alignItems: "center",
-                  minWidth: 0,
-                }}
-              >
-                <CircleRadio
-                  label="C-standard"
-                  checked={standardFilter === "C"}
-                  onClick={() => setStandardFilter("C")}
+              <div style={{ minWidth: 0, maxWidth: "100%", overflow: "hidden" }}>
+                <SegmentedControl<StandardFilter>
+                  ariaLabel="Standard filter"
+                  value={standardFilter}
+                  onChange={setStandardFilter}
                   theme={theme}
-                  fontSize={UI_TYPO.sizeSm}
-                />
-                <CircleRadio
-                  label="A-standard"
-                  checked={standardFilter === "A"}
-                  onClick={() => setStandardFilter("A")}
-                  theme={theme}
-                  fontSize={UI_TYPO.sizeSm}
-                />
-                <CircleRadio
-                  label="A+C-standard"
-                  checked={standardFilter === "C+A"}
-                  onClick={() => setStandardFilter("C+A")}
-                  theme={theme}
-                  fontSize={UI_TYPO.sizeXs}
+                  size="sm"
+                  options={[
+                    { value: "C", label: "C-standard" },
+                    { value: "A", label: "A-standard" },
+                    { value: "C+A", label: "A+C-standard" },
+                  ]}
                 />
               </div>
             </div>
 
-            <div style={{ display: "grid", gap: 6 }}>
+            <div style={{ display: "grid", gap: 6, justifyItems: "start" }}>
+              <div
+                style={{
+                  ...UI_TEXT.sectionLabel,
+                  color: theme.textMuted,
+                }}
+              >
+                Target marks
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  minHeight: CONTROL_HEIGHT,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    borderRadius: 14,
+                    border: `1px solid ${theme.borderStandard}`,
+                    background: theme.controlBg,
+                    height: CONTROL_HEIGHT,
+                    width: 104,
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+                    overflow: "hidden",
+                    boxSizing: "border-box",
+                  }}
+                  title={`Target marks: ${targetMarks}`}
+                >
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    value={targetMarksText}
+                    onChange={(e) => setTargetMarksText(e.target.value)}
+                    onFocus={(e) => e.currentTarget.select()}
+                    onBlur={(e) => commitTargetMarksInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        commitTargetMarksInput(targetMarksText);
+                        e.currentTarget.blur();
+                      }
+                    }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                      outline: "none",
+                      background: "transparent",
+                      color: theme.textPrimary,
+                      fontFamily: UI_TYPO.family,
+                      fontWeight: UI_TYPO.weightSemibold,
+                      fontSize: UI_TYPO.sizeMeta,
+                      textAlign: "left",
+                      lineHeight: 1,
+                      padding: "0 14px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 4,
+                    justifyItems: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <MiniStepButton label="Up" onClick={incMarks} theme={theme} />
+                  <MiniStepButton label="Down" onClick={decMarks} theme={theme} />
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 6,
+                justifyItems: "start",
+                minWidth: 0,
+              }}
+            >
               <div
                 style={{
                   ...UI_TEXT.sectionLabel,
@@ -349,145 +512,49 @@ export default function SkillsTree({
                 Thinking type
               </div>
 
-              <div
-                role="radiogroup"
-                aria-label="Thinking type filter"
-                style={{
-                  display: "flex",
-                  gap: 8,
-                  flexWrap: "nowrap",
-                  alignItems: "center",
-                  minWidth: 0,
-                }}
-              >
-                <CircleRadio
-                  label="Operational"
-                  checked={thinkingTypeFilter === "OPERATIONAL"}
-                  onClick={() => setThinkingTypeFilter("OPERATIONAL")}
-                  theme={theme}
-                  fontSize={UI_TYPO.sizeSm}
-                />
-                <CircleRadio
-                  label="Reasoning"
-                  checked={thinkingTypeFilter === "REASONING"}
-                  onClick={() => setThinkingTypeFilter("REASONING")}
-                  theme={theme}
-                  fontSize={UI_TYPO.sizeSm}
-                />
-                <CircleRadio
-                  label="Any"
-                  checked={thinkingTypeFilter === "ANY"}
-                  onClick={() => setThinkingTypeFilter("ANY")}
-                  theme={theme}
-                  fontSize={UI_TYPO.sizeSm}
-                />
-              </div>
+              <SegmentedControl<ThinkingTypeFilter>
+                ariaLabel="Thinking type filter"
+                value={thinkingTypeFilter}
+                onChange={setThinkingTypeFilter}
+                theme={theme}
+                size="sm"
+                options={[
+                  { value: "OPERATIONAL", label: "Operational" },
+                  { value: "REASONING", label: "Reasoning" },
+                  { value: "ANY", label: "Any" },
+                ]}
+              />
             </div>
 
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "auto 1fr",
-                columnGap: 24,
-                rowGap: 14,
-                alignItems: "end",
+                gap: 6,
+                justifyItems: "start",
+                alignSelf: "end",
+                minWidth: 0,
               }}
             >
-              <div style={{ display: "grid", gap: 6 }}>
-                <div
-                  style={{
-                    ...UI_TEXT.sectionLabel,
-                    color: theme.textMuted,
-                  }}
-                >
-                  Target marks
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 4,
-                    width: "fit-content",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 12,
-                      padding: "0 14px",
-                      borderRadius: 14,
-                      border: `1px solid ${theme.borderStandard}`,
-                      background: theme.controlBg,
-                      height: 38,
-                      minWidth: 180,
-                      boxShadow: insetShadow,
-                    }}
-                    title={`Target marks: ${targetMarks}`}
-                  >
-                    <div
-                      style={{
-                        ...UI_TEXT.valueText,
-                        color: theme.textPrimary,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {targetMarks} marks
-                    </div>
-                  </div>
-
-                  <div style={{ display: "grid", gap: 4 }}>
-                    <MiniStepButton label="Up" onClick={incMarks} theme={theme} />
-                    <MiniStepButton label="Down" onClick={decMarks} theme={theme} />
-                  </div>
-                </div>
-              </div>
-
               <div
                 style={{
-                  display: "grid",
-                  gap: 6,
-                  justifyItems: "start",
-                  alignSelf: "end",
+                  ...UI_TEXT.sectionLabel,
+                  color: theme.textMuted,
                 }}
               >
-                <div
-                  style={{
-                    ...UI_TEXT.sectionLabel,
-                    color: theme.textMuted,
-                  }}
-                >
-                  Add questions to
-                </div>
-
-                <div
-                  role="radiogroup"
-                  aria-label="Active paper"
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    flexWrap: "nowrap",
-                    alignItems: "center",
-                  }}
-                >
-                  <CircleRadio
-                    label="Paper 1"
-                    checked={activePaper === "P1"}
-                    onClick={() => setActivePaper("P1")}
-                    theme={theme}
-                    fontSize={UI_TYPO.sizeMeta}
-                  />
-                  <CircleRadio
-                    label="Paper 2"
-                    checked={activePaper === "P2"}
-                    onClick={() => setActivePaper("P2")}
-                    theme={theme}
-                    fontSize={UI_TYPO.sizeMeta}
-                  />
-                </div>
+                Add questions to
               </div>
+
+              <SegmentedControl<Paper>
+                ariaLabel="Active paper"
+                value={activePaper}
+                onChange={setActivePaper}
+                theme={theme}
+                size="sm"
+                options={[
+                  { value: "P1", label: "Paper 1" },
+                  { value: "P2", label: "Paper 2" },
+                ]}
+              />
             </div>
           </div>
         </div>
