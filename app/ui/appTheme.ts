@@ -43,11 +43,94 @@ export type Theme = {
   paper: string;
   paperBorder: string;
   paperText: string;
+
+  // Compatibility / design-system aliases
+  bgSurface: string;
+  bgElevated: string;
+  controlBgHover: string;
+  controlSelectedBg: string;
+  controlSelectedBorder: string;
+
+  borderStandard: string;
+
+  textPrimary: string;
+  textSecondary: string;
+
+  accentPrimary: string;
+
+  shadowStrong: string;
 };
 
 export type AppTheme = Theme;
 
-const DARK_THEME: Theme = {
+function createTheme(base: {
+  pageBg: string;
+  panelBg: string;
+  panelBg2: string;
+  panelBg3: string;
+  headerBg: string;
+
+  border: string;
+  borderSoft: string;
+  borderStrong: string;
+  viewerChromeBorder: string;
+
+  text: string;
+  subtleText: string;
+  mutedText: string;
+  textMuted: string;
+  textDim: string;
+  inverseText: string;
+
+  accent: string;
+  accentSoft: string;
+  accentStrong: string;
+
+  inputBg: string;
+  inputBgSoft: string;
+  buttonBg: string;
+  buttonBgHover: string;
+  buttonGhostBg: string;
+
+  rowHover: string;
+  controlBg: string;
+  ctaBlueText: string;
+
+  overlay: string;
+  shadow: string;
+  shadowStrong?: string;
+
+  paper: string;
+  paperBorder: string;
+  paperText: string;
+
+  bgSurface?: string;
+  bgElevated?: string;
+  controlBgHover?: string;
+  controlSelectedBg?: string;
+  controlSelectedBorder?: string;
+  borderStandard?: string;
+  textPrimary?: string;
+  textSecondary?: string;
+  accentPrimary?: string;
+}) {
+  return {
+    ...base,
+
+    bgSurface: base.bgSurface ?? base.panelBg,
+    bgElevated: base.bgElevated ?? base.inputBgSoft,
+    controlBgHover: base.controlBgHover ?? base.buttonBgHover,
+    controlSelectedBg: base.controlSelectedBg ?? base.accentSoft,
+    controlSelectedBorder: base.controlSelectedBorder ?? base.accent,
+    borderStandard: base.borderStandard ?? base.border,
+    textPrimary: base.textPrimary ?? base.text,
+    textSecondary: base.textSecondary ?? base.subtleText,
+    accentPrimary: base.accentPrimary ?? base.accent,
+    shadowStrong: base.shadowStrong ?? base.shadow,
+  } satisfies Theme;
+}
+
+const DARK_THEME: Theme = createTheme({
   pageBg: "#0b0f14",
   panelBg: "#0f1620",
   panelBg2: "#101a27",
@@ -82,13 +165,24 @@ const DARK_THEME: Theme = {
 
   overlay: "rgba(3,8,16,0.72)",
   shadow: "0 20px 60px rgba(0,0,0,0.35)",
+  shadowStrong: "0 24px 72px rgba(0,0,0,0.42)",
 
   paper: "#ffffff",
   paperBorder: "#d9dde4",
   paperText: "#111111",
-};
 
-const LIGHT_THEME: Theme = {
+  bgSurface: "#0f1620",
+  bgElevated: "#16212e",
+  controlBgHover: "rgba(255,255,255,0.085)",
+  controlSelectedBg: "rgba(104,168,255,0.18)",
+  controlSelectedBorder: "#68a8ff",
+  borderStandard: "rgba(120,145,175,0.18)",
+  textPrimary: "#f3f7ff",
+  textSecondary: "rgba(227,235,248,0.78)",
+  accentPrimary: "#68a8ff",
+});
+
+const LIGHT_THEME: Theme = createTheme({
   pageBg: "#d9dde2",
   panelBg: "#e2e5e9",
   panelBg2: "#dde1e6",
@@ -123,20 +217,32 @@ const LIGHT_THEME: Theme = {
 
   overlay: "rgba(13,21,33,0.18)",
   shadow: "0 4px 10px rgba(13,21,33,0.045)",
+  shadowStrong: "0 10px 22px rgba(13,21,33,0.08)",
 
   paper: "#ffffff",
   paperBorder: "#d9dde4",
   paperText: "#111111",
-};
 
-export const APP_THEMES: Record<Exclude<AppearancePreference, "system">, Theme> = {
-  light: LIGHT_THEME,
-  dark: DARK_THEME,
-};
+  bgSurface: "#e2e5e9",
+  bgElevated: "#eef1f4",
+  controlBgHover: "rgba(18,32,51,0.085)",
+  controlSelectedBg: "rgba(47,115,224,0.10)",
+  controlSelectedBorder: "#2f73e0",
+  borderStandard: "rgba(27,51,84,0.18)",
+  textPrimary: "#122033",
+  textSecondary: "rgba(18,32,51,0.78)",
+  accentPrimary: "#2f73e0",
+});
+
+export const APP_THEMES: Record<Exclude<AppearancePreference, "system">, Theme> =
+  {
+    light: LIGHT_THEME,
+    dark: DARK_THEME,
+  };
 
 export function resolveAppearance(
   appearance: AppearancePreference,
-  systemPrefersDark: boolean,
+  systemPrefersDark: boolean
 ): "light" | "dark" {
   if (appearance === "system") {
     return systemPrefersDark ? "dark" : "light";
@@ -146,13 +252,15 @@ export function resolveAppearance(
 
 export function getTheme(
   appearance: AppearancePreference,
-  systemPrefersDark = true,
+  systemPrefersDark = true
 ): Theme {
   const resolved = resolveAppearance(appearance, systemPrefersDark);
   return APP_THEMES[resolved];
 }
 
-export function isAppearancePreference(value: unknown): value is AppearancePreference {
+export function isAppearancePreference(
+  value: unknown
+): value is AppearancePreference {
   return value === "light" || value === "dark" || value === "system";
 }
 
@@ -175,9 +283,10 @@ export function getInitialAppearance(): AppearancePreference {
 
 export function useAppearancePreference(
   defaultValue: AppearancePreference = "system",
-  systemPrefersDark = true,
+  systemPrefersDark = true
 ) {
-  const [appearance, setAppearanceState] = useState<AppearancePreference>(defaultValue);
+  const [appearance, setAppearanceState] =
+    useState<AppearancePreference>(defaultValue);
 
   useEffect(() => {
     setAppearanceState(getStoredAppearance());
@@ -185,7 +294,7 @@ export function useAppearancePreference(
 
   const theme = useMemo(
     () => getTheme(appearance, systemPrefersDark),
-    [appearance, systemPrefersDark],
+    [appearance, systemPrefersDark]
   );
 
   const setAppearance = (next: AppearancePreference) => {

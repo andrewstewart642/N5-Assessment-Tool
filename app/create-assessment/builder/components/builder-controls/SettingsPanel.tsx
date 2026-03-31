@@ -72,6 +72,12 @@ type SettingsSectionId =
   | "appearance"
   | "custom-theme";
 
+type HoneycombCell = {
+  id: AccentOption;
+  row: number;
+  col: number;
+};
+
 const THEME_OPTIONS: Array<{
   value: ThemeModePreference;
   label: string;
@@ -89,19 +95,160 @@ const THEME_OPTIONS: Array<{
 ];
 
 const WORD_COLOUR_ROWS: AccentOption[][] = [
-  ["word-r1-c1", "word-r1-c2", "word-r1-c3", "word-r1-c4", "word-r1-c5", "word-r1-c6", "word-r1-c7"],
-  ["word-r2-c1", "word-r2-c2", "word-r2-c3", "word-r2-c4", "word-r2-c5", "word-r2-c6", "word-r2-c7", "word-r2-c8"],
-  ["word-r3-c1", "word-r3-c2", "word-r3-c3", "word-r3-c4", "word-r3-c5", "word-r3-c6", "word-r3-c7", "word-r3-c8", "word-r3-c9"],
-  ["word-r4-c1", "word-r4-c2", "word-r4-c3", "word-r4-c4", "word-r4-c5", "word-r4-c6", "word-r4-c7", "word-r4-c8", "word-r4-c9", "word-r4-c10"],
-  ["word-r5-c1", "word-r5-c2", "word-r5-c3", "word-r5-c4", "word-r5-c5", "word-r5-c6", "word-r5-c7", "word-r5-c8", "word-r5-c9", "word-r5-c10", "word-r5-c11"],
-  ["word-r6-c1", "word-r6-c2", "word-r6-c3", "word-r6-c4", "word-r6-c5", "word-r6-c6", "word-r6-c7", "word-r6-c8", "word-r6-c9", "word-r6-c10", "word-r6-c11", "word-r6-c12"],
-  ["word-r7-c1", "word-r7-c2", "word-r7-c3", "word-r7-c4", "word-r7-c5", "word-r7-c6", "word-r7-c7", "word-r7-c8", "word-r7-c9", "word-r7-c10", "word-r7-c11", "word-r7-c12", "word-r7-c13"],
-  ["word-r8-c1", "word-r8-c2", "word-r8-c3", "word-r8-c4", "word-r8-c5", "word-r8-c6", "word-r8-c7", "word-r8-c8", "word-r8-c9", "word-r8-c10", "word-r8-c11", "word-r8-c12", "word-r8-c13"],
-  ["word-r9-c1", "word-r9-c2", "word-r9-c3", "word-r9-c4", "word-r9-c5", "word-r9-c6", "word-r9-c7", "word-r9-c8", "word-r9-c9", "word-r9-c10", "word-r9-c11"],
-  ["word-r10-c1", "word-r10-c2", "word-r10-c3", "word-r10-c4", "word-r10-c5", "word-r10-c6", "word-r10-c7", "word-r10-c8", "word-r10-c9", "word-r10-c10"],
-  ["word-r11-c1", "word-r11-c2", "word-r11-c3", "word-r11-c4", "word-r11-c5", "word-r11-c6", "word-r11-c7", "word-r11-c8", "word-r11-c9"],
-  ["word-r12-c1", "word-r12-c2", "word-r12-c3", "word-r12-c4", "word-r12-c5", "word-r12-c6", "word-r12-c7", "word-r12-c8"],
-  ["word-r13-c1", "word-r13-c2", "word-r13-c3", "word-r13-c4", "word-r13-c5", "word-r13-c6", "word-r13-c7"],
+  [
+    "word-r1-c1",
+    "word-r1-c2",
+    "word-r1-c3",
+    "word-r1-c4",
+    "word-r1-c5",
+    "word-r1-c6",
+    "word-r1-c7",
+  ],
+  [
+    "word-r2-c1",
+    "word-r2-c2",
+    "word-r2-c3",
+    "word-r2-c4",
+    "word-r2-c5",
+    "word-r2-c6",
+    "word-r2-c7",
+    "word-r2-c8",
+  ],
+  [
+    "word-r3-c1",
+    "word-r3-c2",
+    "word-r3-c3",
+    "word-r3-c4",
+    "word-r3-c5",
+    "word-r3-c6",
+    "word-r3-c7",
+    "word-r3-c8",
+    "word-r3-c9",
+  ],
+  [
+    "word-r4-c1",
+    "word-r4-c2",
+    "word-r4-c3",
+    "word-r4-c4",
+    "word-r4-c5",
+    "word-r4-c6",
+    "word-r4-c7",
+    "word-r4-c8",
+    "word-r4-c9",
+    "word-r4-c10",
+  ],
+  [
+    "word-r5-c1",
+    "word-r5-c2",
+    "word-r5-c3",
+    "word-r5-c4",
+    "word-r5-c5",
+    "word-r5-c6",
+    "word-r5-c7",
+    "word-r5-c8",
+    "word-r5-c9",
+    "word-r5-c10",
+    "word-r5-c11",
+  ],
+  [
+    "word-r6-c1",
+    "word-r6-c2",
+    "word-r6-c3",
+    "word-r6-c4",
+    "word-r6-c5",
+    "word-r6-c6",
+    "word-r6-c7",
+    "word-r6-c8",
+    "word-r6-c9",
+    "word-r6-c10",
+    "word-r6-c11",
+    "word-r6-c12",
+  ],
+  [
+    "word-r7-c1",
+    "word-r7-c2",
+    "word-r7-c3",
+    "word-r7-c4",
+    "word-r7-c5",
+    "word-r7-c6",
+    "word-r7-c7",
+    "word-r7-c8",
+    "word-r7-c9",
+    "word-r7-c10",
+    "word-r7-c11",
+    "word-r7-c12",
+    "word-r7-c13",
+  ],
+  [
+    "word-r8-c1",
+    "word-r8-c2",
+    "word-r8-c3",
+    "word-r8-c4",
+    "word-r8-c5",
+    "word-r8-c6",
+    "word-r8-c7",
+    "word-r8-c8",
+    "word-r8-c9",
+    "word-r8-c10",
+    "word-r8-c11",
+    "word-r8-c12",
+    "word-r8-c13",
+  ],
+  [
+    "word-r9-c1",
+    "word-r9-c2",
+    "word-r9-c3",
+    "word-r9-c4",
+    "word-r9-c5",
+    "word-r9-c6",
+    "word-r9-c7",
+    "word-r9-c8",
+    "word-r9-c9",
+    "word-r9-c10",
+    "word-r9-c11",
+  ],
+  [
+    "word-r10-c1",
+    "word-r10-c2",
+    "word-r10-c3",
+    "word-r10-c4",
+    "word-r10-c5",
+    "word-r10-c6",
+    "word-r10-c7",
+    "word-r10-c8",
+    "word-r10-c9",
+    "word-r10-c10",
+  ],
+  [
+    "word-r11-c1",
+    "word-r11-c2",
+    "word-r11-c3",
+    "word-r11-c4",
+    "word-r11-c5",
+    "word-r11-c6",
+    "word-r11-c7",
+    "word-r11-c8",
+    "word-r11-c9",
+  ],
+  [
+    "word-r12-c1",
+    "word-r12-c2",
+    "word-r12-c3",
+    "word-r12-c4",
+    "word-r12-c5",
+    "word-r12-c6",
+    "word-r12-c7",
+    "word-r12-c8",
+  ],
+  [
+    "word-r13-c1",
+    "word-r13-c2",
+    "word-r13-c3",
+    "word-r13-c4",
+    "word-r13-c5",
+    "word-r13-c6",
+    "word-r13-c7",
+  ],
 ];
 
 const WORD_NEUTRAL_TOP: AccentOption[] = [
@@ -126,12 +273,6 @@ const WORD_NEUTRAL_BOTTOM: AccentOption[] = [
 
 const WORD_NEUTRAL_WHITE: AccentOption = "word-neutral-white";
 const WORD_NEUTRAL_BLACK: AccentOption = "word-neutral-black";
-
-type HoneycombCell = {
-  id: AccentOption;
-  row: number;
-  col: number;
-};
 
 const DEFAULT_OPEN_SECTIONS: Record<SettingsSectionId, boolean> = {
   "paper-content": true,
@@ -244,6 +385,64 @@ function buildHoneycombCells(rows: AccentOption[][]): HoneycombCell[] {
   );
 }
 
+function pickerTextInputStyle(theme: Theme): React.CSSProperties {
+  return {
+    width: "100%",
+    height: 38,
+    borderRadius: 12,
+    border: `1px solid ${theme.borderStandard}`,
+    background: theme.bgElevated,
+    color: theme.textPrimary,
+    padding: "0 12px",
+    fontSize: 14,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightSemibold,
+    outline: "none",
+    boxSizing: "border-box",
+  };
+}
+
+function pickerGhostButtonStyle(theme: Theme): React.CSSProperties {
+  return {
+    height: 40,
+    width: "100%",
+    minWidth: 0,
+    padding: "0 18px",
+    borderRadius: 12,
+    border: `1px solid ${theme.controlSelectedBorder}`,
+    background: theme.controlSelectedBg,
+    color: theme.textPrimary,
+    fontSize: 14,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightBold,
+    cursor: "pointer",
+    transition:
+      "background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+    transform: "scale(1)",
+    boxShadow: "0 0 0 rgba(0,0,0,0)",
+  };
+}
+
+function pickerPrimaryButtonStyle(theme: Theme): React.CSSProperties {
+  return {
+    height: 36,
+    minWidth: 72,
+    padding: "0 16px",
+    borderRadius: 12,
+    border: `1px solid ${theme.controlSelectedBorder}`,
+    background: theme.controlSelectedBg,
+    color: theme.textPrimary,
+    fontSize: 14,
+    fontFamily: UI_TYPO.family,
+    fontWeight: UI_TYPO.weightBold,
+    cursor: "pointer",
+    transition:
+      "background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+    transform: "scale(1)",
+    boxShadow: "0 0 0 rgba(0,0,0,0)",
+  };
+}
+
 function SectionBar({
   title,
   theme,
@@ -335,7 +534,7 @@ function ToggleRow({
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="settings-row-button"
+      className="settings-row-button settings-lift-surface"
       style={{
         width: "100%",
         display: "grid",
@@ -344,14 +543,19 @@ function ToggleRow({
         gap: 14,
         minWidth: 0,
         minHeight: rowHeight,
-        padding: "8px 0",
+        padding: "8px 10px",
+        margin: "2px 0",
         background: "transparent",
         border: "none",
         borderBottom: `1px solid ${theme.borderStandard}`,
         cursor: "pointer",
         textAlign: "left",
-        transition: "background 0.15s ease",
+        transition:
+          "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease",
         fontFamily: UI_TYPO.family,
+        borderRadius: 12,
+        transform: "scale(1)",
+        boxShadow: "0 0 0 rgba(0,0,0,0)",
       }}
     >
       <div
@@ -456,6 +660,7 @@ function TabToggle({
             key={paper}
             type="button"
             onClick={() => onChange(paper)}
+            className="settings-segment-button"
             style={{
               height: "100%",
               width: "100%",
@@ -467,6 +672,10 @@ function TabToggle({
               fontWeight: UI_TYPO.weightSemibold,
               cursor: "pointer",
               whiteSpace: "nowrap",
+              transition:
+                "background 0.18s ease, color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+              transform: "scale(1)",
+              boxShadow: "0 0 0 rgba(0,0,0,0)",
             }}
           >
             {paper === "P1" ? "Paper 1" : "Paper 2"}
@@ -499,7 +708,16 @@ function IntegratedField({
   readOnly?: boolean;
 }) {
   return (
-    <div style={{ position: "relative" }}>
+    <div
+      className={`settings-integrated-field${disabled ? " is-disabled" : ""}`}
+      style={{
+        position: "relative",
+        borderRadius: 14,
+        transform: "scale(1)",
+        transition: "transform 0.18s ease, box-shadow 0.18s ease",
+        boxShadow: "0 0 0 rgba(0,0,0,0)",
+      }}
+    >
       <input
         value={value}
         placeholder={placeholder}
@@ -529,6 +747,8 @@ function IntegratedField({
           boxSizing: "border-box",
           opacity: disabled ? 0.72 : 1,
           cursor: disabled ? "not-allowed" : "pointer",
+          transition:
+            "background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease",
         }}
       />
       <button
@@ -537,6 +757,7 @@ function IntegratedField({
         onClick={() => {
           if (!disabled) onClick();
         }}
+        className="settings-mini-icon-button"
         style={{
           position: "absolute",
           right: 6,
@@ -554,6 +775,10 @@ function IntegratedField({
           lineHeight: 1,
           padding: 0,
           opacity: disabled ? 0.72 : 1,
+          transition:
+            "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+          transform: "scale(1)",
+          boxShadow: "0 0 0 rgba(0,0,0,0)",
         }}
         aria-label="Open picker"
       >
@@ -598,6 +823,86 @@ function PickerOverlay({
     >
       {children}
     </div>
+  );
+}
+
+function PickerNumberButton({
+  value,
+  active,
+  onClick,
+  theme,
+}: {
+  value: string;
+  active: boolean;
+  onClick: () => void;
+  theme: Theme;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="settings-lift-button"
+      style={{
+        height: 36,
+        borderRadius: 12,
+        border: `1px solid ${
+          active ? theme.controlSelectedBorder : theme.borderStandard
+        }`,
+        background: active ? theme.controlSelectedBg : theme.controlBg,
+        color: theme.textPrimary,
+        fontWeight: UI_TYPO.weightBold,
+        fontFamily: UI_TYPO.family,
+        fontSize: 16,
+        cursor: "pointer",
+        transition:
+          "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+        transform: "scale(1)",
+        boxShadow: "0 0 0 rgba(0,0,0,0)",
+      }}
+    >
+      {value}
+    </button>
+  );
+}
+
+function PickerAmPmButton({
+  value,
+  active,
+  onClick,
+  theme,
+}: {
+  value: "AM" | "PM";
+  active: boolean;
+  onClick: () => void;
+  theme: Theme;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="settings-lift-button"
+      style={{
+        height: 36,
+        minWidth: 48,
+        padding: "0 12px",
+        borderRadius: 12,
+        border: `1px solid ${
+          active ? theme.controlSelectedBorder : theme.borderStandard
+        }`,
+        background: active ? theme.controlSelectedBg : theme.controlBg,
+        color: theme.textPrimary,
+        fontWeight: UI_TYPO.weightBold,
+        fontFamily: UI_TYPO.family,
+        fontSize: 14,
+        cursor: "pointer",
+        transition:
+          "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+        transform: "scale(1)",
+        boxShadow: "0 0 0 rgba(0,0,0,0)",
+      }}
+    >
+      {value}
+    </button>
   );
 }
 
@@ -901,12 +1206,18 @@ function TimePickerInline({
           marginTop: 14,
         }}
       >
-        <button type="button" onClick={onCancel} style={pickerGhostButtonStyle(theme)}>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="settings-lift-button"
+          style={pickerGhostButtonStyle(theme)}
+        >
           Cancel
         </button>
         <button
           type="button"
           onClick={() => onApply(formatTimeText(draft))}
+          className="settings-lift-button"
           style={pickerPrimaryButtonStyle(theme)}
         >
           OK
@@ -914,128 +1225,6 @@ function TimePickerInline({
       </div>
     </div>
   );
-}
-
-function PickerNumberButton({
-  value,
-  active,
-  onClick,
-  theme,
-}: {
-  value: string;
-  active: boolean;
-  onClick: () => void;
-  theme: Theme;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        height: 36,
-        borderRadius: 12,
-        border: `1px solid ${
-          active ? theme.controlSelectedBorder : theme.borderStandard
-        }`,
-        background: active ? theme.controlSelectedBg : theme.controlBg,
-        color: theme.textPrimary,
-        fontWeight: UI_TYPO.weightBold,
-        fontFamily: UI_TYPO.family,
-        fontSize: 16,
-        cursor: "pointer",
-      }}
-    >
-      {value}
-    </button>
-  );
-}
-
-function PickerAmPmButton({
-  value,
-  active,
-  onClick,
-  theme,
-}: {
-  value: "AM" | "PM";
-  active: boolean;
-  onClick: () => void;
-  theme: Theme;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        height: 36,
-        minWidth: 48,
-        padding: "0 12px",
-        borderRadius: 12,
-        border: `1px solid ${
-          active ? theme.controlSelectedBorder : theme.borderStandard
-        }`,
-        background: active ? theme.controlSelectedBg : theme.controlBg,
-        color: theme.textPrimary,
-        fontWeight: UI_TYPO.weightBold,
-        fontFamily: UI_TYPO.family,
-        fontSize: 14,
-        cursor: "pointer",
-      }}
-    >
-      {value}
-    </button>
-  );
-}
-
-function pickerTextInputStyle(theme: Theme): React.CSSProperties {
-  return {
-    width: "100%",
-    height: 38,
-    borderRadius: 12,
-    border: `1px solid ${theme.borderStandard}`,
-    background: theme.bgElevated,
-    color: theme.textPrimary,
-    padding: "0 12px",
-    fontSize: 14,
-    fontFamily: UI_TYPO.family,
-    fontWeight: UI_TYPO.weightSemibold,
-    outline: "none",
-    boxSizing: "border-box",
-  };
-}
-
-function pickerGhostButtonStyle(theme: Theme): React.CSSProperties {
-  return {
-    height: 40,
-    width: "100%",
-    minWidth: 0,
-    padding: "0 18px",
-    borderRadius: 12,
-    border: `1px solid ${theme.controlSelectedBorder}`,
-    background: theme.controlSelectedBg,
-    color: theme.textPrimary,
-    fontSize: 14,
-    fontFamily: UI_TYPO.family,
-    fontWeight: UI_TYPO.weightBold,
-    cursor: "pointer",
-    transition:
-      "background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease",
-  };
-}
-
-function pickerPrimaryButtonStyle(theme: Theme): React.CSSProperties {
-  return {
-    height: 36,
-    minWidth: 72,
-    padding: "0 16px",
-    borderRadius: 12,
-    border: `1px solid ${theme.controlSelectedBorder}`,
-    background: theme.controlSelectedBg,
-    color: theme.textPrimary,
-    fontSize: 14,
-    fontFamily: UI_TYPO.family,
-    fontWeight: UI_TYPO.weightBold,
-    cursor: "pointer",
-  };
 }
 
 function HexSwatch({
@@ -1390,6 +1579,7 @@ function InlineCustomThemePalette({
         <button
           type="button"
           onClick={onClose}
+          className="settings-lift-button"
           style={{
             height: 40,
             padding: "0 16px",
@@ -1402,6 +1592,10 @@ function InlineCustomThemePalette({
             fontWeight: UI_TYPO.weightBold,
             cursor: "pointer",
             flex: "0 0 auto",
+            transition:
+              "background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease",
+            transform: "scale(1)",
+            boxShadow: "0 0 0 rgba(0,0,0,0)",
           }}
         >
           Done
@@ -1428,7 +1622,7 @@ function AppearanceOptionRow({
     <button
       type="button"
       onClick={onClick}
-      className="settings-row-button"
+      className="settings-row-button settings-lift-surface"
       style={{
         width: "100%",
         display: "grid",
@@ -1436,14 +1630,19 @@ function AppearanceOptionRow({
         alignItems: "start",
         gap: 12,
         minHeight: 42,
-        padding: "10px 0",
+        padding: "10px 10px",
+        margin: "2px 0",
         background: "transparent",
         border: "none",
         borderBottom: `1px solid ${theme.borderStandard}`,
         cursor: "pointer",
         textAlign: "left",
-        transition: "background 0.15s ease",
+        transition:
+          "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease",
         fontFamily: UI_TYPO.family,
+        borderRadius: 12,
+        transform: "scale(1)",
+        boxShadow: "0 0 0 rgba(0,0,0,0)",
       }}
     >
       <span
@@ -1537,7 +1736,10 @@ export default function SettingsPanel({
   const [openSections, setOpenSections] =
     useState<Record<SettingsSectionId, boolean>>(DEFAULT_OPEN_SECTIONS);
 
-  const selectedLabel = useMemo(() => getAccentLabel(customThemeColour), [customThemeColour]);
+  const selectedLabel = useMemo(
+    () => getAccentLabel(customThemeColour),
+    [customThemeColour]
+  );
 
   useEffect(() => {
     if (!open) {
@@ -1622,14 +1824,52 @@ export default function SettingsPanel({
           background: ${theme.textMuted};
         }
 
-        .settings-section-bar:hover {
+        :global(.settings-section-bar:hover) {
           background: ${theme.controlBgHover} !important;
-          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1);
-          transform: scale(1.004);
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1) !important;
+          transform: scale(1.004) !important;
         }
 
-        .settings-row-button:hover {
-          background: ${theme.controlBg};
+        :global(.settings-lift-surface:hover) {
+          background: ${theme.controlBgHover} !important;
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08) !important;
+          transform: scale(1.004) !important;
+        }
+
+        :global(.settings-row-button:hover) {
+          border-color: ${theme.borderStandard} !important;
+        }
+
+        :global(.settings-lift-button:hover) {
+          background: ${theme.controlBgHover} !important;
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.1) !important;
+          transform: scale(1.01) !important;
+        }
+
+        :global(.settings-segment-button:hover) {
+          background: ${theme.controlBgHover} !important;
+          box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08) !important;
+          transform: scale(1.01) !important;
+        }
+
+        :global(.settings-integrated-field:hover:not(.is-disabled)) {
+          transform: scale(1.004) !important;
+          box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08) !important;
+        }
+
+        :global(.settings-integrated-field:hover:not(.is-disabled) input) {
+          background: ${theme.controlBgHover} !important;
+          border-color: ${theme.controlSelectedBorder} !important;
+        }
+
+        :global(
+            .settings-integrated-field:hover:not(.is-disabled)
+              .settings-mini-icon-button
+          ) {
+          background: ${theme.controlBgHover} !important;
+          border-color: ${theme.controlSelectedBorder} !important;
+          transform: scale(1.04) !important;
+          box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08) !important;
         }
       `}</style>
 
@@ -1720,6 +1960,7 @@ export default function SettingsPanel({
             <button
               type="button"
               onClick={onResetLayout}
+              className="settings-lift-button"
               style={pickerGhostButtonStyle(theme)}
             >
               Reset layout
@@ -1727,6 +1968,7 @@ export default function SettingsPanel({
             <button
               type="button"
               onClick={onResetZoom}
+              className="settings-lift-button"
               style={pickerGhostButtonStyle(theme)}
             >
               Reset zoom
@@ -1766,6 +2008,7 @@ export default function SettingsPanel({
                       <button
                         type="button"
                         onClick={() => setPaper2DateLinked((prev) => !prev)}
+                        className="settings-lift-button"
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -1773,8 +2016,13 @@ export default function SettingsPanel({
                           background: "transparent",
                           border: "none",
                           cursor: "pointer",
-                          padding: 0,
+                          padding: "4px 6px",
+                          borderRadius: 10,
                           fontFamily: UI_TYPO.family,
+                          transition:
+                            "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+                          transform: "scale(1)",
+                          boxShadow: "0 0 0 rgba(0,0,0,0)",
                         }}
                       >
                         <span
@@ -2040,6 +2288,7 @@ export default function SettingsPanel({
                     setOpenPalette((prev) => !prev);
                     setThemePreference("custom");
                   }}
+                  className="settings-lift-button"
                   style={pickerGhostButtonStyle(theme)}
                 >
                   {openPalette ? "Hide palette" : "Choose colour"}

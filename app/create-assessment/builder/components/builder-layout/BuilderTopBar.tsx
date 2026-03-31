@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
+import { INTERACTION } from "@/app/ui/InteractionTokens";
 import {
   BuilderMetaField,
   ViewingToggle,
@@ -85,12 +87,35 @@ function fixedFieldShellStyle(width: number): React.CSSProperties {
   };
 }
 
-function sharedInputStyle(theme: Theme): React.CSSProperties {
+function getDateShellStyle(
+  hovered: boolean,
+  focused: boolean
+): React.CSSProperties {
+  const active = hovered || focused;
+
+  return {
+    width: "100%",
+    borderRadius: TOP_BAR_RADIUS,
+    transform: active ? INTERACTION.lift.subtle.transform : "scale(1)",
+    boxShadow: active ? INTERACTION.lift.subtle.shadow : "0 0 0 rgba(0,0,0,0)",
+    transition: INTERACTION.transition.smooth,
+  };
+}
+
+function sharedInputStyle(
+  theme: Theme,
+  hovered = false,
+  focused = false
+): React.CSSProperties {
+  const active = hovered || focused;
+
   return {
     height: TOP_BAR_CONTROL_HEIGHT,
     borderRadius: TOP_BAR_RADIUS,
-    border: `1px solid ${theme.borderStandard}`,
-    background: theme.bgSurface,
+    border: `1px solid ${
+      active ? theme.controlSelectedBorder : theme.borderStandard
+    }`,
+    background: active ? theme.controlBgHover : theme.bgSurface,
     color: theme.textPrimary,
     padding: "0 34px 0 10px",
     fontSize: 13,
@@ -100,7 +125,10 @@ function sharedInputStyle(theme: Theme): React.CSSProperties {
     width: "100%",
     boxSizing: "border-box",
     outline: "none",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+    boxShadow: active
+      ? "inset 0 1px 0 rgba(255,255,255,0.06)"
+      : "inset 0 1px 0 rgba(255,255,255,0.04)",
+    transition: INTERACTION.transition.smooth,
   };
 }
 
@@ -130,6 +158,11 @@ export default function BuilderTopBar({
   totalViewerPages,
 }: Props) {
   const formattedAssessmentDate = formatAssessmentDateDisplay(assessmentDate);
+  const [dateHovered, setDateHovered] = useState(false);
+  const [dateFocused, setDateFocused] = useState(false);
+  const [calendarButtonHovered, setCalendarButtonHovered] = useState(false);
+  const [zoomOutHovered, setZoomOutHovered] = useState(false);
+  const [zoomInHovered, setZoomInHovered] = useState(false);
 
   return (
     <div
@@ -146,16 +179,14 @@ export default function BuilderTopBar({
         zIndex: 5,
       }}
     >
-      {/* TOP ROW */}
       <div
         style={{
           display: "flex",
-          alignItems: "flex-start", // 🔑 FIX: align stacks, not bottoms
+          alignItems: "flex-start",
           gap: 12,
           minWidth: 0,
         }}
       >
-        {/* LEFT GROUP */}
         <div
           style={{
             display: "flex",
@@ -199,7 +230,6 @@ export default function BuilderTopBar({
           </div>
         </div>
 
-        {/* RIGHT GROUP */}
         <div
           style={{
             display: "flex",
@@ -209,7 +239,6 @@ export default function BuilderTopBar({
             minWidth: 0,
           }}
         >
-          {/* DATE */}
           <div
             ref={builderDateFieldRef}
             style={{
@@ -220,42 +249,66 @@ export default function BuilderTopBar({
           >
             <span style={fieldLabelStyle(theme)}>Assessment Date</span>
 
-            <div style={{ position: "relative" }}>
-              <input
-                type="text"
-                value={formattedAssessmentDate}
-                readOnly
-                onFocus={() => setBuilderCalendarOpen(true)}
-                onClick={() => setBuilderCalendarOpen(true)}
-                style={{
-                  ...sharedInputStyle(theme),
-                  cursor: "pointer",
-                }}
-              />
+            <div
+              style={getDateShellStyle(dateHovered, dateFocused)}
+              onMouseEnter={() => setDateHovered(true)}
+              onMouseLeave={() => setDateHovered(false)}
+            >
+              <div style={{ position: "relative" }}>
+                <input
+                  type="text"
+                  value={formattedAssessmentDate}
+                  readOnly
+                  onFocus={() => {
+                    setDateFocused(true);
+                    setBuilderCalendarOpen(true);
+                  }}
+                  onBlur={() => setDateFocused(false)}
+                  onClick={() => setBuilderCalendarOpen(true)}
+                  style={{
+                    ...sharedInputStyle(theme, dateHovered, dateFocused),
+                    cursor: "pointer",
+                  }}
+                />
 
-              <button
-                type="button"
-                onClick={() => setBuilderCalendarOpen((prev) => !prev)}
-                style={{
-                  position: "absolute",
-                  right: 5,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: 22,
-                  height: 22,
-                  borderRadius: 7,
-                  border: `1px solid ${theme.borderStandard}`,
-                  background: theme.controlBg,
-                  color: theme.textMuted,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 12,
-                }}
-              >
-                🗓️
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setBuilderCalendarOpen((prev) => !prev)}
+                  onMouseEnter={() => setCalendarButtonHovered(true)}
+                  onMouseLeave={() => setCalendarButtonHovered(false)}
+                  style={{
+                    position: "absolute",
+                    right: 5,
+                    top: "50%",
+                    transform: calendarButtonHovered
+                      ? "translateY(-50%) scale(1.04)"
+                      : "translateY(-50%) scale(1)",
+                    width: 22,
+                    height: 22,
+                    borderRadius: 7,
+                    border: `1px solid ${
+                      calendarButtonHovered
+                        ? theme.controlSelectedBorder
+                        : theme.borderStandard
+                    }`,
+                    background: calendarButtonHovered
+                      ? theme.controlBgHover
+                      : theme.controlBg,
+                    color: theme.textMuted,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 12,
+                    transition: INTERACTION.transition.smooth,
+                    boxShadow: calendarButtonHovered
+                      ? INTERACTION.lift.subtle.shadow
+                      : "0 0 0 rgba(0,0,0,0)",
+                  }}
+                >
+                  🗓️
+                </button>
+              </div>
             </div>
 
             {builderCalendarOpen && (
@@ -281,7 +334,6 @@ export default function BuilderTopBar({
             )}
           </div>
 
-          {/* VIEWING */}
           <div
             style={{
               display: "grid",
@@ -308,7 +360,6 @@ export default function BuilderTopBar({
         </div>
       </div>
 
-      {/* ZOOM HUD */}
       <div
         style={{
           display: "flex",
@@ -355,6 +406,8 @@ export default function BuilderTopBar({
           <button
             type="button"
             onClick={zoomOut}
+            onMouseEnter={() => setZoomOutHovered(true)}
+            onMouseLeave={() => setZoomOutHovered(false)}
             style={{
               width: 16,
               height: 16,
@@ -365,6 +418,13 @@ export default function BuilderTopBar({
               fontSize: 16,
               display: "grid",
               placeItems: "center",
+              transition: INTERACTION.transition.smooth,
+              transform: zoomOutHovered
+                ? INTERACTION.lift.subtle.transform
+                : "scale(1)",
+              boxShadow: zoomOutHovered
+                ? INTERACTION.lift.subtle.shadow
+                : "0 0 0 rgba(0,0,0,0)",
             }}
           >
             −
@@ -385,6 +445,8 @@ export default function BuilderTopBar({
           <button
             type="button"
             onClick={zoomIn}
+            onMouseEnter={() => setZoomInHovered(true)}
+            onMouseLeave={() => setZoomInHovered(false)}
             style={{
               width: 16,
               height: 16,
@@ -395,6 +457,13 @@ export default function BuilderTopBar({
               fontSize: 16,
               display: "grid",
               placeItems: "center",
+              transition: INTERACTION.transition.smooth,
+              transform: zoomInHovered
+                ? INTERACTION.lift.subtle.transform
+                : "scale(1)",
+              boxShadow: zoomInHovered
+                ? INTERACTION.lift.subtle.shadow
+                : "0 0 0 rgba(0,0,0,0)",
             }}
           >
             +

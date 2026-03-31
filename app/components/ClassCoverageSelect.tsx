@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import type { Theme } from "@/ui/AppTheme";
 import { UI_TYPO } from "@/app/ui/UiTypography";
+import { INTERACTION } from "@/app/ui/InteractionTokens";
 
 type Props = {
   levelLabel: string | null;
@@ -50,10 +51,27 @@ function getSummaryText(args: {
   );
 
   if (selectedClasses.length === 1) return selectedClasses[0].name;
-  if (selectedClasses.length === 2)
+  if (selectedClasses.length === 2) {
     return `${selectedClasses[0].name}, ${selectedClasses[1].name}`;
+  }
 
   return `${selectedClasses.length} classes selected`;
+}
+
+function getTriggerShellStyle(
+  hovered: boolean,
+  focused: boolean,
+  disabled: boolean
+): React.CSSProperties {
+  const active = !disabled && (hovered || focused);
+
+  return {
+    width: "100%",
+    borderRadius: TOP_BAR_RADIUS,
+    transform: active ? INTERACTION.lift.subtle.transform : "scale(1)",
+    boxShadow: active ? INTERACTION.lift.subtle.shadow : "0 0 0 rgba(0,0,0,0)",
+    transition: INTERACTION.transition.smooth,
+  };
 }
 
 export default function ClassCoverageSelect({
@@ -75,6 +93,8 @@ export default function ClassCoverageSelect({
   theme,
 }: Props) {
   const [open, setOpen] = useState(false);
+  const [triggerHovered, setTriggerHovered] = useState(false);
+  const [triggerFocused, setTriggerFocused] = useState(false);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -140,6 +160,9 @@ export default function ClassCoverageSelect({
     whiteSpace: "nowrap",
   };
 
+  const disabled = !levelLabel;
+  const triggerActive = !disabled && (triggerHovered || triggerFocused || open);
+
   const triggerStyle: React.CSSProperties = {
     display: "flex",
     alignItems: "center",
@@ -149,23 +172,31 @@ export default function ClassCoverageSelect({
     minWidth: 0,
     overflow: "hidden",
     border: theme
-      ? `1px solid ${theme.borderStandard}`
+      ? `1px solid ${
+          triggerActive ? theme.controlSelectedBorder : theme.borderStandard
+        }`
       : "1px solid rgba(255,255,255,0.10)",
     borderRadius: TOP_BAR_RADIUS,
-    background: theme ? theme.controlBg : "rgba(255,255,255,0.02)",
+    background: theme
+      ? triggerActive
+        ? theme.controlBgHover
+        : theme.controlBg
+      : "rgba(255,255,255,0.02)",
     padding: "0 10px",
     height: TOP_BAR_CONTROL_HEIGHT,
-    cursor: levelLabel ? "pointer" : "not-allowed",
-    color: levelLabel
-      ? theme?.textPrimary ?? "#f7fbff"
-      : theme?.textMuted ?? "rgba(214,227,243,0.45)",
+    cursor: disabled ? "not-allowed" : "pointer",
+    color: disabled
+      ? theme?.textMuted ?? "rgba(214,227,243,0.45)"
+      : theme?.textPrimary ?? "#f7fbff",
     fontSize: 13,
     fontFamily: UI_TYPO.family,
     fontWeight: UI_TYPO.weightSemibold,
     textAlign: "left",
     boxSizing: "border-box",
-    transition:
-      "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+    transition: INTERACTION.transition.smooth,
+    boxShadow: triggerActive
+      ? "inset 0 1px 0 rgba(255,255,255,0.06)"
+      : "inset 0 1px 0 rgba(255,255,255,0.04)",
   };
 
   return (
@@ -182,42 +213,50 @@ export default function ClassCoverageSelect({
     >
       <span style={labelStyle}>{label}</span>
 
-      <button
-        type="button"
-        onClick={() => {
-          if (!levelLabel) return;
-          setOpen((prev) => !prev);
-        }}
-        style={triggerStyle}
+      <div
+        style={getTriggerShellStyle(triggerHovered, triggerFocused || open, disabled)}
+        onMouseEnter={() => setTriggerHovered(true)}
+        onMouseLeave={() => setTriggerHovered(false)}
       >
-        <span
-          style={{
-            display: "block",
-            flex: "1 1 auto",
-            minWidth: 0,
-            maxWidth: "100%",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+        <button
+          type="button"
+          onClick={() => {
+            if (!levelLabel) return;
+            setOpen((prev) => !prev);
           }}
+          onFocus={() => setTriggerFocused(true)}
+          onBlur={() => setTriggerFocused(false)}
+          style={triggerStyle}
         >
-          {levelLabel ? summaryText : disabledText}
-        </span>
+          <span
+            style={{
+              display: "block",
+              flex: "1 1 auto",
+              minWidth: 0,
+              maxWidth: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {levelLabel ? summaryText : disabledText}
+          </span>
 
-        <span
-          style={{
-            color: theme ? theme.textMuted : "rgba(214,227,243,0.72)",
-            fontSize: 11,
-            transform: open ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 140ms ease",
-            flexShrink: 0,
-            marginLeft: 2,
-            lineHeight: 1,
-          }}
-        >
-          ▾
-        </span>
-      </button>
+          <span
+            style={{
+              color: theme ? theme.textMuted : "rgba(214,227,243,0.72)",
+              fontSize: 11,
+              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+              transition: "transform 140ms ease",
+              flexShrink: 0,
+              marginLeft: 2,
+              lineHeight: 1,
+            }}
+          >
+            ▾
+          </span>
+        </button>
+      </div>
 
       {!hideHelperText ? (
         <div
@@ -263,6 +302,8 @@ export default function ClassCoverageSelect({
             {classes.length > 0 ? (
               classes.map((schoolClass) => {
                 const checked = selectedClassIds.includes(schoolClass.id);
+                const selectedBg = theme?.controlSelectedBg ?? "rgba(37,99,235,0.16)";
+                const defaultBg = theme?.controlBg ?? "rgba(255,255,255,0.03)";
 
                 return (
                   <button
@@ -278,17 +319,14 @@ export default function ClassCoverageSelect({
                       border: `1px solid ${
                         checked
                           ? theme?.controlSelectedBorder ?? "#60a5fa"
-                          : theme?.borderStandard ??
-                            "rgba(255,255,255,0.08)"
+                          : theme?.borderStandard ?? "rgba(255,255,255,0.08)"
                       }`,
                       borderRadius: 12,
-                      background: checked
-                        ? theme?.controlSelectedBg ??
-                          "rgba(37,99,235,0.16)"
-                        : theme?.controlBg ?? "rgba(255,255,255,0.03)",
+                      background: checked ? selectedBg : defaultBg,
                       padding: "10px 12px",
                       cursor: "pointer",
                       textAlign: "left",
+                      transition: INTERACTION.transition.smooth,
                     }}
                   >
                     <span
@@ -300,8 +338,7 @@ export default function ClassCoverageSelect({
                         border: `2px solid ${
                           checked
                             ? theme?.controlSelectedBorder ?? "#93c5fd"
-                            : theme?.textMuted ??
-                              "rgba(214,227,243,0.50)"
+                            : theme?.textMuted ?? "rgba(214,227,243,0.50)"
                         }`,
                         background: checked
                           ? theme?.controlSelectedBorder ?? "#60a5fa"
@@ -329,9 +366,7 @@ export default function ClassCoverageSelect({
                         style={{
                           fontSize: 12,
                           lineHeight: 1.35,
-                          color:
-                            theme?.textMuted ??
-                            "rgba(214,227,243,0.60)",
+                          color: theme?.textMuted ?? "rgba(214,227,243,0.60)",
                         }}
                       >
                         {[schoolClass.level, schoolClass.teacher]
@@ -352,9 +387,7 @@ export default function ClassCoverageSelect({
                   padding: "12px 14px",
                   fontSize: 13,
                   lineHeight: 1.45,
-                  color:
-                    theme?.textMuted ??
-                    "rgba(214,227,243,0.58)",
+                  color: theme?.textMuted ?? "rgba(214,227,243,0.58)",
                 }}
               >
                 No classes found for this level yet.
@@ -382,17 +415,16 @@ export default function ClassCoverageSelect({
                 border: `1px solid ${
                   useCompleteCourseCoverage
                     ? theme?.controlSelectedBorder ?? "#60a5fa"
-                    : theme?.borderStandard ??
-                      "rgba(255,255,255,0.08)"
+                    : theme?.borderStandard ?? "rgba(255,255,255,0.08)"
                 }`,
                 borderRadius: 12,
                 background: useCompleteCourseCoverage
-                  ? theme?.controlSelectedBg ??
-                    "rgba(37,99,235,0.16)"
+                  ? theme?.controlSelectedBg ?? "rgba(37,99,235,0.16)"
                   : theme?.controlBg ?? "rgba(255,255,255,0.03)",
                 padding: "10px 12px",
                 cursor: "pointer",
                 textAlign: "left",
+                transition: INTERACTION.transition.smooth,
               }}
             >
               <span
@@ -404,8 +436,7 @@ export default function ClassCoverageSelect({
                   border: `2px solid ${
                     useCompleteCourseCoverage
                       ? theme?.controlSelectedBorder ?? "#93c5fd"
-                      : theme?.textMuted ??
-                        "rgba(214,227,243,0.50)"
+                      : theme?.textMuted ?? "rgba(214,227,243,0.50)"
                   }`,
                   background: useCompleteCourseCoverage
                     ? theme?.controlSelectedBorder ?? "#60a5fa"
@@ -433,9 +464,7 @@ export default function ClassCoverageSelect({
                   style={{
                     fontSize: 12,
                     lineHeight: 1.35,
-                    color:
-                      theme?.textMuted ??
-                      "rgba(214,227,243,0.60)",
+                    color: theme?.textMuted ?? "rgba(214,227,243,0.60)",
                   }}
                 >
                   Ignore class coverage filters and show the full course tree.
