@@ -1,18 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import type { Theme } from "@/ui/AppTheme";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { Theme } from "@/ui/AppTheme";
 import { INTERACTION } from "@/app/ui/InteractionTokens";
 
-type Variant = "primary" | "secondary" | "danger" | "ghost";
+export type BuilderActionButtonVariant =
+  | "primary"
+  | "secondary"
+  | "ghost"
+  | "danger";
 
 type Props = {
   onClick: () => void;
   theme: Theme;
   label: string;
   title?: string;
-  variant?: Variant;
+  variant?: BuilderActionButtonVariant;
   disabled?: boolean;
   width?: string | number;
   minWidth?: number;
@@ -34,15 +38,14 @@ export default function BuilderActionButton({
 
   const isPrimary = variant === "primary";
   const isSecondary = variant === "secondary";
-  const isDanger = variant === "danger";
   const isGhost = variant === "ghost";
+  const isDanger = variant === "danger";
 
+  const activeHover = hovered && !disabled;
   const lift =
     isPrimary || isDanger
       ? INTERACTION.lift.medium
       : INTERACTION.lift.subtle;
-
-  const activeHover = hovered && !disabled;
 
   let background = theme.controlBg;
   let color = theme.textPrimary;
@@ -69,7 +72,7 @@ export default function BuilderActionButton({
   }
 
   if (isDanger) {
-    background = activeHover ? theme.buttonBgHover : theme.controlBg;
+    background = activeHover ? theme.controlBgHover : theme.controlBg;
     color = theme.textPrimary;
     border = theme.controlSelectedBorder;
   }
