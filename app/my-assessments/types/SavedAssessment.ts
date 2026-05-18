@@ -5,6 +5,7 @@ import type {
   PaperStructure,
 } from "@/app/create-assessment/setup/AssessmentSetupStorage";
 import type {
+  CourseId,
   Paper,
   Question,
   StandardFilter,
@@ -18,6 +19,15 @@ import type {
 export type SavedAssessmentStatus = "DRAFT" | "COMPLETE";
 
 export type SavedAssessmentSetup = {
+  /**
+   * Course-aware foundation field.
+   *
+   * Optional for now so older saved assessments in localStorage do not
+   * immediately become invalid while the app transitions from N5-only to
+   * course-config-driven.
+   */
+  courseId?: CourseId;
+
   assessmentType: AssessmentType;
   buildPriority: BuildPriority;
   paperStructure: PaperStructure;

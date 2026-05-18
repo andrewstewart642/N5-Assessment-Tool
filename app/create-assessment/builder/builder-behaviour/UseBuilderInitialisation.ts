@@ -1,17 +1,13 @@
 import { useEffect } from "react";
 
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import { getCoursePaperConfig } from "@/course-data/course-configs/CourseConfigTypes";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
-  HUD_HEIGHT_KEY,
-  INCLUDE_COVER_SHEET_KEY,
-  INCLUDE_FORMULA_SHEET_KEY,
-  PANE_RATIO_KEY,
-  SHOW_COVER_DATE_TIME_KEY,
-  SHOW_PROGRESS_PANEL_KEY,
-  SHOW_SCN_BOX_KEY,
-  STORAGE_KEY,
+  BUILDER_STORAGE_KEY_PAIRS,
+  readBuilderStorageValue,
 } from "../BuilderStorageKeys";
 import { loadAssessmentSetupBrief } from "../../setup/AssessmentSetupStorage";
 import {
@@ -83,6 +79,11 @@ function withSpacingBase(question: Question): Question {
   };
 }
 
+function estimateMarksFromTime(paper: Paper, minutes: number): number {
+  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  return Math.max(1, Math.floor(minutes / paperConfig.minutesPerMark));
+}
+
 export function useBuilderInitialisation({
   defaultHudHeight,
   clampFn,
@@ -130,15 +131,19 @@ export function useBuilderInitialisation({
 }: UseBuilderInitialisationArgs) {
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(PANE_RATIO_KEY);
-      if (raw) {
-        const parsed = Number(raw);
+      const rawPaneRatio = readBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.paneRatio
+      );
+      if (rawPaneRatio) {
+        const parsed = Number(rawPaneRatio);
         if (Number.isFinite(parsed)) {
           setLeftPaneRatio(clampFn(parsed, 0.28, 0.62));
         }
       }
 
-      const rawHud = window.localStorage.getItem(HUD_HEIGHT_KEY);
+      const rawHud = readBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.hudHeight
+      );
       if (rawHud) {
         const parsedHud = Number(rawHud);
         if (Number.isFinite(parsedHud)) {
@@ -146,25 +151,33 @@ export function useBuilderInitialisation({
         }
       }
 
-      const rawShowHud = window.localStorage.getItem(SHOW_PROGRESS_PANEL_KEY);
+      const rawShowHud = readBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.showProgressPanel
+      );
       if (rawShowHud === "true") setShowProgressPanel(true);
       if (rawShowHud === "false") setShowProgressPanel(false);
 
-      const rawIncludeCover = window.localStorage.getItem(INCLUDE_COVER_SHEET_KEY);
+      const rawIncludeCover = readBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.includeCoverSheet
+      );
       if (rawIncludeCover === "true") setIncludeCoverSheet(true);
       if (rawIncludeCover === "false") setIncludeCoverSheet(false);
 
-      const rawShowDateTime = window.localStorage.getItem(
-        SHOW_COVER_DATE_TIME_KEY
+      const rawShowDateTime = readBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.showCoverDateTime
       );
       if (rawShowDateTime === "true") setShowCoverDateTime(true);
       if (rawShowDateTime === "false") setShowCoverDateTime(false);
 
-      const rawScn = window.localStorage.getItem(SHOW_SCN_BOX_KEY);
+      const rawScn = readBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.showScottishCandidateNumberBox
+      );
       if (rawScn === "true") setShowScottishCandidateNumberBox(true);
       if (rawScn === "false") setShowScottishCandidateNumberBox(false);
 
-      const rawFormula = window.localStorage.getItem(INCLUDE_FORMULA_SHEET_KEY);
+      const rawFormula = readBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.includeFormulaSheet
+      );
       if (rawFormula === "true") setIncludeFormulaSheet(true);
       if (rawFormula === "false") setIncludeFormulaSheet(false);
 
@@ -298,10 +311,10 @@ export function useBuilderInitialisation({
     }
 
     if (typeof brief.timeTargetP1 === "number" && brief.timeTargetP1 > 0) {
-      setP1Target(Math.max(1, Math.floor(brief.timeTargetP1 / 1.5)));
+      setP1Target(estimateMarksFromTime("P1", brief.timeTargetP1));
     }
     if (typeof brief.timeTargetP2 === "number" && brief.timeTargetP2 > 0) {
-      setP2Target(Math.max(1, Math.floor(brief.timeTargetP2 / 1.8)));
+      setP2Target(estimateMarksFromTime("P2", brief.timeTargetP2));
     }
   }, [
     setActivePaper,
@@ -319,7 +332,7 @@ export function useBuilderInitialisation({
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw = readBuilderStorageValue(BUILDER_STORAGE_KEY_PAIRS.state);
       if (!raw) return;
 
       const parsed = JSON.parse(raw) as { questions?: Question[] };

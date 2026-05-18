@@ -1,51 +1,86 @@
-export type CourseId = "N5" | "Higher" | "AdvancedHigher";
-export type PaperId = "paper1" | "paper2";
+import {
+  ACTIVE_COURSE_CONFIG,
+  getActiveCourseConfig,
+} from "@/course-data/course-configs/ActiveCourseConfig";
 
-type TimingRule = {
-  minutesPerMark: number;
-};
+import {
+  getCoursePaperConfig,
+  type CourseAssessmentConfig,
+} from "@/course-data/course-configs/CourseConfigTypes";
 
-type CourseTiming = {
-  [paper in PaperId]: TimingRule;
-};
+import type { CourseId, Paper } from "@/shared-types/AssessmentTypes";
 
-const TIMING_RULES: Record<CourseId, CourseTiming> = {
-  N5: {
-    paper1: { minutesPerMark: 1.5 },
-    paper2: { minutesPerMark: 1.8 },
-  },
-  Higher: {
-    paper1: { minutesPerMark: 1.5 },
-    paper2: { minutesPerMark: 1.8 },
-  },
-  AdvancedHigher: {
-    paper1: { minutesPerMark: 1.5 },
-    paper2: { minutesPerMark: 1.8 },
-  },
-};
+/**
+ * Legacy IDs kept temporarily so existing code can keep working while the
+ * app moves towards course-config-driven timing.
+ */
+export type LegacyCourseId = "N5" | "Higher" | "AdvancedHigher";
+export type CourseTimingId = CourseId | LegacyCourseId;
 
-export function getMinutesPerMark(course: CourseId, paper: PaperId): number {
-  const courseRules = TIMING_RULES[course];
+export type LegacyPaperId = "paper1" | "paper2";
+export type PaperTimingId = Paper | LegacyPaperId;
 
-  if (!courseRules) {
-    throw new Error(`Unknown course timing: ${course}`);
+function normalisePaperId(paper: PaperTimingId): Paper {
+  if (paper === "paper1") return "P1";
+  if (paper === "paper2") return "P2";
+  return paper;
+}
+
+function resolveTimingCourseConfig(course: CourseTimingId): CourseAssessmentConfig {
+  const activeConfig = getActiveCourseConfig();
+
+  /**
+   * Current bridge behaviour:
+   *
+   * - N5_MATH and legacy N5 both resolve to the active N5 config.
+   * - Higher / AdvancedHigher are not real configs yet, so they temporarily
+   *   resolve to the active config to preserve old behaviour while we refactor.
+   *
+   * Once Higher has its own config, this function should become a proper
+   * course-config lookup.
+   */
+  if (course === activeConfig.courseId || course === "N5") {
+    return activeConfig;
   }
 
-  return courseRules[paper].minutesPerMark;
+  return activeConfig;
+}
+
+export function getMinutesPerMark(
+  course: CourseTimingId,
+  paper: PaperTimingId
+): number {
+  const courseConfig = resolveTimingCourseConfig(course);
+  const paperConfig = getCoursePaperConfig(courseConfig, normalisePaperId(paper));
+
+  return paperConfig.minutesPerMark;
+}
+
+export function getActiveCourseMinutesPerMark(paper: Paper): number {
+  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  return paperConfig.minutesPerMark;
 }
 
 export function calculatePaperDurationMinutes(
-  course: CourseId,
-  paper: PaperId,
-  marks: number,
+  course: CourseTimingId,
+  paper: PaperTimingId,
+  marks: number
 ): number {
   const minutesPerMark = getMinutesPerMark(course, paper);
   return Math.round(marks * minutesPerMark);
 }
 
+export function calculateActiveCoursePaperDurationMinutes(
+  paper: Paper,
+  marks: number
+): number {
+  const minutesPerMark = getActiveCourseMinutesPerMark(paper);
+  return Math.round(marks * minutesPerMark);
+}
+
 export function addMinutesToTimeString(
   timeText: string,
-  minutesToAdd: number,
+  minutesToAdd: number
 ): string {
   const match = timeText.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
 
@@ -75,11 +110,20 @@ export function addMinutesToTimeString(
 }
 
 export function calculateEndTime(
-  course: CourseId,
-  paper: PaperId,
+  course: CourseTimingId,
+  paper: PaperTimingId,
   marks: number,
-  startTime: string,
+  startTime: string
 ): string {
   const duration = calculatePaperDurationMinutes(course, paper, marks);
+  return addMinutesToTimeString(startTime, duration);
+}
+
+export function calculateActiveCourseEndTime(
+  paper: Paper,
+  marks: number,
+  startTime: string
+): string {
+  const duration = calculateActiveCoursePaperDurationMinutes(paper, marks);
   return addMinutesToTimeString(startTime, duration);
 }

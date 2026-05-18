@@ -24,6 +24,12 @@ import {
   createSavedAssessmentDraft,
   setCurrentSavedAssessmentId,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import {
+  getCourseAssessmentStructure,
+  getCoursePaperConfig,
+} from "@/course-data/course-configs/CourseConfigTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 
 type SetupCardProps = {
   title: string;
@@ -352,9 +358,66 @@ function loadAllClasses(): SchoolClass[] {
   }
 }
 
+function isSetupAssessmentType(value: string): value is AssessmentType {
+  return value === "PRELIM" || value === "CLASS_TEST" || value === "HOMEWORK";
+}
+
+function getIncludedPapers(structure: PaperStructure): Paper[] {
+  return getCourseAssessmentStructure(
+    ACTIVE_COURSE_CONFIG,
+    structure
+  ).includedPapers;
+}
+
+function structureIncludesPaper(
+  structure: PaperStructure | null,
+  paper: Paper
+): boolean {
+  if (!structure) return false;
+  return getIncludedPapers(structure).includes(paper);
+}
+
+function getPaperLabel(paper: Paper): string {
+  return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper).label;
+}
+
+function getDefaultTargetMarks(paper: Paper): number {
+  return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper).defaultTargetMarks;
+}
+
+function getDefaultTargetMarksText(paper: Paper): string {
+  return String(getDefaultTargetMarks(paper));
+}
+
+function getDefaultTargetTime(paper: Paper): number {
+  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  return Math.round(paperConfig.defaultTargetMarks * paperConfig.minutesPerMark);
+}
+
+function getDefaultTargetTimeText(paper: Paper): string {
+  return String(getDefaultTargetTime(paper));
+}
+
+function estimateTimeFromMarks(paper: Paper, marks: number): number {
+  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  return Math.round(marks * paperConfig.minutesPerMark);
+}
+
+function estimateMarksFromTime(paper: Paper, minutes: number): number {
+  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  return Math.max(1, Math.floor(minutes / paperConfig.minutesPerMark));
+}
+
 export default function CreateAssessmentSetupPage() {
   const router = useRouter();
   const { theme } = useSettings();
+
+  const setupAssessmentModes = useMemo(() => {
+    return ACTIVE_COURSE_CONFIG.assessmentModes.filter(
+      (mode): mode is typeof mode & { id: AssessmentType } =>
+        isSetupAssessmentType(mode.id)
+    );
+  }, []);
 
   const [assessmentType, setAssessmentType] = useState<AssessmentType | null>(
     null
@@ -399,16 +462,24 @@ export default function CreateAssessmentSetupPage() {
   useEffect(() => {
     if (!buildPriority || !paperStructure) return;
 
+    const includesP1 = structureIncludesPaper(paperStructure, "P1");
+    const includesP2 = structureIncludesPaper(paperStructure, "P2");
+
     if (buildPriority === "MARKS") {
-      if (paperStructure === "BOTH") {
-        setMarksTargetP1((prev) => (prev.trim().length ? prev : "40"));
-        setMarksTargetP2((prev) => (prev.trim().length ? prev : "50"));
-      } else if (paperStructure === "P1_ONLY") {
-        setMarksTargetP1((prev) => (prev.trim().length ? prev : "40"));
-        setMarksTargetP2("");
+      if (includesP1) {
+        setMarksTargetP1((prev) =>
+          prev.trim().length ? prev : getDefaultTargetMarksText("P1")
+        );
       } else {
-        setMarksTargetP2((prev) => (prev.trim().length ? prev : "50"));
         setMarksTargetP1("");
+      }
+
+      if (includesP2) {
+        setMarksTargetP2((prev) =>
+          prev.trim().length ? prev : getDefaultTargetMarksText("P2")
+        );
+      } else {
+        setMarksTargetP2("");
       }
 
       setTimeTargetP1("");
@@ -416,15 +487,20 @@ export default function CreateAssessmentSetupPage() {
       return;
     }
 
-    if (paperStructure === "BOTH") {
-      setTimeTargetP1((prev) => (prev.trim().length ? prev : "60"));
-      setTimeTargetP2((prev) => (prev.trim().length ? prev : "90"));
-    } else if (paperStructure === "P1_ONLY") {
-      setTimeTargetP1((prev) => (prev.trim().length ? prev : "60"));
-      setTimeTargetP2("");
+    if (includesP1) {
+      setTimeTargetP1((prev) =>
+        prev.trim().length ? prev : getDefaultTargetTimeText("P1")
+      );
     } else {
-      setTimeTargetP2((prev) => (prev.trim().length ? prev : "90"));
       setTimeTargetP1("");
+    }
+
+    if (includesP2) {
+      setTimeTargetP2((prev) =>
+        prev.trim().length ? prev : getDefaultTargetTimeText("P2")
+      );
+    } else {
+      setTimeTargetP2("");
     }
 
     setMarksTargetP1("");
@@ -469,23 +545,18 @@ export default function CreateAssessmentSetupPage() {
   const targetsValid = useMemo(() => {
     if (!buildPriority || !paperStructure) return false;
 
+    const includesP1 = structureIncludesPaper(paperStructure, "P1");
+    const includesP2 = structureIncludesPaper(paperStructure, "P2");
+
     if (buildPriority === "MARKS") {
-      if (paperStructure === "BOTH") {
-        return parsedMarksP1 !== null && parsedMarksP2 !== null;
-      }
-      if (paperStructure === "P1_ONLY") {
-        return parsedMarksP1 !== null;
-      }
-      return parsedMarksP2 !== null;
+      const p1Valid = !includesP1 || parsedMarksP1 !== null;
+      const p2Valid = !includesP2 || parsedMarksP2 !== null;
+      return p1Valid && p2Valid;
     }
 
-    if (paperStructure === "BOTH") {
-      return parsedTimeP1 !== null && parsedTimeP2 !== null;
-    }
-    if (paperStructure === "P1_ONLY") {
-      return parsedTimeP1 !== null;
-    }
-    return parsedTimeP2 !== null;
+    const p1Valid = !includesP1 || parsedTimeP1 !== null;
+    const p2Valid = !includesP2 || parsedTimeP2 !== null;
+    return p1Valid && p2Valid;
   }, [
     buildPriority,
     paperStructure,
@@ -498,32 +569,47 @@ export default function CreateAssessmentSetupPage() {
   const derivedSummary = useMemo(() => {
     if (!buildPriority || !paperStructure) return [];
 
-    if (buildPriority === "MARKS") {
-      const rows: string[] = [];
+    const rows: string[] = [];
+    const includedPapers = getIncludedPapers(paperStructure);
 
-      if (paperStructure !== "P2_ONLY" && parsedMarksP1 !== null) {
+    if (buildPriority === "MARKS") {
+      if (includedPapers.includes("P1") && parsedMarksP1 !== null) {
         rows.push(
-          `Paper 1 estimated time: ${Math.round(parsedMarksP1 * 1.5)} mins`
+          `${getPaperLabel("P1")} estimated time: ${estimateTimeFromMarks(
+            "P1",
+            parsedMarksP1
+          )} mins`
         );
       }
 
-      if (paperStructure !== "P1_ONLY" && parsedMarksP2 !== null) {
+      if (includedPapers.includes("P2") && parsedMarksP2 !== null) {
         rows.push(
-          `Paper 2 estimated time: ${Math.round(parsedMarksP2 * 1.8)} mins`
+          `${getPaperLabel("P2")} estimated time: ${estimateTimeFromMarks(
+            "P2",
+            parsedMarksP2
+          )} mins`
         );
       }
 
       return rows;
     }
 
-    const rows: string[] = [];
-
-    if (paperStructure !== "P2_ONLY" && parsedTimeP1 !== null) {
-      rows.push(`Paper 1 estimated marks: ${Math.floor(parsedTimeP1 / 1.5)}`);
+    if (includedPapers.includes("P1") && parsedTimeP1 !== null) {
+      rows.push(
+        `${getPaperLabel("P1")} estimated marks: ${estimateMarksFromTime(
+          "P1",
+          parsedTimeP1
+        )}`
+      );
     }
 
-    if (paperStructure !== "P1_ONLY" && parsedTimeP2 !== null) {
-      rows.push(`Paper 2 estimated marks: ${Math.floor(parsedTimeP2 / 1.8)}`);
+    if (includedPapers.includes("P2") && parsedTimeP2 !== null) {
+      rows.push(
+        `${getPaperLabel("P2")} estimated marks: ${estimateMarksFromTime(
+          "P2",
+          parsedTimeP2
+        )}`
+      );
     }
 
     return rows;
@@ -561,19 +647,20 @@ export default function CreateAssessmentSetupPage() {
 
     const initialP1Target =
       buildPriority === "MARKS"
-        ? parsedMarksP1 ?? 40
+        ? parsedMarksP1 ?? getDefaultTargetMarks("P1")
         : parsedTimeP1 !== null
-          ? Math.max(1, Math.floor(parsedTimeP1 / 1.5))
-          : 40;
+          ? estimateMarksFromTime("P1", parsedTimeP1)
+          : getDefaultTargetMarks("P1");
 
     const initialP2Target =
       buildPriority === "MARKS"
-        ? parsedMarksP2 ?? 50
+        ? parsedMarksP2 ?? getDefaultTargetMarks("P2")
         : parsedTimeP2 !== null
-          ? Math.max(1, Math.floor(parsedTimeP2 / 1.8))
-          : 50;
+          ? estimateMarksFromTime("P2", parsedTimeP2)
+          : getDefaultTargetMarks("P2");
 
     saveAssessmentSetupBrief({
+      courseId: ACTIVE_COURSE_CONFIG.courseId,
       assessmentType,
       buildPriority,
       paperStructure,
@@ -598,6 +685,7 @@ export default function CreateAssessmentSetupPage() {
 
     const savedAssessment = createSavedAssessmentDraft({
       setup: {
+        courseId: ACTIVE_COURSE_CONFIG.courseId,
         assessmentType,
         buildPriority,
         paperStructure,
@@ -798,126 +886,54 @@ export default function CreateAssessmentSetupPage() {
           }}
         >
           <SetupCard title="1. Assessment Type" theme={theme}>
-            <ChoiceRow
-              label="Prelim Assessment (SQA)"
-              selected={assessmentType === "PRELIM"}
-              onClick={() => setAssessmentType("PRELIM")}
-              theme={theme}
-            />
-
-            <ChoiceRow
-              label="Class Test"
-              selected={assessmentType === "CLASS_TEST"}
-              onClick={() => setAssessmentType("CLASS_TEST")}
-              theme={theme}
-            />
-
-            <ChoiceRow
-              label="Homework"
-              selected={assessmentType === "HOMEWORK"}
-              onClick={() => setAssessmentType("HOMEWORK")}
-              theme={theme}
-            />
+            {setupAssessmentModes.map((mode) => (
+              <ChoiceRow
+                key={mode.id}
+                label={mode.label}
+                selected={assessmentType === mode.id}
+                onClick={() => setAssessmentType(mode.id)}
+                theme={theme}
+              />
+            ))}
           </SetupCard>
 
           <SetupCard title="2. Paper Structure" theme={theme}>
             {showPaperStructure ? (
               <>
-                <ChoiceRow
-                  label="Both Paper 1 & Paper 2"
-                  selected={paperStructure === "BOTH"}
-                  onClick={() => setPaperStructure("BOTH")}
-                  theme={theme}
-                >
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: theme.textMuted,
-                      marginBottom: 2,
-                    }}
+                {ACTIVE_COURSE_CONFIG.assessmentStructures.map((structure) => (
+                  <ChoiceRow
+                    key={structure.id}
+                    label={structure.label}
+                    selected={paperStructure === structure.id}
+                    onClick={() => setPaperStructure(structure.id)}
+                    theme={theme}
                   >
-                    Include
-                  </div>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: theme.textMuted,
+                        marginBottom: 2,
+                      }}
+                    >
+                      Include
+                    </div>
 
-                  <CheckRow
-                    label="Cover sheet"
-                    checked={includeCoverSheet}
-                    onToggle={() => setIncludeCoverSheet((prev) => !prev)}
-                    theme={theme}
-                  />
+                    <CheckRow
+                      label="Cover sheet"
+                      checked={includeCoverSheet}
+                      onToggle={() => setIncludeCoverSheet((prev) => !prev)}
+                      theme={theme}
+                    />
 
-                  <CheckRow
-                    label="Formula sheet"
-                    checked={includeFormulaSheet}
-                    onToggle={() => setIncludeFormulaSheet((prev) => !prev)}
-                    theme={theme}
-                  />
-                </ChoiceRow>
-
-                <ChoiceRow
-                  label="Paper 1 only"
-                  selected={paperStructure === "P1_ONLY"}
-                  onClick={() => setPaperStructure("P1_ONLY")}
-                  theme={theme}
-                >
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: theme.textMuted,
-                      marginBottom: 2,
-                    }}
-                  >
-                    Include
-                  </div>
-
-                  <CheckRow
-                    label="Cover sheet"
-                    checked={includeCoverSheet}
-                    onToggle={() => setIncludeCoverSheet((prev) => !prev)}
-                    theme={theme}
-                  />
-
-                  <CheckRow
-                    label="Formula sheet"
-                    checked={includeFormulaSheet}
-                    onToggle={() => setIncludeFormulaSheet((prev) => !prev)}
-                    theme={theme}
-                  />
-                </ChoiceRow>
-
-                <ChoiceRow
-                  label="Paper 2 only"
-                  selected={paperStructure === "P2_ONLY"}
-                  onClick={() => setPaperStructure("P2_ONLY")}
-                  theme={theme}
-                >
-                  <div
-                    style={{
-                      fontSize: 13,
-                      fontWeight: 700,
-                      color: theme.textMuted,
-                      marginBottom: 2,
-                    }}
-                  >
-                    Include
-                  </div>
-
-                  <CheckRow
-                    label="Cover sheet"
-                    checked={includeCoverSheet}
-                    onToggle={() => setIncludeCoverSheet((prev) => !prev)}
-                    theme={theme}
-                  />
-
-                  <CheckRow
-                    label="Formula sheet"
-                    checked={includeFormulaSheet}
-                    onToggle={() => setIncludeFormulaSheet((prev) => !prev)}
-                    theme={theme}
-                  />
-                </ChoiceRow>
+                    <CheckRow
+                      label="Formula sheet"
+                      checked={includeFormulaSheet}
+                      onToggle={() => setIncludeFormulaSheet((prev) => !prev)}
+                      theme={theme}
+                    />
+                  </ChoiceRow>
+                ))}
               </>
             ) : (
               <div
@@ -955,9 +971,9 @@ export default function CreateAssessmentSetupPage() {
                     Targets
                   </div>
 
-                  {paperStructure !== "P2_ONLY" ? (
+                  {structureIncludesPaper(paperStructure, "P1") ? (
                     <NumberField
-                      label="Paper 1 target"
+                      label={`${getPaperLabel("P1")} target`}
                       value={marksTargetP1}
                       onChange={setMarksTargetP1}
                       suffix="marks"
@@ -965,9 +981,9 @@ export default function CreateAssessmentSetupPage() {
                     />
                   ) : null}
 
-                  {paperStructure !== "P1_ONLY" ? (
+                  {structureIncludesPaper(paperStructure, "P2") ? (
                     <NumberField
-                      label="Paper 2 target"
+                      label={`${getPaperLabel("P2")} target`}
                       value={marksTargetP2}
                       onChange={setMarksTargetP2}
                       suffix="marks"
@@ -1006,9 +1022,9 @@ export default function CreateAssessmentSetupPage() {
                     Targets
                   </div>
 
-                  {paperStructure !== "P2_ONLY" ? (
+                  {structureIncludesPaper(paperStructure, "P1") ? (
                     <NumberField
-                      label="Paper 1 target"
+                      label={`${getPaperLabel("P1")} target`}
                       value={timeTargetP1}
                       onChange={setTimeTargetP1}
                       suffix="minutes"
@@ -1016,9 +1032,9 @@ export default function CreateAssessmentSetupPage() {
                     />
                   ) : null}
 
-                  {paperStructure !== "P1_ONLY" ? (
+                  {structureIncludesPaper(paperStructure, "P2") ? (
                     <NumberField
-                      label="Paper 2 target"
+                      label={`${getPaperLabel("P2")} target`}
                       value={timeTargetP2}
                       onChange={setTimeTargetP2}
                       suffix="minutes"

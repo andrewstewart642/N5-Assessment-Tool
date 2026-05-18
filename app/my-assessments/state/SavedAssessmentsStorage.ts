@@ -1,3 +1,5 @@
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+
 import type { SavedAssessment } from "../types/SavedAssessment";
 
 const SAVED_ASSESSMENTS_STORAGE_KEY = "n5-saved-assessments";
@@ -30,7 +32,21 @@ function normaliseSavedAssessment(candidate: unknown): SavedAssessment | null {
     return null;
   }
 
-  return item as SavedAssessment;
+  return {
+    ...(item as SavedAssessment),
+    setup: {
+      ...(item.setup as SavedAssessment["setup"]),
+
+      /**
+       * Backwards compatibility:
+       *
+       * saved assessments created before the course-config refactor will not
+       * have a courseId. For now, those assessments are treated as National 5
+       * Maths because that was the only supported course when they were made.
+       */
+      courseId: item.setup.courseId ?? ACTIVE_COURSE_CONFIG.courseId,
+    },
+  };
 }
 
 export function loadSavedAssessments(): SavedAssessment[] {
@@ -99,7 +115,10 @@ export function createSavedAssessmentDraft(
     isPinned: false,
     createdAt: now,
     updatedAt: now,
-    setup: input.setup,
+    setup: {
+      ...input.setup,
+      courseId: input.setup.courseId ?? ACTIVE_COURSE_CONFIG.courseId,
+    },
     builder: input.builder,
   };
 
