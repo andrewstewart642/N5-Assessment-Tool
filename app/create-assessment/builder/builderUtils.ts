@@ -1,5 +1,6 @@
 import type { DifficultyLevel, Paper, Question } from "@/shared-types/AssessmentTypes";
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
+import { calculateActiveCoursePaperDurationMinutes } from "./AssessmentTiming";
 
 export type DraftByPaper = Record<Paper, Question | null>;
 
@@ -35,8 +36,7 @@ export type PreviewPage =
     };
 
 export function estimateMinutes(paper: Paper, marks: number) {
-  const minsPerMark = paper === "P1" ? 1.5 : 1.8;
-  return Math.max(0, Math.round(marks * minsPerMark));
+  return Math.max(0, calculateActiveCoursePaperDurationMinutes(paper, marks));
 }
 
 export function sumMarks(list: Question[]) {

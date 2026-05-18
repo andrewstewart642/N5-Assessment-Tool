@@ -2,8 +2,12 @@ import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseC
 
 import type { SavedAssessment } from "../types/SavedAssessment";
 
-const SAVED_ASSESSMENTS_STORAGE_KEY = "n5-saved-assessments";
-const CURRENT_ASSESSMENT_ID_STORAGE_KEY = "n5-current-assessment-id";
+const SAVED_ASSESSMENTS_STORAGE_KEY = "assessment_builder_saved_assessments_v1";
+const CURRENT_ASSESSMENT_ID_STORAGE_KEY =
+  "assessment_builder_current_assessment_id_v1";
+
+const LEGACY_SAVED_ASSESSMENTS_STORAGE_KEY = "n5-saved-assessments";
+const LEGACY_CURRENT_ASSESSMENT_ID_STORAGE_KEY = "n5-current-assessment-id";
 
 function makeAssessmentId(): string {
   return `assessment-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -11,6 +15,22 @@ function makeAssessmentId(): string {
 
 function sortAssessments(items: SavedAssessment[]): SavedAssessment[] {
   return [...items].sort((a, b) => b.updatedAt - a.updatedAt);
+}
+
+function readStorageWithLegacyFallback(args: {
+  currentKey: string;
+  legacyKey: string;
+}): string | null {
+  if (typeof window === "undefined") return null;
+
+  const currentValue = window.localStorage.getItem(args.currentKey);
+  if (currentValue !== null) return currentValue;
+
+  const legacyValue = window.localStorage.getItem(args.legacyKey);
+  if (legacyValue === null) return null;
+
+  window.localStorage.setItem(args.currentKey, legacyValue);
+  return legacyValue;
 }
 
 function normaliseSavedAssessment(candidate: unknown): SavedAssessment | null {
@@ -41,8 +61,8 @@ function normaliseSavedAssessment(candidate: unknown): SavedAssessment | null {
        * Backwards compatibility:
        *
        * saved assessments created before the course-config refactor will not
-       * have a courseId. For now, those assessments are treated as National 5
-       * Maths because that was the only supported course when they were made.
+       * have a courseId. For now, those assessments are treated as the active
+       * course because N5 Maths is currently the only complete course config.
        */
       courseId: item.setup.courseId ?? ACTIVE_COURSE_CONFIG.courseId,
     },
@@ -53,7 +73,11 @@ export function loadSavedAssessments(): SavedAssessment[] {
   if (typeof window === "undefined") return [];
 
   try {
-    const raw = window.localStorage.getItem(SAVED_ASSESSMENTS_STORAGE_KEY);
+    const raw = readStorageWithLegacyFallback({
+      currentKey: SAVED_ASSESSMENTS_STORAGE_KEY,
+      legacyKey: LEGACY_SAVED_ASSESSMENTS_STORAGE_KEY,
+    });
+
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as unknown;
@@ -132,6 +156,7 @@ export function deleteSavedAssessment(assessmentId: string) {
   saveSavedAssessments(next);
 
   const currentAssessmentId = getCurrentSavedAssessmentId();
+
   if (currentAssessmentId === assessmentId) {
     clearCurrentSavedAssessmentId();
   }
@@ -139,6 +164,7 @@ export function deleteSavedAssessment(assessmentId: string) {
 
 export function setCurrentSavedAssessmentId(assessmentId: string) {
   if (typeof window === "undefined") return;
+
   window.localStorage.setItem(
     CURRENT_ASSESSMENT_ID_STORAGE_KEY,
     assessmentId
@@ -147,10 +173,16 @@ export function setCurrentSavedAssessmentId(assessmentId: string) {
 
 export function getCurrentSavedAssessmentId(): string | null {
   if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(CURRENT_ASSESSMENT_ID_STORAGE_KEY);
+
+  return readStorageWithLegacyFallback({
+    currentKey: CURRENT_ASSESSMENT_ID_STORAGE_KEY,
+    legacyKey: LEGACY_CURRENT_ASSESSMENT_ID_STORAGE_KEY,
+  });
 }
 
 export function clearCurrentSavedAssessmentId() {
   if (typeof window === "undefined") return;
+
   window.localStorage.removeItem(CURRENT_ASSESSMENT_ID_STORAGE_KEY);
+  window.localStorage.removeItem(LEGACY_CURRENT_ASSESSMENT_ID_STORAGE_KEY);
 }

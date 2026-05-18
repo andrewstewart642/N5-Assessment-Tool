@@ -2,44 +2,57 @@ import { useCallback } from "react";
 
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 import { makeId } from "@/math-helpers/QuestionLogic";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
 import type {
   DifficultyLevel,
   Paper,
   Question,
   Skill,
   StandardFilter,
+  ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
+import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
 import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
   buildGenerated,
   buildSkillLinks,
   getConceptFromSelection,
 } from "../builder-logic/BuilderQuestionGenerators";
-import {
-  buildSingleTopicMarkBreakdown,
-} from "../builder-logic/AssessmentDistributionAnalysis";
+import { buildSingleTopicMarkBreakdown } from "../builder-logic/AssessmentDistributionAnalysis";
 import type { DraftByPaper, EditDraftByPaper } from "../BuilderUtils";
 
-type PendingJumpRef = React.MutableRefObject<{ paper: Paper; draftId: string } | null>;
+type PendingJumpRef = React.MutableRefObject<{
+  paper: Paper;
+  draftId: string;
+} | null>;
+
 type EditDraftRef = React.MutableRefObject<EditDraftByPaper>;
 
 type UseQuestionDraftGenerationArgs = {
   standardFilter: StandardFilter;
+  thinkingTypeFilter: ThinkingTypeFilter;
   targetMarks: number;
+
   editDraftRef: EditDraftRef;
+
   setDraftByPaper: React.Dispatch<React.SetStateAction<DraftByPaper>>;
   setEditDraftByPaper: React.Dispatch<React.SetStateAction<EditDraftByPaper>>;
   setViewPaper: React.Dispatch<React.SetStateAction<Paper>>;
+
   pendingJumpDraftRef: PendingJumpRef;
+
   pushFlash: (message: string) => void;
   addQualityNote: (message: string) => void;
 };
 
 function withSpacingBase(question: Question): Question {
   const code = question.questionCode;
+
   return {
     ...question,
-    spacingBasePx: code ? getSpacingBasePx(code) : DEFAULT_QUESTION_SPACING_BASE_PX,
+    spacingBasePx: code
+      ? getSpacingBasePx(code)
+      : DEFAULT_QUESTION_SPACING_BASE_PX,
   };
 }
 
@@ -61,14 +74,33 @@ function resolveGeneratedTotalMarks(
   return targetMarks;
 }
 
+function buildSelectionFilters(args: {
+  standardFilter: StandardFilter;
+  thinkingTypeFilter: ThinkingTypeFilter;
+  targetMarks: number;
+  paper: Paper;
+}): QuestionSelectionFilters {
+  return {
+    selectedStandard: args.standardFilter,
+    selectedThinkingType: args.thinkingTypeFilter,
+    targetMarks: args.targetMarks,
+    targetPaper: args.paper,
+  };
+}
+
 export function useQuestionDraftGeneration({
   standardFilter,
+  thinkingTypeFilter,
   targetMarks,
+
   editDraftRef,
+
   setDraftByPaper,
   setEditDraftByPaper,
   setViewPaper,
+
   pendingJumpDraftRef,
+
   pushFlash,
   addQualityNote,
 }: UseQuestionDraftGenerationArgs) {
@@ -86,7 +118,20 @@ export function useQuestionDraftGeneration({
         addQualityNote(`• ${msg}`);
       }
 
-      const generated = buildGenerated(skill, concept, difficulty);
+      const selectionFilters = buildSelectionFilters({
+        standardFilter,
+        thinkingTypeFilter,
+        targetMarks,
+        paper,
+      });
+
+      const generated = buildGenerated(
+        skill,
+        concept,
+        difficulty,
+        selectionFilters
+      );
+
       const conceptMeta = getConceptFromSelection(skill, concept);
       const skillLinks = buildSkillLinks(skill, conceptMeta);
       const resolvedMarks = resolveGeneratedTotalMarks(generated, targetMarks);
@@ -94,7 +139,7 @@ export function useQuestionDraftGeneration({
       const draft = withSpacingBase({
         id: makeId(),
         category,
-        courseId: "N5_MATH",
+        courseId: ACTIVE_COURSE_CONFIG.courseId,
         skillId: skill.id,
         skillCode: skill.code,
         skillText: skill.text,
@@ -116,12 +161,21 @@ export function useQuestionDraftGeneration({
           buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
       });
 
-      pendingJumpDraftRef.current = { paper, draftId: draft.id };
-      setDraftByPaper((prev) => ({ ...prev, [paper]: draft }));
+      pendingJumpDraftRef.current = {
+        paper,
+        draftId: draft.id,
+      };
+
+      setDraftByPaper((prev) => ({
+        ...prev,
+        [paper]: draft,
+      }));
+
       setViewPaper((prev) => (prev === paper ? prev : paper));
     },
     [
       standardFilter,
+      thinkingTypeFilter,
       targetMarks,
       setDraftByPaper,
       setViewPaper,
@@ -145,7 +199,20 @@ export function useQuestionDraftGeneration({
         addQualityNote(`• ${msg}`);
       }
 
-      const generated = buildGenerated(skill, concept, difficulty);
+      const selectionFilters = buildSelectionFilters({
+        standardFilter,
+        thinkingTypeFilter,
+        targetMarks,
+        paper,
+      });
+
+      const generated = buildGenerated(
+        skill,
+        concept,
+        difficulty,
+        selectionFilters
+      );
+
       const conceptMeta = getConceptFromSelection(skill, concept);
       const skillLinks = buildSkillLinks(skill, conceptMeta);
       const resolvedMarks = resolveGeneratedTotalMarks(generated, targetMarks);
@@ -160,7 +227,7 @@ export function useQuestionDraftGeneration({
           const nextDraft = withSpacingBase({
             ...nowEdit.draft,
             category,
-            courseId: "N5_MATH",
+            courseId: ACTIVE_COURSE_CONFIG.courseId,
             skillId: skill.id,
             skillCode: skill.code,
             skillText: skill.text,
@@ -182,9 +249,18 @@ export function useQuestionDraftGeneration({
               buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
           });
 
-          pendingJumpDraftRef.current = { paper, draftId: nextDraft.id };
+          pendingJumpDraftRef.current = {
+            paper,
+            draftId: nextDraft.id,
+          };
 
-          return { ...prev, [paper]: { ...nowEdit, draft: nextDraft } };
+          return {
+            ...prev,
+            [paper]: {
+              ...nowEdit,
+              draft: nextDraft,
+            },
+          };
         });
 
         setViewPaper((prev) => (prev === paper ? prev : paper));
@@ -195,7 +271,7 @@ export function useQuestionDraftGeneration({
         const nextDraft = withSpacingBase({
           id: prevDrafts[paper]?.id ?? makeId(),
           category,
-          courseId: "N5_MATH",
+          courseId: ACTIVE_COURSE_CONFIG.courseId,
           skillId: skill.id,
           skillCode: skill.code,
           skillText: skill.text,
@@ -217,15 +293,22 @@ export function useQuestionDraftGeneration({
             buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
         });
 
-        pendingJumpDraftRef.current = { paper, draftId: nextDraft.id };
+        pendingJumpDraftRef.current = {
+          paper,
+          draftId: nextDraft.id,
+        };
 
-        return { ...prevDrafts, [paper]: nextDraft };
+        return {
+          ...prevDrafts,
+          [paper]: nextDraft,
+        };
       });
 
       setViewPaper((prev) => (prev === paper ? prev : paper));
     },
     [
       standardFilter,
+      thinkingTypeFilter,
       targetMarks,
       editDraftRef,
       setEditDraftByPaper,

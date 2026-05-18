@@ -156,9 +156,11 @@ export const N5_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
   awardingBody: "SQA",
   levelLabel: "National 5",
 
-  papers: N5_MATH_PAPERS,
+    papers: N5_MATH_PAPERS,
   assessmentModes: N5_MATH_ASSESSMENT_MODES,
+  visibleSetupAssessmentModeIds: ["PRELIM", "CLASS_TEST", "HOMEWORK"],
   assessmentStructures: N5_MATH_ASSESSMENT_STRUCTURES,
+  visibleSetupAssessmentStructureIds: ["BOTH", "P1_ONLY", "P2_ONLY"],
 
   topicTargets: N5_MATH_TOPIC_TARGETS,
   skillTree: skillsData,

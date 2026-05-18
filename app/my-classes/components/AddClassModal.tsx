@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import {
-  COURSE_OPTIONS,
+  COURSE_OPTION_ENTRIES,
   LEVEL_OPTIONS,
   type CourseOption,
   type LevelOption,
 } from "../types/Classes";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { Theme } from "@/ui/AppTheme";
 
 type Props = {
   open: boolean;
@@ -21,7 +21,7 @@ type Props = {
   setTeacher: (value: string) => void;
   onClose: () => void;
   onCreate: () => void;
-  theme: AppTheme;
+  theme: Theme;
 };
 
 export default function AddClassModal({
@@ -65,17 +65,17 @@ export default function AddClassModal({
   };
 
   const inputStyle: React.CSSProperties = {
-    width: "100%",
-    border: `1px solid ${theme.inputBorder}`,
-    background: theme.inputBg,
-    color: theme.inputText,
-    borderRadius: 14,
-    padding: "12px 14px",
-    fontSize: 14,
-    lineHeight: 1.3,
-    outline: "none",
-    boxSizing: "border-box",
-  };
+  width: "100%",
+  border: `1px solid ${theme.borderStandard}`,
+  background: theme.controlBg,
+  color: theme.textPrimary,
+  borderRadius: 14,
+  padding: "12px 14px",
+  fontSize: 14,
+  lineHeight: 1.3,
+  outline: "none",
+  boxSizing: "border-box",
+};
 
   return (
     <div
@@ -137,15 +137,18 @@ export default function AddClassModal({
               onChange={(event) => setCourse(event.target.value as CourseOption)}
               style={inputStyle}
             >
-              {COURSE_OPTIONS.map((option) => (
-                <option
-                  key={option}
-                  value={option}
-                  style={{ background: theme.bgElevated, color: theme.textPrimary }}
-                >
-                  {option}
-                </option>
-              ))}
+              {COURSE_OPTION_ENTRIES.map((option) => (
+              <option
+                key={option.id}
+                value={option.classCourseLabel}
+                disabled={!option.isAvailable}
+                style={{ background: theme.bgElevated, color: theme.textPrimary }}
+              >
+                {option.isAvailable
+                  ? option.classCourseLabel
+                  : `${option.classCourseLabel} — coming later`}
+              </option>
+            ))}
             </select>
           </label>
 

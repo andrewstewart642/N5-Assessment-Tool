@@ -11,7 +11,10 @@ export type StandardFilter = "C" | "A" | "C+A";
 
 export type ThinkingTypeFilter = "OPERATIONAL" | "REASONING" | "ANY";
 
-export type CourseId = "N5_MATH";
+export type CourseId =
+  | "N5_MATH"
+  | "N5_APPLICATIONS_MATH"
+  | "HIGHER_MATH";
 
 export type Theme = {
   pageBg: string;

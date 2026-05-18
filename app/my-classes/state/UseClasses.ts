@@ -1,9 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { CourseOption, LevelOption, SchoolClass } from "../types/Classes";
 
-const STORAGE_KEY = "n5-my-classes";
+import type { CourseOption, LevelOption, SchoolClass } from "../types/Classes";
+import {
+  buildNewSchoolClass,
+  normaliseClass,
+} from "./ClassNormalisation";
+import {
+  readMyClassesStorageValue,
+  writeMyClassesStorageValue,
+} from "./ClassStorageKeys";
 
 function makeClassId(): string {
   return `class-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -20,39 +27,6 @@ function sortClasses(items: SchoolClass[]): SchoolClass[] {
       sensitivity: "base",
     });
   });
-}
-
-function normaliseClass(candidate: unknown): SchoolClass | null {
-  if (!candidate || typeof candidate !== "object") return null;
-
-  const item = candidate as Partial<SchoolClass>;
-
-  if (
-    typeof item.id !== "string" ||
-    typeof item.name !== "string" ||
-    typeof item.course !== "string" ||
-    typeof item.level !== "string" ||
-    typeof item.teacher !== "string" ||
-    typeof item.createdAt !== "number"
-  ) {
-    return null;
-  }
-
-  return {
-    id: item.id,
-    name: item.name,
-    course: item.course as CourseOption,
-    level: item.level as LevelOption,
-    teacher: item.teacher,
-    createdAt: item.createdAt,
-    updatedAt:
-      typeof item.updatedAt === "number" ? item.updatedAt : item.createdAt,
-    completedSkillIds: Array.isArray(item.completedSkillIds)
-      ? item.completedSkillIds.filter(
-          (skillId): skillId is string => typeof skillId === "string"
-        )
-      : [],
-  };
 }
 
 type AddClassArgs = {
@@ -73,7 +47,8 @@ export function UseClasses() {
 
   useEffect(() => {
     try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
+      const raw = readMyClassesStorageValue();
+
       if (!raw) {
         setHasLoaded(true);
         return;
@@ -100,7 +75,8 @@ export function UseClasses() {
 
   useEffect(() => {
     if (!hasLoaded) return;
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(classes));
+
+    writeMyClassesStorageValue(JSON.stringify(classes));
   }, [classes, hasLoaded]);
 
   const classesByCourse = useMemo(() => {
@@ -123,16 +99,14 @@ export function UseClasses() {
 
     const now = Date.now();
 
-    const nextClass: SchoolClass = {
+    const nextClass = buildNewSchoolClass({
       id: makeClassId(),
       name: trimmedName,
       course,
       level,
       teacher: trimmedTeacher,
       createdAt: now,
-      updatedAt: now,
-      completedSkillIds: [],
-    };
+    });
 
     setClasses((current) => sortClasses([...current, nextClass]));
   }

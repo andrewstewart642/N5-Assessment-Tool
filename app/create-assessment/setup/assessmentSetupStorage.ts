@@ -1,30 +1,20 @@
 import type { CourseId } from "@/shared-types/AssessmentTypes";
+import type {
+  CourseAssessmentModeId,
+  CourseAssessmentStructureId,
+} from "@/course-data/course-configs/CourseConfigTypes";
 
-export const ASSESSMENT_SETUP_STORAGE_KEY = "n5-assessment-setup-brief";
+export const ASSESSMENT_SETUP_STORAGE_KEY =
+  "assessment_builder_setup_brief_v1";
 
-/**
- * These are the assessment modes currently supported by the setup flow.
- *
- * CHECK_TEST and CUSTOM are already allowed here because the course config
- * supports them. The UI can choose whether to show them now or later.
- */
-export type AssessmentType =
-  | "PRELIM"
-  | "CLASS_TEST"
-  | "HOMEWORK"
-  | "CHECK_TEST"
-  | "CUSTOM";
+export const LEGACY_ASSESSMENT_SETUP_STORAGE_KEY =
+  "n5-assessment-setup-brief";
+
+export type AssessmentType = CourseAssessmentModeId;
 
 export type BuildPriority = "MARKS" | "TIME";
 
-/**
- * Temporary N5-style paper structure.
- *
- * This will eventually become course-config-driven more fully, but for now
- * these IDs match the N5 assessment structures already defined in
- * N5MathsCourseConfig.ts.
- */
-export type PaperStructure = "BOTH" | "P1_ONLY" | "P2_ONLY";
+export type PaperStructure = CourseAssessmentStructureId;
 
 export type AssessmentSetupBrief = {
   /**
@@ -53,6 +43,25 @@ export type AssessmentSetupBrief = {
 
   createdAt: number;
 };
+
+function readStorageWithLegacyFallback(): string | null {
+  if (typeof window === "undefined") return null;
+
+  const currentValue = window.localStorage.getItem(
+    ASSESSMENT_SETUP_STORAGE_KEY
+  );
+
+  if (currentValue !== null) return currentValue;
+
+  const legacyValue = window.localStorage.getItem(
+    LEGACY_ASSESSMENT_SETUP_STORAGE_KEY
+  );
+
+  if (legacyValue === null) return null;
+
+  window.localStorage.setItem(ASSESSMENT_SETUP_STORAGE_KEY, legacyValue);
+  return legacyValue;
+}
 
 function isAssessmentType(value: unknown): value is AssessmentType {
   return (
@@ -100,7 +109,7 @@ export function loadAssessmentSetupBrief(): AssessmentSetupBrief | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = window.localStorage.getItem(ASSESSMENT_SETUP_STORAGE_KEY);
+    const raw = readStorageWithLegacyFallback();
     if (!raw) return null;
 
     const parsed = JSON.parse(raw) as Partial<AssessmentSetupBrief>;

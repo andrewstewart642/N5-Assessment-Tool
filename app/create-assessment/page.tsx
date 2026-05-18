@@ -7,13 +7,10 @@ import { UI_TYPO } from "@/app/ui/UiTypography";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import LevelSelect from "./components/LevelSelect";
+import { readMyClassesStorageValue } from "@/app/my-classes/state/ClassStorageKeys";
 import ClassCoverageSelect from "../components/ClassCoverageSelect";
-import {
-  ASSESSMENT_LEVEL_OPTIONS,
-  loadAssessmentClassCoverageBrief,
-  saveAssessmentClassCoverageBrief,
-  type AssessmentLevelId,
-} from "./setup/AssessmentClassCoverageStorage";
+import { normaliseClass } from "@/app/my-classes/state/ClassNormalisation";
+import {getAssessmentLevelOption, getDefaultAssessmentLevelId, loadAssessmentClassCoverageBrief, saveAssessmentClassCoverageBrief, type AssessmentLevelId,} from "@/app/create-assessment/setup/AssessmentClassCoverageStorage";
 import {
   saveAssessmentSetupBrief,
   type AssessmentType,
@@ -333,33 +330,34 @@ function loadAllClasses(): SchoolClass[] {
   if (typeof window === "undefined") return [];
 
   try {
-    const raw = window.localStorage.getItem("n5-my-classes");
+    const raw = readMyClassesStorageValue();
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
 
-    return parsed.filter((item): item is SchoolClass => {
-      if (!item || typeof item !== "object") return false;
-
-      const candidate = item as Partial<SchoolClass>;
-      return (
-        typeof candidate.id === "string" &&
-        typeof candidate.name === "string" &&
-        typeof candidate.course === "string" &&
-        typeof candidate.level === "string" &&
-        typeof candidate.teacher === "string" &&
-        typeof candidate.createdAt === "number" &&
-        Array.isArray(candidate.completedSkillIds)
-      );
-    });
+    return parsed
+      .map(normaliseClass)
+      .filter((item): item is SchoolClass => item !== null);
   } catch {
     return [];
   }
 }
 
-function isSetupAssessmentType(value: string): value is AssessmentType {
-  return value === "PRELIM" || value === "CLASS_TEST" || value === "HOMEWORK";
+function isSetupAssessmentType(value: AssessmentType): boolean {
+  const visibleModeIds =
+    ACTIVE_COURSE_CONFIG.visibleSetupAssessmentModeIds ??
+    ACTIVE_COURSE_CONFIG.assessmentModes.map((mode) => mode.id);
+
+  return visibleModeIds.includes(value);
+}
+
+function isSetupPaperStructure(value: PaperStructure): boolean {
+  const visibleStructureIds =
+    ACTIVE_COURSE_CONFIG.visibleSetupAssessmentStructureIds ??
+    ACTIVE_COURSE_CONFIG.assessmentStructures.map((structure) => structure.id);
+
+  return visibleStructureIds.includes(value);
 }
 
 function getIncludedPapers(structure: PaperStructure): Paper[] {
@@ -413,11 +411,16 @@ export default function CreateAssessmentSetupPage() {
   const { theme } = useSettings();
 
   const setupAssessmentModes = useMemo(() => {
-    return ACTIVE_COURSE_CONFIG.assessmentModes.filter(
-      (mode): mode is typeof mode & { id: AssessmentType } =>
-        isSetupAssessmentType(mode.id)
-    );
-  }, []);
+  return ACTIVE_COURSE_CONFIG.assessmentModes.filter((mode) =>
+    isSetupAssessmentType(mode.id)
+  );
+}, []);
+
+const setupAssessmentStructures = useMemo(() => {
+  return ACTIVE_COURSE_CONFIG.assessmentStructures.filter((structure) =>
+    isSetupPaperStructure(structure.id)
+  );
+}, []);
 
   const [assessmentType, setAssessmentType] = useState<AssessmentType | null>(
     null
@@ -440,8 +443,9 @@ export default function CreateAssessmentSetupPage() {
   const [assessmentName, setAssessmentName] = useState("[Untitled file]");
   const [assessmentDate, setAssessmentDate] = useState(todayIsoDate());
 
-  const [selectedLevelId, setSelectedLevelId] =
-    useState<AssessmentLevelId | null>("N5_MATHS");
+  const [selectedLevelId, setSelectedLevelId] = useState<AssessmentLevelId | null>(
+      getDefaultAssessmentLevelId()
+    );
   const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [useCompleteCourseCoverage, setUseCompleteCourseCoverage] =
     useState(false);
@@ -451,7 +455,9 @@ export default function CreateAssessmentSetupPage() {
   useEffect(() => {
     const savedCoverageBrief = loadAssessmentClassCoverageBrief();
     if (savedCoverageBrief) {
-      setSelectedLevelId(savedCoverageBrief.levelId ?? "N5_MATHS");
+      setSelectedLevelId(
+        savedCoverageBrief.levelId ?? getDefaultAssessmentLevelId()
+      );
       setSelectedClassIds(savedCoverageBrief.selectedClassIds);
       setUseCompleteCourseCoverage(savedCoverageBrief.useCompleteCourseCoverage);
     }
@@ -508,18 +514,16 @@ export default function CreateAssessmentSetupPage() {
   }, [buildPriority, paperStructure]);
 
   const themeLevel = useMemo(() => {
-    return (
-      ASSESSMENT_LEVEL_OPTIONS.find((option) => option.id === selectedLevelId) ??
-      null
-    );
-  }, [selectedLevelId]);
+  return getAssessmentLevelOption(selectedLevelId);
+}, [selectedLevelId]);
 
   const levelClasses = useMemo(() => {
-    if (!themeLevel) return [];
-    return allClasses.filter(
-      (schoolClass) => schoolClass.course === themeLevel.classCourseLabel
-    );
-  }, [allClasses, themeLevel]);
+  if (!themeLevel) return [];
+
+  return allClasses.filter(
+    (schoolClass) => schoolClass.courseId === themeLevel.id
+  );
+}, [allClasses, themeLevel]);
 
   useEffect(() => {
     setSelectedClassIds((current) =>
@@ -900,7 +904,7 @@ export default function CreateAssessmentSetupPage() {
           <SetupCard title="2. Paper Structure" theme={theme}>
             {showPaperStructure ? (
               <>
-                {ACTIVE_COURSE_CONFIG.assessmentStructures.map((structure) => (
+                {setupAssessmentStructures.map((structure) => (
                   <ChoiceRow
                     key={structure.id}
                     label={structure.label}

@@ -8,6 +8,7 @@ import AddClassModal from "./components/AddClassModal";
 import { UseClasses } from "./state/UseClasses";
 import type { CourseOption, LevelOption } from "./types/Classes";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
+import { getDefaultClassCourseLabel } from "@/course-data/course-configs/CourseCatalog";
 
 export default function MyClassesPage() {
   const { theme } = useSettings();
@@ -15,7 +16,7 @@ export default function MyClassesPage() {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [className, setClassName] = useState("");
-  const [course, setCourse] = useState<CourseOption>("National 5 Maths");
+  const [course, setCourse] = useState<CourseOption>(getDefaultClassCourseLabel());
   const [level, setLevel] = useState<LevelOption>("");
   const [teacher, setTeacher] = useState("");
 
@@ -26,7 +27,7 @@ export default function MyClassesPage() {
   function closeAddModal() {
     setIsAddModalOpen(false);
     setClassName("");
-    setCourse("National 5 Maths");
+    setCourse(getDefaultClassCourseLabel());
     setLevel("");
     setTeacher("");
   }

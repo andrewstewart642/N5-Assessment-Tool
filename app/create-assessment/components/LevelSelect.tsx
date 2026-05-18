@@ -52,8 +52,13 @@ export default function LevelSelect({ value, onChange, theme }: Props) {
           </option>
 
           {ASSESSMENT_LEVEL_OPTIONS.map((option) => (
-            <option key={option.id} value={option.id} style={{ color: "#0f172a" }}>
-              {option.label}
+            <option
+              key={option.id}
+              value={option.id}
+              disabled={!option.isAvailable}
+              style={{ color: "#0f172a" }}
+            >
+              {option.isAvailable ? option.label : `${option.label} — coming later`}
             </option>
           ))}
         </select>

@@ -2,20 +2,22 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { BUILDER_STORAGE_KEY_PAIRS } from "./BuilderStorageKeys";
+import { readMyClassesStorageValue } from "@/app/my-classes/state/ClassStorageKeys";
 
 import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/SkillsTree";
 import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
 import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
-
+import { normaliseClass } from "@/app/my-classes/state/ClassNormalisation";
 import {
   BUILDER_DEFAULT_HUD_HEIGHT,
   BUILDER_DIVIDER_WIDTH_PX,
 } from "./builder-definitions/BuilderConstants";
 
-import { skillsData } from "@/course-data/N5-Skills";
-import { N5_MATH_COURSE_CONFIG } from "@/course-data/course-configs/N5MathsCourseConfig";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import { getCoursePaperConfig } from "@/course-data/course-configs/CourseConfigTypes";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
   Paper,
@@ -62,7 +64,8 @@ import {
 } from "./BuilderUtils";
 
 import {
-  ASSESSMENT_LEVEL_OPTIONS,
+  getAssessmentLevelLabel,
+  normaliseAssessmentLevelId,
   type AssessmentLevelId,
 } from "@/app/create-assessment/setup/AssessmentClassCoverageStorage";
 import type { CourseOption, SchoolClass } from "@/app/my-classes/types/Classes";
@@ -74,78 +77,40 @@ import {
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 
-const META_NAME_KEY = "n5-builder-meta-name";
-const META_CLASS_KEY = "n5-builder-meta-class";
-const META_ASSESSMENT_DATE_KEY = "n5-builder-meta-assessment-date";
+const META_NAME_KEY = BUILDER_STORAGE_KEY_PAIRS.metaName;
+const META_CLASS_KEY = BUILDER_STORAGE_KEY_PAIRS.metaClass;
+const META_ASSESSMENT_DATE_KEY = BUILDER_STORAGE_KEY_PAIRS.metaAssessmentDate;
 
-const P1_COVER_DATE_KEY = "n5-builder-p1-cover-date";
-const P1_START_TIME_KEY = "n5-builder-p1-start-time";
-const P1_END_TIME_KEY = "n5-builder-p1-end-time";
+const P1_COVER_DATE_KEY = BUILDER_STORAGE_KEY_PAIRS.p1CoverDate;
+const P1_START_TIME_KEY = BUILDER_STORAGE_KEY_PAIRS.p1StartTime;
+const P1_END_TIME_KEY = BUILDER_STORAGE_KEY_PAIRS.p1EndTime;
 
-const P2_COVER_DATE_KEY = "n5-builder-p2-cover-date";
-const P2_START_TIME_KEY = "n5-builder-p2-start-time";
-const P2_END_TIME_KEY = "n5-builder-p2-end-time";
+const P2_COVER_DATE_KEY = BUILDER_STORAGE_KEY_PAIRS.p2CoverDate;
+const P2_START_TIME_KEY = BUILDER_STORAGE_KEY_PAIRS.p2StartTime;
+const P2_END_TIME_KEY = BUILDER_STORAGE_KEY_PAIRS.p2EndTime;
 
-const P2_DATE_CUSTOM_KEY = "n5-builder-p2-date-custom";
+const P2_DATE_CUSTOM_KEY = BUILDER_STORAGE_KEY_PAIRS.p2DateCustom;
 
-const MY_CLASSES_STORAGE_KEY = "n5-my-classes";
-
-function getCourseLabelForLevelId(
+function getCourseIdForLevelId(
   levelId: AssessmentLevelId | null
-): CourseOption | null {
-  if (!levelId) return null;
-
-  const match = ASSESSMENT_LEVEL_OPTIONS.find((option) => option.id === levelId);
-  if (!match) return null;
-
-  return match.classCourseLabel as CourseOption;
+): AssessmentLevelId | null {
+  return normaliseAssessmentLevelId(levelId);
 }
 
-function normaliseSavedClass(candidate: unknown): SchoolClass | null {
-  if (!candidate || typeof candidate !== "object") return null;
 
-  const item = candidate as Partial<SchoolClass>;
-
-  if (
-    typeof item.id !== "string" ||
-    typeof item.name !== "string" ||
-    typeof item.course !== "string" ||
-    typeof item.level !== "string" ||
-    typeof item.teacher !== "string" ||
-    typeof item.createdAt !== "number"
-  ) {
-    return null;
-  }
-
-  return {
-    id: item.id,
-    name: item.name,
-    course: item.course as CourseOption,
-    level: item.level,
-    teacher: item.teacher,
-    createdAt: item.createdAt,
-    updatedAt:
-      typeof item.updatedAt === "number" ? item.updatedAt : item.createdAt,
-    completedSkillIds: Array.isArray(item.completedSkillIds)
-      ? item.completedSkillIds.filter(
-          (skillId): skillId is string => typeof skillId === "string"
-        )
-      : [],
-  };
-}
 
 function loadSavedClasses(): SchoolClass[] {
   if (typeof window === "undefined") return [];
 
   try {
-    const raw = window.localStorage.getItem(MY_CLASSES_STORAGE_KEY);
+        const raw = readMyClassesStorageValue();
     if (!raw) return [];
 
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
 
     return parsed
-      .map(normaliseSavedClass)
+      .map(normaliseClass)
       .filter((item): item is SchoolClass => item !== null);
   } catch {
     return [];
@@ -216,6 +181,18 @@ export default function CreateAssessmentBuilderPage() {
   const router = useRouter();
   const { theme } = useSettings();
 
+  const activeSkillsData = useMemo<Record<string, Skill[]>>(() => {
+    return (ACTIVE_COURSE_CONFIG.skillTree ?? {}) as Record<string, Skill[]>;
+  }, []);
+
+  const defaultP1Target = useMemo(() => {
+    return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, "P1").defaultTargetMarks;
+  }, []);
+
+  const defaultP2Target = useMemo(() => {
+    return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, "P2").defaultTargetMarks;
+  }, []);
+
   const [standardFilter, setStandardFilter] = useState<StandardFilter>("C+A");
   const [thinkingTypeFilter, setThinkingTypeFilter] =
     useState<ThinkingTypeFilter>("ANY");
@@ -224,8 +201,8 @@ export default function CreateAssessmentBuilderPage() {
   const [activePaper, setActivePaper] = useState<Paper>("P1");
   const [viewPaper, setViewPaper] = useState<Paper>("P1");
 
-  const [p1Target, setP1Target] = useState<number>(40);
-  const [p2Target, setP2Target] = useState<number>(50);
+  const [p1Target, setP1Target] = useState<number>(defaultP1Target);
+  const [p2Target, setP2Target] = useState<number>(defaultP2Target);
 
   const {
     collapsedCategories,
@@ -560,28 +537,22 @@ export default function CreateAssessmentBuilderPage() {
   }, []);
 
   const builderLevelLabel = useMemo(() => {
-    if (!loadedSavedAssessment?.setup.levelId) return null;
-
-    return (
-      ASSESSMENT_LEVEL_OPTIONS.find(
-        (option) => option.id === loadedSavedAssessment.setup.levelId
-      )?.label ?? null
-    );
-  }, [loadedSavedAssessment]);
+  return getAssessmentLevelLabel(loadedSavedAssessment?.setup.levelId);
+}, [loadedSavedAssessment]);
 
   const builderAvailableClasses = useMemo(() => {
-    if (!loadedSavedAssessment?.setup.levelId) return [];
+  if (!loadedSavedAssessment?.setup.levelId) return [];
 
-    const expectedCourse = getCourseLabelForLevelId(
-      loadedSavedAssessment.setup.levelId
-    );
+  const expectedCourseId = getCourseIdForLevelId(
+    loadedSavedAssessment.setup.levelId
+  );
 
-    if (!expectedCourse) return [];
+  if (!expectedCourseId) return [];
 
-    return savedClasses.filter(
-      (schoolClass) => schoolClass.course === expectedCourse
-    );
-  }, [loadedSavedAssessment, savedClasses]);
+  return savedClasses.filter(
+    (schoolClass) => schoolClass.courseId === expectedCourseId
+  );
+}, [loadedSavedAssessment, savedClasses]);
 
   const computedClassSummary = useMemo(() => {
     return buildClassCoverageSummary({
@@ -718,59 +689,59 @@ export default function CreateAssessmentBuilderPage() {
   }, [editDraftByPaper]);
 
   const selectedClassesForCoverage = useMemo(() => {
-    if (!loadedSavedAssessment) return [];
+  if (!loadedSavedAssessment) return [];
 
-    const expectedCourse = getCourseLabelForLevelId(
-      loadedSavedAssessment.setup.levelId
+  const expectedCourseId = getCourseIdForLevelId(
+    loadedSavedAssessment.setup.levelId
+  );
+
+  const selectedClasses = builderSelectedClassIds
+    .map((classId) =>
+      savedClasses.find((schoolClass) => schoolClass.id === classId)
+    )
+    .filter(
+      (schoolClass): schoolClass is SchoolClass => schoolClass !== undefined
     );
 
-    const selectedClasses = builderSelectedClassIds
-      .map((classId) =>
-        savedClasses.find((schoolClass) => schoolClass.id === classId)
-      )
-      .filter((schoolClass): schoolClass is SchoolClass => schoolClass !== undefined);
+  if (!expectedCourseId) return selectedClasses;
 
-    if (!expectedCourse) return selectedClasses;
-
-    return selectedClasses.filter(
-      (schoolClass) => schoolClass.course === expectedCourse
-    );
-  }, [loadedSavedAssessment, savedClasses, builderSelectedClassIds]);
+  return selectedClasses.filter(
+    (schoolClass) => schoolClass.courseId === expectedCourseId
+  );
+}, [loadedSavedAssessment, savedClasses, builderSelectedClassIds]);
 
   const sharedCompletedSkillIds = useMemo(() => {
     return getSharedCompletedSkillIds(selectedClassesForCoverage);
   }, [selectedClassesForCoverage]);
 
   const filteredSkillsData = useMemo<Record<string, Skill[]>>(() => {
-    if (!loadedSavedAssessment) {
-      return skillsData as Record<string, Skill[]>;
-    }
+  if (!loadedSavedAssessment) {
+    return activeSkillsData;
+  }
 
-    if (builderUseCompleteCourseCoverage) {
-      return skillsData as Record<string, Skill[]>;
-    }
+  if (builderUseCompleteCourseCoverage) {
+    return activeSkillsData;
+  }
 
-    if (builderSelectedClassIds.length === 0) {
-      return skillsData as Record<string, Skill[]>;
-    }
+  if (builderSelectedClassIds.length === 0) {
+    return activeSkillsData;
+  }
 
-    if (selectedClassesForCoverage.length === 0) {
-      return skillsData as Record<string, Skill[]>;
-    }
+  if (selectedClassesForCoverage.length === 0) {
+    return activeSkillsData;
+  }
 
-    const allowedSkillIds = new Set(sharedCompletedSkillIds);
+  const allowedSkillIds = new Set(sharedCompletedSkillIds);
 
-    return buildFilteredSkillsData(
-      skillsData as Record<string, Skill[]>,
-      allowedSkillIds
-    );
-  }, [
-    loadedSavedAssessment,
-    selectedClassesForCoverage,
-    sharedCompletedSkillIds,
-    builderUseCompleteCourseCoverage,
-    builderSelectedClassIds,
-  ]);
+  return buildFilteredSkillsData(activeSkillsData, allowedSkillIds);
+}, [
+  activeSkillsData,
+  loadedSavedAssessment,
+  selectedClassesForCoverage,
+  sharedCompletedSkillIds,
+  builderUseCompleteCourseCoverage,
+  builderSelectedClassIds,
+]);
 
   const totalSkillsCount = useMemo(() => {
     return Object.values(filteredSkillsData).reduce<number>(
@@ -791,7 +762,7 @@ export default function CreateAssessmentBuilderPage() {
       expandCategory(question.category);
       expandSkill(question.skillId);
 
-      const categorySkills = (skillsData[question.category] ?? []) as Skill[];
+      const categorySkills = (activeSkillsData[question.category] ?? []) as Skill[];
       const skill = categorySkills.find((entry) => entry.id === question.skillId);
 
       if (!skill) {
@@ -818,6 +789,7 @@ export default function CreateAssessmentBuilderPage() {
       setDifficulty(question.skillId, question.difficulty);
     },
     [
+      activeSkillsData,
       expandCategory,
       expandSkill,
       setConceptIndex,
@@ -829,7 +801,7 @@ export default function CreateAssessmentBuilderPage() {
     ]
   );
 
-  const {
+    const {
     addQuestionToPaper,
     regenerateQuestionToPaper,
     assignNewDraft,
@@ -842,6 +814,7 @@ export default function CreateAssessmentBuilderPage() {
     invalidCommitMessage,
   } = useQuestionWorkflow({
     standardFilter,
+    thinkingTypeFilter,
     targetMarks,
     activePaper,
     viewPaper,
@@ -919,7 +892,7 @@ export default function CreateAssessmentBuilderPage() {
     return analyseTopicBalance({
       questions,
       totalAssessmentMarks,
-      courseConfig: N5_MATH_COURSE_CONFIG,
+      courseConfig: ACTIVE_COURSE_CONFIG,
       includedPapers,
     });
   }, [questions, totalAssessmentMarks, includedPapers]);

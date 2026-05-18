@@ -8,6 +8,7 @@ import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/Builder
 import {
   BUILDER_STORAGE_KEY_PAIRS,
   readBuilderStorageValue,
+  type BuilderStorageKeyPair,
 } from "../BuilderStorageKeys";
 import { loadAssessmentSetupBrief } from "../../setup/AssessmentSetupStorage";
 import {
@@ -50,16 +51,16 @@ type UseBuilderInitialisationArgs = {
 
   setQuestions: (value: Question[]) => void;
 
-  metaNameKey: string;
-  metaClassKey: string;
-  metaAssessmentDateKey: string;
-  p1CoverDateKey: string;
-  p1StartTimeKey: string;
-  p1EndTimeKey: string;
-  p2CoverDateKey: string;
-  p2StartTimeKey: string;
-  p2EndTimeKey: string;
-  p2DateCustomKey: string;
+  metaNameKey: BuilderStorageKeyPair;
+  metaClassKey: BuilderStorageKeyPair;
+  metaAssessmentDateKey: BuilderStorageKeyPair;
+  p1CoverDateKey: BuilderStorageKeyPair;
+  p1StartTimeKey: BuilderStorageKeyPair;
+  p1EndTimeKey: BuilderStorageKeyPair;
+  p2CoverDateKey: BuilderStorageKeyPair;
+  p2StartTimeKey: BuilderStorageKeyPair;
+  p2EndTimeKey: BuilderStorageKeyPair;
+  p2DateCustomKey: BuilderStorageKeyPair;
 };
 
 function withSpacingBase(question: Question): Question {
@@ -181,13 +182,13 @@ export function useBuilderInitialisation({
       if (rawFormula === "true") setIncludeFormulaSheet(true);
       if (rawFormula === "false") setIncludeFormulaSheet(false);
 
-      const storedName = window.localStorage.getItem(metaNameKey);
-      const storedClass = window.localStorage.getItem(metaClassKey);
-      const storedAssessmentDate = window.localStorage.getItem(
+      const storedName = readBuilderStorageValue(metaNameKey);
+      const storedClass = readBuilderStorageValue(metaClassKey);
+      const storedAssessmentDate = readBuilderStorageValue(
         metaAssessmentDateKey
       );
-      const storedP1Date = window.localStorage.getItem(p1CoverDateKey);
-      const storedP2Date = window.localStorage.getItem(p2CoverDateKey);
+      const storedP1Date = readBuilderStorageValue(p1CoverDateKey);
+      const storedP2Date = readBuilderStorageValue(p2CoverDateKey);
 
       if (storedName !== null) setAssessmentName(storedName);
       if (storedClass !== null) setClassName(storedClass);
@@ -204,11 +205,11 @@ export function useBuilderInitialisation({
         setP2CoverDate(normalisedP2Date);
       }
 
-      const storedP1Start = window.localStorage.getItem(p1StartTimeKey);
-      const storedP1End = window.localStorage.getItem(p1EndTimeKey);
-      const storedP2Start = window.localStorage.getItem(p2StartTimeKey);
-      const storedP2End = window.localStorage.getItem(p2EndTimeKey);
-      const storedP2Custom = window.localStorage.getItem(p2DateCustomKey);
+      const storedP1Start = readBuilderStorageValue(p1StartTimeKey);
+      const storedP1End = readBuilderStorageValue(p1EndTimeKey);
+      const storedP2Start = readBuilderStorageValue(p2StartTimeKey);
+      const storedP2End = readBuilderStorageValue(p2EndTimeKey);
+      const storedP2Custom = readBuilderStorageValue(p2DateCustomKey);
 
       if (storedP1Start !== null) setP1StartTime(storedP1Start);
       if (storedP1End !== null) {

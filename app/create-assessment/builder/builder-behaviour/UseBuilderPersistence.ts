@@ -1,14 +1,9 @@
 import { useEffect } from "react";
 
 import {
-  HUD_HEIGHT_KEY,
-  INCLUDE_COVER_SHEET_KEY,
-  INCLUDE_FORMULA_SHEET_KEY,
-  PANE_RATIO_KEY,
-  SHOW_COVER_DATE_TIME_KEY,
-  SHOW_PROGRESS_PANEL_KEY,
-  SHOW_SCN_BOX_KEY,
-  STORAGE_KEY,
+  BUILDER_STORAGE_KEY_PAIRS,
+  writeBuilderStorageValue,
+  type BuilderStorageKeyPair,
 } from "../BuilderStorageKeys";
 
 type UseBuilderPersistenceArgs = {
@@ -32,16 +27,16 @@ type UseBuilderPersistenceArgs = {
 
   questions: unknown[];
 
-  metaNameKey: string;
-  metaClassKey: string;
-  metaAssessmentDateKey: string;
-  p1CoverDateKey: string;
-  p1StartTimeKey: string;
-  p1EndTimeKey: string;
-  p2CoverDateKey: string;
-  p2StartTimeKey: string;
-  p2EndTimeKey: string;
-  p2DateCustomKey: string;
+  metaNameKey: BuilderStorageKeyPair;
+  metaClassKey: BuilderStorageKeyPair;
+  metaAssessmentDateKey: BuilderStorageKeyPair;
+  p1CoverDateKey: BuilderStorageKeyPair;
+  p1StartTimeKey: BuilderStorageKeyPair;
+  p1EndTimeKey: BuilderStorageKeyPair;
+  p2CoverDateKey: BuilderStorageKeyPair;
+  p2StartTimeKey: BuilderStorageKeyPair;
+  p2EndTimeKey: BuilderStorageKeyPair;
+  p2DateCustomKey: BuilderStorageKeyPair;
 };
 
 export function useBuilderPersistence({
@@ -78,7 +73,10 @@ export function useBuilderPersistence({
 }: UseBuilderPersistenceArgs) {
   useEffect(() => {
     try {
-      window.localStorage.setItem(PANE_RATIO_KEY, String(leftPaneRatio));
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.paneRatio,
+        String(leftPaneRatio)
+      );
     } catch {
       // ignore
     }
@@ -86,7 +84,10 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(HUD_HEIGHT_KEY, String(hudHeight));
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.hudHeight,
+        String(hudHeight)
+      );
     } catch {
       // ignore
     }
@@ -94,8 +95,8 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(
-        SHOW_PROGRESS_PANEL_KEY,
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.showProgressPanel,
         String(showProgressPanel)
       );
     } catch {
@@ -105,8 +106,8 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(
-        INCLUDE_COVER_SHEET_KEY,
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.includeCoverSheet,
         String(includeCoverSheet)
       );
     } catch {
@@ -116,8 +117,8 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(
-        SHOW_COVER_DATE_TIME_KEY,
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.showCoverDateTime,
         String(showCoverDateTime)
       );
     } catch {
@@ -127,8 +128,8 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(
-        SHOW_SCN_BOX_KEY,
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.showScottishCandidateNumberBox,
         String(showScottishCandidateNumberBox)
       );
     } catch {
@@ -138,8 +139,8 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(
-        INCLUDE_FORMULA_SHEET_KEY,
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.includeFormulaSheet,
         String(includeFormulaSheet)
       );
     } catch {
@@ -149,22 +150,22 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(metaNameKey, assessmentName);
-      window.localStorage.setItem(metaClassKey, className);
-      window.localStorage.setItem(metaAssessmentDateKey, assessmentDate);
+            writeBuilderStorageValue(metaNameKey, assessmentName);
+      writeBuilderStorageValue(metaClassKey, className);
+      writeBuilderStorageValue(metaAssessmentDateKey, assessmentDate);
 
-      window.localStorage.setItem(p1CoverDateKey, assessmentDate);
-      window.localStorage.setItem(p1StartTimeKey, p1StartTime);
-      window.localStorage.setItem(p1EndTimeKey, p1EndTime);
+      writeBuilderStorageValue(p1CoverDateKey, assessmentDate);
+      writeBuilderStorageValue(p1StartTimeKey, p1StartTime);
+      writeBuilderStorageValue(p1EndTimeKey, p1EndTime);
 
-      window.localStorage.setItem(
+      writeBuilderStorageValue(
         p2CoverDateKey,
         p2DateCustom ? p2CoverDate : assessmentDate
       );
-      window.localStorage.setItem(p2StartTimeKey, p2StartTime);
-      window.localStorage.setItem(p2EndTimeKey, p2EndTime);
+      writeBuilderStorageValue(p2StartTimeKey, p2StartTime);
+      writeBuilderStorageValue(p2EndTimeKey, p2EndTime);
 
-      window.localStorage.setItem(p2DateCustomKey, String(p2DateCustom));
+      writeBuilderStorageValue(p2DateCustomKey, String(p2DateCustom));
     } catch {
       // ignore
     }
@@ -192,7 +193,10 @@ export function useBuilderPersistence({
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ questions }));
+      writeBuilderStorageValue(
+        BUILDER_STORAGE_KEY_PAIRS.state,
+        JSON.stringify({ questions })
+      );
     } catch {
       // ignore
     }

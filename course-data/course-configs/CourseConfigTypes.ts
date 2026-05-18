@@ -111,7 +111,30 @@ export type CourseAssessmentConfig = {
 
   papers: CoursePaperConfig[];
   assessmentModes: CourseAssessmentMode[];
+
+  /**
+   * Which assessment modes should be shown on the initial setup page.
+   *
+   * Example:
+   * - PRELIM
+   * - CLASS_TEST
+   * - HOMEWORK
+   *
+   * Other modes can still exist in the config without being shown yet.
+   */
+    visibleSetupAssessmentModeIds?: CourseAssessmentModeId[];
+
   assessmentStructures: CourseAssessmentStructure[];
+
+  /**
+   * Which paper structures should be shown on the initial setup page.
+   *
+   * Example:
+   * - BOTH
+   * - P1_ONLY
+   * - P2_ONLY
+   */
+  visibleSetupAssessmentStructureIds?: CourseAssessmentStructureId[];
 
   topicTargets: CourseTopicTarget[];
 
