@@ -1,8 +1,14 @@
+import type { Dispatch, SetStateAction } from "react";
+
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
 export type BuilderPaperNumberMap = Partial<Record<Paper, number>>;
 export type BuilderPaperStringMap = Partial<Record<Paper, string>>;
 export type BuilderPaperBooleanMap = Partial<Record<Paper, boolean>>;
+
+export type BuilderPaperStringSetterMap = Partial<
+  Record<Paper, Dispatch<SetStateAction<string>>>
+>;
 
 export type LegacyPaperNumberValues = {
   p1Value: number;
@@ -17,6 +23,11 @@ export type LegacyPaperStringValues = {
 export type LegacyPaperBooleanValues = {
   p1Value: boolean;
   p2Value: boolean;
+};
+
+export type LegacyPaperStringSetters = {
+  setP1Value: Dispatch<SetStateAction<string>>;
+  setP2Value: Dispatch<SetStateAction<string>>;
 };
 
 export function buildPaperNumberMapFromLegacyValues({
@@ -46,6 +57,16 @@ export function buildPaperBooleanMapFromLegacyValues({
   return {
     P1: p1Value,
     P2: p2Value,
+  };
+}
+
+export function buildPaperStringSetterMapFromLegacySetters({
+  setP1Value,
+  setP2Value,
+}: LegacyPaperStringSetters): BuilderPaperStringSetterMap {
+  return {
+    P1: setP1Value,
+    P2: setP2Value,
   };
 }
 
@@ -91,4 +112,14 @@ export function getPaperBooleanValue({
   const value = valuesByPaper[paper];
 
   return typeof value === "boolean" ? value : fallback;
+}
+
+export function getPaperStringSetter({
+  paper,
+  settersByPaper,
+}: {
+  paper: Paper;
+  settersByPaper: BuilderPaperStringSetterMap;
+}): Dispatch<SetStateAction<string>> | null {
+  return settersByPaper[paper] ?? null;
 }

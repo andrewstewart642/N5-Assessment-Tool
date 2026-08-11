@@ -1,8 +1,19 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
-import { todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
-import { calculateBuilderEndTimeForPaper } from "../builder-logic/BuilderPaperTiming";
 import type { Paper } from "@/shared-types/AssessmentTypes";
+import { todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
+import { getBuilderPapers } from "../builder-logic/BuilderPaperTargets";
+import { calculateBuilderEndTimeForPaper } from "../builder-logic/BuilderPaperTiming";
+import {
+  buildPaperStringSetterMapFromLegacySetters,
+  getPaperBooleanValue,
+  getPaperNumberValue,
+  getPaperStringSetter,
+  getPaperStringValue,
+  type BuilderPaperBooleanMap,
+  type BuilderPaperNumberMap,
+  type BuilderPaperStringMap,
+} from "../builder-logic/BuilderPaperStateMaps";
 
 type UseBuilderMetadataTimingArgs = {
   assessmentName: string;
@@ -12,14 +23,11 @@ type UseBuilderMetadataTimingArgs = {
   p2DateCustom: boolean;
   setP2CoverDate: React.Dispatch<React.SetStateAction<string>>;
 
-  p1StartTime: string;
-  p1Marks: number;
-  p1EndTimeManuallyEdited: boolean;
-  setP1EndTime: React.Dispatch<React.SetStateAction<string>>;
+  marksByPaper: BuilderPaperNumberMap;
+  startTimeByPaper: BuilderPaperStringMap;
+  endTimeManuallyEditedByPaper: BuilderPaperBooleanMap;
 
-  p2StartTime: string;
-  p2Marks: number;
-  p2EndTimeManuallyEdited: boolean;
+  setP1EndTime: React.Dispatch<React.SetStateAction<string>>;
   setP2EndTime: React.Dispatch<React.SetStateAction<string>>;
 };
 
@@ -51,16 +59,24 @@ export function useBuilderMetadataTiming({
   p2DateCustom,
   setP2CoverDate,
 
-  p1StartTime,
-  p1Marks,
-  p1EndTimeManuallyEdited,
-  setP1EndTime,
+  marksByPaper,
+  startTimeByPaper,
+  endTimeManuallyEditedByPaper,
 
-  p2StartTime,
-  p2Marks,
-  p2EndTimeManuallyEdited,
+  setP1EndTime,
   setP2EndTime,
 }: UseBuilderMetadataTimingArgs) {
+  const builderPapers = useMemo(() => {
+    return getBuilderPapers();
+  }, []);
+
+  const endTimeSetterByPaper = useMemo(() => {
+    return buildPaperStringSetterMapFromLegacySetters({
+      setP1Value: setP1EndTime,
+      setP2Value: setP2EndTime,
+    });
+  }, [setP1EndTime, setP2EndTime]);
+
   useEffect(() => {
     if (!p2DateCustom) {
       setP2CoverDate(assessmentDate || todayDisplayDate());
@@ -68,28 +84,46 @@ export function useBuilderMetadataTiming({
   }, [assessmentDate, p2DateCustom, setP2CoverDate]);
 
   useEffect(() => {
-    if (p1EndTimeManuallyEdited) return;
+    builderPapers.forEach((paper) => {
+      const endTimeHasBeenManuallyEdited = getPaperBooleanValue({
+        paper,
+        valuesByPaper: endTimeManuallyEditedByPaper,
+      });
 
-    setP1EndTime(
-      calculateCoverEndTimeForPaper({
-        paper: "P1",
-        marks: p1Marks,
-        startTime: p1StartTime,
-      })
-    );
-  }, [p1Marks, p1StartTime, p1EndTimeManuallyEdited, setP1EndTime]);
+      if (endTimeHasBeenManuallyEdited) {
+        return;
+      }
 
-  useEffect(() => {
-    if (p2EndTimeManuallyEdited) return;
+      const setEndTime = getPaperStringSetter({
+        paper,
+        settersByPaper: endTimeSetterByPaper,
+      });
 
-    setP2EndTime(
-      calculateCoverEndTimeForPaper({
-        paper: "P2",
-        marks: p2Marks,
-        startTime: p2StartTime,
-      })
-    );
-  }, [p2Marks, p2StartTime, p2EndTimeManuallyEdited, setP2EndTime]);
+      if (!setEndTime) {
+        return;
+      }
+
+      setEndTime(
+        calculateCoverEndTimeForPaper({
+          paper,
+          marks: getPaperNumberValue({
+            paper,
+            valuesByPaper: marksByPaper,
+          }),
+          startTime: getPaperStringValue({
+            paper,
+            valuesByPaper: startTimeByPaper,
+          }),
+        })
+      );
+    });
+  }, [
+    builderPapers,
+    marksByPaper,
+    startTimeByPaper,
+    endTimeManuallyEditedByPaper,
+    endTimeSetterByPaper,
+  ]);
 
   const handleAssessmentNameFocus = useCallback(() => {
     if (assessmentName === "[Untitled file]") {

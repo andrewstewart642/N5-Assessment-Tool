@@ -16,7 +16,19 @@ import {
   BUILDER_DIVIDER_WIDTH_PX,
 } from "./builder-definitions/BuilderConstants";
 
-import { buildEmptyEditDraftsByPaper, buildEmptyQuestionDraftsByPaper, buildTargetMarksByPaper, getDefaultBuilderPaper, getDefaultTargetMarksForPaper, getIncludedPapersFromTargets } from "./builder-logic/BuilderPaperTargets";
+import {
+  buildEmptyEditDraftsByPaper,
+  buildEmptyQuestionDraftsByPaper,
+  buildTargetMarksByPaper,
+  getDefaultBuilderPaper,
+  getDefaultTargetMarksForPaper,
+  getIncludedPapersFromTargets,
+} from "./builder-logic/BuilderPaperTargets";
+import {
+  buildPaperBooleanMapFromLegacyValues,
+  buildPaperStringMapFromLegacyValues,
+  buildPaperStringSetterMapFromLegacySetters,
+} from "./builder-logic/BuilderPaperStateMaps";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
   Paper,
@@ -434,36 +446,67 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
   }, []);
 
   const {
-    assignedForView,
-    p1Marks,
-    p2Marks,
-    p1Mins,
-    p2Mins,
-    activePaperCoverMarks,
-  } = useBuilderProgressMetrics({
-    questions,
-    viewPaper,
+  assignedForView,
+  p1Marks,
+  p2Marks,
+  p1Mins,
+  p2Mins,
+  activePaperCoverMarks,
+  marksByPaper,
+} = useBuilderProgressMetrics({
+  questions,
+  viewPaper,
+});
+
+const coverDateByPaper = useMemo(() => {
+  return buildPaperStringMapFromLegacyValues({
+    p1Value: assessmentDate,
+    p2Value: p2DateCustom ? p2CoverDate : assessmentDate,
   });
+}, [assessmentDate, p2CoverDate, p2DateCustom]);
+
+const startTimeByPaper = useMemo(() => {
+  return buildPaperStringMapFromLegacyValues({
+    p1Value: p1StartTime,
+    p2Value: p2StartTime,
+  });
+}, [p1StartTime, p2StartTime]);
+
+const endTimeByPaper = useMemo(() => {
+  return buildPaperStringMapFromLegacyValues({
+    p1Value: p1EndTime,
+    p2Value: p2EndTime,
+  });
+}, [p1EndTime, p2EndTime]);
+
+const endTimeManuallyEditedByPaper = useMemo(() => {
+  return buildPaperBooleanMapFromLegacyValues({
+    p1Value: p1EndTimeManuallyEdited,
+    p2Value: p2EndTimeManuallyEdited,
+  });
+}, [p1EndTimeManuallyEdited, p2EndTimeManuallyEdited]);
+
+const endTimeSetterByPaper = useMemo(() => {
+  return buildPaperStringSetterMapFromLegacySetters({
+    setP1Value: setP1EndTime,
+    setP2Value: setP2EndTime,
+  });
+}, [setP1EndTime, setP2EndTime]);
 
   const { handleAssessmentNameFocus, handleAssessmentNameBlur } =
     useBuilderMetadataTiming({
-      assessmentName,
-      setAssessmentName,
+  assessmentName,
+  setAssessmentName,
 
-      assessmentDate,
-      p2DateCustom,
-      setP2CoverDate,
+  assessmentDate,
+  p2DateCustom,
+  setP2CoverDate,
 
-      p1StartTime,
-      p1Marks,
-      p1EndTimeManuallyEdited,
-      setP1EndTime,
-
-      p2StartTime,
-      p2Marks,
-      p2EndTimeManuallyEdited,
-      setP2EndTime,
-    });
+  marksByPaper,
+startTimeByPaper,
+endTimeManuallyEditedByPaper,
+endTimeSetterByPaper,
+});
 
   const { onMeasure } = useMeasuredQuestionHeights({
     questions,
@@ -690,7 +733,7 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
     };
   }, []);
 
-  const editDraftRef = useRef<EditDraftByPaper>({ P1: null, P2: null });
+  const editDraftRef = useRef<EditDraftByPaper>(  buildEmptyEditDraftsByPaper(builderCourseConfig));
   useEffect(() => {
     editDraftRef.current = editDraftByPaper;
   }, [editDraftByPaper]);
@@ -971,15 +1014,11 @@ const totalAssessmentMarks = useMemo(() => {
     3
   )}% ${dividerWidth}px minmax(0, 1fr)`;
   const { coverDateTextForView, coverTimeTextForView } = usePaperViewMetadata({
-    viewPaper,
-    assessmentDate,
-    p2CoverDate,
-    p2DateCustom,
-    p1StartTime,
-    p1EndTime,
-    p2StartTime,
-    p2EndTime,
-  });
+  viewPaper,
+  coverDateByPaper,
+  startTimeByPaper,
+  endTimeByPaper,
+});
 
   function handleBuilderToggleClass(classId: string) {
     setBuilderUseCompleteCourseCoverage(false);

@@ -3,6 +3,10 @@ import { useMemo } from "react";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import { getBuilderPapers } from "../builder-logic/BuilderPaperTargets";
 import {
+  getPaperNumberValue,
+  type BuilderPaperNumberMap,
+} from "../builder-logic/BuilderPaperStateMaps";
+import {
   estimateMinutes,
   sumActualQuestionMarks,
   sumMarks,
@@ -14,7 +18,6 @@ type UseBuilderProgressMetricsArgs = {
 };
 
 type QuestionsByPaper = Partial<Record<Paper, Question[]>>;
-type NumberByPaper = Partial<Record<Paper, number>>;
 
 function buildQuestionsByPaper(
   questions: Question[],
@@ -32,8 +35,8 @@ function buildQuestionsByPaper(
 function buildMarksByPaper(
   questionsByPaper: QuestionsByPaper,
   papers: Paper[]
-): NumberByPaper {
-  return papers.reduce<NumberByPaper>((marksByPaper, paper) => {
+): BuilderPaperNumberMap {
+  return papers.reduce<BuilderPaperNumberMap>((marksByPaper, paper) => {
     marksByPaper[paper] = sumMarks(questionsByPaper[paper] ?? []);
     return marksByPaper;
   }, {});
@@ -42,8 +45,8 @@ function buildMarksByPaper(
 function buildActualQuestionMarksByPaper(
   questionsByPaper: QuestionsByPaper,
   papers: Paper[]
-): NumberByPaper {
-  return papers.reduce<NumberByPaper>((marksByPaper, paper) => {
+): BuilderPaperNumberMap {
+  return papers.reduce<BuilderPaperNumberMap>((marksByPaper, paper) => {
     marksByPaper[paper] = sumActualQuestionMarks(
       questionsByPaper[paper] ?? []
     );
@@ -53,11 +56,18 @@ function buildActualQuestionMarksByPaper(
 }
 
 function buildMinutesByPaper(
-  marksByPaper: NumberByPaper,
+  marksByPaper: BuilderPaperNumberMap,
   papers: Paper[]
-): NumberByPaper {
-  return papers.reduce<NumberByPaper>((minutesByPaper, paper) => {
-    minutesByPaper[paper] = estimateMinutes(paper, marksByPaper[paper] ?? 0);
+): BuilderPaperNumberMap {
+  return papers.reduce<BuilderPaperNumberMap>((minutesByPaper, paper) => {
+    minutesByPaper[paper] = estimateMinutes(
+      paper,
+      getPaperNumberValue({
+        paper,
+        valuesByPaper: marksByPaper,
+      })
+    );
+
     return minutesByPaper;
   }, {});
 }
@@ -91,16 +101,40 @@ export function useBuilderProgressMetrics({
   const p1Questions = questionsByPaper.P1 ?? [];
   const p2Questions = questionsByPaper.P2 ?? [];
 
-  const p1Marks = marksByPaper.P1 ?? 0;
-  const p2Marks = marksByPaper.P2 ?? 0;
+  const p1Marks = getPaperNumberValue({
+    paper: "P1",
+    valuesByPaper: marksByPaper,
+  });
 
-  const p1ActualQuestionMarks = actualQuestionMarksByPaper.P1 ?? 0;
-  const p2ActualQuestionMarks = actualQuestionMarksByPaper.P2 ?? 0;
+  const p2Marks = getPaperNumberValue({
+    paper: "P2",
+    valuesByPaper: marksByPaper,
+  });
 
-  const p1Mins = minutesByPaper.P1 ?? 0;
-  const p2Mins = minutesByPaper.P2 ?? 0;
+  const p1ActualQuestionMarks = getPaperNumberValue({
+    paper: "P1",
+    valuesByPaper: actualQuestionMarksByPaper,
+  });
 
-  const activePaperCoverMarks = actualQuestionMarksByPaper[viewPaper] ?? 0;
+  const p2ActualQuestionMarks = getPaperNumberValue({
+    paper: "P2",
+    valuesByPaper: actualQuestionMarksByPaper,
+  });
+
+  const p1Mins = getPaperNumberValue({
+    paper: "P1",
+    valuesByPaper: minutesByPaper,
+  });
+
+  const p2Mins = getPaperNumberValue({
+    paper: "P2",
+    valuesByPaper: minutesByPaper,
+  });
+
+  const activePaperCoverMarks = getPaperNumberValue({
+    paper: viewPaper,
+    valuesByPaper: actualQuestionMarksByPaper,
+  });
 
   return {
     assignedForView,
