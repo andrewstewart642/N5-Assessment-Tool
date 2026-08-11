@@ -1,10 +1,17 @@
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
-import type { Paper, Question } from "@/shared-types/AssessmentTypes";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import type {
+  Paper,
+  Question,
+  SkillPaperSuitability,
+} from "@/shared-types/AssessmentTypes";
 import type { QuestionCalculatorStatus } from "@/shared-types/QuestionSelectionTypes";
 
 type BuildCalculatorSuitabilityNotesArgs = {
   questions: Question[];
   includedPapers?: Paper[];
+  courseConfig?: CourseAssessmentConfig;
 
   includeBasisNote?: boolean;
   includePassNote?: boolean;
@@ -116,6 +123,41 @@ function getQuestionCalculatorStatus(
   );
 }
 
+function getPaperCalculatorPolicy(
+  courseConfig: CourseAssessmentConfig,
+  paper: Paper
+): SkillPaperSuitability | null {
+  return courseConfig.papers.find((item) => item.id === paper)?.calculatorPolicy ?? null;
+}
+
+function getPaperLabel(
+  courseConfig: CourseAssessmentConfig,
+  paper: Paper
+): string {
+  return courseConfig.papers.find((item) => item.id === paper)?.label ?? paper;
+}
+
+function isCalculatorViolation(args: {
+  paperPolicy: SkillPaperSuitability | null;
+  calculatorStatus: QuestionCalculatorStatus;
+}): boolean {
+  const { paperPolicy, calculatorStatus } = args;
+
+  if (!paperPolicy || paperPolicy === "BOTH") {
+    return false;
+  }
+
+  if (paperPolicy === "P1" && calculatorStatus === "CalculatorRequired") {
+    return true;
+  }
+
+  if (paperPolicy === "P2" && calculatorStatus === "NonCalculatorOnly") {
+    return true;
+  }
+
+  return false;
+}
+
 function buildBasisNote(audit: CalculatorAuditResult): BuilderNote {
   return {
     id: "calculator-audit-basis",
@@ -141,31 +183,37 @@ function buildPassNote(audit: CalculatorAuditResult): BuilderNote {
   };
 }
 
-function buildP1ViolationNote(questionLabel: string): BuilderNote {
-  return {
-    id: `calculator-violation-p1-${questionLabel.toLowerCase()}`,
-    severity: "essential",
-    source: "calculator-audit",
-    rank: 95,
-    message: `${questionLabel} is calculator-required but has been placed in Paper 1.`,
-  };
-}
+function buildViolationNote(args: {
+  questionLabel: string;
+  paperLabel: string;
+  calculatorStatus: QuestionCalculatorStatus;
+}): BuilderNote {
+  const { questionLabel, paperLabel, calculatorStatus } = args;
 
-function buildP2ViolationNote(questionLabel: string): BuilderNote {
+  const statusText =
+    calculatorStatus === "CalculatorRequired"
+      ? "calculator-required"
+      : calculatorStatus === "NonCalculatorOnly"
+        ? "non-calculator only"
+        : "calculator-restricted";
+
   return {
-    id: `calculator-violation-p2-${questionLabel.toLowerCase()}`,
+    id: `calculator-violation-${paperLabel
+      .toLowerCase()
+      .replace(/\s+/g, "-")}-${questionLabel.toLowerCase()}`,
     severity: "essential",
     source: "calculator-audit",
     rank: 95,
-    message: `${questionLabel} is non-calculator only but has been placed in Paper 2.`,
+    message: `${questionLabel} is ${statusText} but has been placed in ${paperLabel}.`,
   };
 }
 
 function auditCalculatorSuitability(args: {
   questions: Question[];
   includedPapers: Paper[];
+  courseConfig: CourseAssessmentConfig;
 }): CalculatorAuditResult {
-  const { questions, includedPapers } = args;
+  const { questions, includedPapers, courseConfig } = args;
 
   let auditedQuestions = 0;
   let unknownStatusQuestions = 0;
@@ -186,13 +234,21 @@ function auditCalculatorSuitability(args: {
       return;
     }
 
-    if (paper === "P1" && calculatorStatus === "CalculatorRequired") {
-      violations.push(buildP1ViolationNote(questionLabel));
-      return;
-    }
+    const paperPolicy = getPaperCalculatorPolicy(courseConfig, paper);
 
-    if (paper === "P2" && calculatorStatus === "NonCalculatorOnly") {
-      violations.push(buildP2ViolationNote(questionLabel));
+    if (
+      isCalculatorViolation({
+        paperPolicy,
+        calculatorStatus,
+      })
+    ) {
+      violations.push(
+        buildViolationNote({
+          questionLabel,
+          paperLabel: getPaperLabel(courseConfig, paper),
+          calculatorStatus,
+        })
+      );
     }
   });
 
@@ -205,13 +261,15 @@ function auditCalculatorSuitability(args: {
 
 export function buildCalculatorSuitabilityNotes({
   questions,
-  includedPapers = ["P1", "P2"],
+  courseConfig = ACTIVE_COURSE_CONFIG,
+  includedPapers = courseConfig.papers.map((paper) => paper.id),
   includeBasisNote = true,
   includePassNote = true,
 }: BuildCalculatorSuitabilityNotesArgs): BuilderNote[] {
   const audit = auditCalculatorSuitability({
     questions,
     includedPapers,
+    courseConfig,
   });
 
   const notes: BuilderNote[] = [];

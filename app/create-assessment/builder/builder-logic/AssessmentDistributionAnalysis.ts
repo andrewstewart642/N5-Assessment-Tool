@@ -10,9 +10,9 @@ import type {
 import type {
   CourseAssessmentConfig,
   CourseTopicTarget,
-} from "@/course-data/course-configs/N5MathsCourseConfig";
+} from "@/course-data/course-configs/CourseConfigTypes";
 
-export const ALL_ASSESSMENT_TOPICS: AssessmentTopicCode[] = [
+export const FALLBACK_ASSESSMENT_TOPICS: AssessmentTopicCode[] = [
   "NUM",
   "ALG",
   "GEO",
@@ -52,6 +52,13 @@ function roundTo(value: number, dp = 2): number {
   return Math.round(value * factor) / factor;
 }
 
+function getAssessmentTopicsFromCourseConfig(
+  courseConfig: CourseAssessmentConfig
+): AssessmentTopicCode[] {
+  const topics = courseConfig.topicTargets.map((target) => target.topic);
+  return topics.length > 0 ? topics : FALLBACK_ASSESSMENT_TOPICS;
+}
+
 export function emptyTopicMarkBreakdown(): QuestionTopicMarkBreakdown {
   return {
     NUM: 0,
@@ -63,11 +70,12 @@ export function emptyTopicMarkBreakdown(): QuestionTopicMarkBreakdown {
 }
 
 export function totalMarksFromTopicBreakdown(
-  breakdown: QuestionTopicMarkBreakdown | undefined
+  breakdown: QuestionTopicMarkBreakdown | undefined,
+  topics: AssessmentTopicCode[] = FALLBACK_ASSESSMENT_TOPICS
 ): number {
   if (!breakdown) return 0;
 
-  return ALL_ASSESSMENT_TOPICS.reduce((sum, topic) => {
+  return topics.reduce((sum, topic) => {
     const value = breakdown[topic];
     return sum + (Number.isFinite(value) ? value : 0);
   }, 0);
@@ -120,7 +128,8 @@ export function getQuestionTopicMarkBreakdown(
 
 export function sumTopicMarkBreakdowns(
   questions: Question[],
-  includedPapers?: Paper[]
+  includedPapers?: Paper[],
+  topics: AssessmentTopicCode[] = FALLBACK_ASSESSMENT_TOPICS
 ): QuestionTopicMarkBreakdown {
   const next = emptyTopicMarkBreakdown();
 
@@ -129,7 +138,7 @@ export function sumTopicMarkBreakdowns(
 
     const breakdown = getQuestionTopicMarkBreakdown(question);
 
-    ALL_ASSESSMENT_TOPICS.forEach((topic: AssessmentTopicCode) => {
+    topics.forEach((topic: AssessmentTopicCode) => {
       next[topic] += breakdown[topic] ?? 0;
     });
   });
@@ -137,6 +146,37 @@ export function sumTopicMarkBreakdowns(
   return next;
 }
 
+/**
+ * Generic total-mark calculation.
+ *
+ * This is the future-facing version. It does not care whether a course has
+ * Paper 1 / Paper 2 specifically. It only needs:
+ *
+ * - which papers are included
+ * - the target marks for each paper
+ */
+export function calculateTotalAssessmentMarksFromPaperTargets(args: {
+  includedPapers: Paper[];
+  targetMarksByPaper: Partial<Record<Paper, number>>;
+}): number {
+  const { includedPapers, targetMarksByPaper } = args;
+
+  return includedPapers.reduce((total, paper) => {
+    const marks = targetMarksByPaper[paper];
+
+    if (typeof marks !== "number" || !Number.isFinite(marks) || marks <= 0) {
+      return total;
+    }
+
+    return total + marks;
+  }, 0);
+}
+
+/**
+ * Legacy N5-style helper kept temporarily for older call sites.
+ *
+ * Prefer calculateTotalAssessmentMarksFromPaperTargets(...) for new code.
+ */
 export function calculateTotalAssessmentMarks(args: {
   includePaper1: boolean;
   includePaper2: boolean;
@@ -150,12 +190,16 @@ export function calculateTotalAssessmentMarks(args: {
     p2TargetMarks,
   } = args;
 
-  let total = 0;
-
-  if (includePaper1) total += p1TargetMarks;
-  if (includePaper2) total += p2TargetMarks;
-
-  return total;
+  return calculateTotalAssessmentMarksFromPaperTargets({
+    includedPapers: [
+      ...(includePaper1 ? (["P1"] as const) : []),
+      ...(includePaper2 ? (["P2"] as const) : []),
+    ],
+    targetMarksByPaper: {
+      P1: p1TargetMarks,
+      P2: p2TargetMarks,
+    },
+  });
 }
 
 function buildRow(
@@ -199,10 +243,16 @@ export function analyseTopicBalance(args: {
     questions,
     totalAssessmentMarks,
     courseConfig,
-    includedPapers = ["P1", "P2"],
+    includedPapers = courseConfig.papers.map((paper) => paper.id),
   } = args;
 
-  const topicTotals = sumTopicMarkBreakdowns(questions, includedPapers);
+  const courseTopics = getAssessmentTopicsFromCourseConfig(courseConfig);
+
+  const topicTotals = sumTopicMarkBreakdowns(
+    questions,
+    includedPapers,
+    courseTopics
+  );
 
   const currentAssignedMarks = roundTo(
     questions
@@ -218,8 +268,10 @@ export function analyseTopicBalance(args: {
   const recommendedNextTopic: TopicBalanceRow | null =
     rows
       .filter((row: TopicBalanceRow) => row.marksFromTarget > 0)
-      .sort((a: TopicBalanceRow, b: TopicBalanceRow) => b.marksFromTarget - a.marksFromTarget)[0] ??
-    null;
+      .sort(
+        (a: TopicBalanceRow, b: TopicBalanceRow) =>
+          b.marksFromTarget - a.marksFromTarget
+      )[0] ?? null;
 
   return {
     totalAssessmentMarks: roundTo(totalAssessmentMarks),

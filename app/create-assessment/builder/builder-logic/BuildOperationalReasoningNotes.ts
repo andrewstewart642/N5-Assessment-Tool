@@ -1,8 +1,11 @@
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 
 type BuildOperationalReasoningNotesArgs = {
   questions: Question[];
+  courseConfig?: CourseAssessmentConfig;
   includedPapers?: Paper[];
   totalAssessmentMarks: number;
 
@@ -41,6 +44,22 @@ function formatNumber(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
+function getPaperLabel(
+  courseConfig: CourseAssessmentConfig,
+  paper: Paper
+): string {
+  return courseConfig.papers.find((item) => item.id === paper)?.shortLabel ?? paper;
+}
+
+function formatIncludedPapers(
+  courseConfig: CourseAssessmentConfig,
+  includedPapers: Paper[]
+): string {
+  return includedPapers
+    .map((paper) => getPaperLabel(courseConfig, paper))
+    .join(" + ");
+}
+
 function getQuestionTotalMarks(question: Question): number {
   if (typeof question.marks === "number" && Number.isFinite(question.marks)) {
     return question.marks;
@@ -77,7 +96,7 @@ function getThinkingTypeBalance(args: {
   includedPapers: Paper[];
   totalAssessmentMarks: number;
 }): ThinkingTypeBalance {
-  const { questions, includedPapers, totalAssessmentMarks } = args;
+  const { questions, includedPapers } = args;
 
   const includedQuestions = questions.filter((q) => includedPapers.includes(q.paper));
 
@@ -144,10 +163,13 @@ function getBuildStage(args: {
   return "final";
 }
 
-function buildBasisNote(
-  balance: ThinkingTypeBalance,
-  includedPapers: Paper[]
-): BuilderNote {
+function buildBasisNote(args: {
+  balance: ThinkingTypeBalance;
+  courseConfig: CourseAssessmentConfig;
+  includedPapers: Paper[];
+}): BuilderNote {
+  const { balance, courseConfig, includedPapers } = args;
+
   return {
     id: "thinking-basis",
     severity: "suggestion",
@@ -155,8 +177,9 @@ function buildBasisNote(
     rank: 1,
     message: `Thinking type basis: ${formatNumber(
       balance.assignedMarks
-    )} assigned marks across ${includedPapers.join(
-      " + "
+    )} assigned marks across ${formatIncludedPapers(
+      courseConfig,
+      includedPapers
     )}, with ${formatNumber(balance.reasoningMarks)} reasoning and ${formatNumber(
       balance.operationalMarks
     )} operational.`,
@@ -207,7 +230,8 @@ function buildRecommendationNote(
 
 export function buildOperationalReasoningNotes({
   questions,
-  includedPapers = ["P1", "P2"],
+  courseConfig = ACTIVE_COURSE_CONFIG,
+  includedPapers = courseConfig.papers.map((paper) => paper.id),
   totalAssessmentMarks,
 
   includeBasisNote = true,
@@ -233,7 +257,13 @@ export function buildOperationalReasoningNotes({
   });
 
   if (includeBasisNote) {
-    notes.push(buildBasisNote(balance, includedPapers));
+    notes.push(
+      buildBasisNote({
+        balance,
+        courseConfig,
+        includedPapers,
+      })
+    );
   }
 
   if (balance.assignedMarks <= 0 || totalAssessmentMarks <= 0) {

@@ -52,7 +52,7 @@ import {
 } from "@/math-helpers/QuestionLogic";
 import {
   analyseTopicBalance,
-  calculateTotalAssessmentMarks,
+  calculateTotalAssessmentMarksFromPaperTargets,
 } from "./builder-logic/AssessmentDistributionAnalysis";
 import { buildTopicBalanceNotes } from "./builder-logic/BuildTopicBalanceNotes";
 import { buildOperationalReasoningNotes } from "./builder-logic/BuildOperationalReasoningNotes";
@@ -145,6 +145,28 @@ function buildFilteredSkillsData(
     .filter(([, skills]) => skills.length > 0);
 
   return Object.fromEntries(filteredEntries);
+}
+
+function buildTargetMarksByPaper(args: {
+  p1Target: number;
+  p2Target: number;
+}): Partial<Record<Paper, number>> {
+  const { p1Target, p2Target } = args;
+
+  return ACTIVE_COURSE_CONFIG.papers.reduce<Partial<Record<Paper, number>>>(
+    (targets, paper) => {
+      if (paper.id === "P1") {
+        targets[paper.id] = p1Target;
+      }
+
+      if (paper.id === "P2") {
+        targets[paper.id] = p2Target;
+      }
+
+      return targets;
+    },
+    {}
+  );
 }
 
 function buildClassCoverageSummary(args: {
@@ -872,21 +894,32 @@ export default function CreateAssessmentBuilderPage() {
     pageWrapperRefs,
   });
 
-  const includedPapers = useMemo<Paper[]>(() => {
-    const papers: Paper[] = [];
-    if (p1Target > 0) papers.push("P1");
-    if (p2Target > 0) papers.push("P2");
-    return papers;
-  }, [p1Target, p2Target]);
+  const targetMarksByPaper = useMemo<Partial<Record<Paper, number>>>(() => {
+  return buildTargetMarksByPaper({
+    p1Target,
+    p2Target,
+  });
+}, [p1Target, p2Target]);
 
-  const totalAssessmentMarks = useMemo(() => {
-    return calculateTotalAssessmentMarks({
-      includePaper1: includedPapers.includes("P1"),
-      includePaper2: includedPapers.includes("P2"),
-      p1TargetMarks: p1Target,
-      p2TargetMarks: p2Target,
+const includedPapers = useMemo<Paper[]>(() => {
+  return ACTIVE_COURSE_CONFIG.papers
+    .map((paper) => paper.id)
+    .filter((paper) => {
+      const targetMarks = targetMarksByPaper[paper];
+      return (
+        typeof targetMarks === "number" &&
+        Number.isFinite(targetMarks) &&
+        targetMarks > 0
+      );
     });
-  }, [includedPapers, p1Target, p2Target]);
+}, [targetMarksByPaper]);
+
+const totalAssessmentMarks = useMemo(() => {
+  return calculateTotalAssessmentMarksFromPaperTargets({
+    includedPapers,
+    targetMarksByPaper,
+  });
+}, [includedPapers, targetMarksByPaper]);
 
   const topicBalanceAnalysis = useMemo(() => {
     return analyseTopicBalance({
@@ -898,39 +931,43 @@ export default function CreateAssessmentBuilderPage() {
   }, [questions, totalAssessmentMarks, includedPapers]);
 
   const topicQualityNotes = useMemo<Array<string | BuilderNote>>(() => {
-    return buildTopicBalanceNotes({
-      analysis: topicBalanceAnalysis,
-      includeBasisNote: true,
-      includeRecommendationNote: true,
-    });
-  }, [topicBalanceAnalysis]);
+  return buildTopicBalanceNotes({
+    analysis: topicBalanceAnalysis,
+    courseConfig: ACTIVE_COURSE_CONFIG,
+    includeBasisNote: true,
+    includeRecommendationNote: true,
+  });
+}, [topicBalanceAnalysis]);
 
   const operationalReasoningNotes = useMemo<Array<string | BuilderNote>>(() => {
-    return buildOperationalReasoningNotes({
-      questions,
-      includedPapers,
-      totalAssessmentMarks,
-      includeBasisNote: true,
-      includeRecommendationNote: true,
-    });
-  }, [questions, includedPapers, totalAssessmentMarks]);
+  return buildOperationalReasoningNotes({
+    questions,
+    courseConfig: ACTIVE_COURSE_CONFIG,
+    includedPapers,
+    totalAssessmentMarks,
+    includeBasisNote: true,
+    includeRecommendationNote: true,
+  });
+}, [questions, includedPapers, totalAssessmentMarks]);
 
-  const calculatorSuitabilityNotes = useMemo<Array<string | BuilderNote>>(() => {
-    return buildCalculatorSuitabilityNotes({
-      questions,
-      includedPapers,
-    });
-  }, [questions, includedPapers]);
+ const calculatorSuitabilityNotes = useMemo<Array<string | BuilderNote>>(() => {
+  return buildCalculatorSuitabilityNotes({
+    questions,
+    courseConfig: ACTIVE_COURSE_CONFIG,
+    includedPapers,
+  });
+}, [questions, includedPapers]);
 
   const standardBalanceNotes = useMemo<Array<string | BuilderNote>>(() => {
-    return buildStandardBalanceNotes({
-      questions,
-      includedPapers,
-      totalAssessmentMarks,
-      includeBasisNote: true,
-      includeRecommendationNote: true,
-    });
-  }, [questions, includedPapers, totalAssessmentMarks]);
+  return buildStandardBalanceNotes({
+    questions,
+    courseConfig: ACTIVE_COURSE_CONFIG,
+    includedPapers,
+    totalAssessmentMarks,
+    includeBasisNote: true,
+    includeRecommendationNote: true,
+  });
+}, [questions, includedPapers, totalAssessmentMarks]);
 
   const mergedQualityNotes = useMemo(() => {
     return [

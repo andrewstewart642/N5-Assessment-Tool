@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 
-import { calculateEndTime } from "../AssessmentTiming";
+import { calculateActiveCourseEndTime } from "../AssessmentTiming";
 import { todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
 
 type UseBuilderMetadataTimingArgs = {
@@ -54,7 +54,7 @@ export function useBuilderMetadataTiming({
       return;
     }
 
-    setP1EndTime(calculateEndTime("N5", "paper1", p1Marks, p1StartTime));
+    setP1EndTime(calculateActiveCourseEndTime("P1", p1Marks, p1StartTime));
   }, [p1Marks, p1StartTime, p1EndTimeManuallyEdited, setP1EndTime]);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export function useBuilderMetadataTiming({
       return;
     }
 
-    setP2EndTime(calculateEndTime("N5", "paper2", p2Marks, p2StartTime));
+    setP2EndTime(calculateActiveCourseEndTime("P2", p2Marks, p2StartTime));
   }, [p2Marks, p2StartTime, p2EndTimeManuallyEdited, setP2EndTime]);
 
   const handleAssessmentNameFocus = useCallback(() => {

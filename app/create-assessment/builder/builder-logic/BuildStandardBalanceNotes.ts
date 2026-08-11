@@ -1,8 +1,11 @@
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 
 type BuildStandardBalanceNotesArgs = {
   questions: Question[];
+  courseConfig?: CourseAssessmentConfig;
   includedPapers?: Paper[];
   totalAssessmentMarks: number;
 
@@ -46,6 +49,22 @@ function roundTo(value: number, dp = 2): number {
 
 function formatNumber(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
+}
+
+function getPaperLabel(
+  courseConfig: CourseAssessmentConfig,
+  paper: Paper
+): string {
+  return courseConfig.papers.find((item) => item.id === paper)?.shortLabel ?? paper;
+}
+
+function formatIncludedPapers(
+  courseConfig: CourseAssessmentConfig,
+  includedPapers: Paper[]
+): string {
+  return includedPapers
+    .map((paper) => getPaperLabel(courseConfig, paper))
+    .join(" + ");
 }
 
 function getQuestionTotalMarks(question: Question): number {
@@ -172,10 +191,13 @@ function getBuildStage(args: {
   return "final";
 }
 
-function buildBasisNote(
-  balance: StandardBalance,
-  includedPapers: Paper[]
-): BuilderNote {
+function buildBasisNote(args: {
+  balance: StandardBalance;
+  courseConfig: CourseAssessmentConfig;
+  includedPapers: Paper[];
+}): BuilderNote {
+  const { balance, courseConfig, includedPapers } = args;
+
   return {
     id: "standard-basis",
     severity: "suggestion",
@@ -183,13 +205,19 @@ function buildBasisNote(
     rank: 1,
     message: `Standard balance basis: ${formatNumber(
       balance.assignedMarks
-    )} assigned marks across ${includedPapers.join(" + ")}, with ${formatNumber(
-      balance.cMarks
-    )} C marks and ${formatNumber(balance.aMarks)} A marks.`,
+    )} assigned marks across ${formatIncludedPapers(
+      courseConfig,
+      includedPapers
+    )}, with ${formatNumber(balance.cMarks)} C marks and ${formatNumber(
+      balance.aMarks
+    )} A marks.`,
   };
 }
 
-function buildLowANote(balance: StandardBalance, severity: "advised" | "essential"): BuilderNote {
+function buildLowANote(
+  balance: StandardBalance,
+  severity: "advised" | "essential"
+): BuilderNote {
   return {
     id: severity === "essential" ? "standard-a-essential" : "standard-a-advised",
     severity,
@@ -210,7 +238,10 @@ function buildLowANote(balance: StandardBalance, severity: "advised" | "essentia
   };
 }
 
-function buildLowCNote(balance: StandardBalance, severity: "advised" | "essential"): BuilderNote {
+function buildLowCNote(
+  balance: StandardBalance,
+  severity: "advised" | "essential"
+): BuilderNote {
   return {
     id: severity === "essential" ? "standard-c-essential" : "standard-c-advised",
     severity,
@@ -245,7 +276,8 @@ function buildRecommendationNote(
 
 export function buildStandardBalanceNotes({
   questions,
-  includedPapers = ["P1", "P2"],
+  courseConfig = ACTIVE_COURSE_CONFIG,
+  includedPapers = courseConfig.papers.map((paper) => paper.id),
   totalAssessmentMarks,
 
   includeBasisNote = true,
@@ -277,7 +309,13 @@ export function buildStandardBalanceNotes({
   });
 
   if (includeBasisNote) {
-    notes.push(buildBasisNote(balance, includedPapers));
+    notes.push(
+      buildBasisNote({
+        balance,
+        courseConfig,
+        includedPapers,
+      })
+    );
   }
 
   if (balance.assignedMarks <= 0 || totalAssessmentMarks <= 0) {

@@ -1,4 +1,7 @@
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 import type {
   TopicBalanceAnalysis,
   TopicBalanceRow,
@@ -6,6 +9,7 @@ import type {
 
 type BuildTopicBalanceNotesArgs = {
   analysis: TopicBalanceAnalysis;
+  courseConfig?: CourseAssessmentConfig;
 
   includeBasisNote?: boolean;
   includeRecommendationNote?: boolean;
@@ -75,7 +79,34 @@ function getBuildStage(args: {
   return "final";
 }
 
-function buildBasisNote(analysis: TopicBalanceAnalysis): BuilderNote {
+function getPaperLabel(
+  courseConfig: CourseAssessmentConfig,
+  paper: Paper
+): string {
+  return courseConfig.papers.find((item) => item.id === paper)?.shortLabel ?? paper;
+}
+
+function formatIncludedPapers(
+  courseConfig: CourseAssessmentConfig,
+  includedPapers: Paper[]
+): string {
+  return includedPapers
+    .map((paper) => getPaperLabel(courseConfig, paper))
+    .join(" + ");
+}
+
+function getAwardingBodyStyleLabel(
+  courseConfig: CourseAssessmentConfig
+): string {
+  return `${courseConfig.awardingBody}-style`;
+}
+
+function buildBasisNote(args: {
+  analysis: TopicBalanceAnalysis;
+  courseConfig: CourseAssessmentConfig;
+}): BuilderNote {
+  const { analysis, courseConfig } = args;
+
   return {
     id: "topic-basis",
     severity: "suggestion",
@@ -83,7 +114,10 @@ function buildBasisNote(analysis: TopicBalanceAnalysis): BuilderNote {
     rank: 1,
     message: `Topic balance basis: ${formatNumber(
       analysis.totalAssessmentMarks
-    )} total assessment marks across ${analysis.includedPapers.join(" + ")}.`,
+    )} total assessment marks across ${formatIncludedPapers(
+      courseConfig,
+      analysis.includedPapers
+    )}.`,
   };
 }
 
@@ -97,7 +131,13 @@ function buildRecommendationNote(row: TopicBalanceRow): BuilderNote {
   };
 }
 
-function buildOverweightEssentialNote(row: TopicBalanceRow): BuilderNote {
+function buildOverweightEssentialNote(args: {
+  row: TopicBalanceRow;
+  courseConfig: CourseAssessmentConfig;
+}): BuilderNote {
+  const { row, courseConfig } = args;
+  const styleLabel = getAwardingBodyStyleLabel(courseConfig);
+
   return {
     id: `topic-${row.topic.toLowerCase()}-overweight-essential`,
     severity: "essential",
@@ -107,16 +147,20 @@ function buildOverweightEssentialNote(row: TopicBalanceRow): BuilderNote {
       row.currentMarks
     )} marks (${formatNumber(
       row.currentPct
-    )}%), which is above the SQA-style maximum of ${formatNumber(
+    )}%), which is above the ${styleLabel} maximum of ${formatNumber(
       row.maxMarks
     )} marks (${formatNumber(row.maxPct)}%). This is now difficult to recover because assigned marks cannot be removed through later topic choices.`,
   };
 }
 
-function buildUnderweightEssentialNote(
-  row: TopicBalanceRow,
-  remainingMarks: number
-): BuilderNote {
+function buildUnderweightEssentialNote(args: {
+  row: TopicBalanceRow;
+  remainingMarks: number;
+  courseConfig: CourseAssessmentConfig;
+}): BuilderNote {
+  const { row, remainingMarks, courseConfig } = args;
+  const styleLabel = getAwardingBodyStyleLabel(courseConfig);
+
   return {
     id: `topic-${row.topic.toLowerCase()}-underweight-essential`,
     severity: "essential",
@@ -128,13 +172,18 @@ function buildUnderweightEssentialNote(
       row.currentPct
     )}%). With only ${formatNumber(
       remainingMarks
-    )} marks still unassigned, it can no longer realistically reach the minimum SQA-style target of ${formatNumber(
+    )} marks still unassigned, it can no longer realistically reach the minimum ${styleLabel} target of ${formatNumber(
       row.minMarks
     )} marks (${formatNumber(row.minPct)}%).`,
   };
 }
 
-function buildRangeDriftAdvisedNote(row: TopicBalanceRow): BuilderNote {
+function buildRangeDriftAdvisedNote(args: {
+  row: TopicBalanceRow;
+  courseConfig: CourseAssessmentConfig;
+}): BuilderNote {
+  const { row, courseConfig } = args;
+  const styleLabel = getAwardingBodyStyleLabel(courseConfig);
   const isBelow = row.currentPct < row.minPct;
   const driftText = isBelow ? "below" : "above";
 
@@ -143,7 +192,7 @@ function buildRangeDriftAdvisedNote(row: TopicBalanceRow): BuilderNote {
     severity: "advised",
     source: "topic-balance",
     rank: 70,
-    message: `${row.label} is currently ${driftText} its SQA-style range at ${formatNumber(
+    message: `${row.label} is currently ${driftText} its ${styleLabel} range at ${formatNumber(
       row.currentMarks
     )} marks (${formatNumber(
       row.currentPct
@@ -195,7 +244,9 @@ function scoreMidpointDrift(row: TopicBalanceRow): number {
   return Math.abs(row.pctFromTarget);
 }
 
-function sortRankedIssuesDescending(issues: RankedTopicIssue[]): RankedTopicIssue[] {
+function sortRankedIssuesDescending(
+  issues: RankedTopicIssue[]
+): RankedTopicIssue[] {
   return [...issues].sort((a, b) => b.score - a.score);
 }
 
@@ -211,6 +262,7 @@ function takeTopIssues(
 
 export function buildTopicBalanceNotes({
   analysis,
+  courseConfig = ACTIVE_COURSE_CONFIG,
   includeBasisNote = true,
   includeRecommendationNote = true,
 
@@ -232,7 +284,12 @@ export function buildTopicBalanceNotes({
   const notes: BuilderNote[] = [];
 
   if (includeBasisNote) {
-    notes.push(buildBasisNote(analysis));
+    notes.push(
+      buildBasisNote({
+        analysis,
+        courseConfig,
+      })
+    );
   }
 
   if (analysis.totalAssessmentMarks <= 0) {
@@ -262,7 +319,10 @@ export function buildTopicBalanceNotes({
 
     if (isOverweightNow) {
       essentialIssues.push({
-        note: buildOverweightEssentialNote(row),
+        note: buildOverweightEssentialNote({
+          row,
+          courseConfig,
+        }),
         score: scoreOverweightEssential(row),
       });
       continue;
@@ -270,7 +330,11 @@ export function buildTopicBalanceNotes({
 
     if (isUnderweightUnrecoverable) {
       essentialIssues.push({
-        note: buildUnderweightEssentialNote(row, remainingMarks),
+        note: buildUnderweightEssentialNote({
+          row,
+          remainingMarks,
+          courseConfig,
+        }),
         score: scoreUnderweightEssential(row, remainingMarks),
       });
       continue;
@@ -282,7 +346,10 @@ export function buildTopicBalanceNotes({
 
     if (isUnderweightNow) {
       advisedIssues.push({
-        note: buildRangeDriftAdvisedNote(row),
+        note: buildRangeDriftAdvisedNote({
+          row,
+          courseConfig,
+        }),
         score: scoreRangeDrift(row),
       });
       continue;
