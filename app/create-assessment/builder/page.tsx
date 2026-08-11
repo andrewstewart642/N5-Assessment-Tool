@@ -16,8 +16,7 @@ import {
   BUILDER_DIVIDER_WIDTH_PX,
 } from "./builder-definitions/BuilderConstants";
 
-import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
-import { buildTargetMarksByPaper, getDefaultBuilderPaper, getDefaultTargetMarksForPaper, getIncludedPapersFromTargets } from "./builder-logic/BuilderPaperTargets";
+import { buildEmptyEditDraftsByPaper, buildEmptyQuestionDraftsByPaper, buildTargetMarksByPaper, getDefaultBuilderPaper, getDefaultTargetMarksForPaper, getIncludedPapersFromTargets } from "./builder-logic/BuilderPaperTargets";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
   Paper,
@@ -29,6 +28,7 @@ import type {
 
 import BuilderGlobalStyles from "./BuilderStyles";
 import BuilderSettingsPanel from "@/app/create-assessment/builder/components/builder-controls/BuilderSettingsPanel";
+import { getBuilderCourseConfig } from "./builder-logic/BuilderCourseConfig";
 import { todayDisplayDate } from "./builder-logic/BuilderDateHelpers";
 import { usePaperViewMetadata } from "./builder-behaviour/UsePaperViewMetadata";
 import { usePreviewJumpNavigation } from "./builder-preview-engine/UsePreviewJumpNavigation";
@@ -68,7 +68,7 @@ import {
   normaliseAssessmentLevelId,
   type AssessmentLevelId,
 } from "@/app/create-assessment/setup/AssessmentClassCoverageStorage";
-import type { CourseOption, SchoolClass } from "@/app/my-classes/types/Classes";
+import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import type { SavedAssessment } from "@/app/my-assessments/types/SavedAssessment";
 import {
   getCurrentSavedAssessmentId,
@@ -181,21 +181,25 @@ export default function CreateAssessmentBuilderPage() {
   const router = useRouter();
   const { theme } = useSettings();
 
-  const activeSkillsData = useMemo<Record<string, Skill[]>>(() => {
-    return (ACTIVE_COURSE_CONFIG.skillTree ?? {}) as Record<string, Skill[]>;
+  const builderCourseConfig = useMemo(() => {
+    return getBuilderCourseConfig();
   }, []);
 
+  const activeSkillsData = useMemo<Record<string, Skill[]>>(() => {
+  return (builderCourseConfig.skillTree ?? {}) as Record<string, Skill[]>;
+}, [builderCourseConfig]);
+
   const defaultP1Target = useMemo(() => {
-  return getDefaultTargetMarksForPaper("P1");
-}, []);
+  return getDefaultTargetMarksForPaper("P1", builderCourseConfig);
+}, [builderCourseConfig]);
 
 const defaultP2Target = useMemo(() => {
-  return getDefaultTargetMarksForPaper("P2");
-}, []);
+  return getDefaultTargetMarksForPaper("P2", builderCourseConfig);
+}, [builderCourseConfig]);
 
 const defaultBuilderPaper = useMemo(() => {
-  return getDefaultBuilderPaper(ACTIVE_COURSE_CONFIG);
-}, []);
+  return getDefaultBuilderPaper(builderCourseConfig);
+}, [builderCourseConfig]);
 
   const [standardFilter, setStandardFilter] = useState<StandardFilter>("C+A");
   const [thinkingTypeFilter, setThinkingTypeFilter] =
@@ -223,14 +227,13 @@ const defaultBuilderPaper = useMemo(() => {
   } = useSkillsTreeState();
 
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [draftByPaper, setDraftByPaper] = useState<DraftByPaper>({
-    P1: null,
-    P2: null,
-  });
-  const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>({
-    P1: null,
-    P2: null,
-  });
+  const [draftByPaper, setDraftByPaper] = useState<DraftByPaper>(() => {
+  return buildEmptyQuestionDraftsByPaper(builderCourseConfig);
+});
+
+const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() => {
+  return buildEmptyEditDraftsByPaper(builderCourseConfig);
+});
 
   const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>(
     {}
@@ -880,16 +883,16 @@ const defaultBuilderPaper = useMemo(() => {
   return buildTargetMarksByPaper({
     p1Target,
     p2Target,
-    courseConfig: ACTIVE_COURSE_CONFIG,
+    courseConfig: builderCourseConfig,
   });
-}, [p1Target, p2Target]);
+}, [p1Target, p2Target, builderCourseConfig]);
 
 const includedPapers = useMemo<Paper[]>(() => {
   return getIncludedPapersFromTargets({
     targetMarksByPaper,
-    courseConfig: ACTIVE_COURSE_CONFIG,
+    courseConfig: builderCourseConfig,
   });
-}, [targetMarksByPaper]);
+}, [targetMarksByPaper, builderCourseConfig]);
 
 const totalAssessmentMarks = useMemo(() => {
   return calculateTotalAssessmentMarksFromPaperTargets({
@@ -902,49 +905,49 @@ const totalAssessmentMarks = useMemo(() => {
     return analyseTopicBalance({
       questions,
       totalAssessmentMarks,
-      courseConfig: ACTIVE_COURSE_CONFIG,
+      courseConfig: builderCourseConfig,
       includedPapers,
     });
-  }, [questions, totalAssessmentMarks, includedPapers]);
+  }, [questions, totalAssessmentMarks, includedPapers, builderCourseConfig]);
 
   const topicQualityNotes = useMemo<Array<string | BuilderNote>>(() => {
   return buildTopicBalanceNotes({
     analysis: topicBalanceAnalysis,
-    courseConfig: ACTIVE_COURSE_CONFIG,
+    courseConfig: builderCourseConfig,
     includeBasisNote: true,
     includeRecommendationNote: true,
   });
-}, [topicBalanceAnalysis]);
+}, [topicBalanceAnalysis, builderCourseConfig]);
 
   const operationalReasoningNotes = useMemo<Array<string | BuilderNote>>(() => {
   return buildOperationalReasoningNotes({
     questions,
-    courseConfig: ACTIVE_COURSE_CONFIG,
+    courseConfig: builderCourseConfig,
     includedPapers,
     totalAssessmentMarks,
     includeBasisNote: true,
     includeRecommendationNote: true,
   });
-}, [questions, includedPapers, totalAssessmentMarks]);
+}, [questions, includedPapers, totalAssessmentMarks, builderCourseConfig]);
 
  const calculatorSuitabilityNotes = useMemo<Array<string | BuilderNote>>(() => {
   return buildCalculatorSuitabilityNotes({
     questions,
-    courseConfig: ACTIVE_COURSE_CONFIG,
+    courseConfig: builderCourseConfig,
     includedPapers,
   });
-}, [questions, includedPapers]);
+}, [questions, includedPapers, builderCourseConfig]);
 
   const standardBalanceNotes = useMemo<Array<string | BuilderNote>>(() => {
   return buildStandardBalanceNotes({
     questions,
-    courseConfig: ACTIVE_COURSE_CONFIG,
+    courseConfig: builderCourseConfig,
     includedPapers,
     totalAssessmentMarks,
     includeBasisNote: true,
     includeRecommendationNote: true,
   });
-}, [questions, includedPapers, totalAssessmentMarks]);
+}, [questions, includedPapers, totalAssessmentMarks, builderCourseConfig]);
 
   const mergedQualityNotes = useMemo(() => {
     return [

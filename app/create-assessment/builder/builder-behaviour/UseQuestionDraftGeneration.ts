@@ -1,8 +1,6 @@
 import { useCallback } from "react";
 
-import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 import { makeId } from "@/math-helpers/QuestionLogic";
-import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
 import type {
   DifficultyLevel,
   Paper,
@@ -12,13 +10,19 @@ import type {
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
-import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
   buildGenerated,
   buildSkillLinks,
   getConceptFromSelection,
 } from "../builder-logic/BuilderQuestionGenerators";
 import { buildSingleTopicMarkBreakdown } from "../builder-logic/AssessmentDistributionAnalysis";
+import { getBuilderCourseId } from "../builder-logic/BuilderCourseConfig";
+import {
+  formatBuilderPaperSuitability,
+  getBuilderPaperLabel,
+  isPaperSuitableForSkill,
+} from "../builder-logic/BuilderPaperTargets";
+import { applyBuilderQuestionSpacingBase } from "../builder-logic/BuilderQuestionSpacing";
 import type { DraftByPaper, EditDraftByPaper } from "../BuilderUtils";
 
 type PendingJumpRef = React.MutableRefObject<{
@@ -46,14 +50,7 @@ type UseQuestionDraftGenerationArgs = {
 };
 
 function withSpacingBase(question: Question): Question {
-  const code = question.questionCode;
-
-  return {
-    ...question,
-    spacingBasePx: code
-      ? getSpacingBasePx(code)
-      : DEFAULT_QUESTION_SPACING_BASE_PX,
-  };
+  return applyBuilderQuestionSpacingBase(question);
 }
 
 function resolveGeneratedTotalMarks(
@@ -88,6 +85,52 @@ function buildSelectionFilters(args: {
   };
 }
 
+function buildPaperMismatchMessage({
+  skill,
+  paper,
+  actionText,
+}: {
+  skill: Skill;
+  paper: Paper;
+  actionText: string;
+}): string {
+  return `Paper mismatch: ${skill.code} is typically ${formatBuilderPaperSuitability(
+    skill.paperSuitability
+  )} but you ${actionText} ${getBuilderPaperLabel(paper)}.`;
+}
+
+function warnIfPaperMismatch({
+  skill,
+  paper,
+  actionText,
+  pushFlash,
+  addQualityNote,
+}: {
+  skill: Skill;
+  paper: Paper;
+  actionText: string;
+  pushFlash: (message: string) => void;
+  addQualityNote: (message: string) => void;
+}): void {
+  if (
+    isPaperSuitableForSkill({
+      paper,
+      paperSuitability: skill.paperSuitability,
+    })
+  ) {
+    return;
+  }
+
+  const message = buildPaperMismatchMessage({
+    skill,
+    paper,
+    actionText,
+  });
+
+  pushFlash(message);
+  addQualityNote(`• ${message}`);
+}
+
 export function useQuestionDraftGeneration({
   standardFilter,
   thinkingTypeFilter,
@@ -104,6 +147,8 @@ export function useQuestionDraftGeneration({
   pushFlash,
   addQualityNote,
 }: UseQuestionDraftGenerationArgs) {
+  const builderCourseId = getBuilderCourseId();
+
   const addQuestionToPaper = useCallback(
     (
       category: string,
@@ -112,11 +157,13 @@ export function useQuestionDraftGeneration({
       difficulty: DifficultyLevel,
       paper: Paper
     ) => {
-      if (skill.paperSuitability !== "BOTH" && skill.paperSuitability !== paper) {
-        const msg = `Paper mismatch: ${skill.code} is typically ${skill.paperSuitability} but you added it to ${paper}.`;
-        pushFlash(msg);
-        addQualityNote(`• ${msg}`);
-      }
+      warnIfPaperMismatch({
+        skill,
+        paper,
+        actionText: "added it to",
+        pushFlash,
+        addQualityNote,
+      });
 
       const selectionFilters = buildSelectionFilters({
         standardFilter,
@@ -139,7 +186,7 @@ export function useQuestionDraftGeneration({
       const draft = withSpacingBase({
         id: makeId(),
         category,
-        courseId: ACTIVE_COURSE_CONFIG.courseId,
+        courseId: builderCourseId,
         skillId: skill.id,
         skillCode: skill.code,
         skillText: skill.text,
@@ -177,6 +224,7 @@ export function useQuestionDraftGeneration({
       standardFilter,
       thinkingTypeFilter,
       targetMarks,
+      builderCourseId,
       setDraftByPaper,
       setViewPaper,
       pendingJumpDraftRef,
@@ -193,11 +241,13 @@ export function useQuestionDraftGeneration({
       difficulty: DifficultyLevel,
       paper: Paper
     ) => {
-      if (skill.paperSuitability !== "BOTH" && skill.paperSuitability !== paper) {
-        const msg = `Paper mismatch: ${skill.code} is typically ${skill.paperSuitability} but you regenerated it for ${paper}.`;
-        pushFlash(msg);
-        addQualityNote(`• ${msg}`);
-      }
+      warnIfPaperMismatch({
+        skill,
+        paper,
+        actionText: "regenerated it for",
+        pushFlash,
+        addQualityNote,
+      });
 
       const selectionFilters = buildSelectionFilters({
         standardFilter,
@@ -227,7 +277,7 @@ export function useQuestionDraftGeneration({
           const nextDraft = withSpacingBase({
             ...nowEdit.draft,
             category,
-            courseId: ACTIVE_COURSE_CONFIG.courseId,
+            courseId: builderCourseId,
             skillId: skill.id,
             skillCode: skill.code,
             skillText: skill.text,
@@ -271,7 +321,7 @@ export function useQuestionDraftGeneration({
         const nextDraft = withSpacingBase({
           id: prevDrafts[paper]?.id ?? makeId(),
           category,
-          courseId: ACTIVE_COURSE_CONFIG.courseId,
+          courseId: builderCourseId,
           skillId: skill.id,
           skillCode: skill.code,
           skillText: skill.text,
@@ -310,6 +360,7 @@ export function useQuestionDraftGeneration({
       standardFilter,
       thinkingTypeFilter,
       targetMarks,
+      builderCourseId,
       editDraftRef,
       setEditDraftByPaper,
       setDraftByPaper,

@@ -1,9 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
-import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
-import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
-import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
   BUILDER_STORAGE_KEY_PAIRS,
   readBuilderStorageValue,
@@ -14,8 +11,13 @@ import {
   normaliseDisplayDate,
   todayDisplayDate,
 } from "../builder-logic/BuilderDateHelpers";
+import { getBuilderCourseConfig } from "../builder-logic/BuilderCourseConfig";
+import {
+  buildTargetMarksByPaperFromSetupTargets,
+  getInitialBuilderPaperForStructure,
+} from "../builder-logic/BuilderPaperTargets";
+import { ensureBuilderQuestionSpacingBase } from "../builder-logic/BuilderQuestionSpacing";
 import type { clamp } from "../BuilderUtils";
-import { estimateMarksFromTimeForPaper, getInitialBuilderPaperForStructure } from "../builder-logic/BuilderPaperTargets";
 
 type UseBuilderInitialisationArgs = {
   defaultHudHeight: number;
@@ -64,20 +66,7 @@ type UseBuilderInitialisationArgs = {
 };
 
 function withSpacingBase(question: Question): Question {
-  if (
-    typeof question.spacingBasePx === "number" &&
-    Number.isFinite(question.spacingBasePx)
-  ) {
-    return question;
-  }
-
-  const code = question.questionCode;
-  return {
-    ...question,
-    spacingBasePx: code
-      ? getSpacingBasePx(code)
-      : DEFAULT_QUESTION_SPACING_BASE_PX,
-  };
+  return ensureBuilderQuestionSpacingBase(question);
 }
 
 export function useBuilderInitialisation({
@@ -125,13 +114,17 @@ export function useBuilderInitialisation({
   p2EndTimeKey,
   p2DateCustomKey,
 }: UseBuilderInitialisationArgs) {
+  const builderCourseConfig = useMemo(() => getBuilderCourseConfig(), []);
+
   useEffect(() => {
     try {
       const rawPaneRatio = readBuilderStorageValue(
         BUILDER_STORAGE_KEY_PAIRS.paneRatio
       );
+
       if (rawPaneRatio) {
         const parsed = Number(rawPaneRatio);
+
         if (Number.isFinite(parsed)) {
           setLeftPaneRatio(clampFn(parsed, 0.28, 0.62));
         }
@@ -140,8 +133,10 @@ export function useBuilderInitialisation({
       const rawHud = readBuilderStorageValue(
         BUILDER_STORAGE_KEY_PAIRS.hudHeight
       );
+
       if (rawHud) {
         const parsedHud = Number(rawHud);
+
         if (Number.isFinite(parsedHud)) {
           setHudHeight(clampFn(parsedHud, defaultHudHeight, 280));
         }
@@ -150,30 +145,35 @@ export function useBuilderInitialisation({
       const rawShowHud = readBuilderStorageValue(
         BUILDER_STORAGE_KEY_PAIRS.showProgressPanel
       );
+
       if (rawShowHud === "true") setShowProgressPanel(true);
       if (rawShowHud === "false") setShowProgressPanel(false);
 
       const rawIncludeCover = readBuilderStorageValue(
         BUILDER_STORAGE_KEY_PAIRS.includeCoverSheet
       );
+
       if (rawIncludeCover === "true") setIncludeCoverSheet(true);
       if (rawIncludeCover === "false") setIncludeCoverSheet(false);
 
       const rawShowDateTime = readBuilderStorageValue(
         BUILDER_STORAGE_KEY_PAIRS.showCoverDateTime
       );
+
       if (rawShowDateTime === "true") setShowCoverDateTime(true);
       if (rawShowDateTime === "false") setShowCoverDateTime(false);
 
       const rawScn = readBuilderStorageValue(
         BUILDER_STORAGE_KEY_PAIRS.showScottishCandidateNumberBox
       );
+
       if (rawScn === "true") setShowScottishCandidateNumberBox(true);
       if (rawScn === "false") setShowScottishCandidateNumberBox(false);
 
       const rawFormula = readBuilderStorageValue(
         BUILDER_STORAGE_KEY_PAIRS.includeFormulaSheet
       );
+
       if (rawFormula === "true") setIncludeFormulaSheet(true);
       if (rawFormula === "false") setIncludeFormulaSheet(false);
 
@@ -191,11 +191,13 @@ export function useBuilderInitialisation({
       const initialAssessmentDate = normaliseDisplayDate(
         storedAssessmentDate || storedP1Date || ""
       );
+
       if (initialAssessmentDate) {
         setAssessmentDate(initialAssessmentDate);
       }
 
       const normalisedP2Date = normaliseDisplayDate(storedP2Date || "");
+
       if (normalisedP2Date) {
         setP2CoverDate(normalisedP2Date);
       }
@@ -207,12 +209,14 @@ export function useBuilderInitialisation({
       const storedP2Custom = readBuilderStorageValue(p2DateCustomKey);
 
       if (storedP1Start !== null) setP1StartTime(storedP1Start);
+
       if (storedP1End !== null) {
         setP1EndTime(storedP1End);
         if (storedP1End.trim()) setP1EndTimeManuallyEdited(true);
       }
 
       if (storedP2Start !== null) setP2StartTime(storedP2Start);
+
       if (storedP2End !== null) {
         setP2EndTime(storedP2End);
         if (storedP2End.trim()) setP2EndTimeManuallyEdited(true);
@@ -220,7 +224,7 @@ export function useBuilderInitialisation({
 
       if (storedP2Custom === "true") setP2DateCustom(true);
     } catch {
-      // ignore
+      // Ignore corrupt local builder storage and continue with defaults.
     }
   }, [
     clampFn,
@@ -270,13 +274,17 @@ export function useBuilderInitialisation({
           : "[Untitled file]"
     );
 
-    setClassName((prev) => (prev.trim().length ? prev : brief.className ?? ""));
+    setClassName((prev) =>
+      prev.trim().length ? prev : brief.className ?? ""
+    );
 
     const briefDate = normaliseDisplayDate(brief.assessmentDate || "");
+
     if (briefDate) {
       setAssessmentDate((prev) =>
         prev && prev !== todayDisplayDate() ? prev : briefDate
       );
+
       setP2CoverDate((prev) =>
         prev && prev !== todayDisplayDate() ? prev : briefDate
       );
@@ -288,44 +296,35 @@ export function useBuilderInitialisation({
         : Date.now()
     );
 
-          const initialPaper = getInitialBuilderPaperForStructure({
-        paperStructure: brief.paperStructure,
-        courseConfig: ACTIVE_COURSE_CONFIG,
-      });
+    const initialPaper = getInitialBuilderPaperForStructure({
+      paperStructure: brief.paperStructure,
+      courseConfig: builderCourseConfig,
+    });
 
-      setActivePaper(initialPaper);
-      setViewPaper(initialPaper);
+    setActivePaper(initialPaper);
+    setViewPaper(initialPaper);
 
-    if (brief.buildPriority === "MARKS") {
-      if (typeof brief.marksTargetP1 === "number" && brief.marksTargetP1 > 0) {
-        setP1Target(brief.marksTargetP1);
-      }
-      if (typeof brief.marksTargetP2 === "number" && brief.marksTargetP2 > 0) {
-        setP2Target(brief.marksTargetP2);
-      }
-      return;
+    const setupTargetsByPaper = buildTargetMarksByPaperFromSetupTargets({
+      buildPriority: brief.buildPriority,
+      marksTargetP1: brief.marksTargetP1,
+      marksTargetP2: brief.marksTargetP2,
+      timeTargetP1: brief.timeTargetP1,
+      timeTargetP2: brief.timeTargetP2,
+      courseConfig: builderCourseConfig,
+    });
+
+    const p1SetupTarget = setupTargetsByPaper.P1;
+    const p2SetupTarget = setupTargetsByPaper.P2;
+
+    if (typeof p1SetupTarget === "number") {
+      setP1Target(p1SetupTarget);
     }
 
-    if (typeof brief.timeTargetP1 === "number" && brief.timeTargetP1 > 0) {
-  setP1Target(
-    estimateMarksFromTimeForPaper({
-      paper: "P1",
-      minutes: brief.timeTargetP1,
-      courseConfig: ACTIVE_COURSE_CONFIG,
-    })
-  );
-}
-
-if (typeof brief.timeTargetP2 === "number" && brief.timeTargetP2 > 0) {
-  setP2Target(
-    estimateMarksFromTimeForPaper({
-      paper: "P2",
-      minutes: brief.timeTargetP2,
-      courseConfig: ACTIVE_COURSE_CONFIG,
-    })
-  );
-}
+    if (typeof p2SetupTarget === "number") {
+      setP2Target(p2SetupTarget);
+    }
   }, [
+    builderCourseConfig,
     setActivePaper,
     setAssessmentDate,
     setAssessmentName,
@@ -349,7 +348,7 @@ if (typeof brief.timeTargetP2 === "number" && brief.timeTargetP2 > 0) {
 
       setQuestions(parsed.questions.map(withSpacingBase));
     } catch {
-      // ignore
+      // Ignore corrupt local builder state and continue with defaults.
     }
   }, [setQuestions]);
 }

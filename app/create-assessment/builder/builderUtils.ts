@@ -1,6 +1,10 @@
-import type { DifficultyLevel, Paper, Question } from "@/shared-types/AssessmentTypes";
-import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
-import { calculateActiveCoursePaperDurationMinutes } from "./AssessmentTiming";
+import type {
+  DifficultyLevel,
+  Paper,
+  Question,
+} from "@/shared-types/AssessmentTypes";
+import { calculateBuilderPaperDurationMinutes } from "./builder-logic/BuilderPaperTiming";
+import { getBuilderQuestionSpacingBasePx } from "./builder-logic/BuilderQuestionSpacing";
 
 export type DraftByPaper = Record<Paper, Question | null>;
 
@@ -36,7 +40,13 @@ export type PreviewPage =
     };
 
 export function estimateMinutes(paper: Paper, marks: number) {
-  return Math.max(0, calculateActiveCoursePaperDurationMinutes(paper, marks));
+  return Math.max(
+    0,
+    calculateBuilderPaperDurationMinutes({
+      paper,
+      marks,
+    })
+  );
 }
 
 export function sumMarks(list: Question[]) {
@@ -47,6 +57,7 @@ export function sumMarks(list: Question[]) {
         : typeof (q as any).targetMarks === "number"
           ? (q as any).targetMarks
           : 0;
+
     return acc + (Number.isFinite(m) ? m : 0);
   }, 0);
 }
@@ -66,10 +77,7 @@ export function spacingBasePxFor(q: Question): number {
     return (q as any).spacingBasePx;
   }
 
-  const code = (q as any).questionCode as string | undefined;
-  if (!code) return 48;
-
-  return getSpacingBasePx(code);
+  return getBuilderQuestionSpacingBasePx((q as any).questionCode);
 }
 
 export const pxPerMm = 96 / 25.4;

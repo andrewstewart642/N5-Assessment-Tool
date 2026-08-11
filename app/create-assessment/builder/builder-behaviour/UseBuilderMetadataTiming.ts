@@ -1,7 +1,8 @@
 import { useCallback, useEffect } from "react";
 
-import { calculateActiveCourseEndTime } from "../AssessmentTiming";
 import { todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
+import { calculateBuilderEndTimeForPaper } from "../builder-logic/BuilderPaperTiming";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 
 type UseBuilderMetadataTimingArgs = {
   assessmentName: string;
@@ -21,6 +22,26 @@ type UseBuilderMetadataTimingArgs = {
   p2EndTimeManuallyEdited: boolean;
   setP2EndTime: React.Dispatch<React.SetStateAction<string>>;
 };
+
+function calculateCoverEndTimeForPaper({
+  paper,
+  marks,
+  startTime,
+}: {
+  paper: Paper;
+  marks: number;
+  startTime: string;
+}): string {
+  if (!startTime.trim()) {
+    return "";
+  }
+
+  return calculateBuilderEndTimeForPaper({
+    paper,
+    marks,
+    startTime,
+  });
+}
 
 export function useBuilderMetadataTiming({
   assessmentName,
@@ -49,23 +70,25 @@ export function useBuilderMetadataTiming({
   useEffect(() => {
     if (p1EndTimeManuallyEdited) return;
 
-    if (!p1StartTime.trim()) {
-      setP1EndTime("");
-      return;
-    }
-
-    setP1EndTime(calculateActiveCourseEndTime("P1", p1Marks, p1StartTime));
+    setP1EndTime(
+      calculateCoverEndTimeForPaper({
+        paper: "P1",
+        marks: p1Marks,
+        startTime: p1StartTime,
+      })
+    );
   }, [p1Marks, p1StartTime, p1EndTimeManuallyEdited, setP1EndTime]);
 
   useEffect(() => {
     if (p2EndTimeManuallyEdited) return;
 
-    if (!p2StartTime.trim()) {
-      setP2EndTime("");
-      return;
-    }
-
-    setP2EndTime(calculateActiveCourseEndTime("P2", p2Marks, p2StartTime));
+    setP2EndTime(
+      calculateCoverEndTimeForPaper({
+        paper: "P2",
+        marks: p2Marks,
+        startTime: p2StartTime,
+      })
+    );
   }, [p2Marks, p2StartTime, p2EndTimeManuallyEdited, setP2EndTime]);
 
   const handleAssessmentNameFocus = useCallback(() => {
