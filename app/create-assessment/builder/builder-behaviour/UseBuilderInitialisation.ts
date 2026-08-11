@@ -2,7 +2,6 @@ import { useEffect } from "react";
 
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
 import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
-import { getCoursePaperConfig } from "@/course-data/course-configs/CourseConfigTypes";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 import {
@@ -16,6 +15,7 @@ import {
   todayDisplayDate,
 } from "../builder-logic/BuilderDateHelpers";
 import type { clamp } from "../BuilderUtils";
+import { estimateMarksFromTimeForPaper, getInitialBuilderPaperForStructure } from "../builder-logic/BuilderPaperTargets";
 
 type UseBuilderInitialisationArgs = {
   defaultHudHeight: number;
@@ -78,11 +78,6 @@ function withSpacingBase(question: Question): Question {
       ? getSpacingBasePx(code)
       : DEFAULT_QUESTION_SPACING_BASE_PX,
   };
-}
-
-function estimateMarksFromTime(paper: Paper, minutes: number): number {
-  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
-  return Math.max(1, Math.floor(minutes / paperConfig.minutesPerMark));
 }
 
 export function useBuilderInitialisation({
@@ -293,13 +288,13 @@ export function useBuilderInitialisation({
         : Date.now()
     );
 
-    if (brief.paperStructure === "P2_ONLY") {
-      setActivePaper("P2");
-      setViewPaper("P2");
-    } else {
-      setActivePaper("P1");
-      setViewPaper("P1");
-    }
+          const initialPaper = getInitialBuilderPaperForStructure({
+        paperStructure: brief.paperStructure,
+        courseConfig: ACTIVE_COURSE_CONFIG,
+      });
+
+      setActivePaper(initialPaper);
+      setViewPaper(initialPaper);
 
     if (brief.buildPriority === "MARKS") {
       if (typeof brief.marksTargetP1 === "number" && brief.marksTargetP1 > 0) {
@@ -312,11 +307,24 @@ export function useBuilderInitialisation({
     }
 
     if (typeof brief.timeTargetP1 === "number" && brief.timeTargetP1 > 0) {
-      setP1Target(estimateMarksFromTime("P1", brief.timeTargetP1));
-    }
-    if (typeof brief.timeTargetP2 === "number" && brief.timeTargetP2 > 0) {
-      setP2Target(estimateMarksFromTime("P2", brief.timeTargetP2));
-    }
+  setP1Target(
+    estimateMarksFromTimeForPaper({
+      paper: "P1",
+      minutes: brief.timeTargetP1,
+      courseConfig: ACTIVE_COURSE_CONFIG,
+    })
+  );
+}
+
+if (typeof brief.timeTargetP2 === "number" && brief.timeTargetP2 > 0) {
+  setP2Target(
+    estimateMarksFromTimeForPaper({
+      paper: "P2",
+      minutes: brief.timeTargetP2,
+      courseConfig: ACTIVE_COURSE_CONFIG,
+    })
+  );
+}
   }, [
     setActivePaper,
     setAssessmentDate,

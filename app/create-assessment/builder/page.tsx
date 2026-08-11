@@ -17,7 +17,7 @@ import {
 } from "./builder-definitions/BuilderConstants";
 
 import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
-import { getCoursePaperConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import { buildTargetMarksByPaper, getDefaultBuilderPaper, getDefaultTargetMarksForPaper, getIncludedPapersFromTargets } from "./builder-logic/BuilderPaperTargets";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
   Paper,
@@ -147,28 +147,6 @@ function buildFilteredSkillsData(
   return Object.fromEntries(filteredEntries);
 }
 
-function buildTargetMarksByPaper(args: {
-  p1Target: number;
-  p2Target: number;
-}): Partial<Record<Paper, number>> {
-  const { p1Target, p2Target } = args;
-
-  return ACTIVE_COURSE_CONFIG.papers.reduce<Partial<Record<Paper, number>>>(
-    (targets, paper) => {
-      if (paper.id === "P1") {
-        targets[paper.id] = p1Target;
-      }
-
-      if (paper.id === "P2") {
-        targets[paper.id] = p2Target;
-      }
-
-      return targets;
-    },
-    {}
-  );
-}
-
 function buildClassCoverageSummary(args: {
   classes: SchoolClass[];
   selectedClassIds: string[];
@@ -208,20 +186,24 @@ export default function CreateAssessmentBuilderPage() {
   }, []);
 
   const defaultP1Target = useMemo(() => {
-    return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, "P1").defaultTargetMarks;
-  }, []);
+  return getDefaultTargetMarksForPaper("P1");
+}, []);
 
-  const defaultP2Target = useMemo(() => {
-    return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, "P2").defaultTargetMarks;
-  }, []);
+const defaultP2Target = useMemo(() => {
+  return getDefaultTargetMarksForPaper("P2");
+}, []);
+
+const defaultBuilderPaper = useMemo(() => {
+  return getDefaultBuilderPaper(ACTIVE_COURSE_CONFIG);
+}, []);
 
   const [standardFilter, setStandardFilter] = useState<StandardFilter>("C+A");
   const [thinkingTypeFilter, setThinkingTypeFilter] =
     useState<ThinkingTypeFilter>("ANY");
   const [targetMarks, setTargetMarks] = useState<number>(2);
 
-  const [activePaper, setActivePaper] = useState<Paper>("P1");
-  const [viewPaper, setViewPaper] = useState<Paper>("P1");
+  const [activePaper, setActivePaper] = useState<Paper>(defaultBuilderPaper);
+  const [viewPaper, setViewPaper] = useState<Paper>(defaultBuilderPaper);
 
   const [p1Target, setP1Target] = useState<number>(defaultP1Target);
   const [p2Target, setP2Target] = useState<number>(defaultP2Target);
@@ -898,20 +880,15 @@ export default function CreateAssessmentBuilderPage() {
   return buildTargetMarksByPaper({
     p1Target,
     p2Target,
+    courseConfig: ACTIVE_COURSE_CONFIG,
   });
 }, [p1Target, p2Target]);
 
 const includedPapers = useMemo<Paper[]>(() => {
-  return ACTIVE_COURSE_CONFIG.papers
-    .map((paper) => paper.id)
-    .filter((paper) => {
-      const targetMarks = targetMarksByPaper[paper];
-      return (
-        typeof targetMarks === "number" &&
-        Number.isFinite(targetMarks) &&
-        targetMarks > 0
-      );
-    });
+  return getIncludedPapersFromTargets({
+    targetMarksByPaper,
+    courseConfig: ACTIVE_COURSE_CONFIG,
+  });
 }, [targetMarksByPaper]);
 
 const totalAssessmentMarks = useMemo(() => {
