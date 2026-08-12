@@ -5,7 +5,6 @@ import { todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
 import { getBuilderPapers } from "../builder-logic/BuilderPaperTargets";
 import { calculateBuilderEndTimeForPaper } from "../builder-logic/BuilderPaperTiming";
 import {
-  buildPaperStringSetterMapFromLegacySetters,
   getPaperBooleanValue,
   getPaperNumberValue,
   getPaperStringSetter,
@@ -13,6 +12,7 @@ import {
   type BuilderPaperBooleanMap,
   type BuilderPaperNumberMap,
   type BuilderPaperStringMap,
+  type BuilderPaperStringSetterMap,
 } from "../builder-logic/BuilderPaperStateMaps";
 
 type UseBuilderMetadataTimingArgs = {
@@ -26,9 +26,7 @@ type UseBuilderMetadataTimingArgs = {
   marksByPaper: BuilderPaperNumberMap;
   startTimeByPaper: BuilderPaperStringMap;
   endTimeManuallyEditedByPaper: BuilderPaperBooleanMap;
-
-  setP1EndTime: React.Dispatch<React.SetStateAction<string>>;
-  setP2EndTime: React.Dispatch<React.SetStateAction<string>>;
+  endTimeSetterByPaper: BuilderPaperStringSetterMap;
 };
 
 function calculateCoverEndTimeForPaper({
@@ -62,20 +60,11 @@ export function useBuilderMetadataTiming({
   marksByPaper,
   startTimeByPaper,
   endTimeManuallyEditedByPaper,
-
-  setP1EndTime,
-  setP2EndTime,
+  endTimeSetterByPaper,
 }: UseBuilderMetadataTimingArgs) {
   const builderPapers = useMemo(() => {
     return getBuilderPapers();
   }, []);
-
-  const endTimeSetterByPaper = useMemo(() => {
-    return buildPaperStringSetterMapFromLegacySetters({
-      setP1Value: setP1EndTime,
-      setP2Value: setP2EndTime,
-    });
-  }, [setP1EndTime, setP2EndTime]);
 
   useEffect(() => {
     if (!p2DateCustom) {
