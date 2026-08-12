@@ -2,37 +2,17 @@ import { useMemo } from "react";
 
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import {
-  buildPaperStringMapFromLegacyValues,
   getPaperStringValue,
+  type BuilderPaperStringMap,
 } from "../builder-logic/BuilderPaperStateMaps";
 
 type UsePaperViewMetadataArgs = {
   viewPaper: Paper;
-
-  assessmentDate: string;
-  p2CoverDate: string;
-  p2DateCustom: boolean;
-
-  p1StartTime: string;
-  p1EndTime: string;
-  p2StartTime: string;
-  p2EndTime: string;
+  coverDateByPaper: BuilderPaperStringMap;
+  startTimeByPaper: BuilderPaperStringMap;
+  endTimeByPaper: BuilderPaperStringMap;
+  fallbackCoverDate: string;
 };
-
-function buildCoverDateByPaper({
-  assessmentDate,
-  p2CoverDate,
-  p2DateCustom,
-}: {
-  assessmentDate: string;
-  p2CoverDate: string;
-  p2DateCustom: boolean;
-}) {
-  return buildPaperStringMapFromLegacyValues({
-    p1Value: assessmentDate,
-    p2Value: p2DateCustom ? p2CoverDate : assessmentDate,
-  });
-}
 
 function buildCoverTimeText({
   startTime,
@@ -57,45 +37,20 @@ function buildCoverTimeText({
 
 export function usePaperViewMetadata({
   viewPaper,
-
-  assessmentDate,
-  p2CoverDate,
-  p2DateCustom,
-
-  p1StartTime,
-  p1EndTime,
-  p2StartTime,
-  p2EndTime,
+  coverDateByPaper,
+  startTimeByPaper,
+  endTimeByPaper,
+  fallbackCoverDate,
 }: UsePaperViewMetadataArgs) {
-  const coverDateByPaper = useMemo(() => {
-    return buildCoverDateByPaper({
-      assessmentDate,
-      p2CoverDate,
-      p2DateCustom,
-    });
-  }, [assessmentDate, p2CoverDate, p2DateCustom]);
-
-  const startTimeByPaper = useMemo(() => {
-    return buildPaperStringMapFromLegacyValues({
-      p1Value: p1StartTime,
-      p2Value: p2StartTime,
-    });
-  }, [p1StartTime, p2StartTime]);
-
-  const endTimeByPaper = useMemo(() => {
-    return buildPaperStringMapFromLegacyValues({
-      p1Value: p1EndTime,
-      p2Value: p2EndTime,
-    });
-  }, [p1EndTime, p2EndTime]);
-
   const coverDateTextForView = useMemo(() => {
-    return getPaperStringValue({
+    const dateForPaper = getPaperStringValue({
       paper: viewPaper,
       valuesByPaper: coverDateByPaper,
-      fallback: assessmentDate,
+      fallback: fallbackCoverDate,
     });
-  }, [viewPaper, coverDateByPaper, assessmentDate]);
+
+    return dateForPaper.trim() ? dateForPaper : fallbackCoverDate;
+  }, [viewPaper, coverDateByPaper, fallbackCoverDate]);
 
   const coverTimeTextForView = useMemo(() => {
     return buildCoverTimeText({

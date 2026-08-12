@@ -16,6 +16,10 @@ export type SQAN5CoverPageProps = {
   showDateTime: boolean;
   dateText: string;
   timeText: string;
+  subjectName?: string;
+  paperTitle?: string;
+  coverInstructionText?: string;
+  showNoCalculatorIcon?: boolean;
   showScottishCandidateNumberBox: boolean;
   viewerScale?: number;
   outerPaddingPx?: number;
@@ -107,9 +111,33 @@ function Divider(props: { y: number }) {
 function NoCalculatorIcon() {
   return (
     <svg width="82" height="82" viewBox="0 0 82 82" aria-hidden="true">
-      <circle cx="41" cy="41" r="33.5" fill="none" stroke="#231f20" strokeWidth="4.5" />
-      <rect x="28.5" y="17.5" width="25" height="40" rx="2.5" fill="none" stroke="#231f20" strokeWidth="2.2" />
-      <rect x="31.8" y="21.2" width="18.4" height="8.2" fill="none" stroke="#231f20" strokeWidth="1.2" />
+      <circle
+        cx="41"
+        cy="41"
+        r="33.5"
+        fill="none"
+        stroke="#231f20"
+        strokeWidth="4.5"
+      />
+      <rect
+        x="28.5"
+        y="17.5"
+        width="25"
+        height="40"
+        rx="2.5"
+        fill="none"
+        stroke="#231f20"
+        strokeWidth="2.2"
+      />
+      <rect
+        x="31.8"
+        y="21.2"
+        width="18.4"
+        height="8.2"
+        fill="none"
+        stroke="#231f20"
+        strokeWidth="1.2"
+      />
       {[
         [33.5, 34.5],
         [39.5, 34.5],
@@ -126,7 +154,15 @@ function NoCalculatorIcon() {
       ].map(([x, y], idx) => (
         <circle key={idx} cx={x} cy={y} r="1.6" fill="#231f20" />
       ))}
-      <line x1="19" y1="19" x2="63" y2="63" stroke="#231f20" strokeWidth="5.4" strokeLinecap="round" />
+      <line
+        x1="19"
+        y1="19"
+        x2="63"
+        y2="63"
+        stroke="#231f20"
+        strokeWidth="5.4"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
@@ -138,18 +174,29 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
     showDateTime,
     dateText,
     timeText,
+    subjectName = "Mathematics",
+    paperTitle,
+    coverInstructionText,
+    showNoCalculatorIcon,
     showScottishCandidateNumberBox,
     viewerScale = 1,
     outerPaddingPx = 18,
   } = props;
 
   const isP1 = paper === "P1";
+
+  const resolvedPaperTitle =
+    paperTitle ?? (isP1 ? "Paper 1 (Non-calculator)" : "Paper 2 (Calculator)");
+
+  const resolvedCoverInstructionText =
+    coverInstructionText ??
+    (isP1 ? "You must NOT use a calculator." : "You may use a calculator.");
+
+  const resolvedShowNoCalculatorIcon = showNoCalculatorIcon ?? isP1;
+
   const showDateLine = showDateTime && dateText.trim().length > 0;
   const showTimeLine = showDateTime && timeText.trim().length > 0;
   const showDateTimeBlock = showDateLine || showTimeLine;
-
-  const paperTitle = isP1 ? "Paper 1 (Non-calculator)" : "Paper 2 (Calculator)";
-  const calculatorRule = isP1 ? "You must NOT use a calculator." : "You may use a calculator.";
 
   const topBandTop = mm(52);
   const lowerBandTop = mm(94.2);
@@ -177,7 +224,13 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
           color: "#111",
         }}
       >
-        <CandidateBoxes count={6} x={mm(56)} y={mm(6.3)} w={mm(118)} h={mm(11)} />
+        <CandidateBoxes
+          count={6}
+          x={mm(56)}
+          y={mm(6.3)}
+          w={mm(118)}
+          h={mm(11)}
+        />
 
         <div
           style={{
@@ -250,30 +303,31 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
             position: "absolute",
             right: mm(3.6),
             top: mm(54.4),
-            width: mm(82),
+            width: mm(100),
             textAlign: "right",
             lineHeight: 0.92,
           }}
         >
           <div
             style={{
-              fontSize: 24.8,
+              fontSize: subjectName.length > 18 ? 21.8 : 24.8,
               fontWeight: 700,
               letterSpacing: -0.01,
               whiteSpace: "nowrap",
             }}
           >
-            Mathematics
+            {subjectName}
           </div>
+
           <div
             style={{
-              fontSize: 24.8,
+              fontSize: resolvedPaperTitle.length > 22 ? 21.8 : 24.8,
               fontWeight: 700,
               letterSpacing: -0.01,
               whiteSpace: "nowrap",
             }}
           >
-            {paperTitle}
+            {resolvedPaperTitle}
           </div>
         </div>
 
@@ -313,7 +367,7 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
           </div>
         ) : null}
 
-        {isP1 ? (
+        {resolvedShowNoCalculatorIcon ? (
           <div
             style={{
               position: "absolute",
@@ -344,21 +398,57 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
           Fill in these boxes and read what is printed below.
         </div>
 
-        <div style={{ position: "absolute", left: mm(1), top: mm(113.8), fontSize: 14.1, fontWeight: 400 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: mm(1),
+            top: mm(113.8),
+            fontSize: 14.1,
+            fontWeight: 400,
+          }}
+        >
           Full name of centre
         </div>
-        <div style={{ position: "absolute", left: mm(108), top: mm(113.8), fontSize: 14.1, fontWeight: 400 }}>
+
+        <div
+          style={{
+            position: "absolute",
+            left: mm(108),
+            top: mm(113.8),
+            fontSize: 14.1,
+            fontWeight: 400,
+          }}
+        >
           Town
         </div>
+
         <LineBox x={mm(1)} y={mm(119.2)} w={mm(98)} h={mm(13.2)} />
         <LineBox x={mm(108)} y={mm(119.2)} w={mm(67)} h={mm(13.2)} />
 
-        <div style={{ position: "absolute", left: mm(1), top: mm(138.2), fontSize: 14.1, fontWeight: 400 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: mm(1),
+            top: mm(138.2),
+            fontSize: 14.1,
+            fontWeight: 400,
+          }}
+        >
           Forename(s)
         </div>
-        <div style={{ position: "absolute", left: mm(81), top: mm(138.2), fontSize: 14.1, fontWeight: 400 }}>
+
+        <div
+          style={{
+            position: "absolute",
+            left: mm(81),
+            top: mm(138.2),
+            fontSize: 14.1,
+            fontWeight: 400,
+          }}
+        >
           Surname
         </div>
+
         <div
           style={{
             position: "absolute",
@@ -371,25 +461,80 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
         >
           Number of seat
         </div>
+
         <LineBox x={mm(1)} y={mm(143.5)} w={mm(67)} h={mm(13.2)} />
         <LineBox x={mm(81)} y={mm(143.5)} w={mm(57)} h={mm(13.2)} />
         <LineBox x={mm(146.5)} y={mm(143.5)} w={mm(28.5)} h={mm(13.2)} />
 
-        <div style={{ position: "absolute", left: mm(10), top: mm(164.1), fontSize: 14.1, fontWeight: 400 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: mm(10),
+            top: mm(164.1),
+            fontSize: 14.1,
+            fontWeight: 400,
+          }}
+        >
           Date of birth
         </div>
-        <div style={{ position: "absolute", left: mm(17), top: mm(170), fontSize: 12.2, fontWeight: 400 }}>
+
+        <div
+          style={{
+            position: "absolute",
+            left: mm(17),
+            top: mm(170),
+            fontSize: 12.2,
+            fontWeight: 400,
+          }}
+        >
           Day
         </div>
-        <div style={{ position: "absolute", left: mm(38), top: mm(170), fontSize: 12.2, fontWeight: 400 }}>
+
+        <div
+          style={{
+            position: "absolute",
+            left: mm(38),
+            top: mm(170),
+            fontSize: 12.2,
+            fontWeight: 400,
+          }}
+        >
           Month
         </div>
-        <div style={{ position: "absolute", left: mm(64), top: mm(170), fontSize: 12.2, fontWeight: 400 }}>
+
+        <div
+          style={{
+            position: "absolute",
+            left: mm(64),
+            top: mm(170),
+            fontSize: 12.2,
+            fontWeight: 400,
+          }}
+        >
           Year
         </div>
-        <CandidateBoxes count={2} x={mm(10)} y={mm(174.5)} w={mm(20)} h={mm(11.2)} />
-        <CandidateBoxes count={2} x={mm(34)} y={mm(174.5)} w={mm(20)} h={mm(11.2)} />
-        <CandidateBoxes count={2} x={mm(58)} y={mm(174.5)} w={mm(20)} h={mm(11.2)} />
+
+        <CandidateBoxes
+          count={2}
+          x={mm(10)}
+          y={mm(174.5)}
+          w={mm(20)}
+          h={mm(11.2)}
+        />
+        <CandidateBoxes
+          count={2}
+          x={mm(34)}
+          y={mm(174.5)}
+          w={mm(20)}
+          h={mm(11.2)}
+        />
+        <CandidateBoxes
+          count={2}
+          x={mm(58)}
+          y={mm(174.5)}
+          w={mm(20)}
+          h={mm(11.2)}
+        />
 
         {showScottishCandidateNumberBox ? (
           <>
@@ -404,7 +549,14 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
             >
               Scottish candidate number
             </div>
-            <CandidateBoxes count={9} x={mm(88)} y={mm(174.5)} w={mm(76)} h={mm(11.2)} />
+
+            <CandidateBoxes
+              count={9}
+              x={mm(88)}
+              y={mm(174.5)}
+              w={mm(76)}
+              h={mm(11.2)}
+            />
           </>
         ) : null}
 
@@ -434,18 +586,25 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
           }}
         >
           <div style={{ marginBottom: 3 }}>Attempt ALL questions.</div>
-          <div style={{ marginBottom: 3, fontWeight: 700 }}>{calculatorRule}</div>
-          <div style={{ marginBottom: 3 }}>To earn full marks you must show your working in your answers.</div>
-          <div style={{ marginBottom: 3 }}>State the units for your answer where appropriate.</div>
+          <div style={{ marginBottom: 3, fontWeight: 700 }}>
+            {resolvedCoverInstructionText}
+          </div>
           <div style={{ marginBottom: 3 }}>
-            Write your answers clearly in the spaces provided in this booklet. Additional space for answers is
-            provided at the end of this booklet. If you use this space you must clearly identify the question
-            number you are attempting.
+            To earn full marks you must show your working in your answers.
+          </div>
+          <div style={{ marginBottom: 3 }}>
+            State the units for your answer where appropriate.
+          </div>
+          <div style={{ marginBottom: 3 }}>
+            Write your answers clearly in the spaces provided in this booklet.
+            Additional space for answers is provided at the end of this booklet.
+            If you use this space you must clearly identify the question number
+            you are attempting.
           </div>
           <div style={{ marginBottom: 3 }}>Use blue or black ink.</div>
           <div>
-            Before leaving the examination room you must give this booklet to the Invigilator; if you do not,
-            you may lose all the marks for this paper.
+            Before leaving the examination room you must give this booklet to the
+            Invigilator; if you do not, you may lose all the marks for this paper.
           </div>
         </div>
       </div>

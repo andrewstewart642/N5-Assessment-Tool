@@ -1,15 +1,24 @@
 import { skillsData } from "@/course-data/N5-Skills";
 import type { CourseAssessmentConfig } from "./CourseConfigTypes";
 
-export const N5_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
-  courseId: "N5_MATH",
-  displayName: "National 5 Mathematics",
-  shortName: "N5 Maths",
+/**
+ * Temporary smoke-test config.
+ *
+ * This is not intended to be a complete or accurate National 5 Applications
+ * of Mathematics course model yet.
+ *
+ * Its purpose is to prove that the builder can support a second course config
+ * without changing the UI or breaking National 5 Maths.
+ */
+export const N5_APPLICATIONS_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
+  courseId: "N5_APPLICATIONS_MATH",
+  displayName: "National 5 Applications of Mathematics",
+  shortName: "N5 Applications",
 
   subjectArea: "Mathematics",
   awardingBody: "SQA",
   levelLabel: "National 5",
-  printSubjectName: "Mathematics",
+  printSubjectName: "Applications of Mathematics",
 
   papers: [
     {
@@ -19,8 +28,8 @@ export const N5_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
       order: 1,
       calculatorPolicy: "P1",
       minutesPerMark: 1.5,
-      defaultTargetMarks: 40,
-      description: "Non-calculator paper.",
+      defaultTargetMarks: 35,
+      description: "Temporary non-calculator-style paper config.",
       printTitle: "Paper 1 (Non-calculator)",
       coverInstructionText: "You must NOT use a calculator.",
       showNoCalculatorIcon: true,
@@ -32,8 +41,8 @@ export const N5_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
       order: 2,
       calculatorPolicy: "P2",
       minutesPerMark: 1.8,
-      defaultTargetMarks: 50,
-      description: "Calculator-allowed paper.",
+      defaultTargetMarks: 45,
+      description: "Temporary calculator-style paper config.",
       printTitle: "Paper 2 (Calculator)",
       coverInstructionText: "You may use a calculator.",
       showNoCalculatorIcon: false,
@@ -114,11 +123,18 @@ export const N5_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
 
   topicTargets: [
     {
+      topic: "NUM",
+      label: "Numeracy",
+      minPct: 30,
+      maxPct: 55,
+      targetPct: 42.5,
+    },
+    {
       topic: "ALG",
       label: "Algebra",
-      minPct: 30,
-      maxPct: 45,
-      targetPct: 37.5,
+      minPct: 10,
+      maxPct: 25,
+      targetPct: 17.5,
     },
     {
       topic: "GEO",
@@ -130,25 +146,19 @@ export const N5_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
     {
       topic: "TRIG",
       label: "Trigonometry",
-      minPct: 10,
-      maxPct: 25,
-      targetPct: 17.5,
-    },
-    {
-      topic: "NUM",
-      label: "Numeracy",
-      minPct: 10,
-      maxPct: 25,
-      targetPct: 17.5,
+      minPct: 5,
+      maxPct: 20,
+      targetPct: 12.5,
     },
     {
       topic: "STAT",
       label: "Statistics",
-      minPct: 5,
-      maxPct: 15,
-      targetPct: 10,
+      minPct: 10,
+      maxPct: 30,
+      targetPct: 20,
     },
   ],
 
+  // Temporary only: this lets us smoke-test the course switch using the existing tree.
   skillTree: skillsData,
 };

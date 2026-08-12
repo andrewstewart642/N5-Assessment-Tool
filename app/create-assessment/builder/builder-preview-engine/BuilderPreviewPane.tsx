@@ -27,6 +27,10 @@ type Props = {
   showCoverDateTime: boolean;
   coverDateTextForView: string;
   coverTimeTextForView: string;
+  printSubjectName: string;
+  paperPrintTitle: string;
+  paperCoverInstructionText: string;
+  showNoCalculatorIcon: boolean;
   showScottishCandidateNumberBox: boolean;
   includeCoverSheet: boolean;
   includeFormulaSheet: boolean;
@@ -55,6 +59,10 @@ export default function BuilderPreviewPane({
   showCoverDateTime,
   coverDateTextForView,
   coverTimeTextForView,
+  printSubjectName,
+  paperPrintTitle,
+  paperCoverInstructionText,
+  showNoCalculatorIcon,
   showScottishCandidateNumberBox,
   includeCoverSheet,
   includeFormulaSheet,
@@ -130,6 +138,10 @@ export default function BuilderPreviewPane({
               showCoverDateTime={showCoverDateTime}
               coverDateTextForView={coverDateTextForView}
               coverTimeTextForView={coverTimeTextForView}
+              printSubjectName={printSubjectName}
+              paperPrintTitle={paperPrintTitle}
+              paperCoverInstructionText={paperCoverInstructionText}
+              showNoCalculatorIcon={showNoCalculatorIcon}
               showScottishCandidateNumberBox={showScottishCandidateNumberBox}
               includeCoverSheet={includeCoverSheet}
               includeFormulaSheet={includeFormulaSheet}

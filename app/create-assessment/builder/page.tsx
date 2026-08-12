@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BUILDER_STORAGE_KEY_PAIRS } from "./BuilderStorageKeys";
+import { useBuilderPaperPrintMetadata } from "./builder-behaviour/UseBuilderPaperPrintMetadata";
 import { readMyClassesStorageValue } from "@/app/my-classes/state/ClassStorageKeys";
 
 import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/SkillsTree";
@@ -10,6 +11,8 @@ import BuilderBottomHud from "@/app/create-assessment/builder/components/builder
 import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+import { useBuilderPaperMetadataMaps } from "./builder-behaviour/UseBuilderPaperMetadataMaps";
+import { useBuilderPaperTargetMaps } from "./builder-behaviour/UseBuilderPaperTargetMaps";
 import { normaliseClass } from "@/app/my-classes/state/ClassNormalisation";
 import {
   BUILDER_DEFAULT_HUD_HEIGHT,
@@ -19,16 +22,9 @@ import {
 import {
   buildEmptyEditDraftsByPaper,
   buildEmptyQuestionDraftsByPaper,
-  buildTargetMarksByPaper,
   getDefaultBuilderPaper,
   getDefaultTargetMarksForPaper,
-  getIncludedPapersFromTargets,
 } from "./builder-logic/BuilderPaperTargets";
-import {
-  buildPaperBooleanMapFromLegacyValues,
-  buildPaperStringMapFromLegacyValues,
-  buildPaperStringSetterMapFromLegacySetters,
-} from "./builder-logic/BuilderPaperStateMaps";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
   Paper,
@@ -62,10 +58,7 @@ import {
   getFilteredConcepts,
   rankConceptsByTargetMarks,
 } from "@/math-helpers/QuestionLogic";
-import {
-  analyseTopicBalance,
-  calculateTotalAssessmentMarksFromPaperTargets,
-} from "./builder-logic/AssessmentDistributionAnalysis";
+import { analyseTopicBalance } from "./builder-logic/AssessmentDistributionAnalysis";
 import { buildTopicBalanceNotes } from "./builder-logic/BuildTopicBalanceNotes";
 import { buildOperationalReasoningNotes } from "./builder-logic/BuildOperationalReasoningNotes";
 
@@ -88,6 +81,7 @@ import {
   upsertSavedAssessment,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
+
 
 const META_NAME_KEY = BUILDER_STORAGE_KEY_PAIRS.metaName;
 const META_CLASS_KEY = BUILDER_STORAGE_KEY_PAIRS.metaClass;
@@ -458,40 +452,27 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
   viewPaper,
 });
 
-const coverDateByPaper = useMemo(() => {
-  return buildPaperStringMapFromLegacyValues({
-    p1Value: assessmentDate,
-    p2Value: p2DateCustom ? p2CoverDate : assessmentDate,
-  });
-}, [assessmentDate, p2CoverDate, p2DateCustom]);
+const {
+  coverDateByPaper,
+  startTimeByPaper,
+  endTimeByPaper,
+  endTimeManuallyEditedByPaper,
+  endTimeSetterByPaper,
+} = useBuilderPaperMetadataMaps({
+  assessmentDate,
 
-const startTimeByPaper = useMemo(() => {
-  return buildPaperStringMapFromLegacyValues({
-    p1Value: p1StartTime,
-    p2Value: p2StartTime,
-  });
-}, [p1StartTime, p2StartTime]);
+  p1StartTime,
+  p1EndTime,
+  p1EndTimeManuallyEdited,
+  setP1EndTime,
 
-const endTimeByPaper = useMemo(() => {
-  return buildPaperStringMapFromLegacyValues({
-    p1Value: p1EndTime,
-    p2Value: p2EndTime,
-  });
-}, [p1EndTime, p2EndTime]);
-
-const endTimeManuallyEditedByPaper = useMemo(() => {
-  return buildPaperBooleanMapFromLegacyValues({
-    p1Value: p1EndTimeManuallyEdited,
-    p2Value: p2EndTimeManuallyEdited,
-  });
-}, [p1EndTimeManuallyEdited, p2EndTimeManuallyEdited]);
-
-const endTimeSetterByPaper = useMemo(() => {
-  return buildPaperStringSetterMapFromLegacySetters({
-    setP1Value: setP1EndTime,
-    setP2Value: setP2EndTime,
-  });
-}, [setP1EndTime, setP2EndTime]);
+  p2CoverDate,
+  p2DateCustom,
+  p2StartTime,
+  p2EndTime,
+  p2EndTimeManuallyEdited,
+  setP2EndTime,
+});
 
   const { handleAssessmentNameFocus, handleAssessmentNameBlur } =
     useBuilderMetadataTiming({
@@ -922,27 +903,15 @@ endTimeSetterByPaper,
     pageWrapperRefs,
   });
 
-  const targetMarksByPaper = useMemo<Partial<Record<Paper, number>>>(() => {
-  return buildTargetMarksByPaper({
-    p1Target,
-    p2Target,
-    courseConfig: builderCourseConfig,
-  });
-}, [p1Target, p2Target, builderCourseConfig]);
-
-const includedPapers = useMemo<Paper[]>(() => {
-  return getIncludedPapersFromTargets({
-    targetMarksByPaper,
-    courseConfig: builderCourseConfig,
-  });
-}, [targetMarksByPaper, builderCourseConfig]);
-
-const totalAssessmentMarks = useMemo(() => {
-  return calculateTotalAssessmentMarksFromPaperTargets({
-    includedPapers,
-    targetMarksByPaper,
-  });
-}, [includedPapers, targetMarksByPaper]);
+  const {
+  targetMarksByPaper,
+  includedPapers,
+  totalAssessmentMarks,
+} = useBuilderPaperTargetMaps({
+  p1Target,
+  p2Target,
+  courseConfig: builderCourseConfig,
+});
 
   const topicBalanceAnalysis = useMemo(() => {
     return analyseTopicBalance({
@@ -1018,6 +987,16 @@ const totalAssessmentMarks = useMemo(() => {
   coverDateByPaper,
   startTimeByPaper,
   endTimeByPaper,
+  fallbackCoverDate: assessmentDate,
+});
+
+const {
+  paperPrintTitle,
+  paperCoverInstructionText,
+  showNoCalculatorIcon,
+} = useBuilderPaperPrintMetadata({
+  paper: viewPaper,
+  courseConfig: builderCourseConfig,
 });
 
   function handleBuilderToggleClass(classId: string) {
@@ -1169,6 +1148,10 @@ const totalAssessmentMarks = useMemo(() => {
               showCoverDateTime={showCoverDateTime}
               coverDateTextForView={coverDateTextForView}
               coverTimeTextForView={coverTimeTextForView}
+              printSubjectName={builderCourseConfig.printSubjectName}
+              paperPrintTitle={paperPrintTitle}
+              paperCoverInstructionText={paperCoverInstructionText}
+              showNoCalculatorIcon={showNoCalculatorIcon}
               showScottishCandidateNumberBox={showScottishCandidateNumberBox}
               includeCoverSheet={includeCoverSheet}
               includeFormulaSheet={includeFormulaSheet}

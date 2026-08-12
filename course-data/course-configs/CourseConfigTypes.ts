@@ -57,6 +57,29 @@ export type CoursePaperConfig = {
 
   defaultTargetMarks: number;
   description?: string;
+
+  /**
+   * Label used on the printable cover page.
+   *
+   * Example:
+   * - Paper 1 (Non-calculator)
+   * - Paper 2 (Calculator)
+   */
+  printTitle: string;
+
+  /**
+   * Instruction shown on the cover page.
+   *
+   * Example:
+   * - You must NOT use a calculator.
+   * - You may use a calculator.
+   */
+  coverInstructionText: string;
+
+  /**
+   * Whether to show the crossed-out calculator icon on the cover page.
+   */
+  showNoCalculatorIcon: boolean;
 };
 
 export type CourseAssessmentModeId =
@@ -109,6 +132,15 @@ export type CourseAssessmentConfig = {
   awardingBody: CourseAwardingBody;
   levelLabel: CourseLevelLabel;
 
+  /**
+   * Label used on printable assessment cover pages.
+   *
+   * Example:
+   * - Mathematics
+   * - Applications of Mathematics
+   */
+  printSubjectName: string;
+
   papers: CoursePaperConfig[];
   assessmentModes: CourseAssessmentMode[];
 
@@ -122,7 +154,7 @@ export type CourseAssessmentConfig = {
    *
    * Other modes can still exist in the config without being shown yet.
    */
-    visibleSetupAssessmentModeIds?: CourseAssessmentModeId[];
+  visibleSetupAssessmentModeIds?: CourseAssessmentModeId[];
 
   assessmentStructures: CourseAssessmentStructure[];
 

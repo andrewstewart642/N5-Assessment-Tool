@@ -1,5 +1,6 @@
 "use client";
 
+import type { RefObject } from "react";
 import SQAPageFrame from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAPageFrame";
 import SQAN5FormulaSheet from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5FormulaSheet";
 import SQAN5CoverPage from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5CoverPage";
@@ -28,12 +29,16 @@ type Props = {
   previewPage: PreviewPage;
   previewIndex: number;
   viewPaper: Paper;
-  pageWrapperRefs: React.RefObject<Array<HTMLDivElement | null>>;
+  pageWrapperRefs: RefObject<Array<HTMLDivElement | null>>;
   viewerScale: number;
   activePaperCoverMarks: number;
   showCoverDateTime: boolean;
   coverDateTextForView: string;
   coverTimeTextForView: string;
+  printSubjectName: string;
+  paperPrintTitle: string;
+  paperCoverInstructionText: string;
+  showNoCalculatorIcon: boolean;
   showScottishCandidateNumberBox: boolean;
   includeCoverSheet: boolean;
   includeFormulaSheet: boolean;
@@ -61,6 +66,10 @@ export default function BuilderPreviewPageRenderer({
   showCoverDateTime,
   coverDateTextForView,
   coverTimeTextForView,
+  printSubjectName,
+  paperPrintTitle,
+  paperCoverInstructionText,
+  showNoCalculatorIcon,
   showScottishCandidateNumberBox,
   includeCoverSheet,
   includeFormulaSheet,
@@ -91,6 +100,10 @@ export default function BuilderPreviewPageRenderer({
           showDateTime={showCoverDateTime}
           dateText={coverDateTextForView}
           timeText={coverTimeTextForView}
+          subjectName={printSubjectName}
+          paperTitle={paperPrintTitle}
+          coverInstructionText={paperCoverInstructionText}
+          showNoCalculatorIcon={showNoCalculatorIcon}
           showScottishCandidateNumberBox={showScottishCandidateNumberBox}
           viewerScale={viewerScale}
           outerPaddingPx={0}
@@ -141,7 +154,8 @@ export default function BuilderPreviewPageRenderer({
               ...UI_TEXT.controlTextStrong,
             }}
           >
-            No questions added yet for {viewPaper === "P1" ? "Paper 1" : "Paper 2"}.
+            No questions added yet for{" "}
+            {viewPaper === "P1" ? "Paper 1" : "Paper 2"}.
           </div>
         </SQAPageFrame>
       </div>
