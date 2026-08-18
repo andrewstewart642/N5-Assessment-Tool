@@ -10,6 +10,8 @@ export const N5_MATH_COURSE_CONFIG: CourseAssessmentConfig = {
   awardingBody: "SQA",
   levelLabel: "National 5",
   printSubjectName: "Mathematics",
+  printQualificationBadge: "N5",
+  printQualificationLabelLines: ["National", "Qualifications"],
 
   papers: [
     {

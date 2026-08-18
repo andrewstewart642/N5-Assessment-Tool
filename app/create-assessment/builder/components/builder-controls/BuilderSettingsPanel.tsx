@@ -2,6 +2,8 @@
 
 import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
 import type { Theme } from "@/ui/AppTheme";
+import type { Paper } from "@/shared-types/AssessmentTypes";
+
 
 type Props = {
   open: boolean;

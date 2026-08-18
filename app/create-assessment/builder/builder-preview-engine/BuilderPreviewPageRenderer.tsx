@@ -36,6 +36,8 @@ type Props = {
   coverDateTextForView: string;
   coverTimeTextForView: string;
   printSubjectName: string;
+  printQualificationBadge: string;
+  printQualificationLabelLines: string[];
   paperPrintTitle: string;
   paperCoverInstructionText: string;
   showNoCalculatorIcon: boolean;
@@ -67,6 +69,8 @@ export default function BuilderPreviewPageRenderer({
   coverDateTextForView,
   coverTimeTextForView,
   printSubjectName,
+  printQualificationBadge,
+  printQualificationLabelLines,
   paperPrintTitle,
   paperCoverInstructionText,
   showNoCalculatorIcon,
@@ -101,6 +105,8 @@ export default function BuilderPreviewPageRenderer({
           dateText={coverDateTextForView}
           timeText={coverTimeTextForView}
           subjectName={printSubjectName}
+          qualificationBadge={printQualificationBadge}
+          qualificationLabelLines={printQualificationLabelLines}
           paperTitle={paperPrintTitle}
           coverInstructionText={paperCoverInstructionText}
           showNoCalculatorIcon={showNoCalculatorIcon}
@@ -154,8 +160,7 @@ export default function BuilderPreviewPageRenderer({
               ...UI_TEXT.controlTextStrong,
             }}
           >
-            No questions added yet for{" "}
-            {viewPaper === "P1" ? "Paper 1" : "Paper 2"}.
+            No questions added yet for {paperPrintTitle}.
           </div>
         </SQAPageFrame>
       </div>

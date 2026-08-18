@@ -3,7 +3,9 @@
 import { UI_TEXT } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
-import AssessmentProgressHud from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
+import AssessmentProgressHud, {
+  type AssessmentProgressHudPaperRow,
+} from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 
 type Props = {
@@ -17,12 +19,7 @@ type Props = {
   } | null>;
   setIsDraggingHud: React.Dispatch<React.SetStateAction<boolean>>;
   viewPaper: Paper;
-  p1Marks: number;
-  p2Marks: number;
-  p1Target: number;
-  p2Target: number;
-  p1Mins: number;
-  p2Mins: number;
+  paperRows: AssessmentProgressHudPaperRow[];
   qualityNotes: Array<string | BuilderNote>;
   saveStateLabel?: string;
   isSaving?: boolean;
@@ -36,12 +33,7 @@ export default function BuilderBottomHud({
   hudResizeStartRef,
   setIsDraggingHud,
   viewPaper,
-  p1Marks,
-  p2Marks,
-  p1Target,
-  p2Target,
-  p1Mins,
-  p2Mins,
+  paperRows,
   qualityNotes,
   saveStateLabel,
   isSaving = false,
@@ -183,12 +175,7 @@ export default function BuilderBottomHud({
           >
             <AssessmentProgressHud
               viewPaper={viewPaper}
-              p1Marks={p1Marks}
-              p2Marks={p2Marks}
-              p1TargetMarks={p1Target}
-              p2TargetMarks={p2Target}
-              p1TimeMinutes={p1Mins}
-              p2TimeMinutes={p2Mins}
+              paperRows={paperRows}
               notes={qualityNotes}
               theme={theme}
             />

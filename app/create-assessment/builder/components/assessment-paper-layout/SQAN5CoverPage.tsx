@@ -17,6 +17,8 @@ export type SQAN5CoverPageProps = {
   dateText: string;
   timeText: string;
   subjectName?: string;
+  qualificationBadge?: string;
+  qualificationLabelLines?: string[];
   paperTitle?: string;
   coverInstructionText?: string;
   showNoCalculatorIcon?: boolean;
@@ -175,6 +177,8 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
     dateText,
     timeText,
     subjectName = "Mathematics",
+    qualificationBadge = "N5",
+    qualificationLabelLines = ["National", "Qualifications"],
     paperTitle,
     coverInstructionText,
     showNoCalculatorIcon,
@@ -248,7 +252,7 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
           <div
             style={{
               color: "#f5f5f5",
-              fontSize: 95,
+              fontSize: qualificationBadge.length > 3 ? 68 : 95,
               fontWeight: 700,
               lineHeight: 0.82,
               letterSpacing: -5.2,
@@ -256,7 +260,7 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
               transform: "translateY(-1px)",
             }}
           >
-            N5
+            {qualificationBadge}
           </div>
         </div>
 
@@ -271,8 +275,9 @@ export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
             lineHeight: 1.01,
           }}
         >
-          <div>National</div>
-          <div>Qualifications</div>
+          {qualificationLabelLines.map((line) => (
+            <div key={line}>{line}</div>
+          ))}
         </div>
 
         <div

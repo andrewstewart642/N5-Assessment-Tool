@@ -28,6 +28,8 @@ type Props = {
   coverDateTextForView: string;
   coverTimeTextForView: string;
   printSubjectName: string;
+  printQualificationBadge: string;
+  printQualificationLabelLines: string[];
   paperPrintTitle: string;
   paperCoverInstructionText: string;
   showNoCalculatorIcon: boolean;
@@ -60,6 +62,8 @@ export default function BuilderPreviewPane({
   coverDateTextForView,
   coverTimeTextForView,
   printSubjectName,
+  printQualificationBadge,
+  printQualificationLabelLines,
   paperPrintTitle,
   paperCoverInstructionText,
   showNoCalculatorIcon,
@@ -139,6 +143,8 @@ export default function BuilderPreviewPane({
               coverDateTextForView={coverDateTextForView}
               coverTimeTextForView={coverTimeTextForView}
               printSubjectName={printSubjectName}
+              printQualificationBadge={printQualificationBadge}
+              printQualificationLabelLines={printQualificationLabelLines}
               paperPrintTitle={paperPrintTitle}
               paperCoverInstructionText={paperCoverInstructionText}
               showNoCalculatorIcon={showNoCalculatorIcon}

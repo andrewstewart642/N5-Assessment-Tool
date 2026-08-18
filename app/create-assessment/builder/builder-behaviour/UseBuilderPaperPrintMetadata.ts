@@ -18,6 +18,10 @@ export function useBuilderPaperPrintMetadata({
   }, [paper, courseConfig]);
 
   return {
+    printSubjectName: courseConfig.printSubjectName,
+    printQualificationBadge: courseConfig.printQualificationBadge,
+    printQualificationLabelLines: courseConfig.printQualificationLabelLines,
+
     paperPrintTitle: paperConfig.printTitle,
     paperCoverInstructionText: paperConfig.coverInstructionText,
     showNoCalculatorIcon: paperConfig.showNoCalculatorIcon,

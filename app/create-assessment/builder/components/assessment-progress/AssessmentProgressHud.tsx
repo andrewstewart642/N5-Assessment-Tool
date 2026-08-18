@@ -13,18 +13,19 @@ import {
   toBuilderNote,
 } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 
+export type AssessmentProgressHudPaperRow = {
+  paper: Paper;
+  paperLabel: string;
+  marks: number;
+  targetMarks: number;
+  timeMinutes: number;
+};
+
 type Props = {
   viewPaper?: Paper;
   paper?: Paper;
 
-  p1Marks: number;
-  p2Marks: number;
-
-  p1TargetMarks: number;
-  p2TargetMarks: number;
-
-  p1TimeMinutes: number;
-  p2TimeMinutes: number;
+  paperRows: AssessmentProgressHudPaperRow[];
 
   notes: Array<string | BuilderNote>;
   theme: Theme;
@@ -135,7 +136,7 @@ function HudDataRow({
   timeValue,
   theme,
 }: {
-  paperLabel: "P1" | "P2";
+  paperLabel: string;
   marksValue: string;
   timeValue: string;
   theme: Theme;
@@ -144,7 +145,7 @@ function HudDataRow({
     <div
       style={{
         display: "grid",
-        gridTemplateColumns: "26px 58px 68px",
+        gridTemplateColumns: "34px 58px 68px",
         columnGap: 8,
         alignItems: "center",
       }}
@@ -153,7 +154,11 @@ function HudDataRow({
         style={{
           ...UI_TEXT.controlTextStrong,
           color: theme.textSecondary,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
         }}
+        title={paperLabel}
       >
         {paperLabel}
       </div>
@@ -188,21 +193,7 @@ function HudDataRow({
 }
 
 export default function AssessmentProgressHud(props: Props) {
-  const {
-    p1Marks,
-    p2Marks,
-    p1TargetMarks,
-    p2TargetMarks,
-    p1TimeMinutes,
-    p2TimeMinutes,
-    notes,
-    theme,
-  } = props;
-
-  const p1m = clampInt(p1Marks);
-  const p2m = clampInt(p2Marks);
-  const p1t = clampInt(p1TargetMarks);
-  const p2t = clampInt(p2TargetMarks);
+  const { paperRows, notes, theme } = props;
 
   const structuredNotes = limitBuilderNotes(
     notes.map((note, index) => toBuilderNote(note, index)),
@@ -217,7 +208,7 @@ export default function AssessmentProgressHud(props: Props) {
         borderTop: `1px solid ${theme.borderStandard}`,
         background: theme.bgSurface,
         display: "grid",
-        gridTemplateColumns: "188px minmax(0, 1fr)",
+        gridTemplateColumns: "196px minmax(0, 1fr)",
         minHeight: 0,
         overflow: "hidden",
         fontFamily: UI_TYPO.family,
@@ -238,19 +229,20 @@ export default function AssessmentProgressHud(props: Props) {
         </div>
 
         <div style={{ display: "grid", gap: 8, alignContent: "start" }}>
-          <HudDataRow
-            paperLabel="P1"
-            marksValue={`${p1m}/${p1t}`}
-            timeValue={`~${formatMinutes(p1TimeMinutes)}`}
-            theme={theme}
-          />
+          {paperRows.map((row) => {
+            const marks = clampInt(row.marks);
+            const targetMarks = clampInt(row.targetMarks);
 
-          <HudDataRow
-            paperLabel="P2"
-            marksValue={`${p2m}/${p2t}`}
-            timeValue={`~${formatMinutes(p2TimeMinutes)}`}
-            theme={theme}
-          />
+            return (
+              <HudDataRow
+                key={row.paper}
+                paperLabel={row.paperLabel}
+                marksValue={`${marks}/${targetMarks}`}
+                timeValue={`~${formatMinutes(row.timeMinutes)}`}
+                theme={theme}
+              />
+            );
+          })}
         </div>
       </div>
 

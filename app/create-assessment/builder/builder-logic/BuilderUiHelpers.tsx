@@ -5,6 +5,10 @@ import type { Paper } from "@/shared-types/AssessmentTypes";
 import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
 import { INTERACTION } from "@/app/ui/InteractionTokens";
+import {
+  getBuilderPaperConfig,
+  getBuilderPapers,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
 
 type BuilderMetaFieldProps = {
   label: string;
@@ -137,14 +141,14 @@ type ViewingToggleProps = {
 };
 
 type ToggleButtonProps = {
-  paper: Paper;
+  label: string;
   active: boolean;
   onClick: () => void;
   theme?: Theme;
 };
 
 function ViewingToggleButton({
-  paper,
+  label,
   active,
   onClick,
   theme,
@@ -187,16 +191,14 @@ function ViewingToggleButton({
           : "0 0 0 rgba(0,0,0,0)",
       }}
     >
-      {paper === "P1" ? "Paper 1" : "Paper 2"}
+      {label}
     </button>
   );
 }
 
-export function ViewingToggle({
-  value,
-  onChange,
-  theme,
-}: ViewingToggleProps) {
+export function ViewingToggle({ value, onChange, theme }: ViewingToggleProps) {
+  const paperOptions = getBuilderPapers();
+
   return (
     <div
       style={{
@@ -211,13 +213,14 @@ export function ViewingToggle({
         boxSizing: "border-box",
       }}
     >
-      {(["P1", "P2"] as const).map((paper) => {
+      {paperOptions.map((paper) => {
         const active = value === paper;
+        const paperConfig = getBuilderPaperConfig(paper);
 
         return (
           <ViewingToggleButton
             key={paper}
-            paper={paper}
+            label={paperConfig.label}
             active={active}
             onClick={() => onChange(paper)}
             theme={theme}

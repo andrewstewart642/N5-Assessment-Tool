@@ -13,6 +13,7 @@ import {
   getEligibleDifficultiesForConcept,
   getAvailableDifficultiesForConcept,
 } from "@/app/create-assessment/builder/builder-logic/BuilderQuestionGenerators";
+import { getBuilderPaperLabel } from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
 import {
   conceptMatchesThinkingTypeFilter,
   getFilteredConcepts,
@@ -23,6 +24,7 @@ import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionT
 import type {
   Concept,
   DifficultyLevel,
+  Paper,
   Skill,
   SkillPaperSuitability,
   StandardFilter,
@@ -137,10 +139,20 @@ function getPaperSuitabilityForConcept(
 function conceptMatchesPaper(
   skill: Skill,
   concept: Concept,
-  targetPaper: "P1" | "P2"
+  targetPaper: Paper
 ): boolean {
   const suitability = getPaperSuitabilityForConcept(skill, concept);
   return suitability === "BOTH" || suitability === targetPaper;
+}
+
+function formatPaperSuitabilityOnlyText(
+  suitability: SkillPaperSuitability
+): string {
+  if (suitability === "BOTH") {
+    return "both papers";
+  }
+
+  return `${getBuilderPaperLabel(suitability)} only`;
 }
 
 function buildThinkingTypeMismatchMessage(
@@ -157,22 +169,23 @@ function buildThinkingTypeMismatchMessage(
   return "This concept does not match the current thinking type.";
 }
 
-function buildPaperMismatchMessage(targetPaper: "P1" | "P2"): string {
-  return targetPaper === "P1"
-    ? "Paper 2 only — switch to Paper 2."
-    : "Paper 1 only — switch to Paper 1.";
+function buildPaperMismatchMessage(
+  suitability: SkillPaperSuitability
+): string {
+  return `${formatPaperSuitabilityOnlyText(suitability)} — switch paper.`;
 }
 
 function buildDropdownMismatchTag(args: {
   skill: Skill;
   concept: Concept;
-  targetPaper: "P1" | "P2";
+  targetPaper: Paper;
   thinkingTypeFilter: ThinkingTypeFilter;
 }): string | null {
   const { skill, concept, targetPaper, thinkingTypeFilter } = args;
+  const suitability = getPaperSuitabilityForConcept(skill, concept);
 
   if (!conceptMatchesPaper(skill, concept, targetPaper)) {
-    return targetPaper === "P1" ? "P2 only" : "P1 only";
+    return formatPaperSuitabilityOnlyText(suitability);
   }
 
   if (!conceptMatchesThinkingTypeFilter(concept, thinkingTypeFilter)) {
@@ -187,7 +200,7 @@ function buildDropdownMismatchTag(args: {
 function buildPrimaryBlockReason(args: {
   selected: Concept | undefined;
   skill: Skill;
-  targetPaper: "P1" | "P2";
+  targetPaper: Paper;
   thinkingTypeFilter: ThinkingTypeFilter;
   currentDifficulty: DifficultyLevel;
   availableLevels: DifficultyLevel[];
@@ -208,8 +221,10 @@ function buildPrimaryBlockReason(args: {
   }
 
   if (!conceptMatchesPaper(skill, selected, targetPaper)) {
-    return buildPaperMismatchMessage(targetPaper);
-  }
+  return buildPaperMismatchMessage(
+    getPaperSuitabilityForConcept(skill, selected)
+  );
+}
 
   if (!conceptMatchesThinkingTypeFilter(selected, thinkingTypeFilter)) {
     return buildThinkingTypeMismatchMessage(thinkingTypeFilter);

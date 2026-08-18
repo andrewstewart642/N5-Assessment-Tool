@@ -13,6 +13,7 @@ import BuilderTopBar from "@/app/create-assessment/builder/components/builder-la
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 import { useBuilderPaperMetadataMaps } from "./builder-behaviour/UseBuilderPaperMetadataMaps";
 import { useBuilderPaperTargetMaps } from "./builder-behaviour/UseBuilderPaperTargetMaps";
+import { useBuilderProgressHudRows } from "./builder-behaviour/UseBuilderProgressHudRows";
 import { normaliseClass } from "@/app/my-classes/state/ClassNormalisation";
 import {
   BUILDER_DEFAULT_HUD_HEIGHT,
@@ -447,6 +448,7 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
   p2Mins,
   activePaperCoverMarks,
   marksByPaper,
+  minutesByPaper,
 } = useBuilderProgressMetrics({
   questions,
   viewPaper,
@@ -913,6 +915,13 @@ endTimeSetterByPaper,
   courseConfig: builderCourseConfig,
 });
 
+const progressHudPaperRows = useBuilderProgressHudRows({
+  courseConfig: builderCourseConfig,
+  marksByPaper,
+  targetMarksByPaper,
+  minutesByPaper,
+});
+
   const topicBalanceAnalysis = useMemo(() => {
     return analyseTopicBalance({
       questions,
@@ -991,6 +1000,9 @@ endTimeSetterByPaper,
 });
 
 const {
+  printSubjectName,
+  printQualificationBadge,
+  printQualificationLabelLines,
   paperPrintTitle,
   paperCoverInstructionText,
   showNoCalculatorIcon,
@@ -1148,7 +1160,9 @@ const {
               showCoverDateTime={showCoverDateTime}
               coverDateTextForView={coverDateTextForView}
               coverTimeTextForView={coverTimeTextForView}
-              printSubjectName={builderCourseConfig.printSubjectName}
+              printSubjectName={printSubjectName}
+              printQualificationBadge={printQualificationBadge}
+              printQualificationLabelLines={printQualificationLabelLines}
               paperPrintTitle={paperPrintTitle}
               paperCoverInstructionText={paperCoverInstructionText}
               showNoCalculatorIcon={showNoCalculatorIcon}
@@ -1176,13 +1190,8 @@ const {
               hudResizeStartRef={hudResizeStartRef}
               setIsDraggingHud={setIsDraggingHud}
               viewPaper={viewPaper}
-              p1Marks={p1Marks}
-              p2Marks={p2Marks}
-              p1Target={p1Target}
-              p2Target={p2Target}
-              p1Mins={p1Mins}
-              p2Mins={p2Mins}
-              qualityNotes={mergedQualityNotes}
+              paperRows={progressHudPaperRows}
+              qualityNotes={qualityNotes}
               saveStateLabel={saveStateLabel}
               isSaving={isSaving}
             />

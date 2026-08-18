@@ -12,6 +12,10 @@ import type {
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
+import {
+  getBuilderPaperConfig,
+  getBuilderPapers,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
 
 const CONTROL_HEIGHT = 40;
 const SEGMENT_INSET = 5;
@@ -252,6 +256,17 @@ export default function SkillsTree({
     targetMarks,
     targetPaper: activePaper,
   };
+
+  const paperOptions = useMemo(() => {
+  return getBuilderPapers().map((paper) => {
+    const paperConfig = getBuilderPaperConfig(paper);
+
+    return {
+      value: paper,
+      label: paperConfig.label,
+    };
+  });
+}, []);
 
   function commitTargetMarksInput(rawValue: string) {
     const digitsOnly = rawValue.replace(/\D/g, "");
@@ -699,10 +714,7 @@ export default function SkillsTree({
                 onChange={setActivePaper}
                 theme={theme}
                 size="sm"
-                options={[
-                  { value: "P1", label: "Paper 1" },
-                  { value: "P2", label: "Paper 2" },
-                ]}
+                options={paperOptions}
               />
             </div>
           </div>

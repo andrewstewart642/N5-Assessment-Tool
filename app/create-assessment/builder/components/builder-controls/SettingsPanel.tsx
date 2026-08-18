@@ -9,6 +9,11 @@ import AppSideTray from "@/app/ui/settings-bar/AppSideTray";
 import AppTrayHeader from "@/app/ui/settings-bar/AppTrayHeader";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { Paper } from "@/shared-types/AssessmentTypes";
+import {
+  getBuilderPaperConfig,
+  getBuilderPapers,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
 
 type Props = {
   open: boolean;
@@ -57,7 +62,7 @@ type ActivePicker =
   | "p2Start"
   | "p2End";
 
-type ActivePaperTab = "P1" | "P2";
+type ActivePaperTab = Paper;
 
 type TimeDraft = {
   hour12: number;

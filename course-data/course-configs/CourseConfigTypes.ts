@@ -49,9 +49,6 @@ export type CoursePaperConfig = {
 
   /**
    * Used to estimate time from marks.
-   * For N5 Maths this is currently:
-   * - Paper 1: 1.5 minutes per mark
-   * - Paper 2: 1.8 minutes per mark
    */
   minutesPerMark: number;
 
@@ -94,14 +91,6 @@ export type CourseAssessmentMode = {
   label: string;
   shortLabel: string;
   description: string;
-
-  /**
-   * This tells the app how strict the guidance should be.
-   *
-   * Example:
-   * - a prelim should care more about balance and exam authenticity
-   * - a homework can be more flexible
-   */
   guidanceStrictness: "strict" | "medium" | "light";
 };
 
@@ -141,31 +130,30 @@ export type CourseAssessmentConfig = {
    */
   printSubjectName: string;
 
+  /**
+   * Badge shown on the printable cover page.
+   *
+   * Example:
+   * - N5
+   * - Higher
+   */
+  printQualificationBadge: string;
+
+  /**
+   * Qualification label lines shown beside the badge.
+   *
+   * Example:
+   * - ["National", "Qualifications"]
+   */
+  printQualificationLabelLines: string[];
+
   papers: CoursePaperConfig[];
   assessmentModes: CourseAssessmentMode[];
 
-  /**
-   * Which assessment modes should be shown on the initial setup page.
-   *
-   * Example:
-   * - PRELIM
-   * - CLASS_TEST
-   * - HOMEWORK
-   *
-   * Other modes can still exist in the config without being shown yet.
-   */
   visibleSetupAssessmentModeIds?: CourseAssessmentModeId[];
 
   assessmentStructures: CourseAssessmentStructure[];
 
-  /**
-   * Which paper structures should be shown on the initial setup page.
-   *
-   * Example:
-   * - BOTH
-   * - P1_ONLY
-   * - P2_ONLY
-   */
   visibleSetupAssessmentStructureIds?: CourseAssessmentStructureId[];
 
   topicTargets: CourseTopicTarget[];

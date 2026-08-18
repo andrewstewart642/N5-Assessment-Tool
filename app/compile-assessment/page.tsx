@@ -7,6 +7,11 @@ import PaperQuestionLocked from "@/app/create-assessment/builder/components/asse
 
 import { PAGE_SIZES, type PageSize } from "@/app/paper-layout/Page-Sizes";
 import { paginateQuestions } from "@/app/paper-layout/Reflow-Pages";
+import {
+  getBuilderPaperConfig,
+  getBuilderPapers,
+  getDefaultBuilderPaper,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
 
 const STORAGE_KEY = "n5_assessment_builder_v1";
 
@@ -23,8 +28,12 @@ function MiniToggle(props: {
         padding: "6px 10px",
         borderRadius: 10,
         border: "1px solid rgba(255,255,255,0.14)",
-        background: props.active ? "rgba(147,197,253,0.18)" : "rgba(0,0,0,0.18)",
-        color: props.active ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.72)",
+        background: props.active
+          ? "rgba(147,197,253,0.18)"
+          : "rgba(0,0,0,0.18)",
+        color: props.active
+          ? "rgba(255,255,255,0.92)"
+          : "rgba(255,255,255,0.72)",
         fontWeight: 900,
         fontSize: 12,
         cursor: "pointer",
@@ -37,22 +46,34 @@ function MiniToggle(props: {
 
 export default function CompileAssessmentPage() {
   const [questions, setQuestions] = useState<Question[]>([]);
-  const [paper, setPaper] = useState<Paper>("P1");
+  const [paper, setPaper] = useState<Paper>(() => getDefaultBuilderPaper());
   const [pageSize, setPageSize] = useState<PageSize>("A4");
+
+  const paperOptions = useMemo(() => {
+    return getBuilderPapers();
+  }, []);
+
+  const activePaperConfig = useMemo(() => {
+    return getBuilderPaperConfig(paper);
+  }, [paper]);
 
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
+
       const parsed = JSON.parse(raw) as { questions?: Question[] };
-      if (Array.isArray(parsed.questions)) setQuestions(parsed.questions);
+
+      if (Array.isArray(parsed.questions)) {
+        setQuestions(parsed.questions);
+      }
     } catch {
       // ignore
     }
   }, []);
 
   const paperQuestions = useMemo(
-    () => questions.filter((q) => q.paper === paper),
+    () => questions.filter((question) => question.paper === paper),
     [questions, paper]
   );
 
@@ -73,7 +94,6 @@ export default function CompileAssessmentPage() {
         gap: 14,
       }}
     >
-      {/* top controls */}
       <div
         style={{
           display: "flex",
@@ -94,23 +114,56 @@ export default function CompileAssessmentPage() {
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: 12,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900 }}>Paper</div>
-            <MiniToggle label="P1" active={paper === "P1"} onClick={() => setPaper("P1")} />
-            <MiniToggle label="P2" active={paper === "P2"} onClick={() => setPaper("P2")} />
+            <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900 }}>
+              Paper
+            </div>
+
+            {paperOptions.map((paperOption) => {
+              const paperConfig = getBuilderPaperConfig(paperOption);
+
+              return (
+                <MiniToggle
+                  key={paperOption}
+                  label={paperConfig.shortLabel}
+                  active={paper === paperOption}
+                  onClick={() => setPaper(paperOption)}
+                />
+              );
+            })}
           </div>
 
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900 }}>Size</div>
-            <MiniToggle label="A4" active={pageSize === "A4"} onClick={() => setPageSize("A4")} />
-            <MiniToggle label="A3" active={pageSize === "A3"} onClick={() => setPageSize("A3")} />
-            <MiniToggle label="A5" active={pageSize === "A5"} onClick={() => setPageSize("A5")} />
+            <div style={{ fontSize: 12, opacity: 0.75, fontWeight: 900 }}>
+              Size
+            </div>
+            <MiniToggle
+              label="A4"
+              active={pageSize === "A4"}
+              onClick={() => setPageSize("A4")}
+            />
+            <MiniToggle
+              label="A3"
+              active={pageSize === "A3"}
+              onClick={() => setPageSize("A3")}
+            />
+            <MiniToggle
+              label="A5"
+              active={pageSize === "A5"}
+              onClick={() => setPageSize("A5")}
+            />
           </div>
         </div>
       </div>
 
-      {/* pages stack */}
       <div style={{ display: "grid", gap: 18 }}>
         {pages.length === 0 ? (
           <div
@@ -121,7 +174,7 @@ export default function CompileAssessmentPage() {
               opacity: 0.8,
             }}
           >
-            No assigned questions found for {paper}.
+            No assigned questions found for {activePaperConfig.label}.
           </div>
         ) : (
           pages.map((pageQuestions, pageIndex) => (
@@ -140,23 +193,29 @@ export default function CompileAssessmentPage() {
                   }}
                 >
                   <div>
-                    [{paper === "P1" ? "Paper 1" : "Paper 2"}] – Prelim Assessment • Page {pageIndex + 1}
+                    [{activePaperConfig.label}] – Prelim Assessment • Page{" "}
+                    {pageIndex + 1}
                   </div>
                   <div>Size: {pageSize}</div>
                 </div>
               }
             >
               <div style={{ display: "grid", gap: 2 }}>
-                {pageQuestions.map((q, i) => {
-                  // question number is global within the paper across pages
+                {pageQuestions.map((question, questionIndex) => {
                   const globalIndex =
                     pages
                       .slice(0, pageIndex)
-                      .reduce((acc, p) => acc + p.length, 0) +
-                    i +
+                      .reduce((acc, page) => acc + page.length, 0) +
+                    questionIndex +
                     1;
 
-                  return <PaperQuestionLocked key={q.id} index={globalIndex} question={q} />;
+                  return (
+                    <PaperQuestionLocked
+                      key={question.id}
+                      index={globalIndex}
+                      question={question}
+                    />
+                  );
                 })}
               </div>
             </SQAPageFrame>
