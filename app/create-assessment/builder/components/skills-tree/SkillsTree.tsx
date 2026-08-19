@@ -12,6 +12,7 @@ import type {
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
+import { getCoursePaperSuitabilityTags } from "@/course-data/course-configs/CourseConfigTypes";
 import {
   getBuilderPaperConfig,
   getBuilderPapers,
@@ -250,12 +251,15 @@ export default function SkillsTree({
     });
   };
 
-  const selectionFilters: QuestionSelectionFilters = {
-    selectedStandard: standardFilter,
-    selectedThinkingType: thinkingTypeFilter,
-    targetMarks,
-    targetPaper: activePaper,
-  };
+  const activePaperConfig = getBuilderPaperConfig(activePaper);
+
+const selectionFilters: QuestionSelectionFilters = {
+  selectedStandard: standardFilter,
+  selectedThinkingType: thinkingTypeFilter,
+  targetMarks,
+  targetPaper: activePaper,
+  targetPaperSuitabilityTags: getCoursePaperSuitabilityTags(activePaperConfig),
+};
 
   const paperOptions = useMemo(() => {
   return getBuilderPapers().map((paper) => {

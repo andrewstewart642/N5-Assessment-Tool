@@ -9,7 +9,7 @@ type UsePreviewViewportArgs = {
   showProgressPanel: boolean;
   includeCoverSheet: boolean;
   includeFormulaSheet: boolean;
-  viewPaper: "P1" | "P2";
+  viewPaper: Paper;
 };
 
 export function usePreviewViewport({

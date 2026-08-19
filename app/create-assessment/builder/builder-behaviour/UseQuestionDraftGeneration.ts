@@ -10,6 +10,7 @@ import type {
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
+import { getCoursePaperSuitabilityTags } from "@/course-data/course-configs/CourseConfigTypes";
 import {
   buildGenerated,
   buildSkillLinks,
@@ -19,6 +20,7 @@ import { buildSingleTopicMarkBreakdown } from "../builder-logic/AssessmentDistri
 import { getBuilderCourseId } from "../builder-logic/BuilderCourseConfig";
 import {
   formatBuilderPaperSuitability,
+  getBuilderPaperConfig,
   getBuilderPaperLabel,
   isPaperSuitableForSkill,
 } from "../builder-logic/BuilderPaperTargets";
@@ -77,11 +79,14 @@ function buildSelectionFilters(args: {
   targetMarks: number;
   paper: Paper;
 }): QuestionSelectionFilters {
+  const paperConfig = getBuilderPaperConfig(args.paper);
+
   return {
     selectedStandard: args.standardFilter,
     selectedThinkingType: args.thinkingTypeFilter,
     targetMarks: args.targetMarks,
     targetPaper: args.paper,
+    targetPaperSuitabilityTags: getCoursePaperSuitabilityTags(paperConfig),
   };
 }
 

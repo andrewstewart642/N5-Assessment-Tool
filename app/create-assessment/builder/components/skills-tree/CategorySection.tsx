@@ -13,7 +13,10 @@ import {
   getEligibleDifficultiesForConcept,
   getAvailableDifficultiesForConcept,
 } from "@/app/create-assessment/builder/builder-logic/BuilderQuestionGenerators";
-import { getBuilderPaperLabel } from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
+import {
+  formatBuilderPaperSuitability,
+  isPaperSuitableForSkill,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
 import {
   conceptMatchesThinkingTypeFilter,
   getFilteredConcepts,
@@ -142,7 +145,11 @@ function conceptMatchesPaper(
   targetPaper: Paper
 ): boolean {
   const suitability = getPaperSuitabilityForConcept(skill, concept);
-  return suitability === "BOTH" || suitability === targetPaper;
+
+  return isPaperSuitableForSkill({
+    paper: targetPaper,
+    paperSuitability: suitability,
+  });
 }
 
 function formatPaperSuitabilityOnlyText(
@@ -152,7 +159,7 @@ function formatPaperSuitabilityOnlyText(
     return "both papers";
   }
 
-  return `${getBuilderPaperLabel(suitability)} only`;
+  return `${formatBuilderPaperSuitability(suitability)} only`;
 }
 
 function buildThinkingTypeMismatchMessage(
