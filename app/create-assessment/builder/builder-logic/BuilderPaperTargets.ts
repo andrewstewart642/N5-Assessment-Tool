@@ -1,4 +1,6 @@
 import {
+  coursePaperMatchesSuitability,
+  findCoursePaperConfigForSuitability,
   getCoursePaperConfig,
   type CourseAssessmentConfig,
   type CourseAssessmentStructureId,
@@ -12,15 +14,19 @@ import type {
 import type { BuildPriority } from "../../setup/AssessmentSetupStorage";
 import { getBuilderCourseConfig } from "./BuilderCourseConfig";
 
+const LEGACY_DEFAULT_PAPER_ID: Paper = "P1";
+
 export type BuilderPaperTargetInputs = {
   p1Target: number;
   p2Target: number;
 };
 
+export type BuilderTargetMarksByPaper = Partial<Record<Paper, number>>;
+
 function buildLegacyPaperTargetInputMap({
   p1Target,
   p2Target,
-}: BuilderPaperTargetInputs): Partial<Record<Paper, number>> {
+}: BuilderPaperTargetInputs): BuilderTargetMarksByPaper {
   return {
     P1: p1Target,
     P2: p2Target,
@@ -41,7 +47,9 @@ type BuilderAssessmentStructure =
 export function getBuilderPapers(
   courseConfig: CourseAssessmentConfig = getBuilderCourseConfig()
 ): Paper[] {
-  return courseConfig.papers.map((paper) => paper.id);
+  return [...courseConfig.papers]
+    .sort((a, b) => a.order - b.order)
+    .map((paper) => paper.id);
 }
 
 export function getBuilderPaperConfig(
@@ -62,6 +70,12 @@ export function getBuilderAssessmentStructure(
   );
 }
 
+export function getDefaultBuilderPaper(
+  courseConfig: CourseAssessmentConfig = getBuilderCourseConfig()
+): Paper {
+  return getBuilderPapers(courseConfig)[0] ?? LEGACY_DEFAULT_PAPER_ID;
+}
+
 export function getDefaultTargetMarksForPaper(
   paper: Paper,
   courseConfig: CourseAssessmentConfig = getBuilderCourseConfig()
@@ -69,21 +83,50 @@ export function getDefaultTargetMarksForPaper(
   return getBuilderPaperConfig(paper, courseConfig).defaultTargetMarks;
 }
 
-export function buildTargetMarksByPaper({
-  p1Target,
-  p2Target,
-  courseConfig = getBuilderCourseConfig(),
-}: BuilderPaperTargetInputs & {
-  courseConfig?: CourseAssessmentConfig;
-}): Partial<Record<Paper, number>> {
-  const targetInputsByPaper = buildLegacyPaperTargetInputMap({
-    p1Target,
-    p2Target,
-  });
-
-  return getBuilderPapers(courseConfig).reduce<Partial<Record<Paper, number>>>(
+export function buildDefaultTargetMarksByPaper(
+  courseConfig: CourseAssessmentConfig = getBuilderCourseConfig()
+): BuilderTargetMarksByPaper {
+  return getBuilderPapers(courseConfig).reduce<BuilderTargetMarksByPaper>(
     (targets, paper) => {
-      const targetMarks = targetInputsByPaper[paper];
+      targets[paper] = getDefaultTargetMarksForPaper(paper, courseConfig);
+      return targets;
+    },
+    {}
+  );
+}
+
+export function normaliseTargetMarksByPaper({
+  targetMarksByPaper,
+  courseConfig = getBuilderCourseConfig(),
+}: {
+  targetMarksByPaper: BuilderTargetMarksByPaper;
+  courseConfig?: CourseAssessmentConfig;
+}): BuilderTargetMarksByPaper {
+  return getBuilderPapers(courseConfig).reduce<BuilderTargetMarksByPaper>(
+    (targets, paper) => {
+      const currentValue = targetMarksByPaper[paper];
+
+      targets[paper] =
+        typeof currentValue === "number" && Number.isFinite(currentValue)
+          ? currentValue
+          : getDefaultTargetMarksForPaper(paper, courseConfig);
+
+      return targets;
+    },
+    {}
+  );
+}
+
+export function buildTargetMarksByPaperFromValues({
+  targetMarksByPaper,
+  courseConfig = getBuilderCourseConfig(),
+}: {
+  targetMarksByPaper: BuilderTargetMarksByPaper;
+  courseConfig?: CourseAssessmentConfig;
+}): BuilderTargetMarksByPaper {
+  return getBuilderPapers(courseConfig).reduce<BuilderTargetMarksByPaper>(
+    (targets, paper) => {
+      const targetMarks = targetMarksByPaper[paper];
 
       if (typeof targetMarks === "number" && Number.isFinite(targetMarks)) {
         targets[paper] = targetMarks;
@@ -95,11 +138,27 @@ export function buildTargetMarksByPaper({
   );
 }
 
+export function buildTargetMarksByPaper({
+  p1Target,
+  p2Target,
+  courseConfig = getBuilderCourseConfig(),
+}: BuilderPaperTargetInputs & {
+  courseConfig?: CourseAssessmentConfig;
+}): BuilderTargetMarksByPaper {
+  return buildTargetMarksByPaperFromValues({
+    targetMarksByPaper: buildLegacyPaperTargetInputMap({
+      p1Target,
+      p2Target,
+    }),
+    courseConfig,
+  });
+}
+
 export function getIncludedPapersFromTargets({
   targetMarksByPaper,
   courseConfig = getBuilderCourseConfig(),
 }: {
-  targetMarksByPaper: Partial<Record<Paper, number>>;
+  targetMarksByPaper: BuilderTargetMarksByPaper;
   courseConfig?: CourseAssessmentConfig;
 }): Paper[] {
   return getBuilderPapers(courseConfig).filter((paper) => {
@@ -111,12 +170,6 @@ export function getIncludedPapersFromTargets({
       targetMarks > 0
     );
   });
-}
-
-export function getDefaultBuilderPaper(
-  courseConfig: CourseAssessmentConfig = getBuilderCourseConfig()
-): Paper {
-  return getBuilderPapers(courseConfig)[0] ?? "P1";
 }
 
 export function getInitialBuilderPaperForStructure({
@@ -190,7 +243,7 @@ export function buildTargetMarksByPaperFromSetupTargets({
   timeTargetP1: number | null;
   timeTargetP2: number | null;
   courseConfig?: CourseAssessmentConfig;
-}): Partial<Record<Paper, number>> {
+}): BuilderTargetMarksByPaper {
   const setupTargetsByPaper: Partial<
     Record<
       Paper,
@@ -210,7 +263,7 @@ export function buildTargetMarksByPaperFromSetupTargets({
     },
   };
 
-  return getBuilderPapers(courseConfig).reduce<Partial<Record<Paper, number>>>(
+  return getBuilderPapers(courseConfig).reduce<BuilderTargetMarksByPaper>(
     (targets, paper) => {
       const setupTarget = setupTargetsByPaper[paper];
 
@@ -279,15 +332,31 @@ export function formatBuilderPaperSuitability(
     return "both papers";
   }
 
-  return getBuilderPaperLabel(paperSuitability, courseConfig);
+  const paperConfig = findCoursePaperConfigForSuitability(
+    courseConfig,
+    paperSuitability
+  );
+
+  return paperConfig?.label ?? paperSuitability;
 }
 
 export function isPaperSuitableForSkill({
   paper,
   paperSuitability,
+  courseConfig = getBuilderCourseConfig(),
 }: {
   paper: Paper;
   paperSuitability: SkillPaperSuitability;
+  courseConfig?: CourseAssessmentConfig;
 }): boolean {
-  return paperSuitability === "BOTH" || paperSuitability === paper;
+  if (paperSuitability === "BOTH") {
+    return true;
+  }
+
+  const paperConfig = getBuilderPaperConfig(paper, courseConfig);
+
+  return coursePaperMatchesSuitability({
+    paperConfig,
+    paperSuitability,
+  });
 }

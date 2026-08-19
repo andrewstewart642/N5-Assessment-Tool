@@ -2,13 +2,17 @@ import type { Dispatch, SetStateAction } from "react";
 
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
-export type BuilderPaperNumberMap = Partial<Record<Paper, number>>;
-export type BuilderPaperStringMap = Partial<Record<Paper, string>>;
-export type BuilderPaperBooleanMap = Partial<Record<Paper, boolean>>;
+export type BuilderPaperValueMap<T> = Partial<Record<Paper, T>>;
 
-export type BuilderPaperStringSetterMap = Partial<
-  Record<Paper, Dispatch<SetStateAction<string>>>
+export type BuilderPaperNumberMap = BuilderPaperValueMap<number>;
+export type BuilderPaperStringMap = BuilderPaperValueMap<string>;
+export type BuilderPaperBooleanMap = BuilderPaperValueMap<boolean>;
+
+export type BuilderPaperSetterMap<T> = Partial<
+  Record<Paper, Dispatch<SetStateAction<T>>>
 >;
+
+export type BuilderPaperStringSetterMap = BuilderPaperSetterMap<string>;
 
 export type LegacyPaperNumberValues = {
   p1Value: number;
@@ -29,6 +33,80 @@ export type LegacyPaperStringSetters = {
   setP1Value: Dispatch<SetStateAction<string>>;
   setP2Value: Dispatch<SetStateAction<string>>;
 };
+
+export function buildPaperValueMap<T>({
+  papers,
+  getValue,
+}: {
+  papers: Paper[];
+  getValue: (paper: Paper) => T;
+}): BuilderPaperValueMap<T> {
+  return papers.reduce<BuilderPaperValueMap<T>>((valuesByPaper, paper) => {
+    valuesByPaper[paper] = getValue(paper);
+    return valuesByPaper;
+  }, {});
+}
+
+export function buildEmptyPaperValueMap<T>({
+  papers,
+  value,
+}: {
+  papers: Paper[];
+  value: T;
+}): BuilderPaperValueMap<T> {
+  return buildPaperValueMap({
+    papers,
+    getValue: () => value,
+  });
+}
+
+export function normalisePaperValueMap<T>({
+  papers,
+  valuesByPaper,
+  getFallbackValue,
+}: {
+  papers: Paper[];
+  valuesByPaper: BuilderPaperValueMap<T>;
+  getFallbackValue: (paper: Paper) => T;
+}): BuilderPaperValueMap<T> {
+  return papers.reduce<BuilderPaperValueMap<T>>((normalised, paper) => {
+    const existingValue = valuesByPaper[paper];
+
+    normalised[paper] =
+      existingValue === undefined ? getFallbackValue(paper) : existingValue;
+
+    return normalised;
+  }, {});
+}
+
+export function getPaperValue<T>({
+  paper,
+  valuesByPaper,
+  fallback,
+}: {
+  paper: Paper;
+  valuesByPaper: BuilderPaperValueMap<T>;
+  fallback: T;
+}): T {
+  const value = valuesByPaper[paper];
+
+  return value === undefined ? fallback : value;
+}
+
+export function setPaperValue<T>({
+  paper,
+  value,
+  setValuesByPaper,
+}: {
+  paper: Paper;
+  value: T;
+  setValuesByPaper: Dispatch<SetStateAction<BuilderPaperValueMap<T>>>;
+}) {
+  setValuesByPaper((prev) => ({
+    ...prev,
+    [paper]: value,
+  }));
+}
 
 export function buildPaperNumberMapFromLegacyValues({
   p1Value,

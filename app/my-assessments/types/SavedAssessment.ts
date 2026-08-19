@@ -15,6 +15,11 @@ import type {
   DraftByPaper,
   EditDraftByPaper,
 } from "@/app/create-assessment/builder/BuilderUtils";
+import type {
+  BuilderPaperBooleanMap,
+  BuilderPaperNumberMap,
+  BuilderPaperStringMap,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
 
 export type SavedAssessmentStatus = "DRAFT" | "COMPLETE";
 
@@ -57,6 +62,14 @@ export type SavedAssessmentBuilder = {
   activePaper: Paper;
   viewPaper: Paper;
 
+  /**
+   * Generic target map used by the course-config-driven builder.
+   *
+   * The legacy p1Target/p2Target fields remain during the transition so older
+   * saved assessments and older UI paths keep working.
+   */
+  targetMarksByPaper?: BuilderPaperNumberMap;
+
   p1Target: number;
   p2Target: number;
 
@@ -72,6 +85,17 @@ export type SavedAssessmentBuilder = {
   assessmentName: string;
   className: string;
   assessmentDate: string;
+
+  /**
+   * Generic paper sitting metadata used by the course-config-driven builder.
+   *
+   * The legacy fields below remain during the transition so old saved
+   * assessments can still be loaded safely.
+   */
+  coverDateByPaper?: BuilderPaperStringMap;
+  startTimeByPaper?: BuilderPaperStringMap;
+  endTimeByPaper?: BuilderPaperStringMap;
+  coverDateCustomByPaper?: BuilderPaperBooleanMap;
 
   p1StartTime: string;
   p1EndTime: string;

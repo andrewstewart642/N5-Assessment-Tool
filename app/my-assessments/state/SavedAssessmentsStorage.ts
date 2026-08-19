@@ -1,6 +1,11 @@
 import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
 
 import type { SavedAssessment } from "../types/SavedAssessment";
+import type {
+  BuilderPaperBooleanMap,
+  BuilderPaperNumberMap,
+  BuilderPaperStringMap,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
 
 const SAVED_ASSESSMENTS_STORAGE_KEY = "assessment_builder_saved_assessments_v1";
 const CURRENT_ASSESSMENT_ID_STORAGE_KEY =
@@ -33,6 +38,77 @@ function readStorageWithLegacyFallback(args: {
   return legacyValue;
 }
 
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+function readFiniteNumber(value: unknown, fallback: number): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : fallback;
+}
+
+function readString(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function readBoolean(value: unknown, fallback = false): boolean {
+  return typeof value === "boolean" ? value : fallback;
+}
+
+function normaliseNumberMap(value: unknown): BuilderPaperNumberMap {
+  if (!isPlainRecord(value)) return {};
+
+  return Object.entries(value).reduce<BuilderPaperNumberMap>(
+    (normalised, [paper, paperValue]) => {
+      if (typeof paperValue === "number" && Number.isFinite(paperValue)) {
+        normalised[paper] = paperValue;
+      }
+
+      return normalised;
+    },
+    {}
+  );
+}
+
+function normaliseStringMap(value: unknown): BuilderPaperStringMap {
+  if (!isPlainRecord(value)) return {};
+
+  return Object.entries(value).reduce<BuilderPaperStringMap>(
+    (normalised, [paper, paperValue]) => {
+      if (typeof paperValue === "string") {
+        normalised[paper] = paperValue;
+      }
+
+      return normalised;
+    },
+    {}
+  );
+}
+
+function normaliseBooleanMap(value: unknown): BuilderPaperBooleanMap {
+  if (!isPlainRecord(value)) return {};
+
+  return Object.entries(value).reduce<BuilderPaperBooleanMap>(
+    (normalised, [paper, paperValue]) => {
+      if (typeof paperValue === "boolean") {
+        normalised[paper] = paperValue;
+      }
+
+      return normalised;
+    },
+    {}
+  );
+}
+
+function getDefaultTargetMarksForPaper(paper: string, fallback: number): number {
+  const paperConfig = ACTIVE_COURSE_CONFIG.papers.find(
+    (coursePaper) => coursePaper.id === paper
+  );
+
+  return paperConfig?.defaultTargetMarks ?? fallback;
+}
+
 function normaliseSavedAssessment(candidate: unknown): SavedAssessment | null {
   if (!candidate || typeof candidate !== "object") return null;
 
@@ -52,10 +128,90 @@ function normaliseSavedAssessment(candidate: unknown): SavedAssessment | null {
     return null;
   }
 
+  const setup = item.setup as SavedAssessment["setup"];
+  const builder = item.builder as Partial<SavedAssessment["builder"]>;
+
+  const existingTargetMarksByPaper = normaliseNumberMap(
+    builder.targetMarksByPaper
+  );
+
+  const p1Target = readFiniteNumber(
+    existingTargetMarksByPaper.P1 ?? builder.p1Target,
+    getDefaultTargetMarksForPaper("P1", 40)
+  );
+
+  const p2Target = readFiniteNumber(
+    existingTargetMarksByPaper.P2 ?? builder.p2Target,
+    getDefaultTargetMarksForPaper("P2", 50)
+  );
+
+  const targetMarksByPaper: BuilderPaperNumberMap = {
+    P1: p1Target,
+    P2: p2Target,
+    ...existingTargetMarksByPaper,
+  };
+
+  const assessmentDate = readString(
+    builder.assessmentDate,
+    readString(setup.assessmentDate)
+  );
+
+  const existingCoverDateByPaper = normaliseStringMap(builder.coverDateByPaper);
+  const existingStartTimeByPaper = normaliseStringMap(builder.startTimeByPaper);
+  const existingEndTimeByPaper = normaliseStringMap(builder.endTimeByPaper);
+  const existingCoverDateCustomByPaper = normaliseBooleanMap(
+    builder.coverDateCustomByPaper
+  );
+
+  const p1StartTime = readString(
+    existingStartTimeByPaper.P1 ?? builder.p1StartTime
+  );
+
+  const p1EndTime = readString(existingEndTimeByPaper.P1 ?? builder.p1EndTime);
+
+  const p2DateCustom = readBoolean(
+    existingCoverDateCustomByPaper.P2 ?? builder.p2DateCustom
+  );
+
+  const p2CoverDate = readString(
+    existingCoverDateByPaper.P2 ?? builder.p2CoverDate,
+    assessmentDate
+  );
+
+  const p2StartTime = readString(
+    existingStartTimeByPaper.P2 ?? builder.p2StartTime
+  );
+
+  const p2EndTime = readString(existingEndTimeByPaper.P2 ?? builder.p2EndTime);
+
+  const coverDateByPaper: BuilderPaperStringMap = {
+    P1: assessmentDate,
+    P2: p2DateCustom ? p2CoverDate : assessmentDate,
+    ...existingCoverDateByPaper,
+  };
+
+  const startTimeByPaper: BuilderPaperStringMap = {
+    P1: p1StartTime,
+    P2: p2StartTime,
+    ...existingStartTimeByPaper,
+  };
+
+  const endTimeByPaper: BuilderPaperStringMap = {
+    P1: p1EndTime,
+    P2: p2EndTime,
+    ...existingEndTimeByPaper,
+  };
+
+  const coverDateCustomByPaper: BuilderPaperBooleanMap = {
+    P1: false,
+    P2: p2DateCustom,
+    ...existingCoverDateCustomByPaper,
+  };
+
   return {
     ...(item as SavedAssessment),
     setup: {
-      ...(item.setup as SavedAssessment["setup"]),
+      ...setup,
 
       /**
        * Backwards compatibility:
@@ -64,7 +220,29 @@ function normaliseSavedAssessment(candidate: unknown): SavedAssessment | null {
        * have a courseId. For now, those assessments are treated as the active
        * course because N5 Maths is currently the only complete course config.
        */
-      courseId: item.setup.courseId ?? ACTIVE_COURSE_CONFIG.courseId,
+      courseId: setup.courseId ?? ACTIVE_COURSE_CONFIG.courseId,
+    },
+    builder: {
+      ...(builder as SavedAssessment["builder"]),
+
+      targetMarksByPaper,
+      p1Target,
+      p2Target,
+
+      assessmentDate,
+
+      coverDateByPaper,
+      startTimeByPaper,
+      endTimeByPaper,
+      coverDateCustomByPaper,
+
+      p1StartTime,
+      p1EndTime,
+
+      p2CoverDate,
+      p2StartTime,
+      p2EndTime,
+      p2DateCustom,
     },
   };
 }

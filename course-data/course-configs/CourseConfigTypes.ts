@@ -52,8 +52,17 @@ export type CoursePaperConfig = {
    */
   minutesPerMark: number;
 
-  defaultTargetMarks: number;
+    defaultTargetMarks: number;
   description?: string;
+
+  /**
+   * Optional compatibility tags used by legacy skill/question metadata.
+   *
+   * Example:
+   * - a paper with id "NON_CALCULATOR" can still match old metadata marked "P1"
+   * - a paper with id "CALCULATOR" can still match old metadata marked "P2"
+   */
+  suitabilityAliases?: string[];
 
   /**
    * Label used on the printable cover page.
@@ -94,7 +103,17 @@ export type CourseAssessmentMode = {
   guidanceStrictness: "strict" | "medium" | "light";
 };
 
-export type CourseAssessmentStructureId = "BOTH" | "P1_ONLY" | "P2_ONLY";
+/**
+ * Identifier for a course's assessment structure.
+ *
+ * Current two-paper maths courses can still use:
+ * - BOTH
+ * - P1_ONLY
+ * - P2_ONLY
+ *
+ * But the config layer should not be structurally limited to those names.
+ */
+export type CourseAssessmentStructureId = string;
 
 export type CourseAssessmentStructure = {
   id: CourseAssessmentStructureId;
@@ -195,4 +214,45 @@ export function getCourseAssessmentStructure(
   }
 
   return found;
+}
+export function getCoursePaperSuitabilityTags(
+  paperConfig: CoursePaperConfig
+): string[] {
+  return [
+    paperConfig.id,
+    paperConfig.calculatorPolicy,
+    ...(paperConfig.suitabilityAliases ?? []),
+  ].filter((tag, index, tags) => tags.indexOf(tag) === index);
+}
+
+export function coursePaperMatchesSuitability({
+  paperConfig,
+  paperSuitability,
+}: {
+  paperConfig: CoursePaperConfig;
+  paperSuitability: SkillPaperSuitability;
+}): boolean {
+  if (paperSuitability === "BOTH") {
+    return true;
+  }
+
+  return getCoursePaperSuitabilityTags(paperConfig).includes(paperSuitability);
+}
+
+export function findCoursePaperConfigForSuitability(
+  courseConfig: CourseAssessmentConfig,
+  paperSuitability: SkillPaperSuitability
+): CoursePaperConfig | null {
+  if (paperSuitability === "BOTH") {
+    return null;
+  }
+
+  return (
+    courseConfig.papers.find((paperConfig) =>
+      coursePaperMatchesSuitability({
+        paperConfig,
+        paperSuitability,
+      })
+    ) ?? null
+  );
 }

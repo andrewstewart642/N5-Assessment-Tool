@@ -1,9 +1,19 @@
 "use client";
 
+import type { Dispatch, SetStateAction } from "react";
+
 import SettingsPanel from "@/app/create-assessment/builder/components/builder-controls/SettingsPanel";
+import {
+  getPaperBooleanValue,
+  getPaperStringValue,
+  type BuilderPaperBooleanMap,
+  type BuilderPaperStringMap,
+} from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
 import type { Theme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
+type StringSetter = Dispatch<SetStateAction<string>>;
+type BooleanSetter = Dispatch<SetStateAction<boolean>>;
 
 type Props = {
   open: boolean;
@@ -11,39 +21,48 @@ type Props = {
   theme: Theme;
 
   includeCoverSheet: boolean;
-  setIncludeCoverSheet: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeCoverSheet: BooleanSetter;
 
   showCoverDateTime: boolean;
-  setShowCoverDateTime: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowCoverDateTime: BooleanSetter;
 
   assessmentDate: string;
-  setAssessmentDate: React.Dispatch<React.SetStateAction<string>>;
+  setAssessmentDate: StringSetter;
 
-  p1StartTime: string;
-  setP1StartTime: React.Dispatch<React.SetStateAction<string>>;
-  p1EndTime: string;
-  setP1EndTime: React.Dispatch<React.SetStateAction<string>>;
-  setP1EndTimeManuallyEdited: React.Dispatch<React.SetStateAction<boolean>>;
+  coverDateByPaper: BuilderPaperStringMap;
+  startTimeByPaper: BuilderPaperStringMap;
+  endTimeByPaper: BuilderPaperStringMap;
+  coverDateCustomByPaper: BuilderPaperBooleanMap;
 
-  p2CoverDate: string;
-  setP2CoverDate: React.Dispatch<React.SetStateAction<string>>;
-  p2DateCustom: boolean;
-  setP2DateCustom: React.Dispatch<React.SetStateAction<boolean>>;
-
-  p2StartTime: string;
-  setP2StartTime: React.Dispatch<React.SetStateAction<string>>;
-  p2EndTime: string;
-  setP2EndTime: React.Dispatch<React.SetStateAction<string>>;
-  setP2EndTimeManuallyEdited: React.Dispatch<React.SetStateAction<boolean>>;
+  setStartTimeForPaper: (
+    paper: Paper,
+    nextValueOrUpdater: SetStateAction<string>
+  ) => void;
+  setEndTimeForPaper: (
+    paper: Paper,
+    nextValueOrUpdater: SetStateAction<string>
+  ) => void;
+  setCoverDateForPaper: (
+    paper: Paper,
+    nextValueOrUpdater: SetStateAction<string>
+  ) => void;
+  setCoverDateCustomForPaper: (
+    paper: Paper,
+    nextValueOrUpdater: SetStateAction<boolean>
+  ) => void;
+  setEndTimeManuallyEditedForPaper: (
+    paper: Paper,
+    nextValueOrUpdater: SetStateAction<boolean>
+  ) => void;
 
   showScottishCandidateNumberBox: boolean;
-  setShowScottishCandidateNumberBox: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowScottishCandidateNumberBox: BooleanSetter;
 
   includeFormulaSheet: boolean;
-  setIncludeFormulaSheet: React.Dispatch<React.SetStateAction<boolean>>;
+  setIncludeFormulaSheet: BooleanSetter;
 
   showProgressPanel: boolean;
-  setShowProgressPanel: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowProgressPanel: BooleanSetter;
 
   resetLayout: () => void;
   resetZoom: () => void;
@@ -59,20 +78,18 @@ export default function BuilderSettingsPanel({
   setShowCoverDateTime,
   assessmentDate,
   setAssessmentDate,
-  p1StartTime,
-  setP1StartTime,
-  p1EndTime,
-  setP1EndTime,
-  setP1EndTimeManuallyEdited,
-  p2CoverDate,
-  setP2CoverDate,
-  p2DateCustom,
-  setP2DateCustom,
-  p2StartTime,
-  setP2StartTime,
-  p2EndTime,
-  setP2EndTime,
-  setP2EndTimeManuallyEdited,
+
+  coverDateByPaper,
+  startTimeByPaper,
+  endTimeByPaper,
+  coverDateCustomByPaper,
+
+  setStartTimeForPaper,
+  setEndTimeForPaper,
+  setCoverDateForPaper,
+  setCoverDateCustomForPaper,
+  setEndTimeManuallyEditedForPaper,
+
   showScottishCandidateNumberBox,
   setShowScottishCandidateNumberBox,
   includeFormulaSheet,
@@ -82,6 +99,44 @@ export default function BuilderSettingsPanel({
   resetLayout,
   resetZoom,
 }: Props) {
+  /**
+   * Temporary adapter:
+   *
+   * The visual SettingsPanel still has Paper 1 / Paper 2 tabs.
+   * This wrapper now reads/writes through the generic paper maps so page.tsx no
+   * longer needs to manually wire every P1/P2 field into the panel.
+   */
+  const p1StartTime = getPaperStringValue({
+    paper: "P1",
+    valuesByPaper: startTimeByPaper,
+  });
+
+  const p1EndTime = getPaperStringValue({
+    paper: "P1",
+    valuesByPaper: endTimeByPaper,
+  });
+
+  const p2CoverDate = getPaperStringValue({
+    paper: "P2",
+    valuesByPaper: coverDateByPaper,
+    fallback: assessmentDate,
+  });
+
+  const p2DateCustom = getPaperBooleanValue({
+    paper: "P2",
+    valuesByPaper: coverDateCustomByPaper,
+  });
+
+  const p2StartTime = getPaperStringValue({
+    paper: "P2",
+    valuesByPaper: startTimeByPaper,
+  });
+
+  const p2EndTime = getPaperStringValue({
+    paper: "P2",
+    valuesByPaper: endTimeByPaper,
+  });
+
   return (
     <SettingsPanel
       open={open}
@@ -94,23 +149,27 @@ export default function BuilderSettingsPanel({
       p1CoverDateText={assessmentDate}
       onChangeP1CoverDateText={setAssessmentDate}
       p1StartTimeText={p1StartTime}
-      onChangeP1StartTimeText={setP1StartTime}
+      onChangeP1StartTimeText={(value: string) => {
+        setStartTimeForPaper("P1", value);
+      }}
       p1EndTimeText={p1EndTime}
       onChangeP1EndTimeText={(value: string) => {
-        setP1EndTimeManuallyEdited(true);
-        setP1EndTime(value);
+        setEndTimeManuallyEditedForPaper("P1", true);
+        setEndTimeForPaper("P1", value);
       }}
       p2CoverDateText={p2DateCustom ? p2CoverDate : assessmentDate}
       onChangeP2CoverDateText={(value: string) => {
-        setP2DateCustom(true);
-        setP2CoverDate(value);
+        setCoverDateCustomForPaper("P2", true);
+        setCoverDateForPaper("P2", value);
       }}
       p2StartTimeText={p2StartTime}
-      onChangeP2StartTimeText={setP2StartTime}
+      onChangeP2StartTimeText={(value: string) => {
+        setStartTimeForPaper("P2", value);
+      }}
       p2EndTimeText={p2EndTime}
       onChangeP2EndTimeText={(value: string) => {
-        setP2EndTimeManuallyEdited(true);
-        setP2EndTime(value);
+        setEndTimeManuallyEditedForPaper("P2", true);
+        setEndTimeForPaper("P2", value);
       }}
       showScottishCandidateNumberBox={showScottishCandidateNumberBox}
       onToggleShowScottishCandidateNumberBox={setShowScottishCandidateNumberBox}

@@ -11,8 +11,9 @@ import BuilderBottomHud from "@/app/create-assessment/builder/components/builder
 import BuilderPreviewPane from "./builder-preview-engine/BuilderPreviewPane";
 import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
-import { useBuilderPaperMetadataMaps } from "./builder-behaviour/UseBuilderPaperMetadataMaps";
+import { useBuilderPaperSittingState } from "./builder-behaviour/UseBuilderPaperSittingState";
 import { useBuilderPaperTargetMaps } from "./builder-behaviour/UseBuilderPaperTargetMaps";
+import { useBuilderTargetMarksState } from "./builder-behaviour/UseBuilderTargetMarksState";
 import { useBuilderProgressHudRows } from "./builder-behaviour/UseBuilderProgressHudRows";
 import { normaliseClass } from "@/app/my-classes/state/ClassNormalisation";
 import {
@@ -24,7 +25,6 @@ import {
   buildEmptyEditDraftsByPaper,
   buildEmptyQuestionDraftsByPaper,
   getDefaultBuilderPaper,
-  getDefaultTargetMarksForPaper,
 } from "./builder-logic/BuilderPaperTargets";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type {
@@ -196,14 +196,6 @@ export default function CreateAssessmentBuilderPage() {
   return (builderCourseConfig.skillTree ?? {}) as Record<string, Skill[]>;
 }, [builderCourseConfig]);
 
-  const defaultP1Target = useMemo(() => {
-  return getDefaultTargetMarksForPaper("P1", builderCourseConfig);
-}, [builderCourseConfig]);
-
-const defaultP2Target = useMemo(() => {
-  return getDefaultTargetMarksForPaper("P2", builderCourseConfig);
-}, [builderCourseConfig]);
-
 const defaultBuilderPaper = useMemo(() => {
   return getDefaultBuilderPaper(builderCourseConfig);
 }, [builderCourseConfig]);
@@ -216,8 +208,16 @@ const defaultBuilderPaper = useMemo(() => {
   const [activePaper, setActivePaper] = useState<Paper>(defaultBuilderPaper);
   const [viewPaper, setViewPaper] = useState<Paper>(defaultBuilderPaper);
 
-  const [p1Target, setP1Target] = useState<number>(defaultP1Target);
-  const [p2Target, setP2Target] = useState<number>(defaultP2Target);
+  const {
+  targetMarksByPaper: builderTargetMarksByPaper,
+  setTargetMarksByPaper: setBuilderTargetMarksByPaper,
+  p1Target,
+  p2Target,
+  setP1Target,
+  setP2Target,
+} = useBuilderTargetMarksState({
+  courseConfig: builderCourseConfig,
+});
 
   const {
     collapsedCategories,
@@ -289,16 +289,47 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
   const [builderCalendarOpen, setBuilderCalendarOpen] = useState(false);
   const [createdAt, setCreatedAt] = useState<number>(Date.now());
 
-  const [p1StartTime, setP1StartTime] = useState("");
-  const [p1EndTime, setP1EndTime] = useState("");
+ const {
+  coverDateByPaper,
+  startTimeByPaper,
+  endTimeByPaper,
+  endTimeManuallyEditedByPaper,
+  endTimeSetterByPaper,
+  coverDateCustomByPaper,
 
-  const [p2CoverDate, setP2CoverDate] = useState(todayDisplayDate());
-  const [p2StartTime, setP2StartTime] = useState("");
-  const [p2EndTime, setP2EndTime] = useState("");
-  const [p2DateCustom, setP2DateCustom] = useState(false);
+  setCoverDateByPaper,
+  setStartTimeByPaper,
+  setEndTimeByPaper,
+  setCoverDateCustomByPaper,
+  setEndTimeManuallyEditedByPaper,
 
-  const [p1EndTimeManuallyEdited, setP1EndTimeManuallyEdited] = useState(false);
-  const [p2EndTimeManuallyEdited, setP2EndTimeManuallyEdited] = useState(false);
+  setStartTimeForPaper,
+  setEndTimeForPaper,
+  setCoverDateForPaper,
+  setCoverDateCustomForPaper,
+  setEndTimeManuallyEditedForPaper,
+
+  p1StartTime,
+  p1EndTime,
+  p2CoverDate,
+  p2StartTime,
+  p2EndTime,
+  p2DateCustom,
+  p1EndTimeManuallyEdited,
+  p2EndTimeManuallyEdited,
+
+  setP1StartTime,
+  setP1EndTime,
+  setP2CoverDate,
+  setP2StartTime,
+  setP2EndTime,
+  setP2DateCustom,
+  setP1EndTimeManuallyEdited,
+  setP2EndTimeManuallyEdited,
+} = useBuilderPaperSittingState({
+  courseConfig: builderCourseConfig,
+  assessmentDate,
+});
 
   const DEFAULT_HUD_HEIGHT = BUILDER_DEFAULT_HUD_HEIGHT;
 
@@ -348,8 +379,7 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
     setActivePaper,
     setViewPaper,
 
-    setP1Target,
-    setP2Target,
+    setTargetMarksByPaper: setBuilderTargetMarksByPaper,   
 
     setQuestions,
 
@@ -454,42 +484,18 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
   viewPaper,
 });
 
-const {
-  coverDateByPaper,
-  startTimeByPaper,
-  endTimeByPaper,
-  endTimeManuallyEditedByPaper,
-  endTimeSetterByPaper,
-} = useBuilderPaperMetadataMaps({
-  assessmentDate,
 
-  p1StartTime,
-  p1EndTime,
-  p1EndTimeManuallyEdited,
-  setP1EndTime,
-
-  p2CoverDate,
-  p2DateCustom,
-  p2StartTime,
-  p2EndTime,
-  p2EndTimeManuallyEdited,
-  setP2EndTime,
-});
 
   const { handleAssessmentNameFocus, handleAssessmentNameBlur } =
-    useBuilderMetadataTiming({
-  assessmentName,
-  setAssessmentName,
+  useBuilderMetadataTiming({
+    assessmentName,
+    setAssessmentName,
 
-  assessmentDate,
-  p2DateCustom,
-  setP2CoverDate,
-
-  marksByPaper,
-startTimeByPaper,
-endTimeManuallyEditedByPaper,
-endTimeSetterByPaper,
-});
+    marksByPaper,
+    startTimeByPaper,
+    endTimeManuallyEditedByPaper,
+    endTimeSetterByPaper,
+  });
 
   const { onMeasure } = useMeasuredQuestionHeights({
     questions,
@@ -531,8 +537,12 @@ endTimeSetterByPaper,
     setActivePaper(savedAssessment.builder.activePaper);
     setViewPaper(savedAssessment.builder.viewPaper);
 
-    setP1Target(savedAssessment.builder.p1Target);
-    setP2Target(savedAssessment.builder.p2Target);
+    setBuilderTargetMarksByPaper(
+      savedAssessment.builder.targetMarksByPaper ?? {
+        P1: savedAssessment.builder.p1Target,
+        P2: savedAssessment.builder.p2Target,
+      }
+    );
 
     setQuestions(savedAssessment.builder.questions);
     setDraftByPaper(savedAssessment.builder.draftByPaper);
@@ -545,19 +555,38 @@ endTimeSetterByPaper,
       savedAssessment.builder.showScottishCandidateNumberBox
     );
 
-    setP1StartTime(savedAssessment.builder.p1StartTime);
-    setP1EndTime(savedAssessment.builder.p1EndTime);
-    setP2CoverDate(savedAssessment.builder.p2CoverDate);
-    setP2StartTime(savedAssessment.builder.p2StartTime);
-    setP2EndTime(savedAssessment.builder.p2EndTime);
-    setP2DateCustom(savedAssessment.builder.p2DateCustom);
+    setCoverDateByPaper(
+  savedAssessment.builder.coverDateByPaper ?? {
+    P1: savedAssessment.builder.assessmentDate,
+    P2: savedAssessment.builder.p2CoverDate,
+  }
+);
 
-    setP1EndTimeManuallyEdited(
-      savedAssessment.builder.p1EndTime.trim().length > 0
-    );
-    setP2EndTimeManuallyEdited(
-      savedAssessment.builder.p2EndTime.trim().length > 0
-    );
+setStartTimeByPaper(
+  savedAssessment.builder.startTimeByPaper ?? {
+    P1: savedAssessment.builder.p1StartTime,
+    P2: savedAssessment.builder.p2StartTime,
+  }
+);
+
+setEndTimeByPaper(
+  savedAssessment.builder.endTimeByPaper ?? {
+    P1: savedAssessment.builder.p1EndTime,
+    P2: savedAssessment.builder.p2EndTime,
+  }
+);
+
+setCoverDateCustomByPaper(
+  savedAssessment.builder.coverDateCustomByPaper ?? {
+    P1: false,
+    P2: savedAssessment.builder.p2DateCustom,
+  }
+);
+
+setEndTimeManuallyEditedByPaper({
+  P1: savedAssessment.builder.p1EndTime.trim().length > 0,
+  P2: savedAssessment.builder.p2EndTime.trim().length > 0,
+});
 
     setBuilderSelectedClassIds(savedAssessment.setup.selectedClassIds);
     setBuilderUseCompleteCourseCoverage(
@@ -634,8 +663,11 @@ endTimeSetterByPaper,
         targetMarks,
         activePaper,
         viewPaper,
+
+        targetMarksByPaper: builderTargetMarksByPaper,
         p1Target,
         p2Target,
+
         questions,
         draftByPaper,
         editDraftByPaper,
@@ -649,6 +681,12 @@ endTimeSetterByPaper,
             : "[Untitled file]",
         className: computedClassSummary,
         assessmentDate,
+
+        coverDateByPaper,
+        startTimeByPaper,
+        endTimeByPaper,
+        coverDateCustomByPaper,
+
         p1StartTime,
         p1EndTime,
         p2CoverDate,
@@ -686,6 +724,7 @@ endTimeSetterByPaper,
     targetMarks,
     activePaper,
     viewPaper,
+    builderTargetMarksByPaper,
     p1Target,
     p2Target,
     questions,
@@ -697,6 +736,10 @@ endTimeSetterByPaper,
     showScottishCandidateNumberBox,
     assessmentName,
     assessmentDate,
+    coverDateByPaper,
+    startTimeByPaper,
+    endTimeByPaper,
+    coverDateCustomByPaper,
     p1StartTime,
     p1EndTime,
     p2CoverDate,
@@ -910,8 +953,7 @@ endTimeSetterByPaper,
   includedPapers,
   totalAssessmentMarks,
 } = useBuilderPaperTargetMaps({
-  p1Target,
-  p2Target,
+  targetMarksByPaper: builderTargetMarksByPaper,
   courseConfig: builderCourseConfig,
 });
 
@@ -1208,20 +1250,15 @@ const {
           setShowCoverDateTime={setShowCoverDateTime}
           assessmentDate={assessmentDate}
           setAssessmentDate={setAssessmentDate}
-          p1StartTime={p1StartTime}
-          setP1StartTime={setP1StartTime}
-          p1EndTime={p1EndTime}
-          setP1EndTime={setP1EndTime}
-          setP1EndTimeManuallyEdited={setP1EndTimeManuallyEdited}
-          p2CoverDate={p2CoverDate}
-          setP2CoverDate={setP2CoverDate}
-          p2DateCustom={p2DateCustom}
-          setP2DateCustom={setP2DateCustom}
-          p2StartTime={p2StartTime}
-          setP2StartTime={setP2StartTime}
-          p2EndTime={p2EndTime}
-          setP2EndTime={setP2EndTime}
-          setP2EndTimeManuallyEdited={setP2EndTimeManuallyEdited}
+          coverDateByPaper={coverDateByPaper}
+          startTimeByPaper={startTimeByPaper}
+          endTimeByPaper={endTimeByPaper}
+          coverDateCustomByPaper={coverDateCustomByPaper}
+          setStartTimeForPaper={setStartTimeForPaper}
+          setEndTimeForPaper={setEndTimeForPaper}
+          setCoverDateForPaper={setCoverDateForPaper}
+          setCoverDateCustomForPaper={setCoverDateCustomForPaper}
+          setEndTimeManuallyEditedForPaper={setEndTimeManuallyEditedForPaper}
           showScottishCandidateNumberBox={showScottishCandidateNumberBox}
           setShowScottishCandidateNumberBox={setShowScottishCandidateNumberBox}
           includeFormulaSheet={includeFormulaSheet}

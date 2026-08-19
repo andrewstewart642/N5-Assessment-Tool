@@ -3,7 +3,13 @@
 import type { PaperPart } from "@/shared-types/PaperParts";
 import type { QuestionVariantSelectionMeta } from "@/shared-types/QuestionSelectionTypes";
 
-export type Paper = "P1" | "P2";
+/**
+ * Generic paper/component identifier.
+ *
+ * Current N5/Higher-style courses still use "P1" and "P2", but the builder
+ * should not be structurally limited to those two literal IDs.
+ */
+export type Paper = string;
 
 export type DifficultyLevel = 1 | 2 | 3 | 4 | 5;
 
@@ -14,7 +20,8 @@ export type ThinkingTypeFilter = "OPERATIONAL" | "REASONING" | "ANY";
 export type CourseId =
   | "N5_MATH"
   | "N5_APPLICATIONS_MATH"
-  | "HIGHER_MATH";
+  | "HIGHER_MATH"
+  | "ADVANCED_HIGHER_MATH";
 
 export type Theme = {
   pageBg: string;
@@ -33,7 +40,13 @@ export type Theme = {
   ctaBlueText: string;
 };
 
-export type SkillPaperSuitability = "P1" | "P2" | "BOTH";
+/**
+ * Where a skill/concept/question can appear.
+ *
+ * "BOTH" is retained as the legacy/all-papers marker.
+ * Any other value should match a configured course paper id.
+ */
+export type SkillPaperSuitability = "BOTH" | Paper;
 
 export type SkillDomain = "NUM" | "ALG" | "GEO" | "TRIG" | "STAT";
 

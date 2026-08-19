@@ -1756,10 +1756,21 @@ export default function SettingsPanel({
   }, [open]);
 
   useEffect(() => {
-    if (paper2DateLinked) {
-      onChangeP2CoverDateText(p1CoverDateText);
-    }
-  }, [paper2DateLinked, p1CoverDateText, onChangeP2CoverDateText]);
+  if (!paper2DateLinked) {
+    return;
+  }
+
+  if (p2CoverDateText === p1CoverDateText) {
+    return;
+  }
+
+  onChangeP2CoverDateText(p1CoverDateText);
+}, [
+  paper2DateLinked,
+  p1CoverDateText,
+  p2CoverDateText,
+  onChangeP2CoverDateText,
+]);
 
   function handleSelectCustomColour(colour: AccentOption) {
     setCustomThemeColour(colour);

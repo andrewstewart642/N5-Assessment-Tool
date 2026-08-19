@@ -15,6 +15,7 @@ import { getBuilderCourseConfig } from "../builder-logic/BuilderCourseConfig";
 import {
   buildTargetMarksByPaperFromSetupTargets,
   getInitialBuilderPaperForStructure,
+  type BuilderTargetMarksByPaper,
 } from "../builder-logic/BuilderPaperTargets";
 import { ensureBuilderQuestionSpacingBase } from "../builder-logic/BuilderQuestionSpacing";
 import type { clamp } from "../BuilderUtils";
@@ -47,9 +48,8 @@ type UseBuilderInitialisationArgs = {
 
   setActivePaper: (value: Paper) => void;
   setViewPaper: (value: Paper) => void;
-
-  setP1Target: (value: number) => void;
-  setP2Target: (value: number) => void;
+  
+  setTargetMarksByPaper: (value: BuilderTargetMarksByPaper) => void;
 
   setQuestions: (value: Question[]) => void;
 
@@ -98,8 +98,7 @@ export function useBuilderInitialisation({
   setActivePaper,
   setViewPaper,
 
-  setP1Target,
-  setP2Target,
+  setTargetMarksByPaper,
 
   setQuestions,
 
@@ -313,16 +312,8 @@ export function useBuilderInitialisation({
       courseConfig: builderCourseConfig,
     });
 
-    const p1SetupTarget = setupTargetsByPaper.P1;
-    const p2SetupTarget = setupTargetsByPaper.P2;
+    setTargetMarksByPaper(setupTargetsByPaper);
 
-    if (typeof p1SetupTarget === "number") {
-      setP1Target(p1SetupTarget);
-    }
-
-    if (typeof p2SetupTarget === "number") {
-      setP2Target(p2SetupTarget);
-    }
   }, [
     builderCourseConfig,
     setActivePaper,
@@ -332,9 +323,8 @@ export function useBuilderInitialisation({
     setCreatedAt,
     setIncludeCoverSheet,
     setIncludeFormulaSheet,
-    setP1Target,
     setP2CoverDate,
-    setP2Target,
+    setTargetMarksByPaper,
     setViewPaper,
   ]);
 

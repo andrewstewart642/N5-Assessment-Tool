@@ -25,28 +25,6 @@
  * The builder state says what the teacher wants.
  * The question variant metadata says what the question actually is.
  * Central filtering logic compares the two.
- *
- * Standards behaviour
- * -------------------
- * - "C"   => target marks refers to C marks
- * - "A"   => target marks refers to A marks
- * - "C+A" => target marks refers to total marks
- *
- * Thinking-type behaviour
- * -----------------------
- * - "OPERATIONAL" => only operational-style questions should match
- * - "REASONING"   => only reasoning-rich questions should match
- * - "ANY"         => no thinking-type restriction
- *
- * Paper / calculator behaviour
- * ----------------------------
- * We treat calculator status as a hard validity rule:
- *
- * - "NonCalculatorOnly" => valid in P1 only
- * - "CalculatorAllowed" => valid in both papers
- * - "CalculatorRequired" => valid in P2 only
- *
- * This prevents invalid questions from slipping into the wrong paper.
  * ============================================================================
  */
 
@@ -64,14 +42,17 @@ export type QuestionThinkingTypeMode =
   | "ANY";
 
 /**
- * Which paper slot the teacher is currently building into.
+ * Paper/component slot used by question selection metadata.
+ *
+ * "BOTH" is retained as the legacy/all-papers marker.
+ * Any other value should match a configured course paper id.
  */
-export type QuestionPaperMode = "P1" | "P2" | "BOTH";
+export type QuestionPaperMode = string;
 
 /**
  * Calculator suitability metadata for a question variant.
  *
- * Interpretation used by filtering:
+ * Interpretation used by legacy filtering:
  * - NonCalculatorOnly => P1 only
  * - CalculatorAllowed => P1 or P2
  * - CalculatorRequired => P2 only
@@ -140,7 +121,16 @@ export type QuestionSelectionFilters = {
   selectedStandard: QuestionStandardMode;
   selectedThinkingType: QuestionThinkingTypeMode;
   targetMarks: number;
-  targetPaper: "P1" | "P2";
+  targetPaper: QuestionPaperMode;
+
+  /**
+   * Course-config compatibility tags for the selected paper.
+   *
+   * Example:
+   * - targetPaper: "NON_CALCULATOR"
+   * - targetPaperSuitabilityTags: ["NON_CALCULATOR", "P1"]
+   */
+  targetPaperSuitabilityTags?: string[];
 };
 
 /**
@@ -189,13 +179,17 @@ export function variantMatchesThinkingType(
  * Determine whether the variant is valid for the target paper based on
  * calculator status.
  *
- * Hard rule:
+ * Legacy rule:
  * - P1 accepts NonCalculatorOnly or CalculatorAllowed
  * - P2 accepts CalculatorAllowed or CalculatorRequired
+ *
+ * For non-legacy paper ids, this function does not make a calculator-policy
+ * decision. Paper suitability remains the hard gate. The course-config alias
+ * layer is handled separately through targetPaperSuitabilityTags.
  */
 export function variantMatchesCalculatorAndPaper(
   variant: QuestionVariantSelectionMeta,
-  targetPaper: "P1" | "P2"
+  targetPaper: QuestionPaperMode
 ): boolean {
   if (targetPaper === "P1") {
     return (
@@ -204,19 +198,32 @@ export function variantMatchesCalculatorAndPaper(
     );
   }
 
-  return (
-    variant.calculatorStatus === "CalculatorAllowed" ||
-    variant.calculatorStatus === "CalculatorRequired"
-  );
+  if (targetPaper === "P2") {
+    return (
+      variant.calculatorStatus === "CalculatorAllowed" ||
+      variant.calculatorStatus === "CalculatorRequired"
+    );
+  }
+
+  return true;
+}
+
+function buildPaperSuitabilityTagSet(
+  filters: QuestionSelectionFilters
+): Set<string> {
+  return new Set([
+    filters.targetPaper,
+    ...(filters.targetPaperSuitabilityTags ?? []),
+  ]);
 }
 
 /**
  * Determine whether a variant is eligible under the current builder filters.
  *
  * Rules:
- * - Standard "C"   => targetMarks matches cMarks
- * - Standard "A"   => targetMarks matches aMarks
- * - Standard "C+A" => targetMarks matches totalMarks
+ * - Standard "C"   => target marks matches cMarks
+ * - Standard "A"   => target marks matches aMarks
+ * - Standard "C+A" => target marks matches totalMarks
  *
  * Hard validity gates:
  * 1) paper suitability must match
@@ -227,9 +234,11 @@ export function isVariantEligibleForFilters(
   variant: QuestionVariantSelectionMeta,
   filters: QuestionSelectionFilters
 ): boolean {
+  const paperSuitabilityTags = buildPaperSuitabilityTagSet(filters);
+
   const paperMatches =
     variant.paperSuitability === "BOTH" ||
-    variant.paperSuitability === filters.targetPaper;
+    paperSuitabilityTags.has(variant.paperSuitability);
 
   if (!paperMatches) return false;
 
@@ -267,10 +276,11 @@ export function explainVariantEligibility(
   filters: QuestionSelectionFilters
 ): QuestionVariantFilterResult {
   const reasons: string[] = [];
+  const paperSuitabilityTags = buildPaperSuitabilityTagSet(filters);
 
   const paperMatches =
     variant.paperSuitability === "BOTH" ||
-    variant.paperSuitability === filters.targetPaper;
+    paperSuitabilityTags.has(variant.paperSuitability);
 
   if (!paperMatches) {
     reasons.push(
@@ -288,12 +298,12 @@ export function explainVariantEligibility(
       filters.targetPaper === "P1" &&
       variant.calculatorStatus === "CalculatorRequired"
     ) {
-      reasons.push("Variant requires a calculator and cannot be used in Paper 1.");
+      reasons.push("Variant requires a calculator and cannot be used in this paper.");
     } else if (
       filters.targetPaper === "P2" &&
       variant.calculatorStatus === "NonCalculatorOnly"
     ) {
-      reasons.push("Variant is non-calculator only and cannot be used in Paper 2.");
+      reasons.push("Variant is non-calculator only and cannot be used in this paper.");
     }
   }
 

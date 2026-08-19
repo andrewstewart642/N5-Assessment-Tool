@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 
 import type { Paper } from "@/shared-types/AssessmentTypes";
-import { todayDisplayDate } from "../builder-logic/BuilderDateHelpers";
 import { getBuilderPapers } from "../builder-logic/BuilderPaperTargets";
 import { calculateBuilderEndTimeForPaper } from "../builder-logic/BuilderPaperTiming";
 import {
@@ -18,10 +17,6 @@ import {
 type UseBuilderMetadataTimingArgs = {
   assessmentName: string;
   setAssessmentName: React.Dispatch<React.SetStateAction<string>>;
-
-  assessmentDate: string;
-  p2DateCustom: boolean;
-  setP2CoverDate: React.Dispatch<React.SetStateAction<string>>;
 
   marksByPaper: BuilderPaperNumberMap;
   startTimeByPaper: BuilderPaperStringMap;
@@ -53,10 +48,6 @@ export function useBuilderMetadataTiming({
   assessmentName,
   setAssessmentName,
 
-  assessmentDate,
-  p2DateCustom,
-  setP2CoverDate,
-
   marksByPaper,
   startTimeByPaper,
   endTimeManuallyEditedByPaper,
@@ -65,12 +56,6 @@ export function useBuilderMetadataTiming({
   const builderPapers = useMemo(() => {
     return getBuilderPapers();
   }, []);
-
-  useEffect(() => {
-    if (!p2DateCustom) {
-      setP2CoverDate(assessmentDate || todayDisplayDate());
-    }
-  }, [assessmentDate, p2DateCustom, setP2CoverDate]);
 
   useEffect(() => {
     builderPapers.forEach((paper) => {

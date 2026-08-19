@@ -5,27 +5,62 @@ import type { Paper } from "@/shared-types/AssessmentTypes";
 import { calculateTotalAssessmentMarksFromPaperTargets } from "../builder-logic/AssessmentDistributionAnalysis";
 import {
   buildTargetMarksByPaper,
+  buildTargetMarksByPaperFromValues,
   getIncludedPapersFromTargets,
+  type BuilderTargetMarksByPaper,
 } from "../builder-logic/BuilderPaperTargets";
 
-type UseBuilderPaperTargetMapsArgs = {
+type LegacyUseBuilderPaperTargetMapsArgs = {
   p1Target: number;
   p2Target: number;
   courseConfig: CourseAssessmentConfig;
 };
 
-export function useBuilderPaperTargetMaps({
-  p1Target,
-  p2Target,
-  courseConfig,
-}: UseBuilderPaperTargetMapsArgs) {
-  const targetMarksByPaper = useMemo<Partial<Record<Paper, number>>>(() => {
-    return buildTargetMarksByPaper({
-      p1Target,
-      p2Target,
-      courseConfig,
+type GenericUseBuilderPaperTargetMapsArgs = {
+  targetMarksByPaper: BuilderTargetMarksByPaper;
+  courseConfig: CourseAssessmentConfig;
+};
+
+type UseBuilderPaperTargetMapsArgs =
+  | LegacyUseBuilderPaperTargetMapsArgs
+  | GenericUseBuilderPaperTargetMapsArgs;
+
+function isGenericTargetArgs(
+  args: UseBuilderPaperTargetMapsArgs
+): args is GenericUseBuilderPaperTargetMapsArgs {
+  return "targetMarksByPaper" in args;
+}
+
+function buildResolvedTargetMarksByPaper(
+  args: UseBuilderPaperTargetMapsArgs
+): BuilderTargetMarksByPaper {
+  if (isGenericTargetArgs(args)) {
+    return buildTargetMarksByPaperFromValues({
+      targetMarksByPaper: args.targetMarksByPaper,
+      courseConfig: args.courseConfig,
     });
-  }, [p1Target, p2Target, courseConfig]);
+  }
+
+  return buildTargetMarksByPaper({
+    p1Target: args.p1Target,
+    p2Target: args.p2Target,
+    courseConfig: args.courseConfig,
+  });
+}
+
+export function useBuilderPaperTargetMaps(args: UseBuilderPaperTargetMapsArgs) {
+  const courseConfig = args.courseConfig;
+
+  const rawTargetMarksByPaper = isGenericTargetArgs(args)
+    ? args.targetMarksByPaper
+    : undefined;
+
+  const legacyP1Target = isGenericTargetArgs(args) ? undefined : args.p1Target;
+  const legacyP2Target = isGenericTargetArgs(args) ? undefined : args.p2Target;
+
+  const targetMarksByPaper = useMemo<BuilderTargetMarksByPaper>(() => {
+    return buildResolvedTargetMarksByPaper(args);
+  }, [args, rawTargetMarksByPaper, legacyP1Target, legacyP2Target]);
 
   const includedPapers = useMemo<Paper[]>(() => {
     return getIncludedPapersFromTargets({
