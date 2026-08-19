@@ -56,6 +56,23 @@ export function getBuilderPaperConfig(
   paper: Paper,
   courseConfig: CourseAssessmentConfig = getBuilderCourseConfig()
 ): CoursePaperConfig {
+  const exactPaperConfig = courseConfig.papers.find(
+    (paperConfig) => paperConfig.id === paper
+  );
+
+  if (exactPaperConfig) {
+    return exactPaperConfig;
+  }
+
+  const aliasPaperConfig = findCoursePaperConfigForSuitability(
+    courseConfig,
+    paper
+  );
+
+  if (aliasPaperConfig) {
+    return aliasPaperConfig;
+  }
+
   return getCoursePaperConfig(courseConfig, paper);
 }
 

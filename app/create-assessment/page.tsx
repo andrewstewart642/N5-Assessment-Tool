@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
@@ -23,8 +23,10 @@ import {
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
 import {
+  findCoursePaperConfigForSuitability,
   getCourseAssessmentStructure,
   getCoursePaperConfig,
+  type CoursePaperConfig,
 } from "@/course-data/course-configs/CourseConfigTypes";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
@@ -372,15 +374,48 @@ function structureIncludesPaper(
   paper: Paper
 ): boolean {
   if (!structure) return false;
-  return getIncludedPapers(structure).includes(paper);
+
+  const includedPapers = getIncludedPapers(structure);
+
+  if (includedPapers.includes(paper)) {
+    return true;
+  }
+
+  const targetPaperConfig = getSetupPaperConfig(paper);
+
+  return includedPapers.some((includedPaper) => {
+    const includedPaperConfig = getSetupPaperConfig(includedPaper);
+    return includedPaperConfig.id === targetPaperConfig.id;
+  });
+}
+
+function getSetupPaperConfig(paper: Paper): CoursePaperConfig {
+  const exactPaperConfig = ACTIVE_COURSE_CONFIG.papers.find(
+    (paperConfig) => paperConfig.id === paper
+  );
+
+  if (exactPaperConfig) {
+    return exactPaperConfig;
+  }
+
+  const aliasPaperConfig = findCoursePaperConfigForSuitability(
+    ACTIVE_COURSE_CONFIG,
+    paper
+  );
+
+  if (aliasPaperConfig) {
+    return aliasPaperConfig;
+  }
+
+  return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
 }
 
 function getPaperLabel(paper: Paper): string {
-  return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper).label;
+  return getSetupPaperConfig(paper).label;
 }
 
 function getDefaultTargetMarks(paper: Paper): number {
-  return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper).defaultTargetMarks;
+  return getSetupPaperConfig(paper).defaultTargetMarks;
 }
 
 function getDefaultTargetMarksText(paper: Paper): string {
@@ -388,7 +423,7 @@ function getDefaultTargetMarksText(paper: Paper): string {
 }
 
 function getDefaultTargetTime(paper: Paper): number {
-  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  const paperConfig = getSetupPaperConfig(paper);
   return Math.round(paperConfig.defaultTargetMarks * paperConfig.minutesPerMark);
 }
 
@@ -397,12 +432,12 @@ function getDefaultTargetTimeText(paper: Paper): string {
 }
 
 function estimateTimeFromMarks(paper: Paper, marks: number): number {
-  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  const paperConfig = getSetupPaperConfig(paper);
   return Math.round(marks * paperConfig.minutesPerMark);
 }
 
 function estimateMarksFromTime(paper: Paper, minutes: number): number {
-  const paperConfig = getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  const paperConfig = getSetupPaperConfig(paper);
   return Math.max(1, Math.floor(minutes / paperConfig.minutesPerMark));
 }
 
@@ -639,6 +674,22 @@ const setupAssessmentStructures = useMemo(() => {
 
     const now = Date.now();
 
+    const coursePapers = ACTIVE_COURSE_CONFIG.papers.map((paper) => paper.id);
+const includedPapers = getIncludedPapers(paperStructure);
+
+const firstCoursePaper = coursePapers[0] ?? "P1";
+const secondCoursePaper = coursePapers[1] ?? firstCoursePaper;
+
+const initialActivePaper = includedPapers[0] ?? firstCoursePaper;
+
+const emptyDraftByPaper = coursePapers.reduce<Record<Paper, null>>(
+  (drafts, paper) => {
+    drafts[paper] = null;
+    return drafts;
+  },
+  {}
+);
+
     const normalisedAssessmentName =
       assessmentName.trim().length > 0
         ? assessmentName.trim()
@@ -650,18 +701,23 @@ const setupAssessmentStructures = useMemo(() => {
       useCompleteCourseCoverage || selectedClassIds.length === 0;
 
     const initialP1Target =
-      buildPriority === "MARKS"
-        ? parsedMarksP1 ?? getDefaultTargetMarks("P1")
-        : parsedTimeP1 !== null
-          ? estimateMarksFromTime("P1", parsedTimeP1)
-          : getDefaultTargetMarks("P1");
+  buildPriority === "MARKS"
+    ? parsedMarksP1 ?? getDefaultTargetMarks(firstCoursePaper)
+    : parsedTimeP1 !== null
+      ? estimateMarksFromTime(firstCoursePaper, parsedTimeP1)
+      : getDefaultTargetMarks(firstCoursePaper);
 
-    const initialP2Target =
-      buildPriority === "MARKS"
-        ? parsedMarksP2 ?? getDefaultTargetMarks("P2")
-        : parsedTimeP2 !== null
-          ? estimateMarksFromTime("P2", parsedTimeP2)
-          : getDefaultTargetMarks("P2");
+const initialP2Target =
+  buildPriority === "MARKS"
+    ? parsedMarksP2 ?? getDefaultTargetMarks(secondCoursePaper)
+    : parsedTimeP2 !== null
+      ? estimateMarksFromTime(secondCoursePaper, parsedTimeP2)
+      : getDefaultTargetMarks(secondCoursePaper);
+
+const targetMarksByPaper = {
+  [firstCoursePaper]: initialP1Target,
+  [secondCoursePaper]: initialP2Target,
+};
 
     saveAssessmentSetupBrief({
       courseId: ACTIVE_COURSE_CONFIG.courseId,
@@ -710,21 +766,50 @@ const setupAssessmentStructures = useMemo(() => {
         standardFilter: "C+A",
         thinkingTypeFilter: "ANY",
         targetMarks: 2,
-        activePaper: paperStructure === "P2_ONLY" ? "P2" : "P1",
-        viewPaper: paperStructure === "P2_ONLY" ? "P2" : "P1",
+        activePaper: initialActivePaper,
+        viewPaper: initialActivePaper,
+        targetMarksByPaper,
         p1Target: initialP1Target,
         p2Target: initialP2Target,
         questions: [],
-        draftByPaper: { P1: null, P2: null },
-        editDraftByPaper: { P1: null, P2: null },
+        draftByPaper: emptyDraftByPaper,
+        editDraftByPaper: emptyDraftByPaper,
         includeCoverSheet,
         includeFormulaSheet,
         showCoverDateTime: false,
         showScottishCandidateNumberBox: true,
         assessmentName: normalisedAssessmentName,
-        className: "",
-        assessmentDate: normalisedAssessmentDate,
-        p1StartTime: "",
+className: "",
+assessmentDate: normalisedAssessmentDate,
+coverDateByPaper: coursePapers.reduce<Record<Paper, string>>(
+  (dates, paper) => {
+    dates[paper] = normalisedAssessmentDate;
+    return dates;
+  },
+  {}
+),
+startTimeByPaper: coursePapers.reduce<Record<Paper, string>>(
+  (times, paper) => {
+    times[paper] = "";
+    return times;
+  },
+  {}
+),
+endTimeByPaper: coursePapers.reduce<Record<Paper, string>>(
+  (times, paper) => {
+    times[paper] = "";
+    return times;
+  },
+  {}
+),
+coverDateCustomByPaper: coursePapers.reduce<Record<Paper, boolean>>(
+  (customFlags, paper) => {
+    customFlags[paper] = false;
+    return customFlags;
+  },
+  {}
+),
+p1StartTime: "",
         p1EndTime: "",
         p2CoverDate: normalisedAssessmentDate,
         p2StartTime: "",

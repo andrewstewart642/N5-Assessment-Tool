@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type SetStateAction,
+} from "react";
 import { useRouter } from "next/navigation";
 import { BUILDER_STORAGE_KEY_PAIRS } from "./BuilderStorageKeys";
 import { useBuilderPaperPrintMetadata } from "./builder-behaviour/UseBuilderPaperPrintMetadata";
@@ -185,6 +193,60 @@ function buildClassCoverageSummary(args: {
 }
 
 export default function CreateAssessmentBuilderPage() {
+
+ useLayoutEffect(() => {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  const previousScrollRestoration = window.history.scrollRestoration;
+  const previousHtmlOverflow = document.documentElement.style.overflow;
+  const previousBodyOverflow = document.body.style.overflow;
+  const previousBodyHeight = document.body.style.height;
+
+  window.history.scrollRestoration = "manual";
+
+  const forceTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "auto",
+    });
+
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  };
+
+  forceTop();
+
+  /**
+   * Browser scroll restoration can happen after React mounts during client-side
+   * navigation. Hit it a few times, then lock document scroll so the builder
+   * behaves like a fixed app workspace.
+   */
+  const frame = window.requestAnimationFrame(() => {
+    forceTop();
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100dvh";
+  });
+
+  const timeoutOne = window.setTimeout(forceTop, 50);
+  const timeoutTwo = window.setTimeout(forceTop, 150);
+
+  return () => {
+    window.cancelAnimationFrame(frame);
+    window.clearTimeout(timeoutOne);
+    window.clearTimeout(timeoutTwo);
+
+    window.history.scrollRestoration = previousScrollRestoration;
+    document.documentElement.style.overflow = previousHtmlOverflow;
+    document.body.style.overflow = previousBodyOverflow;
+    document.body.style.height = previousBodyHeight;
+  };
+}, []);
+
   const router = useRouter();
   const { theme } = useSettings();
 
@@ -206,9 +268,22 @@ const defaultBuilderPaper = useMemo(() => {
   const [targetMarks, setTargetMarks] = useState<number>(2);
 
   const [activePaper, setActivePaper] = useState<Paper>(defaultBuilderPaper);
-  const [viewPaper, setViewPaper] = useState<Paper>(defaultBuilderPaper);
+const [viewPaper, setViewPaper] = useState<Paper>(defaultBuilderPaper);
 
-  const {
+const handleActivePaperChange = useCallback(
+  (nextValueOrUpdater: SetStateAction<Paper>) => {
+    const nextPaper =
+      typeof nextValueOrUpdater === "function"
+        ? nextValueOrUpdater(activePaper)
+        : nextValueOrUpdater;
+
+    setActivePaper(nextPaper);
+    setViewPaper(nextPaper);
+  },
+  [activePaper, setActivePaper, setViewPaper]
+);
+
+const {
   targetMarksByPaper: builderTargetMarksByPaper,
   setTargetMarksByPaper: setBuilderTargetMarksByPaper,
   p1Target,
@@ -942,11 +1017,12 @@ setEndTimeManuallyEditedByPaper({
   });
 
   usePreviewJumpNavigation({
-    pendingJumpDraftRef,
-    previewPages,
-    viewPaper,
-    pageWrapperRefs,
-  });
+  pendingJumpDraftRef,
+  previewPages,
+  viewPaper,
+  pageWrapperRefs,
+  previewPaneRef,
+});
 
   const {
   targetMarksByPaper,
@@ -1115,7 +1191,7 @@ const {
             minTargetMarks={1}
             maxTargetMarks={6}
             activePaper={activePaper}
-            setActivePaper={setActivePaper}
+            setActivePaper={handleActivePaperChange}
             collapsedCategories={collapsedCategories}
             toggleCategory={toggleCategory}
             expandedSkillIds={expandedSkillIds}

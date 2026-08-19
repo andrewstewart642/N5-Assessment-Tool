@@ -1,22 +1,50 @@
 import { useEffect } from "react";
+
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import type { PreviewPage } from "../BuilderUtils";
 
-type PendingJumpRef = React.MutableRefObject<{ paper: Paper; draftId: string } | null>;
+type PendingJumpRef = React.MutableRefObject<{
+  paper: Paper;
+  draftId: string;
+} | null>;
+
 type PageWrapperRefs = React.RefObject<Array<HTMLDivElement | null>>;
+type PreviewPaneRef = React.RefObject<HTMLDivElement | null>;
 
 type UsePreviewJumpNavigationArgs = {
   pendingJumpDraftRef: PendingJumpRef;
   previewPages: PreviewPage[];
   viewPaper: Paper;
   pageWrapperRefs: PageWrapperRefs;
+  previewPaneRef: PreviewPaneRef;
 };
+
+function scrollPreviewPaneToNode({
+  previewPane,
+  targetNode,
+}: {
+  previewPane: HTMLDivElement;
+  targetNode: HTMLDivElement;
+}) {
+  const previewRect = previewPane.getBoundingClientRect();
+  const targetRect = targetNode.getBoundingClientRect();
+
+  const currentScrollTop = previewPane.scrollTop;
+  const targetOffsetWithinPreview = targetRect.top - previewRect.top;
+
+  previewPane.scrollTo({
+    top: currentScrollTop + targetOffsetWithinPreview - 18,
+    left: previewPane.scrollLeft,
+    behavior: "smooth",
+  });
+}
 
 export function usePreviewJumpNavigation({
   pendingJumpDraftRef,
   previewPages,
   viewPaper,
   pageWrapperRefs,
+  previewPaneRef,
 }: UsePreviewJumpNavigationArgs) {
   useEffect(() => {
     const pending = pendingJumpDraftRef.current;
@@ -38,17 +66,25 @@ export function usePreviewJumpNavigation({
     if (targetPreviewIndex < 0) return;
 
     const targetNode = pageWrapperRefs.current[targetPreviewIndex];
-    if (!targetNode) return;
+    const previewPane = previewPaneRef.current;
+
+    if (!targetNode || !previewPane) return;
 
     const frame = window.requestAnimationFrame(() => {
-      targetNode.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-        inline: "nearest",
+      scrollPreviewPaneToNode({
+        previewPane,
+        targetNode,
       });
+
       pendingJumpDraftRef.current = null;
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [pendingJumpDraftRef, previewPages, viewPaper, pageWrapperRefs]);
+  }, [
+    pendingJumpDraftRef,
+    previewPages,
+    viewPaper,
+    pageWrapperRefs,
+    previewPaneRef,
+  ]);
 }

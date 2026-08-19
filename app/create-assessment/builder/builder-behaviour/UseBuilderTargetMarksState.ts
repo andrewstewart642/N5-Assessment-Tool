@@ -4,6 +4,7 @@ import type { CourseAssessmentConfig } from "@/course-data/course-configs/Course
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import {
   buildDefaultTargetMarksByPaper,
+  getBuilderPapers,
   getDefaultTargetMarksForPaper,
   normaliseTargetMarksByPaper,
   type BuilderTargetMarksByPaper,
@@ -31,6 +32,13 @@ function resolveNextTargetMarksValue({
 export function useBuilderTargetMarksState({
   courseConfig,
 }: UseBuilderTargetMarksStateArgs) {
+  const coursePapers = useMemo(() => {
+    return getBuilderPapers(courseConfig);
+  }, [courseConfig]);
+
+  const legacyP1Paper = coursePapers[0] ?? "P1";
+  const legacyP2Paper = coursePapers[1] ?? coursePapers[0] ?? "P2";
+
   const defaultTargetMarksByPaper = useMemo(() => {
     return buildDefaultTargetMarksByPaper(courseConfig);
   }, [courseConfig]);
@@ -89,24 +97,29 @@ export function useBuilderTargetMarksState({
   /**
    * Temporary legacy aliases.
    *
-   * These keep page.tsx, initialisation, saved-assessment loading and settings
-   * code working while we move the real state to targetMarksByPaper.
+   * These no longer assume literal "P1" / "P2" paper ids.
+   * Instead:
+   * - p1Target maps to the first configured paper
+   * - p2Target maps to the second configured paper
+   *
+   * This keeps older page.tsx/UI code working during the transition while still
+   * allowing smoke-test paper ids such as NON_CALCULATOR / CALCULATOR.
    */
-  const p1Target = getTargetMarksForPaper("P1");
-  const p2Target = getTargetMarksForPaper("P2");
+  const p1Target = getTargetMarksForPaper(legacyP1Paper);
+  const p2Target = getTargetMarksForPaper(legacyP2Paper);
 
   const setP1Target: TargetMarksSetter = useCallback(
     (nextValueOrUpdater) => {
-      setTargetMarksForPaper("P1", nextValueOrUpdater);
+      setTargetMarksForPaper(legacyP1Paper, nextValueOrUpdater);
     },
-    [setTargetMarksForPaper]
+    [legacyP1Paper, setTargetMarksForPaper]
   );
 
   const setP2Target: TargetMarksSetter = useCallback(
     (nextValueOrUpdater) => {
-      setTargetMarksForPaper("P2", nextValueOrUpdater);
+      setTargetMarksForPaper(legacyP2Paper, nextValueOrUpdater);
     },
-    [setTargetMarksForPaper]
+    [legacyP2Paper, setTargetMarksForPaper]
   );
 
   return {

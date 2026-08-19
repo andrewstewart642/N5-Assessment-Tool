@@ -3,7 +3,7 @@ import type { CourseAssessmentConfig } from "./CourseConfigTypes";
 import { N5_APPLICATIONS_MATH_COURSE_CONFIG } from "./N5ApplicationsMathCourseConfig";
 import { N5_MATH_COURSE_CONFIG } from "./N5MathsCourseConfig";
 
-export const DEFAULT_COURSE_ID: CourseId = "N5_APPLICATIONS_MATH";
+export const DEFAULT_COURSE_ID: CourseId = "N5_MATH";
 
 export const COURSE_CONFIG_REGISTRY: Partial<
   Record<CourseId, CourseAssessmentConfig>

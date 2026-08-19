@@ -252,11 +252,14 @@ export default function BuilderPreviewPageRenderer({
               );
 
             return (
-              <div key={`${kind}-${layoutQ.id}`}>
-                {content}
-                <div aria-hidden="true" style={{ height: gapPx }} />
-              </div>
-            );
+  <div
+    key={`${kind}-${layoutQ.id}`}
+    data-preview-question-id={q.id}
+  >
+    {content}
+    <div aria-hidden="true" style={{ height: gapPx }} />
+  </div>
+);
           })}
         </div>
       </SQAPageFrame>
