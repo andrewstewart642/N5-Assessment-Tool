@@ -22,10 +22,13 @@ import {
   setCurrentSavedAssessmentId,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
+import { getCourseConfigById } from "@/course-data/course-configs/CourseConfigRegistry";
+import { setBuilderActiveCourseId } from "@/app/create-assessment/builder/builder-logic/BuilderCourseConfig";
 import {
   findCoursePaperConfigForSuitability,
   getCourseAssessmentStructure,
   getCoursePaperConfig,
+  type CourseAssessmentConfig,
   type CoursePaperConfig,
 } from "@/course-data/course-configs/CourseConfigTypes";
 import type { Paper } from "@/shared-types/AssessmentTypes";
@@ -346,51 +349,40 @@ function loadAllClasses(): SchoolClass[] {
   }
 }
 
-function isSetupAssessmentType(value: AssessmentType): boolean {
+function isSetupAssessmentType(
+  value: AssessmentType,
+  courseConfig: CourseAssessmentConfig
+): boolean {
   const visibleModeIds =
-    ACTIVE_COURSE_CONFIG.visibleSetupAssessmentModeIds ??
-    ACTIVE_COURSE_CONFIG.assessmentModes.map((mode) => mode.id);
+    courseConfig.visibleSetupAssessmentModeIds ??
+    courseConfig.assessmentModes.map((mode) => mode.id);
 
   return visibleModeIds.includes(value);
 }
 
-function isSetupPaperStructure(value: PaperStructure): boolean {
+function isSetupPaperStructure(
+  value: PaperStructure,
+  courseConfig: CourseAssessmentConfig
+): boolean {
   const visibleStructureIds =
-    ACTIVE_COURSE_CONFIG.visibleSetupAssessmentStructureIds ??
-    ACTIVE_COURSE_CONFIG.assessmentStructures.map((structure) => structure.id);
+    courseConfig.visibleSetupAssessmentStructureIds ??
+    courseConfig.assessmentStructures.map((structure) => structure.id);
 
   return visibleStructureIds.includes(value);
 }
 
-function getIncludedPapers(structure: PaperStructure): Paper[] {
-  return getCourseAssessmentStructure(
-    ACTIVE_COURSE_CONFIG,
-    structure
-  ).includedPapers;
+function getIncludedPapers(
+  structure: PaperStructure,
+  courseConfig: CourseAssessmentConfig
+): Paper[] {
+  return getCourseAssessmentStructure(courseConfig, structure).includedPapers;
 }
 
-function structureIncludesPaper(
-  structure: PaperStructure | null,
-  paper: Paper
-): boolean {
-  if (!structure) return false;
-
-  const includedPapers = getIncludedPapers(structure);
-
-  if (includedPapers.includes(paper)) {
-    return true;
-  }
-
-  const targetPaperConfig = getSetupPaperConfig(paper);
-
-  return includedPapers.some((includedPaper) => {
-    const includedPaperConfig = getSetupPaperConfig(includedPaper);
-    return includedPaperConfig.id === targetPaperConfig.id;
-  });
-}
-
-function getSetupPaperConfig(paper: Paper): CoursePaperConfig {
-  const exactPaperConfig = ACTIVE_COURSE_CONFIG.papers.find(
+function getSetupPaperConfig(
+  paper: Paper,
+  courseConfig: CourseAssessmentConfig
+): CoursePaperConfig {
+  const exactPaperConfig = courseConfig.papers.find(
     (paperConfig) => paperConfig.id === paper
   );
 
@@ -399,7 +391,7 @@ function getSetupPaperConfig(paper: Paper): CoursePaperConfig {
   }
 
   const aliasPaperConfig = findCoursePaperConfigForSuitability(
-    ACTIVE_COURSE_CONFIG,
+    courseConfig,
     paper
   );
 
@@ -407,37 +399,85 @@ function getSetupPaperConfig(paper: Paper): CoursePaperConfig {
     return aliasPaperConfig;
   }
 
-  return getCoursePaperConfig(ACTIVE_COURSE_CONFIG, paper);
+  return getCoursePaperConfig(courseConfig, paper);
 }
 
-function getPaperLabel(paper: Paper): string {
-  return getSetupPaperConfig(paper).label;
+function structureIncludesPaper(
+  structure: PaperStructure | null,
+  paper: Paper,
+  courseConfig: CourseAssessmentConfig
+): boolean {
+  if (!structure) return false;
+
+  const includedPapers = getIncludedPapers(structure, courseConfig);
+
+  if (includedPapers.includes(paper)) {
+    return true;
+  }
+
+  const targetPaperConfig = getSetupPaperConfig(paper, courseConfig);
+
+  return includedPapers.some((includedPaper) => {
+    const includedPaperConfig = getSetupPaperConfig(
+      includedPaper,
+      courseConfig
+    );
+
+    return includedPaperConfig.id === targetPaperConfig.id;
+  });
 }
 
-function getDefaultTargetMarks(paper: Paper): number {
-  return getSetupPaperConfig(paper).defaultTargetMarks;
+function getPaperLabel(
+  paper: Paper,
+  courseConfig: CourseAssessmentConfig
+): string {
+  return getSetupPaperConfig(paper, courseConfig).label;
 }
 
-function getDefaultTargetMarksText(paper: Paper): string {
-  return String(getDefaultTargetMarks(paper));
+function getDefaultTargetMarks(
+  paper: Paper,
+  courseConfig: CourseAssessmentConfig
+): number {
+  return getSetupPaperConfig(paper, courseConfig).defaultTargetMarks;
 }
 
-function getDefaultTargetTime(paper: Paper): number {
-  const paperConfig = getSetupPaperConfig(paper);
+function getDefaultTargetMarksText(
+  paper: Paper,
+  courseConfig: CourseAssessmentConfig
+): string {
+  return String(getDefaultTargetMarks(paper, courseConfig));
+}
+
+function getDefaultTargetTime(
+  paper: Paper,
+  courseConfig: CourseAssessmentConfig
+): number {
+  const paperConfig = getSetupPaperConfig(paper, courseConfig);
   return Math.round(paperConfig.defaultTargetMarks * paperConfig.minutesPerMark);
 }
 
-function getDefaultTargetTimeText(paper: Paper): string {
-  return String(getDefaultTargetTime(paper));
+function getDefaultTargetTimeText(
+  paper: Paper,
+  courseConfig: CourseAssessmentConfig
+): string {
+  return String(getDefaultTargetTime(paper, courseConfig));
 }
 
-function estimateTimeFromMarks(paper: Paper, marks: number): number {
-  const paperConfig = getSetupPaperConfig(paper);
+function estimateTimeFromMarks(
+  paper: Paper,
+  marks: number,
+  courseConfig: CourseAssessmentConfig
+): number {
+  const paperConfig = getSetupPaperConfig(paper, courseConfig);
   return Math.round(marks * paperConfig.minutesPerMark);
 }
 
-function estimateMarksFromTime(paper: Paper, minutes: number): number {
-  const paperConfig = getSetupPaperConfig(paper);
+function estimateMarksFromTime(
+  paper: Paper,
+  minutes: number,
+  courseConfig: CourseAssessmentConfig
+): number {
+  const paperConfig = getSetupPaperConfig(paper, courseConfig);
   return Math.max(1, Math.floor(minutes / paperConfig.minutesPerMark));
 }
 
@@ -445,17 +485,6 @@ export default function CreateAssessmentSetupPage() {
   const router = useRouter();
   const { theme } = useSettings();
 
-  const setupAssessmentModes = useMemo(() => {
-  return ACTIVE_COURSE_CONFIG.assessmentModes.filter((mode) =>
-    isSetupAssessmentType(mode.id)
-  );
-}, []);
-
-const setupAssessmentStructures = useMemo(() => {
-  return ACTIVE_COURSE_CONFIG.assessmentStructures.filter((structure) =>
-    isSetupPaperStructure(structure.id)
-  );
-}, []);
 
   const [assessmentType, setAssessmentType] = useState<AssessmentType | null>(
     null
@@ -479,9 +508,26 @@ const setupAssessmentStructures = useMemo(() => {
   const [assessmentDate, setAssessmentDate] = useState(todayIsoDate());
 
   const [selectedLevelId, setSelectedLevelId] = useState<AssessmentLevelId | null>(
-      getDefaultAssessmentLevelId()
-    );
-  const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
+  getDefaultAssessmentLevelId()
+);
+
+const selectedCourseConfig = useMemo<CourseAssessmentConfig>(() => {
+  return getCourseConfigById(selectedLevelId ?? ACTIVE_COURSE_CONFIG.courseId);
+}, [selectedLevelId]);
+
+const setupAssessmentModes = useMemo(() => {
+  return selectedCourseConfig.assessmentModes.filter((mode) =>
+    isSetupAssessmentType(mode.id, selectedCourseConfig)
+  );
+}, [selectedCourseConfig]);
+
+const setupAssessmentStructures = useMemo(() => {
+  return selectedCourseConfig.assessmentStructures.filter((structure) =>
+    isSetupPaperStructure(structure.id, selectedCourseConfig)
+  );
+}, [selectedCourseConfig]);
+
+const [selectedClassIds, setSelectedClassIds] = useState<string[]>([]);
   const [useCompleteCourseCoverage, setUseCompleteCourseCoverage] =
     useState(false);
 
@@ -503,13 +549,24 @@ const setupAssessmentStructures = useMemo(() => {
   useEffect(() => {
     if (!buildPriority || !paperStructure) return;
 
-    const includesP1 = structureIncludesPaper(paperStructure, "P1");
-    const includesP2 = structureIncludesPaper(paperStructure, "P2");
+    const includesP1 = structureIncludesPaper(
+      paperStructure,
+      "P1",
+      selectedCourseConfig
+    );
+
+    const includesP2 = structureIncludesPaper(
+      paperStructure,
+      "P2",
+      selectedCourseConfig
+    );
 
     if (buildPriority === "MARKS") {
       if (includesP1) {
         setMarksTargetP1((prev) =>
-          prev.trim().length ? prev : getDefaultTargetMarksText("P1")
+          prev.trim().length
+            ? prev
+            : getDefaultTargetMarksText("P1", selectedCourseConfig)
         );
       } else {
         setMarksTargetP1("");
@@ -517,7 +574,9 @@ const setupAssessmentStructures = useMemo(() => {
 
       if (includesP2) {
         setMarksTargetP2((prev) =>
-          prev.trim().length ? prev : getDefaultTargetMarksText("P2")
+          prev.trim().length
+            ? prev
+            : getDefaultTargetMarksText("P2", selectedCourseConfig)
         );
       } else {
         setMarksTargetP2("");
@@ -530,7 +589,9 @@ const setupAssessmentStructures = useMemo(() => {
 
     if (includesP1) {
       setTimeTargetP1((prev) =>
-        prev.trim().length ? prev : getDefaultTargetTimeText("P1")
+        prev.trim().length
+          ? prev
+          : getDefaultTargetTimeText("P1", selectedCourseConfig)
       );
     } else {
       setTimeTargetP1("");
@@ -538,7 +599,9 @@ const setupAssessmentStructures = useMemo(() => {
 
     if (includesP2) {
       setTimeTargetP2((prev) =>
-        prev.trim().length ? prev : getDefaultTargetTimeText("P2")
+        prev.trim().length
+          ? prev
+          : getDefaultTargetTimeText("P2", selectedCourseConfig)
       );
     } else {
       setTimeTargetP2("");
@@ -546,7 +609,7 @@ const setupAssessmentStructures = useMemo(() => {
 
     setMarksTargetP1("");
     setMarksTargetP2("");
-  }, [buildPriority, paperStructure]);
+  }, [buildPriority, paperStructure, selectedCourseConfig]);
 
   const themeLevel = useMemo(() => {
   return getAssessmentLevelOption(selectedLevelId);
@@ -584,8 +647,17 @@ const setupAssessmentStructures = useMemo(() => {
   const targetsValid = useMemo(() => {
     if (!buildPriority || !paperStructure) return false;
 
-    const includesP1 = structureIncludesPaper(paperStructure, "P1");
-    const includesP2 = structureIncludesPaper(paperStructure, "P2");
+    const includesP1 = structureIncludesPaper(
+      paperStructure,
+      "P1",
+      selectedCourseConfig
+    );
+
+    const includesP2 = structureIncludesPaper(
+      paperStructure,
+      "P2",
+      selectedCourseConfig
+    );
 
     if (buildPriority === "MARKS") {
       const p1Valid = !includesP1 || parsedMarksP1 !== null;
@@ -603,29 +675,35 @@ const setupAssessmentStructures = useMemo(() => {
     parsedMarksP2,
     parsedTimeP1,
     parsedTimeP2,
+    selectedCourseConfig,
   ]);
 
   const derivedSummary = useMemo(() => {
     if (!buildPriority || !paperStructure) return [];
 
     const rows: string[] = [];
-    const includedPapers = getIncludedPapers(paperStructure);
+    const includedPapers = getIncludedPapers(
+      paperStructure,
+      selectedCourseConfig
+    );
 
     if (buildPriority === "MARKS") {
       if (includedPapers.includes("P1") && parsedMarksP1 !== null) {
         rows.push(
-          `${getPaperLabel("P1")} estimated time: ${estimateTimeFromMarks(
+          `${getPaperLabel("P1", selectedCourseConfig)} estimated time: ${estimateTimeFromMarks(
             "P1",
-            parsedMarksP1
+            parsedMarksP1,
+            selectedCourseConfig
           )} mins`
         );
       }
 
       if (includedPapers.includes("P2") && parsedMarksP2 !== null) {
         rows.push(
-          `${getPaperLabel("P2")} estimated time: ${estimateTimeFromMarks(
+          `${getPaperLabel("P2", selectedCourseConfig)} estimated time: ${estimateTimeFromMarks(
             "P2",
-            parsedMarksP2
+            parsedMarksP2,
+            selectedCourseConfig
           )} mins`
         );
       }
@@ -635,18 +713,20 @@ const setupAssessmentStructures = useMemo(() => {
 
     if (includedPapers.includes("P1") && parsedTimeP1 !== null) {
       rows.push(
-        `${getPaperLabel("P1")} estimated marks: ${estimateMarksFromTime(
+        `${getPaperLabel("P1", selectedCourseConfig)} estimated marks: ${estimateMarksFromTime(
           "P1",
-          parsedTimeP1
+          parsedTimeP1,
+          selectedCourseConfig
         )}`
       );
     }
 
     if (includedPapers.includes("P2") && parsedTimeP2 !== null) {
       rows.push(
-        `${getPaperLabel("P2")} estimated marks: ${estimateMarksFromTime(
+        `${getPaperLabel("P2", selectedCourseConfig)} estimated marks: ${estimateMarksFromTime(
           "P2",
-          parsedTimeP2
+          parsedTimeP2,
+          selectedCourseConfig
         )}`
       );
     }
@@ -659,6 +739,7 @@ const setupAssessmentStructures = useMemo(() => {
     parsedMarksP2,
     parsedTimeP1,
     parsedTimeP2,
+    selectedCourseConfig,
   ]);
 
   function handleContinue() {
@@ -674,21 +755,24 @@ const setupAssessmentStructures = useMemo(() => {
 
     const now = Date.now();
 
-    const coursePapers = ACTIVE_COURSE_CONFIG.papers.map((paper) => paper.id);
-const includedPapers = getIncludedPapers(paperStructure);
+    const coursePapers = selectedCourseConfig.papers.map((paper) => paper.id);
+    const includedPapers = getIncludedPapers(
+      paperStructure,
+      selectedCourseConfig
+    );
 
-const firstCoursePaper = coursePapers[0] ?? "P1";
-const secondCoursePaper = coursePapers[1] ?? firstCoursePaper;
+    const firstCoursePaper = coursePapers[0] ?? "P1";
+    const secondCoursePaper = coursePapers[1] ?? firstCoursePaper;
 
-const initialActivePaper = includedPapers[0] ?? firstCoursePaper;
+    const initialActivePaper = includedPapers[0] ?? firstCoursePaper;
 
-const emptyDraftByPaper = coursePapers.reduce<Record<Paper, null>>(
-  (drafts, paper) => {
-    drafts[paper] = null;
-    return drafts;
-  },
-  {}
-);
+    const emptyDraftByPaper = coursePapers.reduce<Record<Paper, null>>(
+      (drafts, paper) => {
+        drafts[paper] = null;
+        return drafts;
+      },
+      {}
+    );
 
     const normalisedAssessmentName =
       assessmentName.trim().length > 0
@@ -701,26 +785,38 @@ const emptyDraftByPaper = coursePapers.reduce<Record<Paper, null>>(
       useCompleteCourseCoverage || selectedClassIds.length === 0;
 
     const initialP1Target =
-  buildPriority === "MARKS"
-    ? parsedMarksP1 ?? getDefaultTargetMarks(firstCoursePaper)
-    : parsedTimeP1 !== null
-      ? estimateMarksFromTime(firstCoursePaper, parsedTimeP1)
-      : getDefaultTargetMarks(firstCoursePaper);
+      buildPriority === "MARKS"
+        ? parsedMarksP1 ??
+          getDefaultTargetMarks(firstCoursePaper, selectedCourseConfig)
+        : parsedTimeP1 !== null
+          ? estimateMarksFromTime(
+              firstCoursePaper,
+              parsedTimeP1,
+              selectedCourseConfig
+            )
+          : getDefaultTargetMarks(firstCoursePaper, selectedCourseConfig);
 
-const initialP2Target =
-  buildPriority === "MARKS"
-    ? parsedMarksP2 ?? getDefaultTargetMarks(secondCoursePaper)
-    : parsedTimeP2 !== null
-      ? estimateMarksFromTime(secondCoursePaper, parsedTimeP2)
-      : getDefaultTargetMarks(secondCoursePaper);
+    const initialP2Target =
+      buildPriority === "MARKS"
+        ? parsedMarksP2 ??
+          getDefaultTargetMarks(secondCoursePaper, selectedCourseConfig)
+        : parsedTimeP2 !== null
+          ? estimateMarksFromTime(
+              secondCoursePaper,
+              parsedTimeP2,
+              selectedCourseConfig
+            )
+          : getDefaultTargetMarks(secondCoursePaper, selectedCourseConfig);
 
-const targetMarksByPaper = {
-  [firstCoursePaper]: initialP1Target,
-  [secondCoursePaper]: initialP2Target,
-};
+    const targetMarksByPaper = {
+      [firstCoursePaper]: initialP1Target,
+      [secondCoursePaper]: initialP2Target,
+    };
+
+    setBuilderActiveCourseId(selectedCourseConfig.courseId);
 
     saveAssessmentSetupBrief({
-      courseId: ACTIVE_COURSE_CONFIG.courseId,
+      courseId: selectedCourseConfig.courseId,
       assessmentType,
       buildPriority,
       paperStructure,
@@ -745,7 +841,7 @@ const targetMarksByPaper = {
 
     const savedAssessment = createSavedAssessmentDraft({
       setup: {
-        courseId: ACTIVE_COURSE_CONFIG.courseId,
+        courseId: selectedCourseConfig.courseId,
         assessmentType,
         buildPriority,
         paperStructure,
@@ -823,30 +919,46 @@ p1StartTime: "",
   }
 
   function handleAssessmentNameFocus() {
-    if (assessmentName === "[Untitled file]") {
-      setAssessmentName("");
-    }
+  if (assessmentName === "[Untitled file]") {
+    setAssessmentName("");
   }
+}
 
-  function handleAssessmentNameBlur() {
-    if (!assessmentName.trim().length) {
-      setAssessmentName("[Untitled file]");
-    }
+function handleAssessmentNameBlur() {
+  if (!assessmentName.trim().length) {
+    setAssessmentName("[Untitled file]");
   }
+}
 
-  function handleToggleClass(classId: string) {
-    setUseCompleteCourseCoverage(false);
-    setSelectedClassIds((current) =>
-      current.includes(classId)
-        ? current.filter((id) => id !== classId)
-        : [...current, classId]
-    );
-  }
+function handleLevelChange(nextLevelId: AssessmentLevelId) {
+  setSelectedLevelId(nextLevelId);
 
-  function handleSelectCompleteCourseCoverage() {
-    setUseCompleteCourseCoverage(true);
-    setSelectedClassIds([]);
-  }
+  setAssessmentType(null);
+  setPaperStructure(null);
+  setBuildPriority(null);
+
+  setMarksTargetP1("");
+  setMarksTargetP2("");
+  setTimeTargetP1("");
+  setTimeTargetP2("");
+
+  setSelectedClassIds([]);
+  setUseCompleteCourseCoverage(false);
+}
+
+function handleToggleClass(classId: string) {
+  setUseCompleteCourseCoverage(false);
+  setSelectedClassIds((current) =>
+    current.includes(classId)
+      ? current.filter((id) => id !== classId)
+      : [...current, classId]
+  );
+}
+
+function handleSelectCompleteCourseCoverage() {
+  setUseCompleteCourseCoverage(true);
+  setSelectedClassIds([]);
+}
 
   return (
     <main
@@ -942,7 +1054,7 @@ p1StartTime: "",
 
             <LevelSelect
               value={selectedLevelId}
-              onChange={setSelectedLevelId}
+              onChange={handleLevelChange}
               theme={theme}
             />
 
@@ -1060,9 +1172,13 @@ p1StartTime: "",
                     Targets
                   </div>
 
-                  {structureIncludesPaper(paperStructure, "P1") ? (
+                  {structureIncludesPaper(
+                    paperStructure,
+                    "P1",
+                    selectedCourseConfig
+                  ) ? (
                     <NumberField
-                      label={`${getPaperLabel("P1")} target`}
+                      label={`${getPaperLabel("P1", selectedCourseConfig)} target`}
                       value={marksTargetP1}
                       onChange={setMarksTargetP1}
                       suffix="marks"
@@ -1070,9 +1186,13 @@ p1StartTime: "",
                     />
                   ) : null}
 
-                  {structureIncludesPaper(paperStructure, "P2") ? (
+                  {structureIncludesPaper(
+                    paperStructure,
+                    "P2",
+                    selectedCourseConfig
+                  ) ? (
                     <NumberField
-                      label={`${getPaperLabel("P2")} target`}
+                      label={`${getPaperLabel("P2", selectedCourseConfig)} target`}
                       value={marksTargetP2}
                       onChange={setMarksTargetP2}
                       suffix="marks"
@@ -1111,9 +1231,13 @@ p1StartTime: "",
                     Targets
                   </div>
 
-                  {structureIncludesPaper(paperStructure, "P1") ? (
+                  {structureIncludesPaper(
+                    paperStructure,
+                    "P1",
+                    selectedCourseConfig
+                  ) ? (
                     <NumberField
-                      label={`${getPaperLabel("P1")} target`}
+                      label={`${getPaperLabel("P1", selectedCourseConfig)} target`}
                       value={timeTargetP1}
                       onChange={setTimeTargetP1}
                       suffix="minutes"
@@ -1121,9 +1245,13 @@ p1StartTime: "",
                     />
                   ) : null}
 
-                  {structureIncludesPaper(paperStructure, "P2") ? (
+                  {structureIncludesPaper(
+                    paperStructure,
+                    "P2",
+                    selectedCourseConfig
+                  ) ? (
                     <NumberField
-                      label={`${getPaperLabel("P2")} target`}
+                      label={`${getPaperLabel("P2", selectedCourseConfig)} target`}
                       value={timeTargetP2}
                       onChange={setTimeTargetP2}
                       suffix="minutes"

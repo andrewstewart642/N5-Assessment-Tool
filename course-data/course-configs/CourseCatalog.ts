@@ -1,4 +1,4 @@
-import { ACTIVE_COURSE_CONFIG } from "./ActiveCourseConfig";
+import { DEFAULT_COURSE_ID } from "./CourseConfigRegistry";
 import type { CourseId } from "@/shared-types/AssessmentTypes";
 
 export type CourseClassCourseLabel =
@@ -14,7 +14,10 @@ export type CourseCatalogEntry = {
   isAvailable: boolean;
 };
 
-const SUPPORTED_COURSE_IDS: CourseId[] = [ACTIVE_COURSE_CONFIG.courseId];
+const SUPPORTED_COURSE_IDS: CourseId[] = [
+  "N5_MATH",
+  "N5_APPLICATIONS_MATH",
+];
 
 export const COURSE_CATALOG: CourseCatalogEntry[] = [
   {
@@ -74,9 +77,7 @@ export function getCourseCatalogEntryByClassCourseLabel(
   );
 }
 
-export function getCourseIdForClassCourseLabel(
-  value: unknown
-): CourseId | null {
+export function getCourseIdForClassCourseLabel(value: unknown): CourseId | null {
   return getCourseCatalogEntryByClassCourseLabel(value)?.id ?? null;
 }
 
@@ -85,7 +86,7 @@ export function isCourseAvailable(value: unknown): boolean {
 }
 
 export function getDefaultCourseId(): CourseId {
-  return ACTIVE_COURSE_CONFIG.courseId;
+  return DEFAULT_COURSE_ID;
 }
 
 export function getDefaultClassCourseLabel(): CourseClassCourseLabel {
