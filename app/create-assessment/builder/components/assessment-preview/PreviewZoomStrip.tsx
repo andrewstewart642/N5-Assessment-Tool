@@ -1,10 +1,15 @@
 "use client";
 
 import { UI_TYPO } from "@/app/ui/UiTypography";
-import type { AppTheme } from "@/ui/AppTheme";
+
+type PreviewZoomStripTheme = {
+  borderSoft: string;
+  textMuted: string;
+  text: string;
+};
 
 type Props = {
-  theme: AppTheme;
+  theme: PreviewZoomStripTheme;
   zoomPct: number;
   zoomIn: () => void;
   zoomOut: () => void;
