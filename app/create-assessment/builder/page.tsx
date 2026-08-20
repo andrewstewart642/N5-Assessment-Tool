@@ -29,6 +29,8 @@ import {
   BUILDER_DIVIDER_WIDTH_PX,
 } from "./builder-definitions/BuilderConstants";
 
+
+
 import {
   buildEmptyEditDraftsByPaper,
   buildEmptyQuestionDraftsByPaper,
@@ -70,6 +72,7 @@ import {
 import { analyseTopicBalance } from "./builder-logic/AssessmentDistributionAnalysis";
 import { buildTopicBalanceNotes } from "./builder-logic/BuildTopicBalanceNotes";
 import { buildOperationalReasoningNotes } from "./builder-logic/BuildOperationalReasoningNotes";
+import { buildN5MathsFractionBuilderQuestion } from "@/course-data/question-generators/fractions/N5MathsFractionQuestionAdapter";
 
 import {
   clamp,
@@ -1129,6 +1132,22 @@ const {
   courseConfig: builderCourseConfig,
 });
 
+  function handleAddGeneratedFractionQuestion() {
+    const generatedQuestion = buildN5MathsFractionBuilderQuestion({
+      paper: "P1",
+    });
+
+    setQuestions((currentQuestions) => [
+      ...currentQuestions,
+      generatedQuestion,
+    ]);
+
+    setActivePaper("P1");
+    setViewPaper("P1");
+
+    pushFlash("Generated a National 5 fraction question for Paper 1.");
+  }
+
   function handleBuilderToggleClass(classId: string) {
     setBuilderUseCompleteCourseCoverage(false);
     setBuilderSelectedClassIds((current) =>
@@ -1265,6 +1284,28 @@ const {
               currentViewerPage={currentViewerPage}
               totalViewerPages={totalViewerPages}
             />
+
+                        <button
+              type="button"
+              onClick={handleAddGeneratedFractionQuestion}
+              style={{
+                position: "absolute",
+                top: 78,
+                right: 34,
+                zIndex: 20,
+                border: `1px solid ${theme.borderStandard}`,
+                borderRadius: 999,
+                padding: "8px 12px",
+                background: theme.bgSurface,
+                color: theme.textPrimary,
+                cursor: "pointer",
+                fontWeight: 700,
+                boxShadow: "0 8px 20px rgba(0,0,0,0.18)",
+              }}
+              title="Temporary dev button"
+            >
+              + Fraction Q
+            </button>
 
             <BuilderPreviewPane
               theme={theme}

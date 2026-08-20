@@ -40,13 +40,17 @@ function formatLastUpdated(timestamp: number): string {
 }
 
 export default function ClassPage({ params }: Props) {
-  const [resolvedMode, setResolvedMode] = useState<ResolvedThemeMode>("dark");
+  const { classId } = use(params);
+
+  const [resolvedMode, setResolvedMode] =
+    useState<ResolvedThemeMode>("dark");
 
   useEffect(() => {
     function readResolvedMode(): ResolvedThemeMode {
       if (typeof window === "undefined") return "dark";
 
       const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
+
       const preference: ThemeModePreference = isThemeModePreference(stored)
         ? stored
         : "system";
@@ -73,17 +77,33 @@ export default function ClassPage({ params }: Props) {
     };
   }, []);
 
-  const theme = getTheme(resolvedMode);
+  const theme = useMemo(() => {
+    const baseTheme = getTheme({
+      mode: resolvedMode as "light" | "dark" | "soft-grey" | "custom",
+    });
+
+    return {
+      ...baseTheme,
+
+      // Compatibility aliases for older My Classes components.
+      bgPrimary: baseTheme.bgPage,
+      cardBg: baseTheme.bgSurface,
+      borderSubtle: baseTheme.borderStandard,
+      divider: baseTheme.borderStandard,
+      success: baseTheme.accentPrimary,
+      scrollbarThumb: baseTheme.borderStandard,
+    };
+  }, [resolvedMode]);
 
   const { hasLoaded, getClassById, updateCompletedSkills } = UseClasses();
-  const { classId } = use(params);
 
   const schoolClass = getClassById(classId);
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
 
   const totalSkills = useMemo(() => getAllCoverageSkills().length, []);
   const completedCount = schoolClass?.completedSkillIds.length ?? 0;
-  const progressPct = totalSkills > 0 ? (completedCount / totalSkills) * 100 : 0;
+  const progressPct =
+    totalSkills > 0 ? (completedCount / totalSkills) * 100 : 0;
 
   function handleToggleSkill(skillId: string) {
     if (!schoolClass) return;

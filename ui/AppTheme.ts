@@ -1,9 +1,11 @@
 import { ACCENT_MAP, type AccentOption } from "./AccentPalette";
 
 /**
- * Theme structure used across the app
+ * Core theme structure used across the app.
+ *
+ * These are the modern canonical theme keys.
  */
-export type Theme = {
+type CoreTheme = {
   bgPage: string;
   bgSurface: string;
   bgElevated: string;
@@ -40,12 +42,98 @@ export type Theme = {
 };
 
 /**
+ * Compatibility theme structure.
+ *
+ * Several older components still expect these names:
+ * cardBg, borderSubtle, bgSurfaceAlt, skillNumerical, etc.
+ *
+ * Rather than rewriting every older component now, getTheme() returns both
+ * the modern keys and the older aliases.
+ */
+export type AppTheme = CoreTheme & {
+  bgPrimary: string;
+  bgSecondary: string;
+  bgSurfaceAlt: string;
+
+  cardBg: string;
+  cardBgHover: string;
+
+  borderSubtle: string;
+  borderSoft: string;
+  borderStrong: string;
+  divider: string;
+
+  text: string;
+  textOnAccent: string;
+
+  success: string;
+  successSoft: string;
+  warning: string;
+  warningSoft: string;
+  danger: string;
+  dangerSoft: string;
+  info: string;
+  infoSoft: string;
+
+  scrollbarThumb: string;
+
+  skillNumerical: string;
+  skillAlgebraic: string;
+  skillGeometric: string;
+  skillTrigonometric: string;
+  skillStatistical: string;
+  skillDefault: string;
+};
+
+export type Theme = AppTheme;
+
+function withAppThemeAliases(theme: CoreTheme): Theme {
+  return {
+    ...theme,
+
+    bgPrimary: theme.bgPage,
+    bgSecondary: theme.bgSurface,
+    bgSurfaceAlt: theme.bgElevated,
+
+    cardBg: theme.bgSurface,
+    cardBgHover: theme.bgElevated,
+
+    borderSubtle: theme.borderStandard,
+    borderSoft: theme.borderStandard,
+    borderStrong: theme.controlSelectedBorder,
+    divider: theme.borderStandard,
+
+    text: theme.textPrimary,
+    textOnAccent: "#ffffff",
+
+    success: "#22c55e",
+    successSoft: "rgba(34,197,94,0.16)",
+    warning: "#f59e0b",
+    warningSoft: "rgba(245,158,11,0.16)",
+    danger: "#ef4444",
+    dangerSoft: "rgba(239,68,68,0.16)",
+    info: theme.accentPrimary,
+    infoSoft: theme.accentSoft,
+
+    scrollbarThumb: theme.borderStandard,
+
+    skillNumerical: theme.categoryStripes.numerical,
+    skillAlgebraic: theme.categoryStripes.algebraic,
+    skillGeometric: theme.categoryStripes.geometric,
+    skillTrigonometric: theme.categoryStripes.trigonometric,
+    skillStatistical: theme.categoryStripes.statistical,
+    skillDefault: theme.categoryStripes.default,
+  };
+}
+
+/**
  * ---------- UTILITIES ----------
  */
 
 function hexToRgb(hex: string) {
   const clean = hex.replace("#", "");
   const bigint = parseInt(clean, 16);
+
   return {
     r: (bigint >> 16) & 255,
     g: (bigint >> 8) & 255,
@@ -139,13 +227,17 @@ function buildCategoryStripes(args: {
  * Used for custom themes generated from a selected base colour.
  */
 
-function generateThemeFromBase(base: string): Theme {
+function generateThemeFromBase(base: string): CoreTheme {
   const light = isLight(base);
 
-  const bgPage = light ? mix(base, "#ffffff", 0.94) : mix(base, "#000000", 0.9);
+  const bgPage = light
+    ? mix(base, "#ffffff", 0.94)
+    : mix(base, "#000000", 0.9);
+
   const bgSurface = light
     ? mix(base, "#ffffff", 0.975)
     : mix(base, "#000000", 0.84);
+
   const bgElevated = light
     ? mix(base, "#ffffff", 0.99)
     : mix(base, "#000000", 0.78);
@@ -173,6 +265,7 @@ function generateThemeFromBase(base: string): Theme {
   const controlSelectedBorder = base;
 
   const accentPrimary = base;
+
   const accentSoft = light
     ? mix(base, "#ffffff", 0.78)
     : mix(base, "#000000", 0.42);
@@ -199,6 +292,7 @@ function generateThemeFromBase(base: string): Theme {
     shadow: light
       ? "0 6px 18px rgba(15,23,42,0.06)"
       : "0 6px 18px rgba(0,0,0,0.24)",
+
     shadowStrong: light
       ? "0 18px 40px rgba(15,23,42,0.12)"
       : "0 18px 40px rgba(0,0,0,0.42)",
@@ -220,7 +314,7 @@ function generateThemeFromBase(base: string): Theme {
  * so Light / Soft Grey / Dark land exactly where you want them.
  */
 
-const LIGHT_THEME: Theme = {
+const LIGHT_THEME: CoreTheme = {
   bgPage: "#f8fafc",
   bgSurface: "#fcfdff",
   bgElevated: "#ffffff",
@@ -249,7 +343,7 @@ const LIGHT_THEME: Theme = {
   categoryStripes: buildCategoryStripes({ mode: "light" }),
 };
 
-const SOFT_GREY_THEME: Theme = {
+const SOFT_GREY_THEME: CoreTheme = {
   bgPage: "#eef1f4",
   bgSurface: "#f5f6f8",
   bgElevated: "#fbfcfd",
@@ -278,7 +372,7 @@ const SOFT_GREY_THEME: Theme = {
   categoryStripes: buildCategoryStripes({ mode: "soft-grey" }),
 };
 
-const DARK_THEME: Theme = {
+const DARK_THEME: CoreTheme = {
   bgPage: "#0d0d0d",
   bgSurface: "#171717",
   bgElevated: "#1f1f1f",
@@ -319,11 +413,16 @@ export function getTheme(options: {
 
   if (mode === "custom" && customColour) {
     const base = ACCENT_MAP[customColour];
-    return generateThemeFromBase(base);
+    return withAppThemeAliases(generateThemeFromBase(base));
   }
 
-  if (mode === "dark") return DARK_THEME;
-  if (mode === "soft-grey") return SOFT_GREY_THEME;
+  if (mode === "dark") {
+    return withAppThemeAliases(DARK_THEME);
+  }
 
-  return LIGHT_THEME;
+  if (mode === "soft-grey") {
+    return withAppThemeAliases(SOFT_GREY_THEME);
+  }
+
+  return withAppThemeAliases(LIGHT_THEME);
 }
