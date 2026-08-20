@@ -98,13 +98,21 @@ export const skillsData: SkillsData = {
     ),
 
     buildSkill(
-      "num-n4-reverse-percentage",
-      "N4",
-      "Work with percentages (reverse percentage)",
-      [buildConcept("num-n4-1", "N4.1", "Reverse percentage", 3, "C+A")],
-      "NUM",
-      "P1"
+  "num-n4-reverse-percentage",
+  "N4",
+  "Work with percentages (reverse percentage)",
+  [
+    buildConcept(
+      "num-n4-1",
+      "N4.1",
+      "Reverse percentage",
+      3,
+      "C"
     ),
+  ],
+  "NUM",
+  "BOTH"
+),
 
     buildSkill(
       "num-n4-appreciation-depreciation",

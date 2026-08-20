@@ -273,7 +273,7 @@ export default function SkillsTree({
 
       flashTimeoutRef.current = setTimeout(() => {
         setFlashingConstraint(null);
-      }, 5000);
+      }, 3000);
     }, 0);
   }
 

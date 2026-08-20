@@ -64,7 +64,16 @@ export type SourceQuestionSurfaceStyleTag =
   | "TABLE_INCLUDED"
   | "MULTI_PART"
   | "FORMULA_GIVEN"
-  | "FORMULA_REQUIRED";
+  | "FORMULA_REQUIRED"
+  | "WORD_PROBLEM"
+  | "DIRECT_CALCULATION_COMMAND"
+  | "PERCENTAGE_RELATIONSHIP"
+  | "TEMPORAL_COMPARISON"
+  | "PART_WHOLE_RELATIONSHIP"
+  | "MONEY_CONTEXT"
+  | "COUNT_CONTEXT"
+  | "MEASUREMENT_CONTEXT"
+  | "INTERLEAVED_SKILL";
 
 export type SourceQuestionAnswerSpaceCategory =
   | "NONE"
@@ -150,6 +159,113 @@ export type SourceQuestionNumberProfile = {
   notes?: string;
 };
 
+export type SourceQuestionPercentageRelationshipType =
+  | "INCREASE"
+  | "DECREASE"
+  | "PART_OF_WHOLE";
+
+export type SourceQuestionPercentageExpressionStyle =
+  | "INCREASED_BY"
+  | "MORE_THAN"
+  | "REDUCED_BY"
+  | "DISCOUNT"
+  | "PERCENT_OF"
+  | "REPRESENTS_PERCENT_OF"
+  | "SURCHARGE"
+  | "OTHER";
+
+export type SourceQuestionPercentageKnownValueRole =
+  | "FINAL_VALUE"
+  | "PART_VALUE";
+
+export type SourceQuestionPercentageRequestedValueRole =
+  | "ORIGINAL_VALUE"
+  | "WHOLE_VALUE"
+  | "CHANGE_AMOUNT";
+
+export type SourceQuestionCalculatorBurden =
+  | "MENTAL_FRIENDLY"
+  | "WRITTEN_NON_CALCULATOR"
+  | "CALCULATOR_NATURAL"
+  | "CALCULATOR_STRONGLY_EXPECTED";
+
+export type SourceQuestionValueFormat =
+  | "INTEGER"
+  | "DECIMAL"
+  | "CURRENCY"
+  | "SCIENTIFIC_NOTATION";
+
+export type SourceQuestionPercentageProfile = {
+  relationshipType: SourceQuestionPercentageRelationshipType;
+  expressionStyle: SourceQuestionPercentageExpressionStyle;
+
+  percentageValue: number;
+  retainedPercentage: number;
+  multiplier: number;
+
+  knownValue: number;
+  knownValueRole: SourceQuestionPercentageKnownValueRole;
+
+  originalOrWholeValue: number;
+
+  requestedValueRole: SourceQuestionPercentageRequestedValueRole;
+  requestedAnswer: number;
+
+  changeAmount?: number;
+
+  workingStepCount: 1 | 2;
+
+  arithmeticComplexity: SourceQuestionArithmeticComplexity;
+
+  nonCalculatorFriendly: boolean;
+  calculatorBurden: SourceQuestionCalculatorBurden;
+
+  inverseCalculationProducesExactResult: boolean;
+
+  knownValueFormat: SourceQuestionValueFormat;
+  answerValueFormat: SourceQuestionValueFormat;
+
+  valueMagnitude: SourceQuestionValueSize | "VERY_LARGE";
+
+  notes?: string;
+};
+
+export type SourceQuestionWordedProblemProfile = {
+  contextDomain: string;
+  contextEntity: string;
+
+  quantityType:
+    | "MONEY"
+    | "COUNT"
+    | "MEASUREMENT";
+
+  temporalStructure:
+    | "NONE"
+    | "BEFORE_AFTER"
+    | "CURRENT_PREVIOUS"
+    | "YEAR_ON_YEAR"
+    | "PART_WHOLE_COMPARISON";
+
+  sentenceCount: number;
+  promptWordCount: number;
+
+  introductionStyle: string;
+  relationshipStatementStyle: string;
+  commandStyle: string;
+
+  informationOrder: string[];
+
+  contextualVocabulary: string[];
+
+  hasNamedPerson: boolean;
+  usesPronounReference: boolean;
+  visualContext: boolean;
+
+  interleavedSkillIds: string[];
+
+  generatorVariationNotes?: string;
+};
+
 export type SourceQuestionPart = {
   id: SourceQuestionId;
   label: string;
@@ -193,6 +309,12 @@ export type SourceQuestionCatalogEntry = {
   operandStructure?: string;
 
   numberProfile?: SourceQuestionNumberProfile;
+
+  percentageProfile?: SourceQuestionPercentageProfile;
+  wordedProblemProfile?: SourceQuestionWordedProblemProfile;
+
+  sourcePromptText?: string;
+  sourcePromptStructure?: string[];
 
   surfaceStyleTags: SourceQuestionSurfaceStyleTag[];
 

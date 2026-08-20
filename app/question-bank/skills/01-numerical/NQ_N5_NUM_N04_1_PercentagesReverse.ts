@@ -1,104 +1,279 @@
-// app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_1_PercentagesReverse.ts
-
 import type { PaperPart } from "@/shared-types/PaperParts";
 import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
   GeneratorContext,
 } from "@/shared-types/QuestionGenerationTypes";
 
+import type {
+  QuestionVariantSelectionMeta,
+} from "@/shared-types/QuestionSelectionTypes";
+
+import {
+  generateN5MathsReversePercentageQuestion,
+  type ReversePercentageDifficulty,
+  type ReversePercentagePaper,
+} from "@/course-data/question-generators/percentages/N5MathsReversePercentageGenerator";
+
 function textPart(value: string): PaperPart {
-  return { kind: "text", value };
-}
-
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function chooseOne<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-function normaliseDifficulty(input: DifficultyLevel): DifficultyLevel {
-  if (input <= 1) return 1;
-  if (input === 2) return 2;
-  return 3;
-}
-
-function buildMarks(level: DifficultyLevel) {
-  if (level === 1) return { totalMarks: 2, cMarks: 2, aMarks: 0, reasoningMarks: 0 };
-  return { totalMarks: 3, cMarks: 2, aMarks: 1, reasoningMarks: 0 };
-}
-
-function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
-  const level = normaliseDifficulty(context.difficulty);
-  const original = randomInt(80, 400);
-  const percent = chooseOne(level === 1 ? [10, 20] : [5, 10, 15, 20, 25]);
-  const increase = Math.random() < 0.5;
-
-  const finalAmount = increase
-    ? original * (1 + percent / 100)
-    : original * (1 - percent / 100);
-
-  const finalText = Number.isInteger(finalAmount) ? `${finalAmount}` : finalAmount.toFixed(2);
-  const markBreakdown = buildMarks(level);
-
   return {
-    prompt: increase
-      ? `After an increase of ${percent}%, a price is £${finalText}. Find the original price.`
-      : `After a decrease of ${percent}%, a price is £${finalText}. Find the original price.`,
-    answer: `£${original}`,
-    marks: markBreakdown.totalMarks,
-    questionCode: "NQ_N5_NUM_N04_1_REVERSE_PERCENTAGES",
-    promptParts: [
-      textPart(
-        increase
-          ? `After an increase of ${percent}%, a price is £${finalText}. Find the original price.`
-          : `After a decrease of ${percent}%, a price is £${finalText}. Find the original price.`
-      ),
-    ],
-    answerParts: [textPart(`£${original}`)],
-    markBreakdown,
-    classification: {
-      standard: level === 1 ? "C" : "Mixed",
-      calculatorStatus: "Either",
-      structureType: "ContextualProblem",
-      isReasoning: false,
-      paperSuitability: "P1",
-    },
-    sourceSkillCode: "NQ_N5_NUM_N04",
-    sourceConceptCode: "N4.1",
-    sourceConceptLabel: "Reverse percentage",
-    templateId: `reverse-percentages-l${level}`,
+    kind: "text",
+    value,
   };
 }
 
-export const ReversePercentagesConceptModule: ConceptGeneratorModule = {
-  metadata: {
-    moduleId: "NQ_N5_NUM_N04_1_REVERSE_PERCENTAGES",
-    domain: "NUM",
-    skillCode: "NQ_N5_NUM_N04",
-    conceptCode: "N4.1",
-    conceptLabel: "Reverse percentage",
-    difficultyProfile: {
-      availableLevels: [1, 2, 3],
-      defaultLevel: 2,
+function normaliseDifficulty(
+  input: DifficultyLevel
+): ReversePercentageDifficulty {
+  if (input <= 1) return 1;
+  if (input === 2) return 2;
+
+  return 3;
+}
+
+function normalisePaper(
+  context: GeneratorContext
+): ReversePercentagePaper {
+  const targetPaper =
+    context.selectionFilters?.targetPaper ??
+    context.paper;
+
+  return targetPaper === "P2" ? "P2" : "P1";
+}
+
+function classificationCalculatorStatusForPaper(
+  paper: ReversePercentagePaper
+): "NonCalculatorOnly" | "CalculatorOnly" {
+  return paper === "P1"
+    ? "NonCalculatorOnly"
+    : "CalculatorOnly";
+}
+
+function selectionCalculatorStatusForPaper(
+  paper: ReversePercentagePaper
+): "NonCalculatorOnly" | "CalculatorRequired" {
+  return paper === "P1"
+    ? "NonCalculatorOnly"
+    : "CalculatorRequired";
+}
+
+function buildSelectionMeta(args: {
+  level: DifficultyLevel;
+  paper: ReversePercentagePaper;
+  templateId: string;
+}): QuestionVariantSelectionMeta {
+  return {
+    level: args.level,
+
+    templateId: args.templateId,
+
+    marks: {
+      totalMarks: 3,
+      cMarks: 3,
+      aMarks: 0,
+      reasoningMarks: 0,
     },
-    capabilities: {
-      standardCoverage: ["C", "Mixed"],
-      canGenerateReasoning: false,
-      calculatorStatus: "Either",
+
+    standardProfile: "C",
+
+    paperSuitability: args.paper,
+
+    calculatorStatus:
+      selectionCalculatorStatusForPaper(args.paper),
+  };
+}
+
+function buildGeneratedReversePercentageQuestion(
+  context: GeneratorContext
+): GeneratedQuestionData {
+  const difficulty =
+    normaliseDifficulty(context.difficulty);
+
+  const paper =
+    normalisePaper(context);
+
+  const generated =
+    generateN5MathsReversePercentageQuestion({
+      paper,
+      difficulty,
+    });
+
+  const templateId = [
+    "source-catalogue-reverse-percentage",
+    paper.toLowerCase(),
+    `level-${difficulty}`,
+    generated.familyId,
+    generated.wordingProfile.patternId,
+    generated.wordingProfile.contextId,
+  ].join("-");
+
+  return {
+    prompt: generated.questionText,
+
+    answer: generated.answerText,
+
+    marks: 3,
+
+    questionCode: generated.familyId,
+
+    promptParts: [
+      textPart(generated.questionText),
+    ],
+
+    answerParts: [
+      textPart(generated.answerText),
+    ],
+
+    markBreakdown: {
+      totalMarks: 3,
+      cMarks: 3,
+      aMarks: 0,
+      reasoningMarks: 0,
+    },
+
+    classification: {
+      standard: "C",
+
+      calculatorStatus:
+        classificationCalculatorStatusForPaper(paper),
+
+      structureType: "ContextualProblem",
+
+      isReasoning: false,
+
+      paperSuitability: paper,
+    },
+
+    sourceSkillCode: "NQ_N5_NUM_N04",
+
+    sourceConceptCode: "N4.1",
+
+    sourceConceptLabel: "Reverse percentage",
+
+    templateId,
+
+    topicMarkBreakdown: {
+      NUM: 3,
+      ALG: 0,
+      GEO: 0,
+      TRIG: 0,
+      STAT: 0,
+    },
+
+    selectionMeta: buildSelectionMeta({
+      level: context.difficulty,
+      paper,
+      templateId,
+    }),
+  };
+}
+
+function levelSelectionEntries(
+  level: DifficultyLevel
+): QuestionVariantSelectionMeta[] {
+  return [
+    {
+      level,
+
+      templateId:
+        `source-catalogue-reverse-percentage-p1-level-${level}`,
+
+      marks: {
+        totalMarks: 3,
+        cMarks: 3,
+        aMarks: 0,
+        reasoningMarks: 0,
+      },
+
+      standardProfile: "C",
+
       paperSuitability: "P1",
-      typicalStructureTypes: ["ContextualProblem"],
+
+      calculatorStatus: "NonCalculatorOnly",
     },
-  },
 
-  canHandle(code: string) {
-    return code === "N4.1";
-  },
+    {
+      level,
 
-  generate: generateQuestion,
-};
+      templateId:
+        `source-catalogue-reverse-percentage-p2-level-${level}`,
+
+      marks: {
+        totalMarks: 3,
+        cMarks: 3,
+        aMarks: 0,
+        reasoningMarks: 0,
+      },
+
+      standardProfile: "C",
+
+      paperSuitability: "P2",
+
+      calculatorStatus: "CalculatorRequired",
+    },
+  ];
+}
+
+export const ReversePercentagesConceptModule:
+  ConceptGeneratorModule = {
+    metadata: {
+      moduleId:
+        "NQ_N5_NUM_N04_1_REVERSE_PERCENTAGES",
+
+      domain: "NUM",
+
+      skillCode: "NQ_N5_NUM_N04",
+
+      conceptCode: "N4.1",
+
+      conceptLabel: "Reverse percentage",
+
+      difficultyProfile: {
+        availableLevels: [1, 2, 3],
+
+        defaultLevel: 2,
+
+        levelDescriptions: {
+          1:
+            "Straightforward reverse percentage with friendly values.",
+
+          2:
+            "Typical National 5 reverse-percentage problem.",
+
+          3:
+            "More demanding National 5 reverse-percentage problem.",
+        },
+      },
+
+      capabilities: {
+        standardCoverage: ["C"],
+
+        canGenerateReasoning: false,
+
+        calculatorStatus: "Either",
+
+        paperSuitability: "BOTH",
+
+        typicalStructureTypes: [
+          "ContextualProblem",
+        ],
+      },
+
+      levelSelectionProfile: {
+        1: levelSelectionEntries(1),
+        2: levelSelectionEntries(2),
+        3: levelSelectionEntries(3),
+      },
+    },
+
+    canHandle(code: string) {
+      return code === "N4.1";
+    },
+
+    generate:
+      buildGeneratedReversePercentageQuestion,
+  };
 
 export default ReversePercentagesConceptModule;
