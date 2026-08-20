@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import CategorySection from "@/app/create-assessment/builder/components/skills-tree/CategorySection";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
@@ -25,6 +32,20 @@ const SEGMENT_INNER_HEIGHT = CONTROL_HEIGHT - SEGMENT_INSET * 2;
 const OVERLAY_SCROLLBAR_WIDTH = 5;
 const OVERLAY_SCROLLBAR_INSET = 2;
 const OVERLAY_SCROLLBAR_MIN_THUMB = 36;
+
+type ConstraintPillId = "standard" | "targetMarks" | "thinkingType" | "paper";
+
+function constraintFlashStyle(active: boolean): CSSProperties {
+  return {
+    borderRadius: 16,
+    outline: active ? "2px solid rgba(239, 68, 68, 0.95)" : "2px solid transparent",
+    boxShadow: active ? "0 0 0 4px rgba(239, 68, 68, 0.22)" : "none",
+    transform: active ? "scale(1.015)" : "scale(1)",
+    animation: active ? "constraintPulseRed 5s ease-in-out" : "none",
+    transition:
+      "box-shadow 0.16s ease, outline-color 0.16s ease, transform 0.16s ease",
+  };
+}
 
 function SegmentedControl<Option extends string>(props: {
   ariaLabel: string;
@@ -217,6 +238,11 @@ export default function SkillsTree({
   const [helperHidden, setHelperHidden] = useState(false);
   const [targetMarksText, setTargetMarksText] = useState(`${targetMarks} marks`);
 
+  const [flashingConstraint, setFlashingConstraint] =
+    useState<ConstraintPillId | null>(null);
+
+  const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [scrollMetrics, setScrollMetrics] = useState({
     isScrollable: false,
     thumbHeight: OVERLAY_SCROLLBAR_MIN_THUMB,
@@ -235,9 +261,33 @@ export default function SkillsTree({
     travelMax: number;
   } | null>(null);
 
+  function triggerConstraintFlash(constraint: ConstraintPillId) {
+    if (flashTimeoutRef.current) {
+      clearTimeout(flashTimeoutRef.current);
+    }
+
+    setFlashingConstraint(null);
+
+    window.setTimeout(() => {
+      setFlashingConstraint(constraint);
+
+      flashTimeoutRef.current = setTimeout(() => {
+        setFlashingConstraint(null);
+      }, 5000);
+    }, 0);
+  }
+
   useEffect(() => {
     setTargetMarksText(`${targetMarks} marks`);
   }, [targetMarks]);
+
+  useEffect(() => {
+    return () => {
+      if (flashTimeoutRef.current) {
+        clearTimeout(flashTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const decMarks = () => setTargetMarks(Math.max(minTargetMarks, targetMarks - 1));
   const incMarks = () => setTargetMarks(Math.min(maxTargetMarks, targetMarks + 1));
@@ -253,24 +303,24 @@ export default function SkillsTree({
 
   const activePaperConfig = getBuilderPaperConfig(activePaper);
 
-const selectionFilters: QuestionSelectionFilters = {
-  selectedStandard: standardFilter,
-  selectedThinkingType: thinkingTypeFilter,
-  targetMarks,
-  targetPaper: activePaper,
-  targetPaperSuitabilityTags: getCoursePaperSuitabilityTags(activePaperConfig),
-};
+  const selectionFilters: QuestionSelectionFilters = {
+    selectedStandard: standardFilter,
+    selectedThinkingType: thinkingTypeFilter,
+    targetMarks,
+    targetPaper: activePaper,
+    targetPaperSuitabilityTags: getCoursePaperSuitabilityTags(activePaperConfig),
+  };
 
   const paperOptions = useMemo(() => {
-  return getBuilderPapers().map((paper) => {
-    const paperConfig = getBuilderPaperConfig(paper);
+    return getBuilderPapers().map((paper) => {
+      const paperConfig = getBuilderPaperConfig(paper);
 
-    return {
-      value: paper,
-      label: paperConfig.label,
-    };
-  });
-}, []);
+      return {
+        value: paper,
+        label: paperConfig.label,
+      };
+    });
+  }, []);
 
   function commitTargetMarksInput(rawValue: string) {
     const digitsOnly = rawValue.replace(/\D/g, "");
@@ -414,6 +464,50 @@ const selectionFilters: QuestionSelectionFilters = {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
         }
+        
+        @keyframes constraintPulseRed {
+  0% {
+    outline-color: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.24);
+    transform: scale(1.015);
+  }
+
+  12% {
+    outline-color: rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.05);
+    transform: scale(1);
+  }
+
+  24% {
+    outline-color: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.24);
+    transform: scale(1.015);
+  }
+
+  36% {
+    outline-color: rgba(239, 68, 68, 0.25);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.05);
+    transform: scale(1);
+  }
+
+  48% {
+    outline-color: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.24);
+    transform: scale(1.015);
+  }
+
+  70% {
+    outline-color: rgba(239, 68, 68, 0.2);
+    box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.04);
+    transform: scale(1);
+  }
+
+  100% {
+    outline-color: transparent;
+    box-shadow: none;
+    transform: scale(1);
+  }
+}
 
         .skills-tree-overlay-scroll::-webkit-scrollbar {
           width: 0 !important;
@@ -558,6 +652,8 @@ const selectionFilters: QuestionSelectionFilters = {
                 gap: 6,
                 justifyItems: "start",
                 minWidth: 0,
+                padding: 4,
+                ...constraintFlashStyle(flashingConstraint === "standard"),
               }}
             >
               <div
@@ -585,7 +681,15 @@ const selectionFilters: QuestionSelectionFilters = {
               </div>
             </div>
 
-            <div style={{ display: "grid", gap: 6, justifyItems: "start" }}>
+            <div
+              style={{
+                display: "grid",
+                gap: 6,
+                justifyItems: "start",
+                padding: 4,
+                ...constraintFlashStyle(flashingConstraint === "targetMarks"),
+              }}
+            >
               <div
                 style={{
                   ...UI_TEXT.sectionLabel,
@@ -669,6 +773,8 @@ const selectionFilters: QuestionSelectionFilters = {
                 gap: 6,
                 justifyItems: "start",
                 minWidth: 0,
+                padding: 4,
+                ...constraintFlashStyle(flashingConstraint === "thinkingType"),
               }}
             >
               <div
@@ -701,6 +807,8 @@ const selectionFilters: QuestionSelectionFilters = {
                 justifyItems: "start",
                 alignSelf: "end",
                 minWidth: 0,
+                padding: 4,
+                ...constraintFlashStyle(flashingConstraint === "paper"),
               }}
             >
               <div
@@ -758,6 +866,7 @@ const selectionFilters: QuestionSelectionFilters = {
                 setConceptIndex={setConceptIndex}
                 getDifficulty={getDifficulty}
                 setDifficulty={setDifficulty}
+                onConstraintBlocked={triggerConstraintFlash}
                 onAddQuestion={(categoryName, skill, concept, difficulty) =>
                   addQuestionToPaper(
                     categoryName,

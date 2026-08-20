@@ -3,7 +3,13 @@
 // app/create-assessment/builder/components/skills-tree/CategorySection.tsx
 // One umbrella category (e.g. Numerical Skills) containing clickable skills.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 
 import AddQuestionButton from "@/app/create-assessment/builder/components/skills-tree/AddQuestionButton";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
@@ -19,7 +25,6 @@ import {
 } from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
 import {
   conceptMatchesThinkingTypeFilter,
-  getFilteredConcepts,
   rankConceptsByTargetMarks,
 } from "@/math-helpers/QuestionLogic";
 import type { PaperPart } from "@/shared-types/PaperParts";
@@ -37,6 +42,13 @@ import type {
 const CATEGORY_STRIPE_HEIGHT = 5;
 const CATEGORY_HEADER_HEIGHT = 58;
 const CATEGORY_ACTION_SLOT_WIDTH = 112;
+
+type ConstraintPillId = "standard" | "targetMarks" | "thinkingType" | "paper";
+
+type ConceptRestriction = {
+  tag: string;
+  constraint: ConstraintPillId;
+};
 
 type Props = {
   category: string;
@@ -58,6 +70,8 @@ type Props = {
 
   getDifficulty: (skillId: string) => DifficultyLevel;
   setDifficulty: (skillId: string, next: DifficultyLevel) => void;
+
+  onConstraintBlocked: (constraint: ConstraintPillId) => void;
 
   onAddQuestion: (
     category: string,
@@ -187,43 +201,100 @@ function formatPaperSuitabilityOnlyText(
   return `${formatBuilderPaperSuitability(suitability)} only`;
 }
 
-function buildThinkingTypeMismatchMessage(
-  filter: ThinkingTypeFilter
-): string {
+function conceptMatchesStandardFilter(
+  concept: Concept,
+  standardFilter: StandardFilter
+): boolean {
+  if (standardFilter === "C+A") return true;
+  if (concept.standard === "C+A") return true;
+  return concept.standard === standardFilter;
+}
+
+function buildStandardMismatchTag(concept: Concept): string {
+  if (concept.standard === "C") return "C-standard only";
+  if (concept.standard === "A") return "A-standard only";
+  if (concept.standard === "C+A") return "A+C-standard";
+  return "Wrong standard";
+}
+
+function buildTargetMarksMismatchTag(concept: Concept): string {
+  if (typeof concept.marks === "number" && Number.isFinite(concept.marks)) {
+    return `${concept.marks} marks only`;
+  }
+
+  return "Wrong mark target";
+}
+
+function buildThinkingTypeMismatchMessage(filter: ThinkingTypeFilter): string {
   if (filter === "REASONING") {
-    return "No reasoning marks here — choose Any or Operational.";
+    return "Operational only — choose Any or Operational.";
   }
 
   if (filter === "OPERATIONAL") {
-    return "Reasoning-only here — choose Any or Reasoning.";
+    return "Reasoning only — choose Any or Reasoning.";
   }
 
   return "This concept does not match the current thinking type.";
 }
 
-function buildPaperMismatchMessage(
-  suitability: SkillPaperSuitability
-): string {
+function buildPaperMismatchMessage(suitability: SkillPaperSuitability): string {
   return `${formatPaperSuitabilityOnlyText(suitability)} — switch paper.`;
 }
 
-function buildDropdownMismatchTag(args: {
+function getConceptRestriction(args: {
   skill: Skill;
   concept: Concept;
-  targetPaper: Paper;
+  standardFilter: StandardFilter;
   thinkingTypeFilter: ThinkingTypeFilter;
-}): string | null {
-  const { skill, concept, targetPaper, thinkingTypeFilter } = args;
+  targetMarks: number;
+  selectionFilters: QuestionSelectionFilters;
+}): ConceptRestriction | null {
+  const {
+    skill,
+    concept,
+    standardFilter,
+    thinkingTypeFilter,
+    selectionFilters,
+  } = args;
+
+  if (!conceptMatchesStandardFilter(concept, standardFilter)) {
+    return {
+      tag: buildStandardMismatchTag(concept),
+      constraint: "standard",
+    };
+  }
+
   const suitability = getPaperSuitabilityForConcept(skill, concept);
 
-  if (!conceptMatchesPaper(skill, concept, targetPaper)) {
-    return formatPaperSuitabilityOnlyText(suitability);
+  if (!conceptMatchesPaper(skill, concept, selectionFilters.targetPaper)) {
+    return {
+      tag: formatPaperSuitabilityOnlyText(suitability),
+      constraint: "paper",
+    };
   }
 
   if (!conceptMatchesThinkingTypeFilter(concept, thinkingTypeFilter)) {
-    return thinkingTypeFilter === "REASONING"
-      ? "Operational only"
-      : "Reasoning only";
+    return {
+      tag:
+        thinkingTypeFilter === "REASONING"
+          ? "Operational only"
+          : "Reasoning only",
+      constraint: "thinkingType",
+    };
+  }
+
+  const conceptText = conceptSelectionText(concept);
+  const eligibleLevels = getEligibleDifficultiesForConcept(
+    skill,
+    conceptText,
+    selectionFilters
+  );
+
+  if (eligibleLevels.length === 0) {
+    return {
+      tag: buildTargetMarksMismatchTag(concept),
+      constraint: "targetMarks",
+    };
   }
 
   return null;
@@ -232,7 +303,9 @@ function buildDropdownMismatchTag(args: {
 function buildPrimaryBlockReason(args: {
   selected: Concept | undefined;
   skill: Skill;
-  targetPaper: Paper;
+  standardFilter: StandardFilter;
+  targetMarks: number;
+  selectionFilters: QuestionSelectionFilters;
   thinkingTypeFilter: ThinkingTypeFilter;
   currentDifficulty: DifficultyLevel;
   availableLevels: DifficultyLevel[];
@@ -241,7 +314,9 @@ function buildPrimaryBlockReason(args: {
   const {
     selected,
     skill,
-    targetPaper,
+    standardFilter,
+    targetMarks,
+    selectionFilters,
     thinkingTypeFilter,
     currentDifficulty,
     availableLevels,
@@ -252,26 +327,43 @@ function buildPrimaryBlockReason(args: {
     return "Select a concept first.";
   }
 
-  if (!conceptMatchesPaper(skill, selected, targetPaper)) {
-  return buildPaperMismatchMessage(
-    getPaperSuitabilityForConcept(skill, selected)
-  );
-}
+  const restriction = getConceptRestriction({
+    skill,
+    concept: selected,
+    standardFilter,
+    thinkingTypeFilter,
+    targetMarks,
+    selectionFilters,
+  });
 
-  if (!conceptMatchesThinkingTypeFilter(selected, thinkingTypeFilter)) {
+  if (restriction?.constraint === "standard") {
+    return `${restriction.tag} — change Standard.`;
+  }
+
+  if (restriction?.constraint === "paper") {
+    return buildPaperMismatchMessage(
+      getPaperSuitabilityForConcept(skill, selected)
+    );
+  }
+
+  if (restriction?.constraint === "thinkingType") {
     return buildThinkingTypeMismatchMessage(thinkingTypeFilter);
   }
 
+  if (restriction?.constraint === "targetMarks") {
+    return `${restriction.tag} — change Target marks.`;
+  }
+
   if (availableLevels.length === 0) {
-    return "No selectable levels for this concept.";
+    return "No selectable difficulty for this concept.";
   }
 
   if (!availableLevels.includes(currentDifficulty)) {
-    return `Level ${currentDifficulty} is not available for this concept.`;
+    return "This difficulty is not available for this concept.";
   }
 
   if (!currentDifficultyIsEligible) {
-    return `Level ${currentDifficulty} does not match the current marks filter.`;
+    return "This difficulty does not match the current marks filter.";
   }
 
   return "This concept is not available under the current filters.";
@@ -302,7 +394,7 @@ function DifficultyStepper(props: {
   const canIncrease = canStepDifficulty(availableLevels, value, "next");
   const hasAvailableDifficulty = availableLevels.length > 0;
 
-  function buttonStyle(enabled: boolean): React.CSSProperties {
+  function buttonStyle(enabled: boolean): CSSProperties {
     return {
       height: 34,
       width: 56,
@@ -377,6 +469,7 @@ function SkillRow(props: {
   setConceptIndex: (skillId: string, nextIndex: number) => void;
   getDifficulty: (skillId: string) => DifficultyLevel;
   setDifficulty: (skillId: string, next: DifficultyLevel) => void;
+  onConstraintBlocked: (constraint: ConstraintPillId) => void;
   onAddQuestion: (
     category: string,
     skill: Skill,
@@ -405,6 +498,7 @@ function SkillRow(props: {
     setConceptIndex,
     getDifficulty,
     setDifficulty,
+    onConstraintBlocked,
     onAddQuestion,
     onRegenerateQuestion,
     theme,
@@ -414,13 +508,9 @@ function SkillRow(props: {
   const [rowHovered, setRowHovered] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const filtered = useMemo(
-    () => getFilteredConcepts(skill, standardFilter),
-    [skill, standardFilter]
-  );
   const ranked = useMemo(
-    () => rankConceptsByTargetMarks(filtered, targetMarks),
-    [filtered, targetMarks]
+    () => rankConceptsByTargetMarks(skill.concepts, targetMarks),
+    [skill.concepts, targetMarks]
   );
 
   const storedIndex = getConceptIndex(skill.id);
@@ -445,13 +535,37 @@ function SkillRow(props: {
     );
   }, [skill, selected, selectedConceptText, selectionFilters]);
 
+  const selectedRestriction = selected
+    ? getConceptRestriction({
+        skill,
+        concept: selected,
+        standardFilter,
+        thinkingTypeFilter,
+        targetMarks,
+        selectionFilters,
+      })
+    : null;
+
   const currentDifficultyIsEligible = eligibleLevels.includes(currentDifficulty);
-  const selectedConceptMatchesThinkingType =
-    !!selected &&
-    conceptMatchesThinkingTypeFilter(selected, thinkingTypeFilter);
-  const selectedConceptMatchesPaper =
-    !!selected &&
-    conceptMatchesPaper(skill, selected, selectionFilters.targetPaper);
+
+  const canAdd =
+    !!selected && selectedRestriction === null && currentDifficultyIsEligible;
+
+  const canRegenerate =
+    !!selected && selectedRestriction === null && currentDifficultyIsEligible;
+
+  function flashCurrentRestriction() {
+    if (!selected) return;
+
+    if (selectedRestriction) {
+      onConstraintBlocked(selectedRestriction.constraint);
+      return;
+    }
+
+    if (!currentDifficultyIsEligible) {
+      onConstraintBlocked("targetMarks");
+    }
+  }
 
   useEffect(() => {
     if (!dropdownOpen) return;
@@ -480,24 +594,12 @@ function SkillRow(props: {
     setDifficulty(skill.id, availableLevels[0]);
   }, [selected, availableLevels, currentDifficulty, setDifficulty, skill.id]);
 
-  const canAdd =
-    !!selected &&
-    selectedConceptMatchesPaper &&
-    selectedConceptMatchesThinkingType &&
-    currentDifficultyIsEligible;
-
-  const canRegenerate =
-    !!selected &&
-    selectedConceptMatchesPaper &&
-    selectedConceptMatchesThinkingType &&
-    currentDifficultyIsEligible;
-
-  
-
   const primaryBlockReason = buildPrimaryBlockReason({
     selected,
     skill,
-    targetPaper: selectionFilters.targetPaper,
+    standardFilter,
+    targetMarks,
+    selectionFilters,
     thinkingTypeFilter,
     currentDifficulty,
     availableLevels,
@@ -626,7 +728,7 @@ function SkillRow(props: {
                     fontWeight: UI_TYPO.weightRegular,
                   }}
                 >
-                  filtered: {standardFilter}
+                  visible with constraints
                 </div>
               </div>
 
@@ -706,22 +808,22 @@ function SkillRow(props: {
                 </button>
 
                 {dropdownOpen ? (
-  <div
-    className="hover-scroll"
-    style={{
-      position: "relative",
-      zIndex: 80,
-      width: "100%",
-      maxWidth: "100%",
-      maxHeight: 240,
-      overflowY: "auto",
-      marginTop: 6,
-      borderRadius: 12,
-      border: `1px solid ${theme.borderStandard}`,
-      background: theme.bgElevated,
-      boxShadow: theme.shadowStrong,
-    }}
-  >
+                  <div
+                    className="hover-scroll"
+                    style={{
+                      position: "relative",
+                      zIndex: 80,
+                      width: "100%",
+                      maxWidth: "100%",
+                      maxHeight: 240,
+                      overflowY: "auto",
+                      marginTop: 6,
+                      borderRadius: 12,
+                      border: `1px solid ${theme.borderStandard}`,
+                      background: theme.bgElevated,
+                      boxShadow: theme.shadowStrong,
+                    }}
+                  >
                     <button
                       type="button"
                       onClick={() => {
@@ -754,13 +856,16 @@ function SkillRow(props: {
 
                     {ranked.map((concept, conceptIdx) => {
                       const active = conceptIdx === currentIndex;
-                      const mismatchTag = buildDropdownMismatchTag({
+                      const restriction = getConceptRestriction({
                         skill,
                         concept,
-                        targetPaper: selectionFilters.targetPaper,
+                        standardFilter,
                         thinkingTypeFilter,
+                        targetMarks,
+                        selectionFilters,
                       });
-                      const isDropdownEligible = mismatchTag === null;
+
+                      const isDropdownEligible = restriction === null;
 
                       return (
                         <button
@@ -769,6 +874,10 @@ function SkillRow(props: {
                           onClick={() => {
                             setConceptIndex(skill.id, conceptIdx);
                             setDropdownOpen(false);
+
+                            if (restriction) {
+                              onConstraintBlocked(restriction.constraint);
+                            }
                           }}
                           style={{
                             width: "100%",
@@ -783,7 +892,7 @@ function SkillRow(props: {
                             color: isDropdownEligible
                               ? theme.textPrimary
                               : theme.textMuted,
-                            opacity: isDropdownEligible ? 1 : 0.7,
+                            opacity: isDropdownEligible ? 1 : 0.62,
                             textAlign: "left",
                             padding: "10px 12px",
                             cursor: "pointer",
@@ -794,8 +903,8 @@ function SkillRow(props: {
                             minWidth: 0,
                           }}
                           title={
-                            mismatchTag
-                              ? `${conceptSelectionText(concept)} — ${mismatchTag}`
+                            restriction
+                              ? `${conceptSelectionText(concept)} — ${restriction.tag}`
                               : conceptSelectionText(concept)
                           }
                         >
@@ -812,7 +921,7 @@ function SkillRow(props: {
                             <PaperContent parts={conceptInlineParts(concept)} />
                           </span>
 
-                          {mismatchTag ? (
+                          {restriction ? (
                             <span
                               style={{
                                 fontSize: UI_TYPO.sizeXs,
@@ -825,7 +934,7 @@ function SkillRow(props: {
                                 background: theme.controlBg,
                               }}
                             >
-                              {mismatchTag}
+                              {restriction.tag}
                             </span>
                           ) : null}
                         </button>
@@ -898,12 +1007,17 @@ function SkillRow(props: {
             <div
               style={{
                 opacity: canAdd ? 1 : 0.62,
-                pointerEvents: canAdd ? "auto" : "none",
               }}
             >
               <AddQuestionButton
                 onClick={() => {
-                  if (!selected || !canAdd) return;
+                  if (!selected) return;
+
+                  if (!canAdd) {
+                    flashCurrentRestriction();
+                    return;
+                  }
+
                   onAddQuestion(
                     category,
                     skill,
@@ -923,12 +1037,17 @@ function SkillRow(props: {
             <div
               style={{
                 opacity: canRegenerate ? 1 : 0.62,
-                pointerEvents: canRegenerate ? "auto" : "none",
               }}
             >
               <AddQuestionButton
                 onClick={() => {
-                  if (!selected || !canRegenerate) return;
+                  if (!selected) return;
+
+                  if (!canRegenerate) {
+                    flashCurrentRestriction();
+                    return;
+                  }
+
                   onRegenerateQuestion(
                     category,
                     skill,
@@ -970,6 +1089,7 @@ export default function CategorySection(props: Props) {
     setConceptIndex,
     getDifficulty,
     setDifficulty,
+    onConstraintBlocked,
     onAddQuestion,
     onRegenerateQuestion,
     theme,
@@ -1166,6 +1286,7 @@ export default function CategorySection(props: Props) {
               setConceptIndex={setConceptIndex}
               getDifficulty={getDifficulty}
               setDifficulty={setDifficulty}
+              onConstraintBlocked={onConstraintBlocked}
               onAddQuestion={onAddQuestion}
               onRegenerateQuestion={onRegenerateQuestion}
               theme={theme}
