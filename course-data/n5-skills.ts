@@ -119,13 +119,20 @@ export const skillsData: SkillsData = {
     ),
 
     buildSkill(
-      "num-n5-fractions",
-      "N5",
-      "Work with fractions",
-      [buildConcept("num-n5-1", "N5.1", "Fraction operations", 2, "C")],
-      "NUM",
-      "P1"
-    ),
+  "num-n5-fractions",
+  "N5",
+  "Work with fractions",
+  [
+    buildConcept("num-n5-1", "N5.1", "Fraction operations", 2, "C"),
+    buildConcept("num-n5-1-add", "N5.1.1", "Fractions add", 2, "C"),
+    buildConcept("num-n5-1-subtract", "N5.1.2", "Fractions subtract", 2, "C"),
+    buildConcept("num-n5-1-multiply", "N5.1.3", "Fractions multiply", 2, "C"),
+    buildConcept("num-n5-1-divide", "N5.1.4", "Fractions divide", 2, "C"),
+    buildConcept("num-n5-1-bracketed", "N5.1.5", "Bracketed fraction operations", 2, "C"),
+  ],
+  "NUM",
+  "P1"
+),
   ],
 
   "Algebraic Skills": [

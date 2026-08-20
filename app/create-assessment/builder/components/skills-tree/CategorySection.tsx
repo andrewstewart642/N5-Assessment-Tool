@@ -106,30 +106,55 @@ function conceptInlineParts(concept: Concept): PaperPart[] {
   return parts;
 }
 
+function getOrderedDifficultyLevels(
+  availableLevels: DifficultyLevel[]
+): DifficultyLevel[] {
+  return [...availableLevels].sort((a, b) => a - b);
+}
+
+function canStepDifficulty(
+  availableLevels: DifficultyLevel[],
+  current: DifficultyLevel,
+  direction: "prev" | "next"
+): boolean {
+  const orderedLevels = getOrderedDifficultyLevels(availableLevels);
+
+  if (orderedLevels.length <= 1) {
+    return false;
+  }
+
+  const currentIndex = orderedLevels.indexOf(current);
+
+  if (currentIndex === -1) {
+    return true;
+  }
+
+  if (direction === "prev") {
+    return currentIndex > 0;
+  }
+
+  return currentIndex < orderedLevels.length - 1;
+}
+
 function stepDifficulty(
   availableLevels: DifficultyLevel[],
   current: DifficultyLevel,
   direction: "prev" | "next"
 ): DifficultyLevel {
-  if (availableLevels.length === 0) return current;
+  const orderedLevels = getOrderedDifficultyLevels(availableLevels);
 
-  const currentIndex = availableLevels.indexOf(current);
-
-  if (currentIndex === -1) {
-    return direction === "prev"
-      ? availableLevels[availableLevels.length - 1]
-      : availableLevels[0];
+  if (orderedLevels.length === 0) {
+    return current;
   }
+
+  const currentIndex = orderedLevels.indexOf(current);
+  const safeIndex = currentIndex === -1 ? 0 : currentIndex;
 
   if (direction === "prev") {
-    return currentIndex === 0
-      ? availableLevels[availableLevels.length - 1]
-      : availableLevels[currentIndex - 1];
+    return orderedLevels[Math.max(0, safeIndex - 1)];
   }
 
-  return currentIndex === availableLevels.length - 1
-    ? availableLevels[0]
-    : availableLevels[currentIndex + 1];
+  return orderedLevels[Math.min(orderedLevels.length - 1, safeIndex + 1)];
 }
 
 function getPaperSuitabilityForConcept(
@@ -267,109 +292,69 @@ function getCategoryStripeColour(category: string, theme: Theme): string {
 function DifficultyStepper(props: {
   value: DifficultyLevel;
   availableLevels: DifficultyLevel[];
-  eligibleLevels: DifficultyLevel[];
   onDecrease: () => void;
   onIncrease: () => void;
   theme: Theme;
 }) {
-  const {
-    value,
-    availableLevels,
-    eligibleLevels,
-    onDecrease,
-    onIncrease,
-    theme,
-  } = props;
+  const { value, availableLevels, onDecrease, onIncrease, theme } = props;
 
-  const isEligible = eligibleLevels.includes(value);
+  const canDecrease = canStepDifficulty(availableLevels, value, "prev");
+  const canIncrease = canStepDifficulty(availableLevels, value, "next");
+  const hasAvailableDifficulty = availableLevels.length > 0;
+
+  function buttonStyle(enabled: boolean): React.CSSProperties {
+    return {
+      height: 34,
+      width: 56,
+      borderRadius: 10,
+      border: `1px solid ${theme.borderStandard}`,
+      background: enabled ? theme.controlBg : theme.bgSurface,
+      color: enabled ? theme.textPrimary : theme.textMuted,
+      cursor: enabled ? "pointer" : "default",
+      opacity: enabled ? 1 : 0.42,
+      display: "grid",
+      placeItems: "center",
+      fontFamily: UI_TYPO.family,
+      fontWeight: UI_TYPO.weightBold,
+      fontSize: 20,
+      lineHeight: 1,
+      padding: 0,
+      transition:
+        "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease",
+    };
+  }
 
   return (
     <div
       style={{
         display: "inline-grid",
-        gridTemplateColumns: "30px 82px 30px",
+        gridTemplateColumns: "56px 56px",
         alignItems: "center",
-        gap: 6,
+        gap: 8,
       }}
+      title={
+        hasAvailableDifficulty
+          ? `Difficulty ${value}`
+          : "No difficulty range available for this concept"
+      }
     >
       <button
         type="button"
         onClick={onDecrease}
-        disabled={availableLevels.length === 0}
-        style={{
-          height: 34,
-          width: 30,
-          borderRadius: 10,
-          border: `1px solid ${theme.borderStandard}`,
-          background: theme.controlBg,
-          color: theme.textMuted,
-          cursor: availableLevels.length === 0 ? "default" : "pointer",
-          opacity: availableLevels.length === 0 ? 0.5 : 1,
-          display: "grid",
-          placeItems: "center",
-          fontFamily: UI_TYPO.family,
-          fontWeight: UI_TYPO.weightBold,
-          fontSize: 18,
-          lineHeight: 1,
-          padding: 0,
-          transition:
-            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
-        }}
-        title="Decrease difficulty"
+        disabled={!canDecrease}
+        style={buttonStyle(canDecrease)}
+        title={canDecrease ? "Decrease difficulty" : "Minimum difficulty reached"}
         aria-label="Decrease difficulty"
       >
         −
       </button>
 
-      <div
-        style={{
-          height: 34,
-          borderRadius: 10,
-          border: `1px solid ${theme.borderStandard}`,
-          background: theme.controlBg,
-          color: isEligible ? theme.textPrimary : theme.textMuted,
-          opacity: isEligible ? 1 : 0.72,
-          display: "grid",
-          placeItems: "center",
-          whiteSpace: "nowrap",
-          fontFamily: UI_TYPO.family,
-          fontWeight: UI_TYPO.weightSemibold,
-          fontSize: UI_TYPO.sizeSm,
-          lineHeight: 1,
-        }}
-        title={
-          isEligible
-            ? `Level ${value} is within the current filters`
-            : `Level ${value} is outside the current filters`
-        }
-      >
-        Level {value}
-      </div>
-
       <button
         type="button"
         onClick={onIncrease}
-        disabled={availableLevels.length === 0}
-        style={{
-          height: 34,
-          width: 30,
-          borderRadius: 10,
-          border: `1px solid ${theme.borderStandard}`,
-          background: theme.controlBg,
-          color: theme.textMuted,
-          cursor: availableLevels.length === 0 ? "default" : "pointer",
-          opacity: availableLevels.length === 0 ? 0.5 : 1,
-          display: "grid",
-          placeItems: "center",
-          fontFamily: UI_TYPO.family,
-          fontWeight: UI_TYPO.weightBold,
-          fontSize: 18,
-          lineHeight: 1,
-          padding: 0,
-          transition:
-            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
-        }}
-        title="Increase difficulty"
+        disabled={!canIncrease}
+        style={buttonStyle(canIncrease)}
+        title={canIncrease ? "Increase difficulty" : "Maximum difficulty reached"}
         aria-label="Increase difficulty"
       >
         +
@@ -507,10 +492,7 @@ function SkillRow(props: {
     selectedConceptMatchesThinkingType &&
     currentDifficultyIsEligible;
 
-  const difficultyRangeText =
-    selected && availableLevels.length > 0
-      ? `${availableLevels[0]}–${availableLevels[availableLevels.length - 1]}`
-      : null;
+  
 
   const primaryBlockReason = buildPrimaryBlockReason({
     selected,
@@ -724,24 +706,22 @@ function SkillRow(props: {
                 </button>
 
                 {dropdownOpen ? (
-                  <div
-                    className="hover-scroll"
-                    style={{
-                      position: "absolute",
-                      top: "calc(100% + 6px)",
-                      left: 0,
-                      right: 0,
-                      zIndex: 60,
-                      width: "100%",
-                      maxWidth: "100%",
-                      maxHeight: 240,
-                      overflowY: "auto",
-                      borderRadius: 12,
-                      border: `1px solid ${theme.borderStandard}`,
-                      background: theme.bgElevated,
-                      boxShadow: theme.shadowStrong,
-                    }}
-                  >
+  <div
+    className="hover-scroll"
+    style={{
+      position: "relative",
+      zIndex: 80,
+      width: "100%",
+      maxWidth: "100%",
+      maxHeight: 240,
+      overflowY: "auto",
+      marginTop: 6,
+      borderRadius: 12,
+      border: `1px solid ${theme.borderStandard}`,
+      background: theme.bgElevated,
+      boxShadow: theme.shadowStrong,
+    }}
+  >
                     <button
                       type="button"
                       onClick={() => {
@@ -865,40 +845,18 @@ function SkillRow(props: {
             >
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "baseline",
-                  justifyContent: "space-between",
-                  gap: 12,
+                  ...UI_TEXT.sectionLabel,
+                  color: theme.textSecondary,
+                  whiteSpace: "nowrap",
                   marginBottom: 6,
                 }}
               >
-                <div
-                  style={{
-                    ...UI_TEXT.sectionLabel,
-                    color: theme.textSecondary,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Difficulty
-                </div>
-
-                {difficultyRangeText ? (
-                  <div
-                    style={{
-                      ...UI_TEXT.metadata,
-                      color: theme.textMuted,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {difficultyRangeText}
-                  </div>
-                ) : null}
+                Difficulty
               </div>
 
               <DifficultyStepper
                 value={currentDifficulty}
                 availableLevels={availableLevels}
-                eligibleLevels={eligibleLevels}
                 onDecrease={() =>
                   setDifficulty(
                     skill.id,
