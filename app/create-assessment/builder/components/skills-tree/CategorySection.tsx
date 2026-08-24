@@ -26,7 +26,7 @@ import {
 import {
   conceptMatchesThinkingTypeFilter,
   rankConceptsByTargetMarks,
-} from "@/math-helpers/QuestionLogic";
+} from "@/math-helpers/QuestionLogic_TEMP";
 import type { PaperPart } from "@/shared-types/PaperParts";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
 import type {

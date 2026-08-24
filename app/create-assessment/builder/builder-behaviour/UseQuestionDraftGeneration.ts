@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { makeId } from "@/math-helpers/QuestionLogic";
+import { makeId } from "@/math-helpers/QuestionLogic_TEMP";
 import type {
   DifficultyLevel,
   Paper,
