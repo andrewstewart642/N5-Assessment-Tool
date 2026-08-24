@@ -3,44 +3,99 @@
 import { UI_TEXT } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
+
 import AssessmentProgressHud, {
   type AssessmentProgressHudPaperRow,
 } from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
+
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+
+import type { BuilderPreviewViewMode } from "@/app/create-assessment/builder/BuilderUtils";
 
 type Props = {
   theme: Theme;
-  routerPushCompile: () => void;
-  showProgressPanel: boolean;
-  hudHeight: number;
-  hudResizeStartRef: React.MutableRefObject<{
-    startY: number;
-    startHeight: number;
-  } | null>;
-  setIsDraggingHud: React.Dispatch<React.SetStateAction<boolean>>;
-  viewPaper: Paper;
-  paperRows: AssessmentProgressHudPaperRow[];
-  qualityNotes: Array<string | BuilderNote>;
+
+  routerPushCompile:
+    () => void;
+
+  showProgressPanel:
+    boolean;
+
+  hudHeight:
+    number;
+
+  hudResizeStartRef:
+    React.MutableRefObject<{
+      startY: number;
+      startHeight: number;
+    } | null>;
+
+  setIsDraggingHud:
+    React.Dispatch<
+      React.SetStateAction<boolean>
+    >;
+
+  viewPaper:
+    Paper;
+
+  paperRows:
+    AssessmentProgressHudPaperRow[];
+
+  qualityNotes:
+    Array<
+      string |
+      BuilderNote
+    >;
+
   saveStateLabel?: string;
+
   isSaving?: boolean;
+
+  previewViewMode:
+    BuilderPreviewViewMode;
+
+  onCyclePreviewViewMode:
+    () => void;
 };
 
 export default function BuilderBottomHud({
   theme,
+
   routerPushCompile,
+
   showProgressPanel,
+
   hudHeight,
+
   hudResizeStartRef,
+
   setIsDraggingHud,
+
   viewPaper,
+
   paperRows,
+
   qualityNotes,
+
   saveStateLabel,
+
   isSaving = false,
+
+  previewViewMode,
+
+  onCyclePreviewViewMode,
 }: Props) {
-  const bottomOffset = showProgressPanel ? hudHeight + 14 : 14;
+  const bottomOffset =
+    showProgressPanel
+      ? hudHeight + 14
+      : 14;
+
   const showSaveState =
-    typeof saveStateLabel === "string" && saveStateLabel.trim().length > 0;
+    typeof saveStateLabel ===
+      "string" &&
+    saveStateLabel
+      .trim()
+      .length > 0;
 
   return (
     <>
@@ -48,11 +103,18 @@ export default function BuilderBottomHud({
         style={{
           position: "absolute",
           right: 14,
-          bottom: bottomOffset,
+          bottom:
+            bottomOffset,
+
           display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
+          flexDirection:
+            "column",
+
+          alignItems:
+            "flex-end",
+
           gap: 8,
+
           zIndex: 10,
         }}
       >
@@ -60,55 +122,113 @@ export default function BuilderBottomHud({
           <div
             aria-live="polite"
             style={{
-              display: "inline-flex",
-              alignItems: "center",
+              display:
+                "inline-flex",
+
+              alignItems:
+                "center",
+
               gap: 8,
-              padding: "6px 10px",
-              borderRadius: 999,
-              border: `1px solid ${theme.borderStandard}`,
-              background: theme.bgElevated,
-              color: theme.textMuted,
-              boxShadow: theme.shadow,
-              pointerEvents: "none",
+
+              padding:
+                "6px 10px",
+
+              borderRadius:
+                999,
+
+              border:
+                `1px solid ${theme.borderStandard}`,
+
+              background:
+                theme.bgElevated,
+
+              color:
+                theme.textMuted,
+
+              boxShadow:
+                theme.shadow,
+
+              pointerEvents:
+                "none",
+
               fontSize: 12,
-              fontWeight: 700,
+
+              fontWeight:
+                700,
+
               lineHeight: 1,
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
+
+              backdropFilter:
+                "blur(8px)",
+
+              WebkitBackdropFilter:
+                "blur(8px)",
             }}
           >
             <span
               style={{
                 width: 7,
                 height: 7,
-                borderRadius: 999,
-                background: isSaving ? theme.accentPrimary : theme.textMuted,
-                boxShadow: isSaving
-                  ? `0 0 10px ${theme.accentSoft}`
-                  : "0 0 10px rgba(148,163,184,0.28)",
-                animation: isSaving
-                  ? "builder-save-pulse 1s ease-in-out infinite"
-                  : "none",
-                flexShrink: 0,
+
+                borderRadius:
+                  999,
+
+                background:
+                  isSaving
+                    ? theme.accentPrimary
+                    : theme.textMuted,
+
+                boxShadow:
+                  isSaving
+                    ? `0 0 10px ${theme.accentSoft}`
+                    : "0 0 10px rgba(148,163,184,0.28)",
+
+                animation:
+                  isSaving
+                    ? "builder-save-pulse 1s ease-in-out infinite"
+                    : "none",
+
+                flexShrink:
+                  0,
               }}
             />
-            <span>{saveStateLabel}</span>
+
+            <span>
+              {saveStateLabel}
+            </span>
           </div>
         ) : null}
 
         <button
           type="button"
-          onClick={routerPushCompile}
+          onClick={
+            routerPushCompile
+          }
           style={{
-            border: `1px solid ${theme.borderStandard}`,
-            background: theme.bgElevated,
-            color: theme.textSecondary,
-            borderRadius: 16,
-            padding: "10px 14px",
-            cursor: "pointer",
-            boxShadow: theme.shadow,
+            border:
+              `1px solid ${theme.borderStandard}`,
+
+            background:
+              theme.bgElevated,
+
+            color:
+              theme.textSecondary,
+
+            borderRadius:
+              16,
+
+            padding:
+              "10px 14px",
+
+            cursor:
+              "pointer",
+
+            boxShadow:
+              theme.shadow,
+
             transition:
               "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease",
+
             ...UI_TEXT.buttonText,
           }}
           title="Compile assessment into printable pages"
@@ -120,69 +240,138 @@ export default function BuilderBottomHud({
       {showProgressPanel ? (
         <div
           style={{
-            borderTop: `1px solid ${theme.borderStandard}`,
+            borderTop:
+              `1px solid ${theme.borderStandard}`,
+
             minHeight: 0,
-            height: "100%",
-            overflow: "hidden",
-            position: "relative",
-            background: theme.bgSurface,
+
+            height:
+              "100%",
+
+            overflow:
+              "hidden",
+
+            position:
+              "relative",
+
+            background:
+              theme.bgSurface,
           }}
         >
           <div
-            onMouseDown={(e) => {
+            onMouseDown={(
+              e
+            ) => {
               e.preventDefault();
               e.stopPropagation();
 
-              hudResizeStartRef.current = {
-                startY: e.clientY,
-                startHeight: hudHeight,
-              };
-              setIsDraggingHud(true);
+              hudResizeStartRef.current =
+                {
+                  startY:
+                    e.clientY,
+
+                  startHeight:
+                    hudHeight,
+                };
+
+              setIsDraggingHud(
+                true
+              );
             }}
             title="Drag to resize notes panel"
             style={{
-              position: "absolute",
+              position:
+                "absolute",
+
               top: 0,
               left: 0,
               right: 0,
+
               height: 12,
-              cursor: "row-resize",
+
+              cursor:
+                "row-resize",
+
               zIndex: 3,
+
               display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              userSelect: "none",
-              WebkitUserSelect: "none",
+
+              justifyContent:
+                "center",
+
+              alignItems:
+                "center",
+
+              userSelect:
+                "none",
+
+              WebkitUserSelect:
+                "none",
             }}
           >
             <div
               style={{
                 width: 54,
                 height: 4,
-                borderRadius: 999,
-                background: theme.borderStandard,
+
+                borderRadius:
+                  999,
+
+                background:
+                  theme.borderStandard,
               }}
             />
           </div>
 
           <div
             style={{
-              position: "absolute",
-              inset: "12px 0 0 0",
+              position:
+                "absolute",
+
+              inset:
+                "12px 0 0 0",
+
               minHeight: 0,
-              overflow: "hidden",
+
+              overflow:
+                "hidden",
             }}
           >
             <AssessmentProgressHud
-              viewPaper={viewPaper}
-              paperRows={paperRows}
-              notes={qualityNotes}
-              theme={theme}
+              viewPaper={
+                viewPaper
+              }
+
+              paperRows={
+                paperRows
+              }
+
+              notes={
+                qualityNotes
+              }
+
+              theme={
+                theme
+              }
+
+              previewViewMode={
+                previewViewMode
+              }
+
+              onCyclePreviewViewMode={
+                onCyclePreviewViewMode
+              }
             />
           </div>
         </div>
       ) : (
-        <div style={{ minHeight: 0, overflow: "hidden" }} />
+        <div
+          style={{
+            minHeight: 0,
+            overflow:
+              "hidden",
+          }}
+        />
       )}
 
       <style jsx>{`
@@ -191,10 +380,12 @@ export default function BuilderBottomHud({
             transform: scale(1);
             opacity: 0.9;
           }
+
           50% {
             transform: scale(1.25);
             opacity: 1;
           }
+
           100% {
             transform: scale(1);
             opacity: 0.9;

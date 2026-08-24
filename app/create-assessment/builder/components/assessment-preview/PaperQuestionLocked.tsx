@@ -11,21 +11,46 @@ import {
 } from "../../builder-definitions/BuilderConstants";
 
 type Props = {
-  index: number; // 1-based
+  index: number;
   question: Question;
 };
 
 function marksFor(q: Question) {
-  if (typeof q.marks === "number" && Number.isFinite(q.marks)) return q.marks;
-  if (typeof q.targetMarks === "number" && Number.isFinite(q.targetMarks)) return q.targetMarks;
+  if (
+    typeof q.marks === "number" &&
+    Number.isFinite(q.marks)
+  ) {
+    return q.marks;
+  }
+
+  if (
+    typeof q.targetMarks === "number" &&
+    Number.isFinite(q.targetMarks)
+  ) {
+    return q.targetMarks;
+  }
+
   return 0;
 }
 
-function isParts(value: unknown): value is PaperPart[] {
-  return Array.isArray(value) && value.every((p) => p && typeof p === "object" && "kind" in (p as any));
+function isParts(
+  value: unknown
+): value is PaperPart[] {
+  return (
+    Array.isArray(value) &&
+    value.every(
+      (p) =>
+        p &&
+        typeof p === "object" &&
+        "kind" in (p as any)
+    )
+  );
 }
 
-export default function PaperQuestionLocked({ index, question }: Props) {
+export default function PaperQuestionLocked({
+  index,
+  question,
+}: Props) {
   const marks = marksFor(question);
 
   const metaBits = [
@@ -35,15 +60,24 @@ export default function PaperQuestionLocked({ index, question }: Props) {
     `Diff ${question.difficulty}`,
   ].filter(Boolean);
 
-  const promptParts = (question as any).promptParts;
-  const answerParts = (question as any).answerParts;
+  const promptParts =
+    (question as any).promptParts;
+
+  const answerParts =
+    (question as any).answerParts;
 
   return (
-    <div style={{ position: "relative", fontFamily: UI_TYPO.family }}>
+    <div
+      style={{
+        position: "relative",
+        fontFamily: UI_TYPO.family,
+      }}
+    >
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: `${QUESTION_NUMBER_COL_PX}px 1fr ${QUESTION_MARKS_COL_PX}px`,
+          gridTemplateColumns:
+            `${QUESTION_NUMBER_COL_PX}px 1fr ${QUESTION_MARKS_COL_PX}px`,
           columnGap: QUESTION_COL_GAP_PX,
           alignItems: "start",
         }}
@@ -77,11 +111,15 @@ export default function PaperQuestionLocked({ index, question }: Props) {
             {isParts(promptParts) ? (
               <PaperContent parts={promptParts} />
             ) : (
-              <span>{question.prompt ?? `${question.skillCode} — ${question.skillText}`}</span>
+              <span>
+                {question.prompt ??
+                  `${question.skillCode} — ${question.skillText}`}
+              </span>
             )}
           </div>
 
           <div
+            className="builder-question-answer"
             style={{
               fontFamily: UI_TYPO.family,
               fontSize: 13,
@@ -93,14 +131,19 @@ export default function PaperQuestionLocked({ index, question }: Props) {
             Answer:{" "}
             <span
               style={{
-                fontWeight: UI_TYPO.weightSemibold,
+                fontWeight:
+                  UI_TYPO.weightSemibold,
                 opacity: 1,
               }}
             >
               {isParts(answerParts) ? (
-                <PaperContent parts={answerParts} />
+                <PaperContent
+                  parts={answerParts}
+                />
               ) : (
-                <span>{question.answer ?? ""}</span>
+                <span>
+                  {question.answer ?? ""}
+                </span>
               )}
             </span>
           </div>

@@ -74,6 +74,7 @@ import { buildTopicBalanceNotes } from "./builder-logic/BuildTopicBalanceNotes";
 import { buildOperationalReasoningNotes } from "./builder-logic/BuildOperationalReasoningNotes";
 import {
   clamp,
+  type BuilderPreviewViewMode,
   type DraftByPaper,
   type EditDraftByPaper,
 } from "./BuilderUtils";
@@ -269,7 +270,34 @@ const defaultBuilderPaper = useMemo(() => {
   const [targetMarks, setTargetMarks] = useState<number>(2);
 
   const [activePaper, setActivePaper] = useState<Paper>(defaultBuilderPaper);
-const [viewPaper, setViewPaper] = useState<Paper>(defaultBuilderPaper);
+const [viewPaper, setViewPaper] =
+  useState<Paper>(defaultBuilderPaper);
+
+  const [previewViewMode, setPreviewViewMode] =
+  useState<BuilderPreviewViewMode>("EXAM");
+
+const suppressPreviewSpacing =
+  previewViewMode !== "EXAM";
+
+const showPreviewAnswers =
+  previewViewMode === "ANSWERS";
+
+const cyclePreviewViewMode =
+  useCallback(() => {
+    setPreviewViewMode((previousMode) => {
+      switch (previousMode) {
+        case "EXAM":
+          return "COMPACT";
+
+        case "COMPACT":
+          return "ANSWERS";
+
+        case "ANSWERS":
+        default:
+          return "EXAM";
+      }
+    });
+  }, []);
 
 const handleActivePaperChange = useCallback(
   (nextValueOrUpdater: SetStateAction<Paper>) => {
@@ -318,9 +346,8 @@ const [editDraftByPaper, setEditDraftByPaper] = useState<EditDraftByPaper>(() =>
   return buildEmptyEditDraftsByPaper(builderCourseConfig);
 });
 
-  const [measuredHeights, setMeasuredHeights] = useState<Record<string, number>>(
-    {}
-  );
+const [measuredHeights, setMeasuredHeights] =
+  useState<Record<string, number>>({});
 
   const [savedClasses, setSavedClasses] = useState<SchoolClass[]>([]);
   const [currentAssessmentId, setCurrentAssessmentId] = useState<string | null>(
@@ -987,17 +1014,98 @@ setEndTimeManuallyEditedByPaper({
   const getConceptIndex = (skillId: string) => conceptIndexBySkill[skillId] ?? -1;
   const getDifficulty = (skillId: string) => difficultyBySkill[skillId] ?? 3;
 
-  const editForView = editDraftByPaper[viewPaper];
-  const newDraftForView = draftByPaper[viewPaper];
+  const editForView =
+  editDraftByPaper[viewPaper];
 
-  const { renderById, previewPages } = usePreviewPages({
+const newDraftForView =
+  draftByPaper[viewPaper];
+
+const COMPACT_PREVIEW_SPACING_PX = 24;
+
+const previewAssignedForView =
+  useMemo(() => {
+    if (!suppressPreviewSpacing) {
+      return assignedForView;
+    }
+
+    return assignedForView.map(
+      (question) => ({
+        ...question,
+        spacingBasePx:
+          COMPACT_PREVIEW_SPACING_PX,
+      })
+    );
+  }, [
     assignedForView,
+    suppressPreviewSpacing,
+  ]);
+
+const previewEditForView =
+  useMemo(() => {
+    if (
+      !editForView ||
+      !suppressPreviewSpacing
+    ) {
+      return editForView;
+    }
+
+    return {
+      ...editForView,
+
+      original: {
+        ...editForView.original,
+        spacingBasePx:
+          COMPACT_PREVIEW_SPACING_PX,
+      },
+
+      draft: {
+        ...editForView.draft,
+        spacingBasePx:
+          COMPACT_PREVIEW_SPACING_PX,
+      },
+    };
+  }, [
     editForView,
+    suppressPreviewSpacing,
+  ]);
+
+const previewNewDraftForView =
+  useMemo(() => {
+    if (
+      !newDraftForView ||
+      !suppressPreviewSpacing
+    ) {
+      return newDraftForView;
+    }
+
+    return {
+      ...newDraftForView,
+      spacingBasePx:
+        COMPACT_PREVIEW_SPACING_PX,
+    };
+  }, [
     newDraftForView,
-    measuredHeights,
-    includeCoverSheet,
-    includeFormulaSheet,
-  });
+    suppressPreviewSpacing,
+  ]);
+
+const {
+  renderById,
+  previewPages,
+} = usePreviewPages({
+  assignedForView:
+    previewAssignedForView,
+
+  editForView:
+    previewEditForView,
+
+  newDraftForView:
+    previewNewDraftForView,
+
+  measuredHeights,
+
+  includeCoverSheet,
+  includeFormulaSheet,
+});
 
   const {
     zoomPct,
@@ -1230,95 +1338,113 @@ const {
           </div>
 
           <section
-            style={{
-              background: theme.bgSurface,
-              display: "grid",
-              gridTemplateRows: `65px minmax(0, 1fr) ${viewerHudRow}`,
-              minHeight: 0,
-              height: "100%",
-              overflow: "hidden",
-              position: "relative",
-              fontFamily: UI_TYPO.family,
-            }}
-          >
-            <BuilderTopBar
-              theme={theme}
-              assessmentName={assessmentName}
-              setAssessmentName={setAssessmentName}
-              assessmentDate={assessmentDate}
-              setAssessmentDate={setAssessmentDate}
-              builderCalendarOpen={builderCalendarOpen}
-              setBuilderCalendarOpen={setBuilderCalendarOpen}
-              builderDateFieldRef={builderDateFieldRef}
-              handleAssessmentNameFocus={handleAssessmentNameFocus}
-              handleAssessmentNameBlur={handleAssessmentNameBlur}
-              viewPaper={viewPaper}
-              setViewPaper={setViewPaper}
-              classLevelLabel={builderLevelLabel}
-              availableClasses={builderAvailableClasses}
-              selectedClassIds={builderSelectedClassIds}
-              useCompleteCourseCoverage={builderUseCompleteCourseCoverage}
-              onToggleClass={handleBuilderToggleClass}
-              onSelectCompleteCourseCoverage={handleBuilderSelectCompleteCourseCoverage}
-              zoomPct={zoomPct}
-              zoomIn={zoomIn}
-              zoomOut={zoomOut}
-              currentViewerPage={currentViewerPage}
-              totalViewerPages={totalViewerPages}
-            />
+  data-preview-answers={
+    showPreviewAnswers
+      ? "shown"
+      : "hidden"
+  }
+  style={{
+    background: theme.bgSurface,
+    display: "grid",
+    gridTemplateRows: `65px minmax(0, 1fr) ${viewerHudRow}`,
+    minHeight: 0,
+    height: "100%",
+    overflow: "hidden",
+    position: "relative",
+    fontFamily: UI_TYPO.family,
+  }}
+>
+  <BuilderTopBar
+    theme={theme}
+    assessmentName={assessmentName}
+    setAssessmentName={setAssessmentName}
+    assessmentDate={assessmentDate}
+    setAssessmentDate={setAssessmentDate}
+    builderCalendarOpen={builderCalendarOpen}
+    setBuilderCalendarOpen={setBuilderCalendarOpen}
+    builderDateFieldRef={builderDateFieldRef}
+    handleAssessmentNameFocus={handleAssessmentNameFocus}
+    handleAssessmentNameBlur={handleAssessmentNameBlur}
+    viewPaper={viewPaper}
+    setViewPaper={setViewPaper}
+    classLevelLabel={builderLevelLabel}
+    availableClasses={builderAvailableClasses}
+    selectedClassIds={builderSelectedClassIds}
+    useCompleteCourseCoverage={builderUseCompleteCourseCoverage}
+    onToggleClass={handleBuilderToggleClass}
+    onSelectCompleteCourseCoverage={
+      handleBuilderSelectCompleteCourseCoverage
+    }
+    zoomPct={zoomPct}
+    zoomIn={zoomIn}
+    zoomOut={zoomOut}
+    currentViewerPage={currentViewerPage}
+    totalViewerPages={totalViewerPages}
+  />
 
+  <BuilderPreviewPane
+    theme={theme}
+    previewPaneRef={previewPaneRef}
+    pageWrapperRefs={pageWrapperRefs}
+    flashWarning={flashWarning}
+    previewPages={previewPages}
+    viewPaper={viewPaper}
+    viewerScale={viewerScale}
+    activePaperCoverMarks={activePaperCoverMarks}
+    showCoverDateTime={showCoverDateTime}
+    coverDateTextForView={coverDateTextForView}
+    coverTimeTextForView={coverTimeTextForView}
+    printSubjectName={printSubjectName}
+    printQualificationBadge={printQualificationBadge}
+    printQualificationLabelLines={
+      printQualificationLabelLines
+    }
+    paperPrintTitle={paperPrintTitle}
+    paperCoverInstructionText={
+      paperCoverInstructionText
+    }
+    showNoCalculatorIcon={showNoCalculatorIcon}
+    showScottishCandidateNumberBox={
+      showScottishCandidateNumberBox
+    }
+    includeCoverSheet={includeCoverSheet}
+    includeFormulaSheet={includeFormulaSheet}
+    renderById={renderById}
+    editForView={previewEditForView}
+    onMeasure={onMeasure}
+    saveEdit={saveEdit}
+    removeWhileEditing={removeWhileEditing}
+    assignNewDraft={assignNewDraft}
+    removeNewDraft={removeNewDraft}
+    startEditLockedQuestion={
+      startEditLockedQuestion
+    }
+    canAssignNewDraft={canAssignNewDraft}
+    canSaveEdit={canSaveEdit}
+    invalidCommitMessage={invalidCommitMessage}
+  />
 
-            <BuilderPreviewPane
-              theme={theme}
-              previewPaneRef={previewPaneRef}
-              pageWrapperRefs={pageWrapperRefs}
-              flashWarning={flashWarning}
-              previewPages={previewPages}
-              viewPaper={viewPaper}
-              viewerScale={viewerScale}
-              activePaperCoverMarks={activePaperCoverMarks}
-              showCoverDateTime={showCoverDateTime}
-              coverDateTextForView={coverDateTextForView}
-              coverTimeTextForView={coverTimeTextForView}
-              printSubjectName={printSubjectName}
-              printQualificationBadge={printQualificationBadge}
-              printQualificationLabelLines={printQualificationLabelLines}
-              paperPrintTitle={paperPrintTitle}
-              paperCoverInstructionText={paperCoverInstructionText}
-              showNoCalculatorIcon={showNoCalculatorIcon}
-              showScottishCandidateNumberBox={showScottishCandidateNumberBox}
-              includeCoverSheet={includeCoverSheet}
-              includeFormulaSheet={includeFormulaSheet}
-              renderById={renderById}
-              editForView={editForView}
-              onMeasure={onMeasure}
-              saveEdit={saveEdit}
-              removeWhileEditing={removeWhileEditing}
-              assignNewDraft={assignNewDraft}
-              removeNewDraft={removeNewDraft}
-              startEditLockedQuestion={startEditLockedQuestion}
-              canAssignNewDraft={canAssignNewDraft}
-              canSaveEdit={canSaveEdit}
-              invalidCommitMessage={invalidCommitMessage}
-            />
+  <BuilderBottomHud
+    theme={theme}
+    routerPushCompile={routerPushCompile}
+    showProgressPanel={showProgressPanel}
+    hudHeight={hudHeight}
+    hudResizeStartRef={hudResizeStartRef}
+    setIsDraggingHud={setIsDraggingHud}
+    viewPaper={viewPaper}
+    paperRows={progressHudPaperRows}
+    qualityNotes={qualityNotes}
+    saveStateLabel={saveStateLabel}
+    isSaving={isSaving}
+    previewViewMode={previewViewMode}
+    onCyclePreviewViewMode={
+      cyclePreviewViewMode
+    }
+  />
+</section>
+</div>
 
-            <BuilderBottomHud
-              theme={theme}
-              routerPushCompile={routerPushCompile}
-              showProgressPanel={showProgressPanel}
-              hudHeight={hudHeight}
-              hudResizeStartRef={hudResizeStartRef}
-              setIsDraggingHud={setIsDraggingHud}
-              viewPaper={viewPaper}
-              paperRows={progressHudPaperRows}
-              qualityNotes={qualityNotes}
-              saveStateLabel={saveStateLabel}
-              isSaving={isSaving}
-            />
-          </section>
-        </div>
-
-        <BuilderSettingsPanel
+<BuilderSettingsPanel
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
           theme={theme}

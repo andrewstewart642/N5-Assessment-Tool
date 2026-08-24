@@ -6,7 +6,9 @@ type Props = {
   theme: Theme;
 };
 
-export default function BuilderGlobalStyles({ theme }: Props) {
+export default function BuilderGlobalStyles({
+  theme,
+}: Props) {
   return (
     <style jsx global>{`
       .hover-scroll {
@@ -15,7 +17,8 @@ export default function BuilderGlobalStyles({ theme }: Props) {
       }
 
       .hover-scroll:hover {
-        scrollbar-color: ${theme.textMuted} ${theme.bgSurface};
+        scrollbar-color: ${theme.textMuted}
+          ${theme.bgSurface};
       }
 
       .hover-scroll::-webkit-scrollbar {
@@ -67,7 +70,8 @@ export default function BuilderGlobalStyles({ theme }: Props) {
         padding: 4px 8px;
         min-height: 30px;
         background: ${theme.bgElevated};
-        border: 1px solid ${theme.borderStandard};
+        border: 1px solid
+          ${theme.borderStandard};
         border-radius: 12px;
         box-shadow: ${theme.shadow};
         color: ${theme.textSecondary};
@@ -102,7 +106,9 @@ export default function BuilderGlobalStyles({ theme }: Props) {
         color: ${theme.textSecondary};
         font-size: 14px;
         line-height: 1;
-        transition: color 0.15s ease, transform 0.15s ease;
+        transition:
+          color 0.15s ease,
+          transform 0.15s ease;
       }
 
       .zoom-overlay .zoom-btn:hover {
@@ -111,6 +117,27 @@ export default function BuilderGlobalStyles({ theme }: Props) {
 
       .zoom-overlay .zoom-btn:active {
         transform: scale(0.96);
+      }
+
+      /*
+       * Preview modes
+       *
+       * EXAM:
+       *   Answers hidden
+       *   Full evidence-led spacing
+       *
+       * COMPACT:
+       *   Answers hidden
+       *   Compact spacing
+       *
+       * ANSWERS:
+       *   Answers visible
+       *   Compact spacing
+       */
+
+      [data-preview-answers="hidden"]
+        .builder-question-answer {
+        display: none !important;
       }
     `}</style>
   );

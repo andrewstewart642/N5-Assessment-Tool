@@ -39,6 +39,11 @@ export type PreviewPage =
       pageNumber: number;
     };
 
+    export type BuilderPreviewViewMode =
+  | "EXAM"
+  | "COMPACT"
+  | "ANSWERS";
+
 export function estimateMinutes(paper: Paper, marks: number) {
   return Math.max(
     0,
