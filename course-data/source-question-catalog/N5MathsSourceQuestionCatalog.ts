@@ -35,12 +35,10 @@ import {
 } from "./N5_Maths_2017/Paper2/N5_Maths_2017_P2_Q05";
 
 // 2018
-//
-// NOTE:
-// N5_MATHS_2018_P1_Q01 is deliberately excluded.
-// The current source file contains duplicated 2014
-// evidence and must be re-catalogued from the genuine
-// 2018 source before being restored.
+import {
+  N5_MATHS_2018_P1_Q01,
+} from "./N5_Maths_2018/Paper1/N5_Maths_2018_P1_Q01";
+
 import {
   N5_MATHS_2018_P2_Q11,
 } from "./N5_Maths_2018/Paper2/N5_Maths_2018_P2_Q11";
@@ -113,6 +111,7 @@ export const N5_MATHS_SOURCE_QUESTION_CATALOG:
     N5_MATHS_2017_P1_Q03,
     N5_MATHS_2017_P2_Q05,
 
+    N5_MATHS_2018_P1_Q01,
     N5_MATHS_2018_P2_Q11,
 
     N5_MATHS_2019_P1_Q02,

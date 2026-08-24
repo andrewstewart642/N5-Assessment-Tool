@@ -585,6 +585,45 @@ function pickFamily(
   ]);
 }
 
+function isFamilySupportedForGeneration(args: {
+  familyId:
+    ReversePercentageFamilyId;
+
+  paper:
+    ReversePercentagePaper;
+
+  difficulty:
+    ReversePercentageDifficulty;
+}): boolean {
+  const {
+    familyId,
+    paper,
+    difficulty,
+  } = args;
+
+  if (
+    paper === "P1"
+  ) {
+    return (
+      familyId ===
+        "NUM_REVERSE_PERCENTAGE_PART_OF_WHOLE" ||
+      familyId ===
+        "NUM_REVERSE_PERCENTAGE_DECREASE_GIVEN_FINAL_VALUE"
+    );
+  }
+
+  if (
+    familyId ===
+    "NUM_REVERSE_PERCENTAGE_INCREASE_FIND_DIFFERENCE"
+  ) {
+    return (
+      difficulty !== 1
+    );
+  }
+
+  return true;
+}
+
 function p1DecreasePercentages(
   difficulty:
     ReversePercentageDifficulty
@@ -2011,6 +2050,31 @@ export function generateN5MathsReversePercentageQuestion(
   GeneratedReversePercentageQuestion {
   const difficulty =
     options.difficulty ?? 2;
+
+
+  if (
+    options.familyId &&
+    !isFamilySupportedForGeneration({
+      familyId:
+        options.familyId,
+
+      paper:
+        options.paper,
+
+      difficulty,
+    })
+  ) {
+    throw new Error(
+      [
+        "The requested reverse-percentage family is not supported",
+        "for the requested paper and difficulty.",
+        `Family: ${options.familyId}.`,
+        `Paper: ${options.paper}.`,
+        `Difficulty: ${difficulty}.`,
+      ].join(" ")
+    );
+  }
+
 
   for (
     let attempt = 0;

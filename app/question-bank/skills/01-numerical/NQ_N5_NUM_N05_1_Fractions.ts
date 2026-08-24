@@ -19,7 +19,8 @@ import type {
 } from "@/shared-types/QuestionSelectionTypes";
 
 import {
-  generateN5MathsFractionSamples,
+  generateN5MathsFractionQuestion,
+  type FractionDifficulty,
   type GeneratedFractionQuestion,
 } from "@/course-data/question-generators/fractions/N5MathsFractionGenerator";
 
@@ -33,8 +34,9 @@ type FractionOperationMode =
   | "BRACKETED";
 
 
-const FRACTION_DIFFICULTY_LEVEL:
-  DifficultyLevel = 3;
+const DEFAULT_FRACTION_DIFFICULTY:
+  FractionDifficulty = 2;
+
 
 const SIMPLEST_FORM_INSTRUCTION =
   "Give your answer in its simplest form.";
@@ -44,7 +46,9 @@ function textPart(
   value: string
 ): PaperPart {
   return {
-    kind: "text",
+    kind:
+      "text",
+
     value,
   };
 }
@@ -54,41 +58,69 @@ function mathPart(
   latex: string
 ): PaperPart {
   return {
-    kind: "math",
+    kind:
+      "math",
+
     latex,
   };
 }
 
 
+function normaliseDifficulty(
+  input:
+    DifficultyLevel
+): FractionDifficulty {
+  if (
+    input <= 1
+  ) {
+    return 1;
+  }
+
+  if (
+    input === 2
+  ) {
+    return 2;
+  }
+
+  return 3;
+}
+
+
 function modeFromConceptCode(
-  conceptCode: string
+  conceptCode:
+    string
 ): FractionOperationMode {
   if (
-    conceptCode === "N5.1.1"
+    conceptCode ===
+    "N5.1.1"
   ) {
     return "ADD";
   }
 
   if (
-    conceptCode === "N5.1.2"
+    conceptCode ===
+    "N5.1.2"
   ) {
     return "SUBTRACT";
   }
 
   if (
-    conceptCode === "N5.1.3"
+    conceptCode ===
+    "N5.1.3"
   ) {
     return "MULTIPLY";
   }
 
   if (
-    conceptCode === "N5.1.4"
+    conceptCode ===
+    "N5.1.4"
   ) {
     return "DIVIDE";
   }
 
   if (
-    conceptCode === "N5.1.5"
+    conceptCode ===
+    "N5.1.5"
   ) {
     return "BRACKETED";
   }
@@ -98,49 +130,74 @@ function modeFromConceptCode(
 
 
 function conceptLabelFromMode(
-  mode: FractionOperationMode
+  mode:
+    FractionOperationMode
 ): string {
   if (
-    mode === "ADD"
+    mode ===
+    "ADD"
   ) {
-    return "Fractions add";
+    return (
+      "Fractions add"
+    );
   }
 
   if (
-    mode === "SUBTRACT"
+    mode ===
+    "SUBTRACT"
   ) {
-    return "Fractions subtract";
+    return (
+      "Fractions subtract"
+    );
   }
 
   if (
-    mode === "MULTIPLY"
+    mode ===
+    "MULTIPLY"
   ) {
-    return "Fractions multiply";
+    return (
+      "Fractions multiply"
+    );
   }
 
   if (
-    mode === "DIVIDE"
+    mode ===
+    "DIVIDE"
   ) {
-    return "Fractions divide";
+    return (
+      "Fractions divide"
+    );
   }
 
   if (
-    mode === "BRACKETED"
+    mode ===
+    "BRACKETED"
   ) {
-    return "Bracketed fraction operations";
+    return (
+      "Bracketed fraction operations"
+    );
   }
 
-  return "Fraction operations";
+  return (
+    "Fraction operations"
+  );
 }
 
 
 function expressionToLatex(
-  expression: string
+  expression:
+    string
 ): string {
   const cleaned =
     expression
-      .replace(/\.$/, "")
-      .replace(/\s+/g, " ")
+      .replace(
+        /\.$/,
+        ""
+      )
+      .replace(
+        /\s+/g,
+        " "
+      )
       .trim();
 
   const tokens =
@@ -152,7 +209,9 @@ function expressionToLatex(
         (token) =>
           token.trim()
       )
-      .filter(Boolean);
+      .filter(
+        Boolean
+      );
 
   return tokens
     .map(
@@ -170,7 +229,8 @@ function expressionToLatex(
             whole,
             numerator,
             denominator,
-          ] = mixedMatch;
+          ] =
+            mixedMatch;
 
           return (
             `${whole}\\,\\dfrac{${numerator}}{${denominator}}`
@@ -189,7 +249,8 @@ function expressionToLatex(
             ,
             numerator,
             denominator,
-          ] = fractionMatch;
+          ] =
+            fractionMatch;
 
           return (
             `\\dfrac{${numerator}}{${denominator}}`
@@ -197,46 +258,63 @@ function expressionToLatex(
         }
 
         if (
-          token === "×"
+          token ===
+          "×"
         ) {
-          return "\\times";
+          return (
+            "\\times"
+          );
         }
 
         if (
-          token === "÷"
+          token ===
+          "÷"
         ) {
-          return "\\div";
+          return (
+            "\\div"
+          );
         }
 
         if (
-          token === "−" ||
-          token === "-"
+          token ===
+            "−" ||
+          token ===
+            "-"
         ) {
           return "-";
         }
 
         if (
-          token === "+"
+          token ===
+          "+"
         ) {
           return "+";
         }
 
         if (
-          token === "("
+          token ===
+          "("
         ) {
-          return "\\left(";
+          return (
+            "\\left("
+          );
         }
 
         if (
-          token === ")"
+          token ===
+          ")"
         ) {
-          return "\\right)";
+          return (
+            "\\right)"
+          );
         }
 
         return token;
       }
     )
-    .join(" ");
+    .join(
+      " "
+    );
 }
 
 
@@ -257,7 +335,8 @@ function buildPromptParts(
             ""
           )
           .trim()
-      : generated.questionText.trim();
+      : generated.questionText
+          .trim();
 
   const expressionText =
     withoutInstruction
@@ -316,81 +395,112 @@ function buildAnswerParts(
 }
 
 
-function operationMatchesMode(
-  generated:
-    GeneratedFractionQuestion,
+function generateFractionQuestionForMode(
   mode:
-    FractionOperationMode
-): boolean {
+    FractionOperationMode,
+
+  difficulty:
+    FractionDifficulty
+): GeneratedFractionQuestion {
   if (
-    mode === "AUTO"
+    mode ===
+    "ADD"
   ) {
-    return true;
+    return (
+      generateN5MathsFractionQuestion({
+        difficulty,
+        operationType:
+          "ADD",
+      })
+    );
   }
 
   if (
-    mode === "BRACKETED"
+    mode ===
+    "SUBTRACT"
   ) {
     return (
-      generated.operationType ===
-      "BRACKETED_SUM_AND_MULTIPLY"
+      generateN5MathsFractionQuestion({
+        difficulty,
+        operationType:
+          "SUBTRACT",
+      })
+    );
+  }
+
+  if (
+    mode ===
+    "MULTIPLY"
+  ) {
+    return (
+      generateN5MathsFractionQuestion({
+        difficulty,
+        operationType:
+          "MULTIPLY",
+      })
+    );
+  }
+
+  if (
+    mode ===
+    "DIVIDE"
+  ) {
+    return (
+      generateN5MathsFractionQuestion({
+        difficulty,
+        operationType:
+          "DIVIDE",
+      })
+    );
+  }
+
+  if (
+    mode ===
+    "BRACKETED"
+  ) {
+    return (
+      generateN5MathsFractionQuestion({
+        difficulty,
+        operationType:
+          "BRACKETED_SUM_AND_MULTIPLY",
+      })
     );
   }
 
   return (
-    generated.operationType ===
-    mode
-  );
-}
-
-
-function generateMatchingFractionQuestion(
-  mode:
-    FractionOperationMode
-): GeneratedFractionQuestion {
-  for (
-    let attempt = 0;
-    attempt < 500;
-    attempt += 1
-  ) {
-    const generated =
-      generateN5MathsFractionSamples(
-        1
-      )[0];
-
-    if (
-      operationMatchesMode(
-        generated,
-        mode
-      )
-    ) {
-      return generated;
-    }
-  }
-
-  return (
-    generateN5MathsFractionSamples(
-      1
-    )[0]
+    generateN5MathsFractionQuestion({
+      difficulty,
+    })
   );
 }
 
 
 function buildSelectionMeta(args: {
-  templateId: string;
+  level:
+    DifficultyLevel;
+
+  templateId:
+    string;
 }): QuestionVariantSelectionMeta {
   return {
     level:
-      FRACTION_DIFFICULTY_LEVEL,
+      args.level,
 
     templateId:
       args.templateId,
 
     marks: {
-      totalMarks: 2,
-      cMarks: 2,
-      aMarks: 0,
-      reasoningMarks: 0,
+      totalMarks:
+        2,
+
+      cMarks:
+        2,
+
+      aMarks:
+        0,
+
+      reasoningMarks:
+        0,
     },
 
     standardProfile:
@@ -418,9 +528,15 @@ function buildGeneratedFractionQuestion(
       conceptCode
     );
 
+  const difficulty =
+    normaliseDifficulty(
+      context.difficulty
+    );
+
   const generated =
-    generateMatchingFractionQuestion(
-      mode
+    generateFractionQuestionForMode(
+      mode,
+      difficulty
     );
 
   const label =
@@ -431,10 +547,12 @@ function buildGeneratedFractionQuestion(
   const templateId = [
     "source-catalogue-fractions",
     mode.toLowerCase(),
-    `level-${FRACTION_DIFFICULTY_LEVEL}`,
+    `level-${difficulty}`,
     generated.familyId,
     generated.operationType,
-  ].join("-");
+  ].join(
+    "-"
+  );
 
   return {
     prompt:
@@ -443,7 +561,8 @@ function buildGeneratedFractionQuestion(
     answer:
       generated.answerText,
 
-    marks: 2,
+    marks:
+      2,
 
     questionCode:
       generated.familyId,
@@ -459,10 +578,17 @@ function buildGeneratedFractionQuestion(
       ),
 
     markBreakdown: {
-      totalMarks: 2,
-      cMarks: 2,
-      aMarks: 0,
-      reasoningMarks: 0,
+      totalMarks:
+        2,
+
+      cMarks:
+        2,
+
+      aMarks:
+        0,
+
+      reasoningMarks:
+        0,
     },
 
     classification: {
@@ -494,35 +620,55 @@ function buildGeneratedFractionQuestion(
     templateId,
 
     topicMarkBreakdown: {
-      NUM: 2,
-      ALG: 0,
-      GEO: 0,
-      TRIG: 0,
-      STAT: 0,
+      NUM:
+        2,
+
+      ALG:
+        0,
+
+      GEO:
+        0,
+
+      TRIG:
+        0,
+
+      STAT:
+        0,
     },
 
     selectionMeta:
       buildSelectionMeta({
+        level:
+          difficulty,
+
         templateId,
       }),
   };
 }
 
 
-function levelSelectionEntry():
-  QuestionVariantSelectionMeta {
+function levelSelectionEntry(
+  level:
+    FractionDifficulty
+): QuestionVariantSelectionMeta {
   return {
-    level:
-      FRACTION_DIFFICULTY_LEVEL,
+    level,
 
     templateId:
-      `source-catalogue-fractions-level-${FRACTION_DIFFICULTY_LEVEL}`,
+      `source-catalogue-fractions-level-${level}`,
 
     marks: {
-      totalMarks: 2,
-      cMarks: 2,
-      aMarks: 0,
-      reasoningMarks: 0,
+      totalMarks:
+        2,
+
+      cMarks:
+        2,
+
+      aMarks:
+        0,
+
+      reasoningMarks:
+        0,
     },
 
     standardProfile:
@@ -557,15 +703,23 @@ export const FractionsConceptModule:
 
       difficultyProfile: {
         availableLevels: [
-          FRACTION_DIFFICULTY_LEVEL,
+          1,
+          2,
+          3,
         ],
 
         defaultLevel:
-          FRACTION_DIFFICULTY_LEVEL,
+          DEFAULT_FRACTION_DIFFICULTY,
 
         levelDescriptions: {
+          1:
+            "Accessible National 5 fraction arithmetic using smaller values while preserving the normal question structure.",
+
+          2:
+            "Typical National 5 fraction arithmetic and numerical burden.",
+
           3:
-            "Current National 5 fraction-question profile.",
+            "More demanding National 5 fraction arithmetic at the upper end of the normal non-calculator range.",
         },
       },
 
@@ -589,22 +743,43 @@ export const FractionsConceptModule:
       },
 
       levelSelectionProfile: {
+        1: [
+          levelSelectionEntry(
+            1
+          ),
+        ],
+
+        2: [
+          levelSelectionEntry(
+            2
+          ),
+        ],
+
         3: [
-          levelSelectionEntry(),
+          levelSelectionEntry(
+            3
+          ),
         ],
       },
     },
 
     canHandle(
-      code: string
+      code:
+        string
     ) {
       return (
-        code === "N5.1" ||
-        code === "N5.1.1" ||
-        code === "N5.1.2" ||
-        code === "N5.1.3" ||
-        code === "N5.1.4" ||
-        code === "N5.1.5"
+        code ===
+          "N5.1" ||
+        code ===
+          "N5.1.1" ||
+        code ===
+          "N5.1.2" ||
+        code ===
+          "N5.1.3" ||
+        code ===
+          "N5.1.4" ||
+        code ===
+          "N5.1.5"
       );
     },
 
