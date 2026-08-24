@@ -5,7 +5,7 @@ import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
 import { INTERACTION } from "@/app/ui/InteractionTokens";
 import {

@@ -43,7 +43,7 @@ import type {
   Skill,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 
 import BuilderGlobalStyles from "./BuilderStyles";
 import BuilderSettingsPanel from "@/app/create-assessment/builder/components/builder-controls/BuilderSettingsPanel";

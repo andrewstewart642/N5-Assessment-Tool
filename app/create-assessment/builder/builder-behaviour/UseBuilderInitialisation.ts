@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-import type { Paper, Question } from "@/shared-types/AssessmentTypes";
+import type { Paper, Question } from "@/shared-types/AssessmentTypes_TEMP";
 import {
   BUILDER_STORAGE_KEY_PAIRS,
   readBuilderStorageValue,

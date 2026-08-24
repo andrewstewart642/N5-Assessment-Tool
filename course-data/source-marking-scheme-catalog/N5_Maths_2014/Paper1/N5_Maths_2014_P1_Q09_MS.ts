@@ -22,7 +22,7 @@ export const N5_MATHS_2014_P1_Q09_MS = {
   totalMarks: 3,
 
   questionFamilyId:
-    "NUM_REVERSE_PERCENTAGE_DECREASE_GIVEN_FINAL_VALUE",
+    "NUM_REVERSE_PERCENTAGE_PART_OF_WHOLE",
 
   sourceContext:
     "STANDARD_EXAM",

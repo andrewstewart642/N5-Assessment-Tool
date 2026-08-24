@@ -9,7 +9,7 @@ import type {
   SkillDomain,
   SkillPaperSuitability,
   QuestionTopicMarkBreakdown,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 import type {
   WorkedAnswerSet,
 } from "@/shared-types/AnswerGenerationTypes";

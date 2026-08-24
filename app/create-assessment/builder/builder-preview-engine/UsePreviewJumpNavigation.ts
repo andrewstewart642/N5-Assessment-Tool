@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 import type { PreviewPage } from "../BuilderUtils";
 
 type PendingJumpRef = React.MutableRefObject<{

@@ -10,7 +10,7 @@ import type {
   Paper,
   Question,
   SkillPaperSuitability,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 import type { BuildPriority } from "../../setup/AssessmentSetupStorage";
 import { getBuilderCourseConfig } from "./BuilderCourseConfig";
 

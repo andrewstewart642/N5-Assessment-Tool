@@ -1,4 +1,4 @@
-import type { Paper, Question } from "@/shared-types/AssessmentTypes";
+import type { Paper, Question } from "@/shared-types/AssessmentTypes_TEMP";
 import type { PaperPart } from "@/shared-types/PaperParts";
 
 import {

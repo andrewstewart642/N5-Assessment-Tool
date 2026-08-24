@@ -1,7 +1,7 @@
 import { getActiveCourseConfig } from "@/course-data/course-configs/ActiveCourseConfig";
 import { getCourseConfigById } from "@/course-data/course-configs/CourseConfigRegistry";
 import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
-import type { CourseId } from "@/shared-types/AssessmentTypes";
+import type { CourseId } from "@/shared-types/AssessmentTypes_TEMP";
 
 export const BUILDER_ACTIVE_COURSE_ID_KEY =
   "assessment_builder_active_course_id_v1";

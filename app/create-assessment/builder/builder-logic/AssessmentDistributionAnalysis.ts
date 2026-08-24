@@ -6,7 +6,7 @@ import type {
   Question,
   QuestionTopicMarkBreakdown,
   SkillDomain,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 import type {
   CourseAssessmentConfig,
   CourseTopicTarget,

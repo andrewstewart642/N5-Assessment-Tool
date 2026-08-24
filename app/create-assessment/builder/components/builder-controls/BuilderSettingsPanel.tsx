@@ -10,7 +10,7 @@ import {
   type BuilderPaperStringMap,
 } from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
 import type { Theme } from "@/ui/AppTheme";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 
 type StringSetter = Dispatch<SetStateAction<string>>;
 type BooleanSetter = Dispatch<SetStateAction<boolean>>;

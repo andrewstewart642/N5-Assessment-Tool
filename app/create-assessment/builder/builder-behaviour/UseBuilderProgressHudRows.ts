@@ -4,7 +4,7 @@ import {
   getCoursePaperConfig,
   type CourseAssessmentConfig,
 } from "@/course-data/course-configs/CourseConfigTypes";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 import type { AssessmentProgressHudPaperRow } from "../components/assessment-progress/AssessmentProgressHud";
 import {
   getPaperNumberValue,

@@ -8,7 +8,7 @@ import type {
   Skill,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
 import { getCoursePaperSuitabilityTags } from "@/course-data/course-configs/CourseConfigTypes";
 import {

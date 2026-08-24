@@ -1,7 +1,7 @@
 // app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation.ts
 
 import type { PaperPart } from "@/shared-types/PaperParts";
-import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+import type { DifficultyLevel } from "@/shared-types/AssessmentTypes_TEMP";
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,

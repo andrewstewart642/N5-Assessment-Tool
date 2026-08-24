@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { clamp, A4_W_PX, type PreviewPage } from "../BuilderUtils";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 
 type UsePreviewViewportArgs = {
   previewPaneRef: React.RefObject<HTMLDivElement | null>;

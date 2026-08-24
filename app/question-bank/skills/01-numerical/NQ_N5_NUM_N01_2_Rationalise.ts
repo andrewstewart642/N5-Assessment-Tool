@@ -48,7 +48,7 @@
 // ======================================================================================
 
 import type { PaperPart } from "@/shared-types/PaperParts";
-import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+import type { DifficultyLevel } from "@/shared-types/AssessmentTypes_TEMP";
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,

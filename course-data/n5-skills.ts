@@ -1,6 +1,6 @@
 // course-data/N5-Skills.ts
 
-import type { Concept, Skill, SkillsData } from "@/shared-types/AssessmentTypes";
+import type { Concept, Skill, SkillsData } from "@/shared-types/AssessmentTypes_TEMP";
 
 function buildConcept(
   id: string,

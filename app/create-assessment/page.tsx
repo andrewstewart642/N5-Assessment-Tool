@@ -31,7 +31,7 @@ import {
   type CourseAssessmentConfig,
   type CoursePaperConfig,
 } from "@/course-data/course-configs/CourseConfigTypes";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 
 type SetupCardProps = {
   title: string;

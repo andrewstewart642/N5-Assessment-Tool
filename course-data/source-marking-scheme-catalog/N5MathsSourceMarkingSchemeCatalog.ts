@@ -1,6 +1,6 @@
 import type {
   Paper,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 
 import type {
   SourceMarkingSchemeCatalogEntry,

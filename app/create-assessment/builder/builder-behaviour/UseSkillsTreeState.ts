@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+import type { DifficultyLevel } from "@/shared-types/AssessmentTypes_TEMP";
 
 type ConceptIndexBySkill = Record<string, number>;
 type DifficultyBySkill = Record<string, DifficultyLevel>;

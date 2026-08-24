@@ -5,7 +5,7 @@ import type {
   Paper,
   Question,
   SkillPaperSuitability,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 import type { QuestionCalculatorStatus } from "@/shared-types/QuestionSelectionTypes";
 
 type BuildCalculatorSuitabilityNotesArgs = {

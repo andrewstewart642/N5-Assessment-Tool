@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 import { UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
 import { INTERACTION } from "@/app/ui/InteractionTokens";

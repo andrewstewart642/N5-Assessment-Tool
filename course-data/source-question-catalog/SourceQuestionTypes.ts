@@ -3,7 +3,7 @@ import type {
   CourseId,
   Paper,
   SkillPaperSuitability,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 
 export type SourceQuestionId = string;
 

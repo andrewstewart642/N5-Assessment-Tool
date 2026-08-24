@@ -1,7 +1,7 @@
 import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
 import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
 import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
 import type {
   TopicBalanceAnalysis,
   TopicBalanceRow,

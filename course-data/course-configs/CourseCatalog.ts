@@ -1,5 +1,5 @@
 import { DEFAULT_COURSE_ID } from "./CourseConfigRegistry";
-import type { CourseId } from "@/shared-types/AssessmentTypes";
+import type { CourseId } from "@/shared-types/AssessmentTypes_TEMP";
 
 export type CourseClassCourseLabel =
   | "National 5 Maths"

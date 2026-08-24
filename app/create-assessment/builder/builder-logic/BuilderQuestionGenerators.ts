@@ -5,7 +5,7 @@ import type {
   DifficultyLevel,
   QuestionSkillLink,
   Skill,
-} from "@/shared-types/AssessmentTypes";
+} from "@/shared-types/AssessmentTypes_TEMP";
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
