@@ -148,29 +148,30 @@ export const N5_MATHS_2022_P1_Q10 = {
     "Strong P1 counterpart to the 2015 calculator-paper discount example. Both assess the same reverse-percentage structure, but this source uses a percentage and monetary value deliberately engineered for straightforward non-calculator working. Generator paper selection should therefore affect numerical construction, not simply question metadata.",
 
   answerSpace: {
-    category: "LARGE",
-    estimatedLines: 8,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 521,
-      bottomPx: 1805,
-      heightPx: 1284,
-
-      topPt: 125.086,
-      bottomPt: 433.205,
-      heightPt: 308.119,
-
-      heightMm: 108.7,
+      category: "LARGE",
+      estimatedLines: 8,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 9,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 521,
+        bottomPx: 1805,
+        heightPx: 1284,
+  
+        topPt: 125.04,
+        bottomPt: 433.2,
+        heightPt: 308.16,
+  
+        heightMm: 108.71,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q10 instruction line to the top of the Q11 prompt block on physical PDF page 9.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q10 instruction line to the top of the Q11 prompt block on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_DECREASE_GIVEN_FINAL_VALUE",

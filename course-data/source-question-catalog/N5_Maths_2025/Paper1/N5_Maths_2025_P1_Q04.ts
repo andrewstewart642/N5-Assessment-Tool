@@ -147,29 +147,30 @@ export const N5_MATHS_2025_P1_Q04 = {
     "Strong recent evidence for a Paper 1 decrease family. Compare with 2022 P1, where a 30% discount leaves £16.10, and 2015 P2, where a 15% discount leaves £297.50. These demonstrate that the underlying family can appear on either paper, with numerical construction controlling calculator suitability. Generated questions should vary context and language substantially while preserving the appropriate paper-specific arithmetic burden.",
 
   answerSpace: {
-    category: "LARGE",
-    estimatedLines: 8,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 1910,
-      bottomPx: 3228,
-      heightPx: 1318,
-
-      topPt: 458.4,
-      bottomPt: 774.72,
-      heightPt: 316.32,
-
-      heightMm: 111.59,
+      category: "LARGE",
+      estimatedLines: 8,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 4,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 1922,
+        bottomPx: 3228,
+        heightPx: 1306,
+  
+        topPt: 461.28,
+        bottomPt: 774.72,
+        heightPt: 313.44,
+  
+        heightMm: 110.57,
+      },
+  
+      notes:
+        "Remeasured from the bottom of the final Q4 instruction line to the top of the barcode/footer region on physical PDF page 4. Q4 is the final question on the page, so part of this area reflects page layout.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q4 instruction line to the top of the barcode/footer region on the original PDF page. As Q4 is the final question on the page, some of this space reflects page layout rather than the minimum working space required.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_DECREASE_GIVEN_FINAL_VALUE",

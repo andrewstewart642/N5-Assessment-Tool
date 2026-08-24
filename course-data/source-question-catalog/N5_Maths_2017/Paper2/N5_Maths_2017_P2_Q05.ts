@@ -145,29 +145,30 @@ export const N5_MATHS_2017_P2_Q05 = {
     "Useful evidence that SQA varies command style even within the same mathematical family. This should inform wording variation in the generator so questions do not repeatedly end with 'Calculate...'.",
 
   answerSpace: {
-    category: "LARGE",
-    estimatedLines: 6,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 1780,
-      bottomPx: 2805,
-      heightPx: 1025,
-
-      topPt: 427.2,
-      bottomPt: 673.2,
-      heightPt: 246.0,
-
-      heightMm: 86.8,
+      category: "LARGE",
+      estimatedLines: 6,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 21,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 2129,
+        bottomPx: 3120,
+        heightPx: 991,
+  
+        topPt: 510.96,
+        bottomPt: 748.8,
+        heightPt: 237.84,
+  
+        heightMm: 83.9,
+      },
+  
+      notes:
+        "Remeasured at 300 dpi from the bottom of the final Q5 question line to the top of the '[Turn over]' marker on physical PDF page 21. This replaces the previous shifted coordinate pair.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q5 question line to the '[Turn over]' marker on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_INCREASE_GIVEN_FINAL_VALUE",

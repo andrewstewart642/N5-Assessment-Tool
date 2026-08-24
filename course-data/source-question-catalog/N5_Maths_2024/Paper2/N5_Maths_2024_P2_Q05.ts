@@ -149,29 +149,30 @@ export const N5_MATHS_2024_P2_Q05 = {
     "Useful comparison with the 2017 and 2023 increase examples. All use the same inverse-percentage mathematics but express the relationship differently: '15% more than', 'has increased by 8%', and 'an increase of 16% on'. The generator should treat these as evidence for multiple independent linguistic constructions rather than a single fixed template.",
 
   answerSpace: {
-    category: "MEDIUM",
-    estimatedLines: 5,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 1764,
-      bottomPx: 2530,
-      heightPx: 766,
-
-      topPt: 423.36,
-      bottomPt: 607.2,
-      heightPt: 183.84,
-
-      heightMm: 64.85,
+      category: "MEDIUM",
+      estimatedLines: 5,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 19,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 1851,
+        bottomPx: 2617,
+        heightPx: 766,
+  
+        topPt: 444.24,
+        bottomPt: 628.08,
+        heightPt: 183.84,
+  
+        heightMm: 64.85,
+      },
+  
+      notes:
+        "Remeasured from the bottom of the final Q5 instruction line to the top of the '[Turn over]' marker on physical PDF page 19. The previous height was correct but both coordinates were offset.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q5 instruction line to the '[Turn over]' marker on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_INCREASE_GIVEN_FINAL_VALUE",

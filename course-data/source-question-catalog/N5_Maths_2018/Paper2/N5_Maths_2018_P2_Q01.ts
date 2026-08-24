@@ -248,18 +248,30 @@ export const N5_MATHS_2018_P2_Q01 = {
 
 
   answerSpace: {
-    category:
-      "MEDIUM",
-
-    estimatedLines:
-      6,
-
-    measurementMethod:
-      "NOT_MEASURED",
-
-    notes:
-      "Q1 appears at the top of Paper 2 page 3 before Q2 begins on the following page. Exact rendered answer-space dimensions have not been recorded.",
-  },
+      category: "FULL_PAGE",
+      estimatedLines: 15,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 23,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 816,
+        bottomPx: 3228,
+        heightPx: 2412,
+  
+        topPt: 195.84,
+        bottomPt: 774.72,
+        heightPt: 578.88,
+  
+        heightMm: 204.22,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q1 instruction line to the top of the barcode/footer region on physical PDF page 23. Q1 is the only question on the page, so this is a page-layout outlier rather than a minimum working-space requirement.",
+    },
 
 
   linkedGeneratorFamilyIds: [

@@ -251,25 +251,68 @@ export const N5_MATHS_2014_P2_Q01 = {
 
 
   /**
-   * Source page provides effectively the remainder
-   * of the page for working.
+   * Exact source response-space measurement.
    *
-   * This has not yet been pixel-measured, so keep
-   * the measurement status explicit rather than
-   * inventing PDF-render coordinates.
+   * Standard:
+   * - source PDF rendered at 300 dpi;
+   * - A4 render = 2481 × 3508 px;
+   * - top-left coordinate origin;
+   * - measured from the bottom of the final
+   *   instruction line to the top of the
+   *   [Turn over] marker.
+   *
+   * Although Q1 is the only question on this
+   * printed page, the area below the Turn-over
+   * marker is not pupil response space and must
+   * not be counted.
    */
   answerSpace: {
     category:
-      "FULL_PAGE",
+      "MEDIUM",
 
     estimatedLines:
-      18,
+      5,
 
     measurementMethod:
-      "MANUAL_ESTIMATE",
+      "PDF_RENDER",
+
+    sourceMeasurement: {
+      pdfPageNumber:
+        19,
+
+      renderDpi:
+        300,
+
+      pageWidthPx:
+        2481,
+
+      pageHeightPx:
+        3508,
+
+      topPx:
+        577,
+
+      bottomPx:
+        1355,
+
+      heightPx:
+        778,
+
+      topPt:
+        138.48,
+
+      bottomPt:
+        325.2,
+
+      heightPt:
+        186.72,
+
+      heightMm:
+        65.87,
+    },
 
     notes:
-      "Q1 is the only question on the source page. After the four-line prompt, almost the entire remainder of the page is available for working before the Turn over/footer region. No pixel measurement has been recorded.",
+      "Measured from the bottom of the final Q1 instruction line ('Give your answer to the nearest ten.') to the top of the '[Turn over]' marker on physical PDF page 19. The previous FULL_PAGE/manual-estimate classification incorrectly treated space below the Turn-over marker as available pupil working space.",
   },
 
 

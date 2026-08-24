@@ -146,29 +146,30 @@ export const N5_MATHS_2015_P2_Q08 = {
     "Strong evidence for a calculator-paper decrease family. Unlike a P1 example, the source uses a decimal currency amount and a divisor of 0.85, making calculator use appropriate. The generator should reproduce the level of interpretation and arithmetic demand while drawing from a broad independent pool of contexts and wording structures.",
 
   answerSpace: {
-    category: "LARGE",
-    estimatedLines: 8,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 1922,
-      bottomPx: 3228,
-      heightPx: 1306,
-
-      topPt: 461.28,
-      bottomPt: 774.72,
-      heightPt: 313.44,
-
-      heightMm: 110.57,
+      category: "LARGE",
+      estimatedLines: 8,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 24,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 1927,
+        bottomPx: 3228,
+        heightPx: 1301,
+  
+        topPt: 462.48,
+        bottomPt: 774.72,
+        heightPt: 312.24,
+  
+        heightMm: 110.15,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q8 instruction line to the top of the barcode/footer region on physical PDF page 24.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q8 instruction line to the top of the barcode/footer region on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_DECREASE_GIVEN_FINAL_VALUE",

@@ -1,0 +1,411 @@
+{
+  "questionCataloguePatches": [
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2016/Paper2/N5_Maths_2016_P2_Q01.ts",
+      "category": "MEDIUM",
+      "lines": 6,
+      "page": 19,
+      "top": 816,
+      "bottom": 1759,
+      "note": "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 19.",
+      "height": 943,
+      "topPt": 195.84,
+      "bottomPt": 422.16,
+      "heightPt": 226.32,
+      "mm": 79.84
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2017/Paper2/N5_Maths_2017_P2_Q02.ts",
+      "category": "LARGE",
+      "lines": 7,
+      "page": 19,
+      "top": 2024,
+      "bottom": 3109,
+      "note": "Measured from the bottom of the final Q2 rounding instruction to the top of the '[Turn over]' marker on physical PDF page 19.",
+      "height": 1085,
+      "topPt": 485.76,
+      "bottomPt": 746.16,
+      "heightPt": 260.4,
+      "mm": 91.86
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2018/Paper2/N5_Maths_2018_P2_Q01.ts",
+      "category": "FULL_PAGE",
+      "lines": 15,
+      "page": 23,
+      "top": 816,
+      "bottom": 3228,
+      "note": "Measured from the bottom of the final Q1 instruction line to the top of the barcode/footer region on physical PDF page 23. Q1 is the only question on the page, so this is a page-layout outlier rather than a minimum working-space requirement.",
+      "height": 2412,
+      "topPt": 195.84,
+      "bottomPt": 774.72,
+      "heightPt": 578.88,
+      "mm": 204.22
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2019/Paper2/N5_Maths_2019_P2_Q01.ts",
+      "category": "MEDIUM",
+      "lines": 6,
+      "page": 23,
+      "top": 816,
+      "bottom": 1768,
+      "note": "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 23.",
+      "height": 952,
+      "topPt": 195.84,
+      "bottomPt": 424.32,
+      "heightPt": 228.48,
+      "mm": 80.6
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2021/Paper2/N5_Maths_2021_P2_Q01.ts",
+      "category": "LARGE",
+      "lines": 6,
+      "page": 18,
+      "top": 840,
+      "bottom": 1901,
+      "note": "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 18.",
+      "height": 1061,
+      "topPt": 201.6,
+      "bottomPt": 456.24,
+      "heightPt": 254.64,
+      "mm": 89.83
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2022/Paper2/N5_Maths_2022_P2_Q02.ts",
+      "category": "LARGE",
+      "lines": 8,
+      "page": 16,
+      "top": 1854,
+      "bottom": 3228,
+      "note": "Measured from the bottom of the final Q2 rounding instruction to the top of the barcode/footer region on physical PDF page 16.",
+      "height": 1374,
+      "topPt": 444.96,
+      "bottomPt": 774.72,
+      "heightPt": 329.76,
+      "mm": 116.33
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2023/Paper2/N5_Maths_2023_P2_Q01.ts",
+      "category": "MEDIUM",
+      "lines": 6,
+      "page": 17,
+      "top": 852,
+      "bottom": 1795,
+      "note": "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 17.",
+      "height": 943,
+      "topPt": 204.48,
+      "bottomPt": 430.8,
+      "heightPt": 226.32,
+      "mm": 79.84
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2024/Paper2/N5_Maths_2024_P2_Q01.ts",
+      "category": "LARGE",
+      "lines": 6,
+      "page": 17,
+      "top": 773,
+      "bottom": 1834,
+      "note": "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 17.",
+      "height": 1061,
+      "topPt": 185.52,
+      "bottomPt": 440.16,
+      "heightPt": 254.64,
+      "mm": 89.83
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2025/Paper2/N5_Maths_2025_P2_Q01.ts",
+      "category": "LARGE",
+      "lines": 9,
+      "page": 16,
+      "top": 828,
+      "bottom": 2362,
+      "note": "Measured from the bottom of the final Q1 instruction line to the top of the '[Turn over]' marker on physical PDF page 16.",
+      "height": 1534,
+      "topPt": 198.72,
+      "bottomPt": 566.88,
+      "heightPt": 368.16,
+      "mm": 129.88
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2014/Paper1/N5_Maths_2014_P1_Q09.ts",
+      "category": "LARGE",
+      "lines": 7,
+      "page": 9,
+      "top": 1758,
+      "bottom": 2937,
+      "note": "Measured from the bottom of the final Q9 instruction line to the top of the '[Turn over]' marker on physical PDF page 9.",
+      "height": 1179,
+      "topPt": 421.92,
+      "bottomPt": 704.88,
+      "heightPt": 282.96,
+      "mm": 99.82
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2015/Paper2/N5_Maths_2015_P2_Q08.ts",
+      "category": "LARGE",
+      "lines": 8,
+      "page": 24,
+      "top": 1927,
+      "bottom": 3228,
+      "note": "Measured from the bottom of the final Q8 instruction line to the top of the barcode/footer region on physical PDF page 24.",
+      "height": 1301,
+      "topPt": 462.48,
+      "bottomPt": 774.72,
+      "heightPt": 312.24,
+      "mm": 110.15
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2017/Paper2/N5_Maths_2017_P2_Q05.ts",
+      "category": "LARGE",
+      "lines": 6,
+      "page": 21,
+      "top": 2129,
+      "bottom": 3120,
+      "note": "Remeasured at 300 dpi from the bottom of the final Q5 question line to the top of the '[Turn over]' marker on physical PDF page 21. This replaces the previous shifted coordinate pair.",
+      "height": 991,
+      "topPt": 510.96,
+      "bottomPt": 748.8,
+      "heightPt": 237.84,
+      "mm": 83.9
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2018/Paper2/N5_Maths_2018_P2_Q11.ts",
+      "category": "FULL_PAGE",
+      "lines": 12,
+      "page": 32,
+      "top": 1180,
+      "bottom": 3228,
+      "note": "Remeasured from the bottom of the final Q11 instruction line to the top of the barcode/footer region on physical PDF page 32. Q11 is the only question on this page, so the large region is a page-layout outlier.",
+      "height": 2048,
+      "topPt": 283.2,
+      "bottomPt": 774.72,
+      "heightPt": 491.52,
+      "mm": 173.4
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2019/Paper2/N5_Maths_2019_P2_Q09.ts",
+      "category": "LARGE",
+      "lines": 8,
+      "page": 29,
+      "top": 588,
+      "bottom": 1935,
+      "note": "Remeasured from the bottom of the final Q9 instruction line to the top of the Q10 prompt block on physical PDF page 29. This normalises the previous shifted coordinates.",
+      "height": 1347,
+      "topPt": 141.12,
+      "bottomPt": 464.4,
+      "heightPt": 323.28,
+      "mm": 114.05
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2021/Paper1/N5_Maths_2021_P1_Q12.ts",
+      "category": "MEDIUM",
+      "lines": 5,
+      "page": 10,
+      "top": 510,
+      "bottom": 1386,
+      "note": "Remeasured from the bottom of the final Q12 instruction line to the top of the Q13 prompt block on physical PDF page 10.",
+      "height": 876,
+      "topPt": 122.4,
+      "bottomPt": 332.64,
+      "heightPt": 210.24,
+      "mm": 74.17
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2022/Paper1/N5_Maths_2022_P1_Q10.ts",
+      "category": "LARGE",
+      "lines": 8,
+      "page": 9,
+      "top": 521,
+      "bottom": 1805,
+      "note": "Measured from the bottom of the final Q10 instruction line to the top of the Q11 prompt block on physical PDF page 9.",
+      "height": 1284,
+      "topPt": 125.04,
+      "bottomPt": 433.2,
+      "heightPt": 308.16,
+      "mm": 108.71
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2023/Paper2/N5_Maths_2023_P2_Q06.ts",
+      "category": "LARGE",
+      "lines": 7,
+      "page": 21,
+      "top": 521,
+      "bottom": 1690,
+      "note": "Measured from the bottom of the final Q6 instruction line to the top of the Q7 prompt block on physical PDF page 21.",
+      "height": 1169,
+      "topPt": 125.04,
+      "bottomPt": 405.6,
+      "heightPt": 280.56,
+      "mm": 98.98
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2024/Paper2/N5_Maths_2024_P2_Q05.ts",
+      "category": "MEDIUM",
+      "lines": 5,
+      "page": 19,
+      "top": 1851,
+      "bottom": 2617,
+      "note": "Remeasured from the bottom of the final Q5 instruction line to the top of the '[Turn over]' marker on physical PDF page 19. The previous height was correct but both coordinates were offset.",
+      "height": 766,
+      "topPt": 444.24,
+      "bottomPt": 628.08,
+      "heightPt": 183.84,
+      "mm": 64.85
+    },
+    {
+      "path": "course-data/source-question-catalog/N5_Maths_2025/Paper1/N5_Maths_2025_P1_Q04.ts",
+      "category": "LARGE",
+      "lines": 8,
+      "page": 4,
+      "top": 1922,
+      "bottom": 3228,
+      "note": "Remeasured from the bottom of the final Q4 instruction line to the top of the barcode/footer region on physical PDF page 4. Q4 is the final question on the page, so part of this area reflects page layout.",
+      "height": 1306,
+      "topPt": 461.28,
+      "bottomPt": 774.72,
+      "heightPt": 313.44,
+      "mm": 110.57
+    }
+  ],
+  "markingSchemeReplacements": [
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2016/Paper2/N5_Maths_2016_P2_Q01_MS.ts",
+      "id": "N5_MATH_2016_P2_Q01_MS",
+      "year": 2016,
+      "paper": "P2",
+      "questionNumber": "1"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2017/Paper2/N5_Maths_2017_P2_Q02_MS.ts",
+      "id": "N5_MATH_2017_P2_Q02_MS",
+      "year": 2017,
+      "paper": "P2",
+      "questionNumber": "2"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2018/Paper2/N5_Maths_2018_P2_Q01_MS.ts",
+      "id": "N5_MATH_2018_P2_Q01_MS",
+      "year": 2018,
+      "paper": "P2",
+      "questionNumber": "1"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2019/Paper2/N5_Maths_2019_P2_Q01_MS.ts",
+      "id": "N5_MATH_2019_P2_Q01_MS",
+      "year": 2019,
+      "paper": "P2",
+      "questionNumber": "1"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2021/Paper2/N5_Maths_2021_P2_Q01_MS.ts",
+      "id": "N5_MATH_2021_P2_Q01_MS",
+      "year": 2021,
+      "paper": "P2",
+      "questionNumber": "1"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2022/Paper2/N5_Maths_2022_P2_Q02_MS.ts",
+      "id": "N5_MATH_2022_P2_Q02_MS",
+      "year": 2022,
+      "paper": "P2",
+      "questionNumber": "2"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2023/Paper2/N5_Maths_2023_P2_Q01_MS.ts",
+      "id": "N5_MATH_2023_P2_Q01_MS",
+      "year": 2023,
+      "paper": "P2",
+      "questionNumber": "1"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2024/Paper2/N5_Maths_2024_P2_Q01_MS.ts",
+      "id": "N5_MATH_2024_P2_Q01_MS",
+      "year": 2024,
+      "paper": "P2",
+      "questionNumber": "1"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2025/Paper2/N5_Maths_2025_P2_Q01_MS.ts",
+      "id": "N5_MATH_2025_P2_Q01_MS",
+      "year": 2025,
+      "paper": "P2",
+      "questionNumber": "1"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2014/Paper1/N5_Maths_2014_P1_Q09_MS.ts",
+      "id": "N5_MATH_2014_P1_Q09_MS",
+      "year": 2014,
+      "paper": "P1",
+      "questionNumber": "9"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2015/Paper2/N5_Maths_2015_P2_Q08_MS.ts",
+      "id": "N5_MATH_2015_P2_Q08_MS",
+      "year": 2015,
+      "paper": "P2",
+      "questionNumber": "8"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2017/Paper2/N5_Maths_2017_P2_Q05_MS.ts",
+      "id": "N5_MATH_2017_P2_Q05_MS",
+      "year": 2017,
+      "paper": "P2",
+      "questionNumber": "5"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2018/Paper2/N5_Maths_2018_P2_Q11_MS.ts",
+      "id": "N5_MATH_2018_P2_Q11_MS",
+      "year": 2018,
+      "paper": "P2",
+      "questionNumber": "11"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2019/Paper2/N5_Maths_2019_P2_Q09_MS.ts",
+      "id": "N5_MATH_2019_P2_Q09_MS",
+      "year": 2019,
+      "paper": "P2",
+      "questionNumber": "9"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2021/Paper1/N5_Maths_2021_P1_Q12_MS.ts",
+      "id": "N5_MATH_2021_P1_Q12_MS",
+      "year": 2021,
+      "paper": "P1",
+      "questionNumber": "12"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2022/Paper1/N5_Maths_2022_P1_Q10_MS.ts",
+      "id": "N5_MATH_2022_P1_Q10_MS",
+      "year": 2022,
+      "paper": "P1",
+      "questionNumber": "10"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2023/Paper2/N5_Maths_2023_P2_Q06_MS.ts",
+      "id": "N5_MATH_2023_P2_Q06_MS",
+      "year": 2023,
+      "paper": "P2",
+      "questionNumber": "6"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2024/Paper2/N5_Maths_2024_P2_Q05_MS.ts",
+      "id": "N5_MATH_2024_P2_Q05_MS",
+      "year": 2024,
+      "paper": "P2",
+      "questionNumber": "5"
+    },
+    {
+      "path": "course-data/source-marking-scheme-catalog/N5_Maths_2025/Paper1/N5_Maths_2025_P1_Q04_MS.ts",
+      "id": "N5_MATH_2025_P1_Q04_MS",
+      "year": 2025,
+      "paper": "P1",
+      "questionNumber": "4"
+    }
+  ],
+  "alreadyCompletedBeforeThisBatch": [
+    "course-data/source-question-catalog/N5_Maths_2014/Paper2/N5_Maths_2014_P2_Q01.ts",
+    "course-data/source-marking-scheme-catalog/N5_Maths_2014/Paper2/N5_Maths_2014_P2_Q01_MS.ts",
+    "course-data/source-question-catalog/N5_Maths_2015/Paper2/N5_Maths_2015_P2_Q01.ts",
+    "course-data/source-marking-scheme-catalog/N5_Maths_2015/Paper2/N5_Maths_2015_P2_Q01_MS.ts"
+  ]
+}

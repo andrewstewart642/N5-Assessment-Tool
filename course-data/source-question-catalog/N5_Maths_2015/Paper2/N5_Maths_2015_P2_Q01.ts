@@ -248,21 +248,72 @@ export const N5_MATHS_2015_P2_Q01 = {
 
 
   /**
-   * Answer-space dimensions have not yet been
-   * formally measured from the rendered PDF.
+   * Exact source response-space measurement.
+   *
+   * Standard:
+   *
+   * - source PDF rendered at 300 dpi;
+   * - A4 render = 2481 × 3508 px;
+   * - top-left coordinate origin;
+   * - physical PDF page 19;
+   * - printed examination page 3.
+   *
+   * Measurement runs from the bottom of Q1's
+   * final instruction line to the top of the Q2
+   * question block.
+   *
+   * This is a genuinely large source response
+   * area. It is slightly taller than the exact
+   * 1306 px response area catalogued for 2015
+   * P2 Q8 reverse percentage.
    */
   answerSpace: {
     category:
-      "MEDIUM",
+      "LARGE",
 
     estimatedLines:
-      6,
+      9,
 
     measurementMethod:
-      "NOT_MEASURED",
+      "PDF_RENDER",
+
+    sourceMeasurement: {
+      pdfPageNumber:
+        19,
+
+      renderDpi:
+        300,
+
+      pageWidthPx:
+        2481,
+
+      pageHeightPx:
+        3508,
+
+      topPx:
+        498,
+
+      bottomPx:
+        1914,
+
+      heightPx:
+        1416,
+
+      topPt:
+        119.52,
+
+      bottomPt:
+        459.36,
+
+      heightPt:
+        339.84,
+
+      heightMm:
+        119.89,
+    },
 
     notes:
-      "The source question appears near the top of the page before Q2. Exact answer-space dimensions have not been recorded.",
+      "Measured from the bottom of the final Q1 instruction line ('Calculate its predicted value after 2 years.') to the top of the Q2 question block on physical PDF page 19. The previous MEDIUM / 6-line estimate has been replaced by the exact 300-dpi source measurement.",
   },
 
 

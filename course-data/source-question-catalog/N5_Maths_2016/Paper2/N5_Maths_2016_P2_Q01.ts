@@ -246,18 +246,30 @@ export const N5_MATHS_2016_P2_Q01 = {
 
 
   answerSpace: {
-    category:
-      "MEDIUM",
-
-    estimatedLines:
-      6,
-
-    measurementMethod:
-      "NOT_MEASURED",
-
-    notes:
-      "The question appears at the start of Paper 2 before Q2. Exact rendered answer-space dimensions have not been recorded.",
-  },
+      category: "MEDIUM",
+      estimatedLines: 6,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 19,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 816,
+        bottomPx: 1759,
+        heightPx: 943,
+  
+        topPt: 195.84,
+        bottomPt: 422.16,
+        heightPt: 226.32,
+  
+        heightMm: 79.84,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 19.",
+    },
 
 
   linkedGeneratorFamilyIds: [

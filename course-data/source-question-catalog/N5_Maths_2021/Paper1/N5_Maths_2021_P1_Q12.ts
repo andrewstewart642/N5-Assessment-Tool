@@ -150,29 +150,30 @@ export const N5_MATHS_2021_P1_Q12 = {
     "Important P1 evidence that a reverse-percentage part-whole question need not use language such as 'total available' or 'original'. The same mathematics can be presented as a comparison between two parallel real-world quantities. This should broaden generator context families substantially.",
 
   answerSpace: {
-    category: "MEDIUM",
-    estimatedLines: 5,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 506,
-      bottomPx: 1404,
-      heightPx: 898,
-
-      topPt: 121.44,
-      bottomPt: 336.96,
-      heightPt: 215.52,
-
-      heightMm: 76.03,
+      category: "MEDIUM",
+      estimatedLines: 5,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 10,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 510,
+        bottomPx: 1386,
+        heightPx: 876,
+  
+        topPt: 122.4,
+        bottomPt: 332.64,
+        heightPt: 210.24,
+  
+        heightMm: 74.17,
+      },
+  
+      notes:
+        "Remeasured from the bottom of the final Q12 instruction line to the top of the Q13 prompt block on physical PDF page 10.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q12 instruction line to the top of the Q13 prompt block on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_PART_OF_WHOLE",

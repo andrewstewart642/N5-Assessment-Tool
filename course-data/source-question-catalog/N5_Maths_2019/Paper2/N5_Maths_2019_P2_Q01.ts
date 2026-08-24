@@ -247,18 +247,30 @@ export const N5_MATHS_2019_P2_Q01 = {
 
 
   answerSpace: {
-    category:
-      "MEDIUM",
-
-    estimatedLines:
-      6,
-
-    measurementMethod:
-      "NOT_MEASURED",
-
-    notes:
-      "Q1 appears at the top of Paper 2 page 3 before Q2. Exact rendered answer-space dimensions have not been recorded.",
-  },
+      category: "MEDIUM",
+      estimatedLines: 6,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 23,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 816,
+        bottomPx: 1768,
+        heightPx: 952,
+  
+        topPt: 195.84,
+        bottomPt: 424.32,
+        heightPt: 228.48,
+  
+        heightMm: 80.6,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 23.",
+    },
 
 
   linkedGeneratorFamilyIds: [

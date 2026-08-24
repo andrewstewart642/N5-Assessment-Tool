@@ -265,18 +265,30 @@ export const N5_MATHS_2023_P2_Q01 = {
 
 
   answerSpace: {
-    category:
-      "MEDIUM",
-
-    estimatedLines:
-      7,
-
-    measurementMethod:
-      "NOT_MEASURED",
-
-    notes:
-      "Q1 appears at the beginning of Paper 2. Exact rendered answer-space dimensions have not been recorded.",
-  },
+      category: "MEDIUM",
+      estimatedLines: 6,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 17,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 852,
+        bottomPx: 1795,
+        heightPx: 943,
+  
+        topPt: 204.48,
+        bottomPt: 430.8,
+        heightPt: 226.32,
+  
+        heightMm: 79.84,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 17.",
+    },
 
 
   linkedGeneratorFamilyIds: [

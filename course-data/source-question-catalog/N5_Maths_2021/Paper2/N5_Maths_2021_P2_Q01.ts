@@ -251,18 +251,30 @@ export const N5_MATHS_2021_P2_Q01 = {
 
 
   answerSpace: {
-    category:
-      "MEDIUM",
-
-    estimatedLines:
-      6,
-
-    measurementMethod:
-      "NOT_MEASURED",
-
-    notes:
-      "Q1 appears at the top of Paper 2 page 3 before Q2. Exact rendered answer-space dimensions have not been recorded.",
-  },
+      category: "LARGE",
+      estimatedLines: 6,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 18,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 840,
+        bottomPx: 1901,
+        heightPx: 1061,
+  
+        topPt: 201.6,
+        bottomPt: 456.24,
+        heightPt: 254.64,
+  
+        heightMm: 89.83,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q1 instruction line to the top of the Q2 question block on physical PDF page 18.",
+    },
 
 
   linkedGeneratorFamilyIds: [

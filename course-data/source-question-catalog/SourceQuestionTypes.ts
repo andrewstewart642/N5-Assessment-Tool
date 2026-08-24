@@ -105,6 +105,84 @@ export type SourceQuestionAnswerSpaceMeasurementMethod =
   | "NOT_MEASURED";
 
 
+export type SourceQuestionPdfRenderMeasurement = {
+  /**
+   * 1-based page number in the source PDF file.
+   *
+   * This is the physical PDF page index, not the
+   * printed page label shown inside the examination
+   * document.
+   */
+  pdfPageNumber?:
+    number;
+
+
+  /**
+   * Rendering standard used when the pixel
+   * measurements were taken.
+   */
+  renderDpi:
+    number;
+
+  pageWidthPx:
+    number;
+
+  pageHeightPx:
+    number;
+
+
+  /**
+   * Vertical coordinates use a TOP-LEFT origin.
+   *
+   * topPx:
+   *   upper edge of the measured answer-space region.
+   *
+   * bottomPx:
+   *   lower edge of the measured answer-space region.
+   *
+   * For ordinary written questions the standard
+   * measurement convention is:
+   *
+   *   bottom of final prompt/instruction line
+   *                    ↓
+   *   top of next question / Turn-over marker /
+   *   footer-barcode region
+   *
+   * depending on the actual historical page layout.
+   */
+  topPx:
+    number;
+
+  bottomPx:
+    number;
+
+  heightPx:
+    number;
+
+
+  /**
+   * Point equivalents are retained for PDF-native
+   * comparison and future extraction tooling.
+   */
+  topPt?:
+    number;
+
+  bottomPt?:
+    number;
+
+  heightPt?:
+    number;
+
+
+  /**
+   * Physical height represented by heightPx at the
+   * recorded render DPI.
+   */
+  heightMm:
+    number;
+};
+
+
 export type SourceQuestionAnswerSpace = {
   category:
     SourceQuestionAnswerSpaceCategory;
@@ -115,37 +193,8 @@ export type SourceQuestionAnswerSpace = {
   measurementMethod:
     SourceQuestionAnswerSpaceMeasurementMethod;
 
-  sourceMeasurement?: {
-    renderDpi:
-      number;
-
-    pageWidthPx:
-      number;
-
-    pageHeightPx:
-      number;
-
-    topPx:
-      number;
-
-    bottomPx:
-      number;
-
-    heightPx:
-      number;
-
-    topPt?:
-      number;
-
-    bottomPt?:
-      number;
-
-    heightPt?:
-      number;
-
-    heightMm:
-      number;
-  };
+  sourceMeasurement?:
+    SourceQuestionPdfRenderMeasurement;
 
   notes?:
     string;

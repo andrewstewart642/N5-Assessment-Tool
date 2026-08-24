@@ -149,29 +149,30 @@ export const N5_MATHS_2023_P2_Q06 = {
     "Useful P2 evidence for an appreciation-style increase question. Compare with 2017, where the relationship is expressed as '15% more than', and 2024, where it is described as 'an increase of 16% on last year's cost'. The generator should exploit these structural wording differences rather than relying on one fixed increase template.",
 
   answerSpace: {
-    category: "LARGE",
-    estimatedLines: 7,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 521,
-      bottomPx: 1690,
-      heightPx: 1169,
-
-      topPt: 125.086,
-      bottomPt: 405.611,
-      heightPt: 280.525,
-
-      heightMm: 98.96,
+      category: "LARGE",
+      estimatedLines: 7,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 21,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 521,
+        bottomPx: 1690,
+        heightPx: 1169,
+  
+        topPt: 125.04,
+        bottomPt: 405.6,
+        heightPt: 280.56,
+  
+        heightMm: 98.98,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q6 instruction line to the top of the Q7 prompt block on physical PDF page 21.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q6 instruction line to the top of the Q7 prompt block on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_INCREASE_GIVEN_FINAL_VALUE",

@@ -257,18 +257,30 @@ export const N5_MATHS_2022_P2_Q02 = {
 
 
   answerSpace: {
-    category:
-      "MEDIUM",
-
-    estimatedLines:
-      6,
-
-    measurementMethod:
-      "NOT_MEASURED",
-
-    notes:
-      "Q2 appears early in Paper 2. Exact rendered answer-space dimensions have not been recorded.",
-  },
+      category: "LARGE",
+      estimatedLines: 8,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 16,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 1854,
+        bottomPx: 3228,
+        heightPx: 1374,
+  
+        topPt: 444.96,
+        bottomPt: 774.72,
+        heightPt: 329.76,
+  
+        heightMm: 116.33,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q2 rounding instruction to the top of the barcode/footer region on physical PDF page 16.",
+    },
 
 
   linkedGeneratorFamilyIds: [

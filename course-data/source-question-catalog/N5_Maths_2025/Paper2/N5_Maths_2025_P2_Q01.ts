@@ -248,18 +248,30 @@ export const N5_MATHS_2025_P2_Q01 = {
 
 
   answerSpace: {
-    category:
-      "MEDIUM",
-
-    estimatedLines:
-      6,
-
-    measurementMethod:
-      "NOT_MEASURED",
-
-    notes:
-      "Q1 appears at the start of Paper 2. Exact rendered answer-space dimensions have not been recorded.",
-  },
+      category: "LARGE",
+      estimatedLines: 9,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 16,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 828,
+        bottomPx: 2362,
+        heightPx: 1534,
+  
+        topPt: 198.72,
+        bottomPt: 566.88,
+        heightPt: 368.16,
+  
+        heightMm: 129.88,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q1 instruction line to the top of the '[Turn over]' marker on physical PDF page 16.",
+    },
 
 
   linkedGeneratorFamilyIds: [

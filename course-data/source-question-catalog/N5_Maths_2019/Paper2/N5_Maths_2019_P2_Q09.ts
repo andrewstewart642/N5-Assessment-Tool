@@ -154,29 +154,30 @@ export const N5_MATHS_2019_P2_Q09 = {
     "Important higher-complexity P2 family. The extra difficulty comes from both awkward calculator arithmetic and the indirect requested quantity. The generator should preserve this two-stage reasoning occasionally, rather than treating all reverse-percentage questions as simple final-to-original calculations.",
 
   answerSpace: {
-    category: "LARGE",
-    estimatedLines: 8,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 713,
-      bottomPx: 2076,
-      heightPx: 1363,
-
-      topPt: 171.12,
-      bottomPt: 498.24,
-      heightPt: 327.12,
-
-      heightMm: 115.4,
+      category: "LARGE",
+      estimatedLines: 8,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 29,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 588,
+        bottomPx: 1935,
+        heightPx: 1347,
+  
+        topPt: 141.12,
+        bottomPt: 464.4,
+        heightPt: 323.28,
+  
+        heightMm: 114.05,
+      },
+  
+      notes:
+        "Remeasured from the bottom of the final Q9 instruction line to the top of the Q10 prompt block on physical PDF page 29. This normalises the previous shifted coordinates.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q9 instruction line to the top of the Q10 prompt block on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_INCREASE_FIND_DIFFERENCE",

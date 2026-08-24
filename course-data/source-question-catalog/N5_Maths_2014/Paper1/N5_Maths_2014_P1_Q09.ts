@@ -146,29 +146,30 @@ export const N5_MATHS_2014_P1_Q09 = {
     "Useful evidence for a non-calculator reverse-percentage family. Although the quantities are large, the 80% relationship gives straightforward arithmetic. Generator should model the mathematical and linguistic structure, not retain this exact surface context or wording.",
 
   answerSpace: {
-    category: "LARGE",
-    estimatedLines: 7,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 1758,
-      bottomPx: 2937,
-      heightPx: 1179,
-
-      topPt: 421.9,
-      bottomPt: 704.902,
-      heightPt: 283.003,
-
-      heightMm: 99.84,
+      category: "LARGE",
+      estimatedLines: 7,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 9,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 1758,
+        bottomPx: 2937,
+        heightPx: 1179,
+  
+        topPt: 421.92,
+        bottomPt: 704.88,
+        heightPt: 282.96,
+  
+        heightMm: 99.82,
+      },
+  
+      notes:
+        "Measured from the bottom of the final Q9 instruction line to the top of the '[Turn over]' marker on physical PDF page 9.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q9 instruction line to the top of the '[Turn over]' marker on the original PDF page.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_PART_OF_WHOLE",

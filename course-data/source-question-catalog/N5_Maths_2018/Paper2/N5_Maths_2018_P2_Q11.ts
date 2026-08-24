@@ -154,29 +154,30 @@ export const N5_MATHS_2018_P2_Q11 = {
     "Strong evidence for allowing controlled interleaving within generated reverse-percentage questions. This should not cause scientific notation to become mandatory for the family; instead it provides evidence for an occasional higher-complexity P2 variant. It also demonstrates that P2 numerical difficulty can come from value representation and arithmetic burden rather than from more complicated percentage reasoning alone.",
 
   answerSpace: {
-    category: "FULL_PAGE",
-    estimatedLines: 12,
-    measurementMethod: "PDF_RENDER",
-
-    sourceMeasurement: {
-      renderDpi: 300,
-      pageWidthPx: 2481,
-      pageHeightPx: 3508,
-
-      topPx: 1175,
-      bottomPx: 3226,
-      heightPx: 2051,
-
-      topPt: 282.0,
-      bottomPt: 774.2,
-      heightPt: 492.2,
-
-      heightMm: 173.64,
+      category: "FULL_PAGE",
+      estimatedLines: 12,
+      measurementMethod: "PDF_RENDER",
+  
+      sourceMeasurement: {
+        pdfPageNumber: 32,
+        renderDpi: 300,
+        pageWidthPx: 2481,
+        pageHeightPx: 3508,
+  
+        topPx: 1180,
+        bottomPx: 3228,
+        heightPx: 2048,
+  
+        topPt: 283.2,
+        bottomPt: 774.72,
+        heightPt: 491.52,
+  
+        heightMm: 173.4,
+      },
+  
+      notes:
+        "Remeasured from the bottom of the final Q11 instruction line to the top of the barcode/footer region on physical PDF page 32. Q11 is the only question on this page, so the large region is a page-layout outlier.",
     },
-
-    notes:
-      "Measured from the bottom of the final Q11 instruction line to the top of the barcode/footer region. As Q11 is the only question on this page, SQA provides substantially more working space than is mathematically required; this should be treated as evidence of page-layout behaviour rather than a strict minimum working-space requirement.",
-  },
 
   linkedGeneratorFamilyIds: [
     "NUM_REVERSE_PERCENTAGE_PART_OF_WHOLE",
