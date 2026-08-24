@@ -2,6 +2,9 @@
 
 import type { PaperPart } from "@/shared-types/PaperParts";
 import type { QuestionVariantSelectionMeta } from "@/shared-types/QuestionSelectionTypes";
+import type {
+  WorkedAnswerSet,
+} from "@/shared-types/AnswerGenerationTypes";
 
 /**
  * Generic paper/component identifier.
@@ -134,8 +137,22 @@ export type Question = {
   answer?: string;
   marks?: number;
 
-  promptParts?: PaperPart[];
+    promptParts?: PaperPart[];
   answerParts?: PaperPart[];
+
+  /**
+   * Generated pupil-style worked solutions.
+   */
+  workedAnswers?: WorkedAnswerSet;
+
+  /**
+   * Teacher-selected primary method.
+   *
+   * Stored separately from the mathematical
+   * question itself so regeneration can retain it
+   * where that method remains valid.
+   */
+  preferredAnswerMethodFamilyId?: string;
 
   questionCode?: string;
 

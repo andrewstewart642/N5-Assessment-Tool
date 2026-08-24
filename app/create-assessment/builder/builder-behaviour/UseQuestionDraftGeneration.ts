@@ -55,6 +55,43 @@ function withSpacingBase(question: Question): Question {
   return applyBuilderQuestionSpacingBase(question);
 }
 
+function resolvePreferredAnswerMethodFamilyId(
+  previousQuestion: Question | null | undefined,
+  generated:
+    ReturnType<typeof buildGenerated>
+): string | undefined {
+  const workedAnswers =
+    generated.workedAnswers;
+
+  if (
+    !workedAnswers ||
+    workedAnswers.methods.length === 0
+  ) {
+    return undefined;
+  }
+
+  const previousPreference =
+    previousQuestion
+      ?.preferredAnswerMethodFamilyId;
+
+  if (
+    previousPreference &&
+    workedAnswers.methods.some(
+      (method) =>
+        method.methodFamilyId ===
+        previousPreference
+    )
+  ) {
+    return previousPreference;
+  }
+
+  return (
+    workedAnswers.defaultMethodFamilyId ??
+    workedAnswers.methods[0]
+      .methodFamilyId
+  );
+}
+
 function resolveGeneratedTotalMarks(
   generated: ReturnType<typeof buildGenerated>,
   targetMarks: number
@@ -207,8 +244,15 @@ export function useQuestionDraftGeneration({
         targetMarks,
         createdAt: Date.now(),
         paper,
-        ...generated,
-        topicMarkBreakdown:
+          ...generated,
+
+          preferredAnswerMethodFamilyId:
+            resolvePreferredAnswerMethodFamilyId(
+              null,
+              generated
+            ),
+
+          topicMarkBreakdown:
           generated.topicMarkBreakdown ??
           buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
       });
@@ -298,8 +342,15 @@ export function useQuestionDraftGeneration({
             targetMarks,
             createdAt: Date.now(),
             paper,
-            ...generated,
-            topicMarkBreakdown:
+              ...generated,
+
+              preferredAnswerMethodFamilyId:
+                resolvePreferredAnswerMethodFamilyId(
+                  nowEdit.draft,
+                  generated
+                ),
+
+              topicMarkBreakdown:
               generated.topicMarkBreakdown ??
               buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
           });
@@ -342,8 +393,15 @@ export function useQuestionDraftGeneration({
           targetMarks,
           createdAt: Date.now(),
           paper,
-          ...generated,
-          topicMarkBreakdown:
+            ...generated,
+
+            preferredAnswerMethodFamilyId:
+              resolvePreferredAnswerMethodFamilyId(
+                prevDrafts[paper],
+                generated
+              ),
+
+            topicMarkBreakdown:
             generated.topicMarkBreakdown ??
             buildSingleTopicMarkBreakdown(skill.domain, resolvedMarks),
         });

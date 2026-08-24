@@ -47,7 +47,14 @@ type Props = {
   canAssignNewDraft: boolean;
   canSaveEdit: boolean;
   invalidCommitMessage: string;
-};
+
+  showWorkedAnswers: boolean;
+
+  onPreferredAnswerMethodChange: (
+    questionId: string,
+    methodFamilyId: string
+  ) => void;
+  };
 
 export default function BuilderPreviewPane({
   theme,
@@ -79,8 +86,11 @@ export default function BuilderPreviewPane({
   removeNewDraft,
   startEditLockedQuestion,
   canAssignNewDraft,
-  canSaveEdit,
-  invalidCommitMessage,
+canSaveEdit,
+invalidCommitMessage,
+
+showWorkedAnswers,
+onPreferredAnswerMethodChange,
 }: Props) {
   return (
     <div
@@ -162,8 +172,17 @@ export default function BuilderPreviewPane({
               canAssignNewDraft={canAssignNewDraft}
               canSaveEdit={canSaveEdit}
               invalidCommitMessage={invalidCommitMessage}
+
+              showWorkedAnswers={
+                showWorkedAnswers
+              }
+
+              onPreferredAnswerMethodChange={
+                onPreferredAnswerMethodChange
+              }
+
               theme={theme}
-            />
+              />
           ))}
         </div>
       </div>

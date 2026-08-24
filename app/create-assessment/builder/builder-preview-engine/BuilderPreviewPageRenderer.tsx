@@ -7,6 +7,7 @@ import SQAN5CoverPage from "@/app/create-assessment/builder/components/assessmen
 import PaperQuestionLocked from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked";
 import PaperQuestionDraft from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionDraft";
 import MeasureBox from "@/app/create-assessment/builder/components/assessment-preview/MeasureBox";
+import WorkedAnswerPreview from "@/app/create-assessment/builder/components/assessment-preview/WorkedAnswerPreview";
 import { UI_TEXT } from "@/app/ui/UiTypography";
 import { getTheme } from "@/ui/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
@@ -55,6 +56,14 @@ type Props = {
   canAssignNewDraft: boolean;
   canSaveEdit: boolean;
   invalidCommitMessage: string;
+
+  showWorkedAnswers: boolean;
+
+  onPreferredAnswerMethodChange: (
+    questionId: string,
+    methodFamilyId: string
+  ) => void;
+
   theme: Theme;
 };
 
@@ -88,8 +97,12 @@ export default function BuilderPreviewPageRenderer({
   canAssignNewDraft,
   canSaveEdit,
   invalidCommitMessage,
+
+  showWorkedAnswers,
+  onPreferredAnswerMethodChange,
+
   theme,
-}: Props) {
+  }: Props) {
   if (previewPage.kind === "cover") {
     return (
       <div
@@ -168,101 +181,170 @@ export default function BuilderPreviewPageRenderer({
   }
 
   return (
-    <div
-      ref={(el) => {
-        pageWrapperRefs.current[previewIndex] = el;
-      }}
-    >
-      <SQAPageFrame
-        viewerScale={viewerScale}
-        outerPaddingPx={0}
-        paper={viewPaper}
-        pageIndex={previewPage.questionPageIndex}
-        footerPageNumber={previewPage.pageNumber}
-        footerLabelMode="sqa-lower"
-        isFirstQuestionPage={previewPage.questionPageIndex === 0}
-        showTurnOver
-      >
-        <div style={{ display: "grid", gap: 2 }}>
-          {previewPage.pageQuestions.map((layoutQ, i) => {
-            const globalIndex = previewPage.questionStartIndex + i;
-
-            const render = renderById.get(layoutQ.id);
-            const kind = render?.kind ?? "locked";
-            const q = render?.q ?? layoutQ;
-
-            let gapPx = spacingBasePxFor(q);
-            if (kind === "edit" && editForView) {
-              gapPx = spacingBasePxFor(editForView.original);
-            }
-
-            const content =
-              kind === "edit" ? (
-                <MeasureBox id={q.id} onMeasure={onMeasure}>
-                  <PaperQuestionDraft
-                    index={globalIndex}
-                    question={q}
-                    primaryLabel="Save"
-                    secondaryLabel="Remove"
-                    onPrimary={saveEdit}
-                    onSecondary={removeWhileEditing}
-                    primaryDisabled={!canSaveEdit}
-                    primaryDisabledReason={invalidCommitMessage}
-                  />
-                </MeasureBox>
-              ) : kind === "draft" ? (
-                <MeasureBox id={q.id} onMeasure={onMeasure}>
-                  <PaperQuestionDraft
-                    index={globalIndex}
-                    question={q}
-                    primaryLabel="Assign"
-                    secondaryLabel="Remove"
-                    onPrimary={assignNewDraft}
-                    onSecondary={removeNewDraft}
-                    primaryDisabled={!canAssignNewDraft}
-                    primaryDisabledReason={invalidCommitMessage}
-                  />
-                </MeasureBox>
-              ) : (
-                <MeasureBox id={q.id} onMeasure={onMeasure}>
-                  <div style={{ position: "relative" }}>
-                    <PaperQuestionLocked index={globalIndex} question={q} />
-                    <button
-                      type="button"
-                      onClick={() => startEditLockedQuestion(q.id)}
-                      style={{
-                        position: "absolute",
-                        top: 6,
-                        right: 86,
-                        border: "1px solid rgba(15,23,42,0.25)",
-                        background: "rgba(255,255,255,0.70)",
-                        color: "rgba(15,23,42,0.75)",
-                        borderRadius: 10,
-                        padding: "6px 10px",
-                        cursor: "pointer",
-                        height: 32,
-                        ...UI_TEXT.buttonTextSmall,
-                      }}
-                      title="Edit"
-                    >
-                      Edit
-                    </button>
-                  </div>
-                </MeasureBox>
-              );
-
-            return (
   <div
-    key={`${kind}-${layoutQ.id}`}
-    data-preview-question-id={q.id}
+    ref={(el) => {
+      pageWrapperRefs.current[previewIndex] = el;
+    }}
   >
-    {content}
-    <div aria-hidden="true" style={{ height: gapPx }} />
+    <SQAPageFrame
+      viewerScale={viewerScale}
+      outerPaddingPx={0}
+      paper={viewPaper}
+      pageIndex={previewPage.questionPageIndex}
+      footerPageNumber={previewPage.pageNumber}
+      footerLabelMode="sqa-lower"
+      isFirstQuestionPage={previewPage.questionPageIndex === 0}
+      showTurnOver
+    >
+      <div style={{ display: "grid", gap: 2 }}>
+        {previewPage.pageQuestions.map((layoutQ, i) => {
+          const globalIndex =
+            previewPage.questionStartIndex + i;
+
+          const render =
+            renderById.get(layoutQ.id);
+
+          const kind =
+            render?.kind ?? "locked";
+
+          const q =
+            render?.q ?? layoutQ;
+
+          let gapPx =
+            spacingBasePxFor(q);
+
+          if (
+            kind === "edit" &&
+            editForView
+          ) {
+            gapPx =
+              spacingBasePxFor(
+                editForView.original
+              );
+          }
+
+          const content =
+            kind === "edit" ? (
+              <MeasureBox
+                id={q.id}
+                onMeasure={onMeasure}
+              >
+                <PaperQuestionDraft
+                  index={globalIndex}
+                  question={q}
+                  primaryLabel="Save"
+                  secondaryLabel="Remove"
+                  onPrimary={saveEdit}
+                  onSecondary={
+                    removeWhileEditing
+                  }
+                  primaryDisabled={
+                    !canSaveEdit
+                  }
+                  primaryDisabledReason={
+                    invalidCommitMessage
+                  }
+                />
+              </MeasureBox>
+            ) : kind === "draft" ? (
+              <MeasureBox
+                id={q.id}
+                onMeasure={onMeasure}
+              >
+                <PaperQuestionDraft
+                  index={globalIndex}
+                  question={q}
+                  primaryLabel="Assign"
+                  secondaryLabel="Remove"
+                  onPrimary={
+                    assignNewDraft
+                  }
+                  onSecondary={
+                    removeNewDraft
+                  }
+                  primaryDisabled={
+                    !canAssignNewDraft
+                  }
+                  primaryDisabledReason={
+                    invalidCommitMessage
+                  }
+                />
+              </MeasureBox>
+            ) : (
+              <MeasureBox
+                id={q.id}
+                onMeasure={onMeasure}
+              >
+                <div
+                  style={{
+                    position: "relative",
+                  }}
+                >
+                  <PaperQuestionLocked
+                    index={globalIndex}
+                    question={q}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startEditLockedQuestion(
+                        q.id
+                      )
+                    }
+                    style={{
+                      position: "absolute",
+                      top: 6,
+                      right: 86,
+                      border:
+                        "1px solid rgba(15,23,42,0.25)",
+                      background:
+                        "rgba(255,255,255,0.70)",
+                      color:
+                        "rgba(15,23,42,0.75)",
+                      borderRadius: 10,
+                      padding: "6px 10px",
+                      cursor: "pointer",
+                      height: 32,
+                      ...UI_TEXT.buttonTextSmall,
+                    }}
+                    title="Edit"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </MeasureBox>
+            );
+
+          return (
+            <div
+              key={`${kind}-${layoutQ.id}`}
+              data-preview-question-id={
+                q.id
+              }
+            >
+              {content}
+
+              <div
+                style={{
+                  height: gapPx,
+                  position: "relative",
+                }}
+              >
+                {showWorkedAnswers ? (
+                  <WorkedAnswerPreview
+                    question={q}
+                    onMethodChange={
+                      onPreferredAnswerMethodChange
+                    }
+                  />
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </SQAPageFrame>
   </div>
 );
-          })}
-        </div>
-      </SQAPageFrame>
-    </div>
-  );
 }

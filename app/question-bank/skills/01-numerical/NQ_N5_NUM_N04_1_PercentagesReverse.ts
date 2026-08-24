@@ -7,6 +7,10 @@ import type {
   GeneratorContext,
 } from "@/shared-types/QuestionGenerationTypes";
 
+import {
+  generateN5MathsReversePercentageWorkedAnswers,
+} from "@/course-data/answer-generators/percentages/N5MathsReversePercentageAnswerGenerator";
+
 import type {
   QuestionVariantSelectionMeta,
 } from "@/shared-types/QuestionSelectionTypes";
@@ -100,6 +104,11 @@ function buildGeneratedReversePercentageQuestion(
       difficulty,
     });
 
+      const workedAnswers =
+    generateN5MathsReversePercentageWorkedAnswers(
+      generated
+    );
+
   const templateId = [
     "source-catalogue-reverse-percentage",
     paper.toLowerCase(),
@@ -125,6 +134,8 @@ function buildGeneratedReversePercentageQuestion(
     answerParts: [
       textPart(generated.answerText),
     ],
+
+    workedAnswers,
 
     markBreakdown: {
       totalMarks: 3,

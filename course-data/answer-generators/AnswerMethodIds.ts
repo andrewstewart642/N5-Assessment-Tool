@@ -1,0 +1,34 @@
+export const ANSWER_METHOD_FAMILY_IDS = {
+  REVERSE_PERCENT_UNITARY:
+    "REVERSE_PERCENT_UNITARY",
+
+  REVERSE_PERCENT_INVERSE_MULTIPLIER:
+    "REVERSE_PERCENT_INVERSE_MULTIPLIER",
+} as const;
+
+export type AnswerMethodFamilyId =
+  typeof ANSWER_METHOD_FAMILY_IDS[
+    keyof typeof ANSWER_METHOD_FAMILY_IDS
+  ];
+
+export const ANSWER_METHOD_VARIANT_IDS = {
+  VIA_1_PERCENT:
+    "VIA_1_PERCENT",
+
+  VIA_10_PERCENT:
+    "VIA_10_PERCENT",
+
+  VIA_20_PERCENT:
+    "VIA_20_PERCENT",
+
+  VIA_25_PERCENT:
+    "VIA_25_PERCENT",
+
+  DIVIDE_BY_MULTIPLIER:
+    "DIVIDE_BY_MULTIPLIER",
+} as const;
+
+export type AnswerMethodVariantId =
+  typeof ANSWER_METHOD_VARIANT_IDS[
+    keyof typeof ANSWER_METHOD_VARIANT_IDS
+  ];

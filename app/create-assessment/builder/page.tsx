@@ -277,7 +277,7 @@ const [viewPaper, setViewPaper] =
   useState<BuilderPreviewViewMode>("EXAM");
 
 const suppressPreviewSpacing =
-  previewViewMode !== "EXAM";
+  previewViewMode === "COMPACT";
 
 const showPreviewAnswers =
   previewViewMode === "ANSWERS";
@@ -298,6 +298,87 @@ const cyclePreviewViewMode =
       }
     });
   }, []);
+
+  const handlePreferredAnswerMethodChange =
+  useCallback(
+    (
+      questionId: string,
+      methodFamilyId: string
+    ) => {
+      setQuestions(
+        (previous) =>
+          previous.map(
+            (question) =>
+              question.id ===
+              questionId
+                ? {
+                    ...question,
+
+                    preferredAnswerMethodFamilyId:
+                      methodFamilyId,
+                  }
+                : question
+          )
+      );
+
+      setDraftByPaper(
+        (previous) =>
+          Object.fromEntries(
+            Object.entries(
+              previous
+            ).map(
+              ([
+                paper,
+                draft,
+              ]) => [
+                paper,
+
+                draft?.id ===
+                questionId
+                  ? {
+                      ...draft,
+
+                      preferredAnswerMethodFamilyId:
+                        methodFamilyId,
+                    }
+                  : draft,
+              ]
+            )
+          ) as DraftByPaper
+      );
+
+      setEditDraftByPaper(
+        (previous) =>
+          Object.fromEntries(
+            Object.entries(
+              previous
+            ).map(
+              ([
+                paper,
+                edit,
+              ]) => [
+                paper,
+
+                edit?.draft.id ===
+                questionId
+                  ? {
+                      ...edit,
+
+                      draft: {
+                        ...edit.draft,
+
+                        preferredAnswerMethodFamilyId:
+                          methodFamilyId,
+                      },
+                    }
+                  : edit,
+              ]
+            )
+          ) as EditDraftByPaper
+      );
+    },
+    []
+  );
 
 const handleActivePaperChange = useCallback(
   (nextValueOrUpdater: SetStateAction<Paper>) => {
@@ -1388,6 +1469,13 @@ const {
     pageWrapperRefs={pageWrapperRefs}
     flashWarning={flashWarning}
     previewPages={previewPages}
+    showWorkedAnswers={
+  showPreviewAnswers
+}
+
+onPreferredAnswerMethodChange={
+  handlePreferredAnswerMethodChange
+}
     viewPaper={viewPaper}
     viewerScale={viewerScale}
     activePaperCoverMarks={activePaperCoverMarks}

@@ -11,6 +11,9 @@ import type {
   QuestionTopicMarkBreakdown,
 } from "@/shared-types/AssessmentTypes";
 import type {
+  WorkedAnswerSet,
+} from "@/shared-types/AnswerGenerationTypes";
+import type {
   QuestionSelectionFilters,
   QuestionVariantSelectionMeta,
 } from "@/shared-types/QuestionSelectionTypes";
@@ -88,8 +91,11 @@ export type GeneratedQuestionData = {
   answer?: string;
   marks?: number;
   questionCode?: string;
+
   promptParts?: PaperPart[];
   answerParts?: PaperPart[];
+
+  workedAnswers?: WorkedAnswerSet;
 
   markBreakdown?: QuestionMarks;
   classification?: QuestionClassification;

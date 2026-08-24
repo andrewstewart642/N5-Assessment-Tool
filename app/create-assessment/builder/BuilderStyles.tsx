@@ -135,10 +135,6 @@ export default function BuilderGlobalStyles({
        *   Compact spacing
        */
 
-      [data-preview-answers="hidden"]
-        .builder-question-answer {
-        display: none !important;
-      }
     `}</style>
   );
 }
