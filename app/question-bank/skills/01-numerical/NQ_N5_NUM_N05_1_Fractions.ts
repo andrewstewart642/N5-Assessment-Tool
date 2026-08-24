@@ -24,6 +24,10 @@ import {
   type GeneratedFractionQuestion,
 } from "@/course-data/question-generators/fractions/N5MathsFractionGenerator";
 
+import {
+  generateN5MathsFractionWorkedAnswers,
+} from "@/course-data/answer-generators/fractions/N5MathsFractionAnswerGenerator";
+
 
 type FractionOperationMode =
   | "AUTO"
@@ -539,6 +543,11 @@ function buildGeneratedFractionQuestion(
       difficulty
     );
 
+  const workedAnswers =
+    generateN5MathsFractionWorkedAnswers(
+      generated
+    );
+
   const label =
     conceptLabelFromMode(
       mode
@@ -576,6 +585,8 @@ function buildGeneratedFractionQuestion(
       buildAnswerParts(
         generated
       ),
+
+    workedAnswers,
 
     markBreakdown: {
       totalMarks:

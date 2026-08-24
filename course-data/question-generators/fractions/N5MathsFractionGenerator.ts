@@ -29,16 +29,140 @@ export type FractionGeneratorOptions = {
 };
 
 
-type Fraction = {
+export type Fraction = {
   numerator: number;
   denominator: number;
 };
 
 
-type MixedNumber = {
+export type MixedNumber = {
   whole: number;
   fraction: Fraction;
 };
+
+
+export type FractionNumericProfile =
+  | {
+      kind:
+        "MIXED_PROPER_ADD";
+
+      mixed:
+        MixedNumber;
+
+      proper:
+        Fraction;
+
+      mixedImproper:
+        Fraction;
+
+      commonDenominator:
+        number;
+
+      rawIntermediate:
+        Fraction;
+
+      answer:
+        Fraction;
+    }
+
+  | {
+      kind:
+        "MIXED_MIXED_SUBTRACT";
+
+      first:
+        MixedNumber;
+
+      second:
+        MixedNumber;
+
+      firstImproper:
+        Fraction;
+
+      secondImproper:
+        Fraction;
+
+      commonDenominator:
+        number;
+
+      rawIntermediate:
+        Fraction;
+
+      answer:
+        Fraction;
+    }
+
+  | {
+      kind:
+        "MIXED_PROPER_MULTIPLY";
+
+      mixed:
+        MixedNumber;
+
+      proper:
+        Fraction;
+
+      mixedImproper:
+        Fraction;
+
+      displayOrder:
+        | "MIXED_THEN_PROPER"
+        | "PROPER_THEN_MIXED";
+
+      rawIntermediate:
+        Fraction;
+
+      answer:
+        Fraction;
+    }
+
+  | {
+      kind:
+        "MIXED_PROPER_DIVIDE";
+
+      mixed:
+        MixedNumber;
+
+      proper:
+        Fraction;
+
+      mixedImproper:
+        Fraction;
+
+      reciprocal:
+        Fraction;
+
+      rawIntermediate:
+        Fraction;
+
+      answer:
+        Fraction;
+    }
+
+  | {
+      kind:
+        "BRACKETED_SUM_AND_MULTIPLY";
+
+      multiplier:
+        Fraction;
+
+      first:
+        Fraction;
+
+      second:
+        Fraction;
+
+      bracketSum:
+        Fraction;
+
+      commonDenominator:
+        number;
+
+      rawIntermediate:
+        Fraction;
+
+      answer:
+        Fraction;
+    };
 
 
 type FractionDifficultyProfile = {
@@ -68,6 +192,9 @@ export type GeneratedFractionQuestion = {
   questionText: string;
   answerText: string;
   workingSummary: string;
+
+  numericProfile:
+    FractionNumericProfile;
 
   sourceEvidenceSummary: string;
 
@@ -858,6 +985,9 @@ function makeGeneratedQuestion(
   workingSummary:
     string,
 
+  numericProfile:
+    FractionNumericProfile,
+
   extraChecks:
     GeneratedFractionQuestion[
       "checks"
@@ -946,6 +1076,8 @@ function makeGeneratedQuestion(
       ),
 
     workingSummary,
+
+    numericProfile,
 
     sourceEvidenceSummary:
       `${sourceCount} historical source question${
@@ -1174,6 +1306,27 @@ function generateMixedProperMultiplication(
 
       "Convert the mixed number to an improper fraction, multiply, then simplify.",
 
+      {
+        kind:
+          "MIXED_PROPER_MULTIPLY",
+
+        mixed,
+
+        proper,
+
+        mixedImproper:
+          mixedFraction,
+
+        displayOrder:
+          mixedFirst
+            ? "MIXED_THEN_PROPER"
+            : "PROPER_THEN_MIXED",
+
+        rawIntermediate,
+
+        answer,
+      },
+
       [
         {
           label:
@@ -1306,6 +1459,24 @@ function generateMixedProperDivision(
       crossCancellationAvailable,
 
       "Convert the mixed number to an improper fraction, multiply by the reciprocal, then simplify.",
+
+      {
+        kind:
+          "MIXED_PROPER_DIVIDE",
+
+        mixed,
+
+        proper,
+
+        mixedImproper:
+          mixedFraction,
+
+        reciprocal,
+
+        rawIntermediate,
+
+        answer,
+      },
 
       [
         {
@@ -1443,6 +1614,24 @@ function generateMixedProperAddition(
       false,
 
       "Use a common denominator, add the fractional parts, then write the answer tidily.",
+
+      {
+        kind:
+          "MIXED_PROPER_ADD",
+
+        mixed,
+
+        proper,
+
+        mixedImproper:
+          mixedFraction,
+
+        commonDenominator,
+
+        rawIntermediate,
+
+        answer,
+      },
 
       [
         {
@@ -1602,6 +1791,27 @@ function generateMixedMixedSubtraction(
       false,
 
       "Convert or handle the mixed numbers, use a common denominator, subtract, then simplify.",
+
+      {
+        kind:
+          "MIXED_MIXED_SUBTRACT",
+
+        first,
+
+        second,
+
+        firstImproper:
+          firstFraction,
+
+        secondImproper:
+          secondFraction,
+
+        commonDenominator,
+
+        rawIntermediate,
+
+        answer,
+      },
 
       [
         {
@@ -1787,6 +1997,25 @@ function generateBracketedFractionExpression(
       ),
 
       "Evaluate the bracket first, multiply by the outside fraction, then simplify.",
+
+      {
+        kind:
+          "BRACKETED_SUM_AND_MULTIPLY",
+
+        multiplier,
+
+        first,
+
+        second,
+
+        bracketSum,
+
+        commonDenominator,
+
+        rawIntermediate,
+
+        answer,
+      },
 
       [
         {
