@@ -7,7 +7,7 @@ import type {
   Skill,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes_TEMP";
+} from "@/shared-types/AssessmentTypes";
 
 export function conceptMatchesFilter(
   concept: Concept,

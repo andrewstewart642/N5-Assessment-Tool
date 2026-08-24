@@ -1,5 +1,5 @@
 import { skillsData } from "@/course-data/N5-Skills";
-import type { Skill } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Skill } from "@/shared-types/AssessmentTypes";
 
 type SkillConceptLike = {
   code?: string;

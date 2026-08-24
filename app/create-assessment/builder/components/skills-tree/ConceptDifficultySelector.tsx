@@ -3,7 +3,7 @@
 
 import type React from "react";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { Theme } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Theme } from "@/shared-types/AssessmentTypes";
 
 type StepperProps = {
   label: string;

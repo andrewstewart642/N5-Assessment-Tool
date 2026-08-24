@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 
-import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 import { getBuilderPapers } from "../builder-logic/BuilderPaperTargets";
 import { calculateBuilderEndTimeForPaper } from "../builder-logic/BuilderPaperTiming";
 import {

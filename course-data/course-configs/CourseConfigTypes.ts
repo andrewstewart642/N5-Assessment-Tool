@@ -4,7 +4,7 @@ import type {
   Paper,
   SkillPaperSuitability,
   SkillsData,
-} from "@/shared-types/AssessmentTypes_TEMP";
+} from "@/shared-types/AssessmentTypes";
 
 /**
  * The course configuration layer is the bridge between:

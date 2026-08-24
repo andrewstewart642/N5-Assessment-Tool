@@ -10,7 +10,7 @@ import type {
   Question,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes_TEMP";
+} from "@/shared-types/AssessmentTypes";
 import type {
   DraftByPaper,
   EditDraftByPaper,

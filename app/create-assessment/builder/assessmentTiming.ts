@@ -8,7 +8,7 @@ import {
   type CourseAssessmentConfig,
 } from "@/course-data/course-configs/CourseConfigTypes";
 
-import type { CourseId, Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { CourseId, Paper } from "@/shared-types/AssessmentTypes";
 
 /**
  * Legacy IDs kept temporarily so existing code can keep working while the

@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 
-import type { Question } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Question } from "@/shared-types/AssessmentTypes";
 import type { DraftByPaper, EditDraftByPaper } from "../BuilderUtils";
 
 type UseMeasuredQuestionHeightsArgs = {

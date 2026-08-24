@@ -1,5 +1,5 @@
 import { getSpacingBasePx } from "@/app/paper-layout/N5-Question-Spacing-px";
-import type { Question } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Question } from "@/shared-types/AssessmentTypes";
 import { DEFAULT_QUESTION_SPACING_BASE_PX } from "../builder-definitions/BuilderConstants";
 
 export function getBuilderQuestionSpacingBasePx(

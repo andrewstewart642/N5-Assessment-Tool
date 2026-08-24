@@ -5,7 +5,7 @@ import {
   isCourseAvailable,
   normaliseCourseId,
 } from "@/course-data/course-configs/CourseCatalog";
-import type { CourseId } from "@/shared-types/AssessmentTypes_TEMP";
+import type { CourseId } from "@/shared-types/AssessmentTypes";
 
 export type AssessmentLevelId = CourseId;
 

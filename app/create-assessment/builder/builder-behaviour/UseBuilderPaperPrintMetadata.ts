@@ -5,7 +5,7 @@ import {
   type CourseAssessmentConfig,
   type CoursePaperConfig,
 } from "@/course-data/course-configs/CourseConfigTypes";
-import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 
 type UseBuilderPaperPrintMetadataArgs = {
   paper: Paper;

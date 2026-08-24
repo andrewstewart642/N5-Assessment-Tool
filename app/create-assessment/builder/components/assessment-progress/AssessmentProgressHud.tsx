@@ -2,7 +2,7 @@
 
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
-import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 import type { BuilderPreviewViewMode } from "@/app/create-assessment/builder/BuilderUtils";
 
 import type {

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 
 import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
-import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 import { calculateTotalAssessmentMarksFromPaperTargets } from "../builder-logic/AssessmentDistributionAnalysis";
 import {
   buildTargetMarksByPaper,

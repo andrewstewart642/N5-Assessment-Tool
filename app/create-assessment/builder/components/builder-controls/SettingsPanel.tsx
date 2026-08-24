@@ -9,7 +9,7 @@ import AppSideTray from "@/app/ui/settings-bar/AppSideTray";
 import AppTrayHeader from "@/app/ui/settings-bar/AppTrayHeader";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 import {
   getBuilderPaperConfig,
   getBuilderPapers,

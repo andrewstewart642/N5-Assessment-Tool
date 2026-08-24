@@ -1,4 +1,4 @@
-import type { CourseId } from "@/shared-types/AssessmentTypes_TEMP";
+import type { CourseId } from "@/shared-types/AssessmentTypes";
 import type { CourseAssessmentConfig } from "./CourseConfigTypes";
 import { N5_APPLICATIONS_MATH_COURSE_CONFIG } from "./N5ApplicationsMathCourseConfig";
 import { N5_MATH_COURSE_CONFIG } from "./N5MathsCourseConfig";

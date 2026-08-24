@@ -2,7 +2,7 @@
 
 import { UI_TEXT } from "@/app/ui/UiTypography";
 import type { Theme } from "@/ui/AppTheme";
-import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 
 import AssessmentProgressHud, {
   type AssessmentProgressHudPaperRow,

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { Paper } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper } from "@/shared-types/AssessmentTypes";
 
 export type FooterLabelMode = "sqa-lower" | "page-cap" | "none";
 

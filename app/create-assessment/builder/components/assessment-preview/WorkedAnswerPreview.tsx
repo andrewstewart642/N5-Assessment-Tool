@@ -2,7 +2,7 @@
 
 import type {
   Question,
-} from "@/shared-types/AssessmentTypes_TEMP";
+} from "@/shared-types/AssessmentTypes";
 
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
 

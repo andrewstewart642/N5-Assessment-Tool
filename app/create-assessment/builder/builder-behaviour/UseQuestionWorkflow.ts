@@ -3,7 +3,7 @@ import type {
   Question,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes_TEMP";
+} from "@/shared-types/AssessmentTypes";
 import type { DraftByPaper, EditDraftByPaper } from "../BuilderUtils";
 import { useDraftWorkflow } from "./UseDraftWorkflow";
 import { useQuestionDraftGeneration } from "./UseQuestionDraftGeneration";

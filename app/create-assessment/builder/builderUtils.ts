@@ -2,7 +2,7 @@ import type {
   DifficultyLevel,
   Paper,
   Question,
-} from "@/shared-types/AssessmentTypes_TEMP";
+} from "@/shared-types/AssessmentTypes";
 import { calculateBuilderPaperDurationMinutes } from "./builder-logic/BuilderPaperTiming";
 import { getBuilderQuestionSpacingBasePx } from "./builder-logic/BuilderQuestionSpacing";
 

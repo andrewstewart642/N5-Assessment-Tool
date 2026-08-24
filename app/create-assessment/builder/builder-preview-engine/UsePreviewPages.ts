@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import type { Question } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Question } from "@/shared-types/AssessmentTypes";
 import { buildBuilderPages, buildPreviewPages } from "./BuildPreviewPages";
 import type { PreviewPage } from "../BuilderUtils";
 

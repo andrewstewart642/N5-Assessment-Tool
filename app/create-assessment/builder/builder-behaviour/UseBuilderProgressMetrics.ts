@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import type { Paper, Question } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import { getBuilderPapers } from "../builder-logic/BuilderPaperTargets";
 import {
   getPaperNumberValue,

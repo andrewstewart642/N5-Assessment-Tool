@@ -1,4 +1,4 @@
-import type { CourseId } from "@/shared-types/AssessmentTypes_TEMP";
+import type { CourseId } from "@/shared-types/AssessmentTypes";
 import type {
   CourseAssessmentModeId,
   CourseAssessmentStructureId,

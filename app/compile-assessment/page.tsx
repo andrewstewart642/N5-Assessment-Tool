@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { Paper, Question } from "@/shared-types/AssessmentTypes_TEMP";
+import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import SQAPageFrame from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAPageFrame";
 import PaperQuestionLocked from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked";
 

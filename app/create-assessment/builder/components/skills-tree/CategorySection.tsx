@@ -37,7 +37,7 @@ import type {
   SkillPaperSuitability,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes_TEMP";
+} from "@/shared-types/AssessmentTypes";
 
 const CATEGORY_STRIPE_HEIGHT = 5;
 const CATEGORY_HEADER_HEIGHT = 58;
