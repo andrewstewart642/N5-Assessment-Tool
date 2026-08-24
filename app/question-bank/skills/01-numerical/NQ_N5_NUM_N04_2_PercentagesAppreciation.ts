@@ -21,6 +21,7 @@ import type {
 import {
   generateN5MathsCompoundPercentageQuestion,
   type CompoundPercentageDifficulty,
+  type CompoundPercentageDirection,
   type GeneratedCompoundPercentageQuestion,
 } from "@/course-data/question-generators/compound-percentages/N5MathsCompoundPercentageGenerator";
 
@@ -31,6 +32,16 @@ import {
 
 const DEFAULT_COMPOUND_PERCENTAGE_DIFFICULTY:
   CompoundPercentageDifficulty = 2;
+
+
+const MIXED_CONCEPT_CODE =
+  "N4.2";
+
+const APPRECIATION_CONCEPT_CODE =
+  "N4.2.1";
+
+const DEPRECIATION_CONCEPT_CODE =
+  "N4.2.2";
 
 
 function textPart(
@@ -89,6 +100,49 @@ function buildAnswerParts(
 }
 
 
+function getSelectedConceptCode(
+  context:
+    GeneratorContext
+): string {
+  return (
+    context.concept?.code ??
+    MIXED_CONCEPT_CODE
+  );
+}
+
+
+function getSelectedConceptLabel(
+  context:
+    GeneratorContext
+): string {
+  return (
+    context.concept?.label ??
+    context.selectedConceptText ??
+    "Mixed appreciation/depreciation"
+  );
+}
+
+
+function getDirectionForConceptCode(
+  conceptCode:
+    string
+): CompoundPercentageDirection | undefined {
+  switch (
+    conceptCode
+  ) {
+    case APPRECIATION_CONCEPT_CODE:
+      return "INCREASE";
+
+    case DEPRECIATION_CONCEPT_CODE:
+      return "DECREASE";
+
+    case MIXED_CONCEPT_CODE:
+    default:
+      return undefined;
+  }
+}
+
+
 function buildSelectionMeta(args: {
   level:
     DifficultyLevel;
@@ -138,9 +192,30 @@ function buildGeneratedCompoundPercentageQuestion(
       context.difficulty
     );
 
+  const selectedConceptCode =
+    getSelectedConceptCode(
+      context
+    );
+
+  const selectedConceptLabel =
+    getSelectedConceptLabel(
+      context
+    );
+
+  const direction =
+    getDirectionForConceptCode(
+      selectedConceptCode
+    );
+
   const generated =
     generateN5MathsCompoundPercentageQuestion({
       difficulty,
+
+      ...(direction
+        ? {
+            direction,
+          }
+        : {}),
     });
 
   const workedAnswers =
@@ -150,6 +225,7 @@ function buildGeneratedCompoundPercentageQuestion(
 
   const templateId = [
     "source-catalogue-compound-percentages",
+    selectedConceptCode,
     `level-${difficulty}`,
     generated.familyId,
     generated.numericProfile.kind,
@@ -219,10 +295,10 @@ function buildGeneratedCompoundPercentageQuestion(
       "NQ_N5_NUM_N04",
 
     sourceConceptCode:
-      "N4.2",
+      selectedConceptCode,
 
     sourceConceptLabel:
-      "Compound percentages",
+      selectedConceptLabel,
 
     templateId,
 
@@ -303,10 +379,10 @@ export const AppreciationConceptModule:
         "NQ_N5_NUM_N04",
 
       conceptCode:
-        "N4.2",
+        MIXED_CONCEPT_CODE,
 
       conceptLabel:
-        "Compound percentages",
+        "Mixed appreciation/depreciation",
 
       difficultyProfile: {
         availableLevels: [
@@ -376,7 +452,11 @@ export const AppreciationConceptModule:
     ) {
       return (
         code ===
-        "N4.2"
+          MIXED_CONCEPT_CODE ||
+        code ===
+          APPRECIATION_CONCEPT_CODE ||
+        code ===
+          DEPRECIATION_CONCEPT_CODE
       );
     },
 

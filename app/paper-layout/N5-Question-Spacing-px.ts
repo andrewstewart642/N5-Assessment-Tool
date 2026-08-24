@@ -3,6 +3,10 @@
  *
  * These values represent the working space placed beneath a question
  * in the assessment-paper layout.
+ *
+ * Source-question measurements are recorded from 300 dpi SQA renders.
+ * Builder values here are the equivalent CSS-pixel working-space
+ * baselines at approximately 96 dpi.
  */
 export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
   /*
@@ -14,10 +18,15 @@ export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
 
   NQ_N5_NUM_N01_C03_SimplifySurds_ExpandAndSimplify: 70,
 
+
   /*
    * Reverse percentages
    *
    * Three-mark contextual problems.
+   *
+   * These retain their existing working-space
+   * baselines pending any later whole-course
+   * spacing normalisation.
    */
   NUM_REVERSE_PERCENTAGE_PART_OF_WHOLE: 320,
 
@@ -27,13 +36,45 @@ export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
 
   NUM_REVERSE_PERCENTAGE_INCREASE_FIND_DIFFERENCE: 400,
 
+
+  /*
+   * Compound percentages
+   *
+   * Three-mark Paper 2 calculator questions.
+   *
+   * These values are derived from the exact
+   * response-space measurements in the hardened
+   * SQA source-question catalogue.
+   *
+   * FIXED-RATE INCREASE
+   * Historical source working spaces cluster
+   * around approximately 305–491 CSS px,
+   * with a central value just under 400 px.
+   *
+   * FIXED-RATE DECREASE
+   * Most historical examples cluster around
+   * approximately 249–340 CSS px. The unusually
+   * large 2018 response area is treated as a
+   * page-layout outlier rather than the baseline.
+   *
+   * MULTI-RATE DECREASE
+   * The confirmed 2023 source example provides
+   * approximately 302 CSS px of response space.
+   */
+  NUM_COMPOUND_PERCENTAGE_FIXED_RATE_INCREASE: 395,
+
+  NUM_COMPOUND_PERCENTAGE_FIXED_RATE_DECREASE: 320,
+
+  NUM_COMPOUND_PERCENTAGE_MULTI_RATE_DECREASE: 305,
+
+
   /*
    * Fractions
    *
    * Two-mark Paper 1 numerical-fluency questions.
    *
-   * Values are based on the measured working space in the
-   * catalogued SQA source questions.
+   * Values are based on the measured working space
+   * in the catalogued SQA source questions.
    */
 
   // Mixed number with a proper fraction.
@@ -48,6 +89,7 @@ export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
   // Historical mean/median evidence is approximately 88 mm.
   NUM_FRACTIONS_BRACKETED_SUM_WITH_FRACTION_MULTIPLIER: 335,
 };
+
 
 export function getSpacingBasePx(
   questionCode?: string
