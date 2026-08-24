@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { makeId } from "@/math-helpers/QuestionLogic_TEMP";
+import { makeId } from "@/math-helpers/QuestionLogic";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import { applyBuilderQuestionSpacingBase } from "../builder-logic/BuilderQuestionSpacing";
 import type { DraftByPaper, EditDraftByPaper } from "../BuilderUtils";
