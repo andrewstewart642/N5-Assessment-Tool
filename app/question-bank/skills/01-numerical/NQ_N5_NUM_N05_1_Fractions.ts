@@ -1,18 +1,28 @@
 // app/question-bank/skills/01-numerical/NQ_N5_NUM_N05_1_Fractions.ts
 
-import type { PaperPart } from "@/shared-types/PaperParts";
-import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+import type {
+  DifficultyLevel,
+} from "@/shared-types/AssessmentTypes";
+
+import type {
+  PaperPart,
+} from "@/shared-types/PaperParts";
+
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
   GeneratorContext,
 } from "@/shared-types/QuestionGenerationTypes";
-import type { QuestionVariantSelectionMeta } from "@/shared-types/QuestionSelectionTypes";
+
+import type {
+  QuestionVariantSelectionMeta,
+} from "@/shared-types/QuestionSelectionTypes";
 
 import {
   generateN5MathsFractionSamples,
   type GeneratedFractionQuestion,
 } from "@/course-data/question-generators/fractions/N5MathsFractionGenerator";
+
 
 type FractionOperationMode =
   | "AUTO"
@@ -22,185 +32,431 @@ type FractionOperationMode =
   | "DIVIDE"
   | "BRACKETED";
 
-const SIMPLEST_FORM_INSTRUCTION = "Give your answer in its simplest form.";
 
-function textPart(value: string): PaperPart {
-  return { kind: "text", value };
+const FRACTION_DIFFICULTY_LEVEL:
+  DifficultyLevel = 3;
+
+const SIMPLEST_FORM_INSTRUCTION =
+  "Give your answer in its simplest form.";
+
+
+function textPart(
+  value: string
+): PaperPart {
+  return {
+    kind: "text",
+    value,
+  };
 }
 
-function mathPart(latex: string): PaperPart {
-  return { kind: "math", latex };
+
+function mathPart(
+  latex: string
+): PaperPart {
+  return {
+    kind: "math",
+    latex,
+  };
 }
 
-function normaliseDifficulty(input: DifficultyLevel): DifficultyLevel {
-  if (input <= 1) return 1;
-  if (input === 2) return 2;
-  if (input === 3) return 3;
-  if (input === 4) return 4;
-  return 5;
-}
 
-function modeFromConceptCode(conceptCode: string): FractionOperationMode {
-  if (conceptCode === "N5.1.1") return "ADD";
-  if (conceptCode === "N5.1.2") return "SUBTRACT";
-  if (conceptCode === "N5.1.3") return "MULTIPLY";
-  if (conceptCode === "N5.1.4") return "DIVIDE";
-  if (conceptCode === "N5.1.5") return "BRACKETED";
+function modeFromConceptCode(
+  conceptCode: string
+): FractionOperationMode {
+  if (
+    conceptCode === "N5.1.1"
+  ) {
+    return "ADD";
+  }
+
+  if (
+    conceptCode === "N5.1.2"
+  ) {
+    return "SUBTRACT";
+  }
+
+  if (
+    conceptCode === "N5.1.3"
+  ) {
+    return "MULTIPLY";
+  }
+
+  if (
+    conceptCode === "N5.1.4"
+  ) {
+    return "DIVIDE";
+  }
+
+  if (
+    conceptCode === "N5.1.5"
+  ) {
+    return "BRACKETED";
+  }
 
   return "AUTO";
 }
 
-function conceptLabelFromMode(mode: FractionOperationMode): string {
-  if (mode === "ADD") return "Fractions add";
-  if (mode === "SUBTRACT") return "Fractions subtract";
-  if (mode === "MULTIPLY") return "Fractions multiply";
-  if (mode === "DIVIDE") return "Fractions divide";
-  if (mode === "BRACKETED") return "Bracketed fraction operations";
+
+function conceptLabelFromMode(
+  mode: FractionOperationMode
+): string {
+  if (
+    mode === "ADD"
+  ) {
+    return "Fractions add";
+  }
+
+  if (
+    mode === "SUBTRACT"
+  ) {
+    return "Fractions subtract";
+  }
+
+  if (
+    mode === "MULTIPLY"
+  ) {
+    return "Fractions multiply";
+  }
+
+  if (
+    mode === "DIVIDE"
+  ) {
+    return "Fractions divide";
+  }
+
+  if (
+    mode === "BRACKETED"
+  ) {
+    return "Bracketed fraction operations";
+  }
 
   return "Fraction operations";
 }
 
-function expressionToLatex(expression: string): string {
-  const cleaned = expression
-    .replace(/\.$/, "")
-    .replace(/\s+/g, " ")
-    .trim();
 
-  const tokens = cleaned
-    .split(/(\d+\s+\d+\/\d+|\d+\/\d+|[()+−+\-×÷])/g)
-    .map((token) => token.trim())
-    .filter(Boolean);
+function expressionToLatex(
+  expression: string
+): string {
+  const cleaned =
+    expression
+      .replace(/\.$/, "")
+      .replace(/\s+/g, " ")
+      .trim();
+
+  const tokens =
+    cleaned
+      .split(
+        /(\d+\s+\d+\/\d+|\d+\/\d+|[()+−+\-×÷])/g
+      )
+      .map(
+        (token) =>
+          token.trim()
+      )
+      .filter(Boolean);
 
   return tokens
-    .map((token) => {
-      const mixedMatch = token.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+    .map(
+      (token) => {
+        const mixedMatch =
+          token.match(
+            /^(\d+)\s+(\d+)\/(\d+)$/
+          );
 
-      if (mixedMatch) {
-        const [, whole, numerator, denominator] = mixedMatch;
-        return `${whole}\\,\\dfrac{${numerator}}{${denominator}}`;
+        if (
+          mixedMatch
+        ) {
+          const [
+            ,
+            whole,
+            numerator,
+            denominator,
+          ] = mixedMatch;
+
+          return (
+            `${whole}\\,\\dfrac{${numerator}}{${denominator}}`
+          );
+        }
+
+        const fractionMatch =
+          token.match(
+            /^(\d+)\/(\d+)$/
+          );
+
+        if (
+          fractionMatch
+        ) {
+          const [
+            ,
+            numerator,
+            denominator,
+          ] = fractionMatch;
+
+          return (
+            `\\dfrac{${numerator}}{${denominator}}`
+          );
+        }
+
+        if (
+          token === "×"
+        ) {
+          return "\\times";
+        }
+
+        if (
+          token === "÷"
+        ) {
+          return "\\div";
+        }
+
+        if (
+          token === "−" ||
+          token === "-"
+        ) {
+          return "-";
+        }
+
+        if (
+          token === "+"
+        ) {
+          return "+";
+        }
+
+        if (
+          token === "("
+        ) {
+          return "\\left(";
+        }
+
+        if (
+          token === ")"
+        ) {
+          return "\\right)";
+        }
+
+        return token;
       }
-
-      const fractionMatch = token.match(/^(\d+)\/(\d+)$/);
-
-      if (fractionMatch) {
-        const [, numerator, denominator] = fractionMatch;
-        return `\\dfrac{${numerator}}{${denominator}}`;
-      }
-
-      if (token === "×") return "\\times";
-      if (token === "÷") return "\\div";
-      if (token === "−") return "-";
-      if (token === "-") return "-";
-      if (token === "+") return "+";
-      if (token === "(") return "\\left(";
-      if (token === ")") return "\\right)";
-
-      return token;
-    })
+    )
     .join(" ");
 }
 
-function buildPromptParts(generated: GeneratedFractionQuestion): PaperPart[] {
+
+function buildPromptParts(
+  generated:
+    GeneratedFractionQuestion
+): PaperPart[] {
   const hasSimplestFormInstruction =
-    generated.questionText.includes(SIMPLEST_FORM_INSTRUCTION);
+    generated.questionText.includes(
+      SIMPLEST_FORM_INSTRUCTION
+    );
 
-  const withoutInstruction = hasSimplestFormInstruction
-    ? generated.questionText.replace(SIMPLEST_FORM_INSTRUCTION, "").trim()
-    : generated.questionText.trim();
+  const withoutInstruction =
+    hasSimplestFormInstruction
+      ? generated.questionText
+          .replace(
+            SIMPLEST_FORM_INSTRUCTION,
+            ""
+          )
+          .trim()
+      : generated.questionText.trim();
 
-  const expressionText = withoutInstruction
-    .replace(/^Evaluate\s+/i, "")
-    .replace(/\.$/, "")
-    .trim();
+  const expressionText =
+    withoutInstruction
+      .replace(
+        /^Evaluate\s+/i,
+        ""
+      )
+      .replace(
+        /\.$/,
+        ""
+      )
+      .trim();
 
-  const parts: PaperPart[] = [
-    textPart("Evaluate "),
-    mathPart(expressionToLatex(expressionText)),
-    textPart("."),
-  ];
+  const parts:
+    PaperPart[] = [
+      textPart(
+        "Evaluate "
+      ),
 
-  if (hasSimplestFormInstruction) {
-    parts.push(textPart(`\n${SIMPLEST_FORM_INSTRUCTION}`));
+      mathPart(
+        expressionToLatex(
+          expressionText
+        )
+      ),
+
+      textPart(
+        "."
+      ),
+    ];
+
+  if (
+    hasSimplestFormInstruction
+  ) {
+    parts.push(
+      textPart(
+        `\n${SIMPLEST_FORM_INSTRUCTION}`
+      )
+    );
   }
 
   return parts;
 }
 
-function buildAnswerParts(generated: GeneratedFractionQuestion): PaperPart[] {
-  return [mathPart(expressionToLatex(generated.answerText))];
+
+function buildAnswerParts(
+  generated:
+    GeneratedFractionQuestion
+): PaperPart[] {
+  return [
+    mathPart(
+      expressionToLatex(
+        generated.answerText
+      )
+    ),
+  ];
 }
+
 
 function operationMatchesMode(
-  generated: GeneratedFractionQuestion,
-  mode: FractionOperationMode
+  generated:
+    GeneratedFractionQuestion,
+  mode:
+    FractionOperationMode
 ): boolean {
-  if (mode === "AUTO") return true;
-
-  if (mode === "BRACKETED") {
-    return generated.operationType === "BRACKETED_SUM_AND_MULTIPLY";
+  if (
+    mode === "AUTO"
+  ) {
+    return true;
   }
 
-  return generated.operationType === mode;
+  if (
+    mode === "BRACKETED"
+  ) {
+    return (
+      generated.operationType ===
+      "BRACKETED_SUM_AND_MULTIPLY"
+    );
+  }
+
+  return (
+    generated.operationType ===
+    mode
+  );
 }
 
-function generateMatchingFractionQuestion(
-  mode: FractionOperationMode
-): GeneratedFractionQuestion {
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    const generated = generateN5MathsFractionSamples(1)[0];
 
-    if (operationMatchesMode(generated, mode)) {
+function generateMatchingFractionQuestion(
+  mode:
+    FractionOperationMode
+): GeneratedFractionQuestion {
+  for (
+    let attempt = 0;
+    attempt < 500;
+    attempt += 1
+  ) {
+    const generated =
+      generateN5MathsFractionSamples(
+        1
+      )[0];
+
+    if (
+      operationMatchesMode(
+        generated,
+        mode
+      )
+    ) {
       return generated;
     }
   }
 
-  return generateN5MathsFractionSamples(1)[0];
+  return (
+    generateN5MathsFractionSamples(
+      1
+    )[0]
+  );
 }
 
+
 function buildSelectionMeta(args: {
-  level: DifficultyLevel;
   templateId: string;
 }): QuestionVariantSelectionMeta {
   return {
-    level: args.level,
-    templateId: args.templateId,
+    level:
+      FRACTION_DIFFICULTY_LEVEL,
+
+    templateId:
+      args.templateId,
+
     marks: {
       totalMarks: 2,
       cMarks: 2,
       aMarks: 0,
       reasoningMarks: 0,
     },
-    standardProfile: "C",
-    paperSuitability: "P1",
-    calculatorStatus: "NonCalculatorOnly",
+
+    standardProfile:
+      "C",
+
+    paperSuitability:
+      "P1",
+
+    calculatorStatus:
+      "NonCalculatorOnly",
   };
 }
 
+
 function buildGeneratedFractionQuestion(
-  context: GeneratorContext
+  context:
+    GeneratorContext
 ): GeneratedQuestionData {
-  const level = normaliseDifficulty(context.difficulty);
-  const conceptCode = context.concept?.code ?? "N5.1";
-  const mode = modeFromConceptCode(conceptCode);
-  const generated = generateMatchingFractionQuestion(mode);
-  const label = conceptLabelFromMode(mode);
+  const conceptCode =
+    context.concept?.code ??
+    "N5.1";
+
+  const mode =
+    modeFromConceptCode(
+      conceptCode
+    );
+
+  const generated =
+    generateMatchingFractionQuestion(
+      mode
+    );
+
+  const label =
+    conceptLabelFromMode(
+      mode
+    );
 
   const templateId = [
     "source-catalogue-fractions",
     mode.toLowerCase(),
-    `level-${level}`,
+    `level-${FRACTION_DIFFICULTY_LEVEL}`,
     generated.familyId,
     generated.operationType,
   ].join("-");
 
   return {
-    prompt: generated.questionText,
-    answer: generated.answerText,
-    marks: 2,
-    questionCode: generated.familyId,
+    prompt:
+      generated.questionText,
 
-    promptParts: buildPromptParts(generated),
-    answerParts: buildAnswerParts(generated),
+    answer:
+      generated.answerText,
+
+    marks: 2,
+
+    questionCode:
+      generated.familyId,
+
+    promptParts:
+      buildPromptParts(
+        generated
+      ),
+
+    answerParts:
+      buildAnswerParts(
+        generated
+      ),
 
     markBreakdown: {
       totalMarks: 2,
@@ -210,16 +466,31 @@ function buildGeneratedFractionQuestion(
     },
 
     classification: {
-      standard: "C",
-      calculatorStatus: "NonCalculatorOnly",
-      structureType: "SingleStep",
-      isReasoning: false,
-      paperSuitability: "P1",
+      standard:
+        "C",
+
+      calculatorStatus:
+        "NonCalculatorOnly",
+
+      structureType:
+        "SingleStep",
+
+      isReasoning:
+        false,
+
+      paperSuitability:
+        "P1",
     },
 
-    sourceSkillCode: "NQ_N5_NUM_N05",
-    sourceConceptCode: conceptCode,
-    sourceConceptLabel: label,
+    sourceSkillCode:
+      "NQ_N5_NUM_N05",
+
+    sourceConceptCode:
+      conceptCode,
+
+    sourceConceptLabel:
+      label,
+
     templateId,
 
     topicMarkBreakdown: {
@@ -230,68 +501,117 @@ function buildGeneratedFractionQuestion(
       STAT: 0,
     },
 
-    selectionMeta: buildSelectionMeta({
-      level,
-      templateId,
-    }),
+    selectionMeta:
+      buildSelectionMeta({
+        templateId,
+      }),
   };
 }
 
-function levelSelectionEntry(level: DifficultyLevel): QuestionVariantSelectionMeta {
+
+function levelSelectionEntry():
+  QuestionVariantSelectionMeta {
   return {
-    level,
-    templateId: `source-catalogue-fractions-level-${level}`,
+    level:
+      FRACTION_DIFFICULTY_LEVEL,
+
+    templateId:
+      `source-catalogue-fractions-level-${FRACTION_DIFFICULTY_LEVEL}`,
+
     marks: {
       totalMarks: 2,
       cMarks: 2,
       aMarks: 0,
       reasoningMarks: 0,
     },
-    standardProfile: "C",
-    paperSuitability: "P1",
-    calculatorStatus: "NonCalculatorOnly",
+
+    standardProfile:
+      "C",
+
+    paperSuitability:
+      "P1",
+
+    calculatorStatus:
+      "NonCalculatorOnly",
   };
 }
 
-export const FractionsConceptModule: ConceptGeneratorModule = {
-  metadata: {
-    moduleId: "NQ_N5_NUM_N05_1_FRACTIONS",
-    domain: "NUM",
-    skillCode: "NQ_N5_NUM_N05",
-    conceptCode: "N5.1",
-    conceptLabel: "Fraction operations",
-    difficultyProfile: {
-      availableLevels: [1, 2, 3, 4, 5],
-      defaultLevel: 3,
-    },
-    capabilities: {
-      standardCoverage: ["C"],
-      canGenerateReasoning: false,
-      calculatorStatus: "NonCalculatorOnly",
-      paperSuitability: "P1",
-      typicalStructureTypes: ["SingleStep"],
-    },
-    levelSelectionProfile: {
-      1: [levelSelectionEntry(1)],
-      2: [levelSelectionEntry(2)],
-      3: [levelSelectionEntry(3)],
-      4: [levelSelectionEntry(4)],
-      5: [levelSelectionEntry(5)],
-    },
-  },
 
-  canHandle(code: string) {
-    return (
-      code === "N5.1" ||
-      code === "N5.1.1" ||
-      code === "N5.1.2" ||
-      code === "N5.1.3" ||
-      code === "N5.1.4" ||
-      code === "N5.1.5"
-    );
-  },
+export const FractionsConceptModule:
+  ConceptGeneratorModule = {
+    metadata: {
+      moduleId:
+        "NQ_N5_NUM_N05_1_FRACTIONS",
 
-  generate: buildGeneratedFractionQuestion,
-};
+      domain:
+        "NUM",
 
-export default FractionsConceptModule;
+      skillCode:
+        "NQ_N5_NUM_N05",
+
+      conceptCode:
+        "N5.1",
+
+      conceptLabel:
+        "Fraction operations",
+
+      difficultyProfile: {
+        availableLevels: [
+          FRACTION_DIFFICULTY_LEVEL,
+        ],
+
+        defaultLevel:
+          FRACTION_DIFFICULTY_LEVEL,
+
+        levelDescriptions: {
+          3:
+            "Current National 5 fraction-question profile.",
+        },
+      },
+
+      capabilities: {
+        standardCoverage: [
+          "C",
+        ],
+
+        canGenerateReasoning:
+          false,
+
+        calculatorStatus:
+          "NonCalculatorOnly",
+
+        paperSuitability:
+          "P1",
+
+        typicalStructureTypes: [
+          "SingleStep",
+        ],
+      },
+
+      levelSelectionProfile: {
+        3: [
+          levelSelectionEntry(),
+        ],
+      },
+    },
+
+    canHandle(
+      code: string
+    ) {
+      return (
+        code === "N5.1" ||
+        code === "N5.1.1" ||
+        code === "N5.1.2" ||
+        code === "N5.1.3" ||
+        code === "N5.1.4" ||
+        code === "N5.1.5"
+      );
+    },
+
+    generate:
+      buildGeneratedFractionQuestion,
+  };
+
+
+export default
+  FractionsConceptModule;
