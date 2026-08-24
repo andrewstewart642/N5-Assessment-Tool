@@ -4,6 +4,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  type ReactNode,
 } from "react";
 
 import type {
@@ -290,14 +291,6 @@ function shouldRenderArithmeticTextAsMath(
   value:
     string
 ): boolean {
-  /**
-   * Temporary compatibility bridge for older
-   * answer generators which store numerical
-   * fraction working as text.
-   *
-   * New answer generators should ideally emit
-   * proper PaperPart math objects themselves.
-   */
   return (
     /\d+\s*\/\s*\d+/.test(
       value
@@ -394,7 +387,7 @@ function Chip({
   children,
 }: {
   children:
-    React.ReactNode;
+    ReactNode;
 }) {
   return (
     <span
@@ -406,28 +399,28 @@ function Chip({
           "center",
 
         minHeight:
-          24,
+          20,
 
         padding:
-          "3px 8px",
+          "2px 7px",
 
         border:
-          "1px solid rgba(148,163,184,0.25)",
+          "1px solid rgba(148,163,184,0.22)",
 
         borderRadius:
           999,
 
         background:
-          "rgba(255,255,255,0.055)",
+          "rgba(255,255,255,0.045)",
 
         color:
           "#cbd5e1",
 
         fontSize:
-          12,
+          10,
 
         lineHeight:
-          1.2,
+          1.15,
 
         whiteSpace:
           "nowrap",
@@ -443,7 +436,7 @@ function ControlLabel({
   children,
 }: {
   children:
-    React.ReactNode;
+    ReactNode;
 }) {
   return (
     <label
@@ -452,13 +445,13 @@ function ControlLabel({
           "grid",
 
         gap:
-          6,
+          4,
 
         color:
           "#cbd5e1",
 
         fontSize:
-          12,
+          11,
 
         fontWeight:
           700,
@@ -466,6 +459,122 @@ function ControlLabel({
     >
       {children}
     </label>
+  );
+}
+
+
+function SectionLabel({
+  children,
+}: {
+  children:
+    ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        marginBottom:
+          5,
+
+        color:
+          "#94a3b8",
+
+        fontSize:
+          9,
+
+        fontWeight:
+          800,
+
+        letterSpacing:
+          "0.06em",
+
+        textTransform:
+          "uppercase",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+
+function CompactClassification({
+  generated,
+}: {
+  generated:
+    GeneratedQuestionData;
+}) {
+  const classification =
+    generated.classification;
+
+  const marks =
+    generated.markBreakdown;
+
+  const totalMarks =
+    generated.marks ??
+    marks?.totalMarks ??
+    "—";
+
+  const items = [
+    `${totalMarks} marks`,
+
+    classification?.standard
+      ? classification.standard
+      : null,
+
+    classification
+      ?.paperSuitability
+      ? classification
+          .paperSuitability
+      : null,
+
+    classification
+      ?.calculatorStatus
+      ? classification
+          .calculatorStatus
+      : null,
+
+    classification
+      ?.structureType
+      ? classification
+          .structureType
+      : null,
+
+    classification
+      ? (
+          classification.isReasoning
+            ? "Reasoning"
+            : "Operational"
+        )
+      : null,
+
+    marks
+      ? (
+          `C${marks.cMarks}`
+          + ` / A${marks.aMarks}`
+          + ` / R${marks.reasoningMarks}`
+        )
+      : null,
+  ].filter(
+    Boolean
+  );
+
+  return (
+    <div
+      style={{
+        color:
+          "#64748b",
+
+        fontSize:
+          9,
+
+        lineHeight:
+          1.35,
+      }}
+    >
+      {items.join(
+        "  •  "
+      )}
+    </div>
   );
 }
 
@@ -487,19 +596,19 @@ function WorkedAnswers({
       <div
         style={{
           padding:
-            14,
+            8,
 
           border:
-            "1px dashed rgba(148,163,184,0.28)",
+            "1px dashed rgba(148,163,184,0.24)",
 
           borderRadius:
-            10,
+            8,
 
           color:
             "#94a3b8",
 
           fontSize:
-            13,
+            10,
         }}
       >
         No worked-answer generator attached.
@@ -514,7 +623,7 @@ function WorkedAnswers({
           "grid",
 
         gap:
-          12,
+          8,
       }}
     >
       {answerSet.methods.map(
@@ -533,19 +642,19 @@ function WorkedAnswers({
               style={{
                 border:
                   isDefault
-                    ? "1px solid rgba(96,165,250,0.52)"
-                    : "1px solid rgba(148,163,184,0.20)",
+                    ? "1px solid rgba(96,165,250,0.46)"
+                    : "1px solid rgba(148,163,184,0.18)",
 
                 borderRadius:
-                  12,
+                  8,
 
                 overflow:
                   "hidden",
 
                 background:
                   isDefault
-                    ? "rgba(59,130,246,0.055)"
-                    : "rgba(255,255,255,0.025)",
+                    ? "rgba(59,130,246,0.045)"
+                    : "rgba(255,255,255,0.02)",
               }}
             >
               <div
@@ -560,13 +669,13 @@ function WorkedAnswers({
                     "space-between",
 
                   gap:
-                    12,
+                    8,
 
                   padding:
-                    "10px 12px",
+                    "6px 8px",
 
                   borderBottom:
-                    "1px solid rgba(148,163,184,0.16)",
+                    "1px solid rgba(148,163,184,0.14)",
                 }}
               >
                 <div
@@ -578,10 +687,10 @@ function WorkedAnswers({
                       "center",
 
                     gap:
-                      8,
+                      5,
 
-                    flexWrap:
-                      "wrap",
+                    minWidth:
+                      0,
                   }}
                 >
                   <strong
@@ -590,23 +699,29 @@ function WorkedAnswers({
                         "#e2e8f0",
 
                       fontSize:
-                        13,
+                        10,
+
+                      lineHeight:
+                        1.2,
+
+                      overflow:
+                        "hidden",
+
+                      textOverflow:
+                        "ellipsis",
+
+                      whiteSpace:
+                        "nowrap",
                     }}
                   >
                     {method.methodFamilyId}
                   </strong>
 
-                  {method.methodVariantId ? (
-                    <Chip>
-                      {method.methodVariantId}
-                    </Chip>
-                  ) : null}
-
                   {isDefault ? (
                     <span
                       style={{
                         padding:
-                          "3px 7px",
+                          "2px 5px",
 
                         borderRadius:
                           999,
@@ -618,13 +733,10 @@ function WorkedAnswers({
                           "#93c5fd",
 
                         fontSize:
-                          10,
+                          8,
 
                         fontWeight:
                           800,
-
-                        letterSpacing:
-                          "0.05em",
                       }}
                     >
                       DEFAULT
@@ -635,26 +747,19 @@ function WorkedAnswers({
                 <span
                   style={{
                     color:
-                      "#94a3b8",
+                      "#64748b",
 
                     fontSize:
-                      12,
+                      9,
 
                     whiteSpace:
                       "nowrap",
                   }}
                 >
-                  Evidence score{" "}
-                  <strong
-                    style={{
-                      color:
-                        "#e2e8f0",
-                    }}
-                  >
-                    {method.evidenceScore.toFixed(
-                      2
-                    )}
-                  </strong>
+                  score{" "}
+                  {method.evidenceScore.toFixed(
+                    2
+                  )}
                 </span>
               </div>
 
@@ -662,7 +767,7 @@ function WorkedAnswers({
               <div
                 style={{
                   padding:
-                    14,
+                    8,
 
                   background:
                     "#ffffff",
@@ -674,7 +779,7 @@ function WorkedAnswers({
                     "Cambria Math, Cambria, Georgia, Times New Roman, serif",
 
                   fontSize:
-                    18,
+                    14,
                 }}
               >
                 <div
@@ -683,14 +788,11 @@ function WorkedAnswers({
                       "grid",
 
                     gap:
-                      10,
+                      5,
                   }}
                 >
                   {method.lines.map(
-                    (
-                      line,
-                      lineIndex
-                    ) => (
+                    (line) => (
                       <div
                         key={
                           line.id
@@ -703,7 +805,7 @@ function WorkedAnswers({
                             "minmax(0, 1fr) auto",
 
                           gap:
-                            14,
+                            8,
 
                           alignItems:
                             "center",
@@ -736,22 +838,18 @@ function WorkedAnswers({
                                 "Inter, ui-sans-serif, system-ui, sans-serif",
 
                               fontSize:
-                                11,
+                                8,
 
                               whiteSpace:
                                 "nowrap",
                             }}
                           >
-                            mark{" "}
+                            m
                             {line.markNumbers.join(
-                              ", "
+                              ","
                             )}
                           </span>
                         ) : null}
-
-                        {lineIndex <
-                        method.lines.length -
-                          1 ? null : null}
                       </div>
                     )
                   )}
@@ -759,38 +857,55 @@ function WorkedAnswers({
               </div>
 
 
-              <div
-                style={{
-                  padding:
-                    "9px 12px",
-
-                  color:
-                    "#94a3b8",
-
-                  fontSize:
-                    11,
-
-                  lineHeight:
-                    1.5,
-                }}
-              >
-                <strong
+              <details>
+                <summary
                   style={{
+                    cursor:
+                      "pointer",
+
+                    padding:
+                      "5px 8px",
+
                     color:
-                      "#cbd5e1",
+                      "#64748b",
+
+                    fontSize:
+                      8,
+
+                    lineHeight:
+                      1.2,
                   }}
                 >
-                  Evidence:
-                </strong>{" "}
+                  Evidence sources
+                </summary>
 
-                {method
-                  .sourceEvidenceIds
-                  .length > 0
-                  ? method.sourceEvidenceIds.join(
-                      ", "
-                    )
-                  : "none"}
-              </div>
+                <div
+                  style={{
+                    padding:
+                      "0 8px 6px",
+
+                    color:
+                      "#64748b",
+
+                    fontSize:
+                      8,
+
+                    lineHeight:
+                      1.35,
+
+                    wordBreak:
+                      "break-word",
+                  }}
+                >
+                  {method
+                    .sourceEvidenceIds
+                    .length > 0
+                    ? method.sourceEvidenceIds.join(
+                        ", "
+                      )
+                    : "none"}
+                </div>
+              </details>
             </div>
           );
         }
@@ -803,12 +918,16 @@ function WorkedAnswers({
 function SampleCard({
   sample,
   index,
+  showWorkedAnswers,
 }: {
   sample:
     GeneratedTestSample;
 
   index:
     number;
+
+  showWorkedAnswers:
+    boolean;
 }) {
   if (
     sample.error
@@ -820,10 +939,10 @@ function SampleCard({
             "1px solid rgba(248,113,113,0.42)",
 
           borderRadius:
-            14,
+            10,
 
           padding:
-            16,
+            10,
 
           background:
             "rgba(127,29,29,0.12)",
@@ -833,6 +952,9 @@ function SampleCard({
           style={{
             color:
               "#fca5a5",
+
+            fontSize:
+              11,
           }}
         >
           Sample {index + 1} failed
@@ -850,7 +972,7 @@ function SampleCard({
               "#fecaca",
 
             fontSize:
-              12,
+              9,
           }}
         >
           {sample.error}
@@ -870,27 +992,20 @@ function SampleCard({
   }
 
 
-  const classification =
-    generated.classification;
-
-  const markBreakdown =
-    generated.markBreakdown;
-
-
   return (
     <article
       style={{
         border:
-          "1px solid rgba(148,163,184,0.20)",
+          "1px solid rgba(148,163,184,0.18)",
 
         borderRadius:
-          16,
+          10,
 
         overflow:
           "hidden",
 
         background:
-          "rgba(255,255,255,0.035)",
+          "rgba(255,255,255,0.03)",
       }}
     >
       <div
@@ -905,46 +1020,32 @@ function SampleCard({
             "space-between",
 
           gap:
-            14,
+            8,
 
           padding:
-            "12px 16px",
+            "7px 10px",
 
           borderBottom:
-            "1px solid rgba(148,163,184,0.16)",
+            "1px solid rgba(148,163,184,0.14)",
         }}
       >
-        <strong>
+        <strong
+          style={{
+            fontSize:
+              11,
+
+            color:
+              "#e2e8f0",
+          }}
+        >
           Sample {index + 1}
         </strong>
 
-        <div
-          style={{
-            display:
-              "flex",
-
-            flexWrap:
-              "wrap",
-
-            justifyContent:
-              "flex-end",
-
-            gap:
-              6,
-          }}
-        >
-          {generated.questionCode ? (
-            <Chip>
-              {generated.questionCode}
-            </Chip>
-          ) : null}
-
-          {generated.templateId ? (
-            <Chip>
-              {generated.templateId}
-            </Chip>
-          ) : null}
-        </div>
+        <CompactClassification
+          generated={
+            generated
+          }
+        />
       </div>
 
 
@@ -954,44 +1055,24 @@ function SampleCard({
             "grid",
 
           gap:
-            16,
+            10,
 
           padding:
-            16,
+            10,
         }}
       >
         <section>
-          <div
-            style={{
-              marginBottom:
-                7,
-
-              color:
-                "#94a3b8",
-
-              fontSize:
-                11,
-
-              fontWeight:
-                800,
-
-              letterSpacing:
-                "0.07em",
-
-              textTransform:
-                "uppercase",
-            }}
-          >
+          <SectionLabel>
             Question
-          </div>
+          </SectionLabel>
 
           <div
             style={{
               padding:
-                18,
+                "10px 12px",
 
               borderRadius:
-                12,
+                8,
 
               background:
                 "#ffffff",
@@ -1003,10 +1084,10 @@ function SampleCard({
                 "Cambria Math, Cambria, Georgia, Times New Roman, serif",
 
               fontSize:
-                18,
+                14,
 
               lineHeight:
-                1.75,
+                1.45,
             }}
           >
             <PaperContent
@@ -1022,40 +1103,20 @@ function SampleCard({
 
 
         <section>
-          <div
-            style={{
-              marginBottom:
-                7,
-
-              color:
-                "#94a3b8",
-
-              fontSize:
-                11,
-
-              fontWeight:
-                800,
-
-              letterSpacing:
-                "0.07em",
-
-              textTransform:
-                "uppercase",
-            }}
-          >
+          <SectionLabel>
             Final answer
-          </div>
+          </SectionLabel>
 
           <div
             style={{
               padding:
-                14,
+                "7px 10px",
 
               borderRadius:
-                12,
+                8,
 
               background:
-                "rgba(255,255,255,0.055)",
+                "rgba(255,255,255,0.05)",
 
               color:
                 "#f8fafc",
@@ -1064,7 +1125,7 @@ function SampleCard({
                 "Cambria Math, Cambria, Georgia, Times New Roman, serif",
 
               fontSize:
-                18,
+                14,
             }}
           >
             <PaperContent
@@ -1079,168 +1140,28 @@ function SampleCard({
         </section>
 
 
-        <section>
-          <div
-            style={{
-              marginBottom:
-                7,
+        {showWorkedAnswers ? (
+          <section>
+            <SectionLabel>
+              Worked answers
+            </SectionLabel>
 
-              color:
-                "#94a3b8",
-
-              fontSize:
-                11,
-
-              fontWeight:
-                800,
-
-              letterSpacing:
-                "0.07em",
-
-              textTransform:
-                "uppercase",
-            }}
-          >
-            Worked answers
-          </div>
-
-          <WorkedAnswers
-            generated={
-              generated
-            }
-          />
-        </section>
-
-
-        <section>
-          <div
-            style={{
-              marginBottom:
-                7,
-
-              color:
-                "#94a3b8",
-
-              fontSize:
-                11,
-
-              fontWeight:
-                800,
-
-              letterSpacing:
-                "0.07em",
-
-              textTransform:
-                "uppercase",
-            }}
-          >
-            Classification
-          </div>
-
-          <div
-            style={{
-              display:
-                "flex",
-
-              gap:
-                6,
-
-              flexWrap:
-                "wrap",
-            }}
-          >
-            <Chip>
-              Marks:{" "}
-              {generated.marks ??
-                markBreakdown?.totalMarks ??
-                "—"}
-            </Chip>
-
-            {classification?.standard ? (
-              <Chip>
-                Standard:{" "}
-                {classification.standard}
-              </Chip>
-            ) : null}
-
-            {classification
-              ?.calculatorStatus ? (
-              <Chip>
-                {
-                  classification
-                    .calculatorStatus
-                }
-              </Chip>
-            ) : null}
-
-            {classification
-              ?.paperSuitability ? (
-              <Chip>
-                Paper:{" "}
-                {
-                  classification
-                    .paperSuitability
-                }
-              </Chip>
-            ) : null}
-
-            {classification
-              ?.structureType ? (
-              <Chip>
-                {
-                  classification
-                    .structureType
-                }
-              </Chip>
-            ) : null}
-
-            {classification ? (
-              <Chip>
-                {classification
-                  .isReasoning
-                  ? "Reasoning"
-                  : "Operational"}
-              </Chip>
-            ) : null}
-
-            {markBreakdown ? (
-              <>
-                <Chip>
-                  C:{" "}
-                  {
-                    markBreakdown
-                      .cMarks
-                  }
-                </Chip>
-
-                <Chip>
-                  A:{" "}
-                  {
-                    markBreakdown
-                      .aMarks
-                  }
-                </Chip>
-
-                <Chip>
-                  R:{" "}
-                  {
-                    markBreakdown
-                      .reasoningMarks
-                  }
-                </Chip>
-              </>
-            ) : null}
-          </div>
-        </section>
+            <WorkedAnswers
+              generated={
+                generated
+              }
+            />
+          </section>
+        ) : null}
 
 
         <details
           style={{
             borderTop:
-              "1px solid rgba(148,163,184,0.14)",
+              "1px solid rgba(148,163,184,0.10)",
 
             paddingTop:
-              12,
+              5,
           }}
         >
           <summary
@@ -1249,16 +1170,16 @@ function SampleCard({
                 "pointer",
 
               color:
-                "#cbd5e1",
+                "#64748b",
 
               fontSize:
-                12,
+                9,
 
               fontWeight:
                 700,
             }}
           >
-            Raw generated output
+            Raw output
           </summary>
 
           <pre
@@ -1267,19 +1188,19 @@ function SampleCard({
                 0,
 
               marginTop:
-                12,
+                6,
 
               maxHeight:
-                460,
+                360,
 
               overflow:
                 "auto",
 
               padding:
-                14,
+                8,
 
               borderRadius:
-                10,
+                7,
 
               background:
                 "rgba(0,0,0,0.28)",
@@ -1288,10 +1209,10 @@ function SampleCard({
                 "#94a3b8",
 
               fontSize:
-                11,
+                8,
 
               lineHeight:
-                1.5,
+                1.35,
 
               whiteSpace:
                 "pre-wrap",
@@ -1396,6 +1317,15 @@ export default function GeneratorTesterPage() {
   ] =
     useState<number>(
       10
+    );
+
+
+  const [
+    showWorkedAnswers,
+    setShowWorkedAnswers,
+  ] =
+    useState(
+      true
     );
 
 
@@ -1534,6 +1464,30 @@ export default function GeneratorTesterPage() {
     ).length;
 
 
+  const controlStyle = {
+    height:
+      32,
+
+    padding:
+      "0 8px",
+
+    border:
+      "1px solid rgba(148,163,184,0.26)",
+
+    borderRadius:
+      7,
+
+    background:
+      "#111827",
+
+    color:
+      "#f8fafc",
+
+    fontSize:
+      11,
+  } as const;
+
+
   return (
     <main
       style={{
@@ -1541,7 +1495,7 @@ export default function GeneratorTesterPage() {
           "100vh",
 
         padding:
-          28,
+          16,
 
         background:
           "#070a10",
@@ -1556,186 +1510,12 @@ export default function GeneratorTesterPage() {
       <div
         style={{
           width:
-            "min(1500px, 100%)",
+            "min(1600px, 100%)",
 
           margin:
             "0 auto",
         }}
       >
-        <header
-          style={{
-            display:
-              "grid",
-
-            gap:
-              12,
-
-            marginBottom:
-              22,
-          }}
-        >
-          <div>
-            <div
-              style={{
-                marginBottom:
-                  5,
-
-                color:
-                  "#60a5fa",
-
-                fontSize:
-                  12,
-
-                fontWeight:
-                  800,
-
-                letterSpacing:
-                  "0.08em",
-
-                textTransform:
-                  "uppercase",
-              }}
-            >
-              Development tool
-            </div>
-
-            <h1
-              style={{
-                margin:
-                  0,
-
-                fontSize:
-                  30,
-              }}
-            >
-              Generator Tester
-            </h1>
-
-            <p
-              style={{
-                marginBottom:
-                  0,
-
-                maxWidth:
-                  900,
-
-                color:
-                  "#94a3b8",
-
-                lineHeight:
-                  1.6,
-              }}
-            >
-              Test a production
-              ConceptGeneratorModule
-              before registering it in
-              the assessment builder.
-              Change the active module in
-              GeneratorTestTarget.ts;
-              this page should not need
-              rewriting for each skill.
-            </p>
-          </div>
-
-
-          <div
-            style={{
-              display:
-                "flex",
-
-              gap:
-                6,
-
-              flexWrap:
-                "wrap",
-            }}
-          >
-            <Chip>
-              {
-                module.metadata
-                  .moduleId
-              }
-            </Chip>
-
-            <Chip>
-              {
-                module.metadata
-                  .domain
-              }
-            </Chip>
-
-            <Chip>
-              Skill{" "}
-              {
-                module.metadata
-                  .skillCode
-              }
-            </Chip>
-
-            <Chip>
-              {
-                module.metadata
-                  .capabilities
-                  .calculatorStatus
-              }
-            </Chip>
-
-            <Chip>
-              {
-                module.metadata
-                  .capabilities
-                  .paperSuitability
-              }
-            </Chip>
-          </div>
-
-
-          {GENERATOR_TEST_TARGET
-            .notes &&
-          GENERATOR_TEST_TARGET
-            .notes.length > 0 ? (
-            <div
-              style={{
-                padding:
-                  "10px 12px",
-
-                border:
-                  "1px solid rgba(96,165,250,0.20)",
-
-                borderRadius:
-                  10,
-
-                background:
-                  "rgba(59,130,246,0.06)",
-
-                color:
-                  "#bfdbfe",
-
-                fontSize:
-                  12,
-
-                lineHeight:
-                  1.5,
-              }}
-            >
-              {GENERATOR_TEST_TARGET
-                .notes.map(
-                  (
-                    note,
-                    index
-                  ) => (
-                    <div
-                      key={`${note}-${index}`}
-                    >
-                      {note}
-                    </div>
-                  )
-                )}
-            </div>
-          ) : null}
-        </header>
-
-
         <section
           style={{
             display:
@@ -1745,25 +1525,25 @@ export default function GeneratorTesterPage() {
               "end",
 
             gap:
-              12,
+              8,
 
             flexWrap:
               "wrap",
 
             padding:
-              14,
+              10,
 
             marginBottom:
-              18,
+              10,
 
             border:
-              "1px solid rgba(148,163,184,0.20)",
+              "1px solid rgba(148,163,184,0.18)",
 
             borderRadius:
-              14,
+              10,
 
             background:
-              "rgba(255,255,255,0.035)",
+              "rgba(255,255,255,0.03)",
           }}
         >
           <ControlLabel>
@@ -1780,26 +1560,10 @@ export default function GeneratorTesterPage() {
                   )
               }
               style={{
+                ...controlStyle,
+
                 minWidth:
-                  230,
-
-                height:
-                  38,
-
-                padding:
-                  "0 10px",
-
-                border:
-                  "1px solid rgba(148,163,184,0.28)",
-
-                borderRadius:
-                  8,
-
-                background:
-                  "#111827",
-
-                color:
-                  "#f8fafc",
+                  220,
               }}
             >
               {GENERATOR_TEST_TARGET
@@ -1840,25 +1604,9 @@ export default function GeneratorTesterPage() {
                     ) as DifficultyLevel
                   )
               }
-              style={{
-                height:
-                  38,
-
-                padding:
-                  "0 10px",
-
-                border:
-                  "1px solid rgba(148,163,184,0.28)",
-
-                borderRadius:
-                  8,
-
-                background:
-                  "#111827",
-
-                color:
-                  "#f8fafc",
-              }}
+              style={
+                controlStyle
+              }
             >
               {availableDifficulties.map(
                 (
@@ -1893,25 +1641,9 @@ export default function GeneratorTesterPage() {
                     event.target.value
                   )
               }
-              style={{
-                height:
-                  38,
-
-                padding:
-                  "0 10px",
-
-                border:
-                  "1px solid rgba(148,163,184,0.28)",
-
-                borderRadius:
-                  8,
-
-                background:
-                  "#111827",
-
-                color:
-                  "#f8fafc",
-              }}
+              style={
+                controlStyle
+              }
             >
               <option value="P1">
                 P1
@@ -1940,25 +1672,9 @@ export default function GeneratorTesterPage() {
                     )
                   )
               }
-              style={{
-                height:
-                  38,
-
-                padding:
-                  "0 10px",
-
-                border:
-                  "1px solid rgba(148,163,184,0.28)",
-
-                borderRadius:
-                  8,
-
-                background:
-                  "#111827",
-
-                color:
-                  "#f8fafc",
-              }}
+              style={
+                controlStyle
+              }
             >
               {SAMPLE_COUNT_OPTIONS.map(
                 (
@@ -1987,16 +1703,16 @@ export default function GeneratorTesterPage() {
             }
             style={{
               height:
-                38,
+                32,
 
               padding:
-                "0 16px",
+                "0 13px",
 
               border:
                 "1px solid rgba(96,165,250,0.52)",
 
               borderRadius:
-                8,
+                7,
 
               background:
                 "rgba(59,130,246,0.18)",
@@ -2007,55 +1723,100 @@ export default function GeneratorTesterPage() {
               cursor:
                 "pointer",
 
+              fontSize:
+                11,
+
               fontWeight:
                 800,
             }}
           >
             Generate
           </button>
-        </section>
 
 
-        <section
-          style={{
-            display:
-              "flex",
+          <button
+            type="button"
+            onClick={
+              () =>
+                setShowWorkedAnswers(
+                  (current) =>
+                    !current
+                )
+            }
+            style={{
+              height:
+                32,
 
-            gap:
-              8,
+              padding:
+                "0 13px",
 
-            flexWrap:
-              "wrap",
+              border:
+                "1px solid rgba(148,163,184,0.28)",
 
-            marginBottom:
-              18,
-          }}
-        >
-          <Chip>
-            Generated:{" "}
-            {samples.length}
-          </Chip>
+              borderRadius:
+                7,
 
-          <Chip>
-            Errors:{" "}
-            {failedCount}
-          </Chip>
+              background:
+                showWorkedAnswers
+                  ? "rgba(255,255,255,0.055)"
+                  : "rgba(16,185,129,0.10)",
 
-          <Chip>
-            Worked answers:{" "}
-            {workedAnswerCount}/
-            {samples.length}
-          </Chip>
+              color:
+                showWorkedAnswers
+                  ? "#cbd5e1"
+                  : "#a7f3d0",
 
-          <Chip>
-            Concept:{" "}
-            {selectedConceptCode}
-          </Chip>
+              cursor:
+                "pointer",
 
-          <Chip>
-            Difficulty:{" "}
-            {difficulty}
-          </Chip>
+              fontSize:
+                11,
+
+              fontWeight:
+                700,
+            }}
+          >
+            {showWorkedAnswers
+              ? "Hide worked answers"
+              : "Show worked answers"}
+          </button>
+
+
+          <div
+            style={{
+              marginLeft:
+                "auto",
+
+              display:
+                "flex",
+
+              gap:
+                5,
+
+              flexWrap:
+                "wrap",
+
+              alignItems:
+                "center",
+            }}
+          >
+            <Chip>
+              {samples.length} generated
+            </Chip>
+
+            <Chip>
+              {failedCount} errors
+            </Chip>
+
+            <Chip>
+              {workedAnswerCount}/
+              {samples.length} worked
+            </Chip>
+
+            <Chip>
+              L{difficulty}
+            </Chip>
+          </div>
         </section>
 
 
@@ -2065,10 +1826,10 @@ export default function GeneratorTesterPage() {
               "grid",
 
             gridTemplateColumns:
-              "repeat(auto-fit, minmax(min(100%, 560px), 1fr))",
+              "repeat(auto-fit, minmax(min(100%, 480px), 1fr))",
 
             gap:
-              18,
+              10,
           }}
         >
           {samples.map(
@@ -2085,6 +1846,9 @@ export default function GeneratorTesterPage() {
                 }
                 index={
                   index
+                }
+                showWorkedAnswers={
+                  showWorkedAnswers
                 }
               />
             )

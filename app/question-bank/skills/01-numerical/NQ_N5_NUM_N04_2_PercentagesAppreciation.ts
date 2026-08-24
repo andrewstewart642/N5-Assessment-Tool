@@ -1,87 +1,389 @@
 // app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation.ts
 
-import type { PaperPart } from "@/shared-types/PaperParts";
-import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+import type {
+  DifficultyLevel,
+} from "@/shared-types/AssessmentTypes";
+
+import type {
+  PaperPart,
+} from "@/shared-types/PaperParts";
+
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
   GeneratorContext,
 } from "@/shared-types/QuestionGenerationTypes";
 
-function textPart(value: string): PaperPart {
-  return { kind: "text", value };
-}
+import type {
+  QuestionVariantSelectionMeta,
+} from "@/shared-types/QuestionSelectionTypes";
 
-function randomInt(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+import {
+  generateN5MathsCompoundPercentageQuestion,
+  type CompoundPercentageDifficulty,
+  type GeneratedCompoundPercentageQuestion,
+} from "@/course-data/question-generators/compound-percentages/N5MathsCompoundPercentageGenerator";
 
-function chooseOne<T>(items: T[]): T {
-  return items[Math.floor(Math.random() * items.length)];
-}
+import {
+  generateN5MathsCompoundPercentageWorkedAnswers,
+} from "@/course-data/answer-generators/compound-percentages/N5MathsCompoundPercentageAnswerGenerator";
 
-function buildMarks() {
-  return { totalMarks: 3, cMarks: 3, aMarks: 0, reasoningMarks: 0 };
-}
 
-function generateQuestion(_: GeneratorContext): GeneratedQuestionData {
-  const principal = randomInt(200, 3000);
-  const rate = chooseOne([2, 3, 4, 5, 6, 8, 10]);
-  const years = randomInt(2, 5);
-  const value = principal * Math.pow(1 + rate / 100, years);
-  const markBreakdown = buildMarks();
+const DEFAULT_COMPOUND_PERCENTAGE_DIFFICULTY:
+  CompoundPercentageDifficulty = 2;
 
+
+function textPart(
+  value: string
+): PaperPart {
   return {
-    prompt: `A value of £${principal} appreciates by ${rate}% each year for ${years} years. Calculate the final value.`,
-    answer: `£${value.toFixed(2)}`,
-    marks: markBreakdown.totalMarks,
-    questionCode: "NQ_N5_NUM_N04_2_PERCENTAGES_APPRECIATION",
-    promptParts: [
-      textPart(
-        `A value of £${principal} appreciates by ${rate}% each year for ${years} years. Calculate the final value.`
-      ),
-    ],
-    answerParts: [textPart(`£${value.toFixed(2)}`)],
-    markBreakdown,
-    classification: {
-      standard: "C",
-      calculatorStatus: "Either",
-      structureType: "ContextualProblem",
-      isReasoning: false,
-      paperSuitability: "P1",
-    },
-    sourceSkillCode: "NQ_N5_NUM_N04",
-    sourceConceptCode: "N4.2",
-    sourceConceptLabel: "Appreciation",
-    templateId: `percentages-appreciation`,
+    kind:
+      "text",
+
+    value,
   };
 }
 
-export const AppreciationConceptModule: ConceptGeneratorModule = {
-  metadata: {
-    moduleId: "NQ_N5_NUM_N04_2_PERCENTAGES_APPRECIATION",
-    domain: "NUM",
-    skillCode: "NQ_N5_NUM_N04",
-    conceptCode: "N4.2",
-    conceptLabel: "Appreciation",
-    difficultyProfile: {
-      availableLevels: [1, 2, 3],
-      defaultLevel: 2,
+
+function normaliseDifficulty(
+  input:
+    DifficultyLevel
+): CompoundPercentageDifficulty {
+  if (
+    input <= 1
+  ) {
+    return 1;
+  }
+
+  if (
+    input === 2
+  ) {
+    return 2;
+  }
+
+  return 3;
+}
+
+
+function buildPromptParts(
+  generated:
+    GeneratedCompoundPercentageQuestion
+): PaperPart[] {
+  return [
+    textPart(
+      generated.questionText
+    ),
+  ];
+}
+
+
+function buildAnswerParts(
+  generated:
+    GeneratedCompoundPercentageQuestion
+): PaperPart[] {
+  return [
+    textPart(
+      generated.answerText
+    ),
+  ];
+}
+
+
+function buildSelectionMeta(args: {
+  level:
+    DifficultyLevel;
+
+  templateId:
+    string;
+}): QuestionVariantSelectionMeta {
+  return {
+    level:
+      args.level,
+
+    templateId:
+      args.templateId,
+
+    marks: {
+      totalMarks:
+        3,
+
+      cMarks:
+        3,
+
+      aMarks:
+        0,
+
+      reasoningMarks:
+        0,
     },
-    capabilities: {
-      standardCoverage: ["C"],
-      canGenerateReasoning: false,
-      calculatorStatus: "Either",
-      paperSuitability: "P1",
-      typicalStructureTypes: ["ContextualProblem"],
+
+    standardProfile:
+      "C",
+
+    paperSuitability:
+      "P2",
+
+    calculatorStatus:
+      "CalculatorRequired",
+  };
+}
+
+
+function buildGeneratedCompoundPercentageQuestion(
+  context:
+    GeneratorContext
+): GeneratedQuestionData {
+  const difficulty =
+    normaliseDifficulty(
+      context.difficulty
+    );
+
+  const generated =
+    generateN5MathsCompoundPercentageQuestion({
+      difficulty,
+    });
+
+  const workedAnswers =
+    generateN5MathsCompoundPercentageWorkedAnswers(
+      generated
+    );
+
+  const templateId = [
+    "source-catalogue-compound-percentages",
+    `level-${difficulty}`,
+    generated.familyId,
+    generated.numericProfile.kind,
+    generated.numericProfile.direction,
+    generated.numericProfile.contextTemplateId,
+  ].join(
+    "-"
+  );
+
+  return {
+    prompt:
+      generated.questionText,
+
+    answer:
+      generated.answerText,
+
+    marks:
+      3,
+
+    questionCode:
+      generated.familyId,
+
+    promptParts:
+      buildPromptParts(
+        generated
+      ),
+
+    answerParts:
+      buildAnswerParts(
+        generated
+      ),
+
+    workedAnswers,
+
+    markBreakdown: {
+      totalMarks:
+        3,
+
+      cMarks:
+        3,
+
+      aMarks:
+        0,
+
+      reasoningMarks:
+        0,
     },
-  },
 
-  canHandle(code: string) {
-    return code === "N4.2";
-  },
+    classification: {
+      standard:
+        "C",
 
-  generate: generateQuestion,
-};
+      calculatorStatus:
+        "CalculatorOnly",
 
-export default AppreciationConceptModule;
+      structureType:
+        "ContextualProblem",
+
+      isReasoning:
+        false,
+
+      paperSuitability:
+        "P2",
+    },
+
+    sourceSkillCode:
+      "NQ_N5_NUM_N04",
+
+    sourceConceptCode:
+      "N4.2",
+
+    sourceConceptLabel:
+      "Compound percentages",
+
+    templateId,
+
+    topicMarkBreakdown: {
+      NUM:
+        3,
+
+      ALG:
+        0,
+
+      GEO:
+        0,
+
+      TRIG:
+        0,
+
+      STAT:
+        0,
+    },
+
+    selectionMeta:
+      buildSelectionMeta({
+        level:
+          difficulty,
+
+        templateId,
+      }),
+  };
+}
+
+
+function levelSelectionEntry(
+  level:
+    CompoundPercentageDifficulty
+): QuestionVariantSelectionMeta {
+  return {
+    level,
+
+    templateId:
+      `source-catalogue-compound-percentages-level-${level}`,
+
+    marks: {
+      totalMarks:
+        3,
+
+      cMarks:
+        3,
+
+      aMarks:
+        0,
+
+      reasoningMarks:
+        0,
+    },
+
+    standardProfile:
+      "C",
+
+    paperSuitability:
+      "P2",
+
+    calculatorStatus:
+      "CalculatorRequired",
+  };
+}
+
+
+export const AppreciationConceptModule:
+  ConceptGeneratorModule = {
+    metadata: {
+      moduleId:
+        "NQ_N5_NUM_N04_2_COMPOUND_PERCENTAGES",
+
+      domain:
+        "NUM",
+
+      skillCode:
+        "NQ_N5_NUM_N04",
+
+      conceptCode:
+        "N4.2",
+
+      conceptLabel:
+        "Compound percentages",
+
+      difficultyProfile: {
+        availableLevels: [
+          1,
+          2,
+          3,
+        ],
+
+        defaultLevel:
+          DEFAULT_COMPOUND_PERCENTAGE_DIFFICULTY,
+
+        levelDescriptions: {
+          1:
+            "Accessible compound percentage questions using friendly whole-number rates and values suited to repeated percentage calculations.",
+
+          2:
+            "Typical National 5 compound percentage questions based on the historical exam distribution.",
+
+          3:
+            "More demanding compound percentage questions with a heavier chance of longer periods, decimal rates and multi-rate depreciation.",
+        },
+      },
+
+      capabilities: {
+        standardCoverage: [
+          "C",
+        ],
+
+        canGenerateReasoning:
+          false,
+
+        calculatorStatus:
+          "CalculatorOnly",
+
+        paperSuitability:
+          "P2",
+
+        typicalStructureTypes: [
+          "ContextualProblem",
+        ],
+      },
+
+      levelSelectionProfile: {
+        1: [
+          levelSelectionEntry(
+            1
+          ),
+        ],
+
+        2: [
+          levelSelectionEntry(
+            2
+          ),
+        ],
+
+        3: [
+          levelSelectionEntry(
+            3
+          ),
+        ],
+      },
+    },
+
+    canHandle(
+      code:
+        string
+    ) {
+      return (
+        code ===
+        "N4.2"
+      );
+    },
+
+    generate:
+      buildGeneratedCompoundPercentageQuestion,
+  };
+
+
+export default
+  AppreciationConceptModule;

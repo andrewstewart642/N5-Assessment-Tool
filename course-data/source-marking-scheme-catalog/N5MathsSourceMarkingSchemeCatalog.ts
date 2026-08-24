@@ -20,6 +20,10 @@ import {
   N5_MATHS_2014_P1_Q09_MS,
 } from "./N5_Maths_2014/Paper1/N5_Maths_2014_P1_Q09_MS";
 
+import {
+  N5_MATHS_2014_P2_Q01_MS,
+} from "./N5_Maths_2014/Paper2/N5_Maths_2014_P2_Q01_MS";
+
 
 /**
  * 2015
@@ -28,6 +32,10 @@ import {
 import {
   N5_MATHS_2015_P1_Q01_MS,
 } from "./N5_Maths_2015/Paper1/N5_Maths_2015_P1_Q01_MS";
+
+import {
+  N5_MATHS_2015_P2_Q01_MS,
+} from "./N5_Maths_2015/Paper2/N5_Maths_2015_P2_Q01_MS";
 
 import {
   N5_MATHS_2015_P2_Q08_MS,
@@ -42,6 +50,10 @@ import {
   N5_MATHS_2016_P1_Q02_MS,
 } from "./N5_Maths_2016/Paper1/N5_Maths_2016_P1_Q02_MS";
 
+import {
+  N5_MATHS_2016_P2_Q01_MS,
+} from "./N5_Maths_2016/Paper2/N5_Maths_2016_P2_Q01_MS";
+
 
 /**
  * 2017
@@ -50,6 +62,10 @@ import {
 import {
   N5_MATHS_2017_P1_Q03_MS,
 } from "./N5_Maths_2017/Paper1/N5_Maths_2017_P1_Q03_MS";
+
+import {
+  N5_MATHS_2017_P2_Q02_MS,
+} from "./N5_Maths_2017/Paper2/N5_Maths_2017_P2_Q02_MS";
 
 import {
   N5_MATHS_2017_P2_Q05_MS,
@@ -65,6 +81,10 @@ import {
 } from "./N5_Maths_2018/Paper1/N5_Maths_2018_P1_Q01_MS";
 
 import {
+  N5_MATHS_2018_P2_Q01_MS,
+} from "./N5_Maths_2018/Paper2/N5_Maths_2018_P2_Q01_MS";
+
+import {
   N5_MATHS_2018_P2_Q11_MS,
 } from "./N5_Maths_2018/Paper2/N5_Maths_2018_P2_Q11_MS";
 
@@ -76,6 +96,10 @@ import {
 import {
   N5_MATHS_2019_P1_Q02_MS,
 } from "./N5_Maths_2019/Paper1/N5_Maths_2019_P1_Q02_MS";
+
+import {
+  N5_MATHS_2019_P2_Q01_MS,
+} from "./N5_Maths_2019/Paper2/N5_Maths_2019_P2_Q01_MS";
 
 import {
   N5_MATHS_2019_P2_Q09_MS,
@@ -94,6 +118,10 @@ import {
   N5_MATHS_2021_P1_Q12_MS,
 } from "./N5_Maths_2021/Paper1/N5_Maths_2021_P1_Q12_MS";
 
+import {
+  N5_MATHS_2021_P2_Q01_MS,
+} from "./N5_Maths_2021/Paper2/N5_Maths_2021_P2_Q01_MS";
+
 
 /**
  * 2022
@@ -107,6 +135,10 @@ import {
   N5_MATHS_2022_P1_Q10_MS,
 } from "./N5_Maths_2022/Paper1/N5_Maths_2022_P1_Q10_MS";
 
+import {
+  N5_MATHS_2022_P2_Q02_MS,
+} from "./N5_Maths_2022/Paper2/N5_Maths_2022_P2_Q02_MS";
+
 
 /**
  * 2023
@@ -115,6 +147,10 @@ import {
 import {
   N5_MATHS_2023_P1_Q01_MS,
 } from "./N5_Maths_2023/Paper1/N5_Maths_2023_P1_Q01_MS";
+
+import {
+  N5_MATHS_2023_P2_Q01_MS,
+} from "./N5_Maths_2023/Paper2/N5_Maths_2023_P2_Q01_MS";
 
 import {
   N5_MATHS_2023_P2_Q06_MS,
@@ -128,6 +164,10 @@ import {
 import {
   N5_MATHS_2024_P1_Q01_MS,
 } from "./N5_Maths_2024/Paper1/N5_Maths_2024_P1_Q01_MS";
+
+import {
+  N5_MATHS_2024_P2_Q01_MS,
+} from "./N5_Maths_2024/Paper2/N5_Maths_2024_P2_Q01_MS";
 
 import {
   N5_MATHS_2024_P2_Q05_MS,
@@ -146,6 +186,10 @@ import {
   N5_MATHS_2025_P1_Q04_MS,
 } from "./N5_Maths_2025/Paper1/N5_Maths_2025_P1_Q04_MS";
 
+import {
+  N5_MATHS_2025_P2_Q01_MS,
+} from "./N5_Maths_2025/Paper2/N5_Maths_2025_P2_Q01_MS";
+
 
 export const N5_MATHS_SOURCE_MARKING_SCHEME_CATALOG:
   SourceMarkingSchemeCatalogEntry[] = [
@@ -154,34 +198,40 @@ export const N5_MATHS_SOURCE_MARKING_SCHEME_CATALOG:
      */
     N5_MATHS_2014_P1_Q01_MS,
     N5_MATHS_2014_P1_Q09_MS,
+    N5_MATHS_2014_P2_Q01_MS,
 
     /**
      * 2015
      */
     N5_MATHS_2015_P1_Q01_MS,
+    N5_MATHS_2015_P2_Q01_MS,
     N5_MATHS_2015_P2_Q08_MS,
 
     /**
      * 2016
      */
     N5_MATHS_2016_P1_Q02_MS,
+    N5_MATHS_2016_P2_Q01_MS,
 
     /**
      * 2017
      */
     N5_MATHS_2017_P1_Q03_MS,
+    N5_MATHS_2017_P2_Q02_MS,
     N5_MATHS_2017_P2_Q05_MS,
 
     /**
      * 2018
      */
     N5_MATHS_2018_P1_Q01_MS,
+    N5_MATHS_2018_P2_Q01_MS,
     N5_MATHS_2018_P2_Q11_MS,
 
     /**
      * 2019
      */
     N5_MATHS_2019_P1_Q02_MS,
+    N5_MATHS_2019_P2_Q01_MS,
     N5_MATHS_2019_P2_Q09_MS,
 
     /**
@@ -189,23 +239,27 @@ export const N5_MATHS_SOURCE_MARKING_SCHEME_CATALOG:
      */
     N5_MATHS_2021_P1_Q02_MS,
     N5_MATHS_2021_P1_Q12_MS,
+    N5_MATHS_2021_P2_Q01_MS,
 
     /**
      * 2022
      */
     N5_MATHS_2022_P1_Q01_MS,
     N5_MATHS_2022_P1_Q10_MS,
+    N5_MATHS_2022_P2_Q02_MS,
 
     /**
      * 2023
      */
     N5_MATHS_2023_P1_Q01_MS,
+    N5_MATHS_2023_P2_Q01_MS,
     N5_MATHS_2023_P2_Q06_MS,
 
     /**
      * 2024
      */
     N5_MATHS_2024_P1_Q01_MS,
+    N5_MATHS_2024_P2_Q01_MS,
     N5_MATHS_2024_P2_Q05_MS,
 
     /**
@@ -213,6 +267,7 @@ export const N5_MATHS_SOURCE_MARKING_SCHEME_CATALOG:
      */
     N5_MATHS_2025_P1_Q01_MS,
     N5_MATHS_2025_P1_Q04_MS,
+    N5_MATHS_2025_P2_Q01_MS,
   ];
 
 

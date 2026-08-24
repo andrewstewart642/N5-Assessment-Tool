@@ -2,7 +2,7 @@ import type {
   ConceptGeneratorModule,
 } from "@/shared-types/QuestionGenerationTypes";
 
-import FractionsConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N05_1_Fractions";
+import AppreciationConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation";
 
 
 export type GeneratorTestConcept = {
@@ -67,59 +67,22 @@ export type GeneratorTestTarget = {
 export const GENERATOR_TEST_TARGET:
   GeneratorTestTarget = {
     module:
-      FractionsConceptModule,
+      AppreciationConceptModule,
 
     concepts: [
       {
         code:
-          "N5.1",
+          "N4.2",
 
         label:
-          "All fraction operations",
-      },
-
-      {
-        code:
-          "N5.1.1",
-
-        label:
-          "Addition",
-      },
-
-      {
-        code:
-          "N5.1.2",
-
-        label:
-          "Subtraction",
-      },
-
-      {
-        code:
-          "N5.1.3",
-
-        label:
-          "Multiplication",
-      },
-
-      {
-        code:
-          "N5.1.4",
-
-        label:
-          "Division",
-      },
-
-      {
-        code:
-          "N5.1.5",
-
-        label:
-          "Bracketed operations",
+          "Compound percentages",
       },
     ],
 
     notes: [
-      "Currently testing the National 5 Fractions generator and its evidence-backed worked answers.",
+      "Currently testing the National 5 compound-percentage generator across appreciation, depreciation and multi-rate depreciation.",
+      "Historical evidence: 11 calculator-paper questions from 2014–2025, all worth 3 marks.",
+      "Check generated questions for realistic SQA-style contexts, sensible values, correct rounding and appropriate difficulty progression.",
+      "Worked answers should normally use multiplier-power. Fixed-rate depreciation may also expose the evidence-backed year-by-year method.",
     ],
   };

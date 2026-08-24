@@ -5,13 +5,17 @@ import type {
   SkillPaperSuitability,
 } from "@/shared-types/AssessmentTypes";
 
-export type SourceQuestionId = string;
+
+export type SourceQuestionId =
+  string;
+
 
 export type SourceQuestionKind =
   | "SQA_PAST_PAPER"
   | "SQA_SPECIMEN"
   | "TEACHER_AUTHORED"
   | "SQA_STYLE";
+
 
 export type SourceQuestionReviewStatus =
   | "DRAFT"
@@ -20,17 +24,24 @@ export type SourceQuestionReviewStatus =
   | "APPROVED"
   | "DEPRECATED";
 
-export type SourceQuestionStandardProfile = "C" | "A" | "C+A";
+
+export type SourceQuestionStandardProfile =
+  | "C"
+  | "A"
+  | "C+A";
+
 
 export type SourceQuestionThinkingProfile =
   | "OPERATIONAL"
   | "REASONING"
   | "MIXED";
 
+
 export type SourceQuestionCalculatorStatus =
   | "NON_CALCULATOR"
   | "CALCULATOR_ALLOWED"
   | "CALCULATOR_REQUIRED";
+
 
 export type SourceQuestionOperationType =
   | "ADD"
@@ -47,6 +58,7 @@ export type SourceQuestionOperationType =
   | "PROVE"
   | "BRACKETED_SUM_AND_MULTIPLY"
   | "OTHER";
+
 
 export type SourceQuestionSurfaceStyleTag =
   | "INLINE_EXPRESSION"
@@ -75,6 +87,7 @@ export type SourceQuestionSurfaceStyleTag =
   | "MEASUREMENT_CONTEXT"
   | "INTERLEAVED_SKILL";
 
+
 export type SourceQuestionAnswerSpaceCategory =
   | "NONE"
   | "VERY_SMALL"
@@ -85,34 +98,59 @@ export type SourceQuestionAnswerSpaceCategory =
   | "GRAPH_GRID"
   | "DIAGRAM_RESPONSE";
 
+
 export type SourceQuestionAnswerSpaceMeasurementMethod =
   | "PDF_RENDER"
   | "MANUAL_ESTIMATE"
   | "NOT_MEASURED";
 
+
 export type SourceQuestionAnswerSpace = {
-  category: SourceQuestionAnswerSpaceCategory;
-  estimatedLines: number;
-  measurementMethod: SourceQuestionAnswerSpaceMeasurementMethod;
+  category:
+    SourceQuestionAnswerSpaceCategory;
+
+  estimatedLines:
+    number;
+
+  measurementMethod:
+    SourceQuestionAnswerSpaceMeasurementMethod;
 
   sourceMeasurement?: {
-    renderDpi: number;
-    pageWidthPx: number;
-    pageHeightPx: number;
+    renderDpi:
+      number;
 
-    topPx: number;
-    bottomPx: number;
-    heightPx: number;
+    pageWidthPx:
+      number;
 
-    topPt?: number;
-    bottomPt?: number;
-    heightPt?: number;
+    pageHeightPx:
+      number;
 
-    heightMm: number;
+    topPx:
+      number;
+
+    bottomPx:
+      number;
+
+    heightPx:
+      number;
+
+    topPt?:
+      number;
+
+    bottomPt?:
+      number;
+
+    heightPt?:
+      number;
+
+    heightMm:
+      number;
   };
 
-  notes?: string;
+  notes?:
+    string;
 };
+
 
 export type SourceQuestionArithmeticComplexity =
   | "VERY_LOW"
@@ -120,10 +158,12 @@ export type SourceQuestionArithmeticComplexity =
   | "MEDIUM"
   | "HIGH";
 
+
 export type SourceQuestionSimplificationVisibility =
   | "EXPLICIT_INSTRUCTION"
   | "IMPLIED_BY_STANDARD_FORM"
   | "NOT_EXPLICITLY_STATED";
+
 
 export type SourceQuestionCancellationStyle =
   | "NONE"
@@ -132,6 +172,7 @@ export type SourceQuestionCancellationStyle =
   | "BRACKETED_SIMPLIFICATION_THEN_MULTIPLY"
   | "COMMON_DENOMINATOR_REQUIRED";
 
+
 export type SourceQuestionFinalAnswerType =
   | "INTEGER"
   | "PROPER_FRACTION"
@@ -139,30 +180,55 @@ export type SourceQuestionFinalAnswerType =
   | "MIXED_NUMBER"
   | "SIMPLIFIED_EXPRESSION";
 
-export type SourceQuestionValueSize = "SMALL" | "MEDIUM" | "LARGE";
+
+export type SourceQuestionValueSize =
+  | "SMALL"
+  | "MEDIUM"
+  | "LARGE";
+
 
 export type SourceQuestionNumberProfile = {
-  arithmeticComplexity: SourceQuestionArithmeticComplexity;
+  arithmeticComplexity:
+    SourceQuestionArithmeticComplexity;
 
-  requiresSimplification: boolean;
-  simplificationVisibility: SourceQuestionSimplificationVisibility;
+  requiresSimplification:
+    boolean;
 
-  cancellationStyle: SourceQuestionCancellationStyle;
+  simplificationVisibility:
+    SourceQuestionSimplificationVisibility;
 
-  finalAnswerType: SourceQuestionFinalAnswerType;
+  cancellationStyle:
+    SourceQuestionCancellationStyle;
 
-  intermediateValueSize: SourceQuestionValueSize;
-  finalValueSize: SourceQuestionValueSize;
+  finalAnswerType:
+    SourceQuestionFinalAnswerType;
 
-  nonCalculatorFriendly: boolean;
+  intermediateValueSize:
+    SourceQuestionValueSize;
 
-  notes?: string;
+  finalValueSize:
+    SourceQuestionValueSize;
+
+  nonCalculatorFriendly:
+    boolean;
+
+  notes?:
+    string;
 };
+
+
+/**
+ * =========================================================
+ * REVERSE / PART-WHOLE PERCENTAGE PROFILE
+ * =========================================================
+ */
+
 
 export type SourceQuestionPercentageRelationshipType =
   | "INCREASE"
   | "DECREASE"
   | "PART_OF_WHOLE";
+
 
 export type SourceQuestionPercentageExpressionStyle =
   | "INCREASED_BY"
@@ -174,14 +240,17 @@ export type SourceQuestionPercentageExpressionStyle =
   | "SURCHARGE"
   | "OTHER";
 
+
 export type SourceQuestionPercentageKnownValueRole =
   | "FINAL_VALUE"
   | "PART_VALUE";
+
 
 export type SourceQuestionPercentageRequestedValueRole =
   | "ORIGINAL_VALUE"
   | "WHOLE_VALUE"
   | "CHANGE_AMOUNT";
+
 
 export type SourceQuestionCalculatorBurden =
   | "MENTAL_FRIENDLY"
@@ -189,50 +258,271 @@ export type SourceQuestionCalculatorBurden =
   | "CALCULATOR_NATURAL"
   | "CALCULATOR_STRONGLY_EXPECTED";
 
+
 export type SourceQuestionValueFormat =
   | "INTEGER"
   | "DECIMAL"
   | "CURRENCY"
   | "SCIENTIFIC_NOTATION";
 
+
 export type SourceQuestionPercentageProfile = {
-  relationshipType: SourceQuestionPercentageRelationshipType;
-  expressionStyle: SourceQuestionPercentageExpressionStyle;
+  relationshipType:
+    SourceQuestionPercentageRelationshipType;
 
-  percentageValue: number;
-  retainedPercentage: number;
-  multiplier: number;
+  expressionStyle:
+    SourceQuestionPercentageExpressionStyle;
 
-  knownValue: number;
-  knownValueRole: SourceQuestionPercentageKnownValueRole;
+  percentageValue:
+    number;
 
-  originalOrWholeValue: number;
+  retainedPercentage:
+    number;
 
-  requestedValueRole: SourceQuestionPercentageRequestedValueRole;
-  requestedAnswer: number;
+  multiplier:
+    number;
 
-  changeAmount?: number;
+  knownValue:
+    number;
 
-  workingStepCount: 1 | 2;
+  knownValueRole:
+    SourceQuestionPercentageKnownValueRole;
 
-  arithmeticComplexity: SourceQuestionArithmeticComplexity;
+  originalOrWholeValue:
+    number;
 
-  nonCalculatorFriendly: boolean;
-  calculatorBurden: SourceQuestionCalculatorBurden;
+  requestedValueRole:
+    SourceQuestionPercentageRequestedValueRole;
 
-  inverseCalculationProducesExactResult: boolean;
+  requestedAnswer:
+    number;
 
-  knownValueFormat: SourceQuestionValueFormat;
-  answerValueFormat: SourceQuestionValueFormat;
+  changeAmount?:
+    number;
 
-  valueMagnitude: SourceQuestionValueSize | "VERY_LARGE";
+  workingStepCount:
+    1 | 2;
 
-  notes?: string;
+  arithmeticComplexity:
+    SourceQuestionArithmeticComplexity;
+
+  nonCalculatorFriendly:
+    boolean;
+
+  calculatorBurden:
+    SourceQuestionCalculatorBurden;
+
+  inverseCalculationProducesExactResult:
+    boolean;
+
+  knownValueFormat:
+    SourceQuestionValueFormat;
+
+  answerValueFormat:
+    SourceQuestionValueFormat;
+
+  valueMagnitude:
+    | SourceQuestionValueSize
+    | "VERY_LARGE";
+
+  notes?:
+    string;
 };
 
+
+/**
+ * =========================================================
+ * COMPOUND PERCENTAGE PROFILE
+ * =========================================================
+ *
+ * Compound percentage questions require information that
+ * does not belong in SourceQuestionPercentageProfile.
+ *
+ * In particular:
+ *
+ * - the initial value is known rather than the final value;
+ * - a percentage multiplier is applied repeatedly;
+ * - the number of periods is mathematically significant;
+ * - some questions use more than one percentage rate;
+ * - final-answer rounding can itself be part of the mark.
+ */
+
+
+export type SourceQuestionCompoundPercentageDirection =
+  | "INCREASE"
+  | "DECREASE";
+
+
+export type SourceQuestionCompoundPercentageRateStructure =
+  | "FIXED_RATE"
+  | "MULTI_RATE";
+
+
+export type SourceQuestionCompoundPercentageStage = {
+  percentageValue:
+    number;
+
+  multiplier:
+    number;
+
+  periods:
+    number;
+};
+
+
+export type SourceQuestionCompoundPercentageRoundingMode =
+  | "NONE"
+  | "NEAREST_INTEGER"
+  | "NEAREST_TEN"
+  | "NEAREST_HUNDRED"
+  | "NEAREST_THOUSAND";
+
+
+export type SourceQuestionCompoundPercentageProfile = {
+  /**
+   * Overall direction of the compound change.
+   *
+   * The current historical N5 corpus contains
+   * either repeated increases or repeated
+   * decreases.
+   */
+  direction:
+    SourceQuestionCompoundPercentageDirection;
+
+
+  /**
+   * FIXED_RATE:
+   *
+   * One percentage rate is applied throughout,
+   * for example:
+   *
+   *   125000 × 0.98^3
+   *
+   * MULTI_RATE:
+   *
+   * Different percentage rates apply to
+   * different periods, for example:
+   *
+   *   20000 × 0.89 × 0.94^2
+   */
+  rateStructure:
+    SourceQuestionCompoundPercentageRateStructure;
+
+
+  /**
+   * One stage for each distinct percentage
+   * rate used by the source question.
+   */
+  stages:
+    SourceQuestionCompoundPercentageStage[];
+
+
+  initialValue:
+    number;
+
+
+  /**
+   * Total number of compound-change periods
+   * represented by all stages.
+   */
+  totalPeriods:
+    number;
+
+
+  /**
+   * Mathematical value before any explicit
+   * final-answer rounding instruction.
+   */
+  unroundedFinalValue:
+    number;
+
+
+  /**
+   * Final value expected by the source
+   * question / marking scheme after any
+   * required rounding.
+   */
+  requestedAnswer:
+    number;
+
+
+  roundingMode:
+    SourceQuestionCompoundPercentageRoundingMode;
+
+
+  /**
+   * Distinguishes an explicit instruction such
+   * as "nearest thousand pounds" from ordinary
+   * currency presentation or an exact integer
+   * result.
+   */
+  roundingExplicitInPrompt:
+    boolean;
+
+
+  /**
+   * Useful where an SQA monetary answer is
+   * naturally displayed to pounds/pence even
+   * though the prompt does not explicitly say
+   * "2 decimal places".
+   */
+  currencyDisplayDecimals?:
+    0 | 2;
+
+
+  arithmeticComplexity:
+    SourceQuestionArithmeticComplexity;
+
+
+  calculatorBurden:
+    SourceQuestionCalculatorBurden;
+
+
+  initialValueFormat:
+    SourceQuestionValueFormat;
+
+
+  answerValueFormat:
+    SourceQuestionValueFormat;
+
+
+  valueMagnitude:
+    | SourceQuestionValueSize
+    | "VERY_LARGE";
+
+
+  /**
+   * True where applying the multiplier once
+   * per period is a natural alternative
+   * representation of the mathematics.
+   *
+   * This does not itself establish marking-
+   * scheme evidence for that answer method.
+   * Answer-method evidence remains in the
+   * marking-scheme catalogue.
+   */
+  yearByYearMethodNatural:
+    boolean;
+
+
+  notes?:
+    string;
+};
+
+
+/**
+ * =========================================================
+ * CONTEXT / WORDING PROFILE
+ * =========================================================
+ */
+
+
 export type SourceQuestionWordedProblemProfile = {
-  contextDomain: string;
-  contextEntity: string;
+  contextDomain:
+    string;
+
+  contextEntity:
+    string;
 
   quantityType:
     | "MONEY"
@@ -246,87 +536,174 @@ export type SourceQuestionWordedProblemProfile = {
     | "YEAR_ON_YEAR"
     | "PART_WHOLE_COMPARISON";
 
-  sentenceCount: number;
-  promptWordCount: number;
+  sentenceCount:
+    number;
 
-  introductionStyle: string;
-  relationshipStatementStyle: string;
-  commandStyle: string;
+  promptWordCount:
+    number;
 
-  informationOrder: string[];
+  introductionStyle:
+    string;
 
-  contextualVocabulary: string[];
+  relationshipStatementStyle:
+    string;
 
-  hasNamedPerson: boolean;
-  usesPronounReference: boolean;
-  visualContext: boolean;
+  commandStyle:
+    string;
 
-  interleavedSkillIds: string[];
+  informationOrder:
+    string[];
 
-  generatorVariationNotes?: string;
+  contextualVocabulary:
+    string[];
+
+  hasNamedPerson:
+    boolean;
+
+  usesPronounReference:
+    boolean;
+
+  visualContext:
+    boolean;
+
+  interleavedSkillIds:
+    string[];
+
+  generatorVariationNotes?:
+    string;
 };
+
 
 export type SourceQuestionPart = {
-  id: SourceQuestionId;
-  label: string;
-  marks: number;
+  id:
+    SourceQuestionId;
 
-  skillIds: string[];
-  conceptIds: string[];
+  label:
+    string;
 
-  topic: AssessmentTopicCode;
-  standardProfile: SourceQuestionStandardProfile;
-  thinkingProfile: SourceQuestionThinkingProfile;
+  marks:
+    number;
+
+  skillIds:
+    string[];
+
+  conceptIds:
+    string[];
+
+  topic:
+    AssessmentTopicCode;
+
+  standardProfile:
+    SourceQuestionStandardProfile;
+
+  thinkingProfile:
+    SourceQuestionThinkingProfile;
 };
 
+
 export type SourceQuestionCatalogEntry = {
-  id: SourceQuestionId;
+  id:
+    SourceQuestionId;
 
-  courseId: CourseId;
-  sourceKind: SourceQuestionKind;
+  courseId:
+    CourseId;
 
-  year?: number;
-  paper: Paper;
-  questionNumber: string;
+  sourceKind:
+    SourceQuestionKind;
 
-  totalMarks: number;
+  year?:
+    number;
 
-  familyId: string;
-  surfaceStyleId: string;
+  paper:
+    Paper;
 
-  primaryTopic: AssessmentTopicCode;
+  questionNumber:
+    string;
 
-  skillIds: string[];
-  conceptIds: string[];
+  totalMarks:
+    number;
 
-  paperSuitability: SkillPaperSuitability;
-  calculatorStatus: SourceQuestionCalculatorStatus;
+  familyId:
+    string;
 
-  standardProfile: SourceQuestionStandardProfile;
-  thinkingProfile: SourceQuestionThinkingProfile;
+  surfaceStyleId:
+    string;
 
-  operationType?: SourceQuestionOperationType;
-  operandStructure?: string;
+  primaryTopic:
+    AssessmentTopicCode;
 
-  numberProfile?: SourceQuestionNumberProfile;
+  skillIds:
+    string[];
 
-  percentageProfile?: SourceQuestionPercentageProfile;
-  wordedProblemProfile?: SourceQuestionWordedProblemProfile;
+  conceptIds:
+    string[];
 
-  sourcePromptText?: string;
-  sourcePromptStructure?: string[];
+  paperSuitability:
+    SkillPaperSuitability;
 
-  surfaceStyleTags: SourceQuestionSurfaceStyleTag[];
+  calculatorStatus:
+    SourceQuestionCalculatorStatus;
 
-  promptSummary: string;
-  styleNotes?: string;
-  privateNotes?: string;
+  standardProfile:
+    SourceQuestionStandardProfile;
 
-  answerSpace: SourceQuestionAnswerSpace;
+  thinkingProfile:
+    SourceQuestionThinkingProfile;
 
-  parts?: SourceQuestionPart[];
+  operationType?:
+    SourceQuestionOperationType;
 
-  linkedGeneratorFamilyIds: string[];
+  operandStructure?:
+    string;
 
-  reviewStatus: SourceQuestionReviewStatus;
+  numberProfile?:
+    SourceQuestionNumberProfile;
+
+
+  /**
+   * Reverse / part-whole percentage evidence.
+   */
+  percentageProfile?:
+    SourceQuestionPercentageProfile;
+
+
+  /**
+   * Repeated percentage-change evidence.
+   */
+  compoundPercentageProfile?:
+    SourceQuestionCompoundPercentageProfile;
+
+
+  wordedProblemProfile?:
+    SourceQuestionWordedProblemProfile;
+
+  sourcePromptText?:
+    string;
+
+  sourcePromptStructure?:
+    string[];
+
+  surfaceStyleTags:
+    SourceQuestionSurfaceStyleTag[];
+
+  promptSummary:
+    string;
+
+  styleNotes?:
+    string;
+
+  privateNotes?:
+    string;
+
+  answerSpace:
+    SourceQuestionAnswerSpace;
+
+  parts?:
+    SourceQuestionPart[];
+
+  linkedGeneratorFamilyIds:
+    string[];
+
+  reviewStatus:
+    SourceQuestionReviewStatus;
 };
