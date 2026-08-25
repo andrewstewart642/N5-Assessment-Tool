@@ -8,8 +8,8 @@ import PaperQuestionLocked from "@/app/create-assessment/builder/components/asse
 import PaperQuestionDraft from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionDraft";
 import MeasureBox from "@/app/create-assessment/builder/components/assessment-preview/MeasureBox";
 import WorkedAnswerPreview from "@/app/create-assessment/builder/components/assessment-preview/WorkedAnswerPreview";
-import { UI_TEXT } from "@/app/ui/UiTypography";
-import { getTheme } from "@/ui/AppTheme";
+import { UI_TEXT } from "@/src/UI/Application/Typography/Typography";
+import { getTheme } from "@/src/UI/Application/Theme/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import {
   spacingBasePxFor,

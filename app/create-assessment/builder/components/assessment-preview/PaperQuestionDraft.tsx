@@ -1,6 +1,6 @@
 "use client";
 
-import { UI_TYPO } from "@/app/ui/UiTypography";
+import { UI_TYPO } from "@/src/UI/Application/Typography/Typography";
 import type { Question } from "@/shared-types/AssessmentTypes";
 import type { PaperPart } from "@/shared-types/PaperParts";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";

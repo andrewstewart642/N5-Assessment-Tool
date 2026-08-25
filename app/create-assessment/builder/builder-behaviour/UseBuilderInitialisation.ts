@@ -20,7 +20,7 @@ import {
 
 import {
   loadAssessmentSetupBrief,
-} from "../../setup/AssessmentSetupStorage";
+} from "../../../../src/Assessments/Creation/Setup/AssessmentSetupStorage";
 
 import {
   normaliseDisplayDate,

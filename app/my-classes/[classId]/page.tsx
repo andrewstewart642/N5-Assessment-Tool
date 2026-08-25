@@ -6,7 +6,7 @@ import { getAllCoverageSkills } from "../components/coverage/CoverageHelpers";
 import { UseClasses } from "../state/UseClasses";
 import CoverageTree from "../components/coverage/CoverageTree";
 import CoverageDetails from "../components/coverage/CoverageDetails";
-import { getTheme } from "@/ui/AppTheme";
+import { getTheme } from "@/src/UI/Application/Theme/AppTheme";
 import {
   getSystemPrefersDark,
   isThemeModePreference,
@@ -14,7 +14,7 @@ import {
   THEME_MODE_STORAGE_KEY,
   type ResolvedThemeMode,
   type ThemeModePreference,
-} from "@/ui/ThemeMode";
+} from "@/src/UI/Application/Theme/ThemeMode";
 
 type Props = {
   params: Promise<{

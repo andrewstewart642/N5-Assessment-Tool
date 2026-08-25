@@ -11,7 +11,7 @@ import type {
   Question,
   SkillPaperSuitability,
 } from "@/shared-types/AssessmentTypes";
-import type { BuildPriority } from "../../setup/AssessmentSetupStorage";
+import type { BuildPriority } from "../../../../src/Assessments/Creation/Setup/AssessmentSetupStorage";
 import { getBuilderCourseConfig } from "./BuilderCourseConfig";
 
 const LEGACY_DEFAULT_PAPER_ID: Paper = "P1";

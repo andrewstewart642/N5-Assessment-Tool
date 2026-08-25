@@ -1,10 +1,8 @@
-"use client";
-
-import type { Theme } from "@/ui/AppTheme";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import {
   ASSESSMENT_LEVEL_OPTIONS,
   type AssessmentLevelId,
-} from "../setup/AssessmentClassCoverageStorage";
+} from "./AssessmentClassCoverageStorage";
 
 type Props = {
   value: AssessmentLevelId | null;

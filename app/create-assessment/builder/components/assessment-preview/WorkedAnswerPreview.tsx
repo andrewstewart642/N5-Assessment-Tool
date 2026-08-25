@@ -8,7 +8,7 @@ import PaperContent from "@/app/create-assessment/builder/components/assessment-
 
 import {
   UI_TYPO,
-} from "@/app/ui/UiTypography";
+} from "@/src/UI/Application/Typography/Typography";
 
 import {
   QUESTION_COL_GAP_PX,

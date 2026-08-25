@@ -6,7 +6,7 @@ import {
   type CourseOption,
   type SchoolClass,
 } from "../types/Classes";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {
   classesByCourse: Map<CourseOption, SchoolClass[]>;

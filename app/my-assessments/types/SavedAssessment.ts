@@ -1,9 +1,9 @@
-import type { AssessmentLevelId } from "@/app/create-assessment/setup/AssessmentClassCoverageStorage";
+import type { AssessmentLevelId } from "@/src/Assessments/Creation/Setup/AssessmentClassCoverageStorage";
 import type {
   AssessmentType,
   BuildPriority,
   PaperStructure,
-} from "@/app/create-assessment/setup/AssessmentSetupStorage";
+} from "@/src/Assessments/Creation/Setup/AssessmentSetupStorage";
 import type {
   CourseId,
   Paper,

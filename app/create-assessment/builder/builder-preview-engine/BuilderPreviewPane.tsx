@@ -2,8 +2,8 @@
 
 import type { RefObject } from "react";
 import BuilderPreviewPageRenderer from "./BuilderPreviewPageRenderer";
-import { UI_TEXT } from "@/app/ui/UiTypography";
-import type { Theme } from "@/ui/AppTheme";
+import { UI_TEXT } from "@/src/UI/Application/Typography/Typography";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
 import type { PreviewPage } from "@/app/create-assessment/builder/BuilderUtils";
 

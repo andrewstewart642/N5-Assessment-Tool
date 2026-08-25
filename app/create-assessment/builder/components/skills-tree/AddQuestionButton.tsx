@@ -1,6 +1,6 @@
 "use client";
 
-import type { Theme } from "@/ui/AppTheme";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import BuilderActionButton, {
   type BuilderActionButtonVariant,
 } from "@/app/create-assessment/builder/components/shared/BuilderActionButton";

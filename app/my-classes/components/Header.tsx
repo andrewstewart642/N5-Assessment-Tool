@@ -1,6 +1,6 @@
 "use client";
 
-import type { AppTheme } from "@/ui/AppTheme";
+import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {
   onAddClass: () => void;

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { Theme } from "@/ui/AppTheme";
-import { INTERACTION } from "@/app/ui/InteractionTokens";
+import { UI_TEXT, UI_TYPO } from "@/src/UI/Application/Typography/Typography";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
+import { INTERACTION } from "@/src/UI/Application/Motion/InteractionTokens";
 
 export type BuilderActionButtonVariant =
   | "primary"

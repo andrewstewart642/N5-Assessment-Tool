@@ -1,6 +1,6 @@
 "use client";
 
-import { UI_TYPO } from "@/app/ui/UiTypography";
+import { UI_TYPO } from "@/src/UI/Application/Typography/Typography";
 
 type PreviewZoomStripTheme = {
   borderSoft: string;

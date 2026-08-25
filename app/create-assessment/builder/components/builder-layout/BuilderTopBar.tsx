@@ -3,11 +3,11 @@
 import { useState } from "react";
 import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
-import { UI_TYPO } from "@/app/ui/UiTypography";
-import type { Theme } from "@/ui/AppTheme";
+import { UI_TYPO } from "@/src/UI/Application/Typography/Typography";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import type { SchoolClass } from "@/app/my-classes/types/Classes";
-import { INTERACTION } from "@/app/ui/InteractionTokens";
+import { INTERACTION } from "@/src/UI/Application/Motion/InteractionTokens";
 import {
   BuilderMetaField,
   ViewingToggle,

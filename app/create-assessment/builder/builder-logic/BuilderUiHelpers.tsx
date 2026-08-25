@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import type { Paper } from "@/shared-types/AssessmentTypes";
-import { UI_TYPO } from "@/app/ui/UiTypography";
-import type { Theme } from "@/ui/AppTheme";
-import { INTERACTION } from "@/app/ui/InteractionTokens";
+import { UI_TYPO } from "@/src/UI/Application/Typography/Typography";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
+import { INTERACTION } from "@/src/UI/Application/Motion/InteractionTokens";
 import {
   getBuilderPaperConfig,
   getBuilderPapers,

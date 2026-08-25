@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { UI_TYPO } from "@/app/ui/UiTypography";
+import { UI_TYPO } from "@/src/UI/Application/Typography/Typography";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 
 type HomeCard = {

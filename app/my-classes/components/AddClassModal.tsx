@@ -7,7 +7,7 @@ import {
   type CourseOption,
   type LevelOption,
 } from "../types/Classes";
-import type { Theme } from "@/ui/AppTheme";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {
   open: boolean;

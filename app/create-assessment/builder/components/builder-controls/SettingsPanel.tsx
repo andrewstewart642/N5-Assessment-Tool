@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Theme } from "@/ui/AppTheme";
-import type { ThemeModePreference } from "@/ui/ThemeMode";
-import { ACCENT_MAP, type AccentOption } from "@/ui/AccentPalette";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
+import type { ThemeModePreference } from "@/src/UI/Application/Theme/ThemeMode";
+import { ACCENT_MAP, type AccentOption } from "@/src/UI/Application/Colours/AccentPalette";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 import Drawer from "@/src/UI/Application/Components/Drawer/Drawer";
 import DrawerHeader from "@/src/UI/Application/Components/Drawer/DrawerHeader";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import { UI_TEXT, UI_TYPO } from "@/src/UI/Application/Typography/Typography";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import {
   getBuilderPaperConfig,

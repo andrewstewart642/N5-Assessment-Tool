@@ -1,6 +1,6 @@
 "use client";
 
-import type { Theme } from "@/ui/AppTheme";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {
   theme: Theme;

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 import {
   getConceptBodyLines,
   getCoverageSkillById,

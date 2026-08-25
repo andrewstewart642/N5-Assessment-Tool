@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "katex/dist/katex.min.css";
 import "./globals.css";
 
-import AppShellTopBar from "@/page-sections/AppShellTopBar";
+import HeaderBar from "@/src/UI/Application/HeaderBar/HeaderBar";
 import { getSQATypographyCssVars } from "@/app/paper-layout/SQA-Typography";
 import { SettingsProvider } from "@/app/settings-bar/GlobalSettingsContext";
 import SettingsDrawer from "@/src/UI/Application/SettingsDrawer/SettingsDrawer";
@@ -59,7 +59,7 @@ export default function RootLayout({
               gridTemplateRows: "56px 1fr",
             }}
           >
-            <AppShellTopBar />
+            <HeaderBar />
             <div style={{ minHeight: 0 }}>{children}</div>
           </div>
 

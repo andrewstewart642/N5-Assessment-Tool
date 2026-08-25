@@ -13,8 +13,8 @@ import {
 
 import AddQuestionButton from "@/app/create-assessment/builder/components/skills-tree/AddQuestionButton";
 import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
-import type { Theme } from "@/ui/AppTheme";
+import { UI_TEXT, UI_TYPO } from "@/src/UI/Application/Typography/Typography";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import {
   getEligibleDifficultiesForConcept,
   getAvailableDifficultiesForConcept,

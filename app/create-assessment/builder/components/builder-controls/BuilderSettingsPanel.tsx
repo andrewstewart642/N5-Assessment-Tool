@@ -9,7 +9,7 @@ import {
   type BuilderPaperBooleanMap,
   type BuilderPaperStringMap,
 } from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
-import type { Theme } from "@/ui/AppTheme";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
 type StringSetter = Dispatch<SetStateAction<string>>;

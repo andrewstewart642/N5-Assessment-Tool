@@ -11,7 +11,7 @@ import {
   setCurrentSavedAssessmentId,
   upsertSavedAssessment,
 } from "./state/SavedAssessmentsStorage";
-import { ASSESSMENT_LEVEL_OPTIONS } from "@/app/create-assessment/setup/AssessmentClassCoverageStorage";
+import { ASSESSMENT_LEVEL_OPTIONS } from "@/src/Assessments/Creation/Setup/AssessmentClassCoverageStorage";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 
 function formatDateTime(timestamp: number): string {

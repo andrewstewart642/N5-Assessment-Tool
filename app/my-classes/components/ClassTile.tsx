@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { SchoolClass } from "../types/Classes";
-import type { AppTheme } from "@/ui/AppTheme";
+import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {
   schoolClass: SchoolClass;

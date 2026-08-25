@@ -1,7 +1,7 @@
 "use client";
 
-import { UI_TEXT } from "@/app/ui/UiTypography";
-import type { Theme } from "@/ui/AppTheme";
+import { UI_TEXT } from "@/src/UI/Application/Typography/Typography";
+import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
 import AssessmentProgressHud, {
