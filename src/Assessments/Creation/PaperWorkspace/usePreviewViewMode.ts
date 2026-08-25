@@ -5,27 +5,36 @@ import {
   useState,
 } from "react";
 
-import type { BuilderPreviewViewMode } from "@/app/create-assessment/builder/BuilderUtils";
+import type {
+  AssessmentPreviewViewMode,
+} from "./PreviewViewMode";
 
 export function usePreviewViewMode() {
   const [
     previewViewMode,
     setPreviewViewMode,
-  ] = useState<BuilderPreviewViewMode>(
-    "EXAM"
-  );
+  ] =
+    useState<AssessmentPreviewViewMode>(
+      "EXAM"
+    );
 
   const suppressPreviewSpacing =
-    previewViewMode === "COMPACT";
+    previewViewMode ===
+    "COMPACT";
 
   const showPreviewAnswers =
-    previewViewMode === "ANSWERS";
+    previewViewMode ===
+    "ANSWERS";
 
   const cyclePreviewViewMode =
     useCallback(() => {
       setPreviewViewMode(
-        (previousMode) => {
-          switch (previousMode) {
+        (
+          previousMode
+        ) => {
+          switch (
+            previousMode
+          ) {
             case "EXAM":
               return "COMPACT";
 
@@ -43,8 +52,10 @@ export function usePreviewViewMode() {
   return {
     previewViewMode,
     setPreviewViewMode,
+
     suppressPreviewSpacing,
     showPreviewAnswers,
+
     cyclePreviewViewMode,
   };
 }

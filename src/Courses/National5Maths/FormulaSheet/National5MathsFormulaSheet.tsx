@@ -5,7 +5,7 @@ import "katex/dist/katex.min.css";
 
 import DocumentPageFrame from "@/src/UI/Documents/Components/DocumentPageFrame";
 
-export type SQAN5FormulaSheetProps = {
+export type National5MathsFormulaSheetProps = {
   pageNumber: number;
   viewerScale?: number;
   outerPaddingPx?: number;
@@ -89,7 +89,7 @@ function Row(props: {
   );
 }
 
-export default function SQAN5FormulaSheet(props: SQAN5FormulaSheetProps) {
+export default function National5MathsFormulaSheet(props: National5MathsFormulaSheetProps) {
   const { pageNumber, viewerScale = 1, outerPaddingPx = 18 } = props;
 
   return (

@@ -8,13 +8,13 @@ import type {
 } from "@/shared-types/AssessmentTypes";
 
 import type {
-  EditDraftByPaper,
-} from "@/app/create-assessment/builder/BuilderUtils";
+  AssessmentEditQuestionDraftByPaper,
+} from "../Questions/AssessmentQuestionDraftTypes";
 
 const COMPACT_PREVIEW_SPACING_PX = 24;
 
 type EditDraft =
-  EditDraftByPaper[Paper];
+  AssessmentEditQuestionDraftByPaper[Paper];
 
 type UseCompactPreviewContentArgs = {
   assignedForView: Question[];

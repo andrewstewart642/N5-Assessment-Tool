@@ -9,7 +9,7 @@ const firaSans = Fira_Sans({
   weight: ["400", "600", "700"],
 });
 
-export type SQAN5CoverPageProps = {
+export type National5MathsCoverPageProps = {
   pageNumber: number;
   paper: Paper;
   totalMarks: number;
@@ -169,7 +169,7 @@ function NoCalculatorIcon() {
   );
 }
 
-export default function SQAN5CoverPage(props: SQAN5CoverPageProps) {
+export default function National5MathsCoverPage(props: National5MathsCoverPageProps) {
   const {
     paper,
     totalMarks,

@@ -2,26 +2,28 @@ import type {
   ComponentProps,
 } from "react";
 
-import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
-
 import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
 
-import BuilderPreviewPane from "@/app/create-assessment/builder/builder-preview-engine/BuilderPreviewPane";
-
-import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
+import type {
+  AppTheme,
+} from "@/src/UI/Application/Theme/AppTheme";
 
 import {
   UI_TYPO,
 } from "@/src/UI/Application/Typography/Typography";
 
-type BuilderTopBarProps =
+import AssessmentTopBar from "../TopBar/AssessmentTopBar";
+
+import AssessmentPreviewPane from "./Preview/AssessmentPreviewPane";
+
+type AssessmentTopBarProps =
   ComponentProps<
-    typeof BuilderTopBar
+    typeof AssessmentTopBar
   >;
 
-type BuilderPreviewPaneProps =
+type AssessmentPreviewPaneProps =
   ComponentProps<
-    typeof BuilderPreviewPane
+    typeof AssessmentPreviewPane
   >;
 
 type BuilderBottomHudProps =
@@ -32,19 +34,21 @@ type BuilderBottomHudProps =
 type AssessmentPaperWorkspaceProps = {
   theme: AppTheme;
 
-  viewerHudRow: string;
+  viewerHudRow:
+    string;
 
-  showPreviewAnswers: boolean;
+  showPreviewAnswers:
+    boolean;
 
   topBarProps:
     Omit<
-      BuilderTopBarProps,
+      AssessmentTopBarProps,
       "theme"
     >;
 
   previewProps:
     Omit<
-      BuilderPreviewPaneProps,
+      AssessmentPreviewPaneProps,
       | "theme"
       | "showWorkedAnswers"
     >;
@@ -80,16 +84,20 @@ export default function AssessmentPaperWorkspace({
         background:
           theme.bgSurface,
 
-        display: "grid",
+        display:
+          "grid",
 
         gridTemplateRows:
           `65px minmax(0, 1fr) ${viewerHudRow}`,
 
-        minHeight: 0,
+        minHeight:
+          0,
 
-        height: "100%",
+        height:
+          "100%",
 
-        overflow: "hidden",
+        overflow:
+          "hidden",
 
         position:
           "relative",
@@ -98,12 +106,12 @@ export default function AssessmentPaperWorkspace({
           UI_TYPO.family,
       }}
     >
-      <BuilderTopBar
+      <AssessmentTopBar
         {...topBarProps}
         theme={theme}
       />
 
-      <BuilderPreviewPane
+      <AssessmentPreviewPane
         {...previewProps}
         theme={theme}
         showWorkedAnswers={

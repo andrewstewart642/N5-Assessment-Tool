@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Paper, Question } from "@/shared-types/AssessmentTypes";
-import SQAPageFrame from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAPageFrame";
+import SQAPageFrame from "@/src/UI/Documents/Components/DocumentPageFrame";
 import PaperQuestionLocked from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked";
 
 import { PAGE_SIZES, type PageSize } from "@/app/paper-layout/Page-Sizes";
