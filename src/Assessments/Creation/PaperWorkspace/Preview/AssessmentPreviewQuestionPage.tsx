@@ -2,7 +2,9 @@ import type {
   RefObject,
 } from "react";
 
-import National5MathsQuestionPage from "@/src/Courses/National5Maths/Documents/QuestionPage/National5MathsQuestionPage";
+import {
+  National5MathsCourseDocuments,
+} from "@/src/Courses/National5Maths/Documents/CourseDocuments";
 
 import type {
   Paper,
@@ -18,6 +20,9 @@ import type {
   AssessmentPreviewPage,
   AssessmentPreviewRenderById,
 } from "./AssessmentPreviewTypes";
+
+const National5MathsQuestionPage =
+  National5MathsCourseDocuments.QuestionPage;
 
 type QuestionPreviewPage =
   Extract<

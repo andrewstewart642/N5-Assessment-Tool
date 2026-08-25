@@ -2,11 +2,9 @@ import type {
   RefObject,
 } from "react";
 
-import SQAN5CoverPage from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5CoverPage";
-
-import SQAN5FormulaSheet from "@/app/create-assessment/builder/components/assessment-paper-layout/SQAN5FormulaSheet";
-
-import National5MathsQuestionPage from "@/src/Courses/National5Maths/Documents/QuestionPage/National5MathsQuestionPage";
+import {
+  National5MathsCourseDocuments,
+} from "@/src/Courses/National5Maths/Documents/CourseDocuments";
 
 import type {
   Paper,
@@ -26,6 +24,15 @@ import type {
   AssessmentPreviewPage,
   AssessmentPreviewRenderById,
 } from "./AssessmentPreviewTypes";
+
+const National5MathsCoverPage =
+  National5MathsCourseDocuments.CoverPage;
+
+const National5MathsFormulaSheet =
+  National5MathsCourseDocuments.FormulaSheet;
+
+const National5MathsQuestionPage =
+  National5MathsCourseDocuments.QuestionPage;
 
 type AssessmentPreviewPageRendererProps = {
   previewPage:
@@ -179,7 +186,7 @@ export default function AssessmentPreviewPageRenderer({
             element;
         }}
       >
-        <SQAN5CoverPage
+        <National5MathsCoverPage
           pageNumber={
             previewPage.pageNumber
           }
@@ -245,7 +252,7 @@ export default function AssessmentPreviewPageRenderer({
             element;
         }}
       >
-        <SQAN5FormulaSheet
+        <National5MathsFormulaSheet
           pageNumber={
             previewPage.pageNumber
           }
