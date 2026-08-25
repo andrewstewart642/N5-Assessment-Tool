@@ -1,0 +1,21 @@
+export const QUESTION_NUMBER_COLUMN_PX =
+  30;
+
+export const QUESTION_MARKS_COLUMN_PX =
+  42;
+
+export const QUESTION_COLUMN_GAP_PX =
+  10;
+
+export const QUESTION_TEXT_COLUMN_LEFT_PX =
+  QUESTION_NUMBER_COLUMN_PX +
+  QUESTION_COLUMN_GAP_PX;
+
+export const DRAFT_CONTROLS_HEIGHT_PX =
+  38;
+
+export const DRAFT_CONTROLS_GAP_PX =
+  10;
+
+export const QUESTION_EDIT_BUTTON_RIGHT_PX =
+  86;

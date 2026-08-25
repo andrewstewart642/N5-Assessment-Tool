@@ -67,8 +67,8 @@ import {
 } from "@/app/create-assessment/builder/builder-behaviour/UseBuilderPersistence";
 
 import {
-  useBuilderProgressHudRows,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderProgressHudRows";
+  useAssessmentProgressRows,
+} from "./HUDBar/useAssessmentProgressRows";
 
 import {
   useBuilderProgressMetrics,
@@ -1108,7 +1108,7 @@ export default function AssessmentCreatorPage() {
     });
 
   const progressHudPaperRows =
-    useBuilderProgressHudRows({
+    useAssessmentProgressRows({
       courseConfig:
         builderCourseConfig,
 

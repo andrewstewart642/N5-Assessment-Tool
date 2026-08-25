@@ -1,72 +1,120 @@
 "use client";
 
-import { UI_TEXT, UI_TYPO } from "@/src/UI/Application/Typography/Typography";
-import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
-import type { Paper } from "@/shared-types/AssessmentTypes";
-import type { BuilderPreviewViewMode } from "@/app/create-assessment/builder/BuilderUtils";
+import type {
+  ReactNode,
+} from "react";
 
 import type {
-  BuilderNote,
-  BuilderNoteSeverity,
-} from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+  Paper,
+} from "@/shared-types/AssessmentTypes";
+
+import type {
+  AppTheme,
+} from "@/src/UI/Application/Theme/AppTheme";
 
 import {
-  DEFAULT_BUILDER_NOTE_LIMITS,
-  limitBuilderNotes,
-  toBuilderNote,
-} from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+  UI_TEXT,
+  UI_TYPO,
+} from "@/src/UI/Application/Typography/Typography";
 
-export type AssessmentProgressHudPaperRow = {
-  paper: Paper;
-  paperLabel: string;
-  marks: number;
-  targetMarks: number;
-  timeMinutes: number;
+import {
+  DEFAULT_ASSESSMENT_QUALITY_NOTE_LIMITS,
+  limitAssessmentQualityNotes,
+  toAssessmentQualityNote,
+  type AssessmentQualityNote,
+  type AssessmentQualityNoteSeverity,
+} from "../Analysis/AssessmentQualityNotes";
+
+import type {
+  AssessmentPreviewViewMode,
+} from "../PaperWorkspace/PreviewViewMode";
+
+export type AssessmentProgressPanelPaperRow = {
+  paper:
+    Paper;
+
+  paperLabel:
+    string;
+
+  marks:
+    number;
+
+  targetMarks:
+    number;
+
+  timeMinutes:
+    number;
 };
 
-type Props = {
-  viewPaper?: Paper;
-  paper?: Paper;
+type AssessmentProgressPanelProps = {
+  viewPaper?:
+    Paper;
 
-  paperRows: AssessmentProgressHudPaperRow[];
+  paperRows:
+    AssessmentProgressPanelPaperRow[];
 
-  notes: Array<string | BuilderNote>;
-  theme: Theme;
+  notes:
+    Array<
+      string |
+      AssessmentQualityNote
+    >;
 
-  previewViewMode: BuilderPreviewViewMode;
-  onCyclePreviewViewMode: () => void;
+  theme:
+    AppTheme;
+
+  previewViewMode:
+    AssessmentPreviewViewMode;
+
+  onCyclePreviewViewMode:
+    () => void;
 };
 
-function clampInt(n: number) {
-  if (!Number.isFinite(n)) {
+function clampInteger(
+  value: number
+): number {
+  if (
+    !Number.isFinite(
+      value
+    )
+  ) {
     return 0;
   }
 
   return Math.max(
     0,
-    Math.round(n)
+    Math.round(
+      value
+    )
   );
 }
 
 function formatMinutes(
   totalMinutes: number
-) {
-  const m =
-    clampInt(totalMinutes);
+): string {
+  const minutes =
+    clampInteger(
+      totalMinutes
+    );
 
-  if (m < 60) {
-    return `${m} min`;
+  if (
+    minutes < 60
+  ) {
+    return `${minutes} min`;
   }
 
-  const h =
-    Math.floor(m / 60);
+  const hours =
+    Math.floor(
+      minutes / 60
+    );
 
-  const r =
-    m % 60;
+  const remainder =
+    minutes % 60;
 
-  return r === 0
-    ? `${h} h`
-    : `${h} h ${r} min`;
+  return (
+    remainder === 0
+      ? `${hours} h`
+      : `${hours} h ${remainder} min`
+  );
 }
 
 function WarningTriangleIcon({
@@ -85,15 +133,21 @@ function WarningTriangleIcon({
     >
       <path
         d="M12 3.6L21 19.5c.35.62-.08 1.4-.79 1.4H3.79c-.71 0-1.14-.78-.79-1.4L12 3.6z"
-        fill={fill}
-        stroke={color}
+        fill={
+          fill
+        }
+        stroke={
+          color
+        }
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
 
       <path
         d="M12 8.2v6.6"
-        stroke={color}
+        stroke={
+          color
+        }
         strokeWidth="2"
         strokeLinecap="round"
       />
@@ -102,7 +156,9 @@ function WarningTriangleIcon({
         cx="12"
         cy="17.4"
         r="1.2"
-        fill={color}
+        fill={
+          color
+        }
       />
     </svg>
   );
@@ -124,15 +180,21 @@ function WarningDiamondIcon({
     >
       <path
         d="M12 2.8L20.8 12 12 21.2 3.2 12 12 2.8z"
-        fill={fill}
-        stroke={color}
+        fill={
+          fill
+        }
+        stroke={
+          color
+        }
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
 
       <path
         d="M12 7.8v6.2"
-        stroke={color}
+        stroke={
+          color
+        }
         strokeWidth="2"
         strokeLinecap="round"
       />
@@ -141,7 +203,9 @@ function WarningDiamondIcon({
         cx="12"
         cy="16.8"
         r="1.2"
-        fill={color}
+        fill={
+          color
+        }
       />
     </svg>
   );
@@ -150,7 +214,8 @@ function WarningDiamondIcon({
 function LightbulbIcon({
   color,
 }: {
-  color: string;
+  color:
+    string;
 }) {
   return (
     <svg
@@ -162,7 +227,9 @@ function LightbulbIcon({
       <path
         d="M8 14.2c-1.3-1-2.1-2.6-2.1-4.4A6.1 6.1 0 0 1 12 3.8a6.1 6.1 0 0 1 6.1 6.1c0 1.8-.8 3.4-2.1 4.4-.5.4-.9.9-1.2 1.5H9.2c-.3-.6-.7-1.1-1.2-1.6Z"
         fill="none"
-        stroke={color}
+        stroke={
+          color
+        }
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -170,14 +237,18 @@ function LightbulbIcon({
 
       <path
         d="M9.4 18.1h5.2"
-        stroke={color}
+        stroke={
+          color
+        }
         strokeWidth="1.8"
         strokeLinecap="round"
       />
 
       <path
         d="M10 20.3h4"
-        stroke={color}
+        stroke={
+          color
+        }
         strokeWidth="1.8"
         strokeLinecap="round"
       />
@@ -186,20 +257,31 @@ function LightbulbIcon({
 }
 
 function getNotePalette(
-  severity: BuilderNoteSeverity,
-  theme: Theme
+  severity:
+    AssessmentQualityNoteSeverity,
+
+  theme:
+    AppTheme
 ): {
-  icon: React.ReactNode;
-  textColor: string;
+  icon:
+    ReactNode;
+
+  textColor:
+    string;
 } {
   if (
-    severity === "essential"
+    severity ===
+    "essential"
   ) {
     return {
       icon: (
         <WarningTriangleIcon
-          color={theme.accentPrimary}
-          fill={theme.accentSoft}
+          color={
+            theme.accentPrimary
+          }
+          fill={
+            theme.accentSoft
+          }
         />
       ),
 
@@ -209,13 +291,18 @@ function getNotePalette(
   }
 
   if (
-    severity === "advised"
+    severity ===
+    "advised"
   ) {
     return {
       icon: (
         <WarningDiamondIcon
-          color={theme.textSecondary}
-          fill={theme.controlBg}
+          color={
+            theme.textSecondary
+          }
+          fill={
+            theme.controlBg
+          }
         />
       ),
 
@@ -227,7 +314,9 @@ function getNotePalette(
   return {
     icon: (
       <LightbulbIcon
-        color={theme.textSecondary}
+        color={
+          theme.textSecondary
+        }
       />
     ),
 
@@ -236,38 +325,59 @@ function getNotePalette(
   };
 }
 
-function HudDataRow({
+function ProgressDataRow({
   paperLabel,
   marksValue,
   timeValue,
   theme,
 }: {
-  paperLabel: string;
-  marksValue: string;
-  timeValue: string;
-  theme: Theme;
+  paperLabel:
+    string;
+
+  marksValue:
+    string;
+
+  timeValue:
+    string;
+
+  theme:
+    AppTheme;
 }) {
   return (
     <div
       style={{
-        display: "grid",
+        display:
+          "grid",
+
         gridTemplateColumns:
           "34px 58px 68px",
-        columnGap: 8,
-        alignItems: "center",
+
+        columnGap:
+          8,
+
+        alignItems:
+          "center",
       }}
     >
       <div
         style={{
           ...UI_TEXT.controlTextStrong,
+
           color:
             theme.textSecondary,
-          overflow: "hidden",
+
+          overflow:
+            "hidden",
+
           textOverflow:
             "ellipsis",
-          whiteSpace: "nowrap",
+
+          whiteSpace:
+            "nowrap",
         }}
-        title={paperLabel}
+        title={
+          paperLabel
+        }
       >
         {paperLabel}
       </div>
@@ -275,14 +385,21 @@ function HudDataRow({
       <div
         style={{
           ...UI_TEXT.controlTextStrong,
+
           color:
             theme.textSecondary,
-          textAlign: "right",
+
+          textAlign:
+            "right",
+
           fontVariantNumeric:
             "tabular-nums",
+
           fontFeatureSettings:
             '"tnum" 1',
-          whiteSpace: "nowrap",
+
+          whiteSpace:
+            "nowrap",
         }}
       >
         {marksValue}
@@ -291,14 +408,21 @@ function HudDataRow({
       <div
         style={{
           ...UI_TEXT.controlTextStrong,
+
           color:
             theme.textSecondary,
-          textAlign: "right",
+
+          textAlign:
+            "right",
+
           fontVariantNumeric:
             "tabular-nums",
+
           fontFeatureSettings:
             '"tnum" 1',
-          whiteSpace: "nowrap",
+
+          whiteSpace:
+            "nowrap",
         }}
       >
         {timeValue}
@@ -307,71 +431,94 @@ function HudDataRow({
   );
 }
 
-export default function AssessmentProgressHud(
-  props: Props
-) {
-  const {
-    paperRows,
-    notes,
-    theme,
-    previewViewMode,
-    onCyclePreviewViewMode,
-  } = props;
-
+export default function AssessmentProgressPanel({
+  paperRows,
+  notes,
+  theme,
+  previewViewMode,
+  onCyclePreviewViewMode,
+}: AssessmentProgressPanelProps) {
   const previewViewLabel =
-    previewViewMode === "EXAM"
+    previewViewMode ===
+    "EXAM"
       ? "Exam"
-      : previewViewMode === "COMPACT"
+      : previewViewMode ===
+          "COMPACT"
         ? "Compact"
         : "Answers";
 
   const structuredNotes =
-    limitBuilderNotes(
+    limitAssessmentQualityNotes(
       notes.map(
-        (note, index) =>
-          toBuilderNote(
+        (
+          note,
+          index
+        ) =>
+          toAssessmentQualityNote(
             note,
             index
           )
       ),
 
-      DEFAULT_BUILDER_NOTE_LIMITS
+      DEFAULT_ASSESSMENT_QUALITY_NOTE_LIMITS
     );
 
   return (
     <div
       style={{
-        width: "100%",
-        height: "100%",
+        width:
+          "100%",
+
+        height:
+          "100%",
+
         borderTop:
           `1px solid ${theme.borderStandard}`,
+
         background:
           theme.bgSurface,
-        display: "grid",
+
+        display:
+          "grid",
+
         gridTemplateColumns:
           "196px minmax(0, 1fr)",
-        minHeight: 0,
-        overflow: "hidden",
+
+        minHeight:
+          0,
+
+        overflow:
+          "hidden",
+
         fontFamily:
           UI_TYPO.family,
       }}
     >
       <div
         style={{
-          minWidth: 0,
+          minWidth:
+            0,
+
           padding:
-            "10px 12px 10px 12px",
+            "10px 12px",
+
           borderRight:
             `1px solid ${theme.borderStandard}`,
-          display: "grid",
+
+          display:
+            "grid",
+
           gridTemplateRows:
             "auto 1fr",
-          gap: 10,
+
+          gap:
+            10,
         }}
       >
         <div
           style={{
             ...UI_TEXT.sectionTitle,
+
             color:
               theme.textSecondary,
           }}
@@ -381,26 +528,35 @@ export default function AssessmentProgressHud(
 
         <div
           style={{
-            display: "grid",
-            gap: 8,
-            alignContent: "start",
+            display:
+              "grid",
+
+            gap:
+              8,
+
+            alignContent:
+              "start",
           }}
         >
           {paperRows.map(
-            (row) => {
+            (
+              row
+            ) => {
               const marks =
-                clampInt(
+                clampInteger(
                   row.marks
                 );
 
               const targetMarks =
-                clampInt(
+                clampInteger(
                   row.targetMarks
                 );
 
               return (
-                <HudDataRow
-                  key={row.paper}
+                <ProgressDataRow
+                  key={
+                    row.paper
+                  }
                   paperLabel={
                     row.paperLabel
                   }
@@ -408,7 +564,9 @@ export default function AssessmentProgressHud(
                   timeValue={`~${formatMinutes(
                     row.timeMinutes
                   )}`}
-                  theme={theme}
+                  theme={
+                    theme
+                  }
                 />
               );
             }
@@ -418,19 +576,29 @@ export default function AssessmentProgressHud(
 
       <div
         style={{
-          minWidth: 0,
+          minWidth:
+            0,
+
           padding:
             "10px 12px 10px 10px",
-          display: "grid",
+
+          display:
+            "grid",
+
           gridTemplateRows:
             "auto minmax(0, 1fr)",
-          gap: 8,
-          position: "relative",
+
+          gap:
+            8,
+
+          position:
+            "relative",
         }}
       >
         <div
           style={{
             ...UI_TEXT.sectionTitle,
+
             color:
               theme.textSecondary,
           }}
@@ -440,21 +608,37 @@ export default function AssessmentProgressHud(
 
         <div
           style={{
-            position: "absolute",
-            top: 6,
-            right: 12,
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 7,
-            zIndex: 2,
+            position:
+              "absolute",
+
+            top:
+              6,
+
+            right:
+              12,
+
+            display:
+              "inline-flex",
+
+            alignItems:
+              "center",
+
+            gap:
+              7,
+
+            zIndex:
+              2,
           }}
         >
           <span
             style={{
               ...UI_TEXT.sectionTitle,
+
               color:
                 theme.textSecondary,
-              whiteSpace: "nowrap",
+
+              whiteSpace:
+                "nowrap",
             }}
           >
             View
@@ -470,21 +654,29 @@ export default function AssessmentProgressHud(
             style={{
               ...UI_TEXT.controlTextStrong,
 
-              minWidth: 78,
-              height: 24,
-              padding: "0 9px",
+              minWidth:
+                78,
+
+              height:
+                24,
+
+              padding:
+                "0 9px",
 
               display:
                 "inline-flex",
+
               alignItems:
                 "center",
+
               justifyContent:
                 "center",
 
               border:
                 `1px solid ${theme.controlSelectedBorder}`,
 
-              borderRadius: 8,
+              borderRadius:
+                8,
 
               background:
                 theme.controlSelectedBg,
@@ -492,9 +684,11 @@ export default function AssessmentProgressHud(
               color:
                 theme.textOnAccent,
 
-              cursor: "pointer",
+              cursor:
+                "pointer",
 
-              lineHeight: 1,
+              lineHeight:
+                1,
 
               whiteSpace:
                 "nowrap",
@@ -505,15 +699,21 @@ export default function AssessmentProgressHud(
               transition:
                 "filter 0.15s ease, transform 0.1s ease",
             }}
-            onMouseDown={(event) => {
+            onMouseDown={(
+              event
+            ) => {
               event.currentTarget.style.transform =
                 "scale(0.97)";
             }}
-            onMouseUp={(event) => {
+            onMouseUp={(
+              event
+            ) => {
               event.currentTarget.style.transform =
                 "scale(1)";
             }}
-            onMouseLeave={(event) => {
+            onMouseLeave={(
+              event
+            ) => {
               event.currentTarget.style.transform =
                 "scale(1)";
             }}
@@ -525,8 +725,11 @@ export default function AssessmentProgressHud(
         <div
           className="hover-scroll"
           style={{
-            minHeight: 0,
-            height: "100%",
+            minHeight:
+              0,
+
+            height:
+              "100%",
 
             border:
               `1px solid ${theme.borderStandard}`,
@@ -534,19 +737,22 @@ export default function AssessmentProgressHud(
             background:
               theme.bgElevated,
 
-            borderRadius: 12,
+            borderRadius:
+              12,
 
             padding:
               "10px 12px",
 
-            overflowY: "auto",
+            overflowY:
+              "auto",
 
             color:
               structuredNotes.length
                 ? theme.textSecondary
                 : theme.textMuted,
 
-            lineHeight: 1.35,
+            lineHeight:
+              1.35,
 
             fontFamily:
               UI_TYPO.family,
@@ -558,12 +764,17 @@ export default function AssessmentProgressHud(
           {structuredNotes.length ? (
             <div
               style={{
-                display: "grid",
-                gap: 10,
+                display:
+                  "grid",
+
+                gap:
+                  10,
               }}
             >
               {structuredNotes.map(
-                (note) => {
+                (
+                  note
+                ) => {
                   const palette =
                     getNotePalette(
                       note.severity,
@@ -572,7 +783,9 @@ export default function AssessmentProgressHud(
 
                   return (
                     <div
-                      key={note.id}
+                      key={
+                        note.id
+                      }
                       title={
                         note.message
                       }
@@ -592,12 +805,18 @@ export default function AssessmentProgressHud(
                     >
                       <div
                         style={{
-                          width: 20,
-                          height: 20,
+                          width:
+                            20,
+
+                          height:
+                            20,
+
                           display:
                             "grid",
+
                           placeItems:
                             "center",
+
                           marginTop:
                             1,
                         }}
@@ -643,6 +862,7 @@ export default function AssessmentProgressHud(
             <div
               style={{
                 ...UI_TEXT.controlTextStrong,
+
                 color:
                   theme.textSecondary,
               }}

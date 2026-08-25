@@ -1,19 +1,38 @@
 "use client";
 
-import { UI_TEXT } from "@/src/UI/Application/Typography/Typography";
-import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type {
+  Dispatch,
+  MutableRefObject,
+  SetStateAction,
+} from "react";
 
-import AssessmentProgressHud, {
-  type AssessmentProgressHudPaperRow,
-} from "@/app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud";
+import type {
+  Paper,
+} from "@/shared-types/AssessmentTypes";
 
-import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+import type {
+  AppTheme,
+} from "@/src/UI/Application/Theme/AppTheme";
 
-import type { BuilderPreviewViewMode } from "@/app/create-assessment/builder/BuilderUtils";
+import {
+  UI_TEXT,
+} from "@/src/UI/Application/Typography/Typography";
 
-type Props = {
-  theme: Theme;
+import type {
+  AssessmentQualityNote,
+} from "../Analysis/AssessmentQualityNotes";
+
+import type {
+  AssessmentPreviewViewMode,
+} from "../PaperWorkspace/PreviewViewMode";
+
+import AssessmentProgressPanel, {
+  type AssessmentProgressPanelPaperRow,
+} from "./AssessmentProgressPanel";
+
+export type AssessmentHUDBarProps = {
+  theme:
+    AppTheme;
 
   routerPushCompile:
     () => void;
@@ -25,66 +44,56 @@ type Props = {
     number;
 
   hudResizeStartRef:
-    React.MutableRefObject<{
+    MutableRefObject<{
       startY: number;
       startHeight: number;
     } | null>;
 
   setIsDraggingHud:
-    React.Dispatch<
-      React.SetStateAction<boolean>
+    Dispatch<
+      SetStateAction<boolean>
     >;
 
   viewPaper:
     Paper;
 
   paperRows:
-    AssessmentProgressHudPaperRow[];
+    AssessmentProgressPanelPaperRow[];
 
   qualityNotes:
     Array<
       string |
-      BuilderNote
+      AssessmentQualityNote
     >;
 
-  saveStateLabel?: string;
+  saveStateLabel?:
+    string;
 
-  isSaving?: boolean;
+  isSaving?:
+    boolean;
 
   previewViewMode:
-    BuilderPreviewViewMode;
+    AssessmentPreviewViewMode;
 
   onCyclePreviewViewMode:
     () => void;
 };
 
-export default function BuilderBottomHud({
+export default function AssessmentHUDBar({
   theme,
-
   routerPushCompile,
-
   showProgressPanel,
-
   hudHeight,
-
   hudResizeStartRef,
-
   setIsDraggingHud,
-
   viewPaper,
-
   paperRows,
-
   qualityNotes,
-
   saveStateLabel,
-
   isSaving = false,
-
   previewViewMode,
-
   onCyclePreviewViewMode,
-}: Props) {
+}: AssessmentHUDBarProps) {
   const bottomOffset =
     showProgressPanel
       ? hudHeight + 14
@@ -101,21 +110,29 @@ export default function BuilderBottomHud({
     <>
       <div
         style={{
-          position: "absolute",
-          right: 14,
+          position:
+            "absolute",
+
+          right:
+            14,
+
           bottom:
             bottomOffset,
 
-          display: "flex",
+          display:
+            "flex",
+
           flexDirection:
             "column",
 
           alignItems:
             "flex-end",
 
-          gap: 8,
+          gap:
+            8,
 
-          zIndex: 10,
+          zIndex:
+            10,
         }}
       >
         {showSaveState ? (
@@ -128,7 +145,8 @@ export default function BuilderBottomHud({
               alignItems:
                 "center",
 
-              gap: 8,
+              gap:
+                8,
 
               padding:
                 "6px 10px",
@@ -151,12 +169,14 @@ export default function BuilderBottomHud({
               pointerEvents:
                 "none",
 
-              fontSize: 12,
+              fontSize:
+                12,
 
               fontWeight:
                 700,
 
-              lineHeight: 1,
+              lineHeight:
+                1,
 
               backdropFilter:
                 "blur(8px)",
@@ -167,8 +187,11 @@ export default function BuilderBottomHud({
           >
             <span
               style={{
-                width: 7,
-                height: 7,
+                width:
+                  7,
+
+                height:
+                  7,
 
                 borderRadius:
                   999,
@@ -185,7 +208,7 @@ export default function BuilderBottomHud({
 
                 animation:
                   isSaving
-                    ? "builder-save-pulse 1s ease-in-out infinite"
+                    ? "assessment-save-pulse 1s ease-in-out infinite"
                     : "none",
 
                 flexShrink:
@@ -243,7 +266,8 @@ export default function BuilderBottomHud({
             borderTop:
               `1px solid ${theme.borderStandard}`,
 
-            minHeight: 0,
+            minHeight:
+              0,
 
             height:
               "100%",
@@ -260,15 +284,15 @@ export default function BuilderBottomHud({
         >
           <div
             onMouseDown={(
-              e
+              event
             ) => {
-              e.preventDefault();
-              e.stopPropagation();
+              event.preventDefault();
+              event.stopPropagation();
 
               hudResizeStartRef.current =
                 {
                   startY:
-                    e.clientY,
+                    event.clientY,
 
                   startHeight:
                     hudHeight,
@@ -283,18 +307,26 @@ export default function BuilderBottomHud({
               position:
                 "absolute",
 
-              top: 0,
-              left: 0,
-              right: 0,
+              top:
+                0,
 
-              height: 12,
+              left:
+                0,
+
+              right:
+                0,
+
+              height:
+                12,
 
               cursor:
                 "row-resize",
 
-              zIndex: 3,
+              zIndex:
+                3,
 
-              display: "flex",
+              display:
+                "flex",
 
               justifyContent:
                 "center",
@@ -311,8 +343,11 @@ export default function BuilderBottomHud({
           >
             <div
               style={{
-                width: 54,
-                height: 4,
+                width:
+                  54,
+
+                height:
+                  4,
 
                 borderRadius:
                   999,
@@ -331,33 +366,29 @@ export default function BuilderBottomHud({
               inset:
                 "12px 0 0 0",
 
-              minHeight: 0,
+              minHeight:
+                0,
 
               overflow:
                 "hidden",
             }}
           >
-            <AssessmentProgressHud
+            <AssessmentProgressPanel
               viewPaper={
                 viewPaper
               }
-
               paperRows={
                 paperRows
               }
-
               notes={
                 qualityNotes
               }
-
               theme={
                 theme
               }
-
               previewViewMode={
                 previewViewMode
               }
-
               onCyclePreviewViewMode={
                 onCyclePreviewViewMode
               }
@@ -367,7 +398,9 @@ export default function BuilderBottomHud({
       ) : (
         <div
           style={{
-            minHeight: 0,
+            minHeight:
+              0,
+
             overflow:
               "hidden",
           }}
@@ -375,7 +408,7 @@ export default function BuilderBottomHud({
       )}
 
       <style jsx>{`
-        @keyframes builder-save-pulse {
+        @keyframes assessment-save-pulse {
           0% {
             transform: scale(1);
             opacity: 0.9;

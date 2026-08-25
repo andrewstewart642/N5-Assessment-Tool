@@ -1,10 +1,10 @@
-import MeasureBox from "@/app/create-assessment/builder/components/assessment-preview/MeasureBox";
+import QuestionMeasureBox from "../../Questions/Preview/QuestionMeasureBox";
 
-import PaperQuestionDraft from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionDraft";
+import QuestionDraftPreview from "../../Questions/Preview/QuestionDraftPreview";
 
-import PaperQuestionLocked from "@/app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked";
+import QuestionLockedPreview from "../../Questions/Preview/QuestionLockedPreview";
 
-import WorkedAnswerPreview from "@/app/create-assessment/builder/components/assessment-preview/WorkedAnswerPreview";
+import WorkedAnswerPreview from "../../Questions/Preview/WorkedAnswerPreview";
 
 import type {
   Question,
@@ -27,7 +27,8 @@ import type {
 } from "./AssessmentPreviewTypes";
 
 type AssessmentPreviewQuestionProps = {
-  globalIndex: number;
+  globalIndex:
+    number;
 
   layoutQuestion:
     Question;
@@ -124,7 +125,7 @@ export default function AssessmentPreviewQuestion({
 
   const content =
     kind === "edit" ? (
-      <MeasureBox
+      <QuestionMeasureBox
         id={
           question.id
         }
@@ -132,7 +133,7 @@ export default function AssessmentPreviewQuestion({
           onMeasure
         }
       >
-        <PaperQuestionDraft
+        <QuestionDraftPreview
           index={
             globalIndex
           }
@@ -154,10 +155,10 @@ export default function AssessmentPreviewQuestion({
             invalidCommitMessage
           }
         />
-      </MeasureBox>
+      </QuestionMeasureBox>
     ) : kind ===
       "draft" ? (
-      <MeasureBox
+      <QuestionMeasureBox
         id={
           question.id
         }
@@ -165,7 +166,7 @@ export default function AssessmentPreviewQuestion({
           onMeasure
         }
       >
-        <PaperQuestionDraft
+        <QuestionDraftPreview
           index={
             globalIndex
           }
@@ -187,9 +188,9 @@ export default function AssessmentPreviewQuestion({
             invalidCommitMessage
           }
         />
-      </MeasureBox>
+      </QuestionMeasureBox>
     ) : (
-      <MeasureBox
+      <QuestionMeasureBox
         id={
           question.id
         }
@@ -203,7 +204,7 @@ export default function AssessmentPreviewQuestion({
               "relative",
           }}
         >
-          <PaperQuestionLocked
+          <QuestionLockedPreview
             index={
               globalIndex
             }
@@ -257,7 +258,7 @@ export default function AssessmentPreviewQuestion({
             Edit
           </button>
         </div>
-      </MeasureBox>
+      </QuestionMeasureBox>
     );
 
   return (

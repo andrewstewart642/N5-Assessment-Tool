@@ -2,8 +2,6 @@ import type {
   ComponentProps,
 } from "react";
 
-import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
-
 import type {
   AppTheme,
 } from "@/src/UI/Application/Theme/AppTheme";
@@ -11,6 +9,8 @@ import type {
 import {
   UI_TYPO,
 } from "@/src/UI/Application/Typography/Typography";
+
+import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
 
 import AssessmentTopBar from "../TopBar/AssessmentTopBar";
 
@@ -26,13 +26,14 @@ type AssessmentPreviewPaneProps =
     typeof AssessmentPreviewPane
   >;
 
-type BuilderBottomHudProps =
+type AssessmentHUDBarProps =
   ComponentProps<
-    typeof BuilderBottomHud
+    typeof AssessmentHUDBar
   >;
 
 type AssessmentPaperWorkspaceProps = {
-  theme: AppTheme;
+  theme:
+    AppTheme;
 
   viewerHudRow:
     string;
@@ -55,22 +56,17 @@ type AssessmentPaperWorkspaceProps = {
 
   hudProps:
     Omit<
-      BuilderBottomHudProps,
+      AssessmentHUDBarProps,
       "theme"
     >;
 };
 
 export default function AssessmentPaperWorkspace({
   theme,
-
   viewerHudRow,
-
   showPreviewAnswers,
-
   topBarProps,
-
   previewProps,
-
   hudProps,
 }: AssessmentPaperWorkspaceProps) {
   return (
@@ -108,20 +104,26 @@ export default function AssessmentPaperWorkspace({
     >
       <AssessmentTopBar
         {...topBarProps}
-        theme={theme}
+        theme={
+          theme
+        }
       />
 
       <AssessmentPreviewPane
         {...previewProps}
-        theme={theme}
+        theme={
+          theme
+        }
         showWorkedAnswers={
           showPreviewAnswers
         }
       />
 
-      <BuilderBottomHud
+      <AssessmentHUDBar
         {...hudProps}
-        theme={theme}
+        theme={
+          theme
+        }
       />
     </section>
   );
