@@ -1,7 +1,10 @@
 "use client";
 
-import type { Theme } from "@/ui/AppTheme";
-import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
+import type { Theme } from "../../Theme/AppTheme";
+import {
+  UI_TEXT,
+  UI_TYPO,
+} from "../../Typography/Typography";
 
 type Props = {
   title: string;
@@ -10,7 +13,7 @@ type Props = {
   theme: Theme;
 };
 
-export default function AppTrayHeader({
+export default function DrawerHeader({
   title,
   subtitle,
   onClose,

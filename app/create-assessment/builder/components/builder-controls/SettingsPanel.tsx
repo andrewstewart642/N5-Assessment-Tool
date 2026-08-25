@@ -5,8 +5,8 @@ import type { Theme } from "@/ui/AppTheme";
 import type { ThemeModePreference } from "@/ui/ThemeMode";
 import { ACCENT_MAP, type AccentOption } from "@/ui/AccentPalette";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
-import AppSideTray from "@/app/ui/settings-bar/AppSideTray";
-import AppTrayHeader from "@/app/ui/settings-bar/AppTrayHeader";
+import Drawer from "@/src/UI/Application/Components/Drawer/Drawer";
+import DrawerHeader from "@/src/UI/Application/Components/Drawer/DrawerHeader";
 import SharedCalendarPicker from "@/app/create-assessment/builder/components/builder-controls/SharedCalendarPicker";
 import { UI_TEXT, UI_TYPO } from "@/app/ui/UiTypography";
 import type { Paper } from "@/shared-types/AssessmentTypes";
@@ -1810,7 +1810,7 @@ export default function SettingsPanel({
     activePaperTab === "P1" ? activePicker === "p1End" : activePicker === "p2End";
 
   return (
-    <AppSideTray open={open} onClose={onClose} theme={theme}>
+    <Drawer open={open} onClose={onClose} theme={theme}>
       <style jsx>{`
         .settings-scroll {
           overflow-y: auto;
@@ -1889,7 +1889,7 @@ export default function SettingsPanel({
         }
       `}</style>
 
-      <AppTrayHeader
+      <DrawerHeader
         title="Settings"
         subtitle="Viewer, layout and cover-sheet options"
         onClose={onClose}
@@ -2323,6 +2323,6 @@ export default function SettingsPanel({
           ) : null}
         </div>
       </div>
-    </AppSideTray>
+    </Drawer>
   );
 }

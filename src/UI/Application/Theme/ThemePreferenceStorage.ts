@@ -2,11 +2,12 @@ import {
   THEME_MODE_STORAGE_KEY,
   isThemeModePreference,
   type ThemeModePreference,
-} from "@/ui/ThemeMode";
+} from "./ThemeMode";
+
 import {
   isAccentOption,
   type AccentOption,
-} from "@/ui/AccentPalette";
+} from "../Colours/AccentPalette";
 
 export const CUSTOM_THEME_COLOUR_STORAGE_KEY = "app-custom-theme-colour";
 

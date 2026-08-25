@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { Theme } from "@/ui/AppTheme";
+import type { Theme } from "../../Theme/AppTheme";
 
 type Props = {
   open: boolean;
@@ -10,7 +10,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function AppSideTray({
+export default function Drawer({
   open,
   onClose,
   theme,

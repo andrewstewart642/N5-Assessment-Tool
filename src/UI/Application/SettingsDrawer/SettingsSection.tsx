@@ -1,6 +1,6 @@
 "use client";
 
-import type { Theme } from "@/ui/AppTheme";
+import type { Theme } from "../Theme/AppTheme";
 
 type Props = {
   title: string;
@@ -9,7 +9,7 @@ type Props = {
   theme: Theme;
 };
 
-export default function AppTraySection({
+export default function SettingsSection({
   title,
   subtitle,
   children,

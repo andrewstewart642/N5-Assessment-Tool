@@ -389,6 +389,42 @@ Broad source migration remains deliberately paused.
 Each further area must still be audited, mapped and approved before substantial
 movement or deletion.
 
+MIG-002 — Application Theme and Settings Architecture
+
+Status: COMPLETE / VERIFIED
+
+This migration established the Architecture V2 owners for global theme state,
+global Settings Drawer state, reusable Drawer primitives, appearance controls
+and the custom accent-colour picker.
+
+Major completed changes include:
+
+- Theme preference storage moved into UI/Application/Theme.
+- Global theme state moved into the V2 ThemeProvider.
+- Settings Drawer open/close state separated into SettingsDrawerProvider.
+- Generic legacy Tray terminology replaced with Drawer terminology.
+- Global appearance settings decomposed into focused V2 components.
+- The accent-colour picker was decomposed into independently owned palette,
+  honeycomb, swatch and neutral-colour components.
+- The V2 SettingsDrawer is now mounted directly by app/layout.tsx.
+- The legacy GlobalSettingsBar.tsx was verified as unreferenced and deleted.
+- GlobalSettingsContext.tsx remains intentionally as a temporary compatibility
+  adapter for unmigrated legacy consumers.
+
+Verification completed:
+
+- npx tsc --noEmit — PASS
+- npm run build — PASS
+- Home page — PASS
+- Global Settings Drawer open/close — PASS
+- System / Light / Soft Grey / Dark / Custom theme modes — PASS
+- Custom accent-colour picker — PASS
+- Assessment setup route — PASS
+- Assessment Builder route — PASS
+- Existing Builder Settings behaviour — PASS
+
+No intentional product behaviour changed during MIG-002.
+
 11. Current Overall Status
 Preservation setup             COMPLETE
 Refactor branch                COMPLETE
@@ -405,6 +441,7 @@ ChatGPTWorkflow.md             COMPLETE
 AGENTS.md                      COMPLETE
 Repository forensic mapping    IN PROGRESS
 MIG-001 UI foundations         COMPLETE / VERIFIED
+MIG-002 Theme and Settings     COMPLETE / VERIFIED
 Application source migration   STARTED — BOUNDED
 Major new feature development  PAUSED
 
@@ -416,16 +453,49 @@ updated as the physical repository changes.
 Architecture V2 now contains its first verified application-source
 implementation.
 
-The following V2 files are authoritative:
+The following Architecture V2 Application UI areas are now authoritative:
 
-src/UI/Application/Colours/AccentPalette.ts
-src/UI/Application/Theme/AppTheme.ts
-src/UI/Application/Theme/ThemeMode.ts
-src/UI/Application/Typography/Typography.ts
+src/UI/Application/
+├── Colours/
+│   └── AccentPalette.ts
+├── Components/
+│   └── Drawer/
+│       ├── Drawer.tsx
+│       └── DrawerHeader.tsx
+├── SettingsDrawer/
+│   ├── Appearance/
+│   │   ├── AccentColourPicker/
+│   │   │   ├── AccentColourOptions.ts
+│   │   │   ├── AccentColourPicker.tsx
+│   │   │   ├── ColourHoneycomb.tsx
+│   │   │   ├── ColourSwatch.tsx
+│   │   │   └── NeutralColourPalette.tsx
+│   │   ├── AccentColourControl.tsx
+│   │   ├── AppearanceSettings.tsx
+│   │   └── ThemeModeControl.tsx
+│   ├── SettingsDrawer.tsx
+│   ├── SettingsDrawerProvider.tsx
+│   └── SettingsSection.tsx
+├── Theme/
+│   ├── AppTheme.ts
+│   ├── ThemeMode.ts
+│   ├── ThemePreferenceStorage.ts
+│   └── ThemeProvider.tsx
+└── Typography/
+    └── Typography.ts
 
-The corresponding legacy files currently remain as temporary compatibility
-adapters so existing imports can continue to function during incremental
-migration.
+Temporary legacy compatibility adapters still remain where unmigrated
+application code depends on historical APIs or import paths.
+
+In particular:
+
+app/settings-bar/GlobalSettingsContext.tsx
+
+remains intentionally active as a compatibility adapter for legacy
+useSettings() consumers.
+
+The legacy GlobalSettingsBar.tsx has been removed after verification that it
+had no remaining consumers.
 
 The wider application still depends heavily upon the legacy source tree.
 

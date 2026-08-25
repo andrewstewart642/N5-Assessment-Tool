@@ -801,7 +801,7 @@ Again, current clear organisational concepts should be preserved where useful.
 
 37. Target src/UI
 
-Status: TARGET — NOT YET IMPLEMENTED
+Status: MIGRATION IN PROGRESS
 
 Single V2 visual domain:
 
@@ -812,27 +812,59 @@ UI/
 This replaces the competing/scattered visual ownership present in legacy
 source.
 
-38. Target UI/Application
+38. UI/Application
 
-Status: TARGET — NOT YET IMPLEMENTED
+Status: MIGRATION IN PROGRESS
 
 Owns
 
 Teacher-facing VecEd application appearance.
 
-Potential areas:
+The first Architecture V2 Application UI responsibilities are now physically
+implemented beneath:
+
+src/UI/Application/
+
+Current V2 structure includes:
 
 Application/
 ├── Colours/
-├── Typography/
-├── Spacing/
-├── Motion/
-├── Shadows/
+│   └── AccentPalette.ts
+├── Components/
+│   └── Drawer/
+│       ├── Drawer.tsx
+│       └── DrawerHeader.tsx
+├── SettingsDrawer/
+│   ├── Appearance/
+│   │   ├── AccentColourPicker/
+│   │   │   ├── AccentColourOptions.ts
+│   │   │   ├── AccentColourPicker.tsx
+│   │   │   ├── ColourHoneycomb.tsx
+│   │   │   ├── ColourSwatch.tsx
+│   │   │   └── NeutralColourPalette.tsx
+│   │   ├── AccentColourControl.tsx
+│   │   ├── AppearanceSettings.tsx
+│   │   └── ThemeModeControl.tsx
+│   ├── SettingsDrawer.tsx
+│   ├── SettingsDrawerProvider.tsx
+│   └── SettingsSection.tsx
 ├── Theme/
-├── HeaderBar/
-└── SettingsDrawer/
+│   ├── AppTheme.ts
+│   ├── ThemeMode.ts
+│   ├── ThemePreferenceStorage.ts
+│   └── ThemeProvider.tsx
+└── Typography/
+    └── Typography.ts
 
-Do not create folders until actual corresponding code is being migrated.
+These V2 files are authoritative for the responsibilities they now own.
+
+Legacy compatibility adapters remain active where unmigrated application areas
+still depend upon historical imports.
+
+Application UI migration is therefore underway but not complete.
+
+HeaderBar, remaining legacy UI systems, Builder-specific settings and other
+application visual responsibilities must still be audited independently.
 
 39. Target HeaderBar
 
@@ -854,25 +886,47 @@ Does not own
 
 Assessment Creation-specific settings behaviour.
 
-40. Target SettingsDrawer
+40. SettingsDrawer
 
-Status: TARGET — NOT YET IMPLEMENTED
+Status: V2 IMPLEMENTED
 
-Target:
+Current owner:
 
 UI/Application/SettingsDrawer/
+
 Owns
 
 Global application settings.
 
-Examples:
+Current implemented responsibilities include:
 
 appearance;
 theme mode;
-accent colour.
+custom accent colour;
+Settings Drawer open/close state;
+global appearance composition;
+accent-colour picker UI.
+
+The previous legacy GlobalSettingsBar wrapper has been removed after verifying
+that it had no remaining consumers.
+
+app/layout.tsx now mounts the Architecture V2 SettingsDrawer directly.
+
+The legacy:
+
+app/settings-bar/GlobalSettingsContext.tsx
+
+remains temporarily active as a compatibility adapter for unmigrated consumers
+of the historical useSettings() API.
+
+This adapter must not yet be deleted.
+
 Does not own
+
 assessment-specific document options;
-PaperWorkspace reset/display controls.
+PaperWorkspace display/reset controls;
+Builder-specific settings.
+
 41. Target UI/Documents
 
 Status: TARGET — NOT YET IMPLEMENTED

@@ -6,7 +6,7 @@ import "./globals.css";
 import AppShellTopBar from "@/page-sections/AppShellTopBar";
 import { getSQATypographyCssVars } from "@/app/paper-layout/SQA-Typography";
 import { SettingsProvider } from "@/app/settings-bar/GlobalSettingsContext";
-import SettingsBar from "@/app/settings-bar/GlobalSettingsBar";
+import SettingsDrawer from "@/src/UI/Application/SettingsDrawer/SettingsDrawer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -63,7 +63,7 @@ export default function RootLayout({
             <div style={{ minHeight: 0 }}>{children}</div>
           </div>
 
-          <SettingsBar />
+          <SettingsDrawer />
         </SettingsProvider>
       </body>
     </html>
