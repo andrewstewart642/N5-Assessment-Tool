@@ -3,498 +3,296 @@
 **Document type:** Binding architectural decision register  
 **Architecture version:** Architecture V2  
 **Status:** Active  
-**Applies to:** All VecEd development unless an explicit current user instruction changes a decision  
-**Primary purpose:** Prevent previously settled architectural decisions from being accidentally reinterpreted, replaced or re-litigated by future development conversations
+**Applies to:** All VecEd development unless explicitly amended by the user
+**Purpose:** Preserve settled architectural decisions between development sessions
 
 ---
 
-# 1. Purpose of This Document
+# 1. Purpose
 
-This document records architectural and development decisions which have already
-been discussed and approved for VecEd Architecture V2.
-
-These decisions are not brainstorming prompts.
-
-They are not suggestions.
-
-They are not examples of one possible way to organise the repository.
-
-Unless explicitly stated otherwise, every decision in this document is:
-
-**LOCKED**
-
-A future developer or AI assistant must not replace a locked decision merely
-because another convention might also be common, fashionable, technically
-valid or personally preferred.
-
-Architecture V2 exists partly because the project was developed across many
-separate conversations and architectural assumptions were repeatedly
-reconstructed from incomplete context.
-
-This file is intended to prevent that from happening again.
-
----
-
-# 2. Meaning of `LOCKED`
+This document records decisions which have already been considered and approved.
 
 A decision marked:
 
 ```text
-Status: LOCKED
+LOCKED
+```
 
-means:
+is not a suggestion or brainstorming prompt.
 
-the issue has already been considered;
-a direction has been deliberately chosen;
-future implementation should follow that direction;
-alternative conventions should not be proposed merely for variety;
-source code which conflicts with the decision should normally be migrated
-toward the decision rather than used as evidence against it;
-the decision may only be changed through the explicit architectural change
-process defined below.
-3. Locked Decisions Are Not Absolute Technical Prohibitions
+Future development should follow it unless:
 
-A locked architectural decision may eventually prove unsuitable because of:
+- the user explicitly requests reconsideration; or
+- new technical evidence demonstrates a material conflict.
 
-a framework constraint;
-a newly discovered technical limitation;
-a significant product change;
-a major new requirement;
-evidence that the existing decision would create material technical harm.
+Legacy implementation which disagrees with a locked decision is normally migration input, not evidence that the locked decision is wrong.
 
-If this happens, do not silently violate the decision.
+---
 
-Instead:
+# 2. Documentation Precedence
 
-identify the exact locked decision;
-explain the newly discovered conflict;
-explain the consequences of preserving the existing decision;
-propose a specific alternative;
-obtain explicit user approval;
-update this file if the decision changes;
-update Architecture.md where necessary;
-update RepositoryMap.md if physical ownership changes.
+Use this precedence for VecEd-specific decisions:
 
-Until that process occurs, the existing decision remains authoritative.
+```text
+1. Explicit current user instruction
+2. AGENTS.md
+3. Docs/LockedDecisions.md
+4. Docs/Architecture.md
+5. Docs/RepositoryMap.md
+6. Docs/RefactorLedger.md
+7. Current source implementation
+8. Historical implementation convention
+```
 
-4. Documentation Precedence
+---
 
-For VecEd-specific architectural decisions, use the following precedence:
+# 3. Changing a Locked Decision
 
-explicit instruction from the user in the current conversation;
-AGENTS.md;
-Docs/LockedDecisions.md;
-Docs/Architecture.md;
-Docs/RepositoryMap.md;
-Docs/RefactorLedger.md;
-current implementation details in source code;
-historical implementation conventions.
+Do not silently violate a locked decision.
 
-Legacy source code is not architectural precedent.
+If a genuine conflict appears:
 
-If legacy implementation conflicts with an explicit Architecture V2 decision,
-treat the legacy implementation as migration input.
-
-5. Decision Format
-
-Each decision contains:
-
-an identifier;
-a status;
-a rule;
-a rationale;
-important consequences;
-exceptions where applicable.
+```text
+IDENTIFY DECISION
+        ↓
+EXPLAIN NEW EVIDENCE
+        ↓
+EXPLAIN CONFLICT
+        ↓
+PROPOSE AMENDMENT
+        ↓
+OBTAIN EXPLICIT APPROVAL
+        ↓
+UPDATE DOCUMENTATION
+```
 
 Decision IDs are permanent.
 
-If a decision is later replaced, retain the original decision entry and mark it
-as superseded rather than reusing its ID.
+If a decision is replaced:
 
-PART I — REFACTOR PURPOSE AND SAFETY
-LD-001 — Architecture V2 is a deliberate repository-wide refactor
+```text
+Status: SUPERSEDED
+```
 
-Status: LOCKED
+must be recorded on the original decision and the replacement must receive a new ID.
 
-Rule
+---
 
-VecEd Architecture V2 is not a cosmetic folder clean-up.
+# PART I — REFACTOR PURPOSE AND SAFETY
 
-It is a deliberate restructuring of:
+## LD-001 — Architecture V2 is a repository-wide architectural refactor
 
-ownership;
-naming;
-dependencies;
-UI organisation;
-course organisation;
-settings ownership;
-persistence ownership;
-state organisation;
-document styling;
-application styling;
-development documentation.
-Rationale
+**Status:** LOCKED
 
-The legacy repository accumulated successfully functioning features without a
-single consistent architecture.
+Architecture V2 restructures ownership, naming, dependencies, UI, Courses, persistence, state and repository organisation.
 
-Simply moving the existing files into prettier folders would preserve the
-underlying ownership problems.
+It is not cosmetic folder tidying.
 
-Consequence
+---
 
-Every significant migration should ask whether the existing implementation
-should be:
+## LD-002 — Preservation is acceptance criterion zero
 
-kept;
-moved;
-renamed;
-split;
-merged;
-simplified;
-deleted.
-LD-002 — Preservation of existing working behaviour is acceptance criterion zero
+**Status:** LOCKED
 
-Status: LOCKED
+Existing working behaviour must be preserved unless a product change is explicitly approved.
 
-Rule
+A cleaner architecture which removes working functionality is a failed migration.
 
-Architecture V2 must preserve existing working VecEd behaviour unless the user
-explicitly approves a product behaviour change.
+---
 
-Rationale
+## LD-003 — Architecture V2 proceeds in bounded stages
 
-The purpose of the refactor is to improve maintainability, not sacrifice
-features which already work.
+**Status:** LOCKED
 
-Consequence
+Do not perform one uncontrolled repository-wide migration.
 
-A cleaner implementation which unintentionally removes working behaviour is not
-a successful migration.
+Use bounded, independently verifiable responsibility migrations.
 
-LD-003 — No mass repository rewrite
+---
 
-Status: LOCKED
+## LD-004 — Refactoring may reduce code
 
-Rule
+**Status:** LOCKED
 
-Architecture V2 must be migrated in bounded, verifiable stages.
+Architecture V2 may delete dead code, merge redundant implementations, simplify behaviour and reduce file count.
 
-Do not move the entire repository and repair it afterwards.
+Historical file count is not valuable.
 
-Required sequence
+---
 
-For each substantial migration:
+## LD-005 — Apparent dead code is not sufficient evidence for deletion
 
-inspect the current implementation;
-trace dependencies;
-establish ownership;
-identify simplification opportunities;
-define the V2 destination;
-migrate a bounded area;
-repair imports and dependencies;
-verify behaviour;
-run relevant build/type checks;
-commit the successful stage.
-Rationale
+**Status:** LOCKED
 
-Small migrations reduce risk and make regressions attributable to specific
-changes.
+Imports, exports, consumers, routes, framework behaviour, persistence and other relevant usage must be considered before deletion.
 
-LD-004 — Refactoring may reduce the amount of code
+---
 
-Status: LOCKED
+## LD-006 — Proven dead code should not be migrated
 
-Rule
+**Status:** LOCKED
 
-Architecture V2 is allowed and encouraged to:
+Once confidently obsolete, delete legacy code rather than institutionalising it under V2.
 
-delete dead code;
-remove duplicate implementations;
-merge redundant files;
-remove obsolete wrappers;
-consolidate state;
-consolidate persistence;
-simplify complicated implementation.
-Rationale
+---
 
-The goal is not to preserve historical file count.
+## LD-007 — Major feature expansion remains secondary to the core refactor
 
-The goal is a smaller and clearer implementation where possible.
+**Status:** LOCKED FOR CURRENT REFACTOR
 
-LD-005 — No file is deleted merely because it appears unused
+Substantial new product development remains paused unless explicitly prioritised over Architecture V2.
 
-Status: LOCKED
+---
 
-Rule
+# PART II — GIT AND PRESERVATION
 
-Before deleting a legacy file, its role must be investigated.
+## LD-008 — Architecture V2 remains in the existing repository
 
-At minimum, check:
+**Status:** LOCKED
 
-imports;
-exports;
-consumers;
-dynamic access where relevant;
-framework conventions;
-persistence compatibility where relevant.
-Rationale
+The authoritative repository remains:
 
-Apparently unused code may still participate in runtime, build-time, routing or
-stored-data behaviour.
-
-LD-006 — Dead code should not be carried into Architecture V2
-
-Status: LOCKED
-
-Rule
-
-Once a file or implementation has been confidently established as genuinely
-dead or obsolete, prefer deleting it over migrating it into the new
-architecture.
-
-Rationale
-
-Architecture V2 should not institutionalise historical debris.
-
-LD-007 — Major new feature development pauses during the core architecture refactor
-
-Status: LOCKED
-
-Rule
-
-Do not resume substantial new product feature work while the Architecture V2
-refactor is being established unless the user explicitly changes this
-priority.
-
-Rationale
-
-Continuing to expand the legacy structure while dismantling it creates moving
-targets and additional migration work.
-
-PART II — GIT AND PRESERVATION
-LD-008 — Architecture V2 remains in the existing Git repository
-
-Status: LOCKED
-
-Rule
-
-The refactor remains inside the existing:
-
+```text
 N5-Assessment-Tool
+```
 
-repository.
+Do not create a separate replacement repository as the normal strategy.
 
-Do not create a completely separate replacement repository as the normal V2
-development strategy.
+---
 
-Rationale
+## LD-009 — Active refactor branch
 
-Keeping V2 within the same Git history preserves:
+**Status:** LOCKED FOR CURRENT REFACTOR
 
-provenance;
-commit history;
-comparison;
-rollback;
-traceability.
-LD-009 — refactor/architecture-V2 is the active refactor branch
+Architecture V2 work occurs on:
 
-Status: LOCKED FOR THE CURRENT REFACTOR**
-
-Rule
-
-Architecture V2 development occurs on:
-
+```text
 refactor/architecture-V2
+```
 
-until a deliberate branch/merge decision changes this.
+until deliberately changed.
 
-Consequence
+---
 
-Before significant source changes, confirm the active branch.
+## LD-010 — `main` remains known-good
 
-LD-010 — main represents known-good VecEd
+**Status:** LOCKED
 
-Status: LOCKED
+Do not perform the active Architecture V2 refactor directly on `main`.
 
-Rule
+---
 
-Do not perform the Architecture V2 refactor directly on main.
+## LD-011 — The archive branch is frozen
 
-main represents the known-good application and becomes the destination only
-when migrated work is considered ready.
+**Status:** LOCKED
 
-LD-011 — The pre-refactor archive branch is frozen
+```text
+archive/25-08-2026-baseline
+```
 
-Status: LOCKED
+is a preservation reference, not a development branch.
 
-Rule
+---
 
-The archive branch exists as a preservation snapshot.
+## LD-012 — The offline project copy is a preservation layer
 
-Do not use it for normal development.
+**Status:** LOCKED
 
-Do not rewrite it casually.
+The manually created Windows backup must not become the normal working copy.
 
-LD-012 — The offline Windows copy is a preservation layer
+---
 
-Status: LOCKED
+## LD-013 — Prefer bounded commits
 
-Rule
+**Status:** LOCKED
 
-The user's manually copied project directory is an additional offline backup.
+Meaningful successful migrations should be committed in understandable stages.
 
-Normal Architecture V2 development must not rely on modifying that backup.
+---
 
-LD-013 — Architecture V2 should use incremental commits
+# PART III — SOURCE MIGRATION MODEL
 
-Status: LOCKED
+## LD-014 — Migrated application source belongs beneath `src`
 
-Rule
+**Status:** LOCKED
 
-Successful bounded migrations should receive their own understandable commits.
+Architecture V2 application source progressively converges beneath:
 
-Examples:
-
-docs: establish Architecture V2 rules
-refactor: establish HeaderBar architecture
-refactor: consolidate application theme state
-refactor: migrate Assessment Creation TopBar
-Rejected alternative
-
-One enormous commit containing the entire repository reorganisation.
-
-PART III — CLEAN-SLATE PROTOCOL
-LD-014 — Architecture V2 grows under src
-
-Status: LOCKED
-
-Rule
-
-The authoritative destination for migrated application source is:
-
+```text
 src/
-Rationale
+```
 
-src creates a clear boundary between the application and repository
-infrastructure.
+---
 
-LD-015 — Do not create N5-Assessment-Tool-V2 as a duplicate working application
+## LD-015 — No duplicate V2 application repository
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Do not maintain parallel complete V1 and V2 application folders as competing working copies.
 
-Do not maintain two complete project copies such as:
+---
 
-N5-Assessment-Tool/
-N5-Assessment-Tool-V2/
+## LD-016 — Historical root source is legacy architecture
 
-as the normal refactor strategy.
+**Status:** LOCKED
 
-Rejected because
+Historical locations such as:
 
-This would create:
-
-two competing sources of truth;
-synchronisation problems;
-confusion over which implementation is current;
-weaker Git rename/history continuity;
-greater risk of fixes being applied to only one copy.
-LD-016 — The existing root source structure is legacy architecture
-
-Status: LOCKED
-
-Rule
-
-The following historical root-level source locations are considered legacy
-during migration:
-
+```text
 app/
 course-data/
 math-helpers/
 page-sections/
 shared-types/
-ui/
+```
 
-Their presence is transitional.
+remain transitional unless specifically retained for framework/infrastructure reasons.
 
-They are not approved permanent Architecture V2 locations.
+---
 
-LD-017 — Legacy source remains physically in place until migrated
+## LD-017 — Legacy source remains in place until safely migrated
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Do not mechanically move all historical code beneath a `Legacy/` directory.
 
-Do not move all legacy source immediately beneath a physical Legacy/ folder.
+---
 
-Rationale
+## LD-018 — Legacy hiding is visual only
 
-Doing so would immediately disrupt:
+**Status:** LOCKED FOR CURRENT WORKFLOW
 
-Next.js routing;
-import paths;
-aliases;
-runtime dependencies.
-Rejected structure
-Legacy/
-├── app/
-├── course-data/
-├── shared-types/
-└── ui/
+VS Code `files.exclude` may hide legacy areas.
 
-as an initial mechanical operation.
+It must not alter source, Git, imports or runtime behaviour.
 
-LD-018 — Legacy source is hidden visually rather than relocated prematurely
+---
 
-Status: LOCKED FOR CURRENT REFACTOR WORKFLOW**
+## LD-019 — `src` is the V2 construction area
 
-Rule
+**Status:** LOCKED
 
-The Architecture V2 VS Code workspace may hide legacy folders through
-files.exclude.
+V2 grows while legacy ownership shrinks.
 
-This is a development-view convenience only.
+---
 
-It must not
-delete legacy source;
-move source;
-affect Git;
-affect Next.js;
-affect imports.
-LD-019 — src is the clean-slate construction area
+## LD-020 — Permanent V1/V2 duplication is prohibited
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Temporary adapters are acceptable.
 
-New Architecture V2 implementation should progressively appear beneath src
-as bounded responsibilities are migrated.
+Permanent duplicate authorities are not.
 
-Legacy source shrinks while src grows.
+---
 
-LD-020 — Do not duplicate migrated source indefinitely
+# PART IV — TOP-LEVEL REPOSITORY STRUCTURE
 
-Status: LOCKED
+## LD-021 — Core V2 application domains are explicit
 
-Rule
+**Status:** LOCKED
 
-Migration should normally move/refactor responsibilities rather than create
-permanent V1 and V2 copies of the same implementation.
-
-Temporary adapters are allowed when technically necessary.
-
-Temporary duplication must have an intended removal path.
-
-PART IV — TOP-LEVEL REPOSITORY STRUCTURE
-LD-021 — Target application source domains
-
-Status: LOCKED
-
-Rule
-
-The intended core top-level application source structure is:
+The principal source domains are:
 
 src/
 ├── app/
@@ -503,2733 +301,2119 @@ src/
 ├── Courses/
 └── UI/
 
-Only genuine implemented domains should physically exist.
+A runtime development domain such as:
 
-LD-022 — Do not create new top-level domains casually
+src/DeveloperTools/
 
-Status: LOCKED
+may be introduced only if genuine developer-facing application functionality
+requires an independent owner.
 
-Rule
+It is not a mandatory core domain.
 
-A new folder directly beneath src requires a genuinely independent
-architectural responsibility.
+---
 
-Do not create new top-level source domains merely to solve a small local
-problem.
+## LD-022 — New top-level domains require genuine ownership
 
-LD-023 — No speculative future feature domains
+**Status:** LOCKED
 
-Status: LOCKED
+Do not create top-level folders merely to solve local organisational problems.
 
-Rule
+---
 
-Do not create empty folders for features not currently being implemented.
+## LD-023 — No speculative feature folders
 
-Examples which must not be added merely for future-proofing include:
+**Status:** LOCKED
 
-Scanning/
-AutoMarking/
-AI/
-Analytics/
-Rationale
+Do not pre-create empty architecture for hypothetical:
 
-Future-proofing comes from good ownership and dependency design, not empty
-directory scaffolding.
+```text
+Scanning
+OCR
+AI marking
+Analytics
+```
 
-LD-024 — Repository documentation lives in Docs
+or other future capabilities.
 
-Status: LOCKED
+---
 
-Rule
+## LD-024 — Architecture documentation belongs in `Docs`
 
-Persistent project architecture and workflow documentation lives under:
+**Status:** LOCKED
 
+Canonical project documentation is:
+
+```text
 Docs/
+├── Architecture.md
+├── LockedDecisions.md
+├── RepositoryMap.md
+├── RefactorLedger.md
+└── ChatGPTWorkflow.md
+```
 
-Current planned documentation:
+---
 
-Architecture.md
-LockedDecisions.md
-RepositoryMap.md
-RefactorLedger.md
-ChatGPTWorkflow.md
-LD-025 — AGENTS.md lives at repository root
+## LD-025 — `AGENTS.md` remains at repository root
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+It is the mandatory development entry-point contract.
 
-AGENTS.md must remain at repository root rather than inside Docs.
+---
 
-Rationale
+## LD-026 — `public/` remains repository infrastructure
 
-It is the mandatory entry-point instruction file for development agents and AI
-assistants.
+**Status:** LOCKED
 
-LD-026 — public remains a repository-root infrastructure folder
+Do not move Next.js public assets beneath `src` merely for structural symmetry.
 
-Status: LOCKED
+---
 
-Rule
+## LD-027 — Repository maintenance tooling belongs under root `Tools`
 
-Do not move standard Next.js static assets beneath src merely for structural
-symmetry.
+**Status:** LOCKED
 
-public/ remains at repository root.
+Migration, validation, catalogue-processing and maintenance scripts with continuing value belong under:
 
-LD-027 — Repository maintenance tooling belongs under root Tools
-
-Status: LOCKED
-
-Rule
-
-One-off or repository-level:
-
-migration scripts;
-validation scripts;
-maintenance scripts;
-catalogue-processing utilities;
-
-belong under:
-
+```text
 Tools/
+```
 
-when they need to remain available.
+---
 
-LD-028 — Runtime developer features and repository Tools are different concepts
+## LD-028 — Runtime developer features are not repository maintenance tools
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Application-based developer/testing features and root maintenance scripts are separate responsibilities.
 
-A developer-only feature which runs inside the application is not the same
-thing as a repository maintenance script.
+---
 
-Do not place runtime application implementation in root Tools.
+# PART V — NAMING
 
-PART V — NAMING CONVENTIONS
-LD-029 — PascalCase is the default VecEd architectural naming convention
+## LD-029 — PascalCase is the default VecEd architectural naming convention
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Use PascalCase for VecEd-owned folders and descriptive source modules where practical.
 
-VecEd-owned architectural source folders and descriptive source filenames use
-PascalCase wherever practical.
+---
 
-Examples:
+## LD-030 — Hooks use `useCamelCase`
 
-Assessments
-PaperWorkspace
-National5Maths
-AssessmentCreatorPage.tsx
-CourseRegistry.ts
-LD-030 — React hooks use conventional useCamelCase
+**Status:** LOCKED
 
-Status: LOCKED
+Example:
 
-Rule
+```text
+useAssessmentProgressRows.ts
+```
 
-Hooks use names such as:
+---
 
-useSkillsTreeState.ts
-useQuestionWorkflow.ts
+## LD-031 — Route folders may use URL-compatible casing
 
-rather than PascalCase filenames.
+**Status:** LOCKED
 
-LD-031 — Next.js URL route folders may remain lowercase/kebab-case
+Next.js URL segments may remain lowercase or kebab-case.
 
-Status: LOCKED
+---
 
-Rule
+## LD-032 — Number folders only where order is meaningful
 
-Route directories which directly define URL segments may use names such as:
+**Status:** LOCKED
 
-create-assessment
-my-assessments
-my-classes
+Numbering may communicate genuine curriculum or visual order.
 
-This is an intentional exception to PascalCase.
+---
 
-LD-032 — Number folders only when order is meaningful
+## LD-033 — Decorative numbering is rejected
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Do not number unrelated domains merely to control Explorer sorting.
 
-Number prefixes are permitted when they communicate genuine:
+---
 
-curriculum order;
-visual order;
-domain sequence.
+## LD-034 — Ordered-folder format is `number-name`
 
-Examples:
-
-01-Numerical
-02-Algebraic
-
-and:
-
-01-SkillsFilters
-02-SkillsTree
-LD-033 — Do not use decorative numbering
-
-Status: LOCKED
-
-Rule
-
-Do not number unrelated sibling domains merely to force Explorer sorting.
-
-Rejected example:
-
-01-Questions
-02-Papers
-03-Analysis
-04-Persistence
-
-when no semantic sequence exists.
-
-LD-034 — Ordered folder format uses number-hyphen-name
-
-Status: LOCKED
-
-Rule
+**Status:** LOCKED
 
 Use:
 
+```text
 01-Numerical
+```
 
-rather than:
+---
 
-01 - Numerical
-01_Numerical
-1.Numerical
-LD-035 — Folder context should reduce filename repetition
+## LD-035 — Folder context should reduce unnecessary repetition
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Do not repeat the complete parent-folder name in every child filename without reason.
 
-Prefer:
+---
 
-TopBar/PaperViewPill.tsx
+## LD-036 — Region root components may repeat meaningful context
 
-rather than:
+**Status:** LOCKED
 
-TopBar/TopBarPaperViewPill.tsx
-LD-036 — Root region components may share their folder name
+A main component may reflect its owning region where this improves clarity.
 
-Status: LOCKED
+Descriptive names such as:
 
-Rule
+```text
+AssessmentTopBar
+AssessmentHUDBar
+```
 
-The main component representing a region may use:
+are also valid where the prefix prevents ambiguity outside the folder.
 
-TopBar/TopBar.tsx
-HUDBar/HUDBar.tsx
-PaperWorkspace/PaperWorkspace.tsx
-HeaderBar/HeaderBar.tsx
+---
 
-This is not considered redundant repetition.
+## LD-037 — Generic dumping-ground folders are prohibited by default
 
-LD-037 — Generic bucket folders are prohibited by default
+**Status:** LOCKED
 
-Status: LOCKED
+Avoid:
 
-Rule
-
-Do not create broad dumping-ground folders named:
-
+```text
 Helpers
 Utils
 Shared
 Common
 Misc
 General
+```
 
-without explicit architectural justification.
+without real architectural justification.
 
-LD-038 — Existing generic legacy buckets should be dismantled by ownership
+---
 
-Status: LOCKED
+## LD-038 — Legacy generic buckets must be dismantled by ownership
 
-Rule
+**Status:** LOCKED
 
-Legacy areas such as:
+Do not simply recreate `shared-types` or `math-helpers` beneath `src`.
 
-shared-types/
-math-helpers/
+---
 
-should not simply be recreated beneath src.
+## LD-039 — Types live with their owners
 
-Their files should be reassigned to the domains which actually own them.
+**Status:** LOCKED
 
-LD-039 — Types live with the domains they describe
+Assessment types belong with Assessments, Course types with Courses, Class types with Classes, etc.
 
-Status: LOCKED
+---
 
-Rule
+## LD-040 — Constants live with their owners
 
-Do not recreate a global generic SharedTypes dumping ground.
+**Status:** LOCKED
+
+Avoid giant generic constant files unless the values are genuinely global.
+
+---
+
+# PART VI — FILE DECOMPOSITION
+
+## LD-041 — Prefer small coherent files
+
+**Status:** LOCKED
+
+A meaningful independently understandable responsibility should normally have a clear source file.
+
+---
+
+## LD-042 — Line count alone does not justify splitting
+
+**Status:** LOCKED
+
+Split by responsibility, not arbitrary length.
+
+---
+
+## LD-043 — Do not create a subfolder for every file
+
+**Status:** LOCKED
+
+Create a subfolder when a responsibility has enough closely related implementation to justify one.
+
+---
+
+## LD-044 — Large visible regions should decompose by recognisable features
+
+**Status:** LOCKED
+
+Controls such as name, date, paper selection and zoom should not remain permanently entangled solely because they began in one large component.
+
+---
+
+## LD-045 — Historical hooks are not automatically permanent abstractions
+
+**Status:** LOCKED
+
+`UseBuilder...` fragmentation must be reconsidered by actual responsibility.
+
+---
+
+# PART VII — ROUTING
+
+## LD-046 — `src/app` is the target framework/routing layer
+
+**Status:** LOCKED
+
+Product implementation belongs in domain-owned files outside the route layer.
+
+---
+
+## LD-047 — `page.tsx` is thin
+
+**Status:** LOCKED
+
+Substantial page implementation must not live permanently inside a giant route file.
+
+---
+
+## LD-048 — Substantial pages have descriptive implementation names
+
+**Status:** LOCKED
 
 Examples:
 
-assessment types → Assessments;
-course types → Courses;
-class types → Classes;
-question-generation types → appropriate question/course owner.
-LD-040 — Constants live with their owners
-
-Status: LOCKED
-
-Rule
-
-Do not create a giant generic global constants file unless the constants are
-genuinely global.
-
-Feature/domain constants should normally live close to their owner.
-
-PART VI — FILE DECOMPOSITION
-LD-041 — Small coherent files are preferred
-
-Status: LOCKED
-
-Rule
-
-A meaningful independently understandable feature should generally have its own
-file.
-
-Examples:
-
-AssessmentNameField.tsx
-PaperViewPill.tsx
-ZoomControl.tsx
-StandardFilter.tsx
-LD-042 — Line count alone does not justify a split
-
-Status: LOCKED
-
-Rule
-
-Do not create micro-files simply because a source file has become long.
-
-A split should correspond to meaningful responsibility.
-
-LD-043 — Do not create a subfolder for every single file
-
-Status: LOCKED
-
-Rule
-
-A single simple responsibility can remain directly in its owning folder.
-
-Create a named subfolder when a feature develops multiple closely related
-files.
-
-LD-044 — Large visible regions should be decomposed by recognisable features
-
-Status: LOCKED
-
-Rule
-
-Large UI components containing several independently understandable controls
-should be split accordingly.
-
-Example:
-
-A large TopBar should not remain one enormous file if it contains:
-
-assessment name;
-class controls;
-date controls;
-paper selector;
-zoom;
-navigation.
-LD-045 — Over-fragmented hooks should be reconsidered
-
-Status: LOCKED
-
-Rule
-
-Architecture V2 must not assume every historical UseBuilder... hook deserves
-to survive independently.
-
-Related behaviour may be reorganised into coherent domain ownership.
-
-PART VII — NEXT.JS ROUTING
-LD-046 — src/app is the routing/framework layer
-
-Status: LOCKED
-
-Rule
-
-Substantial product implementation should live outside src/app where
-appropriate.
-
-src/app primarily connects URLs and Next.js conventions to descriptive
-application page implementations.
-
-LD-047 — page.tsx must remain thin
-
-Status: LOCKED
-
-Rule
-
-A substantial page must not be implemented primarily inside a giant Next.js
-page.tsx.
-
-page.tsx should normally delegate to a descriptively named implementation.
-
-LD-048 — Every substantial page gets a descriptive implementation name
-
-Status: LOCKED
-
-Examples
-HomePage.tsx
-AssessmentSetupPage.tsx
-AssessmentCreatorPage.tsx
-AssessmentsLibraryPage.tsx
-ClassesPage.tsx
-ClassDetailsPage.tsx
-LD-049 — Never give ambiguous page.tsx instructions
-
-Status: LOCKED
-
-Rule
-
-Never instruct a developer to:
-
-Edit page.tsx.
-
-without a complete route path.
-
-Prefer referring to the descriptive page implementation.
-
-LD-050 — Moving root app to src/app happens deliberately, not as the first migration
-
-Status: LOCKED FOR THE CURRENT REFACTOR STRATEGY**
-
-Rule
-
-The existing root app/ remains responsible for routing during early
-Architecture V2 migrations.
-
-Other product responsibilities may migrate into src first.
-
-The routing migration to:
-
-src/app/
-
-should happen only when appropriate and deliberately.
-
-Rationale
-
-Do not combine:
-
-route relocation;
-domain migration;
-component refactoring;
-import rewriting;
-
-into the first architectural change.
-
-LD-051 — The public Builder route is not automatically renamed during initial architecture work
-
-Status: LOCKED UNTIL EXPLICIT ROUTE DECISION**
-
-Rule
-
-Architecture terminology may change from Builder to Assessment Creation
-without requiring the public URL to change immediately.
-
-Any route change, such as changing a historical /builder route to
-/workspace, must be a separate deliberate product/routing decision.
-
-PART VIII — STANDARD VECED UI VOCABULARY
-LD-052 — Global website navigation is HeaderBar
-
-Status: LOCKED
-
-Rule
-
-The topmost global VecEd navigation area is named:
-
-HeaderBar
-
-It contains global application navigation and global settings access.
-
-LD-053 — Assessment Creation upper control area is TopBar
-
-Status: LOCKED
-
-Rule
-
-The Assessment Creation-specific horizontal bar below HeaderBar is named:
-
-TopBar
-
-Do not call it HeaderBar.
-
-LD-054 — Assessment Creation lower region is HUDBar
-
-Status: LOCKED
-
-Rule
-
-The lower persistent assessment information/control area is named:
-
-HUDBar
-LD-055 — The left-hand assessment region is SkillsPanel
-
-Status: LOCKED
-
-Rule
-
-The complete left-hand skill-selection region is:
-
-SkillsPanel
-LD-056 — The central assessment surface is PaperWorkspace
-
-Status: LOCKED
-
-Rule
-
-The central paper working/viewing surface is named:
-
-PaperWorkspace
-LD-057 — PDFWorkspace is rejected
-
-Status: LOCKED
-
-Rule
-
-Do not rename PaperWorkspace according to PDF technology.
-
-Rationale
-
-PaperWorkspace describes the product concept and survives rendering
-implementation changes.
-
-LD-058 — WorkspacePage is rejected as the name of the entire Assessment Creation screen
-
-Status: LOCKED
-
-Rule
-
-The whole screen is:
-
+```text
+HomePage
+AssessmentSetupPage
 AssessmentCreatorPage
+AssessmentCompilationPage
+ClassesPage
+```
 
-The central surface is:
+---
 
+## LD-049 — Never give ambiguous `page.tsx` instructions
+
+**Status:** LOCKED
+
+Always use the complete repository-relative route path or descriptive implementation filename.
+
+---
+
+## LD-050 — Root `app` → `src/app` migration is deliberate
+
+**Status:** LOCKED FOR CURRENT STRATEGY
+
+Do not combine routing relocation with unrelated major domain migrations merely for neatness.
+
+---
+
+## LD-051 — Internal Builder cleanup does not automatically rename public routes
+
+**Status:** LOCKED
+
+URL changes are separate routing/product decisions.
+
+---
+
+# PART VIII — VECED UI VOCABULARY
+
+## LD-052 — Global website navigation is `HeaderBar`
+
+**Status:** LOCKED
+
+---
+
+## LD-053 — Assessment Creation upper controls are `TopBar`
+
+**Status:** LOCKED
+
+---
+
+## LD-054 — Assessment Creation lower region is `HUDBar`
+
+**Status:** LOCKED
+
+---
+
+## LD-055 — Left Assessment Creation region is `SkillsPanel`
+
+**Status:** LOCKED
+
+---
+
+## LD-056 — Central assessment surface is `PaperWorkspace`
+
+**Status:** LOCKED
+
+---
+
+## LD-057 — `PDFWorkspace` is rejected
+
+**Status:** LOCKED
+
+Product terminology must not depend on current rendering technology.
+
+---
+
+## LD-058 — The whole creation screen is not `WorkspacePage`
+
+**Status:** LOCKED
+
+The page is:
+
+```text
+AssessmentCreatorPage
+```
+
+The central region is:
+
+```text
 PaperWorkspace
+```
 
-Avoid naming the whole page WorkspacePage, which would blur those concepts.
+---
 
-LD-059 — Panel means a substantial persistent region
+## LD-059 — `Panel` means a substantial persistent region
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Examples:
+---
 
-SkillsPanel
-ProgressPanel
-LD-060 — Drawer means a substantial edge-opening panel
+## LD-060 — `Drawer` means a substantial edge-opening region
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Example:
+---
 
-SettingsDrawer
-LD-061 — Popover means a small contextual anchored panel
+## LD-061 — `Popover` means a small anchored contextual region
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Example:
+---
 
-SettingsPopover
-LD-062 — Control means an element which changes state/value
+## LD-062 — `Control` means an element which changes state/value
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Examples:
+---
 
-ZoomControl
-PageNavigationControl
-LD-063 — Filter means a control restricting/selecting available information
+## LD-063 — `Filter` restricts/selects displayed or available information
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Examples:
+---
 
-StandardFilter
-TargetMarksFilter
-ThinkingTypeFilter
-LD-064 — Field means editable data input
+## LD-064 — `Field` means editable data input
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Example:
+---
 
-AssessmentNameField
-LD-065 — Pill means compact pill-shaped selector/state control
+## LD-065 — `Pill` means compact pill-shaped selection/state UI
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Example:
+---
 
-PaperViewPill
-LD-066 — Picker means a dedicated selection interface
+## LD-066 — `Picker` means a dedicated selection interface
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Examples:
+---
 
-DatePicker
-TimePicker
-LD-067 — Status / Indicator display state
+## LD-067 — `Status` / `Indicator` display state
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Examples:
+---
 
-SaveStatus
-ConnectionIndicator
-LD-068 — Modal means blocking foreground dialog
+## LD-068 — `Modal` means a blocking foreground dialog
 
-Status: LOCKED VOCABULARY**
+**Status:** LOCKED VOCABULARY
 
-Do not casually replace this term with generic Popup.
+---
 
-LD-069 — Existing VecEd vocabulary should not drift into synonyms
+## LD-069 — Existing VecEd vocabulary should not drift into synonyms
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Avoid introducing `Tray`, `Flyout`, `Popup`, `MiniDrawer`, `Ribbon`, `Widget` or `Sidebar` where an established VecEd term already applies.
 
-Do not casually introduce names such as:
+---
 
-Tray
-Flyout
-Popup
-MiniDrawer
-Ribbon
-Widget
-Sidebar
+# PART IX — ASSESSMENT CREATION
 
-where an existing VecEd term already describes the interface.
+## LD-070 — `Builder` is deprecated V2 domain terminology
 
-A genuinely new UI concept may introduce a new term only deliberately.
+**Status:** LOCKED
 
-PART IX — ASSESSMENT CREATION
-LD-070 — Builder is deprecated Architecture V2 terminology
+Do not use `Builder` as the permanent identity of Assessment Creation.
 
-Status: LOCKED
+---
 
-Rule
+## LD-071 — No blind global Builder rename
 
-Newly migrated Architecture V2 code should use Assessment Creation terminology
-instead of using Builder as the permanent product/domain label.
+**Status:** LOCKED
 
-Legacy Builder filenames remain until individually migrated.
+Each historical `Builder...` responsibility must be understood and renamed according to its true owner.
 
-LD-071 — Do not perform a blind global Builder rename
+---
 
-Status: LOCKED
+## LD-072 — Canonical creation implementation is `AssessmentCreatorPage.tsx`
 
-Rule
+**Status:** LOCKED — IMPLEMENTED
 
-Each legacy Builder... file must be renamed according to its actual
-responsibility during migration.
+Canonical location:
 
-Examples:
-
-BuilderTopBar
-
-may become:
-
-TopBar
-
-where appropriate.
-
-But:
-
-BuilderUtils
-
-must first be analysed because its contents may belong to several different
-owners.
-
-LD-072 — Entire Assessment Creation page implementation is AssessmentCreatorPage.tsx
-
-Status: LOCKED
-
-Rule
-
-The substantial page implementation is:
-
+```text
 src/Assessments/Creation/AssessmentCreatorPage.tsx
+```
 
-once migrated.
+---
 
-LD-073 — Assessment Creation target ownership structure
+## LD-073 — Assessment Creation major ownership structure is stable
 
-Status: LOCKED AT CONCEPTUAL LEVEL**
+**Status:** LOCKED AT CONCEPTUAL LEVEL
 
-Rule
+```text
+Creation/
+├── AssessmentCreatorPage.tsx
+├── AssessmentSetupPage.tsx
+├── Setup/
+├── TopBar/
+├── SkillsPanel/
+├── PaperWorkspace/
+├── HUDBar/
+├── AssessmentSettings/
+├── Questions/
+├── Papers/
+├── Analysis/
+└── Persistence/
+```
 
-The current conceptual architecture is:
+Substructure may evolve without reopening the major ownership model.
 
-Assessments/
-└── Creation/
-    ├── AssessmentCreatorPage.tsx
-    ├── TopBar/
-    ├── SkillsPanel/
-    │   ├── 01-SkillsFilters/
-    │   └── 02-SkillsTree/
-    ├── PaperWorkspace/
-    ├── HUDBar/
-    ├── AssessmentSettings/
-    ├── Questions/
-    ├── Papers/
-    ├── Analysis/
-    └── Persistence/
+---
 
-Detailed subfolders may be refined through forensic migration mapping.
+## LD-074 — Visible Assessment Creation UI is primarily organised by physical product region
 
-The major ownership concepts must not be casually replaced.
+**Status:** LOCKED
 
-LD-074 — Visible Assessment Creation UI is organised primarily by physical region
+---
 
-Status: LOCKED
+## LD-075 — Shared domain behaviour is not duplicated by physical region
 
-Rule
+**Status:** LOCKED
 
-Visible components should generally live with the area in which teachers see
-them.
+Physical UI organisation must not create separate competing state or business logic.
 
-Examples:
+---
 
-TopBar controls → TopBar;
-left-hand skill UI → SkillsPanel;
-central paper controls → PaperWorkspace;
-lower-bar controls → HUDBar.
-LD-075 — Shared domain behaviour is not duplicated by physical region
+# PART X — TOPBAR
 
-Status: LOCKED
+## LD-076 — TopBar and HeaderBar are separate responsibilities
 
-Rule
+**Status:** LOCKED
 
-Physical UI organisation must not create duplicate underlying state.
+---
 
-Shared responsibilities belong to owners such as:
+## LD-077 — TopBar owns page-specific upper controls
 
-Questions
-Papers
-Analysis
-Persistence
-PART X — TOPBAR
-LD-076 — Assessment Creation TopBar is independent from global HeaderBar
+**Status:** LOCKED
 
-Status: LOCKED
+Current examples include:
 
-Rule
+```text
+Assessment Name
+Class
+Assessment Date
+Paper View
+Zoom
+Page Navigation
+```
 
-These are separate components, separate folders and separate responsibilities.
+---
 
-LD-077 — TopBar owns visible page-specific upper controls
+## LD-078 — TopBar does not own shared paper-domain logic
 
-Status: LOCKED
+**Status:** LOCKED
 
-Current expected responsibilities
-assessment name;
-class coverage/selection presentation;
-assessment date;
-P1/P2 viewing;
-zoom;
-page navigation.
+It consumes shared paper state.
 
-Exact component decomposition follows migration analysis.
+---
 
-LD-078 — TopBar does not own shared paper-domain logic
+## LD-079 — Multi-file TopBar features may receive dedicated subfolders
 
-Status: LOCKED
+**Status:** LOCKED DESIGN DIRECTION
 
-Rule
+Use subfolders where a feature has genuine multi-file responsibility.
 
-If TopBar displays current-paper state, it consumes the shared paper owner.
+---
 
-It must not establish a second paper-domain implementation merely because it
-displays the state.
+# PART XI — SKILLS PANEL
 
-LD-079 — Assessment Date may have its own TopBar subfolder
+## LD-080 — SkillsPanel may use meaningful visual ordering
 
-Status: LOCKED DESIGN DIRECTION**
+**Status:** LOCKED
 
-Rule
+Conceptually:
 
-A multi-file date feature may use:
+```text
+01-SkillsFilters
+02-SkillsTree
+```
 
-TopBar/
-└── AssessmentDate/
+---
 
-with descriptive files such as:
+## LD-081 — SkillsFilters owns generic assessment filtering interaction
 
-AssessmentDateControl.tsx
-AssessmentDatePicker.tsx
-AssessmentDateFormatting.ts
+**Status:** LOCKED
 
-Exact filenames may be refined during migration.
+---
 
-PART XI — SKILLS PANEL
-LD-080 — SkillsPanel uses meaningful visual ordering
+## LD-082 — Assessment SkillsTree owns generic rendering/interaction
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-The structure is:
+## LD-083 — Assessment SkillsTree UI does not own Course curriculum data
 
-SkillsPanel/
-├── 01-SkillsFilters/
-└── 02-SkillsTree/
+**Status:** LOCKED
 
-because the interface visually presents Filters above the Tree.
+The active Course supplies curriculum definition.
 
-LD-081 — 01-SkillsFilters owns generic filtering controls
+---
 
-Status: LOCKED
+# PART XII — PAPER WORKSPACE
 
-Expected examples
-StandardFilter
-TargetMarksFilter
-ThinkingTypeFilter
-AddQuestionsButton
-LD-082 — 02-SkillsTree owns generic Skills Tree rendering and interaction
+## LD-084 — `PaperWorkspace` owns the central working/viewing surface
 
-Status: LOCKED
+**Status:** LOCKED — IMPLEMENTED
 
-Possible responsibilities
-category rendering;
-skill rows;
-concept rows;
-difficulty interaction;
-expansion/collapse;
-generic selection interaction.
-LD-083 — Assessment Creation SkillsTree UI does not own course curriculum data
+---
 
-Status: LOCKED
+## LD-085 — Workspace-specific controls belong with PaperWorkspace
 
-Rule
+**Status:** LOCKED
 
-The UI renders curriculum supplied by the active Course.
+---
 
-The Course defines the curriculum.
+## LD-086 — Save-status location follows actual product ownership
 
-PART XII — PAPER WORKSPACE
-LD-084 — PaperWorkspace owns the central paper working/viewing surface
+**Status:** LOCKED OWNERSHIP PRINCIPLE
 
-Status: LOCKED
+Historical location does not determine ownership.
 
-Rule
+Current implementation may display save state through HUDBar where that matches the product.
 
-The central paper display and directly associated workspace interactions belong
-beneath:
+---
 
-PaperWorkspace/
-LD-085 — Workspace-specific controls should live with PaperWorkspace
+## LD-087 — Workspace settings are not global application settings
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-If a control physically and conceptually belongs to the workspace, do not leave
-it in another legacy region solely because that is where it historically
-existed.
+## LD-088 — Small workspace contextual settings use a Popover
 
-LD-086 — Save status may move with PaperWorkspace when product ownership supports it
+**Status:** LOCKED PRODUCT TERMINOLOGY
 
-Status: LOCKED OWNERSHIP PRINCIPLE, FINAL COMPONENT LOCATION SUBJECT TO MAPPING**
+---
 
-Rule
+# PART XIII — HUDBAR
 
-Do not assume save status belongs to HUDBar merely because the legacy BottomHud
-implemented it there.
+## LD-089 — Historical BottomHud becomes HUDBar in V2
 
-Its final location should reflect the actual product UI.
+**Status:** LOCKED — IMPLEMENTED
 
-LD-087 — Workspace settings are not global settings
+`BuilderBottomHud` has been migrated away from canonical Assessment Creation ownership.
 
-Status: LOCKED
+---
 
-Rule
+## LD-090 — HUDBar owns only genuine lower-region responsibilities
 
-Workspace controls such as:
+**Status:** LOCKED
 
-reset zoom;
-reset layout;
-workspace display options;
+Do not mechanically put every historical BottomHud responsibility there.
 
-belong to PaperWorkspace ownership.
+---
 
-LD-088 — Small workspace settings use a Popover
+# PART XIV — SETTINGS
 
-Status: LOCKED PRODUCT TERMINOLOGY**
+## LD-091 — Settings are divided according to what they affect
 
-Rule
+**Status:** LOCKED
 
-A small cog anchored to PaperWorkspace should use a contextual:
+Primary categories are:
 
-SettingsPopover
+```text
+Global application settings
+Assessment settings
+Workspace settings
+```
 
-rather than another global SettingsDrawer.
+---
 
-PART XIII — HUDBAR
-LD-089 — Historical BottomHud becomes HUDBar terminology in Architecture V2
+## LD-092 — Global settings belong to `UI/Application/SettingsDrawer`
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-New V2 naming uses:
+## LD-093 — Assessment settings belong to `Assessments/Creation/AssessmentSettings`
 
-HUDBar
+**Status:** LOCKED
 
-rather than BottomHud.
+---
 
-Legacy filenames may retain their current names until migrated.
+## LD-094 — Workspace settings belong to PaperWorkspace ownership
 
-LD-090 — HUDBar owns only features which actually belong to the lower region
+**Status:** LOCKED
 
-Status: LOCKED
+---
 
-Rule
+## LD-095 — The giant legacy settings implementation must not survive unchanged
 
-Do not migrate every legacy BottomHud responsibility into HUDBar automatically.
+**Status:** LOCKED — MIGRATION STILL REQUIRED
 
-Each responsibility must be assigned according to actual product ownership.
+It must be decomposed by ownership rather than merely relocated.
 
-PART XIV — SETTINGS ARCHITECTURE
-LD-091 — Settings are divided by what they affect
+---
 
-Status: LOCKED
+## LD-096 — HeaderBar Settings always means global application settings
 
-Current categories
-Global application settings.
-Assessment-specific settings.
-Workspace-specific settings.
+**Status:** LOCKED
 
-Do not merge these merely because they all use cog icons.
+---
 
-LD-092 — Global application settings belong to UI/Application/SettingsDrawer
+## LD-097 — Global HeaderBar must not permanently rely on hidden Assessment-specific settings events
 
-Status: LOCKED
+**Status:** LOCKED
 
-Examples
-application appearance;
-theme mode;
-accent colour;
-other genuine application-wide preferences.
-LD-093 — Assessment settings belong to Assessments/Creation/AssessmentSettings
+Transitional compatibility may exist during migration but is not the target architecture.
 
-Status: LOCKED
+---
 
-Potential examples
-cover sheet;
-formula sheet;
-candidate-number box;
-assessment/paper sitting information;
-assessment document options.
+# PART XV — UI ARCHITECTURE
 
-Exact ownership of individual existing settings must be established during
-migration.
+## LD-098 — There is one top-level UI domain
 
-LD-094 — Workspace settings belong to PaperWorkspace
+**Status:** LOCKED
 
-Status: LOCKED
-
-Examples
-workspace layout;
-zoom reset;
-workspace display behaviour;
-workspace panel visibility.
-LD-095 — The legacy giant SettingsPanel must not survive unchanged merely in a new folder
-
-Status: LOCKED
-
-Rule
-
-The historical settings implementation must be decomposed according to the
-three ownership categories.
-
-Rationale
-
-The current large settings file mixes unrelated application-level and
-Assessment Creation-specific responsibilities.
-
-LD-096 — Global HeaderBar Settings button always means global application settings
-
-Status: LOCKED
-
-Rule
-
-The global settings entry point should not change meaning based on the current
-page.
-
-LD-097 — Global HeaderBar should not fire Assessment Creation-specific hidden settings events
-
-Status: LOCKED
-
-Rule
-
-Remove or avoid feature-specific hidden coupling between HeaderBar and
-Assessment Creation as the relevant code is migrated.
-
-PART XV — UI ARCHITECTURE
-LD-098 — There is one top-level UI domain
-
-Status: LOCKED
-
-Rule
-
-Global visual sources of truth belong under:
-
+```text
 src/UI/
+```
 
-Do not create several competing top-level UI systems.
+---
 
-LD-099 — UI is explicitly divided into Application and Documents
+## LD-099 — UI is divided into Application and Documents
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
-
-The major visual split is:
-
+```text
 UI/
 ├── Application/
 └── Documents/
-LD-100 — UI/Application owns teacher-facing VecEd application visuals
+```
 
-Status: LOCKED
+---
 
-Examples
-application typography;
-colours;
-theme;
-motion;
-spacing;
-shadows;
-HeaderBar;
-SettingsDrawer;
-reusable application-level UI primitives.
-LD-101 — UI/Documents owns generated assessment-document visuals
+## LD-100 — `UI/Application` owns teacher-facing application visuals
 
-Status: LOCKED
+**Status:** LOCKED
 
-Examples
-exam/document typography;
-page dimensions;
-document margins;
-question spacing;
-page frames;
-cover-page presentation;
-formula-sheet presentation;
-answer-space layout.
-LD-102 — Application UI and document UI are distinct systems
+---
 
-Status: LOCKED
+## LD-101 — `UI/Documents` owns reusable generated-document visuals
 
-Rule
+**Status:** LOCKED
 
-Do not use one undifferentiated typography/layout system for both the VecEd
-software interface and generated assessment documents merely because both are
-visual.
+---
 
-LD-103 — All genuinely global visual sources of truth converge under UI
+## LD-102 — Application UI and document UI remain separate visual systems
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-Repeated global visual decisions should not remain scattered throughout
-feature folders.
+## LD-103 — Global visual truth converges beneath UI
 
-LD-104 — Course data does not own literal application colours
+**Status:** LOCKED
 
-Status: LOCKED
+---
 
-Rule
+## LD-104 — Course semantic data does not own literal application colours
 
-Courses may expose semantic category identity.
+**Status:** LOCKED
 
-The UI system determines the visual representation.
+---
 
-LD-105 — One authoritative theme architecture
+## LD-105 — There is one authoritative application theme architecture
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-Architecture V2 should converge on:
+## LD-106 — Competing legacy theme systems must be consolidated
 
-one theme definition
-one theme state/provider
-one persistence mechanism
-one coherent visual-token system
+**Status:** LOCKED — SUBSTANTIALLY IMPLEMENTED
 
-where practical.
+Do not introduce a new competing theme authority.
 
-LD-106 — Competing legacy theme systems should be consolidated
+---
 
-Status: LOCKED
+## LD-107 — Not every pixel becomes a global token
 
-Rule
+**Status:** LOCKED
 
-Do not preserve duplicate theme definitions simply because different existing
-components use them.
+Centralise genuinely reusable visual decisions only.
 
-Determine the authoritative V2 system and migrate consumers.
+---
 
-LD-107 — Not every pixel must become a global token
+# PART XVI — COURSES
 
-Status: LOCKED
+## LD-108 — Course-specific knowledge belongs under `src/Courses`
 
-Rule
+**Status:** LOCKED
 
-Unique local layout values may remain local.
+---
 
-Only reusable/global visual decisions require centralised ownership.
+## LD-109 — Assessment Creation is Course-independent architecture
 
-Rationale
+**Status:** LOCKED
 
-Avoid over-engineering the design system.
+Assessment Creation consumes the active Course.
 
-PART XVI — COURSES
-LD-108 — Course-specific knowledge belongs under src/Courses
+It is not intrinsically a National 5 Maths Builder.
 
-Status: LOCKED
+---
 
-Rule
+## LD-110 — Active Course drives the Skills Tree
 
-Curriculum data, course definitions, course-specific generation logic and exam
-source catalogues belong to the Courses domain.
+**Status:** LOCKED
 
-LD-109 — Assessment Creation is course-independent architecture
+---
 
-Status: LOCKED
+## LD-111 — Course resolution should use an explicit CourseRegistry/equivalent boundary
 
-Rule
+**Status:** LOCKED AT ARCHITECTURAL LEVEL
 
-The correct conceptual model is:
+---
 
-Assessment Creation consumes an active course.
+## LD-112 — A CourseDefinition/equivalent contract supplies generic consumers
 
-Not:
+**Status:** LOCKED AT ARCHITECTURAL LEVEL
 
-Assessment Creation is inherently the National 5 Maths Builder.
+Generic features should consume a coherent Course contract rather than internal Course files.
 
-LD-110 — Active course drives the Skills Tree
+---
 
-Status: LOCKED
+## LD-113 — Future Courses are sibling implementations
 
-Dependency model
-Active Course
-    ↓
-CourseRegistry
-    ↓
-CourseDefinition
-    ↓
-SkillsTreeDefinition
-    ↓
-Assessment Creation SkillsTree UI
-LD-111 — CourseRegistry is the intended course-resolution concept
+**Status:** LOCKED
 
-Status: LOCKED AT ARCHITECTURAL LEVEL**
+---
 
-Rule
+## LD-114 — Higher Maths must not require cloning Assessment Creation
 
-VecEd should have a clear authoritative mechanism for identifying and resolving
-supported courses rather than hard-coding National 5 Maths throughout generic
-features.
+**Status:** LOCKED
 
-The detailed implementation may evolve.
+---
 
-LD-112 — CourseDefinition provides the generic course contract
+## LD-115 — Generic UI should avoid Course-name conditionals
 
-Status: LOCKED AT ARCHITECTURAL LEVEL**
+**Status:** LOCKED
 
-Rule
+Use Course-provided variation where practical.
 
-Each Course should expose the information generic application systems need
-through a coherent definition/contract rather than requiring generic UI to know
-course internals.
+---
 
-LD-113 — Future courses are sibling Course implementations
+## LD-116 — National 5 Maths remains navigable by meaningful curriculum area
 
-Status: LOCKED
+**Status:** LOCKED
 
-Example
-Courses/
-├── National5Maths/
-└── HigherMaths/
-LD-114 — Adding Higher Maths must not require cloning Assessment Creation
+---
 
-Status: LOCKED
+## LD-117 — Course-specific question generation remains Course-owned
 
-Rule
+**Status:** LOCKED
 
-Do not create:
+---
 
-a second Higher-specific TopBar;
-a second Higher-specific PaperWorkspace;
-a duplicate Assessment Creation page;
+## LD-118 — Course-specific answer generation remains separate from generic rendering
 
-merely because a second course exists.
+**Status:** LOCKED
 
-Generic Assessment Creation consumes course-specific data.
+---
 
-LD-115 — Generic UI should avoid hard-coded course checks
+## LD-119 — `SourceQuestionCatalog` is approved terminology
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-Avoid logic such as:
+## LD-120 — `SourceMarkingSchemeCatalog` is approved terminology
 
-if course === National5Maths
+**Status:** LOCKED
 
-inside generic UI where the variation can be expressed through CourseDefinition
-data.
+---
 
-LD-116 — National 5 Maths course structure remains easy to navigate by curriculum area
+# PART XVII — EXAM TERMINOLOGY
 
-Status: LOCKED
+## LD-121 — Generic architecture avoids unnecessary awarding-body branding
 
-Intended conceptual organisation
-National5Maths/
-└── SkillsTree/
-    ├── 01-Numerical/
-    ├── 02-Algebraic/
-    ├── 03-Geometric/
-    ├── 04-Trigonometric/
-    └── 05-Statistical/
-LD-117 — QuestionGeneration is course-specific where educational generation knowledge is course-specific
+**Status:** LOCKED
 
-Status: LOCKED
+---
 
-Rule
+## LD-122 — Neutral exam terminology is preferred where genuinely generic
 
-National 5 Maths generator definitions belong beneath the National 5 Maths
-course domain.
+**Status:** LOCKED DIRECTION
 
-Do not move all generator knowledge into generic Assessment Creation.
+Use terms such as `Exam...` where the responsibility is truly generic.
 
-LD-118 — AnswerGeneration is course-owned where answer behaviour is course/question-family specific
+Qualification-family-specific layers may use their real qualification-family identity.
 
-Status: LOCKED
+---
 
-Rule
+## LD-123 — `CandidateNumber` is preferred generic terminology
 
-Keep educational answer-generation logic distinct from generic document
-rendering.
+**Status:** LOCKED DIRECTION
 
-LD-119 — SourceQuestionCatalog is approved terminology
+---
 
-Status: LOCKED
+## LD-124 — `OfficialPastPaper` is preferred where genuinely generic
 
-Rule
+**Status:** LOCKED DIRECTION
 
-Historical/official source question data may live under clearly named:
+---
 
-SourceQuestionCatalog/
+## LD-125 — No blind global awarding-body rename
 
-This existing organisational concept should be preserved where appropriate.
+**Status:** LOCKED
 
-LD-120 — SourceMarkingSchemeCatalog is approved terminology
+Inspect persistence, identifiers, source data and external meaning first.
 
-Status: LOCKED
+---
 
-Rule
+## LD-126 — Neutral naming does not settle legal/content questions
 
-Historical marking-scheme source data may live under:
+**Status:** LOCKED
 
-SourceMarkingSchemeCatalog/
+Copyright, trademarks, source material and document-design questions require separate review.
 
-This is considered clear and maintainable terminology.
+---
 
-PART XVII — AWARDING-BODY-NEUTRAL TERMINOLOGY
-LD-121 — Generic architecture should avoid unnecessary awarding-body branding
+# PART XVIII — QUESTIONS, PAPERS AND ANALYSIS
 
-Status: LOCKED
+## LD-127 — Generic Assessment Creation question workflow belongs under `Questions`
 
-Rule
+**Status:** LOCKED
 
-Where a concept is genuinely generic, prefer neutral internal names rather than
-embedding awarding-body names throughout system architecture.
+---
 
-LD-122 — Approved neutral terminology includes Exam
+## LD-128 — Course generation knowledge remains Course-owned
 
-Status: LOCKED DIRECTION**
+**Status:** LOCKED
 
-Where appropriate, prefer concepts such as:
+---
 
-ExamTypography
-ExamPageFrame
-ExamCoverPage
+## LD-129 — Shared assessment-paper behaviour belongs under `Papers`
 
-over generic infrastructure whose name unnecessarily embeds a particular
-awarding body.
+**Status:** LOCKED
 
-LD-123 — CandidateNumber is preferred generic terminology
+---
 
-Status: LOCKED DIRECTION**
+## LD-130 — Current-paper state must not be independently duplicated
 
-Where the concept does not specifically require an awarding-body name, prefer:
+**Status:** LOCKED
 
-CandidateNumber
+TopBar, PaperWorkspace and HUDBar consume shared state rather than owning competing copies.
 
-rather than an organisation-specific candidate-number identifier.
+---
 
-LD-124 — OfficialPastPaper is preferred neutral concept where appropriate
+## LD-131 — Assessment quality/distribution analysis belongs under `Analysis`
 
-Status: LOCKED DIRECTION**
+**Status:** LOCKED
 
-The exact persisted values and existing data contracts must be reviewed before
-renaming legacy identifiers.
+---
 
-LD-125 — No blind global SQA/QS rename
+## LD-132 — Analysis modules are named for what they analyse
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Prefer meaningful names such as:
 
-Awarding-body-specific legacy identifiers must be inspected individually.
-
-Do not perform a global search-and-replace without considering:
-
-persistence;
-IDs;
-source data;
-compatibility;
-external meaning.
-LD-126 — Neutral naming does not settle copyright or trademark questions
-
-Status: LOCKED
-
-Rule
-
-Internal neutral naming is an architectural decision only.
-
-Legal/content questions concerning:
-
-source questions;
-marking schemes;
-document design;
-trademarks;
-logos;
-
-require separate review.
-
-PART XVIII — QUESTIONS, PAPERS AND ANALYSIS
-LD-127 — Generic Assessment Creation question workflow belongs under Questions
-
-Status: LOCKED
-
-Potential responsibilities
-question selection coordination;
-draft workflow;
-placement;
-editing;
-generation orchestration.
-LD-128 — Course generation knowledge remains Course-owned
-
-Status: LOCKED
-
-Rule
-
-Assessments/Creation/Questions coordinates question workflow.
-
-Courses/<Course>/QuestionGeneration owns course-specific generator knowledge.
-
-Do not collapse these distinct responsibilities.
-
-LD-129 — Shared paper behaviour belongs under Papers
-
-Status: LOCKED
-
-Potential responsibilities
-current paper;
-paper targets;
-paper timing;
-metadata;
-sitting state;
-paper-derived values.
-LD-130 — Current-paper state must not be independently duplicated across visible regions
-
-Status: LOCKED
-
-Rule
-
-TopBar, HUDBar and PaperWorkspace consume shared paper ownership.
-
-Do not maintain three competing versions of the same state.
-
-LD-131 — Assessment quality/distribution analysis belongs under Analysis
-
-Status: LOCKED
-
-Examples
-topic balance;
-standard balance;
-calculator suitability;
-operational/reasoning balance;
-assessment distribution.
-LD-132 — Analysis modules should be named for what they analyse
-
-Status: LOCKED
-
-Rule
-
-Prefer:
-
+```text
 TopicBalance
 StandardBalance
 AssessmentDistribution
+```
 
-over generic:
+over `BuilderLogic` or `AnalysisHelper`.
 
-BuilderLogic
-AnalysisHelper
-PART XIX — CLASSES
-LD-133 — Class-owned functionality belongs under src/Classes
+---
 
-Status: LOCKED
+# PART XIX — CLASSES
 
-Rule
+## LD-133 — Class-owned functionality belongs under `src/Classes`
 
-Class data and class-specific behaviour should not remain permanently scattered
-through route folders and Assessment Creation.
+**Status:** LOCKED
 
-LD-134 — Assessment Creation may consume Classes but does not own Classes
+---
 
-Status: LOCKED
+## LD-134 — Assessment Creation consumes Classes but does not own them
 
-Rule
+**Status:** LOCKED
 
-Selecting classes for an assessment may be an Assessment Creation interaction.
+---
 
-The underlying class domain remains Classes-owned.
+## LD-135 — Do not duplicate Class models for Assessment Creation
 
-LD-135 — Do not duplicate class models for Assessment Creation
+**Status:** LOCKED
 
-Status: LOCKED
+---
 
-Rule
+# PART XX — PERSISTENCE
 
-Assessment Creation should use the authoritative class representation rather
-than maintaining a separate incompatible version.
+## LD-136 — Persistence has explicit domain ownership
 
-PART XX — PERSISTENCE
-LD-136 — Persistence belongs to explicit owning domains
+**Status:** LOCKED
 
-Status: LOCKED
+---
 
-Rule
+## LD-137 — Existing localStorage behaviour survives source refactoring
 
-Visible UI should not scatter persistence implementation throughout unrelated
-components when a clear feature/domain persistence owner can exist.
+**Status:** LOCKED
 
-LD-137 — Existing localStorage behaviour must survive Architecture V2
+---
 
-Status: LOCKED
+## LD-138 — Source renames do not automatically rename persistence keys
 
-Rule
+**Status:** LOCKED
 
-The refactor must not silently break current local data because source
-filenames changed.
+---
 
-LD-138 — Source refactoring does not automatically rename persistence keys
+## LD-139 — Architecture V2 does not automatically introduce a backend/database
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-A file rename such as:
+## LD-140 — Persistence should become sufficiently isolated for future storage changes
 
-BuilderStorageKeys.ts
+**Status:** LOCKED
 
-does not imply that persisted key strings should immediately change.
+Visible application code should not become more tightly coupled to raw storage APIs.
 
-Any persistence-key migration is a separate compatibility decision.
+---
 
-LD-139 — Architecture V2 does not automatically introduce a new backend/database
+# PART XXI — DEPENDENCY AND OWNERSHIP
 
-Status: LOCKED
+## LD-141 — Files live with the domain that owns their responsibility
 
-Rule
+**Status:** LOCKED
 
-Storage technology is not being replaced merely because persistence is being
-architecturally reorganised.
+---
 
-LD-140 — Persistence should be isolated enough to allow future technology changes
+## LD-142 — Visible components normally belong to their visible region
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+This applies to presentation ownership, not shared business logic.
 
-Although localStorage may remain today, visible application implementation
-should become less tightly coupled to direct storage APIs.
+---
 
-PART XXI — DEPENDENCY AND OWNERSHIP RULES
-LD-141 — A file lives with the domain that owns its responsibility
+## LD-143 — Shared domain logic is organised by responsibility
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-Ownership, not whichever feature happens to import the file most frequently,
-determines location.
+## LD-144 — Courses must not depend on Assessment Creation UI
 
-LD-142 — Visible UI location determines visible-component ownership where appropriate
+**Status:** LOCKED
 
-Status: LOCKED
+---
 
-Rule
+## LD-145 — Document UI must not depend on application chrome
 
-If a meaningful visible control clearly belongs to TopBar, its component should
-normally live under TopBar.
+**Status:** LOCKED
 
-This rule applies to presentation ownership, not shared domain logic.
+---
 
-LD-143 — Shared domain logic is organised by responsibility, not physical screen position
+## LD-146 — UI consumes domain meaning rather than redefining it
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+---
 
-A paper rule used by TopBar and PaperWorkspace belongs to Papers rather than
-being duplicated in each physical region.
+## LD-147 — Avoid circular major-domain dependencies
 
-LD-144 — Courses must not depend on Assessment Creation UI
+**Status:** LOCKED
 
-Status: LOCKED
+Repeated two-way imports are evidence that ownership should be reassessed.
 
-Rule
+---
 
-Course definitions should remain usable independently of the specific
-Assessment Creation presentation.
+## LD-148 — Imports should increasingly communicate V2 ownership
 
-LD-145 — Document UI must not depend on application chrome
+**Status:** LOCKED
 
-Status: LOCKED
+---
 
-Rule
+## LD-149 — The import alias should eventually represent V2 source cleanly
 
-Generated assessment document visuals should not depend on:
+**Status:** LOCKED DIRECTION
 
-HeaderBar;
-application navigation;
-global SettingsDrawer.
-LD-146 — UI consumes domain meaning rather than redefining it
+Alias migration must happen deliberately when legacy imports no longer make it dangerous.
 
-Status: LOCKED
+---
 
-Example
+## LD-150 — Barrel files are not required everywhere
 
-PaperViewPill may display available papers.
+**Status:** LOCKED
 
-It should not independently define the course's supported paper structure.
+Use `index.ts` only where it establishes a meaningful public module boundary.
 
-LD-147 — Avoid circular major-domain dependencies
+---
 
-Status: LOCKED
+# PART XXII — DOCUMENT RENDERING
 
-Rule
+## LD-151 — Shared document-rendering truth belongs under `UI/Documents`
 
-If two major domains repeatedly import each other's internal implementation,
-reassess ownership.
+**Status:** LOCKED
 
-LD-148 — Imports should communicate architecture clearly
+When Preview and Compilation share a genuinely generic document rule, prefer one canonical implementation.
 
-Status: LOCKED
+---
 
-Rule
+## LD-152 — Preview is a consumer, not automatically the owner of document rules
 
-As migration progresses, imports should increasingly reflect clear domain
-ownership rather than deep historical relative paths.
+**Status:** LOCKED
 
-LD-149 — @/ should ultimately represent the V2 source root cleanly
+Historical code found under preview must be reassigned according to actual responsibility.
 
-Status: LOCKED DIRECTION**
+---
 
-Rule
+## LD-153 — Rendering technology should not dominate product naming
 
-Once the source migration reaches the appropriate stage, the TypeScript alias
-should be adjusted so clean imports resolve from src.
+**Status:** LOCKED
 
-This must be done deliberately at the appropriate migration stage rather than
-prematurely breaking legacy imports.
+Prefer `PaperWorkspace` to implementation-specific names such as `PDFViewer`.
 
-LD-150 — Do not introduce barrel files everywhere by default
+---
 
-Status: LOCKED
+# PART XXIII — ASSESSMENT LIBRARY AND BROADER ASSESSMENT DOMAIN
 
-Rule
+## LD-154 — Saved-assessment functionality belongs to `Assessments`
 
-index.ts exports may be used for a meaningful public module boundary.
+**Status:** LOCKED
 
-They are not required for every folder.
+---
 
-Rationale
+## LD-155 — Assessment Creation does not own the complete Assessment Library
 
-Excessive barrels can obscure symbol ownership.
+**Status:** LOCKED
 
-PART XXII — DOCUMENT RENDERING
-LD-151 — Shared document-rendering truth belongs under UI/Documents where genuinely shared
+---
 
-Status: LOCKED
+## LD-156 — Routes expose product domains rather than own them
 
-Rule
+**Status:** LOCKED
 
-If preview and compiled assessment depend on the same document visual rule,
-prefer one authoritative implementation where practical.
+---
 
-LD-152 — Preview is not automatically an architectural owner
+# PART XXIV — DEVELOPMENT TOOLING
 
-Status: LOCKED
+## LD-157 — Catalogue-hardening scripts are not application architecture
 
-Rule
+**Status:** LOCKED
 
-Legacy code inside a preview folder must be analysed according to what it
-actually does.
+Move enduring tools to root `Tools/` or delete obsolete temporary tools.
 
-It may belong to:
+---
 
-PaperWorkspace;
-UI/Documents;
-Papers;
-another genuine owner.
+## LD-158 — Temporary tooling needs an expiry decision
 
-Do not preserve preview as a catch-all purely because of history.
+**Status:** LOCKED
 
-LD-153 — Implementation technology should not dominate product naming
+---
 
-Status: LOCKED
+## LD-159 — Runtime developer tools may receive an explicit V2 owner
 
-Rule
+**Status:** LOCKED DIRECTION
 
-Prefer product/domain terminology over names tied to current rendering
-technology.
+Use:
 
-Example:
+```text
+src/DeveloperTools/
+```
 
-PaperWorkspace
+only when an actual runtime developer responsibility is migrated.
 
-instead of:
+---
 
-PDFViewer
-PART XXIII — ASSESSMENT LIBRARY AND ASSESSMENT DOMAIN
-LD-154 — Saved assessment functionality belongs to the Assessments domain
+# PART XXV — DOCUMENTATION
 
-Status: LOCKED
+## LD-160 — Architecture documentation is part of repository architecture
 
-Rule
+**Status:** LOCKED
 
-The saved-assessment library should not remain permanently owned only by a
-Next.js route directory.
+It is persistent project memory, not optional notes.
 
-LD-155 — Assessment Creation does not own the entire Assessment Library
+---
 
-Status: LOCKED
+## LD-161 — `Architecture.md` records long-lived architectural intent
 
-Rule
+**Status:** LOCKED
 
-Assessment Creation may create/save assessments.
+It is not a migration diary.
 
-The persistent assessment library is a broader Assessment-domain
-responsibility.
+---
 
-LD-156 — Next.js routes expose product domains rather than own them
+## LD-162 — `LockedDecisions.md` records settled decisions
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+This document is not a work log.
 
-Routes such as:
+---
 
-my-assessments
-my-classes
+## LD-163 — `RepositoryMap.md` records current physical reality
 
-should become thin entry points into descriptive domain-owned page
-implementations.
+**Status:** LOCKED
 
-PART XXIV — DEVELOPMENT TOOLING AND MIGRATION ARTEFACTS
-LD-157 — One-off catalogue hardening scripts are not application architecture
+---
 
-Status: LOCKED
+## LD-164 — `RefactorLedger.md` records migration progress
 
-Rule
+**Status:** LOCKED
 
-Temporary catalogue migration utilities should eventually:
+---
 
-move into root Tools; or
-be deleted if no longer needed.
+## LD-165 — `ChatGPTWorkflow.md` records AI-assisted development procedure
 
-They should not remain mixed with product source indefinitely.
+**Status:** LOCKED
 
-LD-158 — Temporary tooling should have an expiry decision
+---
 
-Status: LOCKED
+## LD-166 — Significant AI-assisted work begins from repository documentation
 
-Rule
+**Status:** LOCKED
 
-When a migration tool's task is complete, decide whether it has ongoing
-maintenance value.
+---
 
-If not, delete it once the result is safely verified and Git history preserves
-it.
+## LD-167 — Architecture must not be rediscovered from legacy source alone
 
-LD-159 — In-application developer tools may receive an explicit development owner
+**Status:** LOCKED
 
-Status: LOCKED DIRECTION**
+---
 
-Rule
+## LD-168 — Critical rules may be intentionally repeated
 
-Existing runtime developer pages such as generator-testing functionality should
-not be confused with root maintenance scripts.
+**Status:** LOCKED
 
-Their final V2 location should be determined during migration.
+Duplication is acceptable where it materially improves safe handoff.
 
-Do not create speculative empty developer-tool architecture before an actual
-runtime tool is migrated.
+Avoid unnecessary repetition elsewhere.
 
-PART XXV — DOCUMENTATION
-LD-160 — Architecture documentation is part of the repository architecture
+---
 
-Status: LOCKED
+# PART XXVI — MIGRATION PROCESS
 
-Rule
+## LD-169 — Major migrations require responsibility mapping
 
-These files are not optional notes.
+**Status:** LOCKED
 
-They form the persistent memory of the project.
+At minimum understand:
 
-LD-161 — Architecture.md explains long-lived architectural intent
-
-Status: LOCKED
-
-Rule
-
-Do not turn Architecture.md into a day-by-day migration diary.
-
-LD-162 — LockedDecisions.md records settled decisions
-
-Status: LOCKED
-
-Rule
-
-Future conversations must treat entries marked LOCKED as already decided.
-
-LD-163 — RepositoryMap.md records the practical current repository
-
-Status: LOCKED
-
-Rule
-
-RepositoryMap should reflect where responsibilities physically live now,
-including transitional legacy locations during migration.
-
-LD-164 — RefactorLedger.md records migration progress
-
-Status: LOCKED
-
-Rule
-
-The ledger should answer:
-
-what has moved;
-what has not;
-what is currently being worked on;
-what legacy dependencies remain;
-what can safely be deleted.
-LD-165 — ChatGPTWorkflow.md contains reusable AI-development protocols
-
-Status: LOCKED
-
-Rule
-
-It should provide prompts/procedures for:
-
-starting new development conversations;
-bugs;
-refactors;
-audits;
-migration work;
-handoff.
-LD-166 — Future AI conversations must read project documentation before architectural work
-
-Status: LOCKED
-
-Rule
-
-The mandatory startup protocol will be defined in AGENTS.md.
-
-At minimum, significant repository work should be grounded in:
-
-AGENTS.md
-LockedDecisions.md
-Architecture.md
-RepositoryMap.md
-RefactorLedger.md
-
-as relevant.
-
-LD-167 — Future AI sessions must not rediscover architecture from legacy source alone
-
-Status: LOCKED
-
-Rule
-
-Legacy source should not be treated as the primary description of intended
-Architecture V2.
-
-Read the project documents first.
-
-LD-168 — Documentation may intentionally repeat critical rules
-
-Status: LOCKED
-
-Rule
-
-Do not aggressively deduplicate documentation merely for elegance.
-
-Important architectural rules may appear in more than one document when doing
-so makes future handoff safer.
-
-PART XXVI — MIGRATION PROCESS
-LD-169 — Major migrations require a forensic mapping before movement
-
-Status: LOCKED
-
-Required mapping fields
+```text
 CURRENT PATH
 PURPOSE
-IMPORTS
-EXPORTS
+DEPENDENCIES
 CONSUMERS
-NEW OWNER
-NEW PATH
+OWNER
+DESTINATION
 ACTION
-LD-170 — Allowed migration actions are explicit
+RISK
+```
 
-Status: LOCKED
+---
 
-Standard actions
+## LD-170 — Migration actions are explicit
+
+**Status:** LOCKED
+
+Approved concepts include:
+
+```text
 KEEP
+REWRITE
 MOVE
 RENAME
 SPLIT
 MERGE
+CONSOLIDATE
 DELETE
 MOVE OUT OF DOMAIN
+TEMPORARY ADAPTER
+DEFER
+```
 
-Additional specific actions may be defined if needed.
+---
 
-LD-171 — Do not decide destination from filename alone
+## LD-171 — Destination cannot be decided from filename alone
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Inspect implementation.
 
-Inspect the actual implementation.
+---
 
-A legacy name may be inaccurate.
+## LD-172 — Imports and consumers are traced before structural moves/deletion
+
+**Status:** LOCKED
+
+---
+
+## LD-173 — Verify after bounded migrations
+
+**Status:** LOCKED
+
+Do not accumulate many structural changes before TypeScript/build/runtime checks.
+
+---
+
+## LD-174 — User-visible behaviour must be tested where relevant
+
+**Status:** LOCKED
+
+Compilation success alone is insufficient.
+
+---
+
+## LD-175 — Diff review is part of migration completion
+
+**Status:** LOCKED
+
+Check accidental unrelated changes.
+
+---
+
+## LD-176 — RepositoryMap is updated after meaningful structural checkpoints
+
+**Status:** LOCKED
+
+---
+
+## LD-177 — RefactorLedger tracks changing migration status
+
+**Status:** LOCKED
+
+---
+
+## LD-178 — Architecture changes only when architectural truth changes
+
+**Status:** LOCKED
+
+Do not update it after every file move.
+
+---
+
+## LD-179 — LockedDecisions changes only for actual locked-decision changes/additions
+
+**Status:** LOCKED
+
+---
+
+# PART XXVII — REJECTED APPROACHES
+
+## LD-180 — Rejected: duplicate V2 repository
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-181 — Rejected: immediate physical `Legacy/` wrapper
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-182 — Rejected: giant generic Assessment Creation `Components/` folder
+
+**Status:** LOCKED REJECTION
+
+Use meaningful product regions and domain owners.
+
+---
+
+## LD-183 — Rejected: permanent Builder architecture
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-184 — Rejected: `PDFWorkspace`
+
+**Status:** LOCKED REJECTION
+
+Use `PaperWorkspace`.
+
+---
+
+## LD-185 — Rejected: page-specific workspace settings inside global settings
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-186 — Rejected: duplicating National 5 Maths data inside Assessment Creation
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-187 — Rejected: recreating generic helpers beneath `src`
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-188 — Rejected: recreating global `SharedTypes`
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-189 — Rejected: renaming legacy files before understanding them
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-190 — Rejected: preserving every historical file in the name of safety
+
+**Status:** LOCKED REJECTION
+
+Preserve behaviour, not source debris.
+
+---
+
+## LD-191 — Rejected: deletion based on superficial searches
+
+**Status:** LOCKED REJECTION
+
+---
+
+## LD-192 — Rejected: adding a new state library merely for Architecture V2
+
+**Status:** LOCKED
+
+---
+
+## LD-193 — Rejected: speculative architecture for future OCR/AI/scanning/etc.
+
+**Status:** LOCKED REJECTION
+
+---
+
+# PART XXVIII — IMPORTANT LEGACY FINDINGS
+
+These decisions preserve historically important findings.
+
+Resolved findings remain recorded because their IDs are permanent.
+
+## LD-194 — Assessment Creation's historical route implementation was oversized
+
+**Status:** LOCKED FINDING — PARTIALLY RESOLVED
+
+The substantial implementation has moved to:
+
+```text
+src/Assessments/Creation/AssessmentCreatorPage.tsx
+```
+
+Further orchestration decomposition remains appropriate where meaningful.
+
+---
+
+## LD-195 — Legacy BuilderTopBar required decomposition
+
+**Status:** LOCKED FINDING — RESOLVED
+
+Canonical TopBar ownership now exists under:
+
+```text
+src/Assessments/Creation/TopBar/
+```
+
+Do not regress to the legacy monolith.
+
+---
+
+## LD-196 — Legacy BuilderBottomHud responsibilities required reassignment
+
+**Status:** LOCKED FINDING — RESOLVED
+
+Canonical HUD ownership now exists under:
+
+```text
+src/Assessments/Creation/HUDBar/
+```
+
+The old HUD implementation has been removed from the canonical PaperWorkspace dependency chain.
+
+---
+
+## LD-197 — Legacy giant SettingsPanel remains a major decomposition target
+
+**Status:** LOCKED FINDING — ACTIVE
+
+---
+
+## LD-198 — Legacy theme architecture contained competing sources of truth
+
+**Status:** LOCKED FINDING — SUBSTANTIALLY RESOLVED
+
+Do not recreate competing theme ownership.
+
+---
+
+## LD-199 — Legacy `shared-types` requires domain reassignment
+
+**Status:** LOCKED FINDING — ACTIVE
+
+Do not migrate the folder wholesale.
+
+---
+
+## LD-200 — Legacy `math-helpers` is not accepted V2 ownership
+
+**Status:** LOCKED FINDING — ACTIVE WHERE REMAINING
+
+---
+
+## LD-201 — Historical localStorage access was too distributed
+
+**Status:** LOCKED FINDING — MIGRATION IN PROGRESS
+
+---
+
+## LD-202 — Legacy `course-data` mixes responsibilities
+
+**Status:** LOCKED FINDING — MIGRATION IN PROGRESS
+
+Useful data organisation should survive while ownership separates.
+
+---
+
+## LD-203 — Existing `SourceQuestionCatalog` is a positive precedent
+
+**Status:** LOCKED
+
+---
+
+## LD-204 — Existing `SourceMarkingSchemeCatalog` is a positive precedent
+
+**Status:** LOCKED
+
+---
+
+## LD-205 — Meaningful curriculum-family grouping should be preserved
+
+**Status:** LOCKED
+
+Do not flatten strong Course organisation merely for uniformity.
+
+---
+
+# PART XXIX — FUTURE EXTENSIBILITY
+
+## LD-206 — Higher Maths should be additive rather than invasive
+
+**Status:** LOCKED
+
+A future Higher Course should primarily add a sibling Course implementation.
+
+---
+
+## LD-207 — Extensibility comes from clear boundaries, not placeholder folders
+
+**Status:** LOCKED
+
+---
+
+## LD-208 — Do not over-engineer CourseDefinition for unknown requirements
+
+**Status:** LOCKED
+
+Model actual product needs.
+
+---
+
+## LD-209 — New abstractions require demonstrated value
+
+**Status:** LOCKED
+
+Do not abstract merely because something could theoretically be reusable.
+
+---
+
+# PART XXX — AI-ASSISTED DEVELOPMENT
+
+## LD-210 — AI inspects current implementation before meaningful edits
+
+**Status:** LOCKED
+
+Documentation does not replace source inspection.
+
+---
+
+## LD-211 — AI must not infer V2 architecture from historical names
+
+**Status:** LOCKED
+
+---
+
+## LD-212 — AI does not casually relitigate locked conventions
+
+**Status:** LOCKED
+
+---
+
+## LD-213 — AI should identify simplification opportunities
+
+**Status:** LOCKED
+
+Examples include dead code, duplication, misplaced ownership and obsolete adapters.
+
+---
+
+## LD-214 — Proposal is not approval
+
+**Status:** LOCKED
+
+A suggested architecture becomes locked only through explicit approval.
+
+---
+
+## LD-215 — AI uses exact repository-relative file paths
+
+**Status:** LOCKED
+
+Avoid ambiguous `page.tsx`, `types.ts`, etc.
+
+---
+
+## LD-216 — AI must not invent repository structure
+
+**Status:** LOCKED
+
+Inspect when current physical structure matters.
+
+---
+
+## LD-217 — Target architecture and current physical repository must remain distinct concepts
+
+**Status:** LOCKED
+
+---
+
+# PART XXXI — CHANGE CONTROL
+
+## LD-218 — Locked decisions change only through explicit approval
+
+**Status:** LOCKED
+
+Silence and implementation convenience are not approval.
+
+---
+
+## LD-219 — Superseded decisions retain their IDs/history
+
+**Status:** LOCKED
+
+---
+
+## LD-220 — New architectural decisions receive new IDs
+
+**Status:** LOCKED
+
+Continue numbering from the current highest ID.
+
+---
+
+## LD-221 — Approved architecture changes require documentation synchronisation
+
+**Status:** LOCKED
+
+Update the relevant Architecture, Locked Decisions, Repository Map and Ledger documents.
+
+---
+
+# PART XXXII — ARCHITECTURE V2 DEFINITION OF DONE
+
+## LD-222 — Root legacy source is transitional
+
+**Status:** LOCKED
+
+Finished V2 must not fundamentally depend on the historical root source architecture indefinitely.
+
+---
+
+## LD-223 — `src` becomes the authoritative application source tree
+
+**Status:** LOCKED
+
+---
+
+## LD-224 — Generic legacy buckets disappear or receive explicit justification
+
+**Status:** LOCKED
+
+---
+
+## LD-225 — Major route implementations become thin wrappers
+
+**Status:** LOCKED
+
+---
+
+## LD-226 — Global, Assessment and workspace settings gain clear ownership
+
+**Status:** LOCKED
+
+---
+
+## LD-227 — Global visual truth has no competing authorities
+
+**Status:** LOCKED
+
+---
+
+## LD-228 — Assessment Creation does not fundamentally depend on an N5-specific Skills Tree implementation
+
+**Status:** LOCKED
+
+---
+
+## LD-229 — Product language should lead developers to the correct folder
+
+**Status:** LOCKED SUCCESS CRITERION
 
 Example:
 
-QuestionLogic.ts
-
-may contain something quite different from what its name implies.
-
-LD-172 — Imports and consumers must be traced before structural moves
-
-Status: LOCKED
-
-Rule
-
-A migration plan must understand who depends on the file being moved.
-
-LD-173 — Build/type verification occurs after bounded migrations
-
-Status: LOCKED
-
-Rule
-
-Do not accumulate many unverified structural migrations before checking the
-application.
-
-LD-174 — Behaviour testing includes affected visible workflows
-
-Status: LOCKED
-
-Rule
-
-Successful TypeScript compilation alone does not prove that the migrated
-feature still works.
-
-Relevant user-visible behaviour should be tested.
-
-LD-175 — Git diff should be inspected before declaring a migration complete
-
-Status: LOCKED
-
-Rule
-
-Check for accidental unrelated changes.
-
-LD-176 — RepositoryMap must be updated after meaningful structural migration
-
-Status: LOCKED
-
-Rule
-
-A successful move which changes where developers should look for functionality
-should update the practical map.
-
-LD-177 — RefactorLedger must be updated as migration status changes
-
-Status: LOCKED
-
-Rule
-
-The ledger should remain useful to a new conversation joining the project.
-
-LD-178 — Architecture.md changes only when architecture changes
-
-Status: LOCKED
-
-Rule
-
-Do not edit the constitution for every individual moved file.
-
-LD-179 — LockedDecisions.md changes when a locked architectural decision changes or a new one is approved
-
-Status: LOCKED
-
-Rule
-
-Do not use this file as a general work log.
-
-PART XXVII — EXPLICITLY REJECTED APPROACHES
-LD-180 — Rejected: duplicate V2 repository
-
-Status: LOCKED REJECTION**
-
-Rejected
-N5-Assessment-Tool
-N5-Assessment-Tool-V2
-
-as the normal Architecture V2 strategy.
-
-Reason
-
-Duplicate authority and synchronisation risk.
-
-LD-181 — Rejected: immediate physical Legacy/ wrapper
-
-Status: LOCKED REJECTION**
-
-Rejected
-
-Moving all old source beneath:
-
-Legacy/
-
-before migration.
-
-Reason
-
-Would break routing and imports before actual architectural work begins.
-
-LD-182 — Rejected: giant generic Assessment Creation Components folder
-
-Status: LOCKED REJECTION**
-
-Rejected
-Assessments/Creation/Components/
-
-as the primary organisation for all visible Assessment Creation code.
-
-Preferred
-TopBar
-SkillsPanel
-PaperWorkspace
-HUDBar
-
-because these mirror the product.
-
-LD-183 — Rejected: permanent Builder architecture
-
-Status: LOCKED REJECTION**
-
-Rejected
-
-Using Builder as the long-term domain identity of Assessment Creation.
-
-LD-184 — Rejected: PDFWorkspace
-
-Status: LOCKED REJECTION**
-
-Preferred
-PaperWorkspace
-LD-185 — Rejected: global settings containing page-specific workspace settings
-
-Status: LOCKED REJECTION**
-
-Preferred
-
-Settings are split according to ownership.
-
-LD-186 — Rejected: duplicating N5 course data inside Assessment Creation
-
-Status: LOCKED REJECTION**
-
-Preferred
-
-The active Course supplies course definitions to generic Assessment Creation.
-
-LD-187 — Rejected: generic helpers recreated under src
-
-Status: LOCKED REJECTION**
-
-Rejected
-
-Simply transforming:
-
-math-helpers/
-
-into:
-
-src/Helpers/
-
-or equivalent.
-
-Preferred
-
-Distribute responsibilities to actual owners.
-
-LD-188 — Rejected: global SharedTypes recreation
-
-Status: LOCKED REJECTION**
-
-Rejected
-src/SharedTypes/
-
-as a default replacement for legacy shared-types.
-
-LD-189 — Rejected: renaming every legacy file before understanding it
-
-Status: LOCKED REJECTION**
-
-Rule
-
-Migration names should emerge from responsibility analysis.
-
-LD-190 — Rejected: preserving every existing file because refactoring should be “safe”
-
-Status: LOCKED REJECTION**
-
-Rule
-
-Safety means preserving behaviour.
-
-It does not mean preserving obsolete source structure.
-
-LD-191 — Rejected: deleting old code based solely on superficial search results
-
-Status: LOCKED REJECTION**
-
-Rule
-
-Deletion requires dependency understanding.
-
-LD-192 — Rejected: introducing a new state library during this architecture refactor
-
-Status: LOCKED
-
-Rule
-
-Do not add a new global state-management library merely as part of Architecture
-V2.
-
-Rationale
-
-The first objective is to organise the existing state and establish ownership.
-
-A future state-management decision can be considered separately if genuine need
-emerges.
-
-LD-193 — Rejected: premature architecture for hypothetical future capabilities
-
-Status: LOCKED REJECTION**
-
-Rule
-
-Do not add infrastructure purely in anticipation of future:
-
-OCR;
-AI marking;
-scanning;
-analytics;
-other concepts;
-
-unless the current task is actually implementing them.
-
-PART XXVIII — CURRENT KNOWN LEGACY AREAS REQUIRING SPECIAL ATTENTION
-LD-194 — Legacy Assessment Creation page.tsx is recognised as an oversized orchestrator
-
-Status: LOCKED FINDING**
-
-Rule
-
-Architecture V2 should reduce the existing page's combined responsibilities
-rather than reproducing the same giant composition root beneath a new name.
-
-LD-195 — Legacy BuilderTopBar.tsx is expected to be decomposed
-
-Status: LOCKED DIRECTION**
-
-Rule
-
-The current large TopBar implementation should be analysed into meaningful
-visible controls during migration.
-
-Do not assume the entire file should simply become TopBar.tsx unchanged.
-
-LD-196 — Legacy BuilderBottomHud.tsx responsibilities require reassignment
-
-Status: LOCKED DIRECTION**
-
-Rule
-
-The existing BottomHud contains multiple responsibilities.
-
-Some may remain under HUDBar.
-
-Some may move to PaperWorkspace or another owner.
-
-Do not mechanically migrate the file unchanged.
-
-LD-197 — Legacy SettingsPanel.tsx is a major decomposition target
-
-Status: LOCKED FINDING**
-
-Rule
-
-The large legacy settings implementation mixes:
-
-global application appearance;
-Assessment Creation settings;
-workspace settings.
-
-Architecture V2 must separate these ownership categories.
-
-LD-198 — Legacy theme implementations contain duplicate/competing sources of truth
-
-Status: LOCKED FINDING**
-
-Rule
-
-Architecture V2 should consolidate the duplicate theme/appearance systems
-rather than preserving both as parallel authorities.
-
-LD-199 — Legacy shared-types contains types which need domain reassignment
-
-Status: LOCKED FINDING**
-
-Rule
-
-Do not move the folder wholesale.
-
-Classify individual types by owner.
-
-LD-200 — Legacy math-helpers/QuestionLogic.ts is not accepted as generic maths-helper architecture
-
-Status: LOCKED FINDING**
-
-Rule
-
-Its implementation must be inspected and migrated to the domain which actually
-owns its behaviour.
-
-LD-201 — Legacy localStorage access is distributed too widely
-
-Status: LOCKED FINDING**
-
-Rule
-
-Architecture V2 should progressively place storage behaviour behind appropriate
-feature/domain persistence ownership.
-
-Compatibility must be preserved.
-
-LD-202 — Legacy course-data is useful but combines multiple responsibilities
-
-Status: LOCKED FINDING**
-
-Rule
-
-Its useful organisation should be retained where appropriate while separating:
-
-course definition;
-Skills Tree;
-question generation;
-answer generation;
-SourceQuestionCatalog;
-SourceMarkingSchemeCatalog.
-LD-203 — Existing SourceQuestionCatalog organisation is considered a positive precedent
-
-Status: LOCKED
-
-Rule
-
-Do not dismantle a clear source catalogue merely for the sake of changing
-everything during the refactor.
-
-Improve it only where there is a real architectural reason.
-
-LD-204 — Existing SourceMarkingSchemeCatalog organisation is considered a positive precedent
-
-Status: LOCKED
-
-Same principle as LD-203.
-
-LD-205 — Existing question-generation curriculum grouping is worth preserving conceptually
-
-Status: LOCKED
-
-Rule
-
-Strong organisation by meaningful curriculum family should be retained under
-the new Course architecture rather than flattened.
-
-PART XXIX — FUTURE EXTENSIBILITY
-LD-206 — Higher Maths should be additive rather than invasive
-
-Status: LOCKED
-
-Rule
-
-A future Higher Maths course should mainly add a sibling Course implementation.
-
-It should not require widespread modifications throughout generic Assessment
-Creation solely because it is a different course.
-
-LD-207 — Good architecture should allow future features without placeholder folders
-
-Status: LOCKED
-
-Rule
-
-Extension capability comes from clear boundaries and contracts.
-
-Do not confuse extensibility with pre-building empty architecture.
-
-LD-208 — Do not over-engineer CourseDefinition for unknown future requirements
-
-Status: LOCKED
-
-Rule
-
-CourseDefinition should expose actual requirements.
-
-Do not turn it into a speculative all-purpose framework.
-
-LD-209 — New abstractions require demonstrated value
-
-Status: LOCKED
-
-Rule
-
-Do not add an abstraction merely because it could theoretically be useful.
-
-Use abstractions to solve actual repeated or boundary-level problems.
-
-PART XXX — AI-ASSISTED DEVELOPMENT RULES
-LD-210 — AI must inspect before editing
-
-Status: LOCKED
-
-Rule
-
-For meaningful source work, a fresh AI session should inspect the relevant
-current implementation before proposing edits.
-
-Documentation provides architectural context but does not replace source
-inspection.
-
-LD-211 — AI must not infer Architecture V2 from historical naming
-
-Status: LOCKED
-
-Rule
-
-Names such as:
-
-Builder
-shared-types
-math-helpers
-builder-logic
-
-describe legacy history, not approved future architecture.
-
-LD-212 — AI must not casually propose alternative conventions to locked decisions
-
-Status: LOCKED
-
-Rule
-
-Do not waste development conversations re-discussing:
-
-PascalCase;
-src;
-HeaderBar vs TopBar;
-PaperWorkspace naming;
-physical-region organisation;
-course-driven Skills Tree;
-Application/Documents UI split;
-
-unless a genuine new technical conflict exists.
-
-LD-213 — AI should flag simplification opportunities
-
-Status: LOCKED
-
-Rule
-
-During migration, identify potential:
-
-dead code;
-duplication;
-unnecessary complexity;
-misplaced ownership;
-obsolete compatibility code.
-
-Do not silently implement major behavioural/architectural changes without
-approval.
-
-LD-214 — AI must distinguish proposal from approved architecture
-
-Status: LOCKED
-
-Rule
-
-A suggestion made during investigation does not become a locked decision until
-the user approves it.
-
-LD-215 — AI should use exact file paths when ambiguity exists
-
-Status: LOCKED
-
-Rule
-
-Do not refer vaguely to files such as:
-
-page.tsx
-types.ts
-settings.ts
-
-when multiple files could match.
-
-LD-216 — AI must not invent missing repository structure
-
-Status: LOCKED
-
-Rule
-
-If detailed current structure is required, inspect the repository.
-
-Do not assume a proposed target tree has already been implemented.
-
-LD-217 — Architecture V2 target and current RepositoryMap must be distinguished
-
-Status: LOCKED
-
-Rule
-
-A future conversation must understand the difference between:
-
-where a responsibility should end up
-
-and:
-
-where it physically exists today.
-
-That transitional difference is expected during the refactor.
-
-PART XXXI — CHANGE CONTROL
-LD-218 — Locked decisions change only through explicit approval
-
-Status: LOCKED
-
-Rule
-
-Silence is not approval.
-
-Implementation convenience is not approval.
-
-A future assistant preferring another convention is not approval.
-
-LD-219 — Superseded decisions remain in this file
-
-Status: LOCKED
-
-Rule
-
-If a decision later changes, preserve its historical entry and mark:
-
-Status: SUPERSEDED
-
-with a reference to the replacement decision.
-
-Do not erase the fact that the previous decision existed.
-
-LD-220 — New important architectural decisions receive new IDs
-
-Status: LOCKED
-
-Rule
-
-Continue numbering from the latest Decision ID.
-
-Do not reuse IDs.
-
-LD-221 — Architecture changes require documentation synchronisation
-
-Status: LOCKED
-
-Rule
-
-When an approved architectural change affects multiple documents, update the
-appropriate:
-
-LockedDecisions;
-Architecture;
-RepositoryMap;
-RefactorLedger.
-PART XXXII — ARCHITECTURE V2 DEFINITION OF DONE
-LD-222 — Root legacy source folders are transitional, not part of the finished V2 target
-
-Status: LOCKED
-
-Rule
-
-The completed Architecture V2 should not rely on the historical root-level
-source architecture remaining indefinitely.
-
-LD-223 — src becomes the authoritative source tree
-
-Status: LOCKED
-
-Rule
-
-Once migration is complete, application source should be understandable by
-starting under:
-
-src/
-LD-224 — Generic legacy buckets should be removed or explicitly justified
-
-Status: LOCKED
-
-Rule
-
-Architecture V2 is not complete if legacy catch-all folders have merely been
-renamed and retained.
-
-LD-225 — Large route implementations should have become thin wrappers
-
-Status: LOCKED
-
-Rule
-
-Major Next.js route files should delegate to descriptive implementations.
-
-LD-226 — Global and feature settings should have clear ownership
-
-Status: LOCKED
-
-Architecture V2 is not complete while one giant settings system still owns
-unrelated:
-
-application;
-assessment;
-workspace;
-
-settings.
-
-LD-227 — UI visual truth should no longer have competing global authorities
-
-Status: LOCKED
-
-Rule
-
-Theme/appearance architecture should converge on coherent sources of truth.
-
-LD-228 — Assessment Creation should no longer depend fundamentally on N5-specific Skills Tree implementation
-
-Status: LOCKED
-
-Rule
-
-The active Course should supply its curriculum definition.
-
-LD-229 — A future developer should be able to navigate VecEd using product language
-
-Status: LOCKED SUCCESS CRITERION**
-
-Examples:
-
-broken TopBar control
+```text
+broken Assessment TopBar
 → Assessments/Creation/TopBar
 
 wrong curriculum skill
 → Courses/<Course>/SkillsTree
 
-wrong Skills Tree interaction
-→ Assessments/Creation/SkillsPanel/02-SkillsTree
-
-wrong application colour
-→ UI/Application
-
-wrong assessment-paper typography
+wrong generated-paper primitive
 → UI/Documents
 
-wrong class data
-→ Classes
-LD-230 — Architecture V2 must reduce dependence on historical project memory
+wrong Course cover content
+→ Courses/<Course>/Documents
+```
 
-Status: LOCKED SUCCESS CRITERION**
+---
 
-Rule
+## LD-230 — Architecture V2 reduces dependence on historical memory
 
-A new developer or AI assistant should be able to understand ownership through:
+**Status:** LOCKED SUCCESS CRITERION
 
-repository structure;
-Architecture.md;
-LockedDecisions.md;
-RepositoryMap.md;
-RefactorLedger.md;
-AGENTS.md.
+A new developer must be able to reconstruct ownership from repository structure and documentation.
 
-The original author should not need to remember why every file exists.
+---
 
-PART XXXIII — FINAL GOVERNING RULES
-LD-231 — Organise by what the product is, not how the code happened to be written
+# PART XXXIII — GOVERNING PRINCIPLES
 
-Status: LOCKED
+## LD-231 — Organise by what the product is
 
-This is one of the central Architecture V2 principles.
+**Status:** LOCKED
 
-LD-232 — Preserve behaviour, not historical accidents
+Do not organise primarily around how implementation happened historically.
 
-Status: LOCKED
+---
 
-Legacy organisation is not valuable merely because it already exists.
+## LD-232 — Preserve behaviour, not historical accidents
 
-Working behaviour is valuable.
+**Status:** LOCKED
 
-LD-233 — The obvious location should also be the correct location
+---
 
-Status: LOCKED
+## LD-233 — The obvious location should normally be the correct location
 
-Rule
+**Status:** LOCKED
 
-Repository names should make it possible to locate a feature through product
-understanding.
+Repository discoverability is an architectural requirement.
 
-LD-234 — Do not establish a second source of truth to solve a local problem
+---
 
-Status: LOCKED
+## LD-234 — Do not create a second source of truth to solve a local problem
 
-Rule
+**Status:** LOCKED
 
-Before introducing new state, data, visual tokens or persistence, determine
-whether an authoritative implementation already exists.
+Always determine whether an authoritative owner already exists.
 
-LD-235 — Architectural consistency outweighs personal convention preference
+---
 
-Status: LOCKED
+## LD-235 — Architectural consistency outweighs personal convention preference
 
-Rule
+**Status:** LOCKED
 
-Once a VecEd convention has been approved, use it consistently even if another
-developer would personally choose another valid convention.
+---
 
-LD-236 — Architecture V2 should remain intentionally boring to navigate
+## LD-236 — Architecture V2 should be intentionally predictable
 
-Status: LOCKED PRINCIPLE**
+**Status:** LOCKED PRINCIPLE
 
 A developer should not be surprised by where code lives.
 
-Predictability is a feature.
+---
 
-LD-237 — New code should strengthen Architecture V2 rather than recreate legacy patterns
+## LD-237 — New code must strengthen V2 rather than recreate legacy patterns
 
-Status: LOCKED
-
-Rule
+**Status:** LOCKED
 
 Do not knowingly create new:
 
-Builder catch-alls;
-global helper buckets;
-duplicate theme systems;
-giant route implementations;
-course-specific generic UI;
-invisible event coupling;
+```text
+Builder catch-alls
+global helper buckets
+duplicate theme systems
+giant route implementations
+course-specific generic UI
+hidden cross-feature event coupling
+```
 
-inside the V2 source tree.
+inside V2.
 
-LD-238 — When architecture and legacy implementation disagree, investigate before compromising architecture
+---
 
-Status: LOCKED
+## LD-238 — Difficult migration does not automatically invalidate target architecture
 
-Rule
+**Status:** LOCKED
 
-A difficult migration is not automatically evidence that the target
-architecture is wrong.
+Investigate whether the difficulty is simply historical coupling.
 
-First determine whether the difficulty is simply historical coupling which the
-refactor exists to remove.
+---
 
-LD-239 — Genuine technical discoveries may challenge architecture, but they must be surfaced explicitly
+## LD-239 — Genuine technical discoveries may challenge architecture
 
-Status: LOCKED
+**Status:** LOCKED
 
-Rule
+Surface the conflict explicitly rather than drifting silently.
 
-Do not blindly obey an architectural rule if new evidence shows it would cause
-serious technical harm.
+---
 
-Surface the issue.
+## LD-240 — The register is intentionally conservative
 
-Do not silently solve it by architectural drift.
+**Status:** LOCKED
 
-LD-240 — This register is intentionally conservative
+When uncertain whether an established convention may change, assume it remains locked until explicitly reconsidered.
 
-Status: LOCKED
+---
 
-Rule
+# PART XXXIV — DECISIONS ESTABLISHED DURING ACTIVE V2 MIGRATION
 
-When uncertain whether a previously agreed architectural convention may be
-changed, assume it remains locked until explicitly discussed.
+The following decisions were established after the original LD-001 → LD-240 register.
 
-This prevents accidental divergence between development conversations.
+---
 
-6. Quick Locked-Rule Index
+## LD-241 — Prefer write-new migration where practical
 
-The following condensed list exists for fast reference.
+**Status:** LOCKED
 
-It does not replace the full decisions above.
+For a replaceable responsibility, prefer:
 
-Repository
-Architecture V2 remains in the existing repository.
-Refactor work occurs on refactor/architecture-V2.
-main remains known-good.
-Archive baseline remains frozen.
-Application V2 source grows under src.
-Do not build a duplicate V2 application repository.
-Do not physically wrap all legacy source in Legacy/ at the beginning.
-Structure
-Core source domains: app, Assessments, Classes, Courses, UI.
-No speculative empty feature domains.
-Repository tooling belongs under root Tools.
-Documentation belongs under Docs.
-AGENTS.md remains at root.
-public remains at root.
-Naming
-PascalCase for VecEd-owned architecture.
-useCamelCase for React hooks.
-URL-friendly route folders under Next.js.
-Number folders only where order is meaningful.
-Avoid Helpers, Utils, Shared, Common and Misc dumping grounds.
-Do not unnecessarily repeat folder context in filenames.
-Routing
-page.tsx is thin framework glue.
-Significant pages get descriptive implementation files.
-Never refer ambiguously to page.tsx.
-Routing migration to src/app is deliberate.
-Public route renaming is separate from internal Builder terminology cleanup.
-Assessment Creation
-Builder is legacy terminology.
-Whole page = AssessmentCreatorPage.
-Global navigation = HeaderBar.
-Assessment upper controls = TopBar.
-Left region = SkillsPanel.
-Central surface = PaperWorkspace.
-Lower region = HUDBar.
-SkillsPanel contains 01-SkillsFilters then 02-SkillsTree.
-Visible UI organised by physical region.
-Shared behaviour organised by domain responsibility.
-Settings
-Global application settings → UI/Application/SettingsDrawer.
-Assessment settings → Assessments/Creation/AssessmentSettings.
-Workspace settings → PaperWorkspace.
-Workspace contextual settings use a Popover.
-Global HeaderBar Settings always means global application settings.
-UI
-One top-level UI domain.
-UI/Application and UI/Documents are distinct systems.
-Global visual truths converge under UI.
-One authoritative theme system.
-Courses do not own literal application colours.
-Courses
-Course-specific knowledge belongs under Courses.
-Assessment Creation is course-independent.
-Active Course drives Skills Tree.
-Future courses are sibling Course implementations.
-Higher Maths should be additive.
-SourceQuestionCatalog and SourceMarkingSchemeCatalog are approved clear
-concepts.
-Generic architecture uses neutral exam terminology where appropriate.
-Persistence
-Preserve current stored data.
-Do not rename persisted keys merely because files move.
-Persistence should move behind owning domains.
-Architecture V2 does not automatically introduce a database.
-Refactor Process
-No mass rewrite.
-Map before moving.
-Trace imports/exports/consumers.
-Simplify where appropriate.
-Delete genuinely dead code.
-Verify after bounded migrations.
-Commit incrementally.
-Update RepositoryMap and RefactorLedger.
-AI Development
-Read documentation first.
-Inspect the target implementation before editing.
-Locked decisions are not brainstorming prompts.
-Do not infer intended architecture from legacy code.
-Do not invent current repository structure.
-Distinguish target architecture from current migration state.
-7. Final Instruction
+```text
+WRITE NEW
+    ↓
+TYPE-CHECK
+    ↓
+SWITCH CONSUMER
+    ↓
+VERIFY
+    ↓
+SEARCH
+    ↓
+DELETE OLD
+```
 
-If a future developer or AI assistant believes a decision in this document
-should change, the correct response is not:
+over repeatedly moving and mutating the legacy implementation.
 
-I will use a different convention.
+### Rationale
 
-The correct response is:
+Keeping the old owner intact until the replacement is proven reduces migration risk and makes rollback obvious.
 
-This requirement conflicts with locked decision LD-XXX for the following
-technical reason. Here are the consequences of retaining the existing
-decision, and here is the proposed architectural amendment. Should the locked
-decision be reconsidered?
+---
 
-Until explicit approval is given, the existing decision remains in force.
+## LD-242 — The local working tree is authoritative for uncommitted refactor state
 
-The purpose of this register is continuity.
+**Status:** LOCKED
 
-VecEd should not acquire a different architectural personality every time a new
-development conversation begins.
+Connected GitHub may lag behind the user's local branch.
+
+When determining whether a current local migration is complete, prioritise:
+
+```text
+local grep
+local TypeScript
+local build
+local runtime/browser behaviour
+```
+
+over stale remote repository state.
+
+Remote source remains useful for inspecting the latest pushed implementation.
+
+---
+
+## LD-243 — Deletion requires broad symbol-level searching
+
+**Status:** LOCKED
+
+Do not establish deadness from a narrow path-specific search.
+
+Search relevant:
+
+```text
+symbol names
+component names
+filenames
+adapter names
+import paths
+route references
+```
+
+before deletion.
+
+### Rationale
+
+A transitional adapter may be dead while the implementation it wraps still has another consumer.
+
+---
+
+## LD-244 — Whole-file replacement is preferred for normal-sized manual edits
+
+**Status:** LOCKED WORKFLOW
+
+When the user is applying source manually, provide complete replacement contents for normal-sized files.
+
+Use surgical edits only when:
+
+```text
+the file is unusually large
+AND
+the required change is genuinely tiny
+```
+
+Surgical instructions must include distinctive exact boundaries.
+
+---
+
+## LD-245 — PaperWorkspace is a canonical V2 boundary
+
+**Status:** LOCKED — IMPLEMENTED
+
+The canonical subtree is:
+
+```text
+src/Assessments/Creation/PaperWorkspace/
+```
+
+It must not casually regain direct dependencies on:
+
+```text
+app/create-assessment/builder/
+math-helpers/
+```
+
+A future legacy dependency introduced there should be treated as an architectural regression unless explicitly justified.
+
+---
+
+## LD-246 — Generated-document architecture uses layered ownership
+
+**Status:** LOCKED
+
+The dependency model is:
+
+```text
+generic document primitives
+        ↓
+qualification-family templates
+        ↓
+Course-specific documents
+        ↓
+Assessment Preview / Compilation
+```
+
+Current example:
+
+```text
+A4PageFrame
+        ↓
+NationalQualifications templates
+        ↓
+National5Maths Documents
+        ↓
+Assessment consumers
+```
+
+Each layer owns only knowledge appropriate to that level.
+
+---
+
+## LD-247 — Course Documents expose an explicit Course-owned bundle
+
+**Status:** LOCKED
+
+Course-specific generated page components should be exposed through a coherent Course document boundary.
+
+Current National 5 Maths implementation:
+
+```text
+src/Courses/National5Maths/Documents/CourseDocuments.ts
+```
+
+Conceptually provides:
+
+```text
+CoverPage
+FormulaSheet
+QuestionPage
+```
+
+Long-term generic Assessment consumers should resolve these through the active Course contract rather than hard-code one Course throughout the application.
+
+---
+
+## LD-248 — Compilation is a separate Assessment responsibility from Creation
+
+**Status:** LOCKED
+
+Conceptually:
+
+```text
+src/Assessments/Compilation/
+```
+
+owns final printable/generated assessment composition.
+
+Assessment Creation owns interactive building and preview.
+
+A live Compilation route must not be deleted merely because its implementation remains legacy.
+
+It should receive its own bounded migration.
+
+---
+
+## LD-249 — Physical document refactors require visual verification
+
+**Status:** LOCKED
+
+A clean TypeScript result cannot establish visual preservation of generated documents.
+
+Changes affecting:
+
+```text
+cover pages
+formula sheets
+question pages
+page frames
+margins
+corner marks
+page scaling
+document spacing
+```
+
+require relevant visual/browser comparison.
+
+---
+
+## LD-250 — Documentation updates occur at meaningful checkpoints
+
+**Status:** LOCKED WORKFLOW
+
+Do not interrupt every tiny migration with documentation edits.
+
+Update persistent documentation when a meaningful boundary is reached, such as:
+
+```text
+a canonical owner established
+a major legacy seam removed
+a bounded migration completed
+an architectural decision changed
+a handoff point reached
+```
+
+This keeps documentation useful without turning it into a noisy edit-by-edit diary.
+
+---
+
+# 4. Quick Reference
+
+The highest-level locked rules are:
+
+```text
+PRESERVE WORKING BEHAVIOUR.
+
+OWNERSHIP DETERMINES LOCATION.
+
+WRITE NEW BEFORE DELETING OLD WHERE PRACTICAL.
+
+TRACE CONSUMERS BEFORE STRUCTURAL CHANGE.
+
+SEARCH BROADLY BEFORE DELETION.
+
+ROUTES ARE THIN.
+
+BUILDER IS LEGACY TERMINOLOGY.
+
+ASSESSMENT CREATION IS COURSE-INDEPENDENT.
+
+COURSES OWN EDUCATIONAL KNOWLEDGE.
+
+APPLICATION UI AND DOCUMENT UI ARE SEPARATE SYSTEMS.
+
+DOCUMENTS USE GENERIC → TEMPLATE → COURSE → CONSUMER LAYERS.
+
+PERSISTENCE HAS EXPLICIT OWNERSHIP.
+
+DO NOT CREATE SECOND SOURCES OF TRUTH.
+
+DO NOT CREATE SPECULATIVE ARCHITECTURE.
+
+LOCAL WORKING STATE IS AUTHORITATIVE WHILE UNCOMMITTED.
+
+VERIFY TYPES AND RELEVANT USER BEHAVIOUR.
+
+UPDATE DOCUMENTATION AT MEANINGFUL CHECKPOINTS.
+
+WHEN A LOCKED RULE GENUINELY FAILS, SURFACE THE CONFLICT RATHER THAN DRIFTING.
+```
+
+---
+
+# 5. Final Rule
+
+A future developer or AI assistant should treat this register as:
+
+```text
+settled project memory
+```
+
+not:
+
+```text
+a list of suggestions to reconsider
+```
+
+Architecture V2 should evolve deliberately, not accidentally.

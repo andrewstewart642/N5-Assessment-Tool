@@ -3,4260 +3,1920 @@
 **Document type:** AI-assisted development operating manual  
 **Architecture version:** Architecture V2  
 **Status:** Active  
-**Applies to:** All ChatGPT-assisted VecEd development  
-**Primary purpose:** Provide repeatable startup, investigation, implementation, verification and handoff procedures for new ChatGPT conversations  
-**Secondary purpose:** Prevent architectural drift between separate development conversations
+**Applies to:** ChatGPT-assisted VecEd development
+**Purpose:** Provide a repeatable workflow for investigation, implementation, refactoring, verification and handoff without losing architectural continuity between conversations
 
 ---
 
-# 1. Purpose of This Document
+# 1. Purpose
 
-VecEd has been developed across many separate ChatGPT conversations.
+VecEd is developed substantially through ChatGPT-assisted development sessions.
 
-That development model is useful because individual conversations can focus
-deeply on one problem.
+Separate conversations are useful, but they create a continuity problem:
 
-However, separate conversations create a serious architectural risk:
+> A new conversation does not automatically understand every architectural decision, completed migration or known compatibility constraint from previous work.
 
-> A new conversation does not automatically understand every decision made in
-> earlier conversations.
+Architecture V2 solves this through persistent repository documentation.
 
-Architecture V2 introduces persistent repository documentation so that a new
-ChatGPT conversation can recover the intended project architecture from the
-repository itself.
+This document defines **how a ChatGPT development session should operate**.
 
-This document defines **how ChatGPT should work with VecEd**.
-
-It provides:
-
-- mandatory startup procedures;
-- repository-reading order;
-- branch checks;
-- source-inspection rules;
-- refactor procedures;
-- feature-development procedures;
-- bug-investigation procedures;
-- UI procedures;
-- Course-development procedures;
-- persistence procedures;
-- document-rendering procedures;
-- dead-code auditing procedures;
-- verification procedures;
-- commit/documentation procedures;
-- end-of-conversation handoff procedures;
-- reusable prompts which can be pasted into new ChatGPT chats.
-
-The objective is continuity.
-
-A new conversation should not behave like a new architect.
-
-It should behave like another development session within the same established
-project.
-
----
-
-# 2. Core Principle
-
-Every substantial new VecEd ChatGPT conversation should begin from:
-
-```text
-DOCUMENTATION
-        ↓
-CURRENT REPOSITORY
-        ↓
-TARGET FEATURE
-        ↓
-DEPENDENCY ANALYSIS
-        ↓
-PLAN
-        ↓
-USER APPROVAL
-        ↓
-IMPLEMENTATION
-        ↓
-VERIFICATION
-        ↓
-DOCUMENTATION UPDATE
-        ↓
-HANDOFF
-```
-
-Do not begin with:
-
-```text
-USER REQUEST
-    ↓
-GUESS
-    ↓
-EDIT FILES
-```
-
----
-
-# 3. Documentation Is Persistent Project Memory
-
-The following files form VecEd's persistent architectural memory:
-
-```text
-AGENTS.md
-
-Docs/
-├── Architecture.md
-├── LockedDecisions.md
-├── RepositoryMap.md
-├── RefactorLedger.md
-└── ChatGPTWorkflow.md
-```
-
-Each has a distinct role.
-
----
-
-# 4. Documentation Responsibilities
-
-## `AGENTS.md`
-
-Mandatory startup and working contract.
-
-Read first.
-
----
-
-## `Docs/LockedDecisions.md`
-
-Records decisions which have already been settled.
-
-Do not casually reopen them.
-
----
-
-## `Docs/Architecture.md`
-
-Explains the long-form intended architecture.
-
-Use it to understand ownership, naming and dependency philosophy.
-
----
-
-## `Docs/RepositoryMap.md`
-
-Explains where code physically lives at the current stage of migration.
-
-Use it to distinguish:
-
-```text
-TARGET ARCHITECTURE
-```
-
-from:
-
-```text
-CURRENT IMPLEMENTATION
-```
-
----
-
-## `Docs/RefactorLedger.md`
-
-Explains:
-
-- current migration phase;
-- what has already moved;
-- what remains;
-- known risks;
-- current next action.
-
----
-
-## `Docs/ChatGPTWorkflow.md`
-
-This file.
-
-Explains how the development conversation itself should operate.
-
----
-
-# 5. Documentation Precedence
-
-For VecEd-specific decisions, use the following precedence:
-
-1. explicit user instruction in the current conversation;
-2. `AGENTS.md`;
-3. `Docs/LockedDecisions.md`;
-4. `Docs/Architecture.md`;
-5. `Docs/RepositoryMap.md`;
-6. `Docs/RefactorLedger.md`;
-7. current source implementation;
-8. historical source conventions.
-
-A current user instruction may deliberately change an earlier decision.
-
-If it does, identify the conflict and update documentation as part of the work.
-
-Do not silently leave repository documentation inconsistent.
-
----
-
-# 6. Locked Decisions Are Not Brainstorming Prompts
-
-If `LockedDecisions.md` says:
-
-```text
-Status: LOCKED
-```
-
-do not respond by casually proposing alternatives.
-
-Example of incorrect behaviour:
-
-> The project currently uses PascalCase, but kebab-case might be cleaner.
-
-That issue has already been decided.
-
-The correct behaviour is:
-
-> PascalCase is locked for VecEd-owned architecture, so I will follow it.
-
-A locked decision should only be reopened when:
-
-- the user explicitly asks to reconsider it; or
-- a genuine technical conflict is discovered.
-
----
-
-# 7. Technical Conflict With a Locked Decision
-
-If implementation evidence reveals that a locked decision creates a material
-technical problem:
-
-Do not silently violate it.
-
-Use this structure:
-
-```text
-Locked decision:
-LD-XXX
-
-New technical evidence:
-...
-
-Conflict:
-...
-
-Consequences if current rule is retained:
-...
-
-Possible amendment:
-...
-
-Recommendation:
-...
-
-Do you want to reconsider LD-XXX?
-```
-
-Implementation pauses until the architectural conflict is resolved where the
-decision materially affects the requested work.
-
----
-
-# 8. Legacy Source Is Not Architectural Authority
-
-During Architecture V2, legacy folders may contain conventions which conflict
-with target architecture.
-
-Examples:
-
-```text
-Builder
-builder-logic
-builder-behaviour
-shared-types
-math-helpers
-ui
-app/ui
-```
-
-Do not conclude:
-
-> This is the project's convention because many old files use it.
-
-The refactor exists precisely because those conventions are being replaced.
+It does not define the architecture itself.
 
 Use:
 
 ```text
-LockedDecisions
-Architecture
-RepositoryMap
+Docs/Architecture.md
 ```
 
-to determine intended ownership.
+for architecture.
 
-Use legacy code to determine current behaviour.
-
----
-
-# 9. Never Assume Target Structure Already Exists
-
-Documentation may describe target paths such as:
+Use:
 
 ```text
-src/Assessments/Creation/TopBar/
+Docs/LockedDecisions.md
 ```
 
-while the implementation still lives under legacy source.
+for settled decisions.
 
-Before editing:
+Use:
 
-- inspect the repository;
-- confirm the actual current path;
-- check RepositoryMap;
-- check RefactorLedger.
+```text
+Docs/RepositoryMap.md
+```
 
-Do not invent files because Architecture.md says they will eventually exist.
+for current physical repository state.
 
----
+Use:
 
-# 10. Mandatory Startup Protocol for a New VecEd Chat
+```text
+Docs/RefactorLedger.md
+```
 
-Before substantial repository work, a new ChatGPT conversation should:
+for current migration progress.
 
-1. read `AGENTS.md`;
-2. read the relevant locked decisions;
-3. read the relevant Architecture sections;
-4. read the relevant RepositoryMap sections;
-5. read the current RefactorLedger status;
-6. confirm the active Git branch;
-7. inspect the actual current implementation of the target area;
-8. trace important imports/exports/consumers;
-9. summarise understanding;
-10. propose a plan before editing.
+Use this file for:
 
-If the user has asked only a conceptual question which does not require source
-changes, full repository inspection may not be necessary.
-
-Use judgement.
+```text
+HOW TO WORK
+```
 
 ---
 
-# 11. Mandatory Branch Check
+# 2. Core Working Model
 
-Before significant implementation during Architecture V2:
+For substantial repository work, use:
 
-Confirm the active branch is:
+```text
+UNDERSTAND
+    ↓
+INSPECT
+    ↓
+TRACE
+    ↓
+ESTABLISH OWNER
+    ↓
+PLAN
+    ↓
+WRITE NEW
+    ↓
+TYPE-CHECK
+    ↓
+SWITCH CONSUMER
+    ↓
+VERIFY
+    ↓
+SEARCH BROADLY
+    ↓
+DELETE OLD
+    ↓
+VERIFY AGAIN
+    ↓
+DOCUMENT AT CHECKPOINT
+```
+
+Do not use:
+
+```text
+USER ASKS FOR CHANGE
+        ↓
+GUESS FILE
+        ↓
+PATCH RANDOM CODE
+```
+
+---
+
+# 3. Mandatory Documentation Startup
+
+Before substantial Architecture V2 work, read in this order:
+
+```text
+1. AGENTS.md
+
+2. Docs/LockedDecisions.md
+
+3. relevant sections of Docs/Architecture.md
+
+4. relevant sections of Docs/RepositoryMap.md
+
+5. current status in Docs/RefactorLedger.md
+```
+
+Read this workflow when detailed working procedure is required.
+
+Do not reconstruct Architecture V2 from legacy filenames.
+
+---
+
+# 4. Documentation Precedence
+
+For VecEd-specific decisions:
+
+```text
+1. explicit current user instruction
+2. AGENTS.md
+3. Docs/LockedDecisions.md
+4. Docs/Architecture.md
+5. Docs/RepositoryMap.md
+6. Docs/RefactorLedger.md
+7. current source implementation
+8. historical implementation convention
+```
+
+If source conflicts with V2 documentation, investigate whether the source is simply transitional.
+
+Do not automatically modify architecture to match legacy implementation.
+
+---
+
+# 5. Confirm the Working Branch
+
+Before significant source work, confirm the active branch.
+
+Current Architecture V2 branch:
 
 ```text
 refactor/architecture-V2
 ```
 
-unless the user has explicitly moved the project to another approved branch.
-
-Do not assume the branch based on previous conversations.
-
----
-
-# 12. Working Tree Awareness
-
-Before structural work, determine whether unrelated changes already exist.
-
-The desired starting condition is ideally:
+Known-good branch:
 
 ```text
-known branch
-+
-understood working tree
-+
-known last good commit
+main
 ```
 
-If unrelated modifications are present:
+Frozen reference:
 
-Do not casually overwrite them.
+```text
+archive/25-08-2026-baseline
+```
 
-Understand what they are before proceeding.
+Do not make active V2 changes to the frozen archive.
+
+If the user provides a terminal prompt which already clearly shows the correct branch, do not ask them to confirm it again unnecessarily.
 
 ---
 
-# 13. Do Not Ask the User to Repeat Repository Information That Can Be Inspected
+# 6. Local Working Tree vs Connected GitHub
 
-If GitHub or repository access is available:
+The user's local working tree may be newer than the connected GitHub branch.
 
-Inspect the relevant source.
+This distinction is critical.
 
-Do not ask:
+Connected GitHub is useful for:
 
-> Can you paste the file?
+- inspecting pushed source;
+- recovering context;
+- understanding surrounding files;
+- avoiding unnecessary user copy/paste.
 
-when the file can be retrieved directly.
+However, during an active uncommitted migration, local results are authoritative.
 
-Do not ask:
+Prefer:
 
-> What does this hook import?
+```text
+local grep
+local tsc
+local build
+local browser behaviour
+```
 
-when imports can be inspected.
+when determining whether the newest local implementation works or whether a legacy consumer still exists.
 
-Questions should be reserved for:
+Do not claim a local file is dead merely because GitHub search cannot find a consumer.
+
+Before substantial structural work, also establish whether the local working
+tree already contains unrelated modifications.
+
+Do not casually overwrite, revert or absorb changes whose purpose has not been
+understood.
+
+---
+
+# 7. Do Not Ask the User to Paste Source You Can Inspect
+
+If connected repository access is available:
+
+```text
+fetch the file
+inspect the implementation
+inspect its siblings
+inspect consumers
+```
+
+before asking the user to manually provide code.
+
+Ask the user only for information which genuinely requires:
 
 - product intent;
-- ambiguous desired behaviour;
-- architectural choices requiring user approval;
-- information that cannot be determined from source.
+- approval;
+- local-only output;
+- local grep results;
+- compiler/build output;
+- screenshots or runtime behaviour.
 
 ---
 
-# 14. Read Enough Context Before Editing
+# 8. Repository Search Philosophy
 
-A single file often does not contain enough information for safe changes.
+Search serves different purposes.
 
-Before editing a feature, inspect:
+## Remote source inspection
 
-- its parent composition;
-- its local sibling files;
-- shared state;
-- imported types;
-- relevant persistence;
-- relevant Course data;
-- important consumers.
+Use connected repository tools to inspect pushed implementation.
 
-The required breadth depends on the task.
+## Local dependency truth
 
----
+Use user-run commands such as:
 
-# 15. Trace Imports Before Moving Files
-
-Before a structural move:
-
-Determine:
-
-```text
-What does this file import?
-What imports this file?
-What does it export?
-Are there dynamic references?
-Are there path aliases involved?
+```bash
+grep -RInE 'pattern' app src
 ```
 
-Do not move first and discover dependency shape afterwards.
+for current local dependency/deletion decisions.
+
+Local grep has repeatedly proven more reliable than remote code search during active refactoring.
 
 ---
 
-# 16. Understand Behaviour Before Refactoring It
-
-Before breaking apart a large component:
-
-Identify:
-
-- visible controls;
-- state;
-- callbacks;
-- side effects;
-- persistence;
-- derived values;
-- shared dependencies;
-- route dependencies;
-- Course dependencies.
-
-The purpose of decomposition is conceptual clarity, not arbitrary extraction.
-
----
-
-# 17. Standard Response Before Significant Editing
-
-After investigation and before implementation, ChatGPT should normally provide
-a concise summary containing:
-
-```text
-What I found
-Current owner
-Problem
-Proposed V2 owner
-Files affected
-Behaviour to preserve
-Main risks
-Implementation sequence
-Verification plan
-```
-
-Then obtain approval if the change is substantial or architectural.
-
----
-
-# 18. Small Mechanical Changes
-
-For very small, clearly bounded, non-architectural changes, extensive
-pre-approval may not be necessary.
-
-Examples:
-
-- correcting a typo;
-- changing one copy string;
-- fixing one obvious local styling error.
-
-However:
-
-Even small changes must respect existing architecture and source ownership.
-
----
-
-# 19. Architecture V2 Refactor Workflow
-
-Use the following workflow for migration work.
-
----
-
-# 20. Refactor Step 1 — Define the Boundary
-
-Select one bounded area.
-
-Examples:
-
-```text
-HeaderBar
-TopBar
-SkillsFilters
-Theme system
-Paper timing
-```
-
-Avoid scope such as:
-
-```text
-refactor the whole Builder
-```
-
-unless the current task is specifically forensic mapping rather than code
-movement.
-
----
-
-# 21. Refactor Step 2 — Audit the Complete Area
+# 9. Before Editing a Meaningful Responsibility
 
 Inspect:
 
-- all files in the target feature;
-- parent composition;
-- child components;
-- hooks;
-- types;
-- persistence;
-- shared dependencies;
-- consumers.
+```text
+target implementation
+parent/composition layer
+important siblings
+imports
+exports
+consumers
+persistence involvement
+Course dependencies
+Class dependencies
+UI dependencies
+routes
+```
 
-Record observations.
+Then answer:
+
+> What does this code actually do?
+
+> Who should own that responsibility?
+
+Do not decide destination from filename alone.
 
 ---
 
-# 22. Refactor Step 3 — Build the Forensic Map
+# 10. Responsibility Mapping
 
-Use:
+For a meaningful migration, establish:
 
-| Current Path | Purpose | Dependencies | Consumers | Problem | New Owner | New Path | Action | Risk |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+```text
+CURRENT PATH
+CURRENT PURPOSE
+IMPORTANT DEPENDENCIES
+CONSUMERS
+PROBLEMS
+V2 OWNER
+TARGET PATH
+ACTION
+RISKS
+VERIFICATION
+```
 
-Standard actions:
+Possible actions include:
 
 ```text
 KEEP
+REWRITE
 MOVE
 RENAME
 SPLIT
 MERGE
+CONSOLIDATE
 DELETE
-MOVE OUT OF DOMAIN
 TEMPORARY ADAPTER
 DEFER
 ```
 
----
+Not every migration requires a giant written table.
 
-# 23. Refactor Step 4 — Identify Simplification Opportunities
-
-Ask:
-
-- Is anything dead?
-- Is state duplicated?
-- Is data duplicated?
-- Are two files performing the same job?
-- Is one file doing several unrelated jobs?
-- Are several files pretending to be separate responsibilities when they are
-  really one?
-- Is any helper name hiding a domain responsibility?
-- Is there invisible event coupling?
-- Is persistence scattered unnecessarily?
-- Is Course-specific behaviour leaking into generic UI?
-
-Discuss material opportunities before implementation.
+Use enough analysis to make the ownership decision reliable.
 
 ---
 
-# 24. Refactor Step 5 — Define Behaviour That Must Survive
+# 11. Preferred Migration Technique
 
-Write down what users can currently do.
+Where practical, prefer **write-new migration**.
 
-Example for TopBar:
+Example:
 
 ```text
-rename assessment
-select class coverage
-choose assessment date
-switch P1/P2 viewing
-change zoom
-navigate pages
+legacy implementation
+        │
+        │ remains intact
+        ↓
+
+create clean V2 owner
+        ↓
+npx tsc --noEmit
+        ↓
+switch consumer
+        ↓
+npx tsc --noEmit
+        ↓
+browser/build verification
+        ↓
+grep old implementation
+        ↓
+delete when proven dead
 ```
 
-That becomes the migration acceptance checklist.
+This is generally safer than physically moving the old file and repairing it while the application is broken.
 
 ---
 
-# 25. Refactor Step 6 — Define Compatibility Requirements
+# 12. Why Write-New Is Preferred
 
-Check whether the migration affects:
+Writing the replacement first provides:
+
+- an intact fallback;
+- clear old/new ownership;
+- easier comparison;
+- smaller failure radius;
+- easier rollback;
+- simpler deletion auditing.
+
+It also encourages genuine architectural rewriting rather than cosmetic relocation.
+
+---
+
+# 13. When Moving Is Still Appropriate
+
+A simple move/rename may still be appropriate when:
+
+- the implementation is already architecturally sound;
+- only ownership/path is wrong;
+- decomposition would add no value;
+- behaviour is small and obvious;
+- import repair is low risk.
+
+Architecture V2 does not require rewriting good code merely to prove that refactoring occurred.
+
+---
+
+# 14. Temporary Adapters
+
+Adapters may be used when a V2 owner has been established but legacy consumers cannot all move at once.
+
+A good adapter:
 
 ```text
-localStorage
-saved assessments
-classes
-URLs
-Course IDs
-question IDs
-generated documents
-settings
-theme preferences
+legacy import path
+        ↓
+thin re-export / compatibility translation
+        ↓
+canonical V2 implementation
 ```
 
-A file rename may be safe while an internal persisted string rename is not.
+The adapter must not duplicate the implementation.
+
+Example principle:
+
+```text
+BuilderNote
+```
+
+may temporarily alias:
+
+```text
+AssessmentQualityNote
+```
+
+while old analysis consumers remain.
+
+Once all legacy consumers are migrated:
+
+```text
+DELETE ADAPTER
+```
 
 ---
 
-# 26. Refactor Step 7 — Propose Exact V2 Destination
+# 15. Avoid Permanent Compatibility Architecture
 
-The destination must match ownership.
+A migration is not complete if every old path survives forever as an adapter.
+
+Adapters are scaffolding.
+
+At appropriate checkpoints:
+
+```text
+grep consumers
+remove obsolete adapters
+type-check
+```
+
+---
+
+# 16. Whole-File Replacements Are the Default
+
+When asking the user to edit a normal-sized file manually:
+
+> provide the complete replacement file.
+
+Do not make the user perform fifteen tiny edits when one clean rewrite is safer.
+
+This also reduces:
+
+- missed edits;
+- incorrect insertion points;
+- malformed imports;
+- partial migration;
+- conversation overhead.
+
+---
+
+# 17. Surgical Edits
+
+Use surgical edits when:
+
+```text
+the file is genuinely very large
+AND
+the required change is genuinely small
+```
+
+For example, changing two imports in a 2,000-line orchestration file.
+
+A surgical instruction must provide:
+
+```text
+complete repository-relative path
+exact distinctive START text
+exact replacement
+exact next boundary / END text
+```
+
+Do not say:
+
+> Replace the code ending at the next `}`.
+
+That is too ambiguous.
+
+---
+
+# 18. Always Use Complete File Paths
+
+Prefer:
+
+```text
+src/Assessments/Creation/AssessmentCreatorPage.tsx
+```
+
+not:
+
+```text
+AssessmentCreatorPage.tsx
+```
+
+when ambiguity is possible.
+
+Never say only:
+
+```text
+page.tsx
+```
+
+Multiple Next.js route files exist.
+
+---
+
+# 19. File Creation Workflow
+
+When decomposing a giant existing implementation into several new owners, prefer:
+
+```text
+1. create all new owner files
+
+2. ensure they type-check even if temporarily unused
+
+3. rewrite/switch the orchestration boundary
+
+4. type-check
+
+5. verify behaviour
+
+6. delete old owners after grep
+```
+
+This is preferable to repeatedly mutating the giant file after every individual extraction.
+
+---
+
+# 20. TypeScript Verification
+
+Routine bounded verification:
+
+```bash
+npx tsc --noEmit
+```
+
+Expected successful result:
+
+```text
+no output
+```
+
+Do not tell the user that silence means nothing happened.
+
+For this command, silence is success.
+
+---
+
+# 21. When to Run TypeScript
+
+Run TypeScript after:
+
+- creating important new files;
+- switching imports;
+- replacing an owner;
+- deleting legacy files;
+- route changes;
+- significant type changes.
+
+Do not wait until twenty unrelated migrations have accumulated.
+
+---
+
+# 22. Production Build Verification
+
+Use:
+
+```bash
+npm run build
+```
+
+after more substantial boundaries such as:
+
+- route work;
+- major implementation switches;
+- document architecture changes;
+- multiple coordinated migrations;
+- a major checkpoint before committing.
+
+A successful TypeScript check is not always enough.
+
+---
+
+# 23. Development Runtime Verification
+
+Use:
+
+```bash
+npm run dev
+```
+
+when browser behaviour needs checking.
+
+Relevant runtime tests should match the migrated responsibility rather than mechanically testing every feature after every small edit.
+
+---
+
+# 24. Next.js Route-Type Recovery
+
+Route movement can leave stale generated `.next` validator files.
+
+Known recovery:
+
+```bash
+npx next typegen
+npx tsc --noEmit
+```
+
+If generated output remains stale, regenerate `.next`.
+
+Never manually modify:
+
+```text
+.next/
+```
+
+---
+
+# 25. VS Code Stale Diagnostics
+
+If:
+
+```bash
+npx tsc --noEmit
+```
+
+passes but VS Code still shows old errors after moves/renames:
+
+use:
+
+```text
+Ctrl+Shift+P
+Developer: Reload Window
+```
+
+before assuming source remains broken.
+
+The editor has previously retained stale diagnostics after successful migrations.
+
+---
+
+# 26. Browser Smoke Tests
+
+After a visible Assessment Creation migration, relevant checks may include:
+
+```text
+route opens
+P1/P2 switching
+question generation
+question regeneration
+question editing
+question removal
+draft assignment
+preview rendering
+Exam / Compact / Answers switching
+worked answers
+zoom
+page navigation
+HUD resizing
+marks/timings
+quality notes
+save state
+Compile navigation
+```
+
+Test only what the changed area could reasonably affect.
+
+---
+
+# 27. Document Rendering Requires Visual Testing
+
+Changes beneath:
+
+```text
+src/UI/Documents/
+src/Courses/<Course>/Documents/
+```
+
+require more than TypeScript.
+
+Visually verify relevant:
+
+- page dimensions;
+- page scaling;
+- margins;
+- corner marks;
+- marks margin;
+- candidate boxes;
+- cover layout;
+- formula layout;
+- question spacing;
+- footers;
+- Turn over presentation.
+
+Physical document appearance is behaviour.
+
+---
+
+# 28. Deletion Workflow
+
+Deletion should normally happen last.
+
+Use:
+
+```text
+WRITE REPLACEMENT
+        ↓
+SWITCH CONSUMER
+        ↓
+VERIFY
+        ↓
+SEARCH OLD SYMBOL
+        ↓
+DELETE
+        ↓
+TYPE-CHECK AGAIN
+```
+
+Never delete first merely because the new architecture intends to replace something.
+
+---
+
+# 29. Broad Search Before Deletion
+
+Before deleting an old file, search by more than one clue where appropriate.
+
+Example:
+
+```bash
+grep -RInE 'BuilderBottomHud|AssessmentProgressHud' app src
+```
+
+or:
+
+```bash
+grep -RInE 'DocumentPageFrame|SQAPageFrame' app src
+```
+
+Search:
+
+- exported symbol;
+- component name;
+- filename;
+- compatibility alias;
+- historical alternate name.
+
+---
+
+# 30. Narrow Search Is Not Dead-Code Proof
+
+A crucial lesson from the refactor:
+
+```text
+no imports found in one subtree
+```
+
+does not mean:
+
+```text
+component is unused repository-wide
+```
+
+Example:
+
+Assessment Creation stopped using an old document frame.
+
+Compilation still used it.
+
+Therefore always widen the audit before deletion.
+
+---
+
+# 31. Self-Reference-Only Result
+
+A strong deletion signal is:
+
+```text
+grep across app/src
+→ matches occur only inside the old files themselves
+```
+
+At that point, if framework/dynamic usage is not relevant, deletion is usually appropriate.
+
+Then run:
+
+```bash
+npx tsc --noEmit
+```
+
+again.
+
+---
+
+# 32. Empty Folder Cleanup
+
+After deleting obsolete files, remove empty legacy folders where useful.
+
+Do not remove a parent directory containing other active historical code merely because one sub-feature completed migration.
+
+---
+
+# 33. Preserve Active Legacy Consumers
+
+A V2 replacement existing does not make the old implementation dead.
+
+For example:
+
+```text
+Assessment Creation Preview
+```
+
+may use a new question renderer while:
+
+```text
+Compilation
+```
+
+still uses the old one.
+
+Keep the old file until the final consumer moves.
+
+---
+
+# 34. Route Wrappers Are Special Consumers
+
+A page implementation can move successfully while its Next.js route wrapper remains mandatory.
+
+Before deleting/moving route files, understand which URL they register.
+
+A missing route wrapper previously caused:
+
+```text
+/create-assessment/builder
+→ 404
+```
+
+despite otherwise clean source.
+
+---
+
+# 35. Compilation Is a Separate Scope
+
+The live Compilation route is:
+
+```text
+app/compile-assessment/page.tsx
+```
+
+Do not treat its dependencies as dead merely because Assessment Creation has replaced them.
+
+Compilation should receive its own bounded migration.
+
+When working on Creation:
+
+```text
+protect live Compilation behaviour
+```
+
+unless Compilation is explicitly the approved scope.
+
+---
+
+# 36. Course Migration Workflow
+
+When migrating Course knowledge, distinguish:
+
+```text
+generic Assessment behaviour
+```
+
+from:
+
+```text
+Course-specific educational knowledge
+```
 
 Examples:
 
 ```text
-global navigation
-→ UI/Application/HeaderBar
+question workflow
+→ Assessments
 
-Assessment Date visible control
-→ Assessments/Creation/TopBar/AssessmentDate
+mathematical generator rules
+→ Courses/<Course>
 
-paper target calculation
-→ Assessments/Creation/Papers
+Skills Tree interaction
+→ Assessments/Creation
 
-National 5 skill data
-→ Courses/National5Maths/SkillsTree
+curriculum definition
+→ Courses/<Course>/SkillsTree
+
+document page sequencing
+→ Assessment consumer
+
+Course cover contents
+→ Courses/<Course>/Documents
 ```
 
-Avoid destination guesses based only on old folder names.
-
 ---
 
-# 27. Refactor Step 8 — Obtain Approval
+# 37. Avoid Course-Specific Generic UI
 
-Before substantial structural editing, present the mapping.
+When generic UI contains:
 
-Do not begin moving dozens of files while the user is still reviewing the
-architecture.
+```ts
+if (course === "National5Maths")
+```
 
----
-
-# 28. Refactor Step 9 — Implement in a Bounded Change
-
-Perform only the approved migration scope.
-
-Do not opportunistically rewrite unrelated areas unless required for the move
-to compile.
-
-If a newly discovered architectural issue materially changes scope:
-
-Stop and surface it.
-
----
-
-# 29. Refactor Step 10 — Verify
-
-Use relevant checks.
-
-Potential checks:
+ask whether the variation belongs in:
 
 ```text
-TypeScript
-production build
-lint
-development runtime
-manual UI behaviour
-persistence
-document output
-Course resolution
+CourseDefinition
+CourseDocuments
+Course paper rules
+Course SkillsTree
 ```
 
-Do not declare success based solely on files compiling when visible behaviour
-could still be wrong.
+Do not mechanically remove every Course check.
+
+First establish the correct contract.
 
 ---
 
-# 30. Refactor Step 11 — Inspect the Diff
+# 38. Do Not Build Hypothetical Higher Architecture
 
-Before completion:
+Future Higher Maths support should influence boundary quality.
 
-- review changed files;
-- check unexpected changes;
-- ensure old files were actually removed where intended;
-- ensure no accidental duplicate source was introduced.
+It should not cause:
+
+```text
+empty Higher folders
+fake CourseDefinition fields
+placeholder generator registries
+unused document implementations
+```
+
+Build only actual requirements.
 
 ---
 
-# 31. Refactor Step 12 — Update Documentation
+# 39. Application UI Workflow
 
-At minimum consider:
+For teacher-facing visual changes, first identify whether the feature is:
+
+```text
+global application UI
+```
+
+or:
+
+```text
+feature-specific UI
+```
+
+Global visual sources belong under:
+
+```text
+src/UI/Application/
+```
+
+Feature-specific presentation generally stays with its owning feature.
+
+Do not centralise every visual value.
+
+---
+
+# 40. Document UI Workflow
+
+For generated paper visuals, identify the correct layer:
+
+```text
+generic physical page rule
+→ UI/Documents
+
+qualification-family visual convention
+→ UI/Documents/Templates/<Family>
+
+Course content/rule
+→ Courses/<Course>/Documents
+
+page sequence / preview interaction
+→ Assessments
+```
+
+Do not place everything visual under the same folder.
+
+---
+
+# 41. Settings Workflow
+
+Classify every setting by effect.
+
+```text
+Does it affect the whole VecEd application?
+→ UI/Application/SettingsDrawer
+
+Does it affect the generated/current assessment?
+→ Assessments/Creation/AssessmentSettings
+
+Does it affect only workspace interaction/layout?
+→ PaperWorkspace
+```
+
+Do not classify settings based on which cog currently opens them.
+
+---
+
+# 42. Persistence Workflow
+
+Before moving persistence behaviour, identify:
+
+```text
+storage key
+stored shape
+readers
+writers
+fallback behaviour
+migration compatibility
+owner
+```
+
+Do not rename stored keys merely because `Builder` has disappeared from source terminology.
+
+Persistence compatibility is a separate contract.
+
+---
+
+# 43. Shared Types Workflow
+
+Do not migrate:
+
+```text
+shared-types/
+```
+
+as one unit.
+
+For every type, ask:
+
+> What does this type describe?
+
+Then move it toward that owner.
+
+Examples:
+
+```text
+Class type
+→ Classes
+
+Assessment question type
+→ Assessments
+
+Course configuration type
+→ Courses
+
+document rendering type
+→ UI/Documents or Course Documents
+```
+
+Large widely used contracts may require temporary compatibility paths.
+
+---
+
+# 44. Generic Helper Workflow
+
+Do not transform:
+
+```text
+math-helpers/
+```
+
+into:
+
+```text
+src/Helpers/
+```
+
+Instead inspect each function and assign it to:
+
+```text
+Course
+Assessment
+Documents
+other genuine owner
+```
+
+The goal is responsibility ownership, not helper-folder renaming.
+
+---
+
+# 45. Large Orchestration Files
+
+Large orchestration files are not automatically errors.
+
+For example:
+
+```text
+AssessmentCreatorPage.tsx
+```
+
+may remain substantial while it coordinates many regions.
+
+The correct question is:
+
+> Does this code coordinate independent owners?
+
+or:
+
+> Does it secretly implement them?
+
+Extract the second category.
+
+Do not create meaningless wrappers solely to reduce line count.
+
+---
+
+# 46. Choosing the Next Migration
+
+After completing one clean boundary, audit the next consumer boundary.
+
+Example:
+
+```text
+PaperWorkspace clean
+        ↓
+inspect AssessmentCreatorPage remaining legacy imports
+        ↓
+group by responsibility
+        ↓
+choose one cluster
+```
+
+Do not choose the next file randomly.
+
+Follow dependency/ownership seams.
+
+---
+
+# 47. Group Legacy Imports by Responsibility
+
+A useful audit command may be:
+
+```bash
+grep -RInE 'from "(@/app/create-assessment/builder/|@/math-helpers/|@/course-data/|@/shared-types/)' src/Assessments/Creation
+```
+
+Then classify results into groups such as:
+
+```text
+Settings
+Papers
+Analysis
+Persistence
+Course configuration
+Questions
+UI
+```
+
+Migrate a coherent group rather than chasing filenames one at a time.
+
+---
+
+# 48. Scope Control
+
+If an audit discovers an unrelated problem:
+
+```text
+record it
+```
+
+but do not automatically expand the approved migration.
+
+A useful discovery is not automatically the next task.
+
+---
+
+# 49. Product Change vs Refactor
+
+Refactoring may reveal a better product design.
+
+Keep these separate.
+
+Say:
+
+```text
+Current behaviour can be preserved during this migration.
+
+There is also a possible product improvement:
+...
+```
+
+Do not silently implement the product change while claiming it was architectural cleanup.
+
+---
+
+# 50. When to Ask for Approval
+
+Ask before:
+
+- changing locked architecture;
+- changing product behaviour;
+- changing persisted data contracts;
+- changing public routes;
+- introducing new dependencies;
+- creating a new major domain;
+- deleting something whose usage remains uncertain.
+
+Do not repeatedly ask approval for every routine implementation step once the user has approved a clear bounded migration.
+
+---
+
+# 51. When Not to Ask a Question
+
+Do not ask the user:
+
+> Where is this file?
+
+if the repository can answer.
+
+Do not ask:
+
+> Is this imported anywhere?
+
+if local grep can answer.
+
+Do not ask:
+
+> Should I use PascalCase?
+
+when it is already locked.
+
+Use questions for genuine decisions, not repository archaeology.
+
+---
+
+# 52. Communicating Instructions to the User
+
+The user prefers concise but sufficient instructions.
+
+A good implementation message usually contains:
+
+```text
+what we are doing
+exact path
+complete replacement code
+one verification command
+expected result
+```
+
+Avoid overwhelming the user with ten speculative future steps at once.
+
+---
+
+# 53. One Coherent Check at a Time
+
+For risky migration work, proceed in coherent checkpoints.
+
+Example:
+
+```text
+create replacement
+→ tsc
+
+switch consumer
+→ tsc
+
+grep old implementation
+→ delete
+
+browser smoke test
+```
+
+This makes failures easy to attribute.
+
+---
+
+# 54. Avoid Fiddly Manual Work
+
+Prefer:
+
+```text
+create three clean files
++
+replace one consumer file
+```
+
+over:
+
+```text
+make seventeen tiny edits in seven files
+```
+
+where both achieve the same architecture safely.
+
+---
+
+# 55. Terminal Commands
+
+Commands should be:
+
+- exact;
+- copyable;
+- run from repository root unless otherwise stated.
+
+Examples:
+
+```bash
+npx tsc --noEmit
+```
+
+```bash
+npm run build
+```
+
+```bash
+npx next typegen
+```
+
+```bash
+grep -RInE 'BuilderBottomHud|AssessmentProgressHud' app src
+```
+
+State what result is expected.
+
+---
+
+# 56. Interpreting Empty `grep`
+
+If the expected result is no references, say explicitly:
+
+```text
+Expected: no output.
+```
+
+When the user reports blank output, treat it as a successful result rather than asking them to retry.
+
+---
+
+# 57. Interpreting TypeScript Silence
+
+If:
+
+```bash
+npx tsc --noEmit
+```
+
+returns to the prompt without errors:
+
+```text
+PASS
+```
+
+Do not request additional output.
+
+---
+
+# 58. Build/Runtime Failure Handling
+
+If verification fails:
+
+```text
+STOP DELETION
+```
+
+Do not continue deeper into the migration.
+
+Use the error to determine whether:
+
+- import switch is wrong;
+- adapter is needed;
+- hidden consumer exists;
+- generated Next types are stale;
+- the architecture assumption was incomplete.
+
+Repair from the last known-good boundary.
+
+---
+
+# 59. Preserve Known-Good Boundaries
+
+Once a subtree has been explicitly verified clean, protect that boundary.
+
+Current example:
+
+```text
+src/Assessments/Creation/PaperWorkspace/
+```
+
+has been verified free of direct legacy Builder/math-helper imports.
+
+Future work should not casually reintroduce them.
+
+---
+
+# 60. Commit Checkpoints
+
+A good commit point occurs after:
+
+```text
+bounded responsibility migrated
++
+type/build verification
++
+relevant browser verification
++
+legacy cleanup
+```
+
+Prefer meaningful commits rather than giant mixed snapshots.
+
+Before committing a significant migration, review the diff.
+
+Confirm:
+
+- no unrelated files changed accidentally;
+- intended deletions actually occurred;
+- no obsolete duplicate implementation remains;
+- generated files were not accidentally edited;
+- the commit represents the migration that was actually verified.
+
+The user's existing commit naming may be used if they deliberately prefer timestamp-style messages; architectural documentation should not depend on a particular cosmetic commit-message style.
+
+---
+
+# 61. Documentation Timing
+
+Do **not** update documentation after every small source edit.
+
+Update at meaningful checkpoints such as:
+
+- completion of a major visible region;
+- removal of a major legacy dependency boundary;
+- establishment of a new Course/document layer;
+- a locked architectural decision;
+- a substantial handoff point.
+
+Documentation should represent durable project memory, not a live keystroke diary.
+
+---
+
+# 62. Which Documents to Update
+
+At a normal migration checkpoint:
 
 ```text
 RepositoryMap.md
+→ current physical status
+
 RefactorLedger.md
+→ completed migration / remaining work
 ```
 
 Update:
 
 ```text
 Architecture.md
+```
+
+only when long-lived architecture changes.
+
+Update:
+
+```text
 LockedDecisions.md
 ```
 
-only if architecture itself changed.
+only when a meaningful locked decision is established, changed or superseded.
 
----
+Update:
 
-# 32. Refactor Step 13 — Commit
-
-Use a clear commit boundary.
-
-Example:
-
-```text
-refactor: migrate Assessment Creation TopBar
-```
-
-Do not wait until ten unrelated migrations are mixed together.
-
----
-
-# 33. Refactor Step 14 — Record Handoff State
-
-At the end of the work:
-
-Record:
-
-- what changed;
-- verification;
-- commit;
-- remaining legacy dependency;
-- next migration.
-
-This goes into RefactorLedger where appropriate.
-
----
-
-# 34. Feature Development Workflow
-
-After the core Architecture V2 migration, or when the user explicitly approves
-feature development during it, use this process.
-
----
-
-# 35. Feature Step 1 — Identify the Owner
-
-Before creating files, answer:
-
-> Which existing domain owns this feature?
-
-Possible owners include:
-
-```text
-Assessments
-Classes
-Courses
-UI/Application
-UI/Documents
-```
-
-Then identify the feature-level owner beneath that domain.
-
----
-
-# 36. Feature Step 2 — Check for Existing Sources of Truth
-
-Before adding:
-
-- state;
-- types;
-- tokens;
-- Course data;
-- persistence;
-- document layout;
-
-check whether an authoritative owner already exists.
-
-Do not solve a local problem by creating a second source of truth.
-
----
-
-# 37. Feature Step 3 — Determine Whether the Feature Is Generic or Course-Specific
-
-Ask:
-
-> Does this behaviour apply to Assessment Creation generally, or only to one
-> Course?
-
-Example:
-
-```text
-Skills Tree row rendering
-→ generic Assessment Creation UI
-
-definition of "Fractions"
-→ National5Maths Course data
-```
-
----
-
-# 38. Feature Step 4 — Determine Whether It Is App UI or Document UI
-
-Ask:
-
-> Does the teacher interact with this as part of the VecEd application, or is
-> this part of the generated assessment document?
-
-Application visuals:
-
-```text
-UI/Application
-```
-
-Document visuals:
-
-```text
-UI/Documents
-```
-
-Feature-specific visible components remain with their owning feature while
-consuming shared UI sources of truth.
-
----
-
-# 39. Feature Step 5 — Name Using Product Vocabulary
-
-Before creating a new name:
-
-Check established vocabulary.
-
-Examples:
-
-```text
-Panel
-Workspace
-Drawer
-Popover
-Control
-Filter
-Field
-Pill
-Picker
-Status
-Modal
-```
-
-Do not invent:
-
-```text
-FlyoutWidgetTray
-```
-
-when the established concept is a Popover.
-
----
-
-# 40. Feature Step 6 — Avoid Speculative Architecture
-
-Do not add folders for possible future expansion unless current implementation
-actually requires them.
-
-Create the simplest structure which has correct ownership.
-
----
-
-# 41. Bug Investigation Workflow
-
-Bug fixes should begin with cause analysis, not random edits.
-
----
-
-# 42. Bug Step 1 — Reproduce the Report Conceptually
-
-Clarify:
-
-- expected behaviour;
-- actual behaviour;
-- route/screen;
-- trigger;
-- whether it is persistent;
-- whether it affects saved data.
-
-If the user's description is already precise, do not ask unnecessary
-questions.
-
----
-
-# 43. Bug Step 2 — Read Relevant Architecture
-
-Determine the intended owner before searching randomly.
-
-Example:
-
-If the issue is:
-
-> wrong Skills Tree content
-
-check Course data.
-
-If:
-
-> skill row cannot expand
-
-check SkillsTree UI behaviour.
-
----
-
-# 44. Bug Step 3 — Trace the Data/State Path
-
-Follow:
-
-```text
-source
-→ transformation
-→ state
-→ component
-→ visible output
-```
-
-Identify the first point at which reality diverges from expected behaviour.
-
----
-
-# 45. Bug Step 4 — Distinguish Root Cause From Symptom
-
-Do not patch a downstream symptom if upstream state is wrong.
-
-Example:
-
-If the UI displays the wrong marks because paper targets are calculated
-incorrectly:
-
-Fix Papers logic.
-
-Do not hard-code a correction into HUDBar display.
-
----
-
-# 46. Bug Step 5 — Minimise Scope
-
-Fix the root cause with the smallest coherent change.
-
-Do not refactor an unrelated subsystem merely because it is nearby.
-
----
-
-# 47. Bug Step 6 — Verify Regression Risk
-
-Test:
-
-- reported bug;
-- adjacent behaviour;
-- persistence if relevant;
-- other consumers of the changed logic.
-
----
-
-# 48. Bug Step 7 — Document Structural Discoveries
-
-If the bug reveals a genuine architecture issue:
-
-Record it.
-
-Do not silently turn a bug fix into a repository redesign.
-
----
-
-# 49. UI Work Workflow
-
-When changing application UI:
-
----
-
-# 50. UI Step 1 — Identify Physical Owner
-
-Ask where the teacher sees the feature.
-
-Examples:
-
-```text
-global nav
-→ HeaderBar
-
-assessment upper controls
-→ TopBar
-
-left skill controls
-→ SkillsPanel
-
-central paper interaction
-→ PaperWorkspace
-```
-
----
-
-# 51. UI Step 2 — Check Shared Visual Sources
-
-Before hard-coding:
-
-- colours;
-- typography;
-- spacing;
-- radii;
-- motion;
-- shadows;
-
-inspect `UI/Application`.
-
-Reuse authoritative values where appropriate.
-
----
-
-# 52. UI Step 3 — Keep Domain Rules Out of Presentation
-
-A visual component may display data.
-
-It should not redefine the underlying domain rule.
-
-Example:
-
-TopBar may display P1/P2.
-
-It should not independently invent the Course's paper structure.
-
----
-
-# 53. UI Step 4 — Preserve Established Terminology
-
-If the feature is a:
-
-```text
-Popover
-```
-
-do not call it:
-
-```text
-Popup
-```
-
-merely because that name feels locally convenient.
-
----
-
-# 54. UI Step 5 — Avoid Giant Component Regression
-
-If a new visible region begins accumulating many meaningful controls:
-
-Split it by recognisable feature.
-
-Do not recreate another `SettingsPanel.tsx`-style mega-component.
-
----
-
-# 55. Document UI Workflow
-
-Generated assessment documents have their own visual architecture.
-
----
-
-# 56. Document UI Step 1 — Determine Whether the Rule Is Truly Document-Level
-
-Examples:
-
-```text
-page dimensions
-question spacing
-exam typography
-cover page frame
-```
-
-Likely:
-
-```text
-UI/Documents
-```
-
----
-
-# 57. Document UI Step 2 — Distinguish Preview From Document Truth
-
-A rule should not live in PaperWorkspace merely because preview currently uses
-it.
-
-Ask whether compiled assessments also need it.
-
-If yes, consider shared document ownership.
-
----
-
-# 58. Document UI Step 3 — Distinguish Course Semantics From Presentation
-
-Example:
-
-```text
-National 5 paper has particular educational structure
-→ Course
-
-how the page is visually rendered
-→ UI/Documents
-```
-
-Do not merge these layers unnecessarily.
-
----
-
-# 59. Document UI Step 4 — Verify Output
-
-Document work should be visually verified where practical.
-
-Check:
-
-- layout;
-- page breaks;
-- question numbering;
-- answer space;
-- typography;
-- cover/formula pages;
-- printed/compiled result.
-
----
-
-# 60. Course Development Workflow
-
-When working on Course architecture or Course-specific data:
-
----
-
-# 61. Course Step 1 — Identify Whether Behaviour Is Generic
-
-Ask:
-
-> Would this code still make sense if the active Course were Higher Maths?
-
-If yes:
-
-It may belong to generic application architecture.
-
-If no:
-
-It may be Course-owned.
-
----
-
-# 62. Course Step 2 — Preserve Course Independence
-
-Do not make generic Assessment Creation import National 5 Maths internals
-directly when CourseDefinition can provide the information.
-
----
-
-# 63. Course Step 3 — Preserve Navigability
-
-Course data should remain easy to locate by educational concept.
-
-Meaningful folders such as:
-
-```text
-01-Numerical
-02-Algebraic
-03-Geometric
-04-Trigonometric
-05-Statistical
-```
-
-are desirable where they reflect the real Course.
-
----
-
-# 64. Course Step 4 — Preserve Strong Existing Catalogues
-
-Do not dismantle:
-
-```text
-SourceQuestionCatalog
-SourceMarkingSchemeCatalog
-```
-
-without a real benefit.
-
-They are already considered positive organisational patterns.
-
----
-
-# 65. Course Step 5 — Avoid UI Styling in Course Data
-
-Course data may expose semantic category identity.
-
-It should not become the source of literal app colours and fonts.
-
----
-
-# 66. Course Step 6 — Test Through Generic Consumers
-
-When Course definitions change, verify:
-
-- Course resolution;
-- Skills Tree;
-- question generation;
-- relevant paper configuration;
-- source catalogue consumers.
-
----
-
-# 67. Skills Tree Workflow
-
-The Skills Tree has a particularly important ownership boundary.
-
----
-
-# 68. Skills Tree UI Owner
-
-Generic interaction/rendering belongs under:
-
-```text
-Assessments/Creation/SkillsPanel/02-SkillsTree
-```
-
-Examples:
-
-- expand/collapse;
-- category component;
-- skill row;
-- difficulty control;
-- selection interaction.
-
----
-
-# 69. Skills Tree Data Owner
-
-Educational definitions belong under:
-
-```text
-Courses/<Course>/SkillsTree
-```
-
-Examples:
-
-- categories;
-- skills;
-- concepts;
-- ordering;
-- IDs;
-- educational relationships.
-
----
-
-# 70. Skills Tree Debugging Rule
-
-If the tree contains the wrong educational content:
-
-Investigate Course data.
-
-If correct content renders incorrectly:
-
-Investigate Skills Tree UI.
-
-Do not blur those problems.
-
----
-
-# 71. Question Generation Workflow
-
-Question generation has another critical ownership boundary.
-
----
-
-# 72. Generic Assessment Question Workflow
-
-Belongs under:
-
-```text
-Assessments/Creation/Questions
-```
-
-Potential responsibilities:
-
-- selecting;
-- adding;
-- removing;
-- draft coordination;
-- workflow state;
-- placement in assessment.
-
----
-
-# 73. Course-Specific Generator Knowledge
-
-Belongs under:
-
-```text
-Courses/<Course>/QuestionGeneration
-```
-
-Examples:
-
-- mathematical generator families;
-- Course-specific question rules;
-- Course-specific parameterisation.
-
----
-
-# 74. Question Generation Debugging Rule
-
-If Assessment Creation fails to coordinate a valid generated question:
-
-Investigate Questions workflow.
-
-If the generated mathematical content itself is wrong:
-
-Investigate Course QuestionGeneration.
-
----
-
-# 75. Classes Workflow
-
-Class data has its own domain.
-
----
-
-# 76. Classes Ownership
-
-Class:
-
-- records;
-- persistence;
-- types;
-- editing;
-- normalisation;
-
-belong under:
-
-```text
-Classes
-```
-
----
-
-# 77. Assessment Creation Class Selection
-
-The control used to select class coverage may belong to TopBar.
-
-It consumes authoritative Class data.
-
-Do not duplicate Class models inside Assessment Creation.
-
----
-
-# 78. Persistence Workflow
-
-Persistence changes require extra caution.
-
----
-
-# 79. Persistence Step 1 — Identify the Persisted Contract
-
-Before changing code, identify:
-
-- storage key;
-- stored shape;
-- current reader;
-- current writer;
-- compatibility assumptions.
-
----
-
-# 80. Persistence Step 2 — Separate Filename From Persisted Identifier
-
-Renaming:
-
-```text
-BuilderStorageKeys.ts
-```
-
-does not mean stored keys should also change.
-
-Source naming and persistent contracts are separate concerns.
-
----
-
-# 81. Persistence Step 3 — Preserve Existing User Data
-
-When possible, existing data should load after refactoring.
-
-If a persisted shape must change:
-
-Design a migration.
-
-Do not silently abandon old data.
-
----
-
-# 82. Persistence Step 4 — Verify Refresh Behaviour
-
-Test:
-
-```text
-save
-refresh
-restore
-```
-
-where relevant.
-
----
-
-# 83. Theme and Global Settings Workflow
-
-Global theme architecture is a known duplication area.
-
----
-
-# 84. Theme Step 1 — Audit All Authorities Together
-
-Do not modify one theme file in isolation without checking competing systems.
-
-Relevant legacy sources may include:
-
-```text
-root ui/
-app/ui/
-GlobalSettingsContext
-settings-bar
-SettingsPanel appearance settings
-globals.css
-```
-
----
-
-# 85. Theme Step 2 — Determine Authoritative Responsibility
-
-Target principle:
-
-```text
-one theme definition
-one state/provider
-one persistence mechanism
-one coherent token system
-```
-
----
-
-# 86. Theme Step 3 — Preserve User Preferences
-
-If theme/accent preferences are persisted:
-
-Verify they survive consolidation.
-
----
-
-# 87. Theme Step 4 — Remove Obsolete Authority
-
-Once all consumers migrate:
-
-Delete duplicate legacy theme definitions rather than leaving dormant second
-sources of truth.
-
----
-
-# 88. Dead-Code Audit Workflow
-
-Use a deliberately cautious process.
-
----
-
-# 89. Dead-Code Step 1 — Identify Candidate
-
-A candidate may be:
-
-- unimported file;
-- unused export;
-- obsolete migration script;
-- duplicate implementation;
-- empty accidental artefact.
-
----
-
-# 90. Dead-Code Step 2 — Search References
-
-Check:
-
-- static imports;
-- dynamic imports;
-- string references;
-- route conventions;
-- scripts;
-- build configuration;
-- persistence;
-- external tooling where relevant.
-
----
-
-# 91. Dead-Code Step 3 — Establish Replacement or Obsolescence
-
-Ask:
-
-- Was this functionality replaced?
-- Is another implementation authoritative?
-- Was it a one-off tool?
-- Does Git history preserve it if deleted?
-
----
-
-# 92. Dead-Code Step 4 — Record
-
-Before or during deletion, update RefactorLedger where the removal is
-architecturally meaningful.
-
----
-
-# 93. Dead-Code Step 5 — Verify
-
-Run relevant checks after deletion.
-
-Never assume an unreferenced-looking file cannot affect framework behaviour.
-
----
-
-# 94. Root Artefact Cleanup Workflow
-
-For suspicious files such as:
-
-```text
-n5-assessment-tool@0.1.0
-next
-npm
-```
-
-use:
-
-```text
-inspect contents
-→ search references
-→ inspect package scripts
-→ establish origin if possible
-→ verify safe
-→ record
-→ delete
-```
-
-Do not delete solely because they look silly.
-
----
-
-# 95. Repository Tooling Workflow
-
-For migration/maintenance scripts:
-
-Ask:
-
-> Is this useful ongoing tooling or completed one-off machinery?
-
-If ongoing:
-
-```text
-Tools/
-```
-
-may be appropriate.
-
-If complete and no longer useful:
-
-Deletion may be better.
-
----
-
-# 96. New File Creation Checklist
-
-Before creating a file, ask:
-
-1. Who owns this responsibility?
-2. Does an existing file already own it?
-3. Does an existing folder already describe it?
-4. Is the name product-oriented?
-5. Does folder context make part of the filename redundant?
-6. Is this genuinely a new file responsibility?
-7. Would adding it recreate a generic bucket?
-8. Is it Course-specific?
-9. Is it Application UI or Document UI?
-10. Is it speculative?
-
----
-
-# 97. New Folder Creation Checklist
-
-Before creating a folder:
-
-1. Does it represent a real responsibility?
-2. Are there enough related files to justify the grouping?
-3. Does an existing owner already fit?
-4. Is the name precise?
-5. Is ordering meaningful?
-6. Is the folder speculative?
-7. Would it create unnecessary nesting?
-8. Does it violate a locked naming decision?
-
----
-
-# 98. New Top-Level Domain Checklist
-
-A folder directly beneath `src` requires a high bar.
-
-Before proposing one:
-
-- prove existing domains cannot own the responsibility cleanly;
-- explain why it is independently important;
-- explain dependency direction;
-- explain future ownership;
-- treat it as an architectural decision.
-
-Do not create casually.
-
----
-
-# 99. Naming Review Checklist
-
-Before approving a new architectural name:
-
-- Is it PascalCase where required?
-- Does it match product vocabulary?
-- Does it avoid unnecessary implementation technology?
-- Does folder context already communicate part of the name?
-- Does it avoid generic `Utils`/`Shared` language?
-- Does it conflict with an existing VecEd term?
-- Does it remain sensible if implementation technology changes?
-
----
-
-# 100. Large File Review
-
-When a file becomes large, do not automatically split it.
-
-Ask:
-
-> Does it contain multiple independently understandable responsibilities?
-
-If yes:
-
-Split meaningfully.
-
-If no:
-
-A large coherent file can remain large.
-
----
-
-# 101. Small File Review
-
-When many tiny files accumulate:
-
-Ask:
-
-> Can a developer understand why each file exists independently?
-
-If not:
-
-Consider merging closely related implementation.
-
-Architecture V2 prefers clarity, not maximal fragmentation.
-
----
-
-# 102. Hook Review
-
-For every substantial hook:
-
-Ask:
-
-- What state does it own?
-- What feature/domain owns that state?
-- Is the hook simply hiding orchestration complexity?
-- Does it duplicate another hook?
-- Does it combine unrelated behaviours?
-- Should some logic become pure domain functions instead?
-
----
-
-# 103. Context/Provider Review
-
-Before introducing a React Context or provider:
-
-Ask:
-
-- Is the state genuinely shared?
-- What domain owns it?
-- Does an existing provider already represent the same concept?
-- Will this create another global authority?
-
-Do not create providers solely to avoid passing a few local props.
-
----
-
-# 104. Browser Event Review
-
-Before using:
-
-```text
-window events
-custom browser events
-document events
-```
-
-for feature communication:
-
-Ask whether an explicit React/domain relationship is clearer.
-
-Hidden cross-feature events are not preferred Architecture V2 communication.
-
----
-
-# 105. Type Placement Workflow
-
-When moving/creating a type:
-
-Ask:
-
-> What concept does this type represent?
-
-Then place it with that concept's owner.
-
-Avoid:
-
-```text
-SharedTypes
-```
-
-as the default answer.
-
----
-
-# 106. Cross-Domain Contract Types
-
-If a type genuinely crosses domains:
-
-Determine which domain defines the contract.
-
-The fact that two domains use a type does not automatically make it ownerless.
-
----
-
-# 107. Helper Function Placement Workflow
-
-For a function currently described as a helper:
-
-Ask:
-
-> What rule does it implement?
-
-Example:
-
-```text
-calculatePaperTarget()
-```
-
-is not merely a helper.
-
-It likely belongs to Papers.
-
-Rename/place according to responsibility.
-
----
-
-# 108. Constants Placement Workflow
-
-Place constants with their owner.
-
-Examples:
-
-```text
-paper timing constants
-→ Papers
-
-application animation timing
-→ UI/Application/Motion
-
-document page dimensions
-→ UI/Documents/Layout
-```
-
-Do not create `GlobalConstants.ts` without genuine need.
-
----
-
-# 109. Import Review
-
-After a migration, inspect imports for architecture quality.
-
-Warning signs:
-
-```text
-../../../..
-legacy generic helpers
-Course internals imported into generic UI
-UI importing business logic from presentation components
-circular domain imports
-```
-
-Imports should increasingly reveal clear ownership.
-
----
-
-# 110. Barrel File Rule
-
-Do not create `index.ts` everywhere.
-
-Use a barrel only when it provides a meaningful public boundary.
-
-Direct imports are often easier to trace.
-
----
-
-# 111. Alias Rule
-
-When `@/` eventually targets `src`, imports should become readable.
-
-Example:
-
-```ts
-import { ... } from "@/Courses/...";
-```
-
-Do not change the alias until migration reaches a safe point.
-
----
-
-# 112. Route Work Workflow
-
-When working on routes:
-
----
-
-# 113. Route Step 1 — Identify Framework Responsibility
-
-Keep:
-
-```text
-page.tsx
-layout.tsx
-```
-
-focused on Next.js concerns.
-
----
-
-# 114. Route Step 2 — Delegate Product Implementation
-
-Use descriptive page components.
-
-Example:
-
-```text
-page.tsx
-→ AssessmentCreatorPage.tsx
-```
-
----
-
-# 115. Route Step 3 — Do Not Rename URLs Accidentally
-
-Moving internal code does not require changing public routes.
-
-URL changes require explicit product decision.
-
----
-
-# 116. Route Step 4 — Verify Navigation
-
-After route changes, verify:
-
-- direct URL;
-- application navigation;
-- refresh;
-- dynamic params where relevant.
-
----
-
-# 117. Compile Assessment Workflow
-
-When migrating compilation:
-
-Determine:
-
-- route glue;
-- Assessment-domain orchestration;
-- document rendering;
-- Course data;
-- shared document layout.
-
-Do not leave compilation owned purely by the route directory.
-
----
-
-# 118. Saved Assessments Workflow
-
-Distinguish:
-
-```text
-Assessment Creation session persistence
-```
-
-from:
-
-```text
-persistent Assessment Library
-```
-
-They are related but not necessarily the same owner.
-
----
-
-# 119. Developer Tools Workflow
-
-Distinguish:
-
-```text
-runtime developer page
-```
-
-from:
-
-```text
-repository maintenance script
-```
-
-Runtime developer functionality may live within `src`.
-
-Repository scripts belong under root `Tools`.
-
----
-
-# 120. Verification Workflow
-
-Verification should be proportional to risk.
-
----
-
-# 121. TypeScript Check
-
-Where relevant:
-
-```text
-npx tsc --noEmit
-```
-
-or project-approved equivalent.
-
-Record exact failure if unsuccessful.
-
----
-
-# 122. Production Build
-
-Where relevant:
-
-```text
-npm run build
-```
-
-A passing dev server alone is not equivalent to a passing production build.
-
----
-
-# 123. Lint
-
-Use the project's configured lint process where useful.
-
-Distinguish:
-
-- pre-existing warnings;
-- newly introduced errors.
-
----
-
-# 124. Manual Product Check
-
-Test the actual affected workflow.
-
-Code correctness is not fully established by compilation.
-
----
-
-# 125. Persistence Check
-
-When storage changes:
-
-Test old data, new saves and refresh restoration.
-
----
-
-# 126. Document Check
-
-When document logic changes:
-
-Inspect visible output.
-
----
-
-# 127. Course Check
-
-When Course architecture changes:
-
-Verify the active Course still drives expected behaviour.
-
----
-
-# 128. Verification Language
-
-Use:
-
-```text
-PASS
-PASS WITH PRE-EXISTING WARNINGS
-FAIL
-NOT APPLICABLE
-NOT YET TESTED
-```
-
-Avoid vague formal reporting such as:
-
-```text
-probably okay
-looks fine
-```
-
----
-
-# 129. Regression Handling
-
-If a change creates a regression:
-
-Stop stacking further refactors.
-
-Fix or roll back first.
-
----
-
-# 130. Pre-Existing Issue Handling
-
-If an unrelated pre-existing issue is discovered:
-
-Record it.
-
-Do not automatically expand scope unless:
-
-- it blocks current work; or
-- the user explicitly asks to fix it.
-
----
-
-# 131. Scope Expansion Rule
-
-A useful discovery does not automatically become part of the task.
-
-Present:
-
-```text
-Discovery
-Why it matters
-Whether it blocks current work
-Suggested future action
-```
-
-Then continue the approved scope unless instructed otherwise.
-
----
-
-# 132. Commit Workflow
-
-ChatGPT should help maintain understandable commit boundaries.
-
----
-
-# 133. Commit Content Rule
-
-A commit should represent one coherent change where practical.
-
-Good:
-
-```text
-refactor: migrate global HeaderBar
-```
-
-Less useful:
-
-```text
-updates
-```
-
----
-
-# 134. Commit Timing
-
-Commit after:
-
-- migration complete;
-- checks pass;
-- relevant documentation updated.
-
-Do not wait until many unrelated migrations are stacked together.
-
----
-
-# 135. Documentation Commit
-
-The Architecture V2 bootstrap should have its own documentation-focused commit
-before source migration begins.
-
----
-
-# 136. Commit Message Style
-
-Prefer concise imperative/category style such as:
-
-```text
-docs: establish Architecture V2 workflow
-refactor: migrate Assessment Creation TopBar
-fix: restore paper navigation after TopBar migration
-```
-
----
-
-# 137. Documentation Update Workflow
-
-After structural change:
-
----
-
-# 138. Update `RepositoryMap.md`
-
-If physical location/ownership changed.
-
----
-
-# 139. Update `RefactorLedger.md`
-
-If migration progress changed.
-
----
-
-# 140. Update `Architecture.md`
-
-Only if a long-lived architectural principle changed.
-
----
-
-# 141. Update `LockedDecisions.md`
-
-Only when:
-
-- a new important decision has been approved; or
-- an existing locked decision has been superseded.
-
----
-
-# 142. Decision Numbering Rule
-
-New locked decisions continue from the highest existing LD number.
-
-Do not renumber old decisions.
-
----
-
-# 143. Migration Numbering Rule
-
-New completed/planned migration entries use:
-
-```text
-MIG-001
-MIG-002
-...
-```
-
-Do not reuse IDs.
-
----
-
-# 144. End-of-Conversation Handoff Is Mandatory for Significant Work
-
-A long development chat should not end with all relevant state trapped in the
-conversation.
-
-Before ending:
-
-- update RefactorLedger;
-- update RepositoryMap if required;
-- identify commit;
-- record next action.
-
----
-
-# 145. Standard End-of-Chat Handoff
-
-Use this structure:
-
-```text
-## VecEd handoff
-
-Branch:
-...
-
-Current migration:
-...
-
-Completed:
-...
-
-Verification:
-...
-
-Commit:
-...
-
-Remaining legacy dependencies:
-...
-
-Open questions:
-...
-
-Next recommended action:
-...
-```
-
-The permanent details should also exist in repository documentation.
-
----
-
-# 146. If No Code Was Changed
-
-The handoff should still record useful architectural discoveries if they will
-matter later.
-
-Do not update documentation for trivial discussion.
-
-Do update it for approved decisions.
-
----
-
-# 147. Starting a New Chat — Minimal User Prompt
-
-Once `AGENTS.md` is active, the user should be able to start many new
-development chats with:
-
-```text
-This is the VecEd project.
-
-Read AGENTS.md and follow its startup protocol.
-
-Do not make any code changes yet.
-
-My task is:
-
-[DESCRIBE TASK]
-```
-
-The assistant should then gather context from the repository.
-
----
-
-# 148. Starting a New Chat — Full Safe Prompt
-
-Use when beginning substantial work:
-
-```text
-You are continuing development of VecEd.
-
-Before proposing or making any repository changes:
-
-1. Read AGENTS.md.
-2. Read Docs/LockedDecisions.md.
-3. Read the relevant sections of Docs/Architecture.md.
-4. Read the relevant sections of Docs/RepositoryMap.md.
-5. Read the current status in Docs/RefactorLedger.md.
-6. Confirm the active Git branch.
-7. Inspect the complete current implementation of the feature I am asking
-   about.
-8. Trace the relevant imports, exports and consumers.
-9. Distinguish current legacy implementation from target Architecture V2.
-10. Do not make edits yet.
-
-Then report:
-
-- your understanding of the current implementation;
-- the architectural owner;
-- any relevant locked decisions;
-- risks;
-- the files you believe are relevant;
-- your proposed plan.
-
-Wait for my approval before making substantial structural changes.
-
-Task:
-
-[DESCRIBE TASK]
-```
-
----
-
-# 149. New Architecture V2 Refactor Chat Prompt
-
-Use when a fresh conversation is continuing the refactor:
-
-```text
-Continue the VecEd Architecture V2 refactor.
-
-Read AGENTS.md first and follow it.
-
-Then read:
-
-- Docs/LockedDecisions.md
-- Docs/Architecture.md
-- Docs/RepositoryMap.md
-- Docs/RefactorLedger.md
-
-Confirm the active branch before source changes.
-
-Do not edit anything yet.
-
-Audit the target area thoroughly and produce a forensic migration map using:
-
-CURRENT PATH
-PURPOSE
-IMPORTS / DEPENDENCIES
-EXPORTS
-CONSUMERS
-CURRENT PROBLEMS
-PROPOSED OWNER
-PROPOSED V2 PATH
-ACTION
-RISK / COMPATIBILITY NOTES
-
-Allowed actions:
-
-KEEP
-MOVE
-RENAME
-SPLIT
-MERGE
-DELETE
-MOVE OUT OF DOMAIN
-TEMPORARY ADAPTER
-DEFER
-
-Explicitly identify:
-
-- dead-code opportunities;
-- duplicated state;
-- duplicated data;
-- naming problems;
-- ownership problems;
-- simplification opportunities;
-- persistence risks;
-- routing risks.
-
-Do not implement the migration until I approve the map.
-
-Target area:
-
-[AREA]
-```
-
----
-
-# 150. Approved Refactor Execution Prompt
-
-Use after a migration plan has already been approved:
-
-```text
-We have already approved the migration plan for:
-
-[AREA]
-
-Read AGENTS.md, the relevant locked decisions, RepositoryMap and
-RefactorLedger before editing.
-
-Re-inspect the approved target files so you are working from current source.
-
-Implement only the approved migration.
-
-Requirements:
-
-- preserve existing behaviour;
-- preserve persistence compatibility;
-- do not introduce new generic Helpers/Utils/Shared buckets;
-- follow PascalCase naming;
-- keep visible UI with its physical owner;
-- keep shared domain behaviour with its actual owner;
-- do not expand scope unless implementation reveals a blocker;
-- if a new architectural conflict appears, stop and surface it.
-
-After implementation:
-
-1. run relevant type/build/lint checks;
-2. test the affected workflow where possible;
-3. inspect the diff;
-4. update RepositoryMap.md;
-5. update RefactorLedger.md;
-6. report any remaining legacy dependencies.
-
-Do not change Architecture.md or LockedDecisions.md unless the approved plan
-actually changes architecture.
-```
-
----
-
-# 151. Bug Fix Chat Prompt
-
-```text
-Investigate a VecEd bug.
-
-Read AGENTS.md and the relevant project documentation first.
-
-Do not edit immediately.
-
-Bug:
-
-[BUG DESCRIPTION]
-
-Determine:
-
-- expected behaviour;
-- current behaviour;
-- architectural owner;
-- data/state path involved;
-- root cause;
-- whether the problem is legacy architecture, current V2 code or both;
-- whether persistence, Course data or document rendering is involved.
-
-Inspect the relevant source and consumers.
-
-Report the root cause and proposed minimal fix before substantial changes.
-
-Do not use the bug as an excuse for unrelated refactoring.
-
-After fixing:
-
-- verify the reported bug;
-- check adjacent consumers;
-- run relevant checks;
-- update repository documentation only if structure or refactor status changed.
-```
-
----
-
-# 152. UI Change Chat Prompt
-
-```text
-Work on this VecEd UI change:
-
-[UI CHANGE]
-
-First read AGENTS.md and the relevant architecture/locked decisions.
-
-Inspect the current implementation.
-
-Before editing, identify:
-
-- the physical UI owner;
-- whether the feature is application UI or document UI;
-- shared UI tokens it should consume;
-- relevant state/domain owner;
-- established VecEd vocabulary for this component.
-
-Do not introduce duplicate theme, typography, colour or spacing sources of
-truth.
-
-Do not move domain rules into presentation components.
-
-Preserve unrelated behaviour.
-
-Then propose the exact file changes.
-```
-
----
-
-# 153. Skills Tree Chat Prompt
-
-```text
-Work on the VecEd Skills Tree.
-
-Read AGENTS.md and the relevant Course and Assessment Creation architecture.
-
-Keep this ownership boundary explicit:
-
-Courses/<Course>/SkillsTree
-= educational curriculum definition
-
-Assessments/Creation/SkillsPanel/02-SkillsTree
-= generic rendering and interaction
-
-Task:
-
-[TASK]
-
-Inspect both sides where relevant.
-
-Before editing, state whether the issue belongs to:
-
-- Course data;
-- generic Skills Tree UI;
-- selection state;
-- question workflow;
-- more than one layer.
-
-Do not hard-code National 5 Maths curriculum into generic Assessment Creation
-UI.
-```
-
----
-
-# 154. Course Architecture Chat Prompt
-
-```text
-Work on VecEd Course architecture.
-
-Read AGENTS.md, LockedDecisions and the Courses sections of Architecture.md and
-RepositoryMap.md.
-
-Task:
-
-[TASK]
-
-Before editing:
-
-- determine what is generic and what is Course-specific;
-- inspect CourseRegistry / CourseDefinition if already implemented;
-- inspect the active Course implementation;
-- preserve meaningful curriculum grouping;
-- preserve SourceQuestionCatalog and SourceMarkingSchemeCatalog organisation
-  where appropriate;
-- avoid literal app visual styling in Course data;
-- avoid hard-coded Course checks in generic UI where CourseDefinition can
-  express the variation.
-
-Use future Higher Maths only as an architecture test, not as a reason to create
-speculative code.
-
-Propose a plan before substantial changes.
-```
-
----
-
-# 155. Question Generator Chat Prompt
-
-```text
-Work on VecEd question generation.
-
-Read AGENTS.md and the relevant Course / Questions documentation.
-
-Task:
-
-[TASK]
-
-Maintain this boundary:
-
-Courses/<Course>/QuestionGeneration
-= Course-specific mathematical generator knowledge
-
-Assessments/Creation/Questions
-= generic assessment question workflow
-
-Inspect the relevant generator family, types and consumers.
-
-Do not move mathematical generator rules into generic Assessment Creation
-merely because the Builder currently coordinates them.
-
-Preserve question IDs/contracts and existing behaviour unless explicitly
-approved.
-```
-
----
-
-# 156. Global Theme Chat Prompt
-
-```text
-Work on the VecEd global theme / appearance system.
-
-Read AGENTS.md and the UI architecture first.
-
-Before editing, audit all current authorities involved in the requested
-behaviour, including relevant legacy sources such as:
-
-- root ui/
-- app/ui/
-- GlobalSettingsContext
-- settings-bar
-- SettingsPanel appearance controls
-- globals.css
-
-Do not create another theme source.
-
-Target principle:
-
-one authoritative theme definition
-one state/provider
-one persistence mechanism
-one coherent application UI token system
-
-Preserve existing persisted preferences where possible.
-
-Report the current duplication and proposed authoritative V2 model before
-editing.
-```
-
----
-
-# 157. Settings Refactor Chat Prompt
-
-```text
-Refactor VecEd settings.
-
-Read AGENTS.md and the locked settings decisions.
-
-Inspect the complete current Settings implementation before editing.
-
-Classify every affected setting as exactly one of:
-
-GLOBAL APPLICATION
-ASSESSMENT
-WORKSPACE
-OBSOLETE
-
-Target ownership:
-
-GLOBAL APPLICATION
-→ UI/Application/SettingsDrawer
-
-ASSESSMENT
-→ Assessments/Creation/AssessmentSettings
-
-WORKSPACE
-→ Assessments/Creation/PaperWorkspace
-
-OBSOLETE
-→ delete after verification
-
-Do not simply move the legacy giant SettingsPanel.
-
-Produce the classification map first and wait for approval.
-```
-
----
-
-# 158. PaperWorkspace Chat Prompt
-
-```text
-Work on VecEd PaperWorkspace.
-
-Read AGENTS.md and the relevant Assessment Creation and UI/Documents
-architecture.
-
-Task:
-
-[TASK]
-
-Before editing, distinguish:
-
-- workspace interaction;
-- workspace viewport;
-- document rendering;
-- document pagination/layout;
-- shared paper state;
-- Course-specific document rules.
-
-PaperWorkspace owns the teacher-facing central working surface.
-
-UI/Documents owns genuinely shared document presentation.
-
-Papers owns shared paper-domain state.
-
-Do not put everything historically called "preview" into PaperWorkspace
-automatically.
-```
-
----
-
-# 159. Document Rendering Chat Prompt
-
-```text
-Work on VecEd generated document rendering.
-
-Read AGENTS.md and the UI/Documents architecture.
-
-Inspect all relevant consumers, including preview and compiled output.
-
-Task:
-
-[TASK]
-
-Determine whether the rule is:
-
-- shared document visual truth;
-- PaperWorkspace-only interaction;
-- Course-specific semantic configuration;
-- Assessment state.
-
-Avoid duplicate preview vs compiled rendering logic where one authoritative
-document implementation is appropriate.
-
-Preserve generated document behaviour unless a redesign is explicitly
-approved.
-```
-
----
-
-# 160. Persistence Chat Prompt
-
-```text
-Work on VecEd persistence.
-
-Read AGENTS.md and the persistence architecture first.
-
-Task:
-
-[TASK]
-
-Before editing:
-
-- identify every affected storage key;
-- identify readers and writers;
-- identify persisted shapes;
-- identify current compatibility requirements;
-- identify whether existing saved assessments/classes/settings depend on the
-  data.
-
-Source-file renames must not silently rename persisted identifiers.
-
-Do not introduce a new database or storage technology unless explicitly
-requested.
-
-Propose a compatibility-safe plan before editing.
-```
-
----
-
-# 161. Classes Chat Prompt
-
-```text
-Work on the VecEd Classes domain.
-
-Read AGENTS.md and the relevant Classes architecture.
-
-Task:
-
-[TASK]
-
-Inspect current legacy class pages, persistence, types and Assessment Creation
-consumers.
-
-Maintain this boundary:
-
-Classes
-= authoritative class data/behaviour
-
-Assessment Creation
-= may select/use classes but does not own the class model
-
-Do not duplicate class representations.
-
-Propose the ownership/migration plan before structural changes.
-```
-
----
-
-# 162. Saved Assessments Chat Prompt
-
-```text
-Work on VecEd saved assessments.
-
-Read AGENTS.md and the Assessments architecture.
-
-Task:
-
-[TASK]
-
-Distinguish:
-
-- current Assessment Creation session state;
-- persistent saved assessment records;
-- Assessment Library UI;
-- route glue;
-- compilation.
-
-Do not make Assessment Creation the permanent owner of the entire Assessment
-Library merely because it saves assessments.
-
-Inspect persistence compatibility before changing stored structures.
-```
-
----
-
-# 163. Dead-Code Audit Chat Prompt
-
-```text
-Audit this VecEd area for dead or redundant code:
-
-[AREA]
-
-Read AGENTS.md and relevant repository documentation.
-
-Do not delete anything initially.
-
-For each candidate file/export, determine:
-
-- current purpose;
-- imports;
-- consumers;
-- dynamic references;
-- framework significance;
-- persistence significance;
-- replacement implementation if any.
-
-Classify each candidate:
-
-KEEP
-MERGE
-MOVE
-DELETE
-DEFER
-
-For DELETE candidates, provide evidence that removal is safe.
-
-Wait for approval before deleting significant files.
-```
-
----
-
-# 164. Generic Folder Cleanup Prompt
-
-```text
-Audit this legacy generic folder:
-
-[FOLDER]
-
-Examples may include:
-
-shared-types
-math-helpers
-builder-logic
-builder-behaviour
-shared
-
-Read AGENTS.md and Architecture V2 ownership rules.
-
-Do not create a renamed generic V2 equivalent.
-
-For every file:
-
-1. describe its actual responsibility;
-2. identify consumers;
-3. identify true owner;
-4. propose KEEP / MOVE / RENAME / SPLIT / MERGE / DELETE;
-5. propose exact V2 path;
-6. identify compatibility risk.
-
-Produce the full mapping before implementation.
-```
-
----
-
-# 165. Next.js Route Migration Prompt
-
-```text
-Work on VecEd Next.js route migration.
-
-Read AGENTS.md and the locked page.tsx rules.
-
-Task:
-
-[TASK]
-
-Requirements:
-
-- page.tsx remains thin framework glue;
-- substantial implementation belongs in descriptive page components;
-- never refer ambiguously to page.tsx;
-- do not change public URLs unless explicitly approved;
-- do not mix route migration with unrelated major refactors where avoidable.
-
-Inspect all affected navigation and direct-route consumers before editing.
-
-After migration, verify direct URLs, navigation and refresh behaviour.
-```
-
----
-
-# 166. Repository Tooling Cleanup Prompt
-
-```text
-Audit VecEd repository tooling / root artefacts.
-
-Read AGENTS.md.
-
-Target:
-
-[FILES OR FOLDER]
-
-Determine whether each item is:
-
-- active application source;
-- runtime developer tooling;
-- repository maintenance tooling;
-- completed one-off migration tooling;
-- accidental artefact;
-- unknown.
-
-Do not delete unknown items.
-
-If ongoing repository tooling:
-→ propose Tools/ destination.
-
-If verified obsolete:
-→ propose deletion.
-
-Provide evidence before removal.
-```
-
----
-
-# 167. Full Repository Architecture Audit Prompt
-
-Use rarely, when a broad state review is genuinely needed.
-
 ```text
-Perform a VecEd Architecture V2 repository audit.
-
-Read:
-
 AGENTS.md
-Docs/LockedDecisions.md
-Docs/Architecture.md
-Docs/RepositoryMap.md
-Docs/RefactorLedger.md
-
-Do not edit anything.
-
-Inspect the current repository and compare actual implementation against
-Architecture V2.
-
-Report:
-
-1. V2 areas already implemented.
-2. Legacy areas still active.
-3. Documentation drift.
-4. Duplicate sources of truth.
-5. Generic bucket folders still present.
-6. Oversized orchestrators.
-7. Course-specific leakage into generic UI.
-8. UI/Application vs UI/Documents boundary issues.
-9. Persistence risks.
-10. Dead-code candidates.
-11. Temporary adapters.
-12. Recommended next bounded migration.
-
-Do not propose a wholesale rewrite.
-```
-
----
-
-# 168. Architecture Decision Discussion Prompt
-
-```text
-We need to consider a possible VecEd architectural change.
-
-Read AGENTS.md, LockedDecisions.md and Architecture.md first.
-
-Proposed issue:
-
-[ISSUE]
-
-Before recommending any change:
-
-- identify relevant locked decisions;
-- explain the current architecture;
-- explain why the existing rule may no longer be sufficient;
-- distinguish implementation inconvenience from genuine architectural
-  conflict;
-- give the consequences of retaining the existing rule;
-- give the consequences of changing it.
-
-Do not edit source or documentation until I explicitly approve a decision.
-```
-
----
-
-# 169. End-of-Chat Handoff Prompt
-
-Use when a conversation has become long and work will continue elsewhere.
-
-```text
-Prepare the VecEd handoff for the next ChatGPT conversation.
-
-Do not rely only on chat summary.
-
-Update the appropriate repository documentation first if changes have been
-made.
-
-Then provide:
-
-Branch:
-Last known-good commit:
-Current migration ID:
-Current phase:
-
-Completed in this conversation:
-...
-
-Files moved/renamed/deleted:
-...
-
-Verification:
-...
-
-Remaining legacy dependencies:
-...
-
-Open technical questions:
-...
-
-Locked decisions changed:
-...
-
-RepositoryMap updated:
-...
-
-RefactorLedger updated:
-...
-
-Immediate next action:
-...
-
-Then give me a short copy-paste prompt I can use to start the next chat.
-```
-
----
-
-# 170. Resuming From a Handoff Prompt
-
-```text
-Continue VecEd development from the repository's current handoff state.
-
-Read AGENTS.md first.
-
-Then read:
-
-Docs/LockedDecisions.md
-Docs/Architecture.md
-Docs/RepositoryMap.md
-Docs/RefactorLedger.md
-
-Use those files as the authoritative project memory.
-
-Do not assume the previous chat summary is more current than the repository.
-
-Confirm:
-
-- active branch;
-- current migration;
-- last completed migration;
-- next recorded action.
-
-Then inspect the actual source involved in that next action.
-
-Do not edit until you have reported your understanding and plan.
-```
-
----
-
-# 171. Conversation Length Management
-
-Long technical conversations can eventually become difficult to continue
-reliably.
-
-Do not wait until architectural context is trapped only in conversation
-history.
-
-When a substantial milestone is reached:
-
-- update repository Docs;
-- commit;
-- hand off cleanly.
-
-A new conversation should resume from repository state rather than needing a
-gigantic pasted transcript.
-
----
-
-# 172. Repository Documentation Beats Chat Memory
-
-If conversation history and repository documentation conflict:
-
-Investigate which is newer.
-
-Do not blindly trust an older chat statement over current committed project
-documentation.
-
-The repository is intended to become the persistent source of project context.
-
----
-
-# 173. Current Conversation Instruction Beats Documentation When Explicit
-
-If the user explicitly says:
-
-> Change this locked decision.
-
-the current instruction takes precedence.
-
-However:
-
-The documentation must then be updated.
-
-Do not allow an approved architectural change to exist only in chat memory.
-
----
-
-# 174. Avoid Repeated Architecture Explanation to the User
-
-Once the documentation is established, a new ChatGPT session should not require
-the user to explain again:
-
-- why `src` exists;
-- why Builder is deprecated;
-- what HeaderBar means;
-- why PaperWorkspace is named that way;
-- why PascalCase is used;
-- why generic Helpers are discouraged.
-
-Read the repository.
-
----
-
-# 175. User Questions Still Override Automation
-
-The purpose of this workflow is not to make conversations rigid or bureaucratic.
-
-If the user asks:
-
-> Explain what this file does.
-
-Answer the question.
-
-Do not force an unnecessary 12-step workflow for a simple explanation.
-
-Apply the full workflow when source modifications, architectural decisions or
-substantial technical analysis are involved.
-
----
-
-# 176. Explain Technical Work Clearly
-
-VecEd development conversations should remain understandable.
-
-When discussing code:
-
-Prefer:
-
-```text
-This file owns paper timing.
-```
-
-over:
-
-```text
-This abstraction mediates temporal assessment orchestration concerns.
-```
-
-Precision does not require needless jargon.
-
----
-
-# 177. File References Should Be Precise
-
-When multiple files share a generic framework name, use full paths.
-
-Especially:
-
-```text
-page.tsx
-layout.tsx
-types.ts
-```
-
-Never rely on ambiguous shorthand.
-
----
-
-# 178. Proposed Paths Should Be Explicit
-
-When recommending a move, state:
-
-```text
-CURRENT:
-app/...
-
-TARGET:
-src/...
-```
-
-rather than:
-
-> move this into the new folder.
-
----
-
-# 179. Distinguish Confirmed Fact From Hypothesis
-
-During forensic work, label uncertain conclusions.
-
-Use:
-
-```text
-CONFIRMED
-LIKELY
-HYPOTHESIS
-AUDIT REQUIRED
-```
-
-Do not present an inferred destination as though source inspection already
-proved it.
-
----
-
-# 180. Do Not Invent File Contents
-
-If a file has not been inspected:
-
-Do not claim what it does based only on its name.
-
-Filename is evidence.
-
-Source content is stronger evidence.
-
-Consumers are stronger still.
-
----
-
-# 181. Do Not Invent Current V2 Progress
-
-If RepositoryMap or RefactorLedger says migration has not happened:
-
-Do not refer to target files as current implementation.
-
----
-
-# 182. Update Docs When Reality Changes
-
-The documentation only works if it remains truthful.
-
-A new chat which moves code without updating RepositoryMap undermines the entire
-handoff system.
-
-Documentation update is part of structural completion.
-
----
-
-# 183. Avoid Documentation Bloat From Trivial Edits
-
-The reverse is also true.
-
-Do not record every:
-
-- CSS pixel;
-- copy edit;
-- local variable rename;
-
-in the RefactorLedger.
-
-Record meaningful architectural/migration state.
-
----
-
-# 184. Refactor Ledger Update Threshold
-
-Update the ledger when work changes:
-
-- migration status;
-- legacy dependency;
-- safe-to-delete status;
-- open architecture question;
-- migration verification;
-- current phase;
-- next major action.
-
----
-
-# 185. RepositoryMap Update Threshold
-
-Update the map when:
-
-- a file/domain changes owner;
-- a major folder changes path;
-- a legacy area retires;
-- a V2 area becomes authoritative;
-- practical navigation advice changes.
-
----
-
-# 186. LockedDecisions Update Threshold
-
-Add a new locked decision when the user explicitly settles an important
-architectural question which future conversations could plausibly reopen.
-
-Do not create a new LD entry for every implementation detail.
-
----
-
-# 187. Architecture Update Threshold
-
-Update the constitution when:
-
-- core ownership changes;
-- naming philosophy changes;
-- a new major domain is approved;
-- dependency philosophy changes;
-- product architecture changes materially.
-
----
-
-# 188. ChatGPTWorkflow Update Threshold
-
-Update this file when:
-
-- the development process itself changes;
-- a new recurring type of VecEd task needs a standard workflow;
-- a recurring failure mode is discovered in AI-assisted development.
-
----
-
-# 189. AGENTS Update Threshold
-
-Keep `AGENTS.md` concise enough to function as an entry contract.
-
-Do not copy every detail from these longer documents into AGENTS.
-
-AGENTS should point agents to the authoritative detailed files.
-
----
-
-# 190. AI Should Raise Risks, Not Manufacture Debate
-
-A good VecEd assistant should flag:
-
-- persistence risk;
-- circular dependency;
-- duplicate state;
-- dead code;
-- architectural conflict.
-
-It should not manufacture debate over settled stylistic choices.
-
----
-
-# 191. AI Should Prefer Evidence
-
-When recommending a refactor, ground the recommendation in:
-
-- file contents;
-- import graph;
-- runtime role;
-- current ownership;
-- locked architecture.
-
-Avoid generic software-engineering advice disconnected from the repository.
-
----
-
-# 192. AI Should Preserve Strong Existing Work
-
-Architecture V2 is not based on the belief that all old code is bad.
-
-If source is already:
-
-- well named;
-- clearly owned;
-- cohesive;
-- reusable;
-- easy to navigate;
-
-preserve it where appropriate.
-
-Moving may be sufficient.
-
----
-
-# 193. AI Should Challenge Historical Accidents
-
-Conversely, do not retain:
-
-- giant Builder files;
-- duplicate themes;
-- generic helpers;
-- misplaced types;
-
-merely because changing them requires effort.
-
-The refactor exists to correct those issues.
-
----
-
-# 194. AI Should Separate Product Change From Refactor Change
-
-If architecture work creates a tempting UI redesign opportunity:
-
-State it separately.
-
-Example:
-
-```text
-Refactor requirement:
-move workspace settings into PaperWorkspace ownership.
-
-Optional product change:
-change the settings control from X to Y.
-```
-
-Do not blur the two unless approved.
-
----
-
-# 195. AI Should Separate Architecture From Technology Upgrade
-
-Do not combine Architecture V2 with:
-
-- framework upgrades;
-- new state library;
-- new database;
-- dependency overhaul;
-
-unless necessary and explicitly approved.
-
----
-
-# 196. AI Should Avoid “While We're Here” Scope Creep
-
-A refactor should not become:
-
-> while we're here, let's rewrite everything nearby.
-
-Record additional opportunities.
-
-Finish the bounded task.
-
----
-
-# 197. AI Should Stop When New Evidence Invalidates the Plan
-
-If implementation reveals the approved plan was based on incorrect assumptions:
-
-Stop.
-
-Report the evidence.
-
-Do not force the code to match a now-invalid plan.
-
----
-
-# 198. AI Should Not Stop for Trivial Implementation Choices
-
-Not every local implementation detail needs another user approval.
-
-Once the architecture and migration plan are approved, reasonable internal
-choices may be made within that scope.
-
-Use judgement.
-
----
-
-# 199. User Approval Threshold
-
-Explicit approval is especially important for:
-
-- architectural changes;
-- product behaviour changes;
-- route changes;
-- persistence migrations;
-- deleting significant code;
-- changing Course contracts;
-- visual redesign;
-- adding dependencies;
-- changing locked decisions.
-
----
-
-# 200. Standard Investigation Summary Format
-
-Before substantial implementation, a useful summary is:
-
-```text
-## Current state
-
-...
-
-## Ownership
-
-...
-
-## Relevant locked decisions
-
-...
-
-## Problems found
-
-...
-
-## Proposed changes
-
-CURRENT → TARGET
-
-...
-
-## Simplification opportunities
-
-...
-
-## Risks
-
-...
-
-## Verification plan
-
-...
-```
-
----
-
-# 201. Standard Completion Summary Format
-
-After implementation:
-
-```text
-## Completed
-
-...
-
-## Structural changes
-
-...
-
-## Behaviour preserved
-
-...
-
-## Verification
-
-TypeScript:
-Build:
-Lint:
-Manual:
-Persistence:
-Documents:
-
-## Remaining legacy dependencies
-
-...
-
-## Documentation updated
-
-...
-
-## Commit
-
-...
-
-## Next step
-
-...
-```
-
----
-
-# 202. Standard Architecture Conflict Format
-
-```text
-## Architecture conflict
-
-Locked decision:
-LD-XXX
-
-Current rule:
-...
-
-Implementation evidence:
-...
-
-Why this matters:
-...
-
-Options:
-
-A. Preserve existing rule
-Consequences:
-...
-
-B. Amend rule
-Consequences:
-...
-
-Recommendation:
-...
-
-No architecture change has been made yet.
-```
-
----
-
-# 203. Standard Dead-Code Evidence Format
-
-```text
-Candidate:
-[path]
-
-Current purpose:
-...
-
-Imports:
-...
-
-Consumers:
-...
-
-Dynamic/framework references:
-...
-
-Replacement:
-...
-
-Persistence significance:
-...
-
-Conclusion:
-KEEP / DELETE / DEFER
-
-Confidence:
-HIGH / MEDIUM / LOW
-```
-
----
-
-# 204. Standard File Move Format
-
-```text
-CURRENT:
-...
-
-OWNER:
-...
-
-TARGET:
-...
-
-ACTION:
-MOVE / RENAME / SPLIT / etc.
-
-WHY:
-...
-
-CONSUMERS TO UPDATE:
-...
-
-COMPATIBILITY:
-...
-
-VERIFICATION:
-...
-```
-
----
-
-# 205. Standard Source-of-Truth Audit Format
-
-```text
-Concept:
-...
-
-Current authorities:
-1. ...
-2. ...
-3. ...
-
-Consumers:
-...
-
-Duplicate behaviour:
-...
-
-Proposed authoritative owner:
-...
-
-Migration path:
-...
-
-Legacy authorities to retire:
-...
-```
-
-Useful for:
-
-- theme;
-- typography;
-- Course definitions;
-- paper state;
-- persistence.
-
----
-
-# 206. Standard Settings Classification Format
-
-```text
-Setting:
-...
-
-Current location:
-...
-
-Affects:
-GLOBAL APPLICATION / ASSESSMENT / WORKSPACE
-
-Target owner:
-...
-
-Persistence:
-...
-
-Consumers:
-...
-
-Migration action:
-...
-```
-
----
-
-# 207. Standard Course Responsibility Format
-
-```text
-Responsibility:
-...
-
-Generic or Course-specific:
-...
-
-Current location:
-...
-
-Target:
-...
-
-Generic consumer:
-...
-
-Would another Course need its own implementation?
-YES / NO
-
-Reason:
-...
-```
-
----
-
-# 208. Standard UI Ownership Format
-
-```text
-Visible feature:
-...
-
-Where teacher sees it:
-...
-
-Physical owner:
-...
-
-Shared state owner:
-...
-
-Shared visual source:
-...
-
-Course dependency:
-...
-
-Target path:
-...
-```
-
----
-
-# 209. Standard Document Responsibility Format
-
-```text
-Rule/component:
-...
-
-Used by preview?
-YES / NO
-
-Used by compiled output?
-YES / NO
-
-Course-specific?
-YES / NO
-
-Workspace-interaction-specific?
-YES / NO
-
-Likely owner:
-UI/Documents / PaperWorkspace / Course / Papers
-
-Reason:
-...
-```
-
----
-
-# 210. Standard Refactor Session Record
-
-For major sessions, RefactorLedger may include:
-
-```text
-Date:
-Branch:
-Migration:
-Starting commit:
-
-Scope:
-...
-
-Completed:
-...
-
-Verification:
-...
-
-Unexpected discoveries:
-...
-
-Architecture conflicts:
-...
-
-Ending commit:
-...
-
-Next step:
-...
-```
-
----
-
-# 211. Architecture V2 Current Bootstrap State
-
-At the initial creation of this workflow:
-
-```text
-Architecture.md
-→ created
-
-LockedDecisions.md
-→ created
-
-RepositoryMap.md
-→ created
-
-RefactorLedger.md
-→ created
-
 ChatGPTWorkflow.md
-→ this document
-
-AGENTS.md
-→ next file
-
-Application source migration
-→ not yet started
 ```
 
-This section should not be relied upon forever.
-
-The current authoritative migration state lives in `RefactorLedger.md`.
+only when development operating procedure materially changes.
 
 ---
 
-# 212. First New Chat After Documentation Bootstrap
+# 63. End-of-Session Handoff
 
-The first source-refactor conversation after these documents are committed
-should not immediately begin moving files.
+A significant session should leave enough persistent context to resume safely.
 
-Its initial job should be:
+The handoff should answer:
 
 ```text
-FULL FORENSIC MIGRATION MAPPING
+WHAT BECAME CANONICAL?
+
+WHAT WAS DELETED?
+
+WHAT LEGACY DEPENDENCIES REMAIN?
+
+WHAT WAS VERIFIED?
+
+WHAT SHOULD HAPPEN NEXT?
 ```
 
-as recorded in the Refactor Ledger.
+Use `RefactorLedger.md` for durable migration handoff.
 
 ---
 
-# 213. First Refactor Audit Objective
+# 64. Recommended Handoff Format
 
-The audit should map:
+A concise handoff can use:
 
 ```text
-CURRENT FILE
-→ ACTUAL PURPOSE
-→ DEPENDENCIES
-→ CONSUMERS
-→ CORRECT OWNER
-→ V2 DESTINATION
-→ ACTION
+CURRENT BRANCH
+refactor/architecture-V2
+
+COMPLETED
+...
+
+CANONICAL OWNER
+...
+
+REMOVED LEGACY
+...
+
+VERIFIED
+...
+
+KNOWN ACTIVE LEGACY
+...
+
+DO NOT DELETE
+...
+
+NEXT AUDIT
+...
 ```
 
-for the selected major area.
+Do not dump the full conversation into documentation.
 
-The full repository may require several audit passes.
-
----
-
-# 214. Do Not Assume Migration Order From Documentation Order
-
-The fact that Architecture.md discusses HeaderBar before Courses does not
-automatically determine migration order.
-
-Migration order should follow dependency/risk analysis.
+Condense decisions and results.
 
 ---
 
-# 215. Recommended New-Chat Behaviour During Phase 1
+# 65. Starting a Fresh Chat
 
-During forensic mapping:
-
-- read;
-- search;
-- trace;
-- classify;
-- propose.
-
-Do not move source while the user is still approving the map.
-
----
-
-# 216. Recommended New-Chat Behaviour During Later Migration
-
-Once a migration is approved:
-
-- re-read current source;
-- implement bounded changes;
-- verify;
-- document;
-- commit.
-
----
-
-# 217. Do Not Trust Stale Handoff Information Over Current Source
-
-If documentation claims:
+A new ChatGPT conversation can be started with a short instruction such as:
 
 ```text
-File X still exists
+We are continuing the VecEd Architecture V2 refactor.
+
+Read AGENTS.md and the Architecture V2 documentation in Docs before
+proposing changes.
+
+Use Docs/RefactorLedger.md as the current migration handoff.
+
+Inspect the actual current repository before editing.
+
+Preserve working behaviour and continue from the next recorded migration
+boundary.
 ```
 
-but repository inspection shows it has moved:
-
-Recognise documentation drift.
-
-Do not recreate the old file.
-
-Update the documentation.
+The repository documentation should provide the rest.
 
 ---
 
-# 218. Do Not Trust Stale Source Assumptions Over Current Docs
+# 66. Fresh-Chat Assessment Creation Workflow
 
-If a previous chat remembered:
+If resuming Assessment Creation specifically:
 
 ```text
-TopBar should live under Components
+1. read the current Ledger
+
+2. inspect:
+   src/Assessments/Creation/AssessmentCreatorPage.tsx
+
+3. audit remaining legacy imports
+
+4. group by responsibility
+
+5. choose one bounded cluster
+
+6. write the V2 owner first
+
+7. type-check
+
+8. switch consumers
+
+9. verify
+
+10. grep and delete old code
 ```
 
-but current LockedDecisions says:
+Do not reopen already completed PaperWorkspace migration without evidence of a regression.
+
+---
+
+# 67. Current Known-Good Assessment Creation Boundary
+
+At the current checkpoint:
 
 ```text
-TopBar is a physical Assessment Creation owner
+src/Assessments/Creation/PaperWorkspace/
 ```
 
-follow the current docs.
-
----
-
-# 219. Architecture V2 Is Designed to Reduce Full-Repo Archaeology
-
-A new chat should not re-scan every file in VecEd for every local task.
-
-Use:
+has no direct dependencies on:
 
 ```text
-Docs
-→ RepositoryMap
-→ targeted source inspection
+app/create-assessment/builder/
+math-helpers/
 ```
 
-Full scans are appropriate for:
+Its Preview, question preview and HUD behaviour have been browser-tested successfully.
 
-- major audits;
-- uncertain ownership;
-- repository-wide migration planning.
+Treat that as known-good project state.
 
 ---
 
-# 220. Context Efficiency Rule
+# 68. Current Major Protected Legacy Scope
 
-Read the documentation necessary to understand the task.
+The live Compilation feature still depends upon historical document/question code.
 
-Do not repeatedly dump all documentation into every analysis if only one
-section is relevant.
+Do not delete merely because Creation has migrated:
 
-However, do not skip LockedDecisions when a structural choice is involved.
+```text
+app/compile-assessment/page.tsx
 
----
+src/UI/Documents/Components/DocumentPageFrame.tsx
 
-# 221. Maintainability Test
+app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked.tsx
+```
 
-When choosing between two valid implementations, ask:
-
-> Which implementation will make a future developer more likely to find the
-> correct file immediately?
-
-This is an important VecEd architecture criterion.
+until Compilation itself is migrated.
 
 ---
 
-# 222. Product-Language Test
+# 69. Known Good Refactor Pattern Example — HUD
 
-Ask:
+The HUD migration is a useful model.
 
-> Can I describe this folder using the same words the user uses when pointing
-> at the interface?
+Historical dependency:
 
-If yes, that is usually a strong sign for visible-feature ownership.
+```text
+PaperWorkspace
+    ↓
+BuilderBottomHud
+    ↓
+AssessmentProgressHud
+```
+
+Migration:
+
+```text
+write AssessmentQualityNotes
+write AssessmentProgressPanel
+write AssessmentHUDBar
+write useAssessmentProgressRows
+        ↓
+switch PaperWorkspace / Creator consumers
+        ↓
+tsc
+        ↓
+grep old HUD names
+        ↓
+delete old HUD files
+        ↓
+grep again
+        ↓
+browser smoke test
+```
+
+Result:
+
+```text
+no permanent compatibility duplicate
+```
+
+This is the preferred style of Architecture V2 migration.
 
 ---
 
-# 223. Ownership Test
+# 70. Known Failure Pattern Example — Premature Deletion
 
-Ask:
+The `DocumentPageFrame` incident is the model for what not to do.
 
-> If every current consumer disappeared, which domain would still logically own
-> this concept?
+Incorrect reasoning:
 
-That often identifies the true owner.
+```text
+new document frame exists
++
+Preview no longer uses old frame
+=
+old frame is dead
+```
+
+Reality:
+
+```text
+Compilation still consumed old frame
+```
+
+Correct lesson:
+
+```text
+NEW OWNER EXISTS
+≠
+OLD OWNER HAS ZERO CONSUMERS
+```
+
+Always search repository-wide before deletion.
+
+---
+
+# 71. Known Failure Pattern Example — Route Removal
+
+Another important lesson:
+
+```text
+page implementation moved
+≠
+route wrapper unnecessary
+```
+
+When:
+
+```text
+app/create-assessment/builder/page.tsx
+```
+
+was absent, the route returned 404.
+
+The descriptive V2 implementation does not replace the framework route entry point.
+
+---
+
+# 72. Known Success Pattern — Full-File Rewrite
+
+When a component is conceptually being replaced, a fresh V2 implementation has generally proved easier to reason about than repeatedly renaming legacy internals.
+
+Use fresh files where this improves ownership clarity.
+
+Then delete the historical implementation after consumer verification.
+
+---
+
+# 73. Debugging Philosophy
+
+When something breaks during refactor, first assume:
+
+```text
+dependency/consumer assumption may be incomplete
+```
+
+rather than immediately abandoning the target architecture.
+
+Investigate:
+
+```text
+imports
+types
+route registration
+generated types
+persistence
+hidden consumers
+```
+
+before redesigning the architecture.
+
+---
+
+# 74. Avoid Architectural Overreaction
+
+One unexpected dependency does not automatically require a giant abstraction.
+
+Solve the actual boundary.
 
 Example:
 
-Even if Assessment Creation were removed, National 5 Maths curriculum would
-still belong to National5Maths Course data.
-
----
-
-# 224. Source-of-Truth Test
-
-Ask:
-
-> If this value changes, how many places should need editing?
-
-For a true global/domain rule, the ideal answer is usually:
-
 ```text
-one authoritative place
+one legacy consumer remains
 ```
 
-with consumers deriving from it.
-
----
-
-# 225. Generic-Bucket Test
-
-If the proposed folder name could contain almost anything:
+may justify:
 
 ```text
-Utils
-Shared
-Common
-Misc
+temporary adapter
 ```
 
-stop.
-
-The owner has probably not been identified.
-
----
-
-# 226. Future-Course Test
-
-For generic Assessment code, ask:
-
-> Would this still be valid for another Course?
-
-If not:
-
-Determine whether the logic belongs under the active Course.
-
----
-
-# 227. Document-vs-Workspace Test
-
-Ask:
-
-> If PaperWorkspace disappeared but compiled assessments still existed, would
-> this rule still be required?
-
-If yes:
-
-It may be true document ownership rather than workspace ownership.
-
----
-
-# 228. Route-vs-Product Test
-
-Ask:
-
-> Would this component still conceptually exist if the URL changed?
-
-If yes:
-
-It probably belongs outside `app`.
-
----
-
-# 229. Presentation-vs-Domain Test
-
-Ask:
-
-> Does this code determine what is true, or only how truth is displayed?
-
-What is true:
-
-likely domain/data ownership.
-
-How it is displayed:
-
-likely presentation ownership.
-
----
-
-# 230. Persistence-vs-State Test
-
-Ask:
-
-> Is this behaviour about the current in-memory state or about storing/restoring
-> it?
-
-Do not mix those responsibilities without reason.
-
----
-
-# 231. Final New-Chat Rule
-
-A new VecEd conversation should never need to ask:
-
-> What architecture are we using again?
-
-The answer is in the repository.
-
-The job of the new conversation is to:
+not:
 
 ```text
-READ IT
-UNDERSTAND IT
-INSPECT CURRENT SOURCE
-CONTINUE IT
+new global framework
 ```
 
-not reinvent it.
+---
+
+# 75. New Dependencies
+
+Architecture V2 should not casually introduce:
+
+- state libraries;
+- new UI frameworks;
+- new persistence infrastructure;
+- large utility dependencies
+
+merely to make migration easier.
+
+A dependency change is a separate architectural decision when significant.
 
 ---
 
-# 232. Final Development Rule
+# 76. Privacy-Sensitive Work
 
-For every substantial change:
+VecEd's pupil-data model intentionally distinguishes pupil IDs from local teacher name mappings.
 
-> Understand first.
+When working on:
 
-Then:
+```text
+Classes
+assessment pupil data
+storage
+scanning
+future marking
+```
 
-> Assign ownership.
+do not casually move pupil names into broader/server-visible data contracts.
 
-Then:
-
-> Change the smallest coherent thing.
-
-Then:
-
-> Verify it.
-
-Then:
-
-> Record what changed.
-
-This is the standard VecEd development cycle.
+Changes to this model require explicit product/privacy consideration.
 
 ---
 
-# 233. Final Refactor Rule
+# 77. Future Feature Ideas Are Not Current Architecture
 
-Architecture V2 should not be judged by how quickly files move into `src`.
+Ideas such as:
 
-It should be judged by whether those files arrive in `src` with:
+```text
+OCR
+AI marking
+batch scanning
+analytics
+Higher Maths
+```
 
-- clear ownership;
-- accurate names;
-- reduced duplication;
-- preserved behaviour;
-- understandable dependencies;
-- reliable documentation.
+may inform boundary quality.
 
-Fast migration which copies the legacy architecture is failure.
-
-Deliberate migration which improves the system is success.
+They do not justify empty placeholder folders or speculative abstractions today.
 
 ---
 
-# 234. Final ChatGPT Instruction
+# 78. Definition of a Successful Bounded Migration
 
-A ChatGPT conversation working on VecEd is not an independent architectural
-authority.
+A migration can be called complete when:
 
-It is a temporary contributor to an established project.
+```text
+canonical owner exists
+consumer uses it
+behaviour is preserved
+TypeScript passes
+relevant runtime behaviour passes
+old references have been searched
+obsolete source is removed
+no duplicate truth remains
+```
 
-Its responsibilities are to:
+If legacy implementation still materially supplies the responsibility:
 
-- understand the current project;
-- respect approved decisions;
-- investigate actual source;
-- identify genuine problems;
-- suggest improvements when evidence supports them;
-- obtain approval for material architectural change;
-- preserve working behaviour;
-- keep documentation current;
-- leave the repository easier for the next conversation to understand.
+```text
+MIGRATION IN PROGRESS
+```
 
-VecEd should have one architectural identity regardless of how many separate
-ChatGPT conversations contribute to it.
+---
+
+# 79. Definition of a Documentation Checkpoint
+
+A documentation checkpoint is appropriate when a future session would materially benefit from knowing:
+
+```text
+this owner is now canonical
+```
+
+or:
+
+```text
+this legacy boundary is now gone
+```
+
+or:
+
+```text
+this architecture changed
+```
+
+The completion of PaperWorkspace legacy detachment is an example of a good documentation checkpoint.
+
+---
+
+# 80. Final Working Rule
+
+When unsure how to proceed:
+
+```text
+READ THE CURRENT DOCUMENTATION
+        ↓
+INSPECT THE REAL SOURCE
+        ↓
+TRACE THE CONSUMERS
+        ↓
+ASK WHO OWNS THE RESPONSIBILITY
+        ↓
+WRITE THE CLEAN OWNER
+        ↓
+VERIFY BEFORE SWITCHING
+        ↓
+VERIFY AFTER SWITCHING
+        ↓
+SEARCH BEFORE DELETING
+```
+
+The purpose of this workflow is not merely to finish the current refactor.
+
+It is to make future VecEd development predictable enough that a new ChatGPT conversation can continue the project without reconstructing its history from scratch.

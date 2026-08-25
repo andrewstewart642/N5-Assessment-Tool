@@ -252,15 +252,22 @@ Do not infer deadness from a narrower path-specific search.
 
 12. Architecture V2 Source Domains
 
-The intended source architecture is:
+The intended core source architecture is:
 
 src/
 ├── app/
 ├── Assessments/
 ├── Classes/
 ├── Courses/
-├── UI/
-└── DeveloperTools/
+└── UI/
+
+A runtime-only development domain such as:
+
+src/DeveloperTools/
+
+may exist if genuine developer-facing application functionality requires it.
+
+It is not a mandatory core domain and should not be created speculatively.
 
 Repository-level tooling belongs under:
 
