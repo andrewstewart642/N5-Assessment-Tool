@@ -6,7 +6,9 @@ import {
   setCurrentSavedAssessmentId,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 
-import { setBuilderActiveCourseId } from "@/app/create-assessment/builder/builder-logic/BuilderCourseConfig";
+import {
+  saveAssessmentCreationCourseId,
+} from "../Persistence/AssessmentCourseSelectionStorage";
 
 import {
   saveAssessmentClassCoverageBrief,
@@ -161,7 +163,7 @@ export function createAssessmentFromSetup({
     return customFlags;
   }, {});
 
-  setBuilderActiveCourseId(courseConfig.courseId);
+  saveAssessmentCreationCourseId(courseConfig.courseId);
 
   saveAssessmentSetupBrief({
     courseId: courseConfig.courseId,

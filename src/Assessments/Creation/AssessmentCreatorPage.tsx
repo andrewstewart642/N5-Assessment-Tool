@@ -11,11 +11,6 @@ import { useRouter } from "next/navigation";
 
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
 
-import SkillsTree from "@/app/create-assessment/builder/components/skills-tree/SkillsTree";
-import BuilderBottomHud from "@/app/create-assessment/builder/components/builder-layout/BuilderBottomHud";
-import BuilderTopBar from "@/app/create-assessment/builder/components/builder-layout/BuilderTopBar";
-import BuilderSettingsPanel from "@/app/create-assessment/builder/components/builder-controls/BuilderSettingsPanel";
-
 import BuilderGlobalStyles from "@/app/create-assessment/builder/BuilderStyles";
 
 import {
@@ -32,36 +27,12 @@ import {
 } from "@/app/create-assessment/builder/builder-definitions/BuilderConstants";
 
 import {
-  getBuilderCourseConfig,
-} from "@/app/create-assessment/builder/builder-logic/BuilderCourseConfig";
+  getAssessmentCreationCourseConfig,
+} from "./Persistence/AssessmentCourseSelectionStorage";
 
 import {
   todayDisplayDate,
 } from "@/app/create-assessment/builder/builder-logic/BuilderDateHelpers";
-
-import type {
-  BuilderNote,
-} from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
-
-import {
-  analyseTopicBalance,
-} from "@/app/create-assessment/builder/builder-logic/AssessmentDistributionAnalysis";
-
-import {
-  buildCalculatorSuitabilityNotes,
-} from "@/app/create-assessment/builder/builder-logic/BuildCalculatorSuitabilityNotes";
-
-import {
-  buildOperationalReasoningNotes,
-} from "@/app/create-assessment/builder/builder-logic/BuildOperationalReasoningNotes";
-
-import {
-  buildStandardBalanceNotes,
-} from "@/app/create-assessment/builder/builder-logic/BuildStandardBalanceNotes";
-
-import {
-  buildTopicBalanceNotes,
-} from "@/app/create-assessment/builder/builder-logic/BuildTopicBalanceNotes";
 
 import {
   useBuilderFlashFeedback,
@@ -124,12 +95,6 @@ import {
 } from "@/app/create-assessment/builder/builder-behaviour/UseQuestionWorkflow";
 
 import {
-  useSkillsTreeState,
-} from "@/app/create-assessment/builder/builder-behaviour/UseSkillsTreeState";
-
-import BuilderPreviewPane from "@/app/create-assessment/builder/builder-preview-engine/BuilderPreviewPane";
-
-import {
   useMeasuredQuestionHeights,
 } from "@/app/create-assessment/builder/builder-preview-engine/UseMeasuredQuestionHeights";
 
@@ -141,13 +106,7 @@ import {
   usePreviewPages,
 } from "@/app/create-assessment/builder/builder-preview-engine/UsePreviewPages";
 
-import {
-  getFilteredConcepts,
-  rankConceptsByTargetMarks,
-} from "@/math-helpers/QuestionLogic";
-
 import type {
-  Question,
   Skill,
   StandardFilter,
   ThinkingTypeFilter,
@@ -157,6 +116,32 @@ import {
   UI_TEXT,
   UI_TYPO,
 } from "@/src/UI/Application/Typography/Typography";
+
+import {
+  useAssessmentQualityAnalysis,
+} from "./Analysis/useAssessmentQualityAnalysis";
+
+import AssessmentSettings from "./AssessmentSettings/AssessmentSettings";
+
+import {
+  useBuilderPaperSelection,
+} from "./Papers/useBuilderPaperSelection";
+
+import AssessmentPaperWorkspace from "./PaperWorkspace/AssessmentPaperWorkspace";
+
+import WorkspaceDivider from "./PaperWorkspace/WorkspaceDivider";
+
+import {
+  useBuilderWorkspaceDocumentLock,
+} from "./PaperWorkspace/useBuilderWorkspaceDocumentLock";
+
+import {
+  useCompactPreviewContent,
+} from "./PaperWorkspace/useCompactPreviewContent";
+
+import {
+  usePreviewViewMode,
+} from "./PaperWorkspace/usePreviewViewMode";
 
 import {
   useAssessmentCreatorAutoSave,
@@ -170,25 +155,15 @@ import {
   useAssessmentQuestionState,
 } from "./Questions/useAssessmentQuestionState";
 
+import AssessmentSkillsPanel from "./SkillsPanel/AssessmentSkillsPanel";
+
 import {
   useAssessmentSkillsCoverage,
 } from "./SkillsPanel/useAssessmentSkillsCoverage";
 
 import {
-  useBuilderPaperSelection,
-} from "./Papers/useBuilderPaperSelection";
-
-import {
-  useBuilderWorkspaceDocumentLock,
-} from "./PaperWorkspace/useBuilderWorkspaceDocumentLock";
-
-import {
-  useCompactPreviewContent,
-} from "./PaperWorkspace/useCompactPreviewContent";
-
-import {
-  usePreviewViewMode,
-} from "./PaperWorkspace/usePreviewViewMode";
+  useAssessmentSkillsPanelState,
+} from "./SkillsPanel/useAssessmentSkillsPanelState";
 
 
 const META_NAME_KEY =
@@ -228,9 +203,14 @@ export default function AssessmentCreatorPage() {
 
   useBuilderWorkspaceDocumentLock();
 
+
+  /*
+   * Course
+   */
+
   const builderCourseConfig =
     useMemo(() => {
-      return getBuilderCourseConfig();
+      return getAssessmentCreationCourseConfig();
     }, []);
 
   const activeSkillsData =
@@ -267,7 +247,8 @@ export default function AssessmentCreatorPage() {
   const [
     targetMarks,
     setTargetMarks,
-  ] = useState<number>(2);
+  ] =
+    useState<number>(2);
 
 
   /*
@@ -282,10 +263,11 @@ export default function AssessmentCreatorPage() {
     setViewPaper,
 
     handleActivePaperChange,
-  } = useBuilderPaperSelection({
-    courseConfig:
-      builderCourseConfig,
-  });
+  } =
+    useBuilderPaperSelection({
+      courseConfig:
+        builderCourseConfig,
+    });
 
 
   /*
@@ -294,14 +276,17 @@ export default function AssessmentCreatorPage() {
 
   const {
     previewViewMode,
+
     suppressPreviewSpacing,
     showPreviewAnswers,
+
     cyclePreviewViewMode,
-  } = usePreviewViewMode();
+  } =
+    usePreviewViewMode();
 
 
   /*
-   * Per-paper assessment targets
+   * Per-paper target marks
    */
 
   const {
@@ -321,32 +306,39 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Skills Tree interaction state
+   * Skills Panel state
    */
 
   const {
     collapsedCategories,
     expandedSkillIds,
-    conceptIndexBySkill,
-    difficultyBySkill,
 
     toggleCategory,
-    expandCategory,
+    toggleSkillRow,
 
-    toggleSkill:
-      toggleSkillRow,
-
-    expandSkill,
+    collapseAllSkills,
 
     setConceptIndex,
     setDifficulty,
 
-    collapseAllSkills,
-  } = useSkillsTreeState();
+    getConceptIndex,
+    getDifficulty,
+
+    restoreTreeForQuestion,
+  } =
+    useAssessmentSkillsPanelState({
+      activeSkillsData,
+
+      setStandardFilter,
+      setTargetMarks,
+
+      setActivePaper,
+      setViewPaper,
+    });
 
 
   /*
-   * Questions and drafts
+   * Question and draft state
    */
 
   const {
@@ -379,7 +371,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Builder-owned refs
+   * Workspace refs
    */
 
   const previewPaneRef =
@@ -389,9 +381,7 @@ export default function AssessmentCreatorPage() {
 
   const pageWrapperRefs =
     useRef<
-      Array<
-        HTMLDivElement | null
-      >
+      Array<HTMLDivElement | null>
     >([]);
 
   const builderDateFieldRef =
@@ -401,73 +391,83 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Assessment document settings
+   * Document settings
    */
 
   const [
     includeCoverSheet,
     setIncludeCoverSheet,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     showCoverDateTime,
     setShowCoverDateTime,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     showScottishCandidateNumberBox,
     setShowScottishCandidateNumberBox,
-  ] = useState(true);
+  ] =
+    useState(true);
 
   const [
     includeFormulaSheet,
     setIncludeFormulaSheet,
-  ] = useState(false);
+  ] =
+    useState(false);
 
 
   /*
-   * Builder UI state
+   * Builder chrome and assessment metadata
    */
 
   const [
     settingsOpen,
     setSettingsOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     assessmentName,
     setAssessmentName,
-  ] = useState(
-    "[Untitled file]"
-  );
+  ] =
+    useState(
+      "[Untitled file]"
+    );
 
   const [
     className,
     setClassName,
-  ] = useState("");
+  ] =
+    useState("");
 
   const [
     assessmentDate,
     setAssessmentDate,
-  ] = useState(
-    todayDisplayDate()
-  );
+  ] =
+    useState(
+      todayDisplayDate()
+    );
 
   const [
     builderCalendarOpen,
     setBuilderCalendarOpen,
-  ] = useState(false);
+  ] =
+    useState(false);
 
   const [
     ,
     setCreatedAt,
-  ] = useState<number>(
-    Date.now()
-  );
+  ] =
+    useState<number>(
+      Date.now()
+    );
 
 
   /*
-   * Per-paper date and sitting metadata
+   * Paper sitting metadata
    */
 
   const {
@@ -550,17 +550,15 @@ export default function AssessmentCreatorPage() {
     setShowProgressPanel,
 
     resetLayout,
-  } = useBuilderLayout({
-    defaultHudHeight:
-      DEFAULT_HUD_HEIGHT,
-  });
+  } =
+    useBuilderLayout({
+      defaultHudHeight:
+        DEFAULT_HUD_HEIGHT,
+    });
 
 
   /*
-   * Legacy Builder initialisation and local persistence.
-   *
-   * These remain during the migration because existing local-storage
-   * contracts still need to be preserved.
+   * Transitional legacy Builder persistence
    */
 
   useBuilderInitialisation({
@@ -571,6 +569,7 @@ export default function AssessmentCreatorPage() {
 
     setLeftPaneRatio,
     setHudHeight,
+
     setShowProgressPanel,
 
     setIncludeCoverSheet,
@@ -639,10 +638,13 @@ export default function AssessmentCreatorPage() {
 
   useBuilderPersistence({
     leftPaneRatio,
+
     hudHeight,
+
     showProgressPanel,
 
     includeCoverSheet,
+
     showCoverDateTime,
 
     showScottishCandidateNumberBox,
@@ -697,12 +699,13 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Builder feedback and chrome
+   * Feedback and Builder chrome
    */
 
   const {
     qualityNotes,
     flashWarning,
+
     pushFlash,
     addQualityNote,
   } =
@@ -720,12 +723,14 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Assessment progress
+   * Current assessment progress
    */
 
   const {
     assignedForView,
+
     activePaperCoverMarks,
+
     marksByPaper,
     minutesByPaper,
   } =
@@ -736,7 +741,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Assessment metadata timing
+   * Metadata timing
    */
 
   const {
@@ -745,18 +750,21 @@ export default function AssessmentCreatorPage() {
   } =
     useBuilderMetadataTiming({
       assessmentName,
+
       setAssessmentName,
 
       marksByPaper,
+
       startTimeByPaper,
 
       endTimeManuallyEditedByPaper,
+
       endTimeSetterByPaper,
     });
 
 
   /*
-   * Preview measurement
+   * Preview question measurement
    */
 
   const {
@@ -834,7 +842,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Class coverage and Skills Tree availability
+   * Class coverage and visible skills
    */
 
   const {
@@ -903,6 +911,7 @@ export default function AssessmentCreatorPage() {
       p2Target,
 
       questions,
+
       draftByPaper,
       editDraftByPaper,
 
@@ -939,130 +948,6 @@ export default function AssessmentCreatorPage() {
       useCompleteCourseCoverage:
         builderUseCompleteCourseCoverage,
     });
-
-
-  /*
-   * Restore Skills Tree controls when editing an existing question
-   */
-
-  const restoreTreeForQuestion =
-    useCallback(
-      (question: Question) => {
-        setStandardFilter(
-          question.standardFilter
-        );
-
-        setTargetMarks(
-          question.targetMarks
-        );
-
-        setActivePaper(
-          question.paper
-        );
-
-        setViewPaper(
-          question.paper
-        );
-
-        if (
-          !question.category ||
-          !question.skillId
-        ) {
-          return;
-        }
-
-        expandCategory(
-          question.category
-        );
-
-        expandSkill(
-          question.skillId
-        );
-
-        const categorySkills =
-          (
-            activeSkillsData[
-              question.category
-            ] ?? []
-          ) as Skill[];
-
-        const skill =
-          categorySkills.find(
-            (entry) =>
-              entry.id ===
-              question.skillId
-          );
-
-        if (!skill) {
-          setDifficulty(
-            question.skillId,
-            question.difficulty
-          );
-
-          return;
-        }
-
-        const filteredConcepts =
-          getFilteredConcepts(
-            skill,
-            question.standardFilter
-          );
-
-        const rankedConcepts =
-          rankConceptsByTargetMarks(
-            filteredConcepts,
-            question.targetMarks
-          );
-
-        const conceptIndex =
-          rankedConcepts.findIndex(
-            (concept) =>
-              (
-                question.conceptId &&
-                concept.id ===
-                  question.conceptId
-              ) ||
-              concept.label ===
-                question.concept ||
-              concept.code ===
-                question.concept ||
-              `${
-                concept.code
-              } ${
-                concept.shortLabel ??
-                ""
-              }`.trim() ===
-                question.concept.trim()
-          );
-
-        setConceptIndex(
-          skill.id,
-          conceptIndex >= 0
-            ? conceptIndex
-            : -1
-        );
-
-        setDifficulty(
-          question.skillId,
-          question.difficulty
-        );
-      },
-      [
-        activeSkillsData,
-
-        expandCategory,
-        expandSkill,
-
-        setConceptIndex,
-        setDifficulty,
-
-        setStandardFilter,
-        setTargetMarks,
-
-        setActivePaper,
-        setViewPaper,
-      ]
-    );
 
 
   /*
@@ -1118,24 +1003,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Skills Tree selectors
-   */
-
-  const getConceptIndex =
-    (skillId: string) =>
-      conceptIndexBySkill[
-        skillId
-      ] ?? -1;
-
-  const getDifficulty =
-    (skillId: string) =>
-      difficultyBySkill[
-        skillId
-      ] ?? 3;
-
-
-  /*
-   * Compact / answer preview transformations
+   * Preview content
    */
 
   const {
@@ -1154,7 +1022,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Preview page generation
+   * Preview pages
    */
 
   const {
@@ -1212,6 +1080,7 @@ export default function AssessmentCreatorPage() {
     pendingJumpDraftRef,
 
     previewPages,
+
     viewPaper,
 
     pageWrapperRefs,
@@ -1220,7 +1089,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Paper targets and HUD
+   * Paper target maps and HUD
    */
 
   const {
@@ -1244,170 +1113,44 @@ export default function AssessmentCreatorPage() {
         builderCourseConfig,
 
       marksByPaper,
+
       targetMarksByPaper,
+
       minutesByPaper,
     });
 
 
   /*
-   * Assessment analysis
-   *
-   * This remains in the page for this migration pass.
-   * The next architectural pass can move these calculations into Analysis/.
+   * Assessment-quality analysis
    */
 
-  const topicBalanceAnalysis =
-    useMemo(() => {
-      return analyseTopicBalance({
-        questions,
-
-        totalAssessmentMarks,
-
-        courseConfig:
-          builderCourseConfig,
-
-        includedPapers,
-      });
-    }, [
+  const {
+    mergedQualityNotes,
+  } =
+    useAssessmentQualityAnalysis({
       questions,
+
+      courseConfig:
+        builderCourseConfig,
+
+      includedPapers,
+
       totalAssessmentMarks,
-      includedPapers,
-      builderCourseConfig,
-    ]);
 
-  const topicQualityNotes =
-    useMemo<
-      Array<
-        string | BuilderNote
-      >
-    >(() => {
-      return buildTopicBalanceNotes({
-        analysis:
-          topicBalanceAnalysis,
-
-        courseConfig:
-          builderCourseConfig,
-
-        includeBasisNote: true,
-
-        includeRecommendationNote:
-          true,
-      });
-    }, [
-      topicBalanceAnalysis,
-      builderCourseConfig,
-    ]);
-
-  const operationalReasoningNotes =
-    useMemo<
-      Array<
-        string | BuilderNote
-      >
-    >(() => {
-      return buildOperationalReasoningNotes(
-        {
-          questions,
-
-          courseConfig:
-            builderCourseConfig,
-
-          includedPapers,
-
-          totalAssessmentMarks,
-
-          includeBasisNote: true,
-
-          includeRecommendationNote:
-            true,
-        }
-      );
-    }, [
-      questions,
-      includedPapers,
-      totalAssessmentMarks,
-      builderCourseConfig,
-    ]);
-
-  const calculatorSuitabilityNotes =
-    useMemo<
-      Array<
-        string | BuilderNote
-      >
-    >(() => {
-      return buildCalculatorSuitabilityNotes(
-        {
-          questions,
-
-          courseConfig:
-            builderCourseConfig,
-
-          includedPapers,
-        }
-      );
-    }, [
-      questions,
-      includedPapers,
-      builderCourseConfig,
-    ]);
-
-  const standardBalanceNotes =
-    useMemo<
-      Array<
-        string | BuilderNote
-      >
-    >(() => {
-      return buildStandardBalanceNotes({
-        questions,
-
-        courseConfig:
-          builderCourseConfig,
-
-        includedPapers,
-
-        totalAssessmentMarks,
-
-        includeBasisNote: true,
-
-        includeRecommendationNote:
-          true,
-      });
-    }, [
-      questions,
-      includedPapers,
-      totalAssessmentMarks,
-      builderCourseConfig,
-    ]);
-
-  const mergedQualityNotes =
-    useMemo(() => {
-      return [
-        ...qualityNotes,
-
-        ...topicQualityNotes,
-
-        ...operationalReasoningNotes,
-
-        ...calculatorSuitabilityNotes,
-
-        ...standardBalanceNotes,
-      ];
-    }, [
       qualityNotes,
+    });
 
-      topicQualityNotes,
-
-      operationalReasoningNotes,
-
-      calculatorSuitabilityNotes,
-
-      standardBalanceNotes,
-    ]);
-
+  /*
+   * Preserve current visible behaviour.
+   *
+   * The HUD still receives the existing transient qualityNotes collection.
+   * The merged analysis collection remains ready for the later HUD migration.
+   */
   void mergedQualityNotes;
 
 
   /*
-   * Paper display metadata
+   * Printable paper metadata
    */
 
   const {
@@ -1439,7 +1182,8 @@ export default function AssessmentCreatorPage() {
     showNoCalculatorIcon,
   } =
     useBuilderPaperPrintMetadata({
-      paper: viewPaper,
+      paper:
+        viewPaper,
 
       courseConfig:
         builderCourseConfig,
@@ -1447,7 +1191,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Workspace layout calculations
+   * Workspace dimensions
    */
 
   const viewerHudRow =
@@ -1467,7 +1211,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Navigation
+   * Compile navigation
    */
 
   const routerPushCompile =
@@ -1476,11 +1220,6 @@ export default function AssessmentCreatorPage() {
         "/compile-assessment"
       );
     }, [router]);
-
-  const dividerColour =
-    isDraggingDivider
-      ? theme.accentSoft
-      : theme.borderStandard;
 
 
   return (
@@ -1491,8 +1230,11 @@ export default function AssessmentCreatorPage() {
 
       <main
         style={{
-          height: "100vh",
-          maxHeight: "100vh",
+          height:
+            "100vh",
+
+          maxHeight:
+            "100vh",
 
           background:
             theme.bgPage,
@@ -1500,12 +1242,14 @@ export default function AssessmentCreatorPage() {
           color:
             theme.textPrimary,
 
-          display: "grid",
+          display:
+            "grid",
 
           gridTemplateRows:
             "1fr",
 
-          overflow: "hidden",
+          overflow:
+            "hidden",
 
           position:
             "relative",
@@ -1516,14 +1260,16 @@ export default function AssessmentCreatorPage() {
         <div
           ref={layoutRef}
           style={{
-            display: "grid",
+            display:
+              "grid",
 
             gridTemplateColumns:
               bodyGridColumns,
 
             minHeight: 0,
 
-            height: "100%",
+            height:
+              "100%",
 
             overflow:
               "hidden",
@@ -1532,436 +1278,336 @@ export default function AssessmentCreatorPage() {
               UI_TYPO.family,
           }}
         >
-          <SkillsTree
-            skillsData={
-              filteredSkillsData
-            }
-            totalSkillsCount={
-              totalSkillsCount
-            }
-            standardFilter={
-              standardFilter
-            }
-            setStandardFilter={
-              setStandardFilter
-            }
-            thinkingTypeFilter={
-              thinkingTypeFilter
-            }
-            setThinkingTypeFilter={
-              setThinkingTypeFilter
-            }
-            targetMarks={
-              targetMarks
-            }
-            setTargetMarks={
-              setTargetMarks
-            }
-            minTargetMarks={1}
-            maxTargetMarks={6}
-            activePaper={
-              activePaper
-            }
-            setActivePaper={
-              handleActivePaperChange
-            }
-            collapsedCategories={
-              collapsedCategories
-            }
-            toggleCategory={
-              toggleCategory
-            }
-            expandedSkillIds={
-              expandedSkillIds
-            }
-            toggleSkillRow={
-              toggleSkillRow
-            }
-            collapseAllSkills={
-              collapseAllSkills
-            }
-            getConceptIndex={
-              getConceptIndex
-            }
-            setConceptIndex={
-              setConceptIndex
-            }
-            getDifficulty={
-              getDifficulty
-            }
-            setDifficulty={
-              setDifficulty
-            }
-            addQuestionToPaper={
-              addQuestionToPaper
-            }
-            regenerateQuestionToPaper={
-              regenerateQuestionToPaper
-            }
+          <AssessmentSkillsPanel
             theme={theme}
+
+            skillsTreeProps={{
+              skillsData:
+                filteredSkillsData,
+
+              totalSkillsCount,
+
+              standardFilter,
+
+              setStandardFilter,
+
+              thinkingTypeFilter,
+
+              setThinkingTypeFilter,
+
+              targetMarks,
+
+              setTargetMarks,
+
+              minTargetMarks: 1,
+
+              maxTargetMarks: 6,
+
+              activePaper,
+
+              setActivePaper:
+                handleActivePaperChange,
+
+              collapsedCategories,
+
+              toggleCategory,
+
+              expandedSkillIds,
+
+              toggleSkillRow,
+
+              collapseAllSkills,
+
+              getConceptIndex,
+
+              setConceptIndex,
+
+              getDifficulty,
+
+              setDifficulty,
+
+              addQuestionToPaper,
+
+              regenerateQuestionToPaper,
+            }}
           />
 
-          <div
-            onMouseDown={() =>
-              setIsDraggingDivider(
-                true
-              )
+          <WorkspaceDivider
+            theme={theme}
+
+            width={
+              dividerWidth
             }
-            onMouseUp={() =>
-              setIsDraggingDivider(
-                false
-              )
+
+            isDragging={
+              isDraggingDivider
             }
-            style={{
-              width:
-                dividerWidth,
 
-              background:
-                dividerColour,
+            setIsDragging={
+              setIsDraggingDivider
+            }
+          />
 
-              cursor:
-                "col-resize",
+          <AssessmentPaperWorkspace
+            theme={theme}
 
-              position:
-                "relative",
-            }}
-            title="Drag to resize panes"
-          >
-            <div
-              style={{
-                position:
-                  "absolute",
+            viewerHudRow={
+              viewerHudRow
+            }
 
-                inset: 0,
-
-                background:
-                  "linear-gradient(to right, transparent 0, transparent 2px, rgba(147,197,253,0.20) 2px, rgba(147,197,253,0.20) 6px, transparent 6px, transparent 100%)",
-
-                opacity:
-                  isDraggingDivider
-                    ? 1
-                    : 0.3,
-              }}
-            />
-          </div>
-
-          <section
-            data-preview-answers={
+            showPreviewAnswers={
               showPreviewAnswers
-                ? "shown"
-                : "hidden"
             }
-            style={{
-              background:
-                theme.bgSurface,
 
-              display: "grid",
+            topBarProps={{
+              assessmentName,
 
-              gridTemplateRows:
-                `65px minmax(0, 1fr) ${viewerHudRow}`,
+              setAssessmentName,
 
-              minHeight: 0,
+              assessmentDate,
 
-              height: "100%",
+              setAssessmentDate,
 
-              overflow:
-                "hidden",
+              builderCalendarOpen,
 
-              position:
-                "relative",
+              setBuilderCalendarOpen,
 
-              fontFamily:
-                UI_TYPO.family,
+              builderDateFieldRef,
+
+              handleAssessmentNameFocus,
+
+              handleAssessmentNameBlur,
+
+              viewPaper,
+
+              setViewPaper,
+
+              classLevelLabel:
+                builderLevelLabel,
+
+              availableClasses:
+                builderAvailableClasses,
+
+              selectedClassIds:
+                builderSelectedClassIds,
+
+              useCompleteCourseCoverage:
+                builderUseCompleteCourseCoverage,
+
+              onToggleClass:
+                handleBuilderToggleClass,
+
+              onSelectCompleteCourseCoverage:
+                handleBuilderSelectCompleteCourseCoverage,
+
+              zoomPct,
+
+              zoomIn,
+
+              zoomOut,
+
+              currentViewerPage,
+
+              totalViewerPages,
             }}
-          >
-            <BuilderTopBar
-              theme={theme}
-              assessmentName={
-                assessmentName
-              }
-              setAssessmentName={
-                setAssessmentName
-              }
-              assessmentDate={
-                assessmentDate
-              }
-              setAssessmentDate={
-                setAssessmentDate
-              }
-              builderCalendarOpen={
-                builderCalendarOpen
-              }
-              setBuilderCalendarOpen={
-                setBuilderCalendarOpen
-              }
-              builderDateFieldRef={
-                builderDateFieldRef
-              }
-              handleAssessmentNameFocus={
-                handleAssessmentNameFocus
-              }
-              handleAssessmentNameBlur={
-                handleAssessmentNameBlur
-              }
-              viewPaper={
-                viewPaper
-              }
-              setViewPaper={
-                setViewPaper
-              }
-              classLevelLabel={
-                builderLevelLabel
-              }
-              availableClasses={
-                builderAvailableClasses
-              }
-              selectedClassIds={
-                builderSelectedClassIds
-              }
-              useCompleteCourseCoverage={
-                builderUseCompleteCourseCoverage
-              }
-              onToggleClass={
-                handleBuilderToggleClass
-              }
-              onSelectCompleteCourseCoverage={
-                handleBuilderSelectCompleteCourseCoverage
-              }
-              zoomPct={
-                zoomPct
-              }
-              zoomIn={
-                zoomIn
-              }
-              zoomOut={
-                zoomOut
-              }
-              currentViewerPage={
-                currentViewerPage
-              }
-              totalViewerPages={
-                totalViewerPages
-              }
-            />
 
-            <BuilderPreviewPane
-              theme={theme}
-              previewPaneRef={
-                previewPaneRef
-              }
-              pageWrapperRefs={
-                pageWrapperRefs
-              }
-              flashWarning={
-                flashWarning
-              }
-              previewPages={
-                previewPages
-              }
-              showWorkedAnswers={
-                showPreviewAnswers
-              }
-              onPreferredAnswerMethodChange={
-                handlePreferredAnswerMethodChange
-              }
-              viewPaper={
-                viewPaper
-              }
-              viewerScale={
-                viewerScale
-              }
-              activePaperCoverMarks={
-                activePaperCoverMarks
-              }
-              showCoverDateTime={
-                showCoverDateTime
-              }
-              coverDateTextForView={
-                coverDateTextForView
-              }
-              coverTimeTextForView={
-                coverTimeTextForView
-              }
-              printSubjectName={
-                printSubjectName
-              }
-              printQualificationBadge={
-                printQualificationBadge
-              }
-              printQualificationLabelLines={
-                printQualificationLabelLines
-              }
-              paperPrintTitle={
-                paperPrintTitle
-              }
-              paperCoverInstructionText={
-                paperCoverInstructionText
-              }
-              showNoCalculatorIcon={
-                showNoCalculatorIcon
-              }
-              showScottishCandidateNumberBox={
-                showScottishCandidateNumberBox
-              }
-              includeCoverSheet={
-                includeCoverSheet
-              }
-              includeFormulaSheet={
-                includeFormulaSheet
-              }
-              renderById={
-                renderById
-              }
-              editForView={
-                previewEditForView
-              }
-              onMeasure={
-                onMeasure
-              }
-              saveEdit={
-                saveEdit
-              }
-              removeWhileEditing={
-                removeWhileEditing
-              }
-              assignNewDraft={
-                assignNewDraft
-              }
-              removeNewDraft={
-                removeNewDraft
-              }
-              startEditLockedQuestion={
-                startEditLockedQuestion
-              }
-              canAssignNewDraft={
-                canAssignNewDraft
-              }
-              canSaveEdit={
-                canSaveEdit
-              }
-              invalidCommitMessage={
-                invalidCommitMessage
-              }
-            />
+            previewProps={{
+              previewPaneRef,
 
-            <BuilderBottomHud
-              theme={theme}
-              routerPushCompile={
-                routerPushCompile
-              }
-              showProgressPanel={
-                showProgressPanel
-              }
-              hudHeight={
-                hudHeight
-              }
-              hudResizeStartRef={
-                hudResizeStartRef
-              }
-              setIsDraggingHud={
-                setIsDraggingHud
-              }
-              viewPaper={
-                viewPaper
-              }
-              paperRows={
-                progressHudPaperRows
-              }
-              qualityNotes={
-                qualityNotes
-              }
-              saveStateLabel={
-                saveStateLabel
-              }
-              isSaving={
-                isSaving
-              }
-              previewViewMode={
-                previewViewMode
-              }
-              onCyclePreviewViewMode={
-                cyclePreviewViewMode
-              }
-            />
-          </section>
+              pageWrapperRefs,
+
+              flashWarning,
+
+              previewPages,
+
+              onPreferredAnswerMethodChange:
+                handlePreferredAnswerMethodChange,
+
+              viewPaper,
+
+              viewerScale,
+
+              activePaperCoverMarks,
+
+              showCoverDateTime,
+
+              coverDateTextForView,
+
+              coverTimeTextForView,
+
+              printSubjectName,
+
+              printQualificationBadge,
+
+              printQualificationLabelLines,
+
+              paperPrintTitle,
+
+              paperCoverInstructionText,
+
+              showNoCalculatorIcon,
+
+              showScottishCandidateNumberBox,
+
+              includeCoverSheet,
+
+              includeFormulaSheet,
+
+              renderById,
+
+              editForView:
+                previewEditForView,
+
+              onMeasure,
+
+              saveEdit,
+
+              removeWhileEditing,
+
+              assignNewDraft,
+
+              removeNewDraft,
+
+              startEditLockedQuestion,
+
+              canAssignNewDraft,
+
+              canSaveEdit,
+
+              invalidCommitMessage,
+            }}
+
+            hudProps={{
+              routerPushCompile,
+
+              showProgressPanel,
+
+              hudHeight,
+
+              hudResizeStartRef,
+
+              setIsDraggingHud,
+
+              viewPaper,
+
+              paperRows:
+                progressHudPaperRows,
+
+              qualityNotes,
+
+              saveStateLabel,
+
+              isSaving,
+
+              previewViewMode,
+
+              onCyclePreviewViewMode:
+                cyclePreviewViewMode,
+            }}
+          />
         </div>
 
-        <BuilderSettingsPanel
+        <AssessmentSettings
           open={
             settingsOpen
           }
+
           onClose={() =>
             setSettingsOpen(
               false
             )
           }
+
           theme={theme}
+
           includeCoverSheet={
             includeCoverSheet
           }
+
           setIncludeCoverSheet={
             setIncludeCoverSheet
           }
+
           showCoverDateTime={
             showCoverDateTime
           }
+
           setShowCoverDateTime={
             setShowCoverDateTime
           }
+
           assessmentDate={
             assessmentDate
           }
+
           setAssessmentDate={
             setAssessmentDate
           }
+
           coverDateByPaper={
             coverDateByPaper
           }
+
           startTimeByPaper={
             startTimeByPaper
           }
+
           endTimeByPaper={
             endTimeByPaper
           }
+
           coverDateCustomByPaper={
             coverDateCustomByPaper
           }
+
           setStartTimeForPaper={
             setStartTimeForPaper
           }
+
           setEndTimeForPaper={
             setEndTimeForPaper
           }
+
           setCoverDateForPaper={
             setCoverDateForPaper
           }
+
           setCoverDateCustomForPaper={
             setCoverDateCustomForPaper
           }
+
           setEndTimeManuallyEditedForPaper={
             setEndTimeManuallyEditedForPaper
           }
+
           showScottishCandidateNumberBox={
             showScottishCandidateNumberBox
           }
+
           setShowScottishCandidateNumberBox={
             setShowScottishCandidateNumberBox
           }
+
           includeFormulaSheet={
             includeFormulaSheet
           }
+
           setIncludeFormulaSheet={
             setIncludeFormulaSheet
           }
+
           showProgressPanel={
             showProgressPanel
           }
+
           setShowProgressPanel={
             setShowProgressPanel
           }
+
           resetLayout={
             resetLayout
           }
+
           resetZoom={
             resetZoom
           }
