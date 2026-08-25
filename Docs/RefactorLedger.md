@@ -369,52 +369,73 @@ them.
 **Current phase:**
 
 ```text
-PHASE 0 — ARCHITECTURE V2 BOOTSTRAP AND DOCUMENTATION
-```
+PHASE 1 — FULL REPOSITORY FORENSIC MAPPING
 
-No major application source migration has begun.
+Phase 0 — Preservation and Architectural Documentation — is complete.
 
-The project is currently establishing the persistent architectural memory
-required before code movement starts.
+Repository forensic mapping has begun, with the Global Application UI and
+settings/theme architecture being the first major area inspected.
 
----
+The first bounded application-source migration has also been completed:
 
-# 11. Current Overall Status
+MIG-001 — Application UI Foundations
 
-```text
+This migration established the first authoritative Architecture V2 application
+source beneath src/ while retaining temporary compatibility adapters for
+legacy imports.
+
+Broad source migration remains deliberately paused.
+
+Each further area must still be audited, mapped and approved before substantial
+movement or deletion.
+
+11. Current Overall Status
 Preservation setup             COMPLETE
 Refactor branch                COMPLETE
 Frozen baseline                COMPLETE
 Offline backup                 COMPLETE
 Architecture V2 workspace      COMPLETE
 Legacy-source hiding           COMPLETE
-src construction area          CREATED LOCALLY
+src construction area          ACTIVE
 Architecture.md                COMPLETE
 LockedDecisions.md             COMPLETE
-RepositoryMap.md               COMPLETE
-RefactorLedger.md              IN CREATION
-ChatGPTWorkflow.md             PENDING
-AGENTS.md                      PENDING
-Application source migration   NOT STARTED
+RepositoryMap.md               COMPLETE / ACTIVE
+RefactorLedger.md              COMPLETE / ACTIVE
+ChatGPTWorkflow.md             COMPLETE
+AGENTS.md                      COMPLETE
+Repository forensic mapping    IN PROGRESS
+MIG-001 UI foundations         COMPLETE / VERIFIED
+Application source migration   STARTED — BOUNDED
 Major new feature development  PAUSED
-```
 
-Update this table whenever one of these states changes.
+The documentation files marked ACTIVE remain living documents and must be
+updated as the physical repository changes.
 
----
+12. Critical Current Fact
 
-# 12. Critical Current Fact
+Architecture V2 now contains its first verified application-source
+implementation.
 
-At the initial creation of this ledger:
+The following V2 files are authoritative:
 
-> **No application source should yet be considered successfully migrated into
-> Architecture V2.**
+src/UI/Application/Colours/AccentPalette.ts
+src/UI/Application/Theme/AppTheme.ts
+src/UI/Application/Theme/ThemeMode.ts
+src/UI/Application/Typography/Typography.ts
 
-Documentation setup does not count as application-source migration.
+The corresponding legacy files currently remain as temporary compatibility
+adapters so existing imports can continue to function during incremental
+migration.
 
-The current application remains dependent upon the legacy source tree.
+The wider application still depends heavily upon the legacy source tree.
 
----
+Therefore:
+
+Architecture V2 source migration has begun, but the repository remains in a
+transitional mixed V2/legacy state.
+
+No legacy source area should be deleted merely because its first V2
+replacement has been introduced.
 
 # 13. Architecture V2 Documentation Bootstrap
 
