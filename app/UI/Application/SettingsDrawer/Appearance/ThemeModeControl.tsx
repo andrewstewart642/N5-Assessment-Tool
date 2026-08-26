@@ -1,4 +1,3 @@
-"use client";
 
 import SettingsSection from "../SettingsSection";
 import { useTheme } from "../../Theme/ThemeProvider";

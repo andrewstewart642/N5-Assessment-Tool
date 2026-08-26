@@ -1,4 +1,3 @@
-"use client";
 
 import ClassTile from "./ClassTile";
 import {

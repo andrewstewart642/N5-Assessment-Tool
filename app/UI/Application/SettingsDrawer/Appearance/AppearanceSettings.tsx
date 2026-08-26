@@ -1,4 +1,3 @@
-"use client";
 
 import DrawerHeader from "../../Components/Drawer/DrawerHeader";
 import { useSettingsDrawer } from "../SettingsDrawerProvider";

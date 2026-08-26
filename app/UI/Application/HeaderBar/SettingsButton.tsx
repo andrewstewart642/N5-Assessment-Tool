@@ -1,4 +1,3 @@
-"use client";
 
 import { useTheme } from "../Theme/ThemeProvider";
 import { UI_TYPO } from "../Typography/Typography";

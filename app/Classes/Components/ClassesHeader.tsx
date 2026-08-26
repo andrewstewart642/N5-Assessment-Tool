@@ -1,4 +1,3 @@
-"use client";
 
 import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
 
