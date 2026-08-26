@@ -7,43 +7,50 @@ import {
   type SetStateAction,
 } from "react";
 
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import type {
+  CourseAssessmentConfig,
+} from "@/course-data/course-configs/CourseConfigTypes";
 
 import type {
   Paper,
 } from "@/shared-types/AssessmentTypes";
 
 import {
-  getDefaultBuilderPaper,
-} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
+  getDefaultAssessmentPaper,
+} from "./AssessmentPaperRules";
 
-type UseBuilderPaperSelectionArgs = {
-  courseConfig: CourseAssessmentConfig;
+type UseAssessmentPaperSelectionArgs = {
+  courseConfig:
+    CourseAssessmentConfig;
 };
 
-export function useBuilderPaperSelection({
+export function useAssessmentPaperSelection({
   courseConfig,
-}: UseBuilderPaperSelectionArgs) {
-  const defaultBuilderPaper =
+}: UseAssessmentPaperSelectionArgs) {
+  const defaultAssessmentPaper =
     useMemo(() => {
-      return getDefaultBuilderPaper(
+      return getDefaultAssessmentPaper(
         courseConfig
       );
-    }, [courseConfig]);
+    }, [
+      courseConfig,
+    ]);
 
   const [
     activePaper,
     setActivePaper,
-  ] = useState<Paper>(
-    defaultBuilderPaper
-  );
+  ] =
+    useState<Paper>(
+      defaultAssessmentPaper
+    );
 
   const [
     viewPaper,
     setViewPaper,
-  ] = useState<Paper>(
-    defaultBuilderPaper
-  );
+  ] =
+    useState<Paper>(
+      defaultAssessmentPaper
+    );
 
   const handleActivePaperChange =
     useCallback(
@@ -59,14 +66,21 @@ export function useBuilderPaperSelection({
               )
             : nextValueOrUpdater;
 
-        setActivePaper(nextPaper);
-        setViewPaper(nextPaper);
+        setActivePaper(
+          nextPaper
+        );
+
+        setViewPaper(
+          nextPaper
+        );
       },
-      [activePaper]
+      [
+        activePaper,
+      ]
     );
 
   return {
-    defaultBuilderPaper,
+    defaultAssessmentPaper,
 
     activePaper,
     setActivePaper,

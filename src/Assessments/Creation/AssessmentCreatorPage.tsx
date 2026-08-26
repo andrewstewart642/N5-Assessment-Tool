@@ -107,8 +107,8 @@ import {
 } from "./Papers/useAssessmentPaperTargetState";
 
 import {
-  useBuilderPaperSelection,
-} from "./Papers/useBuilderPaperSelection";
+  useAssessmentPaperSelection,
+} from "./Papers/useAssessmentPaperSelection";
 
 import {
   getAssessmentCreationCourseConfig,
@@ -231,7 +231,7 @@ export default function AssessmentCreatorPage() {
 
     handleActivePaperChange,
   } =
-    useBuilderPaperSelection({
+    useAssessmentPaperSelection({
       courseConfig,
     });
 
@@ -896,8 +896,10 @@ export default function AssessmentCreatorPage() {
     canSaveEdit,
 
     invalidCommitMessage,
-  } =
+    } =
     useAssessmentQuestionWorkflow({
+      courseConfig,
+
       standardFilter,
       thinkingTypeFilter,
 

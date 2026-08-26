@@ -1,5 +1,3 @@
-"use client";
-
 import {
   useEffect,
   useRef,
@@ -10,7 +8,9 @@ import {
   upsertSavedAssessment,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 
-import type { SavedAssessment } from "@/app/my-assessments/types/SavedAssessment";
+import type {
+  SavedAssessment,
+} from "@/app/my-assessments/types/SavedAssessment";
 
 import type {
   Paper,
@@ -20,18 +20,18 @@ import type {
 } from "@/shared-types/AssessmentTypes";
 
 import type {
-  DraftByPaper,
-  EditDraftByPaper,
-} from "@/app/create-assessment/builder/BuilderUtils";
+  AssessmentPaperBooleanMap,
+  AssessmentPaperStringMap,
+} from "../Papers/AssessmentPaperValueMaps";
 
 import type {
-  BuilderPaperBooleanMap,
-  BuilderPaperStringMap,
-} from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
+  AssessmentTargetMarksByPaper,
+} from "../Papers/AssessmentPaperTargets";
 
 import type {
-  BuilderTargetMarksByPaper,
-} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
+  AssessmentEditQuestionDraftByPaper,
+  AssessmentQuestionDraftByPaper,
+} from "../Questions/AssessmentQuestionDraftTypes";
 
 type UseAssessmentCreatorAutoSaveArgs = {
   currentAssessmentId:
@@ -59,7 +59,7 @@ type UseAssessmentCreatorAutoSaveArgs = {
     Paper;
 
   targetMarksByPaper:
-    BuilderTargetMarksByPaper;
+    AssessmentTargetMarksByPaper;
 
   p1Target:
     number;
@@ -71,10 +71,10 @@ type UseAssessmentCreatorAutoSaveArgs = {
     Question[];
 
   draftByPaper:
-    DraftByPaper;
+    AssessmentQuestionDraftByPaper;
 
   editDraftByPaper:
-    EditDraftByPaper;
+    AssessmentEditQuestionDraftByPaper;
 
   includeCoverSheet:
     boolean;
@@ -98,16 +98,16 @@ type UseAssessmentCreatorAutoSaveArgs = {
     string;
 
   coverDateByPaper:
-    BuilderPaperStringMap;
+    AssessmentPaperStringMap;
 
   startTimeByPaper:
-    BuilderPaperStringMap;
+    AssessmentPaperStringMap;
 
   endTimeByPaper:
-    BuilderPaperStringMap;
+    AssessmentPaperStringMap;
 
   coverDateCustomByPaper:
-    BuilderPaperBooleanMap;
+    AssessmentPaperBooleanMap;
 
   p1StartTime:
     string;
@@ -182,30 +182,46 @@ export function useAssessmentCreatorAutoSave({
   const [
     saveStateLabel,
     setSaveStateLabel,
-  ] = useState("Saved");
+  ] =
+    useState(
+      "Saved"
+    );
 
   const [
     isSaving,
     setIsSaving,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
 
   const savedAssessmentRef =
-    useRef<SavedAssessment | null>(
+    useRef<
+      SavedAssessment | null
+    >(
       loadedSavedAssessment
     );
 
   const saveTimeoutRef =
     useRef<
-      ReturnType<typeof setTimeout> | null
-    >(null);
+      ReturnType<
+        typeof setTimeout
+      > | null
+    >(
+      null
+    );
 
   const hasInitialSaveCycleCompletedRef =
-    useRef(false);
+    useRef(
+      false
+    );
 
   useEffect(() => {
     savedAssessmentRef.current =
       loadedSavedAssessment;
-  }, [loadedSavedAssessment]);
+  }, [
+    loadedSavedAssessment,
+  ]);
 
   useEffect(() => {
     if (
@@ -220,7 +236,8 @@ export function useAssessmentCreatorAutoSave({
       SavedAssessment = {
       ...savedAssessmentRef.current,
 
-      updatedAt: Date.now(),
+      updatedAt:
+        Date.now(),
 
       setup: {
         ...savedAssessmentRef.current
@@ -295,7 +312,10 @@ export function useAssessmentCreatorAutoSave({
       },
     };
 
-    setIsSaving(true);
+    setIsSaving(
+      true
+    );
+
     setSaveStateLabel(
       "Saving..."
     );
@@ -307,7 +327,9 @@ export function useAssessmentCreatorAutoSave({
     savedAssessmentRef.current =
       nextSavedAssessment;
 
-    if (saveTimeoutRef.current) {
+    if (
+      saveTimeoutRef.current
+    ) {
       clearTimeout(
         saveTimeoutRef.current
       );
@@ -318,18 +340,25 @@ export function useAssessmentCreatorAutoSave({
         .current
     ) {
       saveTimeoutRef.current =
-        setTimeout(() => {
-          setIsSaving(false);
+        setTimeout(
+          () => {
+            setIsSaving(
+              false
+            );
 
-          setSaveStateLabel(
-            "Saved"
-          );
-        }, 350);
+            setSaveStateLabel(
+              "Saved"
+            );
+          },
+          350
+        );
     } else {
       hasInitialSaveCycleCompletedRef.current =
         true;
 
-      setIsSaving(false);
+      setIsSaving(
+        false
+      );
 
       setSaveStateLabel(
         "Saved"

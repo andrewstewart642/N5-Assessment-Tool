@@ -7,26 +7,31 @@ import {
   useState,
 } from "react";
 
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import type {
+  CourseAssessmentConfig,
+} from "@/course-data/course-configs/CourseConfigTypes";
 
 import type {
   Paper,
   Question,
 } from "@/shared-types/AssessmentTypes";
 
-import type {
-  DraftByPaper,
-  EditDraftByPaper,
-} from "@/app/create-assessment/builder/BuilderUtils";
-
 import {
-  buildEmptyEditDraftsByPaper,
-  buildEmptyQuestionDraftsByPaper,
-} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
+  buildEmptyAssessmentEditDraftsByPaper,
+  buildEmptyAssessmentQuestionDraftsByPaper,
+} from "./AssessmentQuestionDrafts";
+
+import type {
+  AssessmentEditQuestionDraftByPaper,
+  AssessmentQuestionDraftByPaper,
+} from "./AssessmentQuestionDraftTypes";
 
 type UseAssessmentQuestionStateArgs = {
-  courseConfig: CourseAssessmentConfig;
-  viewPaper: Paper;
+  courseConfig:
+    CourseAssessmentConfig;
+
+  viewPaper:
+    Paper;
 };
 
 export function useAssessmentQuestionState({
@@ -36,71 +41,104 @@ export function useAssessmentQuestionState({
   const [
     questions,
     setQuestions,
-  ] = useState<Question[]>([]);
+  ] =
+    useState<Question[]>(
+      []
+    );
 
   const [
     draftByPaper,
     setDraftByPaper,
-  ] = useState<DraftByPaper>(() => {
-    return buildEmptyQuestionDraftsByPaper(
-      courseConfig
+  ] =
+    useState<AssessmentQuestionDraftByPaper>(
+      () =>
+        buildEmptyAssessmentQuestionDraftsByPaper(
+          courseConfig
+        )
     );
-  });
 
   const [
     editDraftByPaper,
     setEditDraftByPaper,
-  ] = useState<EditDraftByPaper>(() => {
-    return buildEmptyEditDraftsByPaper(
-      courseConfig
+  ] =
+    useState<AssessmentEditQuestionDraftByPaper>(
+      () =>
+        buildEmptyAssessmentEditDraftsByPaper(
+          courseConfig
+        )
     );
-  });
 
   const [
     measuredHeights,
     setMeasuredHeights,
-  ] = useState<Record<string, number>>(
-    {}
-  );
+  ] =
+    useState<
+      Record<
+        string,
+        number
+      >
+    >(
+      {}
+    );
 
   const editDraftRef =
-    useRef<EditDraftByPaper>(
-      buildEmptyEditDraftsByPaper(
+    useRef<AssessmentEditQuestionDraftByPaper>(
+      buildEmptyAssessmentEditDraftsByPaper(
         courseConfig
       )
     );
 
   const pendingJumpDraftRef =
     useRef<{
-      paper: Paper;
-      draftId: string;
-    } | null>(null);
+      paper:
+        Paper;
+
+      draftId:
+        string;
+    } | null>(
+      null
+    );
 
   useEffect(() => {
     editDraftRef.current =
       editDraftByPaper;
-  }, [editDraftByPaper]);
+  }, [
+    editDraftByPaper,
+  ]);
 
   const handlePreferredAnswerMethodChange =
     useCallback(
       (
-        questionId: string,
-        methodFamilyId: string
+        questionId:
+          string,
+
+        methodFamilyId:
+          string
       ) => {
-        setQuestions((previous) =>
-          previous.map((question) =>
-            question.id === questionId
-              ? {
-                  ...question,
-                  preferredAnswerMethodFamilyId:
-                    methodFamilyId,
-                }
-              : question
-          )
+        setQuestions(
+          (
+            previous
+          ) =>
+            previous.map(
+              (
+                question
+              ) =>
+                question.id ===
+                questionId
+                  ? {
+                      ...question,
+
+                      preferredAnswerMethodFamilyId:
+                        methodFamilyId,
+                    }
+                  : question
+            )
         );
 
         setDraftByPaper(
-          (previous) =>
+          (
+            previous
+          ) =>
             Object.fromEntries(
               Object.entries(
                 previous
@@ -122,11 +160,13 @@ export function useAssessmentQuestionState({
                     : draft,
                 ]
               )
-            ) as DraftByPaper
+            ) as AssessmentQuestionDraftByPaper
         );
 
         setEditDraftByPaper(
-          (previous) =>
+          (
+            previous
+          ) =>
             Object.fromEntries(
               Object.entries(
                 previous
@@ -152,17 +192,21 @@ export function useAssessmentQuestionState({
                     : edit,
                 ]
               )
-            ) as EditDraftByPaper
+            ) as AssessmentEditQuestionDraftByPaper
         );
       },
       []
     );
 
   const editForView =
-    editDraftByPaper[viewPaper];
+    editDraftByPaper[
+      viewPaper
+    ];
 
   const newDraftForView =
-    draftByPaper[viewPaper];
+    draftByPaper[
+      viewPaper
+    ];
 
   return {
     questions,

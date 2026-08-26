@@ -1,34 +1,58 @@
-import { useMemo } from "react";
+import {
+  useMemo,
+} from "react";
 
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import type {
+  CourseAssessmentConfig,
+} from "@/course-data/course-configs/CourseConfigTypes";
 
 import type {
   Paper,
   Question,
 } from "@/shared-types/AssessmentTypes";
 
-import type { BuilderNote } from "@/app/create-assessment/builder/builder-logic/BuilderNotes";
+import {
+  analyseTopicBalance,
+} from "./AssessmentDistributionAnalysis";
 
-import { analyseTopicBalance } from "@/app/create-assessment/builder/builder-logic/AssessmentDistributionAnalysis";
+import {
+  buildCalculatorSuitabilityNotes,
+} from "./BuildCalculatorSuitabilityNotes";
 
-import { buildCalculatorSuitabilityNotes } from "@/app/create-assessment/builder/builder-logic/BuildCalculatorSuitabilityNotes";
+import {
+  buildOperationalReasoningNotes,
+} from "./BuildOperationalReasoningNotes";
 
-import { buildOperationalReasoningNotes } from "@/app/create-assessment/builder/builder-logic/BuildOperationalReasoningNotes";
+import {
+  buildStandardBalanceNotes,
+} from "./BuildStandardBalanceNotes";
 
-import { buildStandardBalanceNotes } from "@/app/create-assessment/builder/builder-logic/BuildStandardBalanceNotes";
+import {
+  buildTopicBalanceNotes,
+} from "./BuildTopicBalanceNotes";
 
-import { buildTopicBalanceNotes } from "@/app/create-assessment/builder/builder-logic/BuildTopicBalanceNotes";
+import type {
+  AssessmentQualityNote,
+} from "./AssessmentQualityNotes";
 
 type UseAssessmentQualityAnalysisArgs = {
-  questions: Question[];
+  questions:
+    Question[];
 
-  courseConfig: CourseAssessmentConfig;
+  courseConfig:
+    CourseAssessmentConfig;
 
-  includedPapers: Paper[];
+  includedPapers:
+    Paper[];
 
-  totalAssessmentMarks: number;
+  totalAssessmentMarks:
+    number;
 
-  qualityNotes: Array<string | BuilderNote>;
+  qualityNotes:
+    Array<
+      string |
+      AssessmentQualityNote
+    >;
 };
 
 export function useAssessmentQualityAnalysis({
@@ -58,7 +82,10 @@ export function useAssessmentQualityAnalysis({
 
   const topicQualityNotes =
     useMemo<
-      Array<string | BuilderNote>
+      Array<
+        string |
+        AssessmentQualityNote
+      >
     >(() => {
       return buildTopicBalanceNotes({
         analysis:
@@ -66,7 +93,8 @@ export function useAssessmentQualityAnalysis({
 
         courseConfig,
 
-        includeBasisNote: true,
+        includeBasisNote:
+          true,
 
         includeRecommendationNote:
           true,
@@ -78,7 +106,10 @@ export function useAssessmentQualityAnalysis({
 
   const operationalReasoningNotes =
     useMemo<
-      Array<string | BuilderNote>
+      Array<
+        string |
+        AssessmentQualityNote
+      >
     >(() => {
       return buildOperationalReasoningNotes({
         questions,
@@ -89,7 +120,8 @@ export function useAssessmentQualityAnalysis({
 
         totalAssessmentMarks,
 
-        includeBasisNote: true,
+        includeBasisNote:
+          true,
 
         includeRecommendationNote:
           true,
@@ -103,7 +135,10 @@ export function useAssessmentQualityAnalysis({
 
   const calculatorSuitabilityNotes =
     useMemo<
-      Array<string | BuilderNote>
+      Array<
+        string |
+        AssessmentQualityNote
+      >
     >(() => {
       return buildCalculatorSuitabilityNotes({
         questions,
@@ -120,7 +155,10 @@ export function useAssessmentQualityAnalysis({
 
   const standardBalanceNotes =
     useMemo<
-      Array<string | BuilderNote>
+      Array<
+        string |
+        AssessmentQualityNote
+      >
     >(() => {
       return buildStandardBalanceNotes({
         questions,
@@ -131,7 +169,8 @@ export function useAssessmentQualityAnalysis({
 
         totalAssessmentMarks,
 
-        includeBasisNote: true,
+        includeBasisNote:
+          true,
 
         includeRecommendationNote:
           true,

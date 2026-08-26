@@ -1,9 +1,27 @@
-import type { AssessmentLevelId } from "@/src/Assessments/Creation/Setup/AssessmentClassCoverageStorage";
+import type {
+  AssessmentLevelId,
+} from "@/src/Assessments/Creation/Setup/AssessmentClassCoverageStorage";
+
 import type {
   AssessmentType,
   BuildPriority,
   PaperStructure,
 } from "@/src/Assessments/Creation/Setup/AssessmentSetupStorage";
+
+import type {
+  AssessmentPaperBooleanMap,
+  AssessmentPaperStringMap,
+} from "@/src/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+
+import type {
+  AssessmentTargetMarksByPaper,
+} from "@/src/Assessments/Creation/Papers/AssessmentPaperTargets";
+
+import type {
+  AssessmentEditQuestionDraftByPaper,
+  AssessmentQuestionDraftByPaper,
+} from "@/src/Assessments/Creation/Questions/AssessmentQuestionDraftTypes";
+
 import type {
   CourseId,
   Paper,
@@ -11,17 +29,10 @@ import type {
   StandardFilter,
   ThinkingTypeFilter,
 } from "@/shared-types/AssessmentTypes";
-import type {
-  DraftByPaper,
-  EditDraftByPaper,
-} from "@/app/create-assessment/builder/BuilderUtils";
-import type {
-  BuilderPaperBooleanMap,
-  BuilderPaperNumberMap,
-  BuilderPaperStringMap,
-} from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
 
-export type SavedAssessmentStatus = "DRAFT" | "COMPLETE";
+export type SavedAssessmentStatus =
+  | "DRAFT"
+  | "COMPLETE";
 
 export type SavedAssessmentSetup = {
   /**
@@ -31,87 +42,173 @@ export type SavedAssessmentSetup = {
    * immediately become invalid while the app transitions from N5-only to
    * course-config-driven.
    */
-  courseId?: CourseId;
+  courseId?:
+    CourseId;
 
-  assessmentType: AssessmentType;
-  buildPriority: BuildPriority;
-  paperStructure: PaperStructure;
+  assessmentType:
+    AssessmentType;
 
-  includeCoverSheet: boolean;
-  includeFormulaSheet: boolean;
+  buildPriority:
+    BuildPriority;
 
-  marksTargetP1: number | null;
-  marksTargetP2: number | null;
-  timeTargetP1: number | null;
-  timeTargetP2: number | null;
+  paperStructure:
+    PaperStructure;
 
-  assessmentName: string;
-  className: string;
-  assessmentDate: string;
+  includeCoverSheet:
+    boolean;
 
-  levelId: AssessmentLevelId | null;
-  selectedClassIds: string[];
-  useCompleteCourseCoverage: boolean;
+  includeFormulaSheet:
+    boolean;
+
+  marksTargetP1:
+    number | null;
+
+  marksTargetP2:
+    number | null;
+
+  timeTargetP1:
+    number | null;
+
+  timeTargetP2:
+    number | null;
+
+  assessmentName:
+    string;
+
+  className:
+    string;
+
+  assessmentDate:
+    string;
+
+  levelId:
+    AssessmentLevelId | null;
+
+  selectedClassIds:
+    string[];
+
+  useCompleteCourseCoverage:
+    boolean;
 };
 
 export type SavedAssessmentBuilder = {
-  standardFilter: StandardFilter;
-  thinkingTypeFilter: ThinkingTypeFilter;
-  targetMarks: number;
+  standardFilter:
+    StandardFilter;
 
-  activePaper: Paper;
-  viewPaper: Paper;
+  thinkingTypeFilter:
+    ThinkingTypeFilter;
+
+  targetMarks:
+    number;
+
+  activePaper:
+    Paper;
+
+  viewPaper:
+    Paper;
 
   /**
-   * Generic target map used by the course-config-driven builder.
+   * Generic target map used by the course-config-driven assessment creator.
    *
    * The legacy p1Target/p2Target fields remain during the transition so older
    * saved assessments and older UI paths keep working.
    */
-  targetMarksByPaper?: BuilderPaperNumberMap;
+  targetMarksByPaper?:
+    AssessmentTargetMarksByPaper;
 
-  p1Target: number;
-  p2Target: number;
+  p1Target:
+    number;
 
-  questions: Question[];
-  draftByPaper: DraftByPaper;
-  editDraftByPaper: EditDraftByPaper;
+  p2Target:
+    number;
 
-  includeCoverSheet: boolean;
-  includeFormulaSheet: boolean;
-  showCoverDateTime: boolean;
-  showScottishCandidateNumberBox: boolean;
+  questions:
+    Question[];
 
-  assessmentName: string;
-  className: string;
-  assessmentDate: string;
+  draftByPaper:
+    AssessmentQuestionDraftByPaper;
+
+  editDraftByPaper:
+    AssessmentEditQuestionDraftByPaper;
+
+  includeCoverSheet:
+    boolean;
+
+  includeFormulaSheet:
+    boolean;
+
+  showCoverDateTime:
+    boolean;
+
+  showScottishCandidateNumberBox:
+    boolean;
+
+  assessmentName:
+    string;
+
+  className:
+    string;
+
+  assessmentDate:
+    string;
 
   /**
-   * Generic paper sitting metadata used by the course-config-driven builder.
+   * Generic paper sitting metadata used by the course-config-driven
+   * assessment creator.
    *
    * The legacy fields below remain during the transition so old saved
    * assessments can still be loaded safely.
    */
-  coverDateByPaper?: BuilderPaperStringMap;
-  startTimeByPaper?: BuilderPaperStringMap;
-  endTimeByPaper?: BuilderPaperStringMap;
-  coverDateCustomByPaper?: BuilderPaperBooleanMap;
+  coverDateByPaper?:
+    AssessmentPaperStringMap;
 
-  p1StartTime: string;
-  p1EndTime: string;
+  startTimeByPaper?:
+    AssessmentPaperStringMap;
 
-  p2CoverDate: string;
-  p2StartTime: string;
-  p2EndTime: string;
-  p2DateCustom: boolean;
+  endTimeByPaper?:
+    AssessmentPaperStringMap;
+
+  coverDateCustomByPaper?:
+    AssessmentPaperBooleanMap;
+
+  p1StartTime:
+    string;
+
+  p1EndTime:
+    string;
+
+  p2CoverDate:
+    string;
+
+  p2StartTime:
+    string;
+
+  p2EndTime:
+    string;
+
+  p2DateCustom:
+    boolean;
 };
 
 export type SavedAssessment = {
-  id: string;
-  status: SavedAssessmentStatus;
-  isPinned: boolean;
-  createdAt: number;
-  updatedAt: number;
-  setup: SavedAssessmentSetup;
-  builder: SavedAssessmentBuilder;
+  id:
+    string;
+
+  status:
+    SavedAssessmentStatus;
+
+  isPinned:
+    boolean;
+
+  createdAt:
+    number;
+
+  updatedAt:
+    number;
+
+  setup:
+    SavedAssessmentSetup;
+
+  builder:
+    SavedAssessmentBuilder;
 };

@@ -25,7 +25,7 @@ import type {
   PaperPart,
 } from "@/shared-types/PaperParts";
 
-import PaperContent from "@/app/create-assessment/builder/components/assessment-preview/PaperContent";
+import PaperContent from "@/src/UI/Documents/Components/PaperContent";
 
 import {
   GENERATOR_TEST_TARGET,

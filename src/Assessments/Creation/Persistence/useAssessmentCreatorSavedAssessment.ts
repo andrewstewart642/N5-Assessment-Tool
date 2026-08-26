@@ -1,4 +1,3 @@
-
 import {
   useEffect,
   useState,
@@ -11,7 +10,9 @@ import {
   loadSavedAssessmentById,
 } from "@/app/my-assessments/state/SavedAssessmentsStorage";
 
-import type { SavedAssessment } from "@/app/my-assessments/types/SavedAssessment";
+import type {
+  SavedAssessment,
+} from "@/app/my-assessments/types/SavedAssessment";
 
 import type {
   Paper,
@@ -21,21 +22,23 @@ import type {
 } from "@/shared-types/AssessmentTypes";
 
 import type {
-  DraftByPaper,
-  EditDraftByPaper,
-} from "@/app/create-assessment/builder/BuilderUtils";
+  AssessmentPaperBooleanMap,
+  AssessmentPaperStringMap,
+} from "../Papers/AssessmentPaperValueMaps";
 
 import type {
-  BuilderPaperBooleanMap,
-  BuilderPaperStringMap,
-} from "@/app/create-assessment/builder/builder-logic/BuilderPaperStateMaps";
+  AssessmentTargetMarksByPaper,
+} from "../Papers/AssessmentPaperTargets";
 
 import type {
-  BuilderTargetMarksByPaper,
-} from "@/app/create-assessment/builder/builder-logic/BuilderPaperTargets";
+  AssessmentEditQuestionDraftByPaper,
+  AssessmentQuestionDraftByPaper,
+} from "../Questions/AssessmentQuestionDraftTypes";
 
 type StateSetter<T> =
-  Dispatch<SetStateAction<T>>;
+  Dispatch<
+    SetStateAction<T>
+  >;
 
 type UseAssessmentCreatorSavedAssessmentArgs = {
   setCreatedAt:
@@ -65,19 +68,24 @@ type UseAssessmentCreatorSavedAssessmentArgs = {
   setViewPaper:
     StateSetter<Paper>;
 
-  setTargetMarksByPaper: (
-    values:
-      BuilderTargetMarksByPaper
-  ) => void;
+  setTargetMarksByPaper:
+    (
+      values:
+        AssessmentTargetMarksByPaper
+    ) => void;
 
   setQuestions:
     StateSetter<Question[]>;
 
   setDraftByPaper:
-    StateSetter<DraftByPaper>;
+    StateSetter<
+      AssessmentQuestionDraftByPaper
+    >;
 
   setEditDraftByPaper:
-    StateSetter<EditDraftByPaper>;
+    StateSetter<
+      AssessmentEditQuestionDraftByPaper
+    >;
 
   setIncludeCoverSheet:
     StateSetter<boolean>;
@@ -93,83 +101,109 @@ type UseAssessmentCreatorSavedAssessmentArgs = {
 
   setCoverDateByPaper:
     StateSetter<
-      BuilderPaperStringMap
+      AssessmentPaperStringMap
     >;
 
   setStartTimeByPaper:
     StateSetter<
-      BuilderPaperStringMap
+      AssessmentPaperStringMap
     >;
 
   setEndTimeByPaper:
     StateSetter<
-      BuilderPaperStringMap
+      AssessmentPaperStringMap
     >;
 
   setCoverDateCustomByPaper:
     StateSetter<
-      BuilderPaperBooleanMap
+      AssessmentPaperBooleanMap
     >;
 
   setEndTimeManuallyEditedByPaper:
     StateSetter<
-      BuilderPaperBooleanMap
+      AssessmentPaperBooleanMap
     >;
 };
 
 export function useAssessmentCreatorSavedAssessment({
   setCreatedAt,
+
   setAssessmentName,
   setClassName,
   setAssessmentDate,
+
   setStandardFilter,
   setThinkingTypeFilter,
   setTargetMarks,
+
   setActivePaper,
   setViewPaper,
+
   setTargetMarksByPaper,
+
   setQuestions,
   setDraftByPaper,
   setEditDraftByPaper,
+
   setIncludeCoverSheet,
   setIncludeFormulaSheet,
+
   setShowCoverDateTime,
   setShowScottishCandidateNumberBox,
+
   setCoverDateByPaper,
   setStartTimeByPaper,
   setEndTimeByPaper,
+
   setCoverDateCustomByPaper,
+
   setEndTimeManuallyEditedByPaper,
 }: UseAssessmentCreatorSavedAssessmentArgs) {
   const [
     currentAssessmentId,
     setCurrentAssessmentId,
-  ] = useState<string | null>(
-    null
-  );
+  ] =
+    useState<
+      string | null
+    >(
+      null
+    );
 
   const [
     loadedSavedAssessment,
     setLoadedSavedAssessment,
   ] =
-    useState<SavedAssessment | null>(
+    useState<
+      SavedAssessment | null
+    >(
       null
     );
 
   const [
     hasLoadedSavedAssessment,
     setHasLoadedSavedAssessment,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
 
   const [
     selectedClassIds,
     setSelectedClassIds,
-  ] = useState<string[]>([]);
+  ] =
+    useState<
+      string[]
+    >(
+      []
+    );
 
   const [
     useCompleteCourseCoverage,
     setUseCompleteCourseCoverage,
-  ] = useState(false);
+  ] =
+    useState(
+      false
+    );
 
   useEffect(() => {
     const nextAssessmentId =
@@ -179,7 +213,9 @@ export function useAssessmentCreatorSavedAssessment({
       nextAssessmentId
     );
 
-    if (!nextAssessmentId) {
+    if (
+      !nextAssessmentId
+    ) {
       setHasLoadedSavedAssessment(
         true
       );
@@ -196,7 +232,9 @@ export function useAssessmentCreatorSavedAssessment({
       savedAssessment
     );
 
-    if (!savedAssessment) {
+    if (
+      !savedAssessment
+    ) {
       setHasLoadedSavedAssessment(
         true
       );
@@ -338,7 +376,8 @@ export function useAssessmentCreatorSavedAssessment({
     setCoverDateCustomByPaper(
       savedAssessment.builder
         .coverDateCustomByPaper ?? {
-        P1: false,
+        P1:
+          false,
 
         P2:
           savedAssessment.builder
@@ -351,13 +390,15 @@ export function useAssessmentCreatorSavedAssessment({
         savedAssessment.builder
           .p1EndTime
           .trim()
-          .length > 0,
+          .length >
+        0,
 
       P2:
         savedAssessment.builder
           .p2EndTime
           .trim()
-          .length > 0,
+          .length >
+        0,
     });
 
     setSelectedClassIds(

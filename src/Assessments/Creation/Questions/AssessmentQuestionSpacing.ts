@@ -1,17 +1,19 @@
+import {
+  getSpacingBasePx,
+} from "@/app/paper-layout/N5-Question-Spacing-px";
+
 import type {
   Question,
 } from "@/shared-types/AssessmentTypes";
 
-import {
-  getBuilderQuestionSpacingBasePx,
-} from "@/app/create-assessment/builder/builder-logic/BuilderQuestionSpacing";
+const DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX =
+  48;
 
 export function getAssessmentQuestionSpacingBasePx(
   question: Question
 ): number {
   const spacingBasePx =
-    (question as any)
-      .spacingBasePx;
+    question.spacingBasePx;
 
   if (
     typeof spacingBasePx ===
@@ -23,8 +25,42 @@ export function getAssessmentQuestionSpacingBasePx(
     return spacingBasePx;
   }
 
-  return getBuilderQuestionSpacingBasePx(
-    (question as any)
-      .questionCode
+  return question.questionCode
+    ? getSpacingBasePx(
+        question.questionCode
+      )
+    : DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX;
+}
+
+export function applyAssessmentQuestionSpacingBase(
+  question: Question
+): Question {
+  return {
+    ...question,
+
+    spacingBasePx:
+      question.questionCode
+        ? getSpacingBasePx(
+            question.questionCode
+          )
+        : DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX,
+  };
+}
+
+export function ensureAssessmentQuestionSpacingBase(
+  question: Question
+): Question {
+  if (
+    typeof question.spacingBasePx ===
+      "number" &&
+    Number.isFinite(
+      question.spacingBasePx
+    )
+  ) {
+    return question;
+  }
+
+  return applyAssessmentQuestionSpacingBase(
+    question
   );
 }

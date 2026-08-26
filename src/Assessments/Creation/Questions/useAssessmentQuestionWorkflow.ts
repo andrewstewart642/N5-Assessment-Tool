@@ -6,6 +6,10 @@ import type {
 } from "react";
 
 import type {
+  CourseAssessmentConfig,
+} from "@/course-data/course-configs/CourseConfigTypes";
+
+import type {
   Paper,
   Question,
   StandardFilter,
@@ -19,18 +23,18 @@ import {
   type QuestionVariantSelectionMeta,
 } from "@/shared-types/QuestionSelectionTypes";
 
-import {
-  useDraftWorkflow,
-} from "@/app/create-assessment/builder/builder-behaviour/UseDraftWorkflow";
-
-import {
-  useQuestionDraftGeneration,
-} from "@/app/create-assessment/builder/builder-behaviour/UseQuestionDraftGeneration";
-
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
 } from "./AssessmentQuestionDraftTypes";
+
+import {
+  useAssessmentDraftWorkflow,
+} from "./useAssessmentDraftWorkflow";
+
+import {
+  useAssessmentQuestionDraftGeneration,
+} from "./useAssessmentQuestionDraftGeneration";
 
 type PendingJumpDraftRef =
   MutableRefObject<
@@ -47,6 +51,9 @@ type EditDraftRef =
   >;
 
 type UseAssessmentQuestionWorkflowArgs = {
+  courseConfig:
+    CourseAssessmentConfig;
+
   standardFilter:
     StandardFilter;
 
@@ -123,7 +130,8 @@ const INVALID_COMMIT_MESSAGE =
   "This question is outside your current tree filters. Adjust the filters to assign it to the paper.";
 
 function mapCalculatorStatus(
-  question: Question
+  question:
+    Question
 ): QuestionCalculatorStatus {
   if (
     question.calculatorStatus ===
@@ -143,7 +151,8 @@ function mapCalculatorStatus(
 }
 
 function buildFallbackSelectionMeta(
-  question: Question
+  question:
+    Question
 ): QuestionVariantSelectionMeta {
   const totalMarks =
     typeof question.marks ===
@@ -227,7 +236,8 @@ function buildFallbackSelectionMeta(
 }
 
 function getSelectionMetaForQuestion(
-  question: Question
+  question:
+    Question
 ): QuestionVariantSelectionMeta {
   return (
     question.selectionMeta ??
@@ -238,8 +248,11 @@ function getSelectionMetaForQuestion(
 }
 
 function isQuestionEligibleForFilters(
-  question: Question,
-  filters: QuestionSelectionFilters
+  question:
+    Question,
+
+  filters:
+    QuestionSelectionFilters
 ): boolean {
   return isVariantEligibleForFilters(
     getSelectionMetaForQuestion(
@@ -250,6 +263,8 @@ function isQuestionEligibleForFilters(
 }
 
 export function useAssessmentQuestionWorkflow({
+  courseConfig,
+
   standardFilter,
   thinkingTypeFilter,
   targetMarks,
@@ -292,7 +307,9 @@ export function useAssessmentQuestionWorkflow({
     addQuestionToPaper,
     regenerateQuestionToPaper,
   } =
-    useQuestionDraftGeneration({
+    useAssessmentQuestionDraftGeneration({
+      courseConfig,
+
       standardFilter,
       thinkingTypeFilter,
       targetMarks,
@@ -342,7 +359,7 @@ export function useAssessmentQuestionWorkflow({
     saveEdit,
     removeWhileEditing,
   } =
-    useDraftWorkflow({
+    useAssessmentDraftWorkflow({
       viewPaper,
 
       questions,
