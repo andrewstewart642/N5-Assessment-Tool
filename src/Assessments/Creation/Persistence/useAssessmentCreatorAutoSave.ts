@@ -6,11 +6,11 @@ import {
 
 import {
   upsertSavedAssessment,
-} from "@/app/my-assessments/state/SavedAssessmentsStorage";
+} from "@/src/Assessments/SavedAssessments/SavedAssessmentsStorage";
 
 import type {
   SavedAssessment,
-} from "@/app/my-assessments/types/SavedAssessment";
+} from "@/src/Assessments/SavedAssessments/SavedAssessment";
 
 import type {
   Paper,

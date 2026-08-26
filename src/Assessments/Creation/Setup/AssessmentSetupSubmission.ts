@@ -4,7 +4,7 @@ import type { Paper } from "@/shared-types/AssessmentTypes";
 import {
   createSavedAssessmentDraft,
   setCurrentSavedAssessmentId,
-} from "@/app/my-assessments/state/SavedAssessmentsStorage";
+} from "@/src/Assessments/SavedAssessments/SavedAssessmentsStorage";
 
 import {
   saveAssessmentCreationCourseId,

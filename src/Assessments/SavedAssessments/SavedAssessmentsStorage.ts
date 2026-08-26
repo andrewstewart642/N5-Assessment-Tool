@@ -11,7 +11,7 @@ import type {
 
 import type {
   SavedAssessment,
-} from "../types/SavedAssessment";
+} from "./SavedAssessment";
 
 const SAVED_ASSESSMENTS_STORAGE_KEY =
   "assessment_builder_saved_assessments_v1";

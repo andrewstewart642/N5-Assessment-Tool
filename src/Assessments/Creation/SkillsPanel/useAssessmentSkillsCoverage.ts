@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import type { SchoolClass } from "@/src/Classes/ClassTypes";
-import type { SavedAssessment } from "@/app/my-assessments/types/SavedAssessment";
+import type { SavedAssessment } from "@/src/Assessments/SavedAssessments/SavedAssessment";
 
 import type {
   Skill,
