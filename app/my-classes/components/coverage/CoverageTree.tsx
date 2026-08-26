@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { skillsData } from "@/course-data/N5-Skills";
+import { skillsData } from "@/src/Courses/National5Maths/Skills/National5MathsSkills";
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 import {
   getCoverageSkillById,

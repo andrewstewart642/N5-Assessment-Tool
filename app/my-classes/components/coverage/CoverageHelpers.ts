@@ -1,4 +1,4 @@
-import { skillsData } from "@/course-data/N5-Skills";
+import { skillsData } from "@/src/Courses/National5Maths/Skills/National5MathsSkills";
 import type { Skill } from "@/shared-types/AssessmentTypes";
 
 type SkillConceptLike = {
