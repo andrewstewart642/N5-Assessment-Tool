@@ -68,21 +68,3 @@ export function getRegisteredCourseAssessmentConfigs():
         courseConfig !== undefined
   );
 }
-
-/**
- * Transitional compatibility API.
- *
- * Historical consumers still use the shorter
- * "CourseConfig" terminology.
- */
-export const COURSE_CONFIG_REGISTRY =
-  COURSE_REGISTRY;
-
-export const getCourseConfigById =
-  getCourseAssessmentConfigById;
-
-export const getDefaultCourseConfig =
-  getDefaultCourseAssessmentConfig;
-
-export const getRegisteredCourseConfigs =
-  getRegisteredCourseAssessmentConfigs;
