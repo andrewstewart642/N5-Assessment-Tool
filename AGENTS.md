@@ -85,14 +85,11 @@ app/
 Current high-level structure:
 
 app/
-├── [...route]/
 ├── Assessments/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
 ├── UI/
-├── favicon.ico
-├── globals.css
 ├── layout.tsx
 └── page.tsx
 
@@ -103,6 +100,10 @@ src/
 tree.
 
 Do not recreate one.
+
+Global application CSS is owned beneath:
+
+app/UI/Application/Styles/ApplicationGlobals.css
 
 5. Primary Ownership Areas
 
@@ -532,31 +533,43 @@ GeneratorTester/
 
 This is runtime source.
 
-30. Repository Tools
+30. Repository Tooling and Migration History
 
-Repository tooling and historical migrations belong beneath:
+There is currently no repository-level:
 
 Tools/
 
-This is different from:
+tree.
+
+Historical one-off migration tooling used during Architecture V2 has been removed from the live repository after its work was completed and verified.
+
+Migration history belongs in:
+
+Docs/RefactorLedger.md
+
+and Git history.
+
+Runtime application code must not depend on historical migration material.
+
+If repository tooling is introduced in future, it must have a specific justified responsibility and must remain separate from:
 
 app/DeveloperTools/
 
-Rule:
-
-app/DeveloperTools/
-→ runtime developer application functionality
-
-Tools/
-→ repository tooling / migration history
-
-Runtime application code should not depend on historical migration material.
+which owns developer functionality that executes inside the application runtime.
 
 31. Routing
 
-Application routes are primarily dispatched through:
+Public application URLs are defined through internal rewrites in:
 
-app/[...route]/page.tsx
+next.config.ts
+
+Those rewrites dispatch into:
+
+app/page.tsx
+
+app/page.tsx is the single thin application routing adapter.
+
+It may select the appropriate product-owned page implementation from the internal route information supplied by the rewrite layer.
 
 Do not recreate duplicate feature folders solely to represent URLs.
 
@@ -568,11 +581,7 @@ app/my-assessments/
 app/my-classes/
 app/dev/
 
-as parallel source architecture.
-
-The catch-all route is a thin adapter.
-
-Product implementation stays with its owner.
+Feature implementation belongs beneath its product owner.
 
 32. Next.js Special Filenames
 
@@ -958,10 +967,9 @@ as current architectural guidance.
 Use:
 
 Docs/RefactorLedger.md
-Tools/LegacyMigrations/
+Git history
 
-as history.
-
+as migration history.
 54. Documentation Changes
 
 When architecture changes, update the relevant current-state documentation.

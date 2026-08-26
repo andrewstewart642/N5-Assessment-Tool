@@ -16,7 +16,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
     "plugins": [
       {
         "name": "next"
@@ -26,7 +25,8 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "incremental": true
   },
   "include": [
     "next-env.d.ts",
@@ -37,12 +37,6 @@
     "**/*.mts"
   ],
   "exclude": [
-    "node_modules",
-    "Tools/LegacyMigrations/PercentageCatalogueHardening",
-    "Tools/LegacyMigrations/PercentageCatalogueHardening/**",
-    ".percentage_catalogue_hardening_backup",
-    ".percentage_catalogue_hardening_backup/**",
-    "percentage_catalogue_hardening_backup",
-    "percentage_catalogue_hardening_backup/**"
+    "node_modules"
   ]
 }

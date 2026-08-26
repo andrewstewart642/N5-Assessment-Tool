@@ -8,7 +8,7 @@ import {
 } from "next/font/google";
 
 import "katex/dist/katex.min.css";
-import "./globals.css";
+import "@/app/UI/Application/Styles/ApplicationGlobals.css";
 
 import HeaderBar from "@/app/UI/Application/HeaderBar/HeaderBar";
 

@@ -3203,3 +3203,47 @@ a list of suggestions to reconsider
 ```
 
 Architecture V2 should evolve deliberately, not accidentally.
+
+---
+
+## LD-267 — VecEd uses one application page with centralised public-route rewrites
+
+**Status:** LOCKED — IMPLEMENTED
+
+The runtime App Router surface is intentionally minimal:
+
+```text
+app/
+├── Assessments/
+├── Classes/
+├── Courses/
+├── DeveloperTools/
+├── UI/
+├── layout.tsx
+└── page.tsx
+
+Public application URLs are preserved through rewrites defined in:
+
+next.config.ts
+
+Those rewrites dispatch into:
+
+app/page.tsx
+
+which acts as the single thin application routing adapter.
+
+Product implementation must remain beneath its owning domain rather than
+recreating filesystem route trees for public URLs.
+
+Do not recreate:
+
+app/create-assessment/
+app/my-assessments/
+app/my-classes/
+app/compile-assessment/
+app/dev/
+
+merely to mirror URL structure.
+
+The routing model may be changed in future only for a genuine framework,
+performance or product requirement, not simply to mirror URLs physically.

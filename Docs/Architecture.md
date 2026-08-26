@@ -110,14 +110,11 @@ app/
 The top-level runtime source structure is:
 
 app/
-├── [...route]/
 ├── Assessments/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
 ├── UI/
-├── favicon.ico
-├── globals.css
 ├── layout.tsx
 └── page.tsx
 
@@ -126,6 +123,10 @@ There is no separate runtime:
 src/
 
 tree.
+
+Global application CSS is owned beneath:
+
+app/UI/Application/Styles/ApplicationGlobals.css
 
 The root app/ folder therefore serves two roles:
 
@@ -172,28 +173,31 @@ These are separate concerns.
 
 6. Routing Architecture
 
-Most application URLs are dispatched by:
+VecEd uses a deliberately minimal Next.js routing surface.
 
-app/[...route]/page.tsx
+Public application URLs are mapped through internal rewrites defined in:
 
-The catch-all route is intentionally thin.
+next.config.ts
+
+Those rewrites preserve the public browser URL while dispatching requests into:
+
+app/page.tsx
+
+app/page.tsx is the single thin application routing adapter.
 
 Its responsibility is to:
 
-read route segments,
-resolve route parameters,
+read the internal route information supplied by the rewrite layer,
+resolve route parameters where required,
 select the appropriate product-owned page,
-call notFound() when no route exists.
+call notFound() when no valid route exists.
 
-It must not accumulate feature logic.
-
-The homepage remains:
-
-app/page.tsx
+It must not accumulate feature implementation.
 
 Global App Router composition remains:
 
 app/layout.tsx
+
 7. Current Public Route Contract
 
 The current route contract includes:
@@ -1410,11 +1414,11 @@ GeneratorTester/
 
 Developer Tools should not contain production educational ownership merely because a developer tool consumes it.
 
-78. Repository Tools
+78. Repository Tooling
 
-Repository tooling belongs beneath:
+There is currently no permanent repository-level Tools/ tree.
 
-Tools/
+Historical migration tooling used during Architecture V2 was removed after its work was completed and verified.
 
 This is separate from:
 
@@ -1425,20 +1429,23 @@ The distinction is:
 app/DeveloperTools/
 → runtime application tooling
 
-Tools/
-→ repository scripts, migration artefacts and historical tooling
+repository tooling
+→ temporary or specifically justified development/migration scripts outside runtime source
 
-Runtime application code should not depend on historical migration tooling.
+Repository tooling must not become a generic dumping ground.
+
+Runtime application code must never depend on historical migration tooling.
 
 79. Legacy Migration Material
 
-Historical one-off migration material belongs beneath:
+Completed one-off migration material is not retained as live repository source merely for historical interest.
 
-Tools/LegacyMigrations/
+Architecture V2 migration history is preserved through:
 
-It exists as repository history/tooling.
+Docs/RefactorLedger.md
+Git history
 
-Legacy migrations are evidence of how the repository arrived at its current state.
+Historical migration artefacts are evidence of how the repository arrived at an earlier state.
 
 They are not precedent for new runtime architecture.
 

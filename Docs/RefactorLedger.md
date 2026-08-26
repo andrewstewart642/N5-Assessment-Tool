@@ -2468,3 +2468,121 @@ ARCHITECTURE V2 SIGN-OFF
 COMMIT DOCUMENTATION / FINAL CHECKPOINT
 
 Do not begin unrelated feature development until this final verification is complete unless explicitly requested.
+
+# 58. Architecture V2 Final Sign-Off — 26 August 2026
+
+Architecture V2 is now:
+
+```text
+COMPLETE
+
+The repository-wide migration and final cleanup have been completed and verified.
+
+58.1 Final Runtime Structure
+
+The canonical runtime source root is:
+
+app/
+├── Assessments/
+├── Classes/
+├── Courses/
+├── DeveloperTools/
+├── UI/
+├── layout.tsx
+└── page.tsx
+
+There is no separate runtime src/ tree and no physical feature-route tree.
+
+58.2 Final Routing Architecture
+
+Public URLs are preserved through internal rewrites owned by:
+
+next.config.ts
+
+The single application page:
+
+app/page.tsx
+
+acts as the thin routing dispatcher and selects product-owned page implementations.
+
+The historical:
+
+app/[...route]/page.tsx
+
+adapter has been retired.
+
+58.3 Final Repository Cleanup
+
+The final cleanup removed proven dead or historical repository material, including:
+
+README.md
+Tools/LegacyMigrations/
+public/ starter assets
+postcss.config.mjs
+app/favicon.ico
+
+Unused Tailwind/PostCSS dependencies were removed.
+
+Global application CSS moved from:
+
+app/globals.css
+
+to:
+
+app/UI/Application/Styles/ApplicationGlobals.css
+
+The required Turbopack project-root configuration remains in:
+
+next.config.ts
+
+Required framework/generated files remain available even where they are hidden from the normal VS Code Explorer working surface.
+
+58.4 Dependency and Security Checkpoint
+
+The project was upgraded to:
+
+Next.js 16.3.3
+eslint-config-next 16.3.3
+
+The final npm audit reported:
+
+0 vulnerabilities
+
+for both the complete dependency tree and production dependencies.
+
+58.5 Final Verification
+
+The final Architecture V2 tree passed:
+
+TypeScript typecheck
+production Next.js build
+git diff --check
+repository structural inspection
+public-route browser smoke testing
+direct URL refresh testing
+browser navigation testing
+Assessment Setup
+Assessment Creator
+question interaction
+save/reopen behaviour
+Compilation
+My Assessments
+My Classes
+Class Details
+application settings
+Assessment settings
+generated-document behaviour
+
+The final application remained functional after the routing and repository cleanup.
+
+58.6 Architecture V2 Status
+
+The Architecture V2 repository-wide refactor is signed off.
+
+Future development should proceed on top of this architecture rather than continuing the repository-wide migration.
+
+Architecture V2 being complete does not mean VecEd itself is complete.
+
+Future changes should be feature work, bounded architectural improvement, bug fixing or deliberate compatibility migration.
+
+Historical migration entries earlier in this ledger remain historical truth and must not be rewritten merely to match the final physical structure.

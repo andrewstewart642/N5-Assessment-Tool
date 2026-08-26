@@ -30,8 +30,6 @@ The high-level repository structure is:
 N5-Assessment-Tool/
 ├── app/
 ├── Docs/
-├── Tools/
-├── public/
 ├── AGENTS.md
 └── framework / package / TypeScript configuration files
 
@@ -50,14 +48,11 @@ source tree.
 The current runtime architecture is:
 
 app/
-├── [...route]/
 ├── Assessments/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
 ├── UI/
-├── favicon.ico
-├── globals.css
 ├── layout.tsx
 └── page.tsx
 
@@ -72,6 +67,10 @@ UI/
 These folders describe product responsibility.
 
 They are not route folders.
+
+Global application CSS lives beneath:
+
+app/UI/Application/Styles/ApplicationGlobals.css
 
 4. Next.js Routing
 4.1 Routing philosophy
@@ -89,17 +88,20 @@ app/
 
 must not be recreated.
 
-Instead, application URLs are dispatched through:
+Instead, public application URLs are mapped through:
 
-app/[...route]/page.tsx
+next.config.ts
 
-The homepage remains:
+using internal rewrites.
+
+Those rewrites dispatch into the single application page:
 
 app/page.tsx
 
 The global Next.js layout remains:
 
 app/layout.tsx
+
 4.2 Current application routes
 
 The catch-all router currently resolves the following URLs:
@@ -138,16 +140,18 @@ The catch-all router currently resolves the following URLs:
 
 4.3 Routing rule
 
-app/[...route]/page.tsx is a routing adapter only.
+next.config.ts owns the public URL rewrite map.
 
-It may:
+app/page.tsx is the thin application routing adapter.
 
-inspect route segments,
-resolve route parameters,
+Together they may:
+
+preserve public URLs,
+supply internal route identifiers and parameters,
 select the appropriate product-owned page,
 invoke notFound() for unsupported routes.
 
-It must not become a home for feature implementation.
+Neither file should become a home for feature implementation.
 
 Feature implementation belongs in its owning product folder.
 
@@ -1000,26 +1004,19 @@ app/DeveloperTools/
 
 DeveloperTools/ is application source.
 
-It is distinct from repository-level:
+51. Repository Tooling
 
-Tools/
-51. Repository Tools
+There is currently no permanent repository-level Tools/ directory.
 
-Repository tooling and migration artefacts live beneath:
+The historical one-off migration tooling used during Architecture V2 was removed once its work had been completed and verified.
 
-Tools/
+Migration history is preserved in:
 
-These are not runtime application source.
+Docs/RefactorLedger.md
 
-Historical one-off migration material currently belongs beneath:
+and Git history.
 
-Tools/LegacyMigrations/
-
-Current historical migration material includes:
-
-Tools/LegacyMigrations/PercentageCatalogueHardening/
-
-Historical tooling should not be imported by runtime source.
+Runtime source must not depend on historical migration tooling.
 
 52. Documentation
 
@@ -1096,8 +1093,6 @@ UI/Documents
 DeveloperTools
 → runtime development utilities
 
-Tools
-→ repository tooling and historical migrations
 55. Dependency Direction
 
 Preferred high-level dependency direction:
@@ -1174,7 +1169,12 @@ Their implementation belongs in the product architecture.
 
 Routing is handled by:
 
-app/[...route]/page.tsx
+next.config.ts
+        ↓
+app/page.tsx
+
+Public URLs are preserved through internal rewrites rather than physical feature-route folders.
+
 59. Next.js Special Filename Rule
 
 Because the complete runtime source now lives beneath Next.js's:
@@ -1310,10 +1310,6 @@ app/UI/
 app/DeveloperTools/
 
 → runtime developer functionality
-
-Tools/
-
-→ repository tooling/history
 
 without needing to understand the Architecture V2 migration that produced this structure.
 
