@@ -2,6 +2,7 @@
 
 import {
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -168,6 +169,36 @@ import AssessmentCreatorStyles from "./AssessmentCreatorStyles";
 
 
 export default function AssessmentCreatorPage() {
+  const [
+    hasMounted,
+    setHasMounted,
+  ] =
+    useState(
+      false
+    );
+
+  useEffect(
+    () => {
+      setHasMounted(
+        true
+      );
+    },
+    []
+  );
+
+  if (
+    !hasMounted
+  ) {
+    return null;
+  }
+
+  return (
+    <AssessmentCreatorContent />
+  );
+}
+
+
+function AssessmentCreatorContent() {
   const router =
     useRouter();
 
