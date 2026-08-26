@@ -1,8 +1,8 @@
-import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
+import ClassCoverageSelect from "@/src/Classes/Coverage/ClassCoverageSelect";
 
 import type {
   SchoolClass,
-} from "@/app/my-classes/types/Classes";
+} from "@/src/Classes/ClassTypes";
 
 import type {
   Paper,

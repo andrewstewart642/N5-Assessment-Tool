@@ -9,7 +9,7 @@ import {
   getSkillConceptSummary,
   getSkillTitle,
   type SkillLike,
-} from "./CoverageHelpers";
+} from "./ClassCoverageHelpers";
 
 type Props = {
   selectedSkillId: string | null;

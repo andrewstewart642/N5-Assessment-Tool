@@ -6,7 +6,7 @@ import {
   LEVEL_OPTIONS,
   type CourseOption,
   type LevelOption,
-} from "../types/Classes";
+} from "../ClassTypes";
 import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {

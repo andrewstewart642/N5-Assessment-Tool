@@ -1,6 +1,6 @@
-import { readMyClassesStorageValue } from "@/app/my-classes/state/ClassStorageKeys";
-import { normaliseClass } from "@/app/my-classes/state/ClassNormalisation";
-import type { SchoolClass } from "@/app/my-classes/types/Classes";
+import { readMyClassesStorageValue } from "@/src/Classes/State/ClassStorage";
+import { normaliseClass } from "@/src/Classes/State/ClassNormalisation";
+import type { SchoolClass } from "@/src/Classes/ClassTypes";
 
 import type { Skill } from "@/shared-types/AssessmentTypes";
 

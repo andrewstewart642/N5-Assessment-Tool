@@ -1,5 +1,5 @@
-import ClassCoverageSelect from "@/app/components/ClassCoverageSelect";
-import type { SchoolClass } from "@/app/my-classes/types/Classes";
+import ClassCoverageSelect from "@/src/Classes/Coverage/ClassCoverageSelect";
+import type { SchoolClass } from "@/src/Classes/ClassTypes";
 
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 import { UI_TYPO } from "@/src/UI/Application/Typography/Typography";

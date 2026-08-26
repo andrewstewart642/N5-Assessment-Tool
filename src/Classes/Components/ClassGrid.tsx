@@ -5,7 +5,7 @@ import {
   COURSE_OPTIONS,
   type CourseOption,
   type SchoolClass,
-} from "../types/Classes";
+} from "../ClassTypes";
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {

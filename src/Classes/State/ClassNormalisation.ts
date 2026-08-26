@@ -5,7 +5,7 @@ import {
   getDefaultCourseId,
 } from "@/src/Courses/CourseCatalog";
 import type { CourseId } from "@/shared-types/AssessmentTypes";
-import type { CourseOption, LevelOption, SchoolClass } from "../types/Classes";
+import type { CourseOption, LevelOption, SchoolClass } from "../ClassTypes";
 
 export function isCourseOption(value: unknown): value is CourseOption {
   return (

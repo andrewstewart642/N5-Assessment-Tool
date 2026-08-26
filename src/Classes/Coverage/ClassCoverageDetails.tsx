@@ -6,7 +6,7 @@ import {
   getConceptBodyLines,
   getCoverageSkillById,
   getSkillTitle,
-} from "./CoverageHelpers";
+} from "./ClassCoverageHelpers";
 
 type Props = {
   selectedSkillId: string | null;

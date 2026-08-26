@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { SchoolClass } from "../types/Classes";
+import type { SchoolClass } from "../ClassTypes";
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 
 type Props = {

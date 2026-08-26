@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import type { CourseOption, LevelOption, SchoolClass } from "../types/Classes";
+import type { CourseOption, LevelOption, SchoolClass } from "../ClassTypes";
 import {
   buildNewSchoolClass,
   normaliseClass,
@@ -10,7 +10,7 @@ import {
 import {
   readMyClassesStorageValue,
   writeMyClassesStorageValue,
-} from "./ClassStorageKeys";
+} from "./ClassStorage";
 
 function makeClassId(): string {
   return `class-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -41,7 +41,7 @@ type UpdateCompletedSkillsArgs = {
   completedSkillIds: string[];
 };
 
-export function UseClasses() {
+export function useClasses() {
   const [classes, setClasses] = useState<SchoolClass[]>([]);
   const [hasLoaded, setHasLoaded] = useState(false);
 

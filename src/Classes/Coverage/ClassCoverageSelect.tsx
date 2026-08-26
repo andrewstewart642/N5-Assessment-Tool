@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { SchoolClass } from "@/app/my-classes/types/Classes";
+import type { SchoolClass } from "@/src/Classes/ClassTypes";
 import type { Theme } from "@/src/UI/Application/Theme/AppTheme";
 import { UI_TYPO } from "@/src/UI/Application/Typography/Typography";
 import { INTERACTION } from "@/src/UI/Application/Motion/InteractionTokens";

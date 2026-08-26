@@ -1,6 +1,6 @@
-import type { SchoolClass } from "@/app/my-classes/types/Classes";
-import { normaliseClass } from "@/app/my-classes/state/ClassNormalisation";
-import { readMyClassesStorageValue } from "@/app/my-classes/state/ClassStorageKeys";
+import type { SchoolClass } from "@/src/Classes/ClassTypes";
+import { normaliseClass } from "@/src/Classes/State/ClassNormalisation";
+import { readMyClassesStorageValue } from "@/src/Classes/State/ClassStorage";
 
 export function loadAssessmentSetupClasses(): SchoolClass[] {
   if (typeof window === "undefined") {
