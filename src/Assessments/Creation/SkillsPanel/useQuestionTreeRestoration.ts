@@ -7,7 +7,7 @@ import {
 import {
   getFilteredConcepts,
   rankConceptsByTargetMarks,
-} from "@/src/Courses/National5Maths/QuestionWriting/ConceptSelection";
+} from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptSelection";
 
 import type {
   DifficultyLevel,

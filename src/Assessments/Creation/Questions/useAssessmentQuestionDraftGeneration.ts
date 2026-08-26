@@ -30,7 +30,7 @@ import {
   buildGenerated,
   buildSkillLinks,
   getConceptFromSelection,
-} from "@/src/Courses/National5Maths/QuestionWriting/QuestionWriterRegistry";
+} from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/QuestionWriterRegistry";
 
 import {
   formatAssessmentPaperSuitability,
