@@ -6,7 +6,7 @@ import type {
 
 import type {
   GeneratedReversePercentageQuestion,
-} from "@/course-data/question-generators/percentages/N5MathsReversePercentageGenerator";
+} from "@/src/Courses/National5Maths/QuestionWriting/Numerical/N04_Percentages/N04_1_PercentagesReverse/N04_1_PercentagesReverseQuestionWriter";
 
 import {
   getN5MathsAnswerViewMethodEvidence,
@@ -15,7 +15,7 @@ import {
 import {
   ANSWER_METHOD_FAMILY_IDS,
   ANSWER_METHOD_VARIANT_IDS,
-} from "@/course-data/answer-generators/AnswerMethodIds";
+} from "@/src/Courses/National5Maths/AnswerMethods/AnswerMethodIds";
 
 
 type QuantityType =

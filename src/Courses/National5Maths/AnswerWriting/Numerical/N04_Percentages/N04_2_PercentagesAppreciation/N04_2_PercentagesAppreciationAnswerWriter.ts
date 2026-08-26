@@ -12,7 +12,7 @@ import type {
   CompoundPercentageNumericProfile,
   CompoundPercentageStage,
   GeneratedCompoundPercentageQuestion,
-} from "@/course-data/question-generators/compound-percentages/N5MathsCompoundPercentageGenerator";
+} from "@/src/Courses/National5Maths/QuestionWriting/Numerical/N04_Percentages/N04_2_PercentagesAppreciation/N04_2_PercentagesAppreciationQuestionWriter";
 
 import {
   getN5MathsAnswerViewMethodEvidence,
@@ -20,7 +20,7 @@ import {
 
 import {
   ANSWER_METHOD_FAMILY_IDS,
-} from "@/course-data/answer-generators/AnswerMethodIds";
+} from "@/src/Courses/National5Maths/AnswerMethods/AnswerMethodIds";
 
 
 const COMPOUND_PERCENTAGE_PAPER =

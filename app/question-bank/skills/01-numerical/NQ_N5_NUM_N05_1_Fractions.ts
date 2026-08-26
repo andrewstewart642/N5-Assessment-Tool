@@ -22,11 +22,11 @@ import {
   generateN5MathsFractionQuestion,
   type FractionDifficulty,
   type GeneratedFractionQuestion,
-} from "@/course-data/question-generators/fractions/N5MathsFractionGenerator";
+} from "@/src/Courses/National5Maths/QuestionWriting/Numerical/N05_Fractions/N05_1_Fractions/N05_1_FractionsQuestionWriter";
 
 import {
   generateN5MathsFractionWorkedAnswers,
-} from "@/course-data/answer-generators/fractions/N5MathsFractionAnswerGenerator";
+} from "@/src/Courses/National5Maths/AnswerWriting/Numerical/N05_Fractions/N05_1_Fractions/N05_1_FractionsAnswerWriter";
 
 
 type FractionOperationMode =

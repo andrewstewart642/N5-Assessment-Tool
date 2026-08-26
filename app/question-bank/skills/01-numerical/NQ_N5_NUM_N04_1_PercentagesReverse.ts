@@ -9,7 +9,7 @@ import type {
 
 import {
   generateN5MathsReversePercentageWorkedAnswers,
-} from "@/course-data/answer-generators/percentages/N5MathsReversePercentageAnswerGenerator";
+} from "@/src/Courses/National5Maths/AnswerWriting/Numerical/N04_Percentages/N04_1_PercentagesReverse/N04_1_PercentagesReverseAnswerWriter";
 
 import type {
   QuestionVariantSelectionMeta,
@@ -19,7 +19,7 @@ import {
   generateN5MathsReversePercentageQuestion,
   type ReversePercentageDifficulty,
   type ReversePercentagePaper,
-} from "@/course-data/question-generators/percentages/N5MathsReversePercentageGenerator";
+} from "@/src/Courses/National5Maths/QuestionWriting/Numerical/N04_Percentages/N04_1_PercentagesReverse/N04_1_PercentagesReverseQuestionWriter";
 
 function textPart(value: string): PaperPart {
   return {

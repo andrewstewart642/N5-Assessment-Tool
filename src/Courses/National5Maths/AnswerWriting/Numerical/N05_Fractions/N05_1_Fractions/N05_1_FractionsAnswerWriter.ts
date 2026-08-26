@@ -8,7 +8,7 @@ import type {
   Fraction,
   GeneratedFractionQuestion,
   MixedNumber,
-} from "@/course-data/question-generators/fractions/N5MathsFractionGenerator";
+} from "@/src/Courses/National5Maths/QuestionWriting/Numerical/N05_Fractions/N05_1_Fractions/N05_1_FractionsQuestionWriter";
 
 import {
   getN5MathsAnswerViewMethodEvidence,
@@ -16,7 +16,7 @@ import {
 
 import {
   ANSWER_METHOD_FAMILY_IDS,
-} from "@/course-data/answer-generators/AnswerMethodIds";
+} from "@/src/Courses/National5Maths/AnswerMethods/AnswerMethodIds";
 
 
 const FRACTION_PAPER =

@@ -4,7 +4,7 @@ import type {
 
 import {
   ANSWER_METHOD_FAMILY_IDS,
-} from "@/course-data/answer-generators/AnswerMethodIds";
+} from "@/src/Courses/National5Maths/AnswerMethods/AnswerMethodIds";
 
 
 export const N5_MATHS_2023_P1_Q01_MS = {

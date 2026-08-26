@@ -1,7 +1,7 @@
 import {
   getAvailableDifficultiesForConcept,
   getEligibleDifficultiesForConcept,
-} from "@/src/Courses/National5Maths/QuestionGeneration/QuestionGeneratorRegistry";
+} from "@/src/Courses/National5Maths/QuestionWriting/QuestionWriterRegistry";
 
 import {
   formatAssessmentPaperSuitability,
@@ -10,7 +10,7 @@ import {
 
 import {
   conceptMatchesThinkingTypeFilter,
-} from "@/src/Courses/National5Maths/QuestionGeneration/ConceptSelection";
+} from "@/src/Courses/National5Maths/QuestionWriting/ConceptSelection";
 
 import type {
   Concept,

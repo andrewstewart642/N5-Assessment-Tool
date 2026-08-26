@@ -23,11 +23,11 @@ import {
   type CompoundPercentageDifficulty,
   type CompoundPercentageDirection,
   type GeneratedCompoundPercentageQuestion,
-} from "@/course-data/question-generators/compound-percentages/N5MathsCompoundPercentageGenerator";
+} from "@/src/Courses/National5Maths/QuestionWriting/Numerical/N04_Percentages/N04_2_PercentagesAppreciation/N04_2_PercentagesAppreciationQuestionWriter";
 
 import {
   generateN5MathsCompoundPercentageWorkedAnswers,
-} from "@/course-data/answer-generators/compound-percentages/N5MathsCompoundPercentageAnswerGenerator";
+} from "@/src/Courses/National5Maths/AnswerWriting/Numerical/N04_Percentages/N04_2_PercentagesAppreciation/N04_2_PercentagesAppreciationAnswerWriter";
 
 
 const DEFAULT_COMPOUND_PERCENTAGE_DIFFICULTY:

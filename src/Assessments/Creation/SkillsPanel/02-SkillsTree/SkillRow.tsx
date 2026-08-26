@@ -8,7 +8,7 @@ import ActionButton from "@/src/UI/Application/Components/ActionButton";
 
 import {
   rankConceptsByTargetMarks,
-} from "@/src/Courses/National5Maths/QuestionGeneration/ConceptSelection";
+} from "@/src/Courses/National5Maths/QuestionWriting/ConceptSelection";
 
 import type {
   DifficultyLevel,
