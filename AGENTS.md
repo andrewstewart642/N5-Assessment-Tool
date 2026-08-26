@@ -1,899 +1,1005 @@
-# VecEd — Repository Working Contract
+# VecEd — Agent Instructions
 
-**Architecture:** V2  
-**Status:** Active  
-**Applies to:** All developer-led and AI-assisted work in this repository  
-**Purpose:** Define the mandatory rules for safely developing and refactoring VecEd
+## 1. Purpose
 
----
+This file is the first set of repository instructions for any coding agent working on VecEd.
 
-# 1. Read This First
+Read it before making changes.
 
-Before making a meaningful repository change, read this file.
-
-VecEd has an established Architecture V2.
-
-Do not reconstruct the intended architecture from legacy source code.
-
-Do not invent a new convention merely because another convention would also be reasonable.
-
-For substantial work, read the relevant project documentation in this order:
-
-1. `AGENTS.md`
-2. `Docs/LockedDecisions.md`
-3. relevant sections of `Docs/Architecture.md`
-4. relevant sections of `Docs/RepositoryMap.md`
-5. current status in `Docs/RefactorLedger.md`
-
-Use:
+For deeper information, use:
 
 ```text
-Docs/ChatGPTWorkflow.md
-
-for the detailed development and refactor procedure.
-
-2. Documentation Responsibilities
-
-Each Architecture V2 document has one job.
-
-AGENTS.md
-
-Mandatory working rules.
-
-Docs/LockedDecisions.md
-
-Binding decisions which must not be casually reinterpreted.
-
 Docs/Architecture.md
-
-Long-lived ownership, dependency and structural architecture.
-
 Docs/RepositoryMap.md
-
-Current physical repository structure and migration state.
-
+Docs/LockedDecisions.md
+Docs/ChatGPTWorkflow.md
 Docs/RefactorLedger.md
 
-What has been completed, what remains, known transitional seams and the current next area.
+Use those documents for their intended purposes:
 
-Docs/ChatGPTWorkflow.md
+Architecture.md
+→ architecture and dependency rules
 
-Detailed working procedure for investigation, rewriting, verification, deletion and handoff.
+RepositoryMap.md
+→ where current code belongs
 
-Do not use one document as a substitute for another.
+LockedDecisions.md
+→ decisions that should not be casually reopened
 
-3. Documentation Precedence
+ChatGPTWorkflow.md
+→ safe AI-assisted development workflow
 
-For VecEd-specific decisions, use this precedence:
+RefactorLedger.md
+→ historical migration record
 
-explicit user instruction in the current conversation;
-AGENTS.md;
-Docs/LockedDecisions.md;
-Docs/Architecture.md;
-Docs/RepositoryMap.md;
-Docs/RefactorLedger.md;
-current source implementation;
-historical implementation convention.
+RefactorLedger.md contains historical paths.
 
-Legacy source is migration evidence.
+Do not treat historical paths as current architecture.
 
-It is not architectural precedent.
+2. Product
 
-4. Git Safety
+VecEd is an assessment-building application.
 
-The active Architecture V2 branch is:
+The current workflow includes:
 
-refactor/architecture-V2
+select/configure assessment
+        ↓
+build assessment
+        ↓
+preview assessment
+        ↓
+save assessment
+        ↓
+compile document
 
-Known-good application history remains on:
+The architecture is intended to support multiple Courses without making generic Assessment workflows depend directly on one Course implementation.
 
-main
+3. Acceptance Criterion Zero
 
-The frozen pre-refactor archive is:
+Preserve working product behaviour.
 
-archive/25-08-2026-baseline
+Architecture cleanup is not permission to remove functioning features.
 
-Do not perform normal development on the archive branch.
+Unless behavioural change is explicitly requested, preserve:
 
-Before substantial Architecture V2 work, confirm the active branch.
+public URLs,
+assessment creation behaviour,
+question generation,
+previews,
+saved assessments,
+class data,
+generated documents,
+application settings,
+persisted browser data.
 
-A complete offline project backup also exists and must not be used as the normal working copy.
+Do not delete code merely because its name looks old.
 
-5. Preservation Is Acceptance Criterion Zero
+Prove that it is dead first.
 
-Architecture V2 exists to improve the implementation without unintentionally damaging the working product.
+4. Runtime Source Root
 
-Refactoring may:
+All runtime source lives beneath:
 
-rewrite;
-move;
-rename;
-split;
-merge;
-consolidate;
-simplify;
-delete genuinely dead code.
+app/
 
-Refactoring must preserve working behaviour unless a product change has been explicitly approved.
+Current high-level structure:
 
-A structurally cleaner repository with lost functionality is a failed migration.
-
-Preserve behaviour, not historical accidents.
-
-6. Architecture V2 Is Not a File-Moving Exercise
-
-Do not treat successful relocation as successful refactoring.
-
-Every migrated area should be considered for:
-
-KEEP
-REWRITE
-MOVE
-RENAME
-SPLIT
-MERGE
-CONSOLIDATE
-DELETE
-TEMPORARY ADAPTER
-DEFER
-
-Prefer meaningful ownership improvements over cosmetic path changes.
-
-Architecture V2 should reduce unnecessary code and duplication where safely possible.
-
-7. Preferred Migration Strategy
-
-Where practical, prefer:
-
-WRITE NEW
-    ↓
-TYPE-CHECK
-    ↓
-SWITCH CONSUMER
-    ↓
-VERIFY
-    ↓
-SEARCH FOR OLD REFERENCES
-    ↓
-DELETE LEGACY IMPLEMENTATION
-    ↓
-VERIFY AGAIN
-
-This is preferred over repeatedly moving and mutating legacy files.
-
-The old implementation should remain intact until the replacement has compiled and the consumer boundary has been switched successfully.
-
-Temporary adapters are acceptable when they provide a controlled migration boundary.
-
-Do not keep adapters indefinitely once all consumers have moved.
-
-8. Inspect Before Editing
-
-Before changing a meaningful feature:
-
-inspect the actual implementation;
-inspect relevant parent/composition files;
-inspect sibling responsibilities;
-trace imports;
-trace exports;
-trace consumers;
-identify persistence involvement;
-identify Course, Class, UI and Assessment dependencies;
-determine the true architectural owner.
-
-Do not infer ownership from a filename alone.
-
-If repository access can answer a question, inspect the repository rather than asking the user to paste the source manually.
-
-9. Local Working State Is Authoritative During Active Refactoring
-
-The local working tree may be ahead of the connected GitHub branch.
-
-When local commands and remote repository inspection disagree:
-
-local grep;
-local TypeScript results;
-local build results;
-local browser behaviour
-
-are authoritative for the current uncommitted state.
-
-Connected GitHub remains useful for inspection of pushed source, but must not be assumed to contain the user's newest local changes.
-
-Never delete code solely because a remote search fails to find a consumer.
-
-10. Dead-Code Rule
-
-Do not delete a file because:
-
-its name looks old;
-it appears redundant;
-one narrow search returns nothing;
-another file appears to replace it.
-
-Before deletion, search broadly using:
-
-component/function name;
-filename;
-import path;
-known aliases or adapter names.
-
-Consider:
-
-direct imports;
-re-exports;
-route usage;
-framework conventions;
-dynamic usage;
-persistence;
-compilation screens;
-transitional consumers.
-
-When confidently obsolete, delete rather than migrate dead code.
-
-After deletion, type-check again.
-
-11. Search the Actual Symbol Before Deletion
-
-Deletion audits must search the real implementation, not merely an adapter path.
-
-For example, if investigating:
-
-DocumentPageFrame
-
-search broadly for:
-
-DocumentPageFrame
-SQAPageFrame
-
-rather than checking only one historical path.
-
-Do not infer deadness from a narrower path-specific search.
-
-12. Architecture V2 Source Domains
-
-The intended core source architecture is:
-
-src/
-├── app/
+app/
+├── [...route]/
 ├── Assessments/
 ├── Classes/
 ├── Courses/
-└── UI/
+├── DeveloperTools/
+├── UI/
+├── favicon.ico
+├── globals.css
+├── layout.tsx
+└── page.tsx
 
-A runtime-only development domain such as:
+There is no runtime:
 
-src/DeveloperTools/
+src/
 
-may exist if genuine developer-facing application functionality requires it.
+tree.
 
-It is not a mandatory core domain and should not be created speculatively.
+Do not recreate one.
 
-Repository-level tooling belongs under:
+5. Primary Ownership Areas
 
-Tools/
+The main ownership domains are:
 
-when required.
+app/Assessments/
+app/Classes/
+app/Courses/
+app/DeveloperTools/
+app/UI/
 
-Do not create new top-level source domains casually.
+Use responsibility to decide ownership.
 
-Do not create speculative future-feature folders.
+Do not choose an owner merely because it produces the shortest import path.
 
-Create folders when actual implementation requires them.
+6. Assessments
 
-13. Transitional Legacy Source
+Generic Assessment workflow belongs beneath:
 
-Historical source remains active in areas including:
+app/Assessments/
 
-app/
-course-data/
-math-helpers/
-page-sections/
-shared-types/
+Major areas include:
 
-Some legacy areas have already been removed.
+Compilation/
+Creation/
+MyAssessments/
+Questions/
+SavedAssessments/
+AssessmentTypes.ts
 
-Do not add new permanent architecture to legacy folders unless a temporary compatibility boundary requires it.
+Assessments owns generic assessment workflow.
 
-Do not assume a legacy path should remain simply because current code still imports from it.
+It should not own Course-specific educational knowledge.
 
-Migration status belongs in:
+7. Assessment Creation
 
-Docs/RepositoryMap.md
-Docs/RefactorLedger.md
-14. Naming Rules
+Assessment Creation lives beneath:
 
-VecEd-owned architectural folders use PascalCase where practical.
+app/Assessments/Creation/
 
-Examples:
+Main entry points:
 
-Assessments
-PaperWorkspace
-National5Maths
-SettingsDrawer
-
-Descriptive React components use PascalCase:
-
+AssessmentSetupPage.tsx
 AssessmentCreatorPage.tsx
-AssessmentHUDBar.tsx
-National5MathsCoverPage.tsx
 
-Descriptive TypeScript modules use PascalCase where they represent named responsibilities:
+Major areas include:
 
-CourseDocuments.ts
-AssessmentQualityNotes.ts
-DocumentUnits.ts
+Analysis/
+AssessmentSettings/
+Feedback/
+HUDBar/
+Papers/
+PaperWorkspace/
+Persistence/
+Questions/
+Setup/
+SkillsPanel/
+TopBar/
 
-Hooks use:
+Use these existing areas before creating new generic folders.
 
-useCamelCase.ts
+8. Product UI Terminology
 
-Examples:
-
-useAssessmentProgressRows.ts
-useAssessmentQuestionState.ts
-
-Next.js route folders may remain lowercase or kebab-case where required by URL structure.
-
-Do not globally rename historical identifiers without understanding their consumers and persistence implications.
-
-15. Meaningful Numbering Only
-
-Folder numbering is permitted only where order is conceptually meaningful.
-
-Examples:
-
-01-Numerical
-02-Algebraic
-03-Geometric
-
-and:
-
-01-SkillsFilters
-02-SkillsTree
-
-Do not number unrelated domains decoratively.
-
-16. Avoid Generic Buckets
-
-Do not create architectural dumping grounds such as:
-
-Helpers
-Utils
-Shared
-Common
-Misc
-
-without explicit justification.
-
-A responsibility should live with the domain which owns it.
-
-Do not recreate legacy:
-
-shared-types
-math-helpers
-
-under different generic names.
-
-17. File Decomposition
-
-Prefer small, coherent files representing meaningful responsibilities.
-
-Do not:
-
-preserve giant components merely because they already exist;
-split code solely to reduce line count;
-create micro-files with no independent conceptual value.
-
-A file should have a clear reason to exist and a clear owner.
-
-18. Full-File Rewrites Are Preferred
-
-For normal-sized files, provide or implement complete replacement contents rather than asking for many small manual edits.
-
-Use surgical changes only when:
-
-the file is unusually large; and
-the required change is genuinely tiny.
-
-When giving a surgical edit, identify an exact distinctive start and end boundary.
-
-Do not use an ambiguous closing brace as the only end marker.
-
-Always identify files using complete repository-relative paths.
-
-19. Next.js page.tsx Rule
-
-Next.js route files should be thin framework wrappers.
-
-Substantial implementation belongs in descriptive domain-owned page components.
-
-Example:
-
-app/create-assessment/builder/page.tsx
-    ↓
-src/Assessments/Creation/AssessmentCreatorPage.tsx
-
-A route wrapper should normally do little more than import and render its implementation component.
-
-Never refer generically to “page.tsx” when multiple route files exist.
-
-Use the complete repository-relative path.
-
-20. Product Terminology
-
-Use these terms consistently:
+Use the current recognised names:
 
 HeaderBar
 TopBar
 HUDBar
-Panel
-Workspace
+SkillsPanel
+PaperWorkspace
 Drawer
 Popover
-Control
-Filter
-Field
-Pill
-Button
-Picker
-Status
-Indicator
-Modal
 
-Do not introduce unnecessary synonyms.
+Meaning:
 
-The legacy term:
+HeaderBar
+→ global application header
 
-Builder
+TopBar
+→ upper Assessment Creation region
 
-is deprecated Architecture V2 terminology for the Assessment Creation feature.
+HUDBar
+→ lower Assessment Creation region
 
-Do not perform a blind global Builder rename.
+SkillsPanel
+→ assessment skill-selection region
 
-Rename responsibilities as they are deliberately migrated.
+PaperWorkspace
+→ central Assessment Creation workspace
 
-21. Assessment Creation Ownership
+Do not revive old Builder terminology as source architecture.
 
-The primary Assessment Creation domain is:
+9. Builder Compatibility
 
-src/Assessments/Creation/
+The public URL:
 
-Its major responsibility groups include:
+/create-assessment/builder
 
-AssessmentCreatorPage.tsx
-Setup/
-TopBar/
-SkillsPanel/
-PaperWorkspace/
-HUDBar/
-AssessmentSettings/
-Questions/
+still exists.
+
+Persisted keys may also contain historical builder terminology.
+
+That does not mean new source should be placed in folders such as:
+
+Builder/
+BuilderComponents/
+BuilderLogic/
+
+Current source terminology is:
+
+Assessment Creation
+
+Public/persisted compatibility wording may differ from source terminology.
+
+10. Assessment Compilation
+
+Compilation lives beneath:
+
+app/Assessments/Compilation/
+
+Compilation is separate from Creation.
+
+Creation determines assessment content.
+
+Compilation turns assessment content into paginated/generated document output.
+
+Do not merge these domains merely because they consume the same assessment data.
+
+11. Saved Assessments
+
+Persistent saved-assessment data belongs beneath:
+
+app/Assessments/SavedAssessments/
+
+The user-facing assessment library belongs beneath:
+
+app/Assessments/MyAssessments/
+
+Keep the distinction:
+
+SavedAssessments
+→ persistence/data
+
+MyAssessments
+→ UI/workflow
+12. Generic Questions
+
+Generic Assessment question contracts belong beneath:
+
+app/Assessments/Questions/
+
+Current responsibilities include:
+
+Content/
+Generation/
+Preview/
+Selection/
+
+Course-specific question-writing logic does not belong here.
+
+13. Classes
+
+Class-owned functionality belongs beneath:
+
+app/Classes/
+
+Current major areas include:
+
+Components/
+Coverage/
+State/
+ClassDetailsPage.tsx
+ClassTypes.ts
+MyClassesPage.tsx
+
+Classes owns:
+
+class data,
+class persistence,
+class coverage,
+My Classes,
+Class Details.
+14. Classes Must Be Course-Aware, Not Course-Specific
+
+Class coverage should resolve educational structure through:
+
+SchoolClass.courseId
+        ↓
+CourseRegistry
+        ↓
+CourseAssessmentConfig
+        ↓
+skillTree
+
+Do not make Classes directly depend on:
+
+National5MathsSkills
+
+when the Course abstraction can provide the information.
+
+15. Courses
+
+Educational and Course-specific knowledge belongs beneath:
+
+app/Courses/
+
+Generic Course infrastructure includes:
+
+CourseAssessmentConfig.ts
+CourseCatalog.ts
+CourseRegistry.ts
+CourseTypes.ts
 Papers/
-Analysis/
-Persistence/
+Selection/
 
-Visible areas may be grouped according to their physical product region.
+Course-specific implementation belongs beneath:
 
-Shared assessment behaviour belongs with the domain responsibility that owns it.
+app/Courses/<Course>/
+16. CourseId Ownership
 
-Do not duplicate state merely because multiple visible areas consume it.
+CourseId is owned by:
 
-22. Current PaperWorkspace Rule
+app/Courses/CourseTypes.ts
 
-The canonical Assessment Creation paper workspace is:
+Import it directly from its owner.
 
-src/Assessments/Creation/PaperWorkspace/
+Do not re-export it from Assessment files merely for convenience.
 
-It must not regain dependencies on:
+Do not create parallel Course ID types.
 
-app/create-assessment/builder/
-math-helpers/
+17. Course Registry Terminology
 
-without explicit architectural justification.
+Use the canonical Course Registry API.
 
-Its current V2 dependencies should flow through V2 Assessment, Course and UI ownership.
+Current terminology includes:
 
-If future work introduces a legacy dependency back into this subtree, treat that as a regression unless deliberately approved.
+COURSE_REGISTRY
+getCourseAssessmentConfigById
+getDefaultCourseAssessmentConfig
+getRegisteredCourseAssessmentConfigs
 
-23. Course Ownership
+Do not reintroduce retired CourseConfig compatibility aliases unless a real compatibility requirement appears.
 
-Course-specific educational knowledge belongs under:
+18. National 5 Mathematics
 
-src/Courses/
+National 5 Mathematics knowledge belongs beneath:
 
-Assessment Creation consumes Course behaviour.
+app/Courses/National5Maths/
 
-Assessment Creation does not own Course definitions.
+Current high-level structure:
 
-Course responsibilities may include:
+AssessmentConfig.ts
+Documents/
+ExamQuestionAndAnswerCatalog/
+QuestionAndAnswerGeneration/
+Skills/
 
-curriculum structure;
-Skills Tree definitions;
-question generation;
-paper rules;
-generated document configuration;
-source-question catalogues;
-source-marking-scheme catalogues.
+Generic Assessment code should consume this knowledge through Course contracts where possible.
 
-Do not hard-code National 5 Maths knowledge into generic Assessment Creation UI.
+19. National 5 Maths Skills
 
-Do not create Higher Maths placeholder architecture until actual implementation begins.
+The canonical National 5 Maths skills definition lives beneath:
 
-24. Skills Tree Boundary
+app/Courses/National5Maths/Skills/
 
-Course curriculum definition belongs under:
+Do not create another skills tree elsewhere for convenience.
 
-src/Courses/<Course>/SkillsTree/
+20. Historical Exam Material
 
-Generic Assessment Creation Skills Tree interaction belongs under:
+Historical exam question and marking-scheme catalogues live beneath:
 
-src/Assessments/Creation/SkillsPanel/
+app/Courses/National5Maths/ExamQuestionAndAnswerCatalog/
 
-The Course owns what the curriculum contains.
+with:
 
-Assessment Creation owns how a user interacts with it while creating an assessment.
+Questions/
+MarkingSchemes/
 
-Do not merge these responsibilities.
+Historical exam evidence and generated-question implementation are separate responsibilities.
 
-25. Question Boundary
+21. Question and Answer Generation
 
-Generic question workflow belongs under:
+National 5 Maths generation implementation lives beneath:
 
-src/Assessments/Creation/Questions/
+app/Courses/National5Maths/QuestionAndAnswerGeneration/
 
-Course-specific mathematical generation belongs under:
+Current conceptual structure:
 
-src/Courses/<Course>/QuestionGeneration/
+AnswerMethods/
+AnswerWriting/
+QuestionWriting/
 
-Generated-document rendering is a separate concern again.
+Use current terminology:
 
-Do not collapse all three responsibilities into one generic question folder.
+QuestionWriting
+AnswerWriting
+ExamQuestion
+ExamMarkingScheme
 
-26. Classes Boundary
+Do not revive the retired Question Bank architecture.
 
-Class data and class-specific behaviour belong to:
+22. Question Bank Is Retired
 
-src/Classes/
+Do not recreate:
 
-Assessment Creation may select and consume classes.
+app/question-bank/
 
-It does not own the underlying Class model.
+Live generation adapters were moved into Course-owned question-writing architecture.
 
-Avoid duplicate Class representations.
+Future generation work should extend:
 
-27. UI Architecture
+app/Courses/<Course>/QuestionAndAnswerGeneration/
 
-There is one top-level visual domain:
+rather than creating a parallel question-bank domain.
 
-src/UI/
+23. Course Documents
 
-It contains two intentionally separate systems:
+National 5 Maths document composition belongs beneath:
 
-src/UI/
+app/Courses/National5Maths/Documents/
+
+Course-specific document concerns may include:
+
+cover-page composition,
+formula sheets,
+question pages,
+question spacing,
+Course document registration.
+
+Generic document infrastructure does not belong here.
+
+24. UI Architecture
+
+UI is divided into:
+
+app/UI/
 ├── Application/
 └── Documents/
-UI/Application
 
-Teacher-facing VecEd interface visuals.
+This separation is important.
 
-Examples:
+25. Application UI
 
-theme;
-colours;
-typography;
-application controls;
-HeaderBar;
-SettingsDrawer.
-UI/Documents
+Interactive application presentation belongs beneath:
 
-Generated assessment-document visuals.
+app/UI/Application/
 
-Examples:
+Examples include:
 
-page dimensions;
-document layout;
-A4 frame;
-document content rendering;
-National Qualifications document templates.
+Components/
+HeaderBar/
+Home/
+Settings/
+SettingsDrawer/
+Theme/
+Typography/
 
-Do not mix application chrome with generated-document visual truth.
+Application UI owns interactive product presentation.
 
-28. Document Architecture
+26. Documents UI
 
-Generated documents use layered ownership.
+Generated-document presentation belongs beneath:
 
-Conceptually:
+app/UI/Documents/
+
+Current major areas:
+
+Components/
+Layout/
+Templates/
+
+The generated-document system is distinct from interactive application UI.
+
+27. Document Dependency Direction
+
+Preserve this layering:
 
 generic document primitives
         ↓
 qualification-family templates
         ↓
-course-specific document composition
+Course-specific documents
         ↓
-assessment preview / compilation
+Assessment consumers
 
-Current examples are:
+Generic document primitives:
 
-src/UI/Documents/Components/A4PageFrame.tsx
+app/UI/Documents/Components/
 
-src/UI/Documents/Templates/NationalQualifications/
+Qualification-family templates:
 
-src/Courses/National5Maths/Documents/
+app/UI/Documents/Templates/NationalQualifications/
 
-Generic A4 dimensions and generic document rendering do not belong to National 5 Maths.
+Course-specific documents:
 
-National Qualifications visual conventions do not belong to Assessment Creation.
+app/Courses/National5Maths/Documents/
 
-National 5 Maths paper-specific decisions belong to the National 5 Maths Course.
+Assessment consumers:
 
-Assessment Preview consumes the Course document implementation rather than owning those visual rules.
+app/Assessments/
 
-29. Course Document Bundle
+Do not invert this dependency direction.
 
-National 5 Maths currently exposes its generated document components through:
+28. Application vs Documents Boundary
 
-src/Courses/National5Maths/Documents/CourseDocuments.ts
+Code beneath:
 
-with course-owned responsibilities including:
+app/UI/Documents/
 
-CoverPage/
-FormulaSheet/
-QuestionPage/
+should not depend on:
 
-This bundle represents the intended plug-in boundary for course-specific document composition.
+app/UI/Application/
 
-Do not recreate duplicate top-level National 5 Maths cover/formula/question implementations.
+Generated documents should not depend on application navigation, drawers, hover state or global application presentation.
 
-30. Application Theme and Visual Truth
+An Assessment-owned interactive preview may use Application UI styling where that styling belongs to the editor experience.
 
-Architecture V2 must converge on one authoritative Application visual system.
+29. Developer Tools
 
-Do not introduce competing:
+Runtime developer functionality belongs beneath:
 
-theme systems;
-typography systems;
-colour systems;
-application-wide visual token systems.
+app/DeveloperTools/
 
-Not every local pixel value needs to become a global design token.
+Current example:
 
-Centralise values only when they are genuinely reusable visual decisions.
+GeneratorTester/
 
-31. Settings Ownership
+This is runtime source.
 
-Global application settings belong under:
+30. Repository Tools
 
-src/UI/Application/SettingsDrawer/
+Repository tooling and historical migrations belong beneath:
 
-Assessment-specific settings belong under:
+Tools/
 
-src/Assessments/Creation/AssessmentSettings/
+This is different from:
 
-Workspace-specific contextual controls belong with the workspace that owns them.
+app/DeveloperTools/
 
-The global HeaderBar Settings button always means global application settings.
+Rule:
 
-Do not make its semantic meaning change from page to page.
+app/DeveloperTools/
+→ runtime developer application functionality
 
-32. Persistence Ownership
+Tools/
+→ repository tooling / migration history
 
-Persistence must have explicit ownership.
+Runtime application code should not depend on historical migration material.
 
-Avoid scattering direct storage access across visible components where a persistence module can own it.
+31. Routing
 
-Preserve existing persistence behaviour during refactoring unless a migration is explicitly approved.
+Application routes are primarily dispatched through:
 
-Source-code renaming does not imply storage-key renaming.
+app/[...route]/page.tsx
 
-Do not replace local storage with a database, cloud account or backend merely as part of Architecture V2.
+Do not recreate duplicate feature folders solely to represent URLs.
 
-That is a separate product decision.
+Do not recreate:
 
-33. State Management
+app/create-assessment/
+app/compile-assessment/
+app/my-assessments/
+app/my-classes/
+app/dev/
 
-Do not introduce a new global state-management library merely because the repository is being refactored.
+as parallel source architecture.
 
-First:
+The catch-all route is a thin adapter.
 
-identify existing state;
-establish ownership;
-remove duplication;
-simplify React coordination.
+Product implementation stays with its owner.
 
-Any future state-library decision requires separate justification.
+32. Next.js Special Filenames
 
-34. Neutral Exam Terminology
+Inside app/, filenames such as:
 
-Generic architecture should avoid unnecessary awarding-body-specific naming.
+page.tsx
+layout.tsx
+route.ts
+loading.tsx
+error.tsx
+not-found.tsx
+template.tsx
+default.tsx
 
-Prefer neutral concepts where appropriate, such as:
+have framework meaning.
 
-Exam
-OfficialPastPaper
-CandidateNumber
-SourceQuestionCatalog
-SourceMarkingSchemeCatalog
+Do not use them casually inside product folders.
 
-Qualification- or course-specific branding may remain where that identity is genuinely part of the responsibility.
+Use descriptive implementation names such as:
 
-Do not perform blind renames of persisted or externally meaningful identifiers.
+AssessmentCreatorPage.tsx
+AssessmentCompilationPage.tsx
+MyClassesPage.tsx
+ClassDetailsPage.tsx
 
-35. Verification Cadence
+unless a real Next.js route/framework boundary is intended.
 
-After a small rewrite, split, import switch or deletion, run:
+33. "use client"
 
-npx tsc --noEmit
+Add "use client" only at genuine client entry boundaries.
 
-Silent output means the TypeScript check passed.
+Do not add it to every component or custom hook that uses:
 
-After meaningful implementation switches, route changes or visual changes, also use relevant runtime verification such as:
+useState
+useEffect
+useMemo
+useRef
+window
+document
+localStorage
+event handlers
 
-npm run build
-npm run dev
+Internal modules imported below an existing client boundary inherit the client environment.
 
-and browser-test the affected workflow.
+Do not add "use client" defensively.
 
-Physical document rendering requires visual verification; TypeScript success alone is insufficient.
+34. Persistence Is a Compatibility Contract
 
-36. Next.js Generated-Type Recovery
+Browser-persisted data survives source refactors.
 
-Route moves can leave stale generated Next.js type files.
+Do not rename storage keys or persisted fields merely because they contain old terminology.
 
-If a route change produces stale .next type errors, run:
+Before changing persisted data, investigate:
 
-npx next typegen
-npx tsc --noEmit
+existing keys,
+existing saved records,
+normalisation,
+backwards compatibility,
+optional legacy fields,
+migration requirements.
 
-If necessary, remove generated .next output and regenerate.
+A persistence migration is a separate deliberate change.
 
-Never manually edit generated .next files.
+35. Compatibility Code
 
-If terminal TypeScript passes but VS Code still displays stale diagnostics, use:
+Do not delete compatibility code merely because comments contain words such as:
 
-Developer: Reload Window
+legacy
+compatibility
+transitional
+backwards compatibility
 
-before assuming the source is still broken.
+First determine what it supports.
 
-37. Product Behaviour Smoke Tests
+Possible reasons include:
 
-After visual or interactive migrations, manually test relevant behaviour.
+persisted data,
+active event wiring,
+old saved assessments,
+old class records,
+Course metadata compatibility.
 
-For Assessment Creation this may include:
+Remove compatibility only after its consumers have been migrated or proven absent.
 
-P1/P2 switching;
-question generation;
-regeneration;
-editing;
-assigning/removing drafts;
-worked-answer views;
-Exam/Compact/Answers cycling;
-zoom;
-page navigation;
-HUD resizing;
-notes;
-marks/timings;
-autosave state;
-Compile navigation;
-document rendering.
+36. Dead Code Investigation
 
-Only test behaviour relevant to the changed area.
+Before deleting a file, symbol or compatibility layer, check more than direct imports.
 
-38. Scope Control
+Investigate:
 
-Do not expand a bounded migration into unrelated work simply because another issue becomes visible.
+direct imports
+re-exports
+registries
+dynamic imports
+string lookup
+route dispatch
+browser events
+persistence
+Course registration
+generated-data consumers
 
-Record useful discoveries.
+Absence from one grep is not always proof of dead code.
 
-Finish the current ownership boundary.
+37. Ownership Before Movement
 
-If a newly discovered issue blocks the migration, surface it explicitly.
+Before moving a file, answer:
 
-Do not silently combine:
-
-architecture refactor
-
-with:
-
-product redesign
-
-Preserve current behaviour unless change has been approved.
-
-39. Locked Decision Conflicts
-
-If implementation evidence materially conflicts with a locked decision:
-
-stop;
-identify the exact decision;
-explain the technical conflict;
-explain the consequences;
-propose a specific amendment;
-obtain approval before violating the rule.
-
-Do not silently drift architecture.
-
-40. Documentation Checkpoints
-
-Do not update the documentation after every tiny file change.
-
-Update it at meaningful architectural checkpoints.
-
-A good checkpoint occurs when:
-
-a responsibility has obtained a canonical V2 owner;
-a significant legacy seam has been removed;
-a bounded migration has completed;
-architecture or a locked decision has changed;
-a new future session would otherwise struggle to reconstruct the current state.
-
-At a checkpoint:
-
-update RepositoryMap.md;
-update RefactorLedger.md;
-update Architecture.md only if architectural truth changed;
-update LockedDecisions.md only if a locked decision changed or a new one was deliberately established.
-41. Completion Standard
-
-A migration is not complete merely because files have moved.
-
-Before declaring a bounded migration complete, confirm:
-
-the canonical owner exists;
-consumers use the canonical implementation;
-old references have been searched broadly;
-obsolete files have been removed where appropriate;
-TypeScript passes;
-relevant runtime behaviour works;
-no duplicate source of truth remains;
-documentation accurately records the new state at the next checkpoint.
+Which domain owns this responsibility?
 
 Use:
 
-MIGRATION IN PROGRESS
+Assessments
+→ generic assessment workflow
 
-when significant V2 code still relies upon a legacy implementation.
+Classes
+→ class data/workflow
 
-42. Working With the User
+Courses
+→ educational/course knowledge
 
-The user should not be burdened with repository work that can be inferred or inspected directly.
+UI/Application
+→ interactive application presentation
 
-When giving manual instructions:
+UI/Documents
+→ generated-document presentation
 
-use complete repository-relative paths;
-prefer whole-file replacements;
-keep steps coherent;
-avoid dozens of tiny edits;
-give exact commands;
-state the expected result;
-verify before deletion.
+DeveloperTools
+→ runtime developer tooling
 
-When a giant source file requires only a tiny change, use a precise surgical edit rather than rewriting thousands of lines unnecessarily.
+Tools
+→ repository tooling/history
 
-43. Before Ending a Significant Session
+Do not move a file simply because many consumers happen to exist elsewhere.
 
-Do not leave important project state trapped only in conversation history.
+38. Type Ownership
 
-At an appropriate checkpoint, record:
+Types belong with the concept they describe.
 
-what became canonical;
-what legacy code was removed;
-what transitional dependencies remain;
-what was verified;
-what should happen next.
+Examples:
 
-Docs/RefactorLedger.md is the authoritative handoff for refactor progress.
+CourseId
+→ app/Courses/CourseTypes.ts
 
-44. Final Rule
+Class types
+→ app/Classes/ClassTypes.ts
 
-When uncertain:
+Assessment types
+→ app/Assessments/AssessmentTypes.ts
 
-INSPECT
-TRACE
-ESTABLISH OWNERSHIP
-PRESERVE BEHAVIOUR
-WRITE THE CLEAN OWNER
+question content contracts
+→ app/Assessments/Questions/Content/
+
+generation contracts
+→ app/Assessments/Questions/Generation/
+
+Do not create a global:
+
+shared-types/
+
+bucket.
+
+39. Avoid Generic Buckets
+
+Do not introduce broad dumping grounds such as:
+
+Helpers/
+Utils/
+Shared/
+Common/
+Misc/
+math-helpers/
+shared-types/
+
+without a durable architectural responsibility.
+
+Prefer domain-specific ownership.
+
+40. No Placeholder Architecture
+
+Do not create empty folders for hypothetical future work.
+
+Examples include:
+
+Higher Maths implementation before it exists,
+Advanced Higher implementation before it exists,
+OCR infrastructure before implementation begins,
+AI marking folders before implementation begins.
+
+Add architecture when real implementation requires ownership.
+
+41. New Courses
+
+When implementing another Course, place real Course-specific functionality beneath:
+
+app/Courses/<Course>/
+
+Expose it through generic Course contracts where appropriate.
+
+Do not copy the entire National 5 Maths tree merely to make folders symmetrical.
+
+Only create real responsibilities.
+
+42. Structural Refactor Workflow
+
+For non-trivial migrations, prefer:
+
+AUDIT
+  ↓
+OWNER
+  ↓
+WRITE NEW
+  ↓
+TYPE-CHECK
+  ↓
+SWITCH CONSUMER
+  ↓
 VERIFY
-SEARCH
-DELETE ONLY WHEN PROVEN SAFE
+  ↓
+BROAD GREP
+  ↓
+DELETE OLD
+  ↓
+VERIFY AGAIN
+  ↓
+DOCUMENT
+  ↓
+COMMIT
 
-Architecture V2 should make VecEd easier for the next developer to understand than it was for the previous one.
+Do not delete the old implementation before the replacement path is working.
+
+43. Work in Small Visible Steps
+
+Prefer small, understandable migrations.
+
+Before mutation:
+
+establish the current state;
+identify the owner;
+identify consumers;
+explain what will change.
+
+Avoid large unexplained mutation scripts.
+
+Automation is acceptable for genuinely repetitive mechanical work, but the scope and operation must be clear first.
+
+44. Source File Changes
+
+When practical, provide or create complete replacement files rather than fragile chains of tiny text substitutions.
+
+Use surgical edits when:
+
+the file is genuinely very large,
+the change is tiny,
+and a full replacement would make review harder.
+
+Preserve surrounding behaviour.
+
+45. Verification Commands
+
+After structural TypeScript/source work, normally run:
+
+npx tsc --noEmit
+npm run build
+git --no-pager diff --check
+
+Use:
+
+git --no-pager ...
+
+for Git output that could otherwise enter a pager during scripted verification.
+
+46. Git Line-Ending Warnings
+
+On Windows, Git may report messages such as:
+
+LF will be replaced by CRLF the next time Git touches it
+
+These are not automatically diff errors.
+
+For whitespace validation, use:
+
+git --no-pager diff --check
+
+or, for staged changes:
+
+git --no-pager diff --cached --check
+
+Distinguish warnings from actual whitespace errors.
+
+47. Next.js Generated Types
+
+After changing route files, .next/types may temporarily describe an old route tree.
+
+If TypeScript errors point only to stale generated route validators after a routing migration:
+
+rebuild,
+run Next type generation where appropriate,
+or clear stale .next output.
+
+Do not rewrite correct source merely to satisfy stale generated files.
+
+48. Browser Smoke Testing
+
+Type-check and build are not sufficient for final sign-off after substantive architecture changes.
+
+Verify important workflows in the browser.
+
+Major checks include:
+
+Home
+Assessment Setup
+Assessment Creator
+question generation
+paper switching
+assessment preview
+settings
+saved assessments
+Compilation
+My Assessments
+My Classes
+Class Details
+
+If document infrastructure changed, visually inspect generated pages as well.
+
+49. Visual Preservation
+
+Architecture refactors should not accidentally change:
+
+spacing,
+typography,
+colours,
+paper layout,
+question positioning,
+cover-page layout,
+formula-sheet layout,
+interactive control behaviour.
+
+If a migration is intended to be structural, visual output should remain equivalent.
+
+50. Course Independence Check
+
+When changing generic Assessment code, ask:
+
+Is this rule genuinely generic, or is it National 5 Maths knowledge?
+
+If it is Course-specific, prefer ownership beneath:
+
+app/Courses/<Course>/
+51. Classes Independence Check
+
+When changing Classes, ask:
+
+Could this work for another registered Course without importing that Course's concrete skills file?
+
+If not, resolve the information through Course configuration instead.
+
+52. Document Independence Check
+
+When changing generated-document UI, ask:
+
+Does this really belong to a generic document, a qualification family, or a specific Course?
+
+Use the correct layer.
+
+Do not put Course-specific layout into generic document primitives.
+
+53. Do Not Infer Architecture from Legacy
+
+Legacy code and historical migration files are evidence.
+
+They are not precedent.
+
+If current documentation and historical files disagree, determine whether the historical material is describing a past state.
+
+Use:
+
+Docs/RepositoryMap.md
+Docs/Architecture.md
+Docs/LockedDecisions.md
+
+as current architectural guidance.
+
+Use:
+
+Docs/RefactorLedger.md
+Tools/LegacyMigrations/
+
+as history.
+
+54. Documentation Changes
+
+When architecture changes, update the relevant current-state documentation.
+
+Do not blindly replace historical paths inside:
+
+Docs/RefactorLedger.md
+
+if those paths accurately describe what existed at that stage of the migration.
+
+History should remain historically accurate.
+
+55. No Feature Work During Structural Migration Without Need
+
+When performing a structural refactor, avoid mixing unrelated feature development into the same change.
+
+A migration should be easy to evaluate as:
+
+same behaviour
++
+better ownership
+
+Feature changes should normally be separate.
+
+56. Final Standard
+
+A good change should leave the repository easier for the next developer to understand.
+
+Before finishing, ask:
+
+Is ownership clearer?
+Is dependency direction clearer?
+Did working behaviour survive?
+Did persisted data survive?
+Did public routing survive?
+Is there one obvious source of truth?
+Did we avoid creating another compatibility layer unnecessarily?
+Did we remove old code only after proving it safe?
+Does the documentation still match the repository?
+
+If not, the migration is not finished.

@@ -1,72 +1,57 @@
-# VecEd ChatGPT Workflow
+VecEd ChatGPT Workflow
 
-**Document type:** AI-assisted development operating manual  
-**Architecture version:** Architecture V2  
-**Status:** Active  
-**Applies to:** ChatGPT-assisted VecEd development
-**Purpose:** Provide a repeatable workflow for investigation, implementation, refactoring, verification and handoff without losing architectural continuity between conversations
+Document type: AI-assisted development operating manual
+Architecture version: Architecture V2
+Status: Active
+Applies to: ChatGPT-assisted VecEd development
+Purpose: Provide a repeatable, low-risk workflow for investigation, implementation, refactoring, verification, documentation and handoff.
 
----
+1. Purpose
 
-# 1. Purpose
+VecEd is developed substantially through AI-assisted development sessions.
 
-VecEd is developed substantially through ChatGPT-assisted development sessions.
+Separate conversations are useful, but continuity must come from the repository rather than from reconstructing old chats.
 
-Separate conversations are useful, but they create a continuity problem:
+This document defines:
 
-> A new conversation does not automatically understand every architectural decision, completed migration or known compatibility constraint from previous work.
-
-Architecture V2 solves this through persistent repository documentation.
-
-This document defines **how a ChatGPT development session should operate**.
+HOW TO WORK
 
 It does not define the architecture itself.
 
 Use:
 
-```text
 Docs/Architecture.md
-```
 
-for architecture.
+for architecture and dependency rules.
 
 Use:
 
-```text
 Docs/LockedDecisions.md
-```
 
-for settled decisions.
+for settled architectural decisions.
 
 Use:
 
-```text
 Docs/RepositoryMap.md
-```
 
 for current physical repository state.
 
 Use:
 
-```text
 Docs/RefactorLedger.md
-```
 
-for current migration progress.
+for migration history and durable handoff.
 
-Use this file for:
+Use:
 
-```text
-HOW TO WORK
-```
+AGENTS.md
 
----
+as the repository-level working contract.
 
-# 2. Core Working Model
+2. Core Working Model
 
 For substantial repository work, use:
 
-```text
 UNDERSTAND
     ↓
 INSPECT
@@ -77,7 +62,7 @@ ESTABLISH OWNER
     ↓
 PLAN
     ↓
-WRITE NEW
+WRITE / MOVE / REPLACE
     ↓
 TYPE-CHECK
     ↓
@@ -92,47 +77,35 @@ DELETE OLD
 VERIFY AGAIN
     ↓
 DOCUMENT AT CHECKPOINT
-```
+    ↓
+COMMIT
 
 Do not use:
 
-```text
 USER ASKS FOR CHANGE
         ↓
 GUESS FILE
         ↓
 PATCH RANDOM CODE
-```
 
----
-
-# 3. Mandatory Documentation Startup
+3. Mandatory Documentation Startup
 
 Before substantial Architecture V2 work, read in this order:
 
-```text
 1. AGENTS.md
-
 2. Docs/LockedDecisions.md
-
 3. relevant sections of Docs/Architecture.md
-
 4. relevant sections of Docs/RepositoryMap.md
+5. relevant history/status in Docs/RefactorLedger.md
 
-5. current status in Docs/RefactorLedger.md
-```
+Read this workflow when detailed operating procedure is required.
 
-Read this workflow when detailed working procedure is required.
+Do not reconstruct the architecture from legacy filenames or old conversation history alone.
 
-Do not reconstruct Architecture V2 from legacy filenames.
-
----
-
-# 4. Documentation Precedence
+4. Documentation Precedence
 
 For VecEd-specific decisions:
 
-```text
 1. explicit current user instruction
 2. AGENTS.md
 3. Docs/LockedDecisions.md
@@ -141,129 +114,124 @@ For VecEd-specific decisions:
 6. Docs/RefactorLedger.md
 7. current source implementation
 8. historical implementation convention
-```
 
-If source conflicts with V2 documentation, investigate whether the source is simply transitional.
+If source conflicts with current Architecture V2 documentation, investigate whether the source is transitional or whether the documentation is stale.
 
-Do not automatically modify architecture to match legacy implementation.
+Do not automatically change architecture to match a historical implementation accident.
 
----
+5. Confirm the Working Branch
 
-# 5. Confirm the Working Branch
-
-Before significant source work, confirm the active branch.
+Before significant source work, confirm the active branch when it is not already obvious.
 
 Current Architecture V2 branch:
 
-```text
 refactor/architecture-V2
-```
 
 Known-good branch:
 
-```text
 main
-```
 
 Frozen reference:
 
-```text
 archive/25-08-2026-baseline
-```
 
 Do not make active V2 changes to the frozen archive.
 
-If the user provides a terminal prompt which already clearly shows the correct branch, do not ask them to confirm it again unnecessarily.
+If the terminal prompt already clearly shows the correct branch, do not ask for redundant confirmation.
 
----
+6. Local Working Tree Is Authoritative During Active Refactoring
 
-# 6. Local Working Tree vs Connected GitHub
+The local working tree may be newer than any connected remote repository.
 
-The user's local working tree may be newer than the connected GitHub branch.
+During active uncommitted work, prefer:
 
-This distinction is critical.
-
-Connected GitHub is useful for:
-
-- inspecting pushed source;
-- recovering context;
-- understanding surrounding files;
-- avoiding unnecessary user copy/paste.
-
-However, during an active uncommitted migration, local results are authoritative.
-
-Prefer:
-
-```text
 local grep
-local tsc
+local TypeScript
 local build
-local browser behaviour
-```
+local runtime/browser behaviour
+local git diff
 
-when determining whether the newest local implementation works or whether a legacy consumer still exists.
+when deciding what currently exists or whether a consumer remains.
 
-Do not claim a local file is dead merely because GitHub search cannot find a consumer.
+Remote source is useful for pushed history and context.
 
-Before substantial structural work, also establish whether the local working
-tree already contains unrelated modifications.
+It is not authoritative for uncommitted local state.
 
-Do not casually overwrite, revert or absorb changes whose purpose has not been
-understood.
+Do not claim that a local file is dead merely because remote search cannot find a consumer.
 
----
+7. Establish Working-Tree State Before Mutation
 
-# 7. Do Not Ask the User to Paste Source You Can Inspect
+Before meaningful structural work, inspect:
 
-If connected repository access is available:
+git status --short
 
-```text
-fetch the file
-inspect the implementation
-inspect its siblings
-inspect consumers
-```
+Understand any existing modifications before adding new ones.
 
-before asking the user to manually provide code.
+Do not casually overwrite, revert, absorb or stage unrelated changes.
 
-Ask the user only for information which genuinely requires:
+For a bounded migration, know:
 
-- product intent;
-- approval;
-- local-only output;
-- local grep results;
-- compiler/build output;
-- screenshots or runtime behaviour.
+what was already modified
+what this migration intends to modify
+what must remain untouched
 
----
+8. Prefer Read-Only Audit Before Mutation
 
-# 8. Repository Search Philosophy
+When ownership or consumers are uncertain, start with read-only inspection.
 
-Search serves different purposes.
+Useful tools include:
 
-## Remote source inspection
+cat
+sed -n
+grep -RIn
+find
+git status --short
+git --no-pager diff
 
-Use connected repository tools to inspect pushed implementation.
+Before running a mutation, explain:
 
-## Local dependency truth
+what will change
+why it will change
+which files are involved
+what will remain untouched
 
-Use user-run commands such as:
+The user should be able to understand the migration before executing it.
 
-```bash
-grep -RInE 'pattern' app src
-```
+9. Do Not Ask for Information the Repository Can Answer
 
-for current local dependency/deletion decisions.
+Do not ask:
 
-Local grep has repeatedly proven more reliable than remote code search during active refactoring.
+Where is this file?
 
----
+if repository inspection can answer it.
 
-# 9. Before Editing a Meaningful Responsibility
+Do not ask:
+
+Is this imported anywhere?
+
+if search can answer it.
+
+Do not ask:
+
+Should this be PascalCase?
+
+when the convention is already locked.
+
+Use questions for:
+
+product intent
+approval
+behavioural choices
+privacy choices
+ambiguous requirements
+local-only runtime evidence
+
+not routine repository archaeology.
+
+10. Before Editing a Meaningful Responsibility
 
 Inspect:
 
-```text
 target implementation
 parent/composition layer
 important siblings
@@ -274,39 +242,36 @@ persistence involvement
 Course dependencies
 Class dependencies
 UI dependencies
-routes
-```
+routing involvement
+framework significance
 
 Then answer:
 
-> What does this code actually do?
+What does this code actually do?
 
-> Who should own that responsibility?
+and:
+
+Which domain owns that responsibility?
 
 Do not decide destination from filename alone.
 
----
-
-# 10. Responsibility Mapping
+11. Responsibility Mapping
 
 For a meaningful migration, establish:
 
-```text
 CURRENT PATH
 CURRENT PURPOSE
 IMPORTANT DEPENDENCIES
 CONSUMERS
 PROBLEMS
-V2 OWNER
+OWNER
 TARGET PATH
 ACTION
 RISKS
 VERIFICATION
-```
 
 Possible actions include:
 
-```text
 KEEP
 REWRITE
 MOVE
@@ -315,1608 +280,1330 @@ SPLIT
 MERGE
 CONSOLIDATE
 DELETE
+MOVE OUT OF DOMAIN
 TEMPORARY ADAPTER
 DEFER
-```
 
-Not every migration requires a giant written table.
+Not every change needs a formal table.
 
 Use enough analysis to make the ownership decision reliable.
 
----
+12. Ownership Model
 
-# 11. Preferred Migration Technique
+Use responsibility to determine location.
 
-Where practical, prefer **write-new migration**.
+High-level ownership:
 
-Example:
+app/Assessments/
+→ generic assessment workflow
 
-```text
-legacy implementation
-        │
-        │ remains intact
+app/Classes/
+→ class data and class workflows
+
+app/Courses/
+→ educational and Course-specific knowledge
+
+app/UI/Application/
+→ interactive application presentation
+
+app/UI/Documents/
+→ generated-document presentation
+
+app/DeveloperTools/
+→ runtime developer functionality
+
+Tools/
+→ repository tooling and historical migrations
+
+Do not move a file merely because one consumer imports it heavily.
+
+13. Runtime Source Root
+
+All runtime application source lives beneath:
+
+app/
+
+Current high-level source areas are:
+
+app/[...route]/
+app/Assessments/
+app/Classes/
+app/Courses/
+app/DeveloperTools/
+app/UI/
+app/layout.tsx
+app/page.tsx
+
+There is no separate runtime source tree outside app/.
+
+Do not create a second competing application source root.
+
+14. Product Structure Is Not Route Structure
+
+Public URLs and source ownership are separate concerns.
+
+For example:
+
+/create-assessment/builder
+
+is routed to:
+
+app/Assessments/Creation/AssessmentCreatorPage.tsx
+
+Do not create a parallel feature tree merely to mirror the URL.
+
+Application routes are primarily dispatched through:
+
+app/[...route]/page.tsx
+
+The route dispatcher is thin.
+
+Feature implementation remains with the owning product domain.
+
+15. Next.js Special Filenames
+
+Inside app/, filenames such as:
+
+page.tsx
+layout.tsx
+route.ts
+loading.tsx
+error.tsx
+not-found.tsx
+template.tsx
+default.tsx
+
+have framework meaning.
+
+Do not use them casually inside product folders.
+
+Ordinary page implementations should use descriptive names such as:
+
+AssessmentCreatorPage.tsx
+AssessmentCompilationPage.tsx
+MyClassesPage.tsx
+ClassDetailsPage.tsx
+
+unless a genuine Next.js route/framework boundary is intended.
+
+16. Preferred Migration Technique
+
+Where practical, prefer write-new migration.
+
+old implementation remains intact
         ↓
-
-create clean V2 owner
+write clean owner
         ↓
-npx tsc --noEmit
+type-check
         ↓
 switch consumer
         ↓
-npx tsc --noEmit
+type-check
         ↓
-browser/build verification
+build / browser verify
         ↓
-grep old implementation
+search old implementation
         ↓
 delete when proven dead
-```
-
-This is generally safer than physically moving the old file and repairing it while the application is broken.
-
----
-
-# 12. Why Write-New Is Preferred
-
-Writing the replacement first provides:
-
-- an intact fallback;
-- clear old/new ownership;
-- easier comparison;
-- smaller failure radius;
-- easier rollback;
-- simpler deletion auditing.
-
-It also encourages genuine architectural rewriting rather than cosmetic relocation.
-
----
-
-# 13. When Moving Is Still Appropriate
-
-A simple move/rename may still be appropriate when:
-
-- the implementation is already architecturally sound;
-- only ownership/path is wrong;
-- decomposition would add no value;
-- behaviour is small and obvious;
-- import repair is low risk.
-
-Architecture V2 does not require rewriting good code merely to prove that refactoring occurred.
-
----
-
-# 14. Temporary Adapters
-
-Adapters may be used when a V2 owner has been established but legacy consumers cannot all move at once.
-
-A good adapter:
-
-```text
-legacy import path
         ↓
-thin re-export / compatibility translation
-        ↓
-canonical V2 implementation
-```
+verify again
 
-The adapter must not duplicate the implementation.
+This is usually safer than mutating the only working implementation while simultaneously moving it.
 
-Example principle:
+17. When Moving Is Appropriate
 
-```text
-BuilderNote
-```
+A direct move or rename may be appropriate when:
 
-may temporarily alias:
+implementation is already architecturally sound
+only ownership/path is wrong
+behaviour is small and obvious
+import repair is low risk
+rewriting would add no value
 
-```text
-AssessmentQualityNote
-```
+Architecture V2 does not require rewriting good code merely to prove refactoring occurred.
 
-while old analysis consumers remain.
+18. Temporary Adapters
 
-Once all legacy consumers are migrated:
+Adapters may be used when the canonical owner is established but not every consumer can move at once.
 
-```text
-DELETE ADAPTER
-```
+A good adapter is:
 
----
+old import/API
+    ↓
+thin translation or re-export
+    ↓
+canonical owner
 
-# 15. Avoid Permanent Compatibility Architecture
+It must not duplicate the implementation.
 
-A migration is not complete if every old path survives forever as an adapter.
+Adapters are scaffolding, not permanent architecture.
 
-Adapters are scaffolding.
+Once consumers are migrated:
 
-At appropriate checkpoints:
+search
+verify
+delete adapter
 
-```text
-grep consumers
-remove obsolete adapters
-type-check
-```
+19. Compatibility Is Not Automatically Dead Code
 
----
+Comments containing words such as:
 
-# 16. Whole-File Replacements Are the Default
+legacy
+compatibility
+transitional
+backwards compatibility
 
-When asking the user to edit a normal-sized file manually:
+do not prove that code should be deleted.
 
-> provide the complete replacement file.
+Compatibility may support:
 
-Do not make the user perform fifteen tiny edits when one clean rewrite is safer.
+saved assessments
+class persistence
+localStorage keys
+old data shapes
+active event wiring
+Course metadata
 
-This also reduces:
+Trace the actual contract first.
 
-- missed edits;
-- incorrect insertion points;
-- malformed imports;
-- partial migration;
-- conversation overhead.
+20. Whole-File Replacement Is the Default Manual Editing Strategy
 
----
+For a normal-sized source file, provide the complete replacement file.
 
-# 17. Surgical Edits
+Do not make the user perform a long sequence of tiny edits when one clean replacement is safer.
+
+Complete replacements reduce:
+
+missed edits
+wrong insertion points
+malformed imports
+partial migrations
+formatting drift
+conversation overhead
+
+Always state the exact repository-relative path.
+
+21. Surgical Edits
 
 Use surgical edits when:
 
-```text
 the file is genuinely very large
 AND
-the required change is genuinely small
-```
+the required change is genuinely tiny
 
-For example, changing two imports in a 2,000-line orchestration file.
+A surgical instruction must include:
 
-A surgical instruction must provide:
-
-```text
-complete repository-relative path
-exact distinctive START text
+exact repository-relative path
+distinctive start text
 exact replacement
-exact next boundary / END text
-```
+distinctive end/next boundary
 
-Do not say:
+Avoid ambiguous instructions such as:
 
-> Replace the code ending at the next `}`.
+Replace the code ending at the next }.
 
-That is too ambiguous.
+22. Automation Must Remain Understandable
 
----
+Automation is acceptable for clearly mechanical work.
 
-# 18. Always Use Complete File Paths
+Examples:
 
-Prefer:
+repetitive import-prefix replacement
+removing the same first-line directive from a verified file list
+moving a coherent directory tree
 
-```text
-src/Assessments/Creation/AssessmentCreatorPage.tsx
-```
+Before automation:
 
-not:
+show the exact scope
+show the exact transformation
+explain why it is mechanical
 
-```text
-AssessmentCreatorPage.tsx
-```
+Avoid large unexplained scripts that combine auditing, movement, rewriting and deletion.
 
-when ambiguity is possible.
+Prefer visibility over cleverness.
 
-Never say only:
+23. One Coherent Change at a Time
 
-```text
-page.tsx
-```
+For risky migration work, proceed in understandable checkpoints.
 
-Multiple Next.js route files exist.
+Example:
 
----
+audit
+→ create replacement
+→ type-check
+→ switch consumer
+→ type-check
+→ search old owner
+→ delete
+→ build
+→ browser check
 
-# 19. File Creation Workflow
+This keeps failures attributable.
 
-When decomposing a giant existing implementation into several new owners, prefer:
+Do not stack many unrelated structural changes before verification.
 
-```text
-1. create all new owner files
-
-2. ensure they type-check even if temporarily unused
-
-3. rewrite/switch the orchestration boundary
-
-4. type-check
-
-5. verify behaviour
-
-6. delete old owners after grep
-```
-
-This is preferable to repeatedly mutating the giant file after every individual extraction.
-
----
-
-# 20. TypeScript Verification
+24. TypeScript Verification
 
 Routine bounded verification:
 
-```bash
 npx tsc --noEmit
-```
 
 Expected successful result:
 
-```text
 no output
-```
 
-Do not tell the user that silence means nothing happened.
+Silence means success for this command.
 
-For this command, silence is success.
+Do not ask the user to rerun it merely because it printed nothing.
 
----
-
-# 21. When to Run TypeScript
-
-Run TypeScript after:
-
-- creating important new files;
-- switching imports;
-- replacing an owner;
-- deleting legacy files;
-- route changes;
-- significant type changes.
-
-Do not wait until twenty unrelated migrations have accumulated.
-
----
-
-# 22. Production Build Verification
+25. Production Build Verification
 
 Use:
 
-```bash
 npm run build
-```
 
-after more substantial boundaries such as:
+after substantial boundaries such as:
 
-- route work;
-- major implementation switches;
-- document architecture changes;
-- multiple coordinated migrations;
-- a major checkpoint before committing.
+route changes
+major implementation switches
+document architecture changes
+multiple coordinated migrations
+large ownership changes
+pre-commit checkpoints
 
-A successful TypeScript check is not always enough.
+A successful type-check is not always enough.
 
----
-
-# 23. Development Runtime Verification
+26. Development Runtime Verification
 
 Use:
 
-```bash
 npm run dev
-```
 
-when browser behaviour needs checking.
+when browser behaviour must be checked.
 
-Relevant runtime tests should match the migrated responsibility rather than mechanically testing every feature after every small edit.
+Test the changed responsibility, not every feature after every tiny edit.
 
----
+After major architecture work, perform a broader smoke test.
 
-# 24. Next.js Route-Type Recovery
+27. Next.js Generated-Type Recovery
 
-Route movement can leave stale generated `.next` validator files.
+Route changes can leave stale generated .next route validators.
 
-Known recovery:
+If source routing has changed and TypeScript errors point only to stale generated route types, use an appropriate regeneration path such as:
 
-```bash
 npx next typegen
 npx tsc --noEmit
-```
 
-If generated output remains stale, regenerate `.next`.
+or:
 
-Never manually modify:
+rm -rf .next
+npm run build
 
-```text
+Never manually edit:
+
 .next/
-```
 
----
-
-# 25. VS Code Stale Diagnostics
+28. VS Code Stale Diagnostics
 
 If:
 
-```bash
 npx tsc --noEmit
-```
 
-passes but VS Code still shows old errors after moves/renames:
+passes but VS Code still shows old diagnostics after moves or renames, use:
 
-use:
-
-```text
 Ctrl+Shift+P
 Developer: Reload Window
-```
 
-before assuming source remains broken.
+before assuming the source is still broken.
 
-The editor has previously retained stale diagnostics after successful migrations.
+29. Git Pager Behaviour
 
----
+Some Git commands may open the less pager.
 
-# 26. Browser Smoke Tests
+A terminal showing:
 
-After a visible Assessment Creation migration, relevant checks may include:
+:
 
-```text
-route opens
-P1/P2 switching
+at the bottom is usually waiting inside the pager, not frozen.
+
+Press:
+
+q
+
+to exit.
+
+For verification commands, prefer:
+
+git --no-pager diff --check
+git --no-pager diff --cached --check
+git --no-pager diff
+
+when pager behaviour would be distracting.
+
+30. CRLF Warnings
+
+On Windows, Git may report:
+
+LF will be replaced by CRLF the next time Git touches it
+
+This is a line-ending warning, not automatically a diff error.
+
+For whitespace validation use:
+
+git --no-pager diff --check
+
+or:
+
+git --no-pager diff --cached --check
+
+Distinguish warnings from actual whitespace errors.
+
+31. Browser Smoke Tests
+
+After substantive source architecture work, useful checks include:
+
+Home
+Assessment Setup
+Assessment Creator
+paper switching
 question generation
 question regeneration
 question editing
 question removal
-draft assignment
 preview rendering
 Exam / Compact / Answers switching
 worked answers
 zoom
 page navigation
-HUD resizing
-marks/timings
+HUD behaviour
+marks/timing
 quality notes
 save state
 Compile navigation
-```
+Compilation
+My Assessments
+My Classes
+Class Details
 
-Test only what the changed area could reasonably affect.
+Test the areas reasonably affected by the migration.
 
----
+For final Architecture V2 sign-off, test the major end-to-end flows.
 
-# 27. Document Rendering Requires Visual Testing
+32. Document Rendering Requires Visual Verification
 
 Changes beneath:
 
-```text
-src/UI/Documents/
-src/Courses/<Course>/Documents/
-```
+app/UI/Documents/
+app/Courses/<Course>/Documents/
+app/Assessments/Compilation/
 
-require more than TypeScript.
+may affect visible generated output.
 
 Visually verify relevant:
 
-- page dimensions;
-- page scaling;
-- margins;
-- corner marks;
-- marks margin;
-- candidate boxes;
-- cover layout;
-- formula layout;
-- question spacing;
-- footers;
-- Turn over presentation.
+page dimensions
+page scaling
+margins
+corner marks
+marks margin
+candidate boxes
+cover layout
+formula layout
+question spacing
+footers
+Turn over presentation
+pagination
 
-Physical document appearance is behaviour.
+Physical document appearance is product behaviour.
 
----
+33. Deletion Happens Last
 
-# 28. Deletion Workflow
+Preferred deletion sequence:
 
-Deletion should normally happen last.
-
-Use:
-
-```text
-WRITE REPLACEMENT
+WRITE / ESTABLISH REPLACEMENT
         ↓
 SWITCH CONSUMER
         ↓
 VERIFY
         ↓
-SEARCH OLD SYMBOL
+SEARCH OLD SYMBOL / PATH
         ↓
 DELETE
         ↓
 TYPE-CHECK AGAIN
-```
+        ↓
+BUILD / RUNTIME CHECK
 
-Never delete first merely because the new architecture intends to replace something.
+Never delete first merely because the target architecture intends to replace something.
 
----
-
-# 29. Broad Search Before Deletion
+34. Broad Search Before Deletion
 
 Before deleting an old file, search by more than one clue where appropriate.
 
-Example:
-
-```bash
-grep -RInE 'BuilderBottomHud|AssessmentProgressHud' app src
-```
-
-or:
-
-```bash
-grep -RInE 'DocumentPageFrame|SQAPageFrame' app src
-```
-
 Search:
 
-- exported symbol;
-- component name;
-- filename;
-- compatibility alias;
-- historical alternate name.
-
----
-
-# 30. Narrow Search Is Not Dead-Code Proof
-
-A crucial lesson from the refactor:
-
-```text
-no imports found in one subtree
-```
-
-does not mean:
-
-```text
-component is unused repository-wide
-```
+exported symbol
+component name
+filename
+compatibility alias
+historical alternate name
+route reference
+registry key
+event name
+persisted field/key
 
 Example:
 
-Assessment Creation stopped using an old document frame.
+grep -RInE 'OldSymbol|AlternateOldName' app \
+  --exclude-dir=.next \
+  --exclude-dir=node_modules
 
-Compilation still used it.
+A narrow path-only search is not dead-code proof.
 
-Therefore always widen the audit before deletion.
-
----
-
-# 31. Self-Reference-Only Result
+35. Self-Reference-Only Results
 
 A strong deletion signal is:
 
-```text
-grep across app/src
-→ matches occur only inside the old files themselves
-```
+repository-wide search
+→ matches occur only inside the old implementation itself
 
-At that point, if framework/dynamic usage is not relevant, deletion is usually appropriate.
+Then still consider:
 
-Then run:
+framework discovery
+dynamic imports
+registries
+string lookup
+persistence
+route dispatch
+browser events
 
-```bash
-npx tsc --noEmit
-```
+If those do not apply, deletion is usually appropriate.
 
-again.
+Verify again afterwards.
 
----
+36. Empty Folder Cleanup
 
-# 32. Empty Folder Cleanup
+After obsolete files are deleted, remove empty folders when useful.
 
-After deleting obsolete files, remove empty legacy folders where useful.
+Do not keep empty historical signposts merely because they once had meaning.
 
-Do not remove a parent directory containing other active historical code merely because one sub-feature completed migration.
+Do not remove a parent folder that still contains active responsibilities.
 
----
+37. Course Migration Workflow
 
-# 33. Preserve Active Legacy Consumers
+Distinguish:
 
-A V2 replacement existing does not make the old implementation dead.
-
-For example:
-
-```text
-Assessment Creation Preview
-```
-
-may use a new question renderer while:
-
-```text
-Compilation
-```
-
-still uses the old one.
-
-Keep the old file until the final consumer moves.
-
----
-
-# 34. Route Wrappers Are Special Consumers
-
-A page implementation can move successfully while its Next.js route wrapper remains mandatory.
-
-Before deleting/moving route files, understand which URL they register.
-
-A missing route wrapper previously caused:
-
-```text
-/create-assessment/builder
-→ 404
-```
-
-despite otherwise clean source.
-
----
-
-# 35. Compilation Is a Separate Scope
-
-The live Compilation route is:
-
-```text
-app/compile-assessment/page.tsx
-```
-
-Do not treat its dependencies as dead merely because Assessment Creation has replaced them.
-
-Compilation should receive its own bounded migration.
-
-When working on Creation:
-
-```text
-protect live Compilation behaviour
-```
-
-unless Compilation is explicitly the approved scope.
-
----
-
-# 36. Course Migration Workflow
-
-When migrating Course knowledge, distinguish:
-
-```text
-generic Assessment behaviour
-```
+generic Assessment workflow
 
 from:
 
-```text
 Course-specific educational knowledge
-```
 
 Examples:
 
-```text
-question workflow
-→ Assessments
+assessment question workflow
+→ app/Assessments/
 
 mathematical generator rules
-→ Courses/<Course>
+→ app/Courses/<Course>/
 
-Skills Tree interaction
-→ Assessments/Creation
+SkillsPanel interaction
+→ app/Assessments/Creation/SkillsPanel/
 
 curriculum definition
-→ Courses/<Course>/SkillsTree
+→ app/Courses/<Course>/Skills/
 
-document page sequencing
-→ Assessment consumer
+Course document content
+→ app/Courses/<Course>/Documents/
 
-Course cover contents
-→ Courses/<Course>/Documents
-```
+generic generated-document primitive
+→ app/UI/Documents/
 
----
+38. Course Contracts
 
-# 37. Avoid Course-Specific Generic UI
+Generic features should consume Course knowledge through the canonical Course architecture where practical.
 
-When generic UI contains:
+Current generic Course owners include:
 
-```ts
-if (course === "National5Maths")
-```
+app/Courses/CourseTypes.ts
+app/Courses/CourseCatalog.ts
+app/Courses/CourseRegistry.ts
+app/Courses/CourseAssessmentConfig.ts
+app/Courses/Papers/
+app/Courses/Selection/
+
+Do not bypass these contracts merely because importing a concrete Course file is quicker.
+
+39. CourseId Ownership
+
+CourseId is owned by:
+
+app/Courses/CourseTypes.ts
+
+Consumers should import it from its owner.
+
+Do not create convenience re-exports from unrelated domains.
+
+40. Course Registry API
+
+Use canonical Course Registry terminology:
+
+COURSE_REGISTRY
+getCourseAssessmentConfigById
+getDefaultCourseAssessmentConfig
+getRegisteredCourseAssessmentConfigs
+
+Do not reintroduce retired compatibility aliases unless a real compatibility requirement appears.
+
+41. National 5 Maths Question Architecture
+
+National 5 Maths historical exam evidence lives beneath:
+
+app/Courses/National5Maths/ExamQuestionAndAnswerCatalog/
+
+with:
+
+Questions/
+MarkingSchemes/
+
+Generated question/answer implementation lives beneath:
+
+app/Courses/National5Maths/QuestionAndAnswerGeneration/
+
+with:
+
+QuestionWriting/
+AnswerWriting/
+AnswerMethods/
+
+Do not recreate the retired Question Bank architecture.
+
+42. Avoid Course-Specific Generic UI
+
+When generic UI contains logic such as:
+
+if (course === "National5Maths") {
+  // ...
+}
 
 ask whether the variation belongs in:
 
-```text
-CourseDefinition
-CourseDocuments
+CourseAssessmentConfig
+Course Documents
 Course paper rules
-Course SkillsTree
-```
+Course skill data
 
-Do not mechanically remove every Course check.
+Do not mechanically remove every Course condition.
 
-First establish the correct contract.
+Establish the correct owner first.
 
----
+43. No Hypothetical Course Architecture
 
-# 38. Do Not Build Hypothetical Higher Architecture
+Future Higher or Advanced Higher support should influence boundary quality.
 
-Future Higher Maths support should influence boundary quality.
+It should not create:
 
-It should not cause:
-
-```text
-empty Higher folders
-fake CourseDefinition fields
-placeholder generator registries
-unused document implementations
-```
+empty Course trees
+placeholder document folders
+fake configuration fields
+unused generator registries
 
 Build only actual requirements.
 
----
+44. Classes Workflow
 
-# 39. Application UI Workflow
+Class-owned functionality belongs beneath:
 
-For teacher-facing visual changes, first identify whether the feature is:
+app/Classes/
 
-```text
+Classes should obtain Course-specific skill knowledge through:
+
+SchoolClass.courseId
+        ↓
+CourseRegistry
+        ↓
+CourseAssessmentConfig
+        ↓
+skillTree
+
+Do not make Classes depend directly on a concrete National 5 Maths skills file when the Course abstraction can provide the data.
+
+45. Application UI Workflow
+
+For interactive visual changes, first determine whether the responsibility is:
+
 global application UI
-```
 
 or:
 
-```text
 feature-specific UI
-```
 
-Global visual sources belong under:
+Global application visual infrastructure belongs beneath:
 
-```text
-src/UI/Application/
-```
+app/UI/Application/
 
-Feature-specific presentation generally stays with its owning feature.
+Feature-specific presentation normally stays with its owning product feature.
 
-Do not centralise every visual value.
+Do not centralise every colour, spacing value or component merely because it is visual.
 
----
+46. Generated-Document Workflow
 
-# 40. Document UI Workflow
+For generated document visuals, identify the correct layer:
 
-For generated paper visuals, identify the correct layer:
+generic document primitive
+→ app/UI/Documents/
 
-```text
-generic physical page rule
-→ UI/Documents
+qualification-family convention
+→ app/UI/Documents/Templates/<Family>/
 
-qualification-family visual convention
-→ UI/Documents/Templates/<Family>
+Course-specific document content/rule
+→ app/Courses/<Course>/Documents/
 
-Course content/rule
-→ Courses/<Course>/Documents
+assessment sequence / compilation workflow
+→ app/Assessments/
 
-page sequence / preview interaction
-→ Assessments
-```
+Preserve the dependency direction:
 
-Do not place everything visual under the same folder.
+generic document primitives
+        ↓
+qualification-family templates
+        ↓
+Course-specific documents
+        ↓
+Assessment consumers
 
----
+47. Application UI and Document UI Stay Separate
 
-# 41. Settings Workflow
+Code beneath:
 
-Classify every setting by effect.
+app/UI/Documents/
 
-```text
+should not depend on interactive application chrome.
+
+Do not make generated documents depend on:
+
+navigation
+settings drawers
+hover state
+application-only layout
+global application controls
+
+An Assessment-owned interactive preview may use Application styling where that styling belongs to the editor experience.
+
+48. Settings Workflow
+
+Classify settings by what they affect.
+
 Does it affect the whole VecEd application?
-→ UI/Application/SettingsDrawer
+→ app/UI/Application/SettingsDrawer/
 
-Does it affect the generated/current assessment?
-→ Assessments/Creation/AssessmentSettings
+Does it affect the assessment being created?
+→ app/Assessments/Creation/AssessmentSettings/
 
 Does it affect only workspace interaction/layout?
-→ PaperWorkspace
-```
+→ app/Assessments/Creation/PaperWorkspace/
 
-Do not classify settings based on which cog currently opens them.
+Do not classify settings based solely on which cog currently opens them.
 
----
+49. Persistence Workflow
 
-# 42. Persistence Workflow
+Before changing persistence behaviour, identify:
 
-Before moving persistence behaviour, identify:
-
-```text
 storage key
 stored shape
 readers
 writers
+normalisation
 fallback behaviour
-migration compatibility
+compatibility
 owner
-```
 
-Do not rename stored keys merely because `Builder` has disappeared from source terminology.
+Do not rename persisted keys merely because source terminology changed.
 
-Persistence compatibility is a separate contract.
+A persistence migration is a separate deliberate change.
 
----
+50. Historical Persistence Terminology Is Allowed
 
-# 43. Shared Types Workflow
+Persisted data may retain old terminology such as:
 
-Do not migrate:
+builder
+P1
+P2
+legacy field names
 
-```text
-shared-types/
-```
+when changing it would risk existing user data.
 
-as one unit.
+Source cleanliness does not override persistence compatibility.
 
-For every type, ask:
+51. Hidden Event Coupling
 
-> What does this type describe?
+Prefer explicit dependencies over hidden browser-event coupling.
 
-Then move it toward that owner.
+However, do not delete an active event bridge until all consumers have a replacement.
+
+Migration sequence:
+
+understand event
+→ identify dispatcher
+→ identify listeners
+→ introduce explicit replacement
+→ switch consumers
+→ verify
+→ delete event bridge
+
+A hidden event may be architecturally undesirable and still be currently necessary.
+
+52. Type Ownership
+
+Types live with the concepts they describe.
 
 Examples:
 
-```text
-Class type
-→ Classes
+CourseId
+→ app/Courses/CourseTypes.ts
 
-Assessment question type
-→ Assessments
+Class types
+→ app/Classes/ClassTypes.ts
 
-Course configuration type
-→ Courses
+Assessment types
+→ app/Assessments/AssessmentTypes.ts
 
-document rendering type
-→ UI/Documents or Course Documents
-```
+question content contracts
+→ app/Assessments/Questions/Content/
 
-Large widely used contracts may require temporary compatibility paths.
+question generation contracts
+→ app/Assessments/Questions/Generation/
 
----
+Do not create a global shared-types bucket for convenience.
 
-# 44. Generic Helper Workflow
+53. Generic Helper Workflow
 
-Do not transform:
+Do not respond to ownership uncertainty by creating:
 
-```text
-math-helpers/
-```
+Helpers/
+Utils/
+Shared/
+Common/
+Misc/
 
-into:
+Instead ask:
 
-```text
-src/Helpers/
-```
+Which domain owns this behaviour?
 
-Instead inspect each function and assign it to:
+Place it there.
 
-```text
-Course
-Assessment
-Documents
-other genuine owner
-```
+A helper function is still owned by the concept it helps.
 
-The goal is responsibility ownership, not helper-folder renaming.
+54. Large Orchestration Files
 
----
-
-# 45. Large Orchestration Files
-
-Large orchestration files are not automatically errors.
+Large orchestration files are not automatically architectural failures.
 
 For example:
 
-```text
-AssessmentCreatorPage.tsx
-```
+app/Assessments/Creation/AssessmentCreatorPage.tsx
 
-may remain substantial while it coordinates many regions.
+may remain substantial while coordinating many independent responsibilities.
 
-The correct question is:
+Ask:
 
-> Does this code coordinate independent owners?
+Does this code coordinate owners?
 
 or:
 
-> Does it secretly implement them?
+Does it secretly implement them?
 
 Extract the second category.
 
 Do not create meaningless wrappers solely to reduce line count.
 
----
+55. Client Boundary Workflow
 
-# 46. Choosing the Next Migration
+"use client" marks a client entry boundary.
 
-After completing one clean boundary, audit the next consumer boundary.
+Do not add it to every internal component or hook that uses:
 
-Example:
+useState
+useEffect
+useMemo
+useRef
+window
+document
+localStorage
+event handlers
 
-```text
-PaperWorkspace clean
-        ↓
-inspect AssessmentCreatorPage remaining legacy imports
-        ↓
-group by responsibility
-        ↓
-choose one cluster
-```
+If the module is imported beneath a genuine client boundary, it inherits the client environment.
 
-Do not choose the next file randomly.
+Goal:
 
-Follow dependency/ownership seams.
+deliberate client boundaries
 
----
+not:
 
-# 47. Group Legacy Imports by Responsibility
+zero client directives
 
-A useful audit command may be:
+56. Client-Boundary Audit
 
-```bash
-grep -RInE 'from "(@/app/create-assessment/builder/|@/math-helpers/|@/course-data/|@/shared-types/)' src/Assessments/Creation
-```
+When reviewing "use client":
 
-Then classify results into groups such as:
+identify where the file is imported;
 
-```text
-Settings
-Papers
-Analysis
-Persistence
-Course configuration
-Questions
-UI
-```
+determine whether it is itself an entry from a server graph;
 
-Migrate a coherent group rather than chasing filenames one at a time.
+inspect whether a parent already establishes the client subtree;
 
----
+remove only genuinely redundant directives;
 
-# 48. Scope Control
+type-check;
+
+build;
+
+verify runtime behaviour where relevant.
+
+Do not remove directives by filename pattern alone.
+
+57. Scope Control
 
 If an audit discovers an unrelated problem:
 
-```text
 record it
-```
 
 but do not automatically expand the approved migration.
 
 A useful discovery is not automatically the next task.
 
----
+58. Product Change vs Refactor
 
-# 49. Product Change vs Refactor
+Refactoring may expose a better product design.
 
-Refactoring may reveal a better product design.
+Keep the two changes separate.
 
-Keep these separate.
+Use language such as:
 
-Say:
-
-```text
 Current behaviour can be preserved during this migration.
 
-There is also a possible product improvement:
+A separate product improvement could be:
 ...
-```
 
-Do not silently implement the product change while claiming it was architectural cleanup.
+Do not silently introduce a product change while presenting it as architecture cleanup.
 
----
-
-# 50. When to Ask for Approval
+59. When Approval Is Required
 
 Ask before:
 
-- changing locked architecture;
-- changing product behaviour;
-- changing persisted data contracts;
-- changing public routes;
-- introducing new dependencies;
-- creating a new major domain;
-- deleting something whose usage remains uncertain.
+changing locked architecture
+changing product behaviour
+changing persisted data contracts
+changing public URLs
+introducing a significant dependency
+creating a new major domain
+deleting something whose usage remains uncertain
+weakening privacy assumptions
 
-Do not repeatedly ask approval for every routine implementation step once the user has approved a clear bounded migration.
+Do not ask for approval for every routine implementation step inside an already-approved bounded migration.
 
----
-
-# 51. When Not to Ask a Question
-
-Do not ask the user:
-
-> Where is this file?
-
-if the repository can answer.
-
-Do not ask:
-
-> Is this imported anywhere?
-
-if local grep can answer.
-
-Do not ask:
-
-> Should I use PascalCase?
-
-when it is already locked.
-
-Use questions for genuine decisions, not repository archaeology.
-
----
-
-# 52. Communicating Instructions to the User
-
-The user prefers concise but sufficient instructions.
+60. Communicating Instructions
 
 A good implementation message usually contains:
 
-```text
 what we are doing
-exact path
-complete replacement code
-one verification command
+why
+exact repository-relative path
+complete replacement file or exact mechanical command
+one coherent verification step
 expected result
-```
 
-Avoid overwhelming the user with ten speculative future steps at once.
+Avoid overwhelming the user with many speculative future steps.
 
----
-
-# 53. One Coherent Check at a Time
-
-For risky migration work, proceed in coherent checkpoints.
-
-Example:
-
-```text
-create replacement
-→ tsc
-
-switch consumer
-→ tsc
-
-grep old implementation
-→ delete
-
-browser smoke test
-```
-
-This makes failures easy to attribute.
-
----
-
-# 54. Avoid Fiddly Manual Work
-
-Prefer:
-
-```text
-create three clean files
-+
-replace one consumer file
-```
-
-over:
-
-```text
-make seventeen tiny edits in seven files
-```
-
-where both achieve the same architecture safely.
-
----
-
-# 55. Terminal Commands
+61. Terminal Commands
 
 Commands should be:
 
-- exact;
-- copyable;
-- run from repository root unless otherwise stated.
+exact
+copyable
+run from repository root unless stated otherwise
 
-Examples:
+State the expected result.
 
-```bash
+Useful examples:
+
 npx tsc --noEmit
-```
 
-```bash
 npm run build
-```
 
-```bash
-npx next typegen
-```
+git status --short
 
-```bash
-grep -RInE 'BuilderBottomHud|AssessmentProgressHud' app src
-```
+git --no-pager diff --check
 
-State what result is expected.
+grep -RInE 'PatternA|PatternB' app \
+  --exclude-dir=.next \
+  --exclude-dir=node_modules
 
----
+62. Interpreting Empty Search Output
 
-# 56. Interpreting Empty `grep`
+If the expected result is no references, say:
 
-If the expected result is no references, say explicitly:
-
-```text
 Expected: no output.
-```
 
-When the user reports blank output, treat it as a successful result rather than asking them to retry.
+When the command returns blank output, treat that as success.
 
----
+Do not make the user rerun a successful empty search without a new reason.
 
-# 57. Interpreting TypeScript Silence
-
-If:
-
-```bash
-npx tsc --noEmit
-```
-
-returns to the prompt without errors:
-
-```text
-PASS
-```
-
-Do not request additional output.
-
----
-
-# 58. Build/Runtime Failure Handling
+63. Failure Handling
 
 If verification fails:
 
-```text
 STOP DELETION
-```
 
 Do not continue deeper into the migration.
 
-Use the error to determine whether:
+Investigate whether:
 
-- import switch is wrong;
-- adapter is needed;
-- hidden consumer exists;
-- generated Next types are stale;
-- the architecture assumption was incomplete.
+import switch is wrong
+hidden consumer exists
+adapter is required
+generated Next types are stale
+persistence assumption was incomplete
+route behaviour changed
+client boundary was incorrect
+architecture assumption was incomplete
 
 Repair from the last known-good boundary.
 
----
-
-# 59. Preserve Known-Good Boundaries
-
-Once a subtree has been explicitly verified clean, protect that boundary.
-
-Current example:
-
-```text
-src/Assessments/Creation/PaperWorkspace/
-```
-
-has been verified free of direct legacy Builder/math-helper imports.
-
-Future work should not casually reintroduce them.
-
----
-
-# 60. Commit Checkpoints
+64. Commit Checkpoints
 
 A good commit point occurs after:
 
-```text
-bounded responsibility migrated
+bounded responsibility completed
 +
 type/build verification
 +
 relevant browser verification
 +
 legacy cleanup
-```
 
-Prefer meaningful commits rather than giant mixed snapshots.
+Before committing:
 
-Before committing a significant migration, review the diff.
+git status --short
+git --no-pager diff --check
 
-Confirm:
+Then stage:
 
-- no unrelated files changed accidentally;
-- intended deletions actually occurred;
-- no obsolete duplicate implementation remains;
-- generated files were not accidentally edited;
-- the commit represents the migration that was actually verified.
+git add -A
 
-The user's existing commit naming may be used if they deliberately prefer timestamp-style messages; architectural documentation should not depend on a particular cosmetic commit-message style.
+Validate staged diff:
 
----
+git --no-pager diff --cached --check
 
-# 61. Documentation Timing
+Commit only when the staged change represents what was actually verified.
 
-Do **not** update documentation after every small source edit.
+65. Do Not Mix Unrelated Changes Into a Commit
+
+Before committing, confirm:
+
+no unrelated files changed accidentally
+intended deletions occurred
+no duplicate implementation remains
+generated output was not accidentally edited
+documentation matches the completed boundary
+
+A commit should tell one understandable story.
+
+66. Documentation Timing
+
+Do not update documentation after every tiny source edit.
 
 Update at meaningful checkpoints such as:
 
-- completion of a major visible region;
-- removal of a major legacy dependency boundary;
-- establishment of a new Course/document layer;
-- a locked architectural decision;
-- a substantial handoff point.
+canonical owner established
+major legacy seam removed
+bounded migration completed
+architectural decision changed
+handoff point reached
+Architecture V2 finalisation
 
-Documentation should represent durable project memory, not a live keystroke diary.
+Documentation is durable project memory, not a keystroke diary.
 
----
+67. Which Documents to Update
 
-# 62. Which Documents to Update
+Use:
 
-At a normal migration checkpoint:
+Docs/RepositoryMap.md
+→ current physical repository
 
-```text
-RepositoryMap.md
-→ current physical status
+Docs/Architecture.md
+→ current architecture and dependency rules
 
-RefactorLedger.md
-→ completed migration / remaining work
-```
+Docs/LockedDecisions.md
+→ settled decisions and supersessions
 
-Update:
+Docs/RefactorLedger.md
+→ migration history / handoff
 
-```text
-Architecture.md
-```
+Docs/ChatGPTWorkflow.md
+→ development operating procedure
 
-only when long-lived architecture changes.
-
-Update:
-
-```text
-LockedDecisions.md
-```
-
-only when a meaningful locked decision is established, changed or superseded.
-
-Update:
-
-```text
 AGENTS.md
-ChatGPTWorkflow.md
-```
+→ concise repository entry contract
 
-only when development operating procedure materially changes.
+Do not rewrite history in RefactorLedger.md merely because paths later changed.
 
----
+Historical paths may be correct for the time they describe.
 
-# 63. End-of-Session Handoff
+68. RefactorLedger Is Historical
 
-A significant session should leave enough persistent context to resume safely.
+Docs/RefactorLedger.md is intentionally different from current-state documentation.
 
-The handoff should answer:
+When refreshing it:
 
-```text
+preserve historical entries
+preserve old paths when historically accurate
+append final outcomes
+mark migrations complete where appropriate
+record the final architecture
+
+Do not run a blind global path replacement through the Ledger.
+
+69. End-of-Session Handoff
+
+A significant session should leave durable context answering:
+
 WHAT BECAME CANONICAL?
-
-WHAT WAS DELETED?
-
-WHAT LEGACY DEPENDENCIES REMAIN?
-
+WHAT WAS REMOVED?
+WHAT COMPATIBILITY REMAINS?
 WHAT WAS VERIFIED?
-
 WHAT SHOULD HAPPEN NEXT?
-```
 
-Use `RefactorLedger.md` for durable migration handoff.
+Use Docs/RefactorLedger.md for durable migration handoff.
 
----
-
-# 64. Recommended Handoff Format
-
-A concise handoff can use:
-
-```text
-CURRENT BRANCH
-refactor/architecture-V2
-
-COMPLETED
-...
-
-CANONICAL OWNER
-...
-
-REMOVED LEGACY
-...
-
-VERIFIED
-...
-
-KNOWN ACTIVE LEGACY
-...
-
-DO NOT DELETE
-...
-
-NEXT AUDIT
-...
-```
-
-Do not dump the full conversation into documentation.
+Do not paste the entire conversation into project documentation.
 
 Condense decisions and results.
 
----
+70. Starting a Fresh Chat
 
-# 65. Starting a Fresh Chat
+A fresh ChatGPT conversation can begin with:
 
-A new ChatGPT conversation can be started with a short instruction such as:
+We are continuing VecEd development.
 
-```text
-We are continuing the VecEd Architecture V2 refactor.
+Read AGENTS.md and the Architecture V2 documentation in Docs before proposing changes.
 
-Read AGENTS.md and the Architecture V2 documentation in Docs before
-proposing changes.
-
-Use Docs/RefactorLedger.md as the current migration handoff.
+Use Docs/RefactorLedger.md for historical migration context.
 
 Inspect the actual current repository before editing.
 
-Preserve working behaviour and continue from the next recorded migration
-boundary.
-```
+Preserve working behaviour and follow the current ownership architecture.
 
 The repository documentation should provide the rest.
 
----
+71. Current Architecture V2 Source Shape
 
-# 66. Fresh-Chat Assessment Creation Workflow
+A fresh session should expect the runtime source shape:
 
-If resuming Assessment Creation specifically:
+app/
+├── [...route]/
+├── Assessments/
+├── Classes/
+├── Courses/
+├── DeveloperTools/
+├── UI/
+├── favicon.ico
+├── globals.css
+├── layout.tsx
+└── page.tsx
 
-```text
-1. read the current Ledger
+Do not assume an older source layout.
 
-2. inspect:
-   src/Assessments/Creation/AssessmentCreatorPage.tsx
+If the real repository differs, inspect before editing and determine whether documentation is stale or a new migration has occurred.
 
-3. audit remaining legacy imports
+72. Current Assessment Creation Owner
 
-4. group by responsibility
+Assessment Creation is owned beneath:
 
-5. choose one bounded cluster
+app/Assessments/Creation/
 
-6. write the V2 owner first
+Main entry points:
 
-7. type-check
+app/Assessments/Creation/AssessmentSetupPage.tsx
+app/Assessments/Creation/AssessmentCreatorPage.tsx
 
-8. switch consumers
+Major regions include:
 
-9. verify
+Analysis/
+AssessmentSettings/
+Feedback/
+HUDBar/
+Papers/
+PaperWorkspace/
+Persistence/
+Questions/
+Setup/
+SkillsPanel/
+TopBar/
 
-10. grep and delete old code
-```
+Do not recreate a generic Builder architecture.
 
-Do not reopen already completed PaperWorkspace migration without evidence of a regression.
+73. Current Compilation Owner
 
----
+Assessment Compilation is owned beneath:
 
-# 67. Current Known-Good Assessment Creation Boundary
+app/Assessments/Compilation/
 
-At the current checkpoint:
+It is separate from Creation.
 
-```text
-src/Assessments/Creation/PaperWorkspace/
-```
+Do not treat Compilation dependencies as dead merely because Creation no longer uses them.
 
-has no direct dependencies on:
+Search repository-wide before deleting shared document or question infrastructure.
 
-```text
-app/create-assessment/builder/
-math-helpers/
-```
+74. Current Routing Owner
 
-Its Preview, question preview and HUD behaviour have been browser-tested successfully.
+Public feature URLs are resolved through:
 
-Treat that as known-good project state.
+app/[...route]/page.tsx
 
----
+Current route dispatch includes:
 
-# 68. Current Major Protected Legacy Scope
+/compile-assessment
+/create-assessment
+/create-assessment/builder
+/my-assessments
+/my-classes
+/my-classes/:classId
+/dev/generator-tester
 
-The live Compilation feature still depends upon historical document/question code.
+The catch-all route should remain thin.
 
-Do not delete merely because Creation has migrated:
+Do not create duplicate physical feature trees solely to represent these URLs.
 
-```text
-app/compile-assessment/page.tsx
+75. Current Shared Question Preview
 
-src/UI/Documents/Components/DocumentPageFrame.tsx
+Shared Assessment question preview code belongs beneath:
 
-app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked.tsx
-```
+app/Assessments/Questions/Preview/
 
-until Compilation itself is migrated.
+Course-specific question writing belongs beneath the Course.
 
----
+Generated-document primitives belong beneath app/UI/Documents/.
 
-# 69. Known Good Refactor Pattern Example — HUD
+Do not collapse these three responsibilities into one generic Preview bucket.
 
-The HUD migration is a useful model.
+76. Current Document Architecture
 
-Historical dependency:
+Generated documents use:
 
-```text
-PaperWorkspace
-    ↓
-BuilderBottomHud
-    ↓
-AssessmentProgressHud
-```
-
-Migration:
-
-```text
-write AssessmentQualityNotes
-write AssessmentProgressPanel
-write AssessmentHUDBar
-write useAssessmentProgressRows
+app/UI/Documents/
         ↓
-switch PaperWorkspace / Creator consumers
+app/UI/Documents/Templates/NationalQualifications/
         ↓
-tsc
+app/Courses/National5Maths/Documents/
         ↓
-grep old HUD names
-        ↓
-delete old HUD files
-        ↓
-grep again
-        ↓
-browser smoke test
-```
+Assessment consumers
 
-Result:
+Keep generic physical-document infrastructure separate from Course-specific document content.
 
-```text
-no permanent compatibility duplicate
-```
+77. Current Developer Tools Boundary
 
-This is the preferred style of Architecture V2 migration.
+Runtime developer functionality belongs beneath:
 
----
+app/DeveloperTools/
 
-# 70. Known Failure Pattern Example — Premature Deletion
+Repository maintenance and historical migration tooling belongs beneath:
 
-The `DocumentPageFrame` incident is the model for what not to do.
+Tools/
 
-Incorrect reasoning:
+Do not merge these concerns.
 
-```text
-new document frame exists
-+
-Preview no longer uses old frame
-=
-old frame is dead
-```
+78. No Speculative Architecture
 
-Reality:
+Future ideas such as:
 
-```text
-Compilation still consumed old frame
-```
-
-Correct lesson:
-
-```text
-NEW OWNER EXISTS
-≠
-OLD OWNER HAS ZERO CONSUMERS
-```
-
-Always search repository-wide before deletion.
-
----
-
-# 71. Known Failure Pattern Example — Route Removal
-
-Another important lesson:
-
-```text
-page implementation moved
-≠
-route wrapper unnecessary
-```
-
-When:
-
-```text
-app/create-assessment/builder/page.tsx
-```
-
-was absent, the route returned 404.
-
-The descriptive V2 implementation does not replace the framework route entry point.
-
----
-
-# 72. Known Success Pattern — Full-File Rewrite
-
-When a component is conceptually being replaced, a fresh V2 implementation has generally proved easier to reason about than repeatedly renaming legacy internals.
-
-Use fresh files where this improves ownership clarity.
-
-Then delete the historical implementation after consumer verification.
-
----
-
-# 73. Debugging Philosophy
-
-When something breaks during refactor, first assume:
-
-```text
-dependency/consumer assumption may be incomplete
-```
-
-rather than immediately abandoning the target architecture.
-
-Investigate:
-
-```text
-imports
-types
-route registration
-generated types
-persistence
-hidden consumers
-```
-
-before redesigning the architecture.
-
----
-
-# 74. Avoid Architectural Overreaction
-
-One unexpected dependency does not automatically require a giant abstraction.
-
-Solve the actual boundary.
-
-Example:
-
-```text
-one legacy consumer remains
-```
-
-may justify:
-
-```text
-temporary adapter
-```
-
-not:
-
-```text
-new global framework
-```
-
----
-
-# 75. New Dependencies
-
-Architecture V2 should not casually introduce:
-
-- state libraries;
-- new UI frameworks;
-- new persistence infrastructure;
-- large utility dependencies
-
-merely to make migration easier.
-
-A dependency change is a separate architectural decision when significant.
-
----
-
-# 76. Privacy-Sensitive Work
-
-VecEd's pupil-data model intentionally distinguishes pupil IDs from local teacher name mappings.
-
-When working on:
-
-```text
-Classes
-assessment pupil data
-storage
-scanning
-future marking
-```
-
-do not casually move pupil names into broader/server-visible data contracts.
-
-Changes to this model require explicit product/privacy consideration.
-
----
-
-# 77. Future Feature Ideas Are Not Current Architecture
-
-Ideas such as:
-
-```text
 OCR
 AI marking
 batch scanning
 analytics
 Higher Maths
-```
+Advanced Higher Maths
 
-may inform boundary quality.
+may influence boundary quality.
 
-They do not justify empty placeholder folders or speculative abstractions today.
+They do not justify empty placeholder folders or unused abstractions.
 
----
+Build architecture when implementation exists.
 
-# 78. Definition of a Successful Bounded Migration
+79. Privacy-Sensitive Work
 
-A migration can be called complete when:
+VecEd's pupil-data approach intentionally separates pupil IDs from teacher-local name mapping.
 
-```text
+When working on:
+
+Classes
+assessment pupil data
+storage
+future scanning
+future marking
+
+do not casually move pupil names into broader or server-visible data contracts.
+
+Changes to the privacy model require explicit product/privacy consideration.
+
+80. Definition of a Successful Bounded Migration
+
+A bounded migration is complete when:
+
 canonical owner exists
 consumer uses it
-behaviour is preserved
+working behaviour is preserved
 TypeScript passes
-relevant runtime behaviour passes
-old references have been searched
+build passes where relevant
+runtime behaviour passes where relevant
+old references are searched broadly
 obsolete source is removed
 no duplicate truth remains
-```
+documentation is updated when the boundary is meaningful
 
-If legacy implementation still materially supplies the responsibility:
+If the old implementation still materially supplies the responsibility:
 
-```text
 MIGRATION IN PROGRESS
-```
 
----
+81. Definition of a Documentation Checkpoint
 
-# 79. Definition of a Documentation Checkpoint
+A documentation checkpoint is appropriate when a future developer would materially benefit from knowing:
 
-A documentation checkpoint is appropriate when a future session would materially benefit from knowing:
-
-```text
 this owner is now canonical
-```
 
 or:
 
-```text
-this legacy boundary is now gone
-```
+this legacy boundary is gone
 
 or:
 
-```text
-this architecture changed
-```
+this architectural rule changed
 
-The completion of PaperWorkspace legacy detachment is an example of a good documentation checkpoint.
+or:
 
----
+Architecture V2 reached final sign-off
 
-# 80. Final Working Rule
+82. Final Working Rule
 
 When unsure how to proceed:
 
-```text
-READ THE CURRENT DOCUMENTATION
+READ CURRENT DOCUMENTATION
         ↓
-INSPECT THE REAL SOURCE
+INSPECT REAL SOURCE
         ↓
-TRACE THE CONSUMERS
+TRACE CONSUMERS
         ↓
-ASK WHO OWNS THE RESPONSIBILITY
+ESTABLISH OWNER
         ↓
-WRITE THE CLEAN OWNER
+MAKE ONE COHERENT CHANGE
         ↓
-VERIFY BEFORE SWITCHING
-        ↓
-VERIFY AFTER SWITCHING
+VERIFY
         ↓
 SEARCH BEFORE DELETING
-```
+        ↓
+VERIFY AGAIN
+        ↓
+DOCUMENT AT A MEANINGFUL CHECKPOINT
 
-The purpose of this workflow is not merely to finish the current refactor.
+The purpose of this workflow is not only to finish Architecture V2.
 
-It is to make future VecEd development predictable enough that a new ChatGPT conversation can continue the project without reconstructing its history from scratch.
+It is to make future VecEd development predictable enough that a new developer or AI-assisted session can continue safely without reconstructing the project's history.

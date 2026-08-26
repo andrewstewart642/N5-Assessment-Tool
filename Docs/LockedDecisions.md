@@ -1,9 +1,13 @@
 # VecEd Locked Decisions
 
-**Document type:** Binding architectural decision register  
-**Architecture version:** Architecture V2  
-**Status:** Active  
+**Document type:** Binding architectural decision register  
+
+**Architecture version:** Architecture V2  
+
+**Status:** Active  
+
 **Applies to:** All VecEd development unless explicitly amended by the user
+
 **Purpose:** Preserve settled architectural decisions between development sessions
 
 ---
@@ -15,7 +19,9 @@ This document records decisions which have already been considered and approved.
 A decision marked:
 
 ```text
+
 LOCKED
+
 ```
 
 is not a suggestion or brainstorming prompt.
@@ -23,6 +29,7 @@ is not a suggestion or brainstorming prompt.
 Future development should follow it unless:
 
 - the user explicitly requests reconsideration; or
+
 - new technical evidence demonstrates a material conflict.
 
 Legacy implementation which disagrees with a locked decision is normally migration input, not evidence that the locked decision is wrong.
@@ -34,14 +41,23 @@ Legacy implementation which disagrees with a locked decision is normally migrati
 Use this precedence for VecEd-specific decisions:
 
 ```text
+
 1. Explicit current user instruction
+
 2. AGENTS.md
+
 3. Docs/LockedDecisions.md
+
 4. Docs/Architecture.md
+
 5. Docs/RepositoryMap.md
+
 6. Docs/RefactorLedger.md
+
 7. Current source implementation
+
 8. Historical implementation convention
+
 ```
 
 ---
@@ -53,17 +69,29 @@ Do not silently violate a locked decision.
 If a genuine conflict appears:
 
 ```text
+
 IDENTIFY DECISION
-        ↓
+
+        ↓
+
 EXPLAIN NEW EVIDENCE
-        ↓
+
+        ↓
+
 EXPLAIN CONFLICT
-        ↓
+
+        ↓
+
 PROPOSE AMENDMENT
-        ↓
+
+        ↓
+
 OBTAIN EXPLICIT APPROVAL
-        ↓
+
+        ↓
+
 UPDATE DOCUMENTATION
+
 ```
 
 Decision IDs are permanent.
@@ -71,7 +99,9 @@ Decision IDs are permanent.
 If a decision is replaced:
 
 ```text
+
 Status: SUPERSEDED
+
 ```
 
 must be recorded on the original decision and the replacement must receive a new ID.
@@ -153,7 +183,9 @@ Substantial new product development remains paused unless explicitly prioritised
 The authoritative repository remains:
 
 ```text
+
 N5-Assessment-Tool
+
 ```
 
 Do not create a separate replacement repository as the normal strategy.
@@ -167,7 +199,9 @@ Do not create a separate replacement repository as the normal strategy.
 Architecture V2 work occurs on:
 
 ```text
+
 refactor/architecture-V2
+
 ```
 
 until deliberately changed.
@@ -187,7 +221,9 @@ Do not perform the active Architecture V2 refactor directly on `main`.
 **Status:** LOCKED
 
 ```text
+
 archive/25-08-2026-baseline
+
 ```
 
 is a preservation reference, not a development branch.
@@ -214,12 +250,14 @@ Meaningful successful migrations should be committed in understandable stages.
 
 ## LD-014 — Migrated application source belongs beneath `src`
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-251
 
 Architecture V2 application source progressively converges beneath:
 
 ```text
+
 src/
+
 ```
 
 ---
@@ -234,16 +272,22 @@ Do not maintain parallel complete V1 and V2 application folders as competing wor
 
 ## LD-016 — Historical root source is legacy architecture
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-251
 
 Historical locations such as:
 
 ```text
+
 app/
+
 course-data/
+
 math-helpers/
+
 page-sections/
+
 shared-types/
+
 ```
 
 remain transitional unless specifically retained for framework/infrastructure reasons.
@@ -270,7 +314,7 @@ It must not alter source, Git, imports or runtime behaviour.
 
 ## LD-019 — `src` is the V2 construction area
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-251
 
 V2 grows while legacy ownership shrinks.
 
@@ -290,15 +334,20 @@ Permanent duplicate authorities are not.
 
 ## LD-021 — Core V2 application domains are explicit
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-252
 
 The principal source domains are:
 
 src/
+
 ├── app/
+
 ├── Assessments/
+
 ├── Classes/
+
 ├── Courses/
+
 └── UI/
 
 A runtime development domain such as:
@@ -306,6 +355,7 @@ A runtime development domain such as:
 src/DeveloperTools/
 
 may be introduced only if genuine developer-facing application functionality
+
 requires an independent owner.
 
 It is not a mandatory core domain.
@@ -327,10 +377,15 @@ Do not create top-level folders merely to solve local organisational problems.
 Do not pre-create empty architecture for hypothetical:
 
 ```text
+
 Scanning
+
 OCR
+
 AI marking
+
 Analytics
+
 ```
 
 or other future capabilities.
@@ -344,12 +399,19 @@ or other future capabilities.
 Canonical project documentation is:
 
 ```text
+
 Docs/
+
 ├── Architecture.md
+
 ├── LockedDecisions.md
+
 ├── RepositoryMap.md
+
 ├── RefactorLedger.md
+
 └── ChatGPTWorkflow.md
+
 ```
 
 ---
@@ -377,7 +439,9 @@ Do not move Next.js public assets beneath `src` merely for structural symmetry.
 Migration, validation, catalogue-processing and maintenance scripts with continuing value belong under:
 
 ```text
+
 Tools/
+
 ```
 
 ---
@@ -407,7 +471,9 @@ Use PascalCase for VecEd-owned folders and descriptive source modules where prac
 Example:
 
 ```text
+
 useAssessmentProgressRows.ts
+
 ```
 
 ---
@@ -443,7 +509,9 @@ Do not number unrelated domains merely to control Explorer sorting.
 Use:
 
 ```text
+
 01-Numerical
+
 ```
 
 ---
@@ -465,8 +533,11 @@ A main component may reflect its owning region where this improves clarity.
 Descriptive names such as:
 
 ```text
+
 AssessmentTopBar
+
 AssessmentHUDBar
+
 ```
 
 are also valid where the prefix prevents ambiguity outside the folder.
@@ -480,12 +551,19 @@ are also valid where the prefix prevents ambiguity outside the folder.
 Avoid:
 
 ```text
+
 Helpers
+
 Utils
+
 Shared
+
 Common
+
 Misc
+
 General
+
 ```
 
 without real architectural justification.
@@ -562,7 +640,7 @@ Controls such as name, date, paper selection and zoom should not remain permanen
 
 ## LD-046 — `src/app` is the target framework/routing layer
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-253
 
 Product implementation belongs in domain-owned files outside the route layer.
 
@@ -583,11 +661,17 @@ Substantial page implementation must not live permanently inside a giant route f
 Examples:
 
 ```text
+
 HomePage
+
 AssessmentSetupPage
+
 AssessmentCreatorPage
+
 AssessmentCompilationPage
+
 ClassesPage
+
 ```
 
 ---
@@ -602,7 +686,7 @@ Always use the complete repository-relative route path or descriptive implementa
 
 ## LD-050 — Root `app` → `src/app` migration is deliberate
 
-**Status:** LOCKED FOR CURRENT STRATEGY
+**Status:** SUPERSEDED BY LD-251 / LD-253
 
 Do not combine routing relocation with unrelated major domain migrations merely for neatness.
 
@@ -663,13 +747,17 @@ Product terminology must not depend on current rendering technology.
 The page is:
 
 ```text
+
 AssessmentCreatorPage
+
 ```
 
 The central region is:
 
 ```text
+
 PaperWorkspace
+
 ```
 
 ---
@@ -762,12 +850,14 @@ Each historical `Builder...` responsibility must be understood and renamed accor
 
 ## LD-072 — Canonical creation implementation is `AssessmentCreatorPage.tsx`
 
-**Status:** LOCKED — IMPLEMENTED
+**Status:** SUPERSEDED IN PATH BY LD-254; CONCEPT RETAINED
 
 Canonical location:
 
 ```text
+
 src/Assessments/Creation/AssessmentCreatorPage.tsx
+
 ```
 
 ---
@@ -777,19 +867,33 @@ src/Assessments/Creation/AssessmentCreatorPage.tsx
 **Status:** LOCKED AT CONCEPTUAL LEVEL
 
 ```text
+
 Creation/
+
 ├── AssessmentCreatorPage.tsx
+
 ├── AssessmentSetupPage.tsx
+
 ├── Setup/
+
 ├── TopBar/
+
 ├── SkillsPanel/
+
 ├── PaperWorkspace/
+
 ├── HUDBar/
+
 ├── AssessmentSettings/
+
 ├── Questions/
+
 ├── Papers/
+
 ├── Analysis/
+
 └── Persistence/
+
 ```
 
 Substructure may evolve without reopening the major ownership model.
@@ -825,12 +929,19 @@ Physical UI organisation must not create separate competing state or business lo
 Current examples include:
 
 ```text
+
 Assessment Name
+
 Class
+
 Assessment Date
+
 Paper View
+
 Zoom
+
 Page Navigation
+
 ```
 
 ---
@@ -860,8 +971,11 @@ Use subfolders where a feature has genuine multi-file responsibility.
 Conceptually:
 
 ```text
+
 01-SkillsFilters
+
 02-SkillsTree
+
 ```
 
 ---
@@ -949,9 +1063,13 @@ Do not mechanically put every historical BottomHud responsibility there.
 Primary categories are:
 
 ```text
+
 Global application settings
+
 Assessment settings
+
 Workspace settings
+
 ```
 
 ---
@@ -1000,10 +1118,12 @@ Transitional compatibility may exist during migration but is not the target arch
 
 ## LD-098 — There is one top-level UI domain
 
-**Status:** LOCKED
+**Status:** SUPERSEDED IN PATH BY LD-252; CONCEPT RETAINED
 
 ```text
+
 src/UI/
+
 ```
 
 ---
@@ -1013,9 +1133,13 @@ src/UI/
 **Status:** LOCKED
 
 ```text
+
 UI/
+
 ├── Application/
+
 └── Documents/
+
 ```
 
 ---
@@ -1076,7 +1200,7 @@ Centralise genuinely reusable visual decisions only.
 
 ## LD-108 — Course-specific knowledge belongs under `src/Courses`
 
-**Status:** LOCKED
+**Status:** SUPERSEDED IN PATH BY LD-255; CONCEPT RETAINED
 
 ---
 
@@ -1150,13 +1274,13 @@ Use Course-provided variation where practical.
 
 ## LD-119 — `SourceQuestionCatalog` is approved terminology
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-256
 
 ---
 
 ## LD-120 — `SourceMarkingSchemeCatalog` is approved terminology
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-256
 
 ---
 
@@ -1247,9 +1371,13 @@ TopBar, PaperWorkspace and HUDBar consume shared state rather than owning compet
 Prefer meaningful names such as:
 
 ```text
+
 TopicBalance
+
 StandardBalance
+
 AssessmentDistribution
+
 ```
 
 over `BuilderLogic` or `AnalysisHelper`.
@@ -1260,7 +1388,7 @@ over `BuilderLogic` or `AnalysisHelper`.
 
 ## LD-133 — Class-owned functionality belongs under `src/Classes`
 
-**Status:** LOCKED
+**Status:** SUPERSEDED IN PATH BY LD-255; CONCEPT RETAINED
 
 ---
 
@@ -1366,7 +1494,7 @@ Repeated two-way imports are evidence that ownership should be reassessed.
 
 ## LD-149 — The import alias should eventually represent V2 source cleanly
 
-**Status:** LOCKED DIRECTION
+**Status:** LOCKED DIRECTION — IMPLEMENTED BY LD-251
 
 Alias migration must happen deliberately when legacy imports no longer make it dangerous.
 
@@ -1444,12 +1572,14 @@ Move enduring tools to root `Tools/` or delete obsolete temporary tools.
 
 ## LD-159 — Runtime developer tools may receive an explicit V2 owner
 
-**Status:** LOCKED DIRECTION
+**Status:** SUPERSEDED IN PATH BY LD-257; CONCEPT RETAINED
 
 Use:
 
 ```text
+
 src/DeveloperTools/
+
 ```
 
 only when an actual runtime developer responsibility is migrated.
@@ -1531,14 +1661,23 @@ Avoid unnecessary repetition elsewhere.
 At minimum understand:
 
 ```text
+
 CURRENT PATH
+
 PURPOSE
+
 DEPENDENCIES
+
 CONSUMERS
+
 OWNER
+
 DESTINATION
+
 ACTION
+
 RISK
+
 ```
 
 ---
@@ -1550,17 +1689,29 @@ RISK
 Approved concepts include:
 
 ```text
+
 KEEP
+
 REWRITE
+
 MOVE
+
 RENAME
+
 SPLIT
+
 MERGE
+
 CONSOLIDATE
+
 DELETE
+
 MOVE OUT OF DOMAIN
+
 TEMPORARY ADAPTER
+
 DEFER
+
 ```
 
 ---
@@ -1729,12 +1880,14 @@ Resolved findings remain recorded because their IDs are permanent.
 
 ## LD-194 — Assessment Creation's historical route implementation was oversized
 
-**Status:** LOCKED FINDING — PARTIALLY RESOLVED
+**Status:** LOCKED FINDING — RESOLVED; CURRENT PATH SET BY LD-254
 
 The substantial implementation has moved to:
 
 ```text
+
 src/Assessments/Creation/AssessmentCreatorPage.tsx
+
 ```
 
 Further orchestration decomposition remains appropriate where meaningful.
@@ -1743,12 +1896,14 @@ Further orchestration decomposition remains appropriate where meaningful.
 
 ## LD-195 — Legacy BuilderTopBar required decomposition
 
-**Status:** LOCKED FINDING — RESOLVED
+**Status:** LOCKED FINDING — RESOLVED; CURRENT PATH SET BY LD-254
 
 Canonical TopBar ownership now exists under:
 
 ```text
+
 src/Assessments/Creation/TopBar/
+
 ```
 
 Do not regress to the legacy monolith.
@@ -1757,12 +1912,14 @@ Do not regress to the legacy monolith.
 
 ## LD-196 — Legacy BuilderBottomHud responsibilities required reassignment
 
-**Status:** LOCKED FINDING — RESOLVED
+**Status:** LOCKED FINDING — RESOLVED; CURRENT PATH SET BY LD-254
 
 Canonical HUD ownership now exists under:
 
 ```text
+
 src/Assessments/Creation/HUDBar/
+
 ```
 
 The old HUD implementation has been removed from the canonical PaperWorkspace dependency chain.
@@ -1785,7 +1942,7 @@ Do not recreate competing theme ownership.
 
 ## LD-199 — Legacy `shared-types` requires domain reassignment
 
-**Status:** LOCKED FINDING — ACTIVE
+**Status:** LOCKED FINDING — RESOLVED BY LD-258
 
 Do not migrate the folder wholesale.
 
@@ -1793,7 +1950,7 @@ Do not migrate the folder wholesale.
 
 ## LD-200 — Legacy `math-helpers` is not accepted V2 ownership
 
-**Status:** LOCKED FINDING — ACTIVE WHERE REMAINING
+**Status:** LOCKED FINDING — RESOLVED BY LD-258
 
 ---
 
@@ -1805,7 +1962,7 @@ Do not migrate the folder wholesale.
 
 ## LD-202 — Legacy `course-data` mixes responsibilities
 
-**Status:** LOCKED FINDING — MIGRATION IN PROGRESS
+**Status:** LOCKED FINDING — RESOLVED BY LD-258
 
 Useful data organisation should survive while ownership separates.
 
@@ -1813,13 +1970,13 @@ Useful data organisation should survive while ownership separates.
 
 ## LD-203 — Existing `SourceQuestionCatalog` is a positive precedent
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-256
 
 ---
 
 ## LD-204 — Existing `SourceMarkingSchemeCatalog` is a positive precedent
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-256
 
 ---
 
@@ -1959,7 +2116,7 @@ Update the relevant Architecture, Locked Decisions, Repository Map and Ledger do
 
 ## LD-222 — Root legacy source is transitional
 
-**Status:** LOCKED
+**Status:** LOCKED — IMPLEMENTED BY LD-251 / LD-258
 
 Finished V2 must not fundamentally depend on the historical root source architecture indefinitely.
 
@@ -1967,7 +2124,7 @@ Finished V2 must not fundamentally depend on the historical root source architec
 
 ## LD-223 — `src` becomes the authoritative application source tree
 
-**Status:** LOCKED
+**Status:** SUPERSEDED BY LD-251
 
 ---
 
@@ -1979,7 +2136,7 @@ Finished V2 must not fundamentally depend on the historical root source architec
 
 ## LD-225 — Major route implementations become thin wrappers
 
-**Status:** LOCKED
+**Status:** LOCKED — IMPLEMENTED; ROUTING MODEL CLARIFIED BY LD-253
 
 ---
 
@@ -2008,17 +2165,23 @@ Finished V2 must not fundamentally depend on the historical root source architec
 Example:
 
 ```text
+
 broken Assessment TopBar
+
 → Assessments/Creation/TopBar
 
 wrong curriculum skill
-→ Courses/<Course>/SkillsTree
+
+→ Courses/<Course>/Skills
 
 wrong generated-paper primitive
+
 → UI/Documents
 
 wrong Course cover content
+
 → Courses/<Course>/Documents
+
 ```
 
 ---
@@ -2084,12 +2247,19 @@ A developer should not be surprised by where code lives.
 Do not knowingly create new:
 
 ```text
+
 Builder catch-alls
+
 global helper buckets
+
 duplicate theme systems
+
 giant route implementations
+
 course-specific generic UI
+
 hidden cross-feature event coupling
+
 ```
 
 inside V2.
@@ -2133,17 +2303,29 @@ The following decisions were established after the original LD-001 → LD-240 re
 For a replaceable responsibility, prefer:
 
 ```text
+
 WRITE NEW
-    ↓
+
+    ↓
+
 TYPE-CHECK
-    ↓
+
+    ↓
+
 SWITCH CONSUMER
-    ↓
+
+    ↓
+
 VERIFY
-    ↓
+
+    ↓
+
 SEARCH
-    ↓
+
+    ↓
+
 DELETE OLD
+
 ```
 
 over repeatedly moving and mutating the legacy implementation.
@@ -2163,10 +2345,15 @@ Connected GitHub may lag behind the user's local branch.
 When determining whether a current local migration is complete, prioritise:
 
 ```text
+
 local grep
+
 local TypeScript
+
 local build
+
 local runtime/browser behaviour
+
 ```
 
 over stale remote repository state.
@@ -2184,12 +2371,19 @@ Do not establish deadness from a narrow path-specific search.
 Search relevant:
 
 ```text
+
 symbol names
+
 component names
+
 filenames
+
 adapter names
+
 import paths
+
 route references
+
 ```
 
 before deletion.
@@ -2209,9 +2403,13 @@ When the user is applying source manually, provide complete replacement contents
 Use surgical edits only when:
 
 ```text
+
 the file is unusually large
+
 AND
+
 the required change is genuinely tiny
+
 ```
 
 Surgical instructions must include distinctive exact boundaries.
@@ -2220,19 +2418,24 @@ Surgical instructions must include distinctive exact boundaries.
 
 ## LD-245 — PaperWorkspace is a canonical V2 boundary
 
-**Status:** LOCKED — IMPLEMENTED
+**Status:** SUPERSEDED IN PATH BY LD-254; CONCEPT RETAINED
 
 The canonical subtree is:
 
 ```text
+
 src/Assessments/Creation/PaperWorkspace/
+
 ```
 
 It must not casually regain direct dependencies on:
 
 ```text
+
 app/create-assessment/builder/
+
 math-helpers/
+
 ```
 
 A future legacy dependency introduced there should be treated as an architectural regression unless explicitly justified.
@@ -2246,25 +2449,41 @@ A future legacy dependency introduced there should be treated as an architectura
 The dependency model is:
 
 ```text
+
 generic document primitives
-        ↓
+
+        ↓
+
 qualification-family templates
-        ↓
+
+        ↓
+
 Course-specific documents
-        ↓
+
+        ↓
+
 Assessment Preview / Compilation
+
 ```
 
 Current example:
 
 ```text
+
 A4PageFrame
-        ↓
+
+        ↓
+
 NationalQualifications templates
-        ↓
+
+        ↓
+
 National5Maths Documents
-        ↓
+
+        ↓
+
 Assessment consumers
+
 ```
 
 Each layer owns only knowledge appropriate to that level.
@@ -2273,22 +2492,28 @@ Each layer owns only knowledge appropriate to that level.
 
 ## LD-247 — Course Documents expose an explicit Course-owned bundle
 
-**Status:** LOCKED
+**Status:** SUPERSEDED IN PATH BY LD-259; CONCEPT RETAINED
 
 Course-specific generated page components should be exposed through a coherent Course document boundary.
 
 Current National 5 Maths implementation:
 
 ```text
+
 src/Courses/National5Maths/Documents/CourseDocuments.ts
+
 ```
 
 Conceptually provides:
 
 ```text
+
 CoverPage
+
 FormulaSheet
+
 QuestionPage
+
 ```
 
 Long-term generic Assessment consumers should resolve these through the active Course contract rather than hard-code one Course throughout the application.
@@ -2297,12 +2522,14 @@ Long-term generic Assessment consumers should resolve these through the active C
 
 ## LD-248 — Compilation is a separate Assessment responsibility from Creation
 
-**Status:** LOCKED
+**Status:** SUPERSEDED IN PATH BY LD-259; CONCEPT RETAINED
 
 Conceptually:
 
 ```text
+
 src/Assessments/Compilation/
+
 ```
 
 owns final printable/generated assessment composition.
@@ -2324,14 +2551,23 @@ A clean TypeScript result cannot establish visual preservation of generated docu
 Changes affecting:
 
 ```text
+
 cover pages
+
 formula sheets
+
 question pages
+
 page frames
+
 margins
+
 corner marks
+
 page scaling
+
 document spacing
+
 ```
 
 require relevant visual/browser comparison.
@@ -2347,14 +2583,544 @@ Do not interrupt every tiny migration with documentation edits.
 Update persistent documentation when a meaningful boundary is reached, such as:
 
 ```text
+
 a canonical owner established
+
 a major legacy seam removed
+
 a bounded migration completed
+
 an architectural decision changed
+
 a handoff point reached
+
 ```
 
 This keeps documentation useful without turning it into a noisy edit-by-edit diary.
+
+---
+
+# PART XXXV — ARCHITECTURE V2 FINAL-STATE DECISIONS
+
+The following decisions record the final source-ownership model established after the original V2 migration strategy changed from a src/ construction area to a root app/ application source container.
+
+They supersede only the specific earlier decisions identified below. Earlier decision IDs remain in this register as historical project memory.
+
+---
+
+## LD-251 — Root app/ is the authoritative runtime application source tree
+
+**Status:** LOCKED — IMPLEMENTED
+
+The authoritative runtime source container is:
+
+```text
+
+app/
+
+```
+
+There is no separate runtime:
+
+```text
+
+src/
+
+```
+
+tree.
+
+This supersedes the source-root assumptions in LD-014, LD-016, LD-019, LD-050 and LD-223.
+
+The final repository architecture must not recreate a second src/ application tree.
+
+---
+
+## LD-252 — Product ownership domains live directly beneath root app/
+
+**Status:** LOCKED — IMPLEMENTED
+
+The principal runtime ownership domains are:
+
+```text
+
+app/
+├── Assessments/
+├── Classes/
+├── Courses/
+├── DeveloperTools/
+└── UI/
+
+```
+
+Next.js routing infrastructure also lives beneath root app/, but routing does not determine product ownership.
+
+This supersedes the physical src/... model in LD-021 and the path-only wording in LD-098.
+
+---
+
+## LD-253 — Public routes use a thin catch-all dispatcher rather than shadow feature trees
+
+**Status:** LOCKED — IMPLEMENTED
+
+The current routing adapter is:
+
+```text
+
+app/[...route]/page.tsx
+
+```
+
+It dispatches the established public URLs to product-owned page implementations.
+
+Current preserved route contract includes:
+
+```text
+
+/
+/create-assessment
+/create-assessment/builder
+/compile-assessment
+/my-assessments
+/my-classes
+/my-classes/
+/dev/generator-tester
+
+```
+
+Do not recreate parallel physical signpost trees such as:
+
+```text
+
+app/create-assessment/
+app/compile-assessment/
+app/my-assessments/
+app/my-classes/
+app/dev/
+
+```
+
+merely to mirror URLs.
+
+This supersedes LD-046 and the routing direction in LD-050.
+
+LD-047, LD-048, LD-049, LD-051, LD-156 and LD-225 remain conceptually active.
+
+---
+
+## LD-254 — Assessment Creation's canonical implementation lives under root app/Assessments/Creation
+
+**Status:** LOCKED — IMPLEMENTED
+
+Canonical creation entry points are:
+
+```text
+
+app/Assessments/Creation/AssessmentSetupPage.tsx
+app/Assessments/Creation/AssessmentCreatorPage.tsx
+
+```
+
+The canonical PaperWorkspace subtree is:
+
+```text
+
+app/Assessments/Creation/PaperWorkspace/
+
+```
+
+The established Creation ownership model remains:
+
+```text
+
+Creation/
+├── Analysis/
+├── AssessmentSettings/
+├── Feedback/
+├── HUDBar/
+├── Papers/
+├── PaperWorkspace/
+├── Persistence/
+├── Questions/
+├── Setup/
+├── SkillsPanel/
+├── TopBar/
+├── AssessmentCreatorPage.tsx
+└── AssessmentSetupPage.tsx
+
+```
+
+This supersedes only the obsolete src/... paths in LD-072 and LD-245.
+
+The conceptual decisions in LD-070 through LD-097 remain active unless separately superseded.
+
+---
+
+## LD-255 — Courses and Classes use root app/ ownership
+
+**Status:** LOCKED — IMPLEMENTED
+
+Course-specific knowledge belongs beneath:
+
+```text
+
+app/Courses/
+
+```
+
+Class-owned functionality belongs beneath:
+
+```text
+
+app/Classes/
+
+```
+
+Course-specific implementation belongs beneath:
+
+```text
+
+app/Courses/<Course>/
+
+```
+
+This supersedes only the obsolete src/... paths in LD-108 and LD-133.
+
+The ownership principles behind those decisions remain active.
+
+---
+
+## LD-256 — Current historical-exam terminology is ExamQuestion / ExamMarkingScheme
+
+**Status:** LOCKED — IMPLEMENTED
+
+The current National 5 Mathematics historical exam evidence owner is:
+
+```text
+
+app/Courses/National5Maths/ExamQuestionAndAnswerCatalog/
+├── Questions/
+└── MarkingSchemes/
+
+```
+
+Current terminology is:
+
+```text
+
+ExamQuestion
+ExamMarkingScheme
+ExamQuestionAndAnswerCatalog
+
+```
+
+The historical SourceQuestionCatalog and SourceMarkingSchemeCatalog terminology is retired from current source architecture.
+
+This supersedes LD-119, LD-120, LD-203 and LD-204.
+
+Historical migration material may still use the old terminology where historically accurate.
+
+---
+
+## LD-257 — Runtime Developer Tools live under app/DeveloperTools; repository tooling remains under root Tools
+
+**Status:** LOCKED — IMPLEMENTED
+
+Runtime developer-facing application functionality belongs beneath:
+
+```text
+
+app/DeveloperTools/
+
+```
+
+Current example:
+
+```text
+
+app/DeveloperTools/GeneratorTester/
+
+```
+
+Repository scripts, migration artefacts and maintenance tooling belong beneath:
+
+```text
+
+Tools/
+
+```
+
+This supersedes only the obsolete src/DeveloperTools/ path in LD-159.
+
+LD-027 and LD-028 remain active.
+
+---
+
+## LD-258 — Root generic legacy source buckets are retired
+
+**Status:** LOCKED — IMPLEMENTED
+
+The former root runtime-source buckets:
+
+```text
+
+shared-types/
+math-helpers/
+course-data/
+
+```
+
+have been removed from current application architecture.
+
+Their surviving responsibilities were reassigned to explicit owners.
+
+Do not recreate these buckets under root app/, beneath another source container, or under renamed generic equivalents.
+
+This resolves the active findings recorded in LD-199, LD-200 and LD-202.
+
+---
+
+## LD-259 — Current generated-document and Compilation owners use root app/ paths
+
+**Status:** LOCKED — IMPLEMENTED
+
+Generic generated-document infrastructure lives beneath:
+
+```text
+
+app/UI/Documents/
+
+```
+
+National 5 Mathematics Course documents live beneath:
+
+```text
+
+app/Courses/National5Maths/Documents/
+
+```
+
+The Course document bundle is:
+
+```text
+
+app/Courses/National5Maths/Documents/CourseDocuments.ts
+
+```
+
+Assessment Compilation lives beneath:
+
+```text
+
+app/Assessments/Compilation/
+
+```
+
+The layering remains:
+
+```text
+
+generic document primitives
+↓
+qualification-family templates
+↓
+Course-specific documents
+↓
+Assessment consumers
+
+```
+
+This supersedes only the obsolete src/... paths in LD-247 and LD-248.
+
+LD-145, LD-151 through LD-153, LD-246 and LD-249 remain active.
+
+---
+
+## LD-260 — CourseId has one canonical owner
+
+**Status:** LOCKED — IMPLEMENTED
+
+CourseId is defined by:
+
+```text
+
+app/Courses/CourseTypes.ts
+
+```
+
+Genuine consumers import it directly from Courses.
+
+Do not re-export CourseId from Assessment-owned type files merely for convenience.
+
+Do not create parallel Course identity types.
+
+---
+
+## LD-261 — Course Registry uses the canonical Course Assessment Config API
+
+**Status:** LOCKED — IMPLEMENTED
+
+The canonical Course registry owner is:
+
+```text
+
+app/Courses/CourseRegistry.ts
+
+```
+
+Canonical API terminology includes:
+
+```text
+
+COURSE_REGISTRY
+getCourseAssessmentConfigById
+getDefaultCourseAssessmentConfig
+getRegisteredCourseAssessmentConfigs
+
+```
+
+Retired compatibility aliases such as:
+
+```text
+
+COURSE_CONFIG_REGISTRY
+getCourseConfigById
+getDefaultCourseConfig
+getRegisteredCourseConfigs
+
+```
+
+must not be reintroduced without a demonstrated compatibility requirement.
+
+---
+
+## LD-262 — Classes resolves Course skills through the Course abstraction
+
+**Status:** LOCKED — IMPLEMENTED
+
+Class coverage resolves educational structure through:
+
+```text
+
+SchoolClass.courseId
+↓
+CourseRegistry
+↓
+CourseAssessmentConfig
+↓
+skillTree
+
+```
+
+Classes must not directly depend on National 5 Mathematics skill data when the Course contract supplies the required educational structure.
+
+This is the implemented form of LD-110, LD-111, LD-112, LD-115 and LD-133 through LD-135.
+
+---
+
+## LD-263 — The Question Bank architecture is retired
+
+**Status:** LOCKED — IMPLEMENTED
+
+The former:
+
+```text
+
+app/question-bank/
+
+```
+
+architecture has been removed.
+
+Live concept adapters were migrated into Course-owned generation beneath:
+
+```text
+
+app/Courses/National5Maths/QuestionAndAnswerGeneration/
+
+```
+
+Proven dead history/evidence/prompt-style files were deleted rather than migrated.
+
+Do not recreate a parallel Question Bank architecture.
+
+Future question and answer generation should extend the Course-owned generation model.
+
+---
+
+## LD-264 — "use client" marks genuine client entry boundaries only
+
+**Status:** LOCKED — IMPLEMENTED
+
+Do not add "use client" to an internal hook or child component merely because it uses:
+
+```text
+
+useState
+useEffect
+useMemo
+useCallback
+useRef
+browser APIs
+event handlers
+
+```
+
+A module imported beneath an existing Client Component boundary inherits the client environment.
+
+Use "use client" where the module intentionally establishes a client subtree from a server boundary.
+
+Do not add the directive defensively.
+
+---
+
+## LD-265 — Historical paths remain valid inside the Refactor Ledger when they describe history
+
+**Status:** LOCKED
+
+Docs/RefactorLedger.md is a historical migration record.
+
+Do not blindly rewrite earlier src/..., legacy Builder or old route paths inside the ledger when those paths accurately describe repository state at that point in the migration.
+
+Current-state documents must describe the current root app/ architecture.
+
+Historical documents must remain historically truthful.
+
+---
+
+## LD-266 — Next.js special filenames inside product architecture require deliberate framework intent
+
+**Status:** LOCKED
+
+Because product source now lives beneath the App Router's root app/ tree, filenames such as:
+
+```text
+
+page.tsx
+layout.tsx
+route.ts
+loading.tsx
+error.tsx
+not-found.tsx
+template.tsx
+default.tsx
+
+```
+
+must be introduced deliberately.
+
+Ordinary product page implementations should use descriptive names such as:
+
+```text
+
+AssessmentCreatorPage.tsx
+AssessmentCompilationPage.tsx
+MyClassesPage.tsx
+ClassDetailsPage.tsx
+
+```
+
+unless the file is genuinely intended to define Next.js routing/framework behaviour.
 
 ---
 
@@ -2363,9 +3129,16 @@ This keeps documentation useful without turning it into a noisy edit-by-edit dia
 The highest-level locked rules are:
 
 ```text
+
 PRESERVE WORKING BEHAVIOUR.
 
+ROOT app/ IS THE AUTHORITATIVE RUNTIME SOURCE.
+
+DO NOT RECREATE A src/ APPLICATION TREE.
+
 OWNERSHIP DETERMINES LOCATION.
+
+PUBLIC ROUTES USE THIN ROUTING ADAPTERS; DO NOT RECREATE SHADOW ROUTE TREES.
 
 WRITE NEW BEFORE DELETING OLD WHERE PRACTICAL.
 
@@ -2380,6 +3153,14 @@ BUILDER IS LEGACY TERMINOLOGY.
 ASSESSMENT CREATION IS COURSE-INDEPENDENT.
 
 COURSES OWN EDUCATIONAL KNOWLEDGE.
+
+COURSEID IS OWNED BY app/Courses/CourseTypes.ts.
+
+CLASSES RESOLVES COURSE SKILLS THROUGH THE COURSE REGISTRY/CONFIG CONTRACT.
+
+QUESTION BANK IS RETIRED.
+
+"USE CLIENT" BELONGS ONLY AT GENUINE CLIENT ENTRY BOUNDARIES.
 
 APPLICATION UI AND DOCUMENT UI ARE SEPARATE SYSTEMS.
 
@@ -2398,6 +3179,7 @@ VERIFY TYPES AND RELEVANT USER BEHAVIOUR.
 UPDATE DOCUMENTATION AT MEANINGFUL CHECKPOINTS.
 
 WHEN A LOCKED RULE GENUINELY FAILS, SURFACE THE CONFLICT RATHER THAN DRIFTING.
+
 ```
 
 ---
@@ -2407,13 +3189,17 @@ WHEN A LOCKED RULE GENUINELY FAILS, SURFACE THE CONFLICT RATHER THAN DRIFTING.
 A future developer or AI assistant should treat this register as:
 
 ```text
+
 settled project memory
+
 ```
 
 not:
 
 ```text
+
 a list of suggestions to reconsider
+
 ```
 
 Architecture V2 should evolve deliberately, not accidentally.
