@@ -1,14 +1,16 @@
 /**
- * Central baseline spacing rules (A4 baseline) keyed by questionCode.
+ * National 5 Mathematics assessment-paper working-space baselines.
  *
- * These values represent the working space placed beneath a question
- * in the assessment-paper layout.
+ * Values are expressed as CSS pixels at the A4 baseline.
  *
- * Source-question measurements are recorded from 300 dpi SQA renders.
- * Builder values here are the equivalent CSS-pixel working-space
- * baselines at approximately 96 dpi.
+ * Source-question measurements originate from 300 dpi SQA renders
+ * and are converted to the approximate 96 dpi CSS-pixel baseline used
+ * by the assessment document layout.
  */
-export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
+export const NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX: Record<
+  string,
+  number
+> = {
   /*
    * Surds
    */
@@ -17,7 +19,6 @@ export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
   NQ_N5_NUM_N01_C02_SimplifySurds_CollectMultipleTerms: 50,
 
   NQ_N5_NUM_N01_C03_SimplifySurds_ExpandAndSimplify: 70,
-
 
   /*
    * Reverse percentages
@@ -35,7 +36,6 @@ export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
   NUM_REVERSE_PERCENTAGE_INCREASE_GIVEN_FINAL_VALUE: 340,
 
   NUM_REVERSE_PERCENTAGE_INCREASE_FIND_DIFFERENCE: 400,
-
 
   /*
    * Compound percentages
@@ -67,7 +67,6 @@ export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
 
   NUM_COMPOUND_PERCENTAGE_MULTI_RATE_DECREASE: 305,
 
-
   /*
    * Fractions
    *
@@ -90,17 +89,17 @@ export const N5_QUESTION_SPACING_BASE_PX: Record<string, number> = {
   NUM_FRACTIONS_BRACKETED_SUM_WITH_FRACTION_MULTIPLIER: 335,
 };
 
+const DEFAULT_NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX = 40;
 
-export function getSpacingBasePx(
+export function getNational5MathsQuestionSpacingBasePx(
   questionCode?: string
 ): number {
   if (!questionCode) {
-    return 40;
+    return DEFAULT_NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX;
   }
 
   return (
-    N5_QUESTION_SPACING_BASE_PX[
-      questionCode
-    ] ?? 40
+    NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX[questionCode] ??
+    DEFAULT_NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX
   );
 }

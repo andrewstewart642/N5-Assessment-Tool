@@ -16,13 +16,13 @@ import SQAPageFrame from "@/src/UI/Documents/Components/DocumentPageFrame";
 import QuestionLockedPreview from "@/src/Assessments/Questions/Preview/QuestionLockedPreview";
 
 import {
-  PAGE_SIZES,
-  type PageSize,
-} from "@/app/paper-layout/Page-Sizes";
+  COMPILATION_PAGE_SIZES,
+  type CompilationPageSize,
+} from "@/src/Assessments/Compilation/CompilationPageSizes";
 
 import {
-  paginateQuestions,
-} from "@/app/paper-layout/Reflow-Pages";
+  paginateCompilationQuestions,
+} from "@/src/Assessments/Compilation/CompilationPagination";
 
 import {
   getSelectedCourseConfig,
@@ -86,8 +86,7 @@ function MiniToggle({
 }
 
 export default function AssessmentCompilationPage() {
-
-    const courseConfig =
+  const courseConfig =
     useMemo(
       () =>
         getSelectedCourseConfig(),
@@ -108,36 +107,38 @@ export default function AssessmentCompilationPage() {
   ] =
     useState<Paper>(
       () =>
-        getDefaultCoursePaper(courseConfig)
+        getDefaultCoursePaper(
+          courseConfig
+        )
     );
 
   const [
     pageSize,
     setPageSize,
   ] =
-    useState<PageSize>(
+    useState<CompilationPageSize>(
       "A4"
     );
 
   const paperOptions =
-  useMemo(() => {
-    return getCoursePapers(
-      courseConfig
-    );
-  }, [
-    courseConfig,
-  ]);
+    useMemo(() => {
+      return getCoursePapers(
+        courseConfig
+      );
+    }, [
+      courseConfig,
+    ]);
 
-const activePaperConfig =
-  useMemo(() => {
-    return resolveCoursePaperConfig(
+  const activePaperConfig =
+    useMemo(() => {
+      return resolveCoursePaperConfig(
+        paper,
+        courseConfig
+      );
+    }, [
       paper,
-      courseConfig
-    );
-  }, [
-    paper,
-    courseConfig,
-  ]);
+      courseConfig,
+    ]);
 
   useEffect(() => {
     try {
@@ -190,13 +191,13 @@ const activePaperConfig =
     );
 
   const sizeCfg =
-    PAGE_SIZES[
+    COMPILATION_PAGE_SIZES[
       pageSize
     ];
 
   const pages =
     useMemo(() => {
-      return paginateQuestions(
+      return paginateCompilationQuestions(
         paperQuestions,
         sizeCfg
       );

@@ -1,6 +1,6 @@
 import {
-  getSpacingBasePx,
-} from "@/app/paper-layout/N5-Question-Spacing-px";
+  getNational5MathsQuestionSpacingBasePx,
+} from "@/src/Courses/National5Maths/Documents/National5MathsQuestionSpacing";
 
 import type {
   Question,
@@ -26,7 +26,7 @@ export function getAssessmentQuestionSpacingBasePx(
   }
 
   return question.questionCode
-    ? getSpacingBasePx(
+    ? getNational5MathsQuestionSpacingBasePx(
         question.questionCode
       )
     : DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX;
@@ -40,7 +40,7 @@ export function applyAssessmentQuestionSpacingBase(
 
     spacingBasePx:
       question.questionCode
-        ? getSpacingBasePx(
+        ? getNational5MathsQuestionSpacingBasePx(
             question.questionCode
           )
         : DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX,
