@@ -2,7 +2,7 @@ import type {
   CourseAssessmentConfig,
   CourseAssessmentStructureId,
   CoursePaperConfig,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 import type {
   Paper,

@@ -1,6 +1,7 @@
 import {
-  ACTIVE_COURSE_CONFIG,
-} from "@/course-data/course-configs/ActiveCourseConfig";
+  DEFAULT_COURSE_ID,
+  getDefaultCourseAssessmentConfig,
+} from "@/src/Courses/CourseRegistry";
 
 import type {
   AssessmentPaperBooleanMap,
@@ -264,7 +265,7 @@ function getDefaultTargetMarksForPaper(
   fallback: number
 ): number {
   const paperConfig =
-    ACTIVE_COURSE_CONFIG.papers.find(
+    getDefaultCourseAssessmentConfig().papers.find(
       (
         coursePaper
       ) =>
@@ -498,8 +499,7 @@ function normaliseSavedAssessment(
        */
       courseId:
         setup.courseId ??
-        ACTIVE_COURSE_CONFIG
-          .courseId,
+        DEFAULT_COURSE_ID,
     },
 
     builder: {
@@ -701,8 +701,7 @@ export function createSavedAssessmentDraft(
         courseId:
           input.setup
             .courseId ??
-          ACTIVE_COURSE_CONFIG
-            .courseId,
+          DEFAULT_COURSE_ID,
       },
 
       builder:

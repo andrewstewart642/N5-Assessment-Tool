@@ -2,7 +2,7 @@ import type { CourseId } from "@/shared-types/AssessmentTypes";
 import type {
   CourseAssessmentModeId,
   CourseAssessmentStructureId,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 export const ASSESSMENT_SETUP_STORAGE_KEY =
   "assessment_builder_setup_brief_v1";

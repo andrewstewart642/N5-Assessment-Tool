@@ -7,7 +7,7 @@ import type {
 
 import type {
   CourseAssessmentConfig,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 import type {
   Paper,

@@ -6,28 +6,11 @@ import type {
   SkillsData,
 } from "@/shared-types/AssessmentTypes";
 
-/**
- * The course configuration layer is the bridge between:
- *
- * - the generic assessment builder
- * - the specific rules of a course such as National 5 Maths
- *
- * The generic app should eventually ask the active course config:
- *
- * - What course is active?
- * - What papers or sections exist?
- * - What timing rules apply?
- * - What assessment structures are allowed?
- * - What skills can be assessed?
- * - What balance rules should be used?
- *
- * This file should stay course-neutral.
- * National 5-specific detail belongs inside N5MathsCourseConfig.ts.
- */
+export type CourseSubjectArea =
+  "Mathematics";
 
-export type CourseSubjectArea = "Mathematics";
-
-export type CourseAwardingBody = "SQA";
+export type CourseAwardingBody =
+  "SQA";
 
 export type CourseLevelLabel =
   | "National 5"
@@ -42,48 +25,39 @@ export type CoursePaperConfig = {
   order: number;
 
   /**
-   * This currently uses the existing N5-style calculator suitability language.
-   * Later, this can be widened if another course needs a different model.
+   * Calculator suitability used by the current
+   * assessment/question metadata model.
    */
   calculatorPolicy: SkillPaperSuitability;
 
   /**
-   * Used to estimate time from marks.
+   * Used to estimate assessment time from marks.
    */
   minutesPerMark: number;
 
-    defaultTargetMarks: number;
+  defaultTargetMarks: number;
+
   description?: string;
 
   /**
-   * Optional compatibility tags used by legacy skill/question metadata.
-   *
-   * Example:
-   * - a paper with id "NON_CALCULATOR" can still match old metadata marked "P1"
-   * - a paper with id "CALCULATOR" can still match old metadata marked "P2"
+   * Compatibility tags used by historical
+   * skill/question metadata.
    */
   suitabilityAliases?: string[];
 
   /**
-   * Label used on the printable cover page.
-   *
-   * Example:
-   * - Paper 1 (Non-calculator)
-   * - Paper 2 (Calculator)
+   * Label used on printable assessment cover pages.
    */
   printTitle: string;
 
   /**
-   * Instruction shown on the cover page.
-   *
-   * Example:
-   * - You must NOT use a calculator.
-   * - You may use a calculator.
+   * Instruction displayed on the assessment cover.
    */
   coverInstructionText: string;
 
   /**
-   * Whether to show the crossed-out calculator icon on the cover page.
+   * Whether the printable cover should display the
+   * crossed-out calculator icon.
    */
   showNoCalculatorIcon: boolean;
 };
@@ -100,20 +74,28 @@ export type CourseAssessmentMode = {
   label: string;
   shortLabel: string;
   description: string;
-  guidanceStrictness: "strict" | "medium" | "light";
+
+  guidanceStrictness:
+    | "strict"
+    | "medium"
+    | "light";
 };
 
 /**
- * Identifier for a course's assessment structure.
+ * Identifier for a Course-supported assessment
+ * structure.
  *
- * Current two-paper maths courses can still use:
- * - BOTH
- * - P1_ONLY
- * - P2_ONLY
+ * Current maths Courses use values such as:
  *
- * But the config layer should not be structurally limited to those names.
+ * BOTH
+ * P1_ONLY
+ * P2_ONLY
+ *
+ * but generic Course architecture is not restricted
+ * to those identifiers.
  */
-export type CourseAssessmentStructureId = string;
+export type CourseAssessmentStructureId =
+  string;
 
 export type CourseAssessmentStructure = {
   id: CourseAssessmentStructureId;
@@ -131,8 +113,17 @@ export type CourseTopicTarget = {
   targetPct: number;
 };
 
+/**
+ * Generic Assessment-facing configuration supplied
+ * by a Course.
+ *
+ * This does not represent the whole Course domain.
+ * Course-owned documents, skills, generators and
+ * source evidence remain separate concerns.
+ */
 export type CourseAssessmentConfig = {
   courseId: CourseId;
+
   displayName: string;
   shortName: string;
 
@@ -140,46 +131,30 @@ export type CourseAssessmentConfig = {
   awardingBody: CourseAwardingBody;
   levelLabel: CourseLevelLabel;
 
-  /**
-   * Label used on printable assessment cover pages.
-   *
-   * Example:
-   * - Mathematics
-   * - Applications of Mathematics
-   */
   printSubjectName: string;
-
-  /**
-   * Badge shown on the printable cover page.
-   *
-   * Example:
-   * - N5
-   * - Higher
-   */
   printQualificationBadge: string;
-
-  /**
-   * Qualification label lines shown beside the badge.
-   *
-   * Example:
-   * - ["National", "Qualifications"]
-   */
   printQualificationLabelLines: string[];
 
   papers: CoursePaperConfig[];
+
   assessmentModes: CourseAssessmentMode[];
 
-  visibleSetupAssessmentModeIds?: CourseAssessmentModeId[];
+  visibleSetupAssessmentModeIds?:
+    CourseAssessmentModeId[];
 
-  assessmentStructures: CourseAssessmentStructure[];
+  assessmentStructures:
+    CourseAssessmentStructure[];
 
-  visibleSetupAssessmentStructureIds?: CourseAssessmentStructureId[];
+  visibleSetupAssessmentStructureIds?:
+    CourseAssessmentStructureId[];
 
   topicTargets: CourseTopicTarget[];
 
   /**
-   * This is optional for now so we can introduce the config safely.
-   * Eventually, the builder should render its skills tree from this.
+   * Transitional optional curriculum contract.
+   *
+   * Course-specific skills ownership is being
+   * migrated independently.
    */
   skillTree?: SkillsData;
 };
@@ -188,7 +163,11 @@ export function getCoursePaperConfig(
   courseConfig: CourseAssessmentConfig,
   paper: Paper
 ): CoursePaperConfig {
-  const found = courseConfig.papers.find((item) => item.id === paper);
+  const found =
+    courseConfig.papers.find(
+      (item) =>
+        item.id === paper
+    );
 
   if (!found) {
     throw new Error(
@@ -203,9 +182,11 @@ export function getCourseAssessmentStructure(
   courseConfig: CourseAssessmentConfig,
   structureId: CourseAssessmentStructureId
 ): CourseAssessmentStructure {
-  const found = courseConfig.assessmentStructures.find(
-    (item) => item.id === structureId
-  );
+  const found =
+    courseConfig.assessmentStructures.find(
+      (item) =>
+        item.id === structureId
+    );
 
   if (!found) {
     throw new Error(
@@ -215,6 +196,7 @@ export function getCourseAssessmentStructure(
 
   return found;
 }
+
 export function getCoursePaperSuitabilityTags(
   paperConfig: CoursePaperConfig
 ): string[] {
@@ -222,7 +204,10 @@ export function getCoursePaperSuitabilityTags(
     paperConfig.id,
     paperConfig.calculatorPolicy,
     ...(paperConfig.suitabilityAliases ?? []),
-  ].filter((tag, index, tags) => tags.indexOf(tag) === index);
+  ].filter(
+    (tag, index, tags) =>
+      tags.indexOf(tag) === index
+  );
 }
 
 export function coursePaperMatchesSuitability({
@@ -236,7 +221,11 @@ export function coursePaperMatchesSuitability({
     return true;
   }
 
-  return getCoursePaperSuitabilityTags(paperConfig).includes(paperSuitability);
+  return getCoursePaperSuitabilityTags(
+    paperConfig
+  ).includes(
+    paperSuitability
+  );
 }
 
 export function findCoursePaperConfigForSuitability(
@@ -248,11 +237,12 @@ export function findCoursePaperConfigForSuitability(
   }
 
   return (
-    courseConfig.papers.find((paperConfig) =>
-      coursePaperMatchesSuitability({
-        paperConfig,
-        paperSuitability,
-      })
+    courseConfig.papers.find(
+      (paperConfig) =>
+        coursePaperMatchesSuitability({
+          paperConfig,
+          paperSuitability,
+        })
     ) ?? null
   );
 }

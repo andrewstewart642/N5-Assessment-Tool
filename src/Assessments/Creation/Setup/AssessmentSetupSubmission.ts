@@ -1,4 +1,4 @@
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import type { CourseAssessmentConfig } from "@/src/Courses/CourseAssessmentConfig";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 
 import {

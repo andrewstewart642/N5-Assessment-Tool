@@ -5,7 +5,7 @@ import {
   type CourseAssessmentConfig,
   type CourseAssessmentStructureId,
   type CoursePaperConfig,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 import type {
   Paper,

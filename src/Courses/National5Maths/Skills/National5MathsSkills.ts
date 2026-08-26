@@ -1,4 +1,4 @@
-// course-data/N5-Skills.ts
+// src/Courses/National5Maths/Skills/National5MathsSkills.ts
 
 import type {
   Concept,

@@ -2,9 +2,11 @@
 
 import { useMemo, useState } from "react";
 
-import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
-import { getCourseConfigById } from "@/course-data/course-configs/CourseConfigRegistry";
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import {
+  DEFAULT_COURSE_ID,
+  getCourseAssessmentConfigById,
+} from "@/src/Courses/CourseRegistry";
+import type { CourseAssessmentConfig } from "@/src/Courses/CourseAssessmentConfig";
 
 import type { AssessmentLevelId } from "./AssessmentClassCoverageStorage";
 
@@ -49,9 +51,9 @@ export function useAssessmentSetupConfiguration({
 
   const selectedCourseConfig =
     useMemo<CourseAssessmentConfig>(() => {
-      return getCourseConfigById(
+      return getCourseAssessmentConfigById(
         selectedLevelId ??
-          ACTIVE_COURSE_CONFIG.courseId
+          DEFAULT_COURSE_ID
       );
     }, [selectedLevelId]);
 

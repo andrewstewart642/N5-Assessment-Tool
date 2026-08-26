@@ -8,7 +8,7 @@ import AddClassModal from "./components/AddClassModal";
 import { UseClasses } from "./state/UseClasses";
 import type { CourseOption, LevelOption } from "./types/Classes";
 import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
-import { getDefaultClassCourseLabel } from "@/course-data/course-configs/CourseCatalog";
+import { getDefaultClassCourseLabel } from "@/src/Courses/CourseCatalog";
 
 export default function MyClassesPage() {
   const { theme } = useSettings();

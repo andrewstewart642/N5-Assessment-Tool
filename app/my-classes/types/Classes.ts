@@ -2,7 +2,7 @@ import {
   COURSE_CATALOG,
   type CourseCatalogEntry,
   type CourseClassCourseLabel,
-} from "@/course-data/course-configs/CourseCatalog";
+} from "@/src/Courses/CourseCatalog";
 import type { CourseId } from "@/shared-types/AssessmentTypes";
 
 export type CourseOption = CourseClassCourseLabel;

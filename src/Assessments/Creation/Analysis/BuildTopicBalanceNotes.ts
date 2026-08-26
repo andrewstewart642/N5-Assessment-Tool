@@ -1,8 +1,8 @@
 import type {
   AssessmentQualityNote,
 } from "./AssessmentQualityNotes";
-import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import { getDefaultCourseAssessmentConfig } from "@/src/Courses/CourseRegistry";
+import type { CourseAssessmentConfig } from "@/src/Courses/CourseAssessmentConfig";
 import type { Paper } from "@/shared-types/AssessmentTypes";
 import type {
   TopicBalanceAnalysis,
@@ -264,7 +264,7 @@ function takeTopIssues(
 
 export function buildTopicBalanceNotes({
   analysis,
-  courseConfig = ACTIVE_COURSE_CONFIG,
+  courseConfig = getDefaultCourseAssessmentConfig(),
   includeBasisNote = true,
   includeRecommendationNote = true,
 

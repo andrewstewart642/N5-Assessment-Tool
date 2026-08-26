@@ -1,8 +1,8 @@
 import type {
   AssessmentQualityNote,
 } from "./AssessmentQualityNotes";
-import { ACTIVE_COURSE_CONFIG } from "@/course-data/course-configs/ActiveCourseConfig";
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import { getDefaultCourseAssessmentConfig } from "@/src/Courses/CourseRegistry";
+import type { CourseAssessmentConfig } from "@/src/Courses/CourseAssessmentConfig";
 import type {
   Paper,
   Question,
@@ -263,7 +263,7 @@ function auditCalculatorSuitability(args: {
 
 export function buildCalculatorSuitabilityNotes({
   questions,
-  courseConfig = ACTIVE_COURSE_CONFIG,
+  courseConfig = getDefaultCourseAssessmentConfig(),
   includedPapers = courseConfig.papers.map((paper) => paper.id),
   includeBasisNote = true,
   includePassNote = true,

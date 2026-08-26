@@ -4,7 +4,7 @@ import {
   getCoursePaperConfig,
   type CourseAssessmentConfig,
   type CoursePaperConfig,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 import type { Paper } from "@/shared-types/AssessmentTypes";
 

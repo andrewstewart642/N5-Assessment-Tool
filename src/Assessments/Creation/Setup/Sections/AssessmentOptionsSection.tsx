@@ -1,4 +1,4 @@
-import type { CourseAssessmentConfig } from "@/course-data/course-configs/CourseConfigTypes";
+import type { CourseAssessmentConfig } from "@/src/Courses/CourseAssessmentConfig";
 
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 

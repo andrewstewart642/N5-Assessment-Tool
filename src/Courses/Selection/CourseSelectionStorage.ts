@@ -1,14 +1,15 @@
 import {
-  getActiveCourseConfig,
-} from "@/course-data/course-configs/ActiveCourseConfig";
+  getDefaultCourseAssessmentConfig,
+  getCourseAssessmentConfigById,
+} from "@/src/Courses/CourseRegistry";
 
 import {
-  getCourseConfigById,
-} from "@/course-data/course-configs/CourseConfigRegistry";
+  normaliseCourseId,
+} from "@/src/Courses/CourseCatalog";
 
 import type {
   CourseAssessmentConfig,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 import type {
   CourseId,
@@ -18,61 +19,10 @@ import type {
  * Historical persisted key.
  *
  * Keep this exact string for backwards compatibility even though
- * course selection is no longer owned specifically by Assessment Creation.
+ * Course selection is no longer owned specifically by Assessment Creation.
  */
 export const ACTIVE_COURSE_ID_STORAGE_KEY =
   "assessment_builder_active_course_id_v1";
-
-function normaliseCourseId(
-  value: unknown
-): CourseId | null {
-  if (
-    value ===
-    "N5_MATH"
-  ) {
-    return "N5_MATH";
-  }
-
-  if (
-    value ===
-    "N5_APPLICATIONS_MATH"
-  ) {
-    return "N5_APPLICATIONS_MATH";
-  }
-
-  if (
-    value ===
-    "HIGHER_MATH"
-  ) {
-    return "HIGHER_MATH";
-  }
-
-  /*
-   * Preserve historical persisted aliases.
-   */
-  if (
-    value ===
-    "N5_MATHS"
-  ) {
-    return "N5_MATH";
-  }
-
-  if (
-    value ===
-    "N5_APPS"
-  ) {
-    return "N5_APPLICATIONS_MATH";
-  }
-
-  if (
-    value ===
-    "HIGHER_MATHS"
-  ) {
-    return "HIGHER_MATH";
-  }
-
-  return null;
-}
 
 export function saveSelectedCourseId(
   courseId: CourseId
@@ -106,13 +56,13 @@ export function getSelectedCourseConfig():
     if (
       storedCourseId
     ) {
-      return getCourseConfigById(
+      return getCourseAssessmentConfigById(
         storedCourseId
       );
     }
   }
 
-  return getActiveCourseConfig();
+  return getDefaultCourseAssessmentConfig();
 }
 
 export function getSelectedCourseId(

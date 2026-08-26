@@ -8,7 +8,7 @@ import type {
 import type {
   CourseAssessmentConfig,
   CourseTopicTarget,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 export const FALLBACK_ASSESSMENT_TOPICS: AssessmentTopicCode[] = [
   "NUM",

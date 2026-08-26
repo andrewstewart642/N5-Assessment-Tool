@@ -8,7 +8,7 @@ import CategorySection from "./CategorySection";
 
 import {
   getCoursePaperSuitabilityTags,
-} from "@/course-data/course-configs/CourseConfigTypes";
+} from "@/src/Courses/CourseAssessmentConfig";
 
 import {
   getAssessmentPaperConfig,
