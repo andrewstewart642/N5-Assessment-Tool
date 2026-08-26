@@ -1,6 +1,6 @@
 import type {
   CourseId,
-} from "@/app/Assessments/AssessmentTypes";
+} from "@/app/Courses/CourseTypes";
 
 import {
   DEFAULT_COURSE_ID,

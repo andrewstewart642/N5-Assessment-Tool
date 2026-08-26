@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import type {
   CourseId,
-} from "@/app/Assessments/AssessmentTypes";
+} from "@/app/Courses/CourseTypes";
 
 import type {
   AppTheme,

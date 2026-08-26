@@ -13,7 +13,7 @@ import type {
 
 import type {
   CourseId,
-} from "@/app/Assessments/AssessmentTypes";
+} from "@/app/Courses/CourseTypes";
 
 /**
  * Historical persisted key.

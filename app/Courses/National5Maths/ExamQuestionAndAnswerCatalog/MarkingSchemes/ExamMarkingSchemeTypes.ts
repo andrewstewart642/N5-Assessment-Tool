@@ -1,5 +1,6 @@
+import type { CourseId } from "@/app/Courses/CourseTypes";
+
 import type {
-  CourseId,
   Paper,
 } from "@/app/Assessments/AssessmentTypes";
 

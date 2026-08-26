@@ -1,4 +1,4 @@
-import type { CourseId } from "@/app/Assessments/AssessmentTypes";
+import type { CourseId } from "@/app/Courses/CourseTypes";
 import type {
   CourseAssessmentModeId,
   CourseAssessmentStructureId,

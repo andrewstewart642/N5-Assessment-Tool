@@ -15,17 +15,6 @@ import type {
 } from "@/app/Assessments/Questions/Generation/AnswerGenerationTypes";
 
 /**
- * Transitional re-export.
- *
- * CourseId is now owned by Courses. Existing AssessmentTypes consumers
- * can continue importing it from here until their imports are migrated
- * directly to CourseTypes.
- */
-export type {
-  CourseId,
-} from "@/app/Courses/CourseTypes";
-
-/**
  * Generic paper/component identifier.
  *
  * Current N5/Higher-style courses still use "P1" and "P2", but the builder

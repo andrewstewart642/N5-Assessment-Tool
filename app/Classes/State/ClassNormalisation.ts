@@ -4,7 +4,7 @@ import {
   getCourseIdForClassCourseLabel,
   getDefaultCourseId,
 } from "@/app/Courses/CourseCatalog";
-import type { CourseId } from "@/app/Assessments/AssessmentTypes";
+import type { CourseId } from "@/app/Courses/CourseTypes";
 import type { CourseOption, LevelOption, SchoolClass } from "../ClassTypes";
 
 export function isCourseOption(value: unknown): value is CourseOption {

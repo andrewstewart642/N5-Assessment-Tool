@@ -2,8 +2,9 @@ import {
   getCourseAssessmentConfigById,
 } from "@/app/Courses/CourseRegistry";
 
+import type { CourseId } from "@/app/Courses/CourseTypes";
+
 import type {
-  CourseId,
   Skill,
 } from "@/app/Assessments/AssessmentTypes";
 

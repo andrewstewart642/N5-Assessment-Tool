@@ -22,8 +22,9 @@ import type {
   AssessmentQuestionDraftByPaper,
 } from "@/app/Assessments/Creation/Questions/AssessmentQuestionDraftTypes";
 
+import type { CourseId } from "@/app/Courses/CourseTypes";
+
 import type {
-  CourseId,
   Paper,
   Question,
   StandardFilter,

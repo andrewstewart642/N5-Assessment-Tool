@@ -1,6 +1,7 @@
+import type { CourseId } from "@/app/Courses/CourseTypes";
+
 import type {
   AssessmentTopicCode,
-  CourseId,
   Paper,
   SkillPaperSuitability,
 } from "@/app/Assessments/AssessmentTypes";
