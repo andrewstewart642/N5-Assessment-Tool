@@ -1,4 +1,3 @@
-// app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation.ts
 
 import type {
   DifficultyLevel,

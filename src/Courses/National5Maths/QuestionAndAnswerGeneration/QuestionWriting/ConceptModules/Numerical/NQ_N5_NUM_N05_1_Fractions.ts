@@ -1,4 +1,3 @@
-// app/question-bank/skills/01-numerical/NQ_N5_NUM_N05_1_Fractions.ts
 
 import type {
   DifficultyLevel,

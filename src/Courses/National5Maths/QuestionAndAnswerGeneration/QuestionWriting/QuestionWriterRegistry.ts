@@ -20,29 +20,29 @@ import {
   isVariantEligibleForFilters,
 } from "@/shared-types/QuestionSelectionTypes";
 
-import SurdsConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N01_1_Surds";
+import SurdsConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N01_1_Surds";
 
-import RationaliseConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N01_2_Rationalise";
+import RationaliseConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N01_2_Rationalise";
 
-import MultiplyDivideIndicesConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_1_MultiplyAndDivideIndices";
+import MultiplyDivideIndicesConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N02_1_MultiplyAndDivideIndices";
 
-import PowerOfAProductConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_2_PowerOfAProduct";
+import PowerOfAProductConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N02_2_PowerOfAProduct";
 
-import PowerToAPowerConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_3_PowerToAPower";
+import PowerToAPowerConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N02_3_PowerToAPower";
 
-import FractionalIndicesConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_4_FractionalIndices";
+import FractionalIndicesConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N02_4_FractionalIndices";
 
-import ScientificNotationConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_5_ScientificNotation";
+import ScientificNotationConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N02_5_ScientificNotation";
 
-import SignificantFiguresConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N03_1_SignificantFigures";
+import SignificantFiguresConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N03_1_SignificantFigures";
 
-import ReversePercentagesConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_1_PercentagesReverse";
+import ReversePercentagesConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_1_PercentagesReverse";
 
-import AppreciationConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation";
+import AppreciationConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation";
 
-import DepreciationConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_3_PercentagesDepreciation";
+import DepreciationConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_3_PercentagesDepreciation";
 
-import FractionsConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N05_1_Fractions";
+import FractionsConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N05_1_Fractions";
 
 const conceptModules:
   ConceptGeneratorModule[] = [

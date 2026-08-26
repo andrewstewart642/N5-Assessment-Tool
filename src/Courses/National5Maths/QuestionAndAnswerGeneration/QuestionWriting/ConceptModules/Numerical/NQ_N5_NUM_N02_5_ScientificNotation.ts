@@ -1,4 +1,3 @@
-// app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_5_ScientificNotation.ts
 
 import type { PaperPart } from "@/shared-types/PaperParts";
 import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";

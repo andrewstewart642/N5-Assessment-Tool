@@ -2,7 +2,7 @@ import type {
   ConceptGeneratorModule,
 } from "@/shared-types/QuestionGenerationTypes";
 
-import AppreciationConceptModule from "@/app/question-bank/skills/01-numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation";
+import AppreciationConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation";
 
 
 export type GeneratorTestConcept = {

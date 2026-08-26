@@ -1,4 +1,3 @@
-// app/question-bank/skills/01-numerical/NQ_N5_NUM_N02_1_MultiplyAndDivideIndices.ts
 
 import type { PaperPart } from "@/shared-types/PaperParts";
 import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
@@ -33,50 +32,48 @@ function normaliseDifficulty(input: DifficultyLevel): DifficultyLevel {
   return 4;
 }
 
-function formatPower(variable: string, exponent: number): string {
-  if (exponent === 1) return variable;
-  if (exponent === 0) return "1";
-  return `${variable}^${exponent}`;
+function buildVariable(): string {
+  return chooseOne(["a", "b", "x", "y", "m", "n"]);
 }
 
-function formatPowerLatex(variable: string, exponent: number): string {
-  if (exponent === 1) return variable;
-  if (exponent === 0) return "1";
-  return `${variable}^{${exponent}}`;
-}
-
-function buildExponents(level: DifficultyLevel, isDivision: boolean) {
+function buildPowers(level: DifficultyLevel): { inner: number; outer: number } {
   if (level === 1) {
-    const m = randomInt(2, 6);
-    const n = randomInt(2, 6);
-    return { m, n };
+    return {
+      inner: chooseOne([2, 3, 4]),
+      outer: chooseOne([2, 3]),
+    };
   }
 
   if (level === 2) {
-    if (isDivision) {
-      const n = randomInt(2, 6);
-      const result = randomInt(1, 5);
-      const m = n + result;
-      return { m, n };
-    }
-
     return {
-      m: randomInt(2, 7),
-      n: randomInt(2, 7),
+      inner: chooseOne([2, 3, 4, 5]),
+      outer: chooseOne([2, 3, 4]),
     };
   }
 
   if (level === 3) {
     return {
-      m: randomInt(-3, 8),
-      n: randomInt(-3, 8),
+      inner: chooseOne([-3, -2, 2, 3, 4, 5]),
+      outer: chooseOne([2, 3, 4]),
     };
   }
 
   return {
-    m: randomInt(-5, 10),
-    n: randomInt(-5, 10),
+    inner: chooseOne([-4, -3, -2, 2, 3, 4, 5, 6]),
+    outer: chooseOne([2, 3, 4, 5]),
   };
+}
+
+function formatPowerPlain(variable: string, exponent: number): string {
+  if (exponent === 0) return "1";
+  if (exponent === 1) return variable;
+  return `${variable}^${exponent}`;
+}
+
+function formatPowerLatex(variable: string, exponent: number): string {
+  if (exponent === 0) return "1";
+  if (exponent === 1) return variable;
+  return `${variable}^{${exponent}}`;
 }
 
 function buildMarks(level: DifficultyLevel) {
@@ -108,32 +105,20 @@ function buildMarks(level: DifficultyLevel) {
 
 function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
   const level = normaliseDifficulty(context.difficulty);
-  const variable = chooseOne(["a", "b", "x", "y", "m"]);
-  const isDivision = Math.random() < 0.5;
-
-  let { m, n } = buildExponents(level, isDivision);
-
-  if (isDivision && m === n) {
-    m += 1;
-  }
-
-  const resultExponent = isDivision ? m - n : m + n;
+  const variable = buildVariable();
+  const { inner, outer } = buildPowers(level);
+  const resultExponent = inner * outer;
   const markBreakdown = buildMarks(level);
 
-  const promptLatex = isDivision
-    ? `${variable}^{${m}} \\div ${variable}^{${n}}`
-    : `${variable}^{${m}} \\times ${variable}^{${n}}`;
-
-  const promptPlain = isDivision
-    ? `${variable}^${m} ÷ ${variable}^${n}`
-    : `${variable}^${m} × ${variable}^${n}`;
+  const promptPlain = `(${variable}^${inner})^${outer}`;
+  const promptLatex = `(${variable}^{${inner}})^{${outer}}`;
 
   return {
     prompt: `Simplify ${promptPlain}.`,
-    answer: formatPower(variable, resultExponent),
+    answer: formatPowerPlain(variable, resultExponent),
     marks: markBreakdown.totalMarks,
 
-    questionCode: "NQ_N5_NUM_N02_1_MULTIPLY_AND_DIVIDE_INDICES",
+    questionCode: "NQ_N5_NUM_N02_3_POWER_TO_A_POWER",
 
     promptParts: [textPart("Simplify "), mathPart(promptLatex), textPart(".")],
     answerParts: [mathPart(formatPowerLatex(variable, resultExponent))],
@@ -148,28 +133,28 @@ function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
     },
 
     sourceSkillCode: "NQ_N5_NUM_N02",
-    sourceConceptCode: "N2.1",
-    sourceConceptLabel: "Multiply and divide indices",
-    templateId: `multiply-divide-indices-l${level}`,
+    sourceConceptCode: "N2.3",
+    sourceConceptLabel: "Power to a power",
+    templateId: `power-to-a-power-l${level}`,
   };
 }
 
-export const MultiplyDivideIndicesConceptModule: ConceptGeneratorModule = {
+export const PowerToAPowerConceptModule: ConceptGeneratorModule = {
   metadata: {
-    moduleId: "NQ_N5_NUM_N02_1_MULTIPLY_AND_DIVIDE_INDICES",
+    moduleId: "NQ_N5_NUM_N02_3_POWER_TO_A_POWER",
     domain: "NUM",
     skillCode: "NQ_N5_NUM_N02",
-    conceptCode: "N2.1",
-    conceptLabel: "Multiply and divide indices",
+    conceptCode: "N2.3",
+    conceptLabel: "Power to a power",
 
     difficultyProfile: {
       availableLevels: [1, 2, 3, 4],
       defaultLevel: 2,
       levelDescriptions: {
-        1: "Straightforward positive-index multiplication or division.",
-        2: "Typical SQA-style multiply/divide indices questions.",
-        3: "Includes less friendly exponents such as negatives.",
-        4: "Most demanding within this concept while staying in-course.",
+        1: "Straightforward positive powers.",
+        2: "Typical SQA-style power to a power question.",
+        3: "Includes less friendly inner powers such as negatives.",
+        4: "Most demanding in-course variants for this concept.",
       },
     },
 
@@ -183,10 +168,10 @@ export const MultiplyDivideIndicesConceptModule: ConceptGeneratorModule = {
   },
 
   canHandle(code: string) {
-    return code === "N2.1";
+    return code === "N2.3";
   },
 
   generate: generateQuestion,
 };
 
-export default MultiplyDivideIndicesConceptModule;
+export default PowerToAPowerConceptModule;
