@@ -1,18 +1,25 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type {
+  ReactNode,
+} from "react";
 
 import {
   ThemeProvider,
   useTheme,
-} from "../../src/UI/Application/Theme/ThemeProvider";
+} from "@/src/UI/Application/Theme/ThemeProvider";
 
 import {
   SettingsDrawerProvider,
   useSettingsDrawer,
-} from "../../src/UI/Application/SettingsDrawer/SettingsDrawerProvider";
+} from "@/src/UI/Application/SettingsDrawer/SettingsDrawerProvider";
 
-export function SettingsProvider({ children }: { children: ReactNode }) {
+export function SettingsProvider({
+  children,
+}: {
+  children:
+    ReactNode;
+}) {
   return (
     <ThemeProvider>
       <SettingsDrawerProvider>
@@ -23,8 +30,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 }
 
 export function useSettings() {
-  const theme = useTheme();
-  const settingsDrawer = useSettingsDrawer();
+  const theme =
+    useTheme();
+
+  const settingsDrawer =
+    useSettingsDrawer();
 
   return {
     ...theme,

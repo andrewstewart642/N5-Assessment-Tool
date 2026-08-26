@@ -20,7 +20,7 @@ import {
 
 import {
   useSettings,
-} from "@/app/settings-bar/GlobalSettingsContext";
+} from "@/src/UI/Application/Settings/ApplicationSettings";
 
 import AssessmentPreviewCard from "./Components/AssessmentPreviewCard";
 import DeleteAssessmentModal from "./Components/DeleteAssessmentModal";

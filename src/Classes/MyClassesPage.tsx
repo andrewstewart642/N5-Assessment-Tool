@@ -7,7 +7,7 @@ import ClassGrid from "./Components/ClassGrid";
 import AddClassModal from "./Components/AddClassModal";
 import { useClasses } from "./State/useClasses";
 import type { CourseOption, LevelOption } from "./ClassTypes";
-import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
+import { useSettings } from "@/src/UI/Application/Settings/ApplicationSettings";
 import { getDefaultClassCourseLabel } from "@/src/Courses/CourseCatalog";
 
 export default function MyClassesPage() {

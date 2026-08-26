@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
+import { useSettings } from "@/src/UI/Application/Settings/ApplicationSettings";
 
 import type { AssessmentLevelId } from "./Setup/AssessmentClassCoverageStorage";
 

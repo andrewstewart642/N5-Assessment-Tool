@@ -14,7 +14,7 @@ import HeaderBar from "@/src/UI/Application/HeaderBar/HeaderBar";
 
 import {
   SettingsProvider,
-} from "@/app/settings-bar/GlobalSettingsContext";
+} from "@/src/UI/Application/Settings/ApplicationSettings";
 
 import SettingsDrawer from "@/src/UI/Application/SettingsDrawer/SettingsDrawer";
 

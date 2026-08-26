@@ -2,7 +2,7 @@ import type {
   SavedAssessment,
 } from "@/src/Assessments/SavedAssessments/SavedAssessment";
 
-import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
+import { useSettings } from "@/src/UI/Application/Settings/ApplicationSettings";
 
 type DeleteAssessmentModalProps = {
   savedAssessment: SavedAssessment | null;

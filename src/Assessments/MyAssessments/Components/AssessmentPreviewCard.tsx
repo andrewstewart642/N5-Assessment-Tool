@@ -8,7 +8,7 @@ import {
   setCurrentSavedAssessmentId,
 } from "@/src/Assessments/SavedAssessments/SavedAssessmentsStorage";
 
-import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
+import { useSettings } from "@/src/UI/Application/Settings/ApplicationSettings";
 
 import {
   formatDateTime,
