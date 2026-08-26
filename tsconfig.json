@@ -38,8 +38,8 @@
   ],
   "exclude": [
     "node_modules",
-    "percentage_catalogue_hardening",
-    "percentage_catalogue_hardening/**",
+    "Tools/LegacyMigrations/PercentageCatalogueHardening",
+    "Tools/LegacyMigrations/PercentageCatalogueHardening/**",
     ".percentage_catalogue_hardening_backup",
     ".percentage_catalogue_hardening_backup/**",
     "percentage_catalogue_hardening_backup",
