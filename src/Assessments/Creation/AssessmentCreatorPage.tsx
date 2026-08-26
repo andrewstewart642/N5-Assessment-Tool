@@ -7,115 +7,18 @@ import {
   useState,
 } from "react";
 
-import { useRouter } from "next/navigation";
-
-import { useSettings } from "@/app/settings-bar/GlobalSettingsContext";
-
-import BuilderGlobalStyles from "@/app/create-assessment/builder/BuilderStyles";
-
 import {
-  BUILDER_STORAGE_KEY_PAIRS,
-} from "@/app/create-assessment/builder/BuilderStorageKeys";
-
-import {
-  clamp,
-} from "@/app/create-assessment/builder/BuilderUtils";
-
-import {
-  BUILDER_DEFAULT_HUD_HEIGHT,
-  BUILDER_DIVIDER_WIDTH_PX,
-} from "@/app/create-assessment/builder/builder-definitions/BuilderConstants";
-
-import {
-  getAssessmentCreationCourseConfig,
-} from "./Persistence/AssessmentCourseSelectionStorage";
-
-import {
-  todayDisplayDate,
-} from "@/app/create-assessment/builder/builder-logic/BuilderDateHelpers";
-
-import {
-  useBuilderFlashFeedback,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderFlashFeedback";
-
-import {
-  useBuilderInitialisation,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderInitialisation";
-
-import {
-  useBuilderLayout,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderLayouts";
-
-import {
-  useBuilderMetadataTiming,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderMetadataTiming";
-
-import {
-  useBuilderPaperPrintMetadata,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderPaperPrintMetadata";
-
-import {
-  useBuilderPaperSittingState,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderPaperSittingState";
-
-import {
-  useBuilderPaperTargetMaps,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderPaperTargetMaps";
-
-import {
-  useBuilderPersistence,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderPersistence";
-
-import {
-  useAssessmentProgressRows,
-} from "./HUDBar/useAssessmentProgressRows";
-
-import {
-  useBuilderProgressMetrics,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderProgressMetrics";
-
-import {
-  useBuilderTargetMarksState,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderTargetMarksState";
-
-import {
-  useBuilderUiChrome,
-} from "@/app/create-assessment/builder/builder-behaviour/UseBuilderUiChrome";
-
-import {
-  usePaperViewMetadata,
-} from "@/app/create-assessment/builder/builder-behaviour/UsePaperViewMetadata";
-
-import {
-  usePreviewViewport,
-} from "@/app/create-assessment/builder/builder-behaviour/UsePreviewViewport";
-
-import {
-  useQuestionWorkflow,
-} from "@/app/create-assessment/builder/builder-behaviour/UseQuestionWorkflow";
-
-import {
-  useMeasuredQuestionHeights,
-} from "@/app/create-assessment/builder/builder-preview-engine/UseMeasuredQuestionHeights";
-
-import {
-  usePreviewJumpNavigation,
-} from "@/app/create-assessment/builder/builder-preview-engine/UsePreviewJumpNavigation";
-
-import {
-  usePreviewPages,
-} from "@/app/create-assessment/builder/builder-preview-engine/UsePreviewPages";
-
-import type {
-  Skill,
-  StandardFilter,
-  ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+  useRouter,
+} from "next/navigation";
 
 import {
   UI_TEXT,
   UI_TYPO,
 } from "@/src/UI/Application/Typography/Typography";
+
+import {
+  useTheme,
+} from "@/src/UI/Application/Theme/ThemeProvider";
 
 import {
   useAssessmentQualityAnalysis,
@@ -124,12 +27,56 @@ import {
 import AssessmentSettings from "./AssessmentSettings/AssessmentSettings";
 
 import {
-  useBuilderPaperSelection,
-} from "./Papers/useBuilderPaperSelection";
+  getTodayAssessmentDisplayDate,
+} from "./AssessmentSettings/AssessmentDateTime";
+
+import {
+  useAssessmentSettingsDrawer,
+} from "./AssessmentSettings/useAssessmentSettingsDrawer";
+
+import {
+  useAssessmentCreationFeedback,
+} from "./Feedback/useAssessmentCreationFeedback";
+
+import {
+  useAssessmentProgressMetrics,
+} from "./HUDBar/useAssessmentProgressMetrics";
+
+import {
+  useAssessmentProgressRows,
+} from "./HUDBar/useAssessmentProgressRows";
+
+import {
+  ASSESSMENT_WORKSPACE_DIVIDER_WIDTH_PX,
+} from "./PaperWorkspace/AssessmentWorkspaceLayout";
 
 import AssessmentPaperWorkspace from "./PaperWorkspace/AssessmentPaperWorkspace";
 
 import WorkspaceDivider from "./PaperWorkspace/WorkspaceDivider";
+
+import {
+  useAssessmentPreviewJumpNavigation,
+} from "./PaperWorkspace/Preview/useAssessmentPreviewJumpNavigation";
+
+import {
+  useAssessmentPaperPrintMetadata,
+} from "./PaperWorkspace/Preview/useAssessmentPaperPrintMetadata";
+
+import {
+  useAssessmentPaperViewMetadata,
+} from "./PaperWorkspace/Preview/useAssessmentPaperViewMetadata";
+
+import {
+  useAssessmentPreviewPages,
+} from "./PaperWorkspace/Preview/useAssessmentPreviewPages";
+
+import {
+  useAssessmentPreviewViewport,
+} from "./PaperWorkspace/Preview/useAssessmentPreviewViewport";
+
+import {
+  useAssessmentWorkspaceLayout,
+} from "./PaperWorkspace/useAssessmentWorkspaceLayout";
 
 import {
   useBuilderWorkspaceDocumentLock,
@@ -144,16 +91,60 @@ import {
 } from "./PaperWorkspace/usePreviewViewMode";
 
 import {
+  useAssessmentPaperAutomaticTiming,
+} from "./Papers/useAssessmentPaperAutomaticTiming";
+
+import {
+  useAssessmentPaperSittingState,
+} from "./Papers/useAssessmentPaperSittingState";
+
+import {
+  useAssessmentPaperTargets,
+} from "./Papers/useAssessmentPaperTargets";
+
+import {
+  useAssessmentPaperTargetState,
+} from "./Papers/useAssessmentPaperTargetState";
+
+import {
+  useBuilderPaperSelection,
+} from "./Papers/useBuilderPaperSelection";
+
+import {
+  getAssessmentCreationCourseConfig,
+} from "./Persistence/AssessmentCourseSelectionStorage";
+
+import {
+  useAssessmentCreationPersistence,
+} from "./Persistence/useAssessmentCreationPersistence";
+
+import {
   useAssessmentCreatorAutoSave,
 } from "./Persistence/useAssessmentCreatorAutoSave";
+
+import {
+  useAssessmentCreatorInitialisation,
+} from "./Persistence/useAssessmentCreatorInitialisation";
 
 import {
   useAssessmentCreatorSavedAssessment,
 } from "./Persistence/useAssessmentCreatorSavedAssessment";
 
 import {
+  useAssessmentQuestionControls,
+} from "./Questions/useAssessmentQuestionControls";
+
+import {
   useAssessmentQuestionState,
 } from "./Questions/useAssessmentQuestionState";
+
+import {
+  useAssessmentQuestionWorkflow,
+} from "./Questions/useAssessmentQuestionWorkflow";
+
+import {
+  useMeasuredQuestionHeights,
+} from "./Questions/Preview/useMeasuredQuestionHeights";
 
 import AssessmentSkillsPanel from "./SkillsPanel/AssessmentSkillsPanel";
 
@@ -165,41 +156,25 @@ import {
   useAssessmentSkillsPanelState,
 } from "./SkillsPanel/useAssessmentSkillsPanelState";
 
+import {
+  useAssessmentDatePopover,
+} from "./TopBar/useAssessmentDatePopover";
 
-const META_NAME_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.metaName;
+import {
+  useAssessmentNameField,
+} from "./TopBar/useAssessmentNameField";
 
-const META_CLASS_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.metaClass;
-
-const META_ASSESSMENT_DATE_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.metaAssessmentDate;
-
-const P1_COVER_DATE_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.p1CoverDate;
-
-const P1_START_TIME_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.p1StartTime;
-
-const P1_END_TIME_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.p1EndTime;
-
-const P2_COVER_DATE_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.p2CoverDate;
-
-const P2_START_TIME_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.p2StartTime;
-
-const P2_END_TIME_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.p2EndTime;
-
-const P2_DATE_CUSTOM_KEY =
-  BUILDER_STORAGE_KEY_PAIRS.p2DateCustom;
+import AssessmentCreatorStyles from "./AssessmentCreatorStyles";
 
 
 export default function AssessmentCreatorPage() {
-  const router = useRouter();
-  const { theme } = useSettings();
+  const router =
+    useRouter();
+
+  const {
+    theme,
+  } =
+    useTheme();
 
   useBuilderWorkspaceDocumentLock();
 
@@ -208,47 +183,39 @@ export default function AssessmentCreatorPage() {
    * Course
    */
 
-  const builderCourseConfig =
-    useMemo(() => {
-      return getAssessmentCreationCourseConfig();
-    }, []);
+  const courseConfig =
+    useMemo(
+      () =>
+        getAssessmentCreationCourseConfig(),
+      []
+    );
 
   const activeSkillsData =
-    useMemo<
-      Record<string, Skill[]>
-    >(() => {
-      return (
-        builderCourseConfig.skillTree ??
-        {}
-      ) as Record<string, Skill[]>;
-    }, [builderCourseConfig]);
+    useMemo(
+      () =>
+        courseConfig.skillTree ??
+        {},
+      [
+        courseConfig,
+      ]
+    );
 
 
   /*
    * Question-generation controls
    */
 
-  const [
+  const {
     standardFilter,
     setStandardFilter,
-  ] =
-    useState<StandardFilter>(
-      "C+A"
-    );
 
-  const [
     thinkingTypeFilter,
     setThinkingTypeFilter,
-  ] =
-    useState<ThinkingTypeFilter>(
-      "ANY"
-    );
 
-  const [
     targetMarks,
     setTargetMarks,
-  ] =
-    useState<number>(2);
+  } =
+    useAssessmentQuestionControls();
 
 
   /*
@@ -265,8 +232,7 @@ export default function AssessmentCreatorPage() {
     handleActivePaperChange,
   } =
     useBuilderPaperSelection({
-      courseConfig:
-        builderCourseConfig,
+      courseConfig,
     });
 
 
@@ -291,17 +257,16 @@ export default function AssessmentCreatorPage() {
 
   const {
     targetMarksByPaper:
-      builderTargetMarksByPaper,
+      assessmentTargetMarksByPaper,
 
     setTargetMarksByPaper:
-      setBuilderTargetMarksByPaper,
+      setAssessmentTargetMarksByPaper,
 
     p1Target,
     p2Target,
   } =
-    useBuilderTargetMarksState({
-      courseConfig:
-        builderCourseConfig,
+    useAssessmentPaperTargetState({
+      courseConfig,
     });
 
 
@@ -363,9 +328,7 @@ export default function AssessmentCreatorPage() {
     handlePreferredAnswerMethodChange,
   } =
     useAssessmentQuestionState({
-      courseConfig:
-        builderCourseConfig,
-
+      courseConfig,
       viewPaper,
     });
 
@@ -381,10 +344,14 @@ export default function AssessmentCreatorPage() {
 
   const pageWrapperRefs =
     useRef<
-      Array<HTMLDivElement | null>
-    >([]);
+      Array<
+        HTMLDivElement | null
+      >
+    >(
+      []
+    );
 
-  const builderDateFieldRef =
+  const assessmentDateFieldRef =
     useRef<HTMLDivElement | null>(
       null
     );
@@ -398,36 +365,46 @@ export default function AssessmentCreatorPage() {
     includeCoverSheet,
     setIncludeCoverSheet,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     showCoverDateTime,
     setShowCoverDateTime,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     showScottishCandidateNumberBox,
     setShowScottishCandidateNumberBox,
   ] =
-    useState(true);
+    useState(
+      true
+    );
 
   const [
     includeFormulaSheet,
     setIncludeFormulaSheet,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
 
   /*
-   * Builder chrome and assessment metadata
+   * Assessment metadata and local UI
    */
 
   const [
     settingsOpen,
     setSettingsOpen,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     assessmentName,
@@ -441,21 +418,25 @@ export default function AssessmentCreatorPage() {
     className,
     setClassName,
   ] =
-    useState("");
+    useState(
+      ""
+    );
 
   const [
     assessmentDate,
     setAssessmentDate,
   ] =
     useState(
-      todayDisplayDate()
+      getTodayAssessmentDisplayDate()
     );
 
   const [
-    builderCalendarOpen,
-    setBuilderCalendarOpen,
+    assessmentCalendarOpen,
+    setAssessmentCalendarOpen,
   ] =
-    useState(false);
+    useState(
+      false
+    );
 
   const [
     ,
@@ -516,10 +497,8 @@ export default function AssessmentCreatorPage() {
     setP1EndTimeManuallyEdited,
     setP2EndTimeManuallyEdited,
   } =
-    useBuilderPaperSittingState({
-      courseConfig:
-        builderCourseConfig,
-
+    useAssessmentPaperSittingState({
+      courseConfig,
       assessmentDate,
     });
 
@@ -527,9 +506,6 @@ export default function AssessmentCreatorPage() {
   /*
    * Workspace layout
    */
-
-  const DEFAULT_HUD_HEIGHT =
-    BUILDER_DEFAULT_HUD_HEIGHT;
 
   const {
     layoutRef,
@@ -551,21 +527,15 @@ export default function AssessmentCreatorPage() {
 
     resetLayout,
   } =
-    useBuilderLayout({
-      defaultHudHeight:
-        DEFAULT_HUD_HEIGHT,
-    });
+    useAssessmentWorkspaceLayout();
 
 
   /*
-   * Transitional legacy Builder persistence
+   * Historical local-state compatibility
    */
 
-  useBuilderInitialisation({
-    defaultHudHeight:
-      DEFAULT_HUD_HEIGHT,
-
-    clampFn: clamp,
+  useAssessmentCreatorInitialisation({
+    courseConfig,
 
     setLeftPaneRatio,
     setHudHeight,
@@ -601,42 +571,12 @@ export default function AssessmentCreatorPage() {
     setViewPaper,
 
     setTargetMarksByPaper:
-      setBuilderTargetMarksByPaper,
+      setAssessmentTargetMarksByPaper,
 
     setQuestions,
-
-    metaNameKey:
-      META_NAME_KEY,
-
-    metaClassKey:
-      META_CLASS_KEY,
-
-    metaAssessmentDateKey:
-      META_ASSESSMENT_DATE_KEY,
-
-    p1CoverDateKey:
-      P1_COVER_DATE_KEY,
-
-    p1StartTimeKey:
-      P1_START_TIME_KEY,
-
-    p1EndTimeKey:
-      P1_END_TIME_KEY,
-
-    p2CoverDateKey:
-      P2_COVER_DATE_KEY,
-
-    p2StartTimeKey:
-      P2_START_TIME_KEY,
-
-    p2EndTimeKey:
-      P2_END_TIME_KEY,
-
-    p2DateCustomKey:
-      P2_DATE_CUSTOM_KEY,
   });
 
-  useBuilderPersistence({
+  useAssessmentCreationPersistence({
     leftPaneRatio,
 
     hudHeight,
@@ -665,41 +605,11 @@ export default function AssessmentCreatorPage() {
     p2DateCustom,
 
     questions,
-
-    metaNameKey:
-      META_NAME_KEY,
-
-    metaClassKey:
-      META_CLASS_KEY,
-
-    metaAssessmentDateKey:
-      META_ASSESSMENT_DATE_KEY,
-
-    p1CoverDateKey:
-      P1_COVER_DATE_KEY,
-
-    p1StartTimeKey:
-      P1_START_TIME_KEY,
-
-    p1EndTimeKey:
-      P1_END_TIME_KEY,
-
-    p2CoverDateKey:
-      P2_COVER_DATE_KEY,
-
-    p2StartTimeKey:
-      P2_START_TIME_KEY,
-
-    p2EndTimeKey:
-      P2_END_TIME_KEY,
-
-    p2DateCustomKey:
-      P2_DATE_CUSTOM_KEY,
   });
 
 
   /*
-   * Feedback and Builder chrome
+   * Feedback
    */
 
   const {
@@ -709,16 +619,30 @@ export default function AssessmentCreatorPage() {
     pushFlash,
     addQualityNote,
   } =
-    useBuilderFlashFeedback();
+    useAssessmentCreationFeedback();
 
-  useBuilderUiChrome({
-    builderCalendarOpen,
-    setBuilderCalendarOpen,
 
-    builderDateFieldRef,
+  /*
+   * Local UI behaviour
+   */
 
-    settingsOpen,
-    setSettingsOpen,
+  useAssessmentDatePopover({
+    open:
+      assessmentCalendarOpen,
+
+    setOpen:
+      setAssessmentCalendarOpen,
+
+    fieldRef:
+      assessmentDateFieldRef,
+  });
+
+  useAssessmentSettingsDrawer({
+    open:
+      settingsOpen,
+
+    setOpen:
+      setSettingsOpen,
   });
 
 
@@ -734,32 +658,41 @@ export default function AssessmentCreatorPage() {
     marksByPaper,
     minutesByPaper,
   } =
-    useBuilderProgressMetrics({
+    useAssessmentProgressMetrics({
       questions,
       viewPaper,
+      courseConfig,
     });
 
 
   /*
-   * Metadata timing
+   * Automatic paper timing
+   */
+
+  useAssessmentPaperAutomaticTiming({
+    courseConfig,
+
+    marksByPaper,
+
+    startTimeByPaper,
+
+    endTimeManuallyEditedByPaper,
+
+    endTimeSetterByPaper,
+  });
+
+
+  /*
+   * Assessment-name field behaviour
    */
 
   const {
     handleAssessmentNameFocus,
     handleAssessmentNameBlur,
   } =
-    useBuilderMetadataTiming({
+    useAssessmentNameField({
       assessmentName,
-
       setAssessmentName,
-
-      marksByPaper,
-
-      startTimeByPaper,
-
-      endTimeManuallyEditedByPaper,
-
-      endTimeSetterByPaper,
     });
 
 
@@ -791,17 +724,13 @@ export default function AssessmentCreatorPage() {
 
     hasLoadedSavedAssessment,
 
-    selectedClassIds:
-      builderSelectedClassIds,
+    selectedClassIds,
 
-    setSelectedClassIds:
-      setBuilderSelectedClassIds,
+    setSelectedClassIds,
 
-    useCompleteCourseCoverage:
-      builderUseCompleteCourseCoverage,
+    useCompleteCourseCoverage,
 
-    setUseCompleteCourseCoverage:
-      setBuilderUseCompleteCourseCoverage,
+    setUseCompleteCourseCoverage,
   } =
     useAssessmentCreatorSavedAssessment({
       setCreatedAt,
@@ -818,7 +747,7 @@ export default function AssessmentCreatorPage() {
       setViewPaper,
 
       setTargetMarksByPaper:
-        setBuilderTargetMarksByPaper,
+        setAssessmentTargetMarksByPaper,
 
       setQuestions,
       setDraftByPaper,
@@ -846,8 +775,11 @@ export default function AssessmentCreatorPage() {
    */
 
   const {
-    builderLevelLabel,
-    builderAvailableClasses,
+    builderLevelLabel:
+      assessmentLevelLabel,
+
+    builderAvailableClasses:
+      availableClasses,
 
     computedClassSummary,
 
@@ -855,25 +787,21 @@ export default function AssessmentCreatorPage() {
     totalSkillsCount,
 
     toggleClass:
-      handleBuilderToggleClass,
+      handleToggleClass,
 
     selectCompleteCourseCoverage:
-      handleBuilderSelectCompleteCourseCoverage,
+      handleSelectCompleteCourseCoverage,
   } =
     useAssessmentSkillsCoverage({
       loadedSavedAssessment,
 
-      selectedClassIds:
-        builderSelectedClassIds,
+      selectedClassIds,
 
-      setSelectedClassIds:
-        setBuilderSelectedClassIds,
+      setSelectedClassIds,
 
-      useCompleteCourseCoverage:
-        builderUseCompleteCourseCoverage,
+      useCompleteCourseCoverage,
 
-      setUseCompleteCourseCoverage:
-        setBuilderUseCompleteCourseCoverage,
+      setUseCompleteCourseCoverage,
 
       activeSkillsData,
 
@@ -905,7 +833,7 @@ export default function AssessmentCreatorPage() {
       viewPaper,
 
       targetMarksByPaper:
-        builderTargetMarksByPaper,
+        assessmentTargetMarksByPaper,
 
       p1Target,
       p2Target,
@@ -942,11 +870,9 @@ export default function AssessmentCreatorPage() {
 
       p2DateCustom,
 
-      selectedClassIds:
-        builderSelectedClassIds,
+      selectedClassIds,
 
-      useCompleteCourseCoverage:
-        builderUseCompleteCourseCoverage,
+      useCompleteCourseCoverage,
     });
 
 
@@ -971,7 +897,7 @@ export default function AssessmentCreatorPage() {
 
     invalidCommitMessage,
   } =
-    useQuestionWorkflow({
+    useAssessmentQuestionWorkflow({
       standardFilter,
       thinkingTypeFilter,
 
@@ -1029,7 +955,7 @@ export default function AssessmentCreatorPage() {
     renderById,
     previewPages,
   } =
-    usePreviewPages({
+    useAssessmentPreviewPages({
       assignedForView:
         previewAssignedForView,
 
@@ -1062,7 +988,7 @@ export default function AssessmentCreatorPage() {
     zoomOut,
     resetZoom,
   } =
-    usePreviewViewport({
+    useAssessmentPreviewViewport({
       previewPaneRef,
       pageWrapperRefs,
 
@@ -1076,7 +1002,7 @@ export default function AssessmentCreatorPage() {
       viewPaper,
     });
 
-  usePreviewJumpNavigation({
+  useAssessmentPreviewJumpNavigation({
     pendingJumpDraftRef,
 
     previewPages,
@@ -1089,7 +1015,7 @@ export default function AssessmentCreatorPage() {
 
 
   /*
-   * Paper target maps and HUD
+   * Paper targets and HUD
    */
 
   const {
@@ -1099,18 +1025,16 @@ export default function AssessmentCreatorPage() {
 
     totalAssessmentMarks,
   } =
-    useBuilderPaperTargetMaps({
+    useAssessmentPaperTargets({
       targetMarksByPaper:
-        builderTargetMarksByPaper,
+        assessmentTargetMarksByPaper,
 
-      courseConfig:
-        builderCourseConfig,
+      courseConfig,
     });
 
   const progressHudPaperRows =
     useAssessmentProgressRows({
-      courseConfig:
-        builderCourseConfig,
+      courseConfig,
 
       marksByPaper,
 
@@ -1130,8 +1054,7 @@ export default function AssessmentCreatorPage() {
     useAssessmentQualityAnalysis({
       questions,
 
-      courseConfig:
-        builderCourseConfig,
+      courseConfig,
 
       includedPapers,
 
@@ -1141,10 +1064,11 @@ export default function AssessmentCreatorPage() {
     });
 
   /*
-   * Preserve current visible behaviour.
+   * Preserve the existing visible HUD
+   * behaviour for this migration.
    *
-   * The HUD still receives the existing transient qualityNotes collection.
-   * The merged analysis collection remains ready for the later HUD migration.
+   * The merged analysis collection remains
+   * ready for its later HUD integration.
    */
   void mergedQualityNotes;
 
@@ -1157,7 +1081,7 @@ export default function AssessmentCreatorPage() {
     coverDateTextForView,
     coverTimeTextForView,
   } =
-    usePaperViewMetadata({
+    useAssessmentPaperViewMetadata({
       viewPaper,
 
       coverDateByPaper,
@@ -1181,12 +1105,11 @@ export default function AssessmentCreatorPage() {
 
     showNoCalculatorIcon,
   } =
-    useBuilderPaperPrintMetadata({
+    useAssessmentPaperPrintMetadata({
       paper:
         viewPaper,
 
-      courseConfig:
-        builderCourseConfig,
+      courseConfig,
     });
 
 
@@ -1200,11 +1123,12 @@ export default function AssessmentCreatorPage() {
       : "0px";
 
   const dividerWidth =
-    BUILDER_DIVIDER_WIDTH_PX;
+    ASSESSMENT_WORKSPACE_DIVIDER_WIDTH_PX;
 
   const bodyGridColumns =
     `${(
-      leftPaneRatio * 100
+      leftPaneRatio *
+      100
     ).toFixed(
       3
     )}% ${dividerWidth}px minmax(0, 1fr)`;
@@ -1215,16 +1139,21 @@ export default function AssessmentCreatorPage() {
    */
 
   const routerPushCompile =
-    useCallback(() => {
-      router.push(
-        "/compile-assessment"
-      );
-    }, [router]);
+    useCallback(
+      () => {
+        router.push(
+          "/compile-assessment"
+        );
+      },
+      [
+        router,
+      ]
+    );
 
 
   return (
     <>
-      <BuilderGlobalStyles
+      <AssessmentCreatorStyles
         theme={theme}
       />
 
@@ -1266,7 +1195,8 @@ export default function AssessmentCreatorPage() {
             gridTemplateColumns:
               bodyGridColumns,
 
-            minHeight: 0,
+            minHeight:
+              0,
 
             height:
               "100%",
@@ -1299,9 +1229,11 @@ export default function AssessmentCreatorPage() {
 
               setTargetMarks,
 
-              minTargetMarks: 1,
+              minTargetMarks:
+                1,
 
-              maxTargetMarks: 6,
+              maxTargetMarks:
+                6,
 
               activePaper,
 
@@ -1368,11 +1300,14 @@ export default function AssessmentCreatorPage() {
 
               setAssessmentDate,
 
-              builderCalendarOpen,
+              builderCalendarOpen:
+                assessmentCalendarOpen,
 
-              setBuilderCalendarOpen,
+              setBuilderCalendarOpen:
+                setAssessmentCalendarOpen,
 
-              builderDateFieldRef,
+              builderDateFieldRef:
+                assessmentDateFieldRef,
 
               handleAssessmentNameFocus,
 
@@ -1383,22 +1318,19 @@ export default function AssessmentCreatorPage() {
               setViewPaper,
 
               classLevelLabel:
-                builderLevelLabel,
+                assessmentLevelLabel,
 
-              availableClasses:
-                builderAvailableClasses,
+              availableClasses,
 
-              selectedClassIds:
-                builderSelectedClassIds,
+              selectedClassIds,
 
-              useCompleteCourseCoverage:
-                builderUseCompleteCourseCoverage,
+              useCompleteCourseCoverage,
 
               onToggleClass:
-                handleBuilderToggleClass,
+                handleToggleClass,
 
               onSelectCompleteCourseCoverage:
-                handleBuilderSelectCompleteCourseCoverage,
+                handleSelectCompleteCourseCoverage,
 
               zoomPct,
 
