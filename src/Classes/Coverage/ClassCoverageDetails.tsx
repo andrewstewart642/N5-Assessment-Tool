@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
+import type { CourseId } from "@/shared-types/AssessmentTypes";
 import {
   getConceptBodyLines,
   getCoverageSkillById,
@@ -9,19 +10,25 @@ import {
 } from "./ClassCoverageHelpers";
 
 type Props = {
+  courseId: CourseId;
   selectedSkillId: string | null;
   theme: AppTheme;
 };
 
 export default function CoverageDetails({
+  courseId,
   selectedSkillId,
   theme,
 }: Props) {
   const [expandedConceptCode, setExpandedConceptCode] = useState<string | null>(null);
 
   const selectedEntry = useMemo(
-    () => getCoverageSkillById(selectedSkillId),
-    [selectedSkillId]
+    () =>
+      getCoverageSkillById(
+        courseId,
+        selectedSkillId
+      ),
+    [courseId, selectedSkillId]
   );
 
   if (!selectedEntry) {

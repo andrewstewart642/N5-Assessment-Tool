@@ -100,7 +100,15 @@ export default function ClassPage({ params }: Props) {
   const schoolClass = getClassById(classId);
   const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
 
-  const totalSkills = useMemo(() => getAllCoverageSkills().length, []);
+  const totalSkills = useMemo(
+    () =>
+      schoolClass
+        ? getAllCoverageSkills(
+            schoolClass.courseId
+          ).length
+        : 0,
+    [schoolClass?.courseId]
+  );
   const completedCount = schoolClass?.completedSkillIds.length ?? 0;
   const progressPct =
     totalSkills > 0 ? (completedCount / totalSkills) * 100 : 0;
@@ -376,6 +384,7 @@ export default function ClassPage({ params }: Props) {
               }}
             >
               <CoverageTree
+                courseId={schoolClass.courseId}
                 selectedSkillId={selectedSkillId}
                 onSelectSkillId={setSelectedSkillId}
                 completedSkillIds={schoolClass.completedSkillIds}
@@ -391,7 +400,11 @@ export default function ClassPage({ params }: Props) {
                 }}
               />
 
-              <CoverageDetails selectedSkillId={selectedSkillId} theme={theme} />
+              <CoverageDetails
+                courseId={schoolClass.courseId}
+                selectedSkillId={selectedSkillId}
+                theme={theme}
+              />
             </section>
 
             <section
