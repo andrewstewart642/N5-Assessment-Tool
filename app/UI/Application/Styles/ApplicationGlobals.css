@@ -6,7 +6,9 @@ body {
 
 html:hover,
 body:hover {
-  scrollbar-color: #2c3c50 #0b1118;
+  scrollbar-color:
+    var(--app-scrollbar-thumb, #2a2b2c)
+    var(--app-scrollbar-track, #191a1b);
 }
 
 html::-webkit-scrollbar,
@@ -27,17 +29,17 @@ body::-webkit-scrollbar-thumb {
 
 html:hover::-webkit-scrollbar-track,
 body:hover::-webkit-scrollbar-track {
-  background: #0b1118;
+  background: var(--app-scrollbar-track, #191a1b);
 }
 
 html:hover::-webkit-scrollbar-thumb,
 body:hover::-webkit-scrollbar-thumb {
-  background: #2c3c50;
+  background: var(--app-scrollbar-thumb, #2a2b2c);
 }
 
 html:hover::-webkit-scrollbar-thumb:hover,
 body:hover::-webkit-scrollbar-thumb:hover {
-  background: #3a4e66;
+  background: var(--app-scrollbar-thumb-hover, #8c8c8c);
 }
 
 html::-webkit-scrollbar-corner,

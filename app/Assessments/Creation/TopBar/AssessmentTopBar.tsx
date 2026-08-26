@@ -144,7 +144,7 @@ export default function AssessmentTopBar({
           `1px solid ${theme.borderStandard}`,
 
         background:
-          theme.bgSurface,
+          theme.bgSection,
 
         display:
           "grid",

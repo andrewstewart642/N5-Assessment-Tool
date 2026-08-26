@@ -734,7 +734,7 @@ export default function AssessmentProgressPanel({
               `1px solid ${theme.borderStandard}`,
 
             background:
-              theme.bgElevated,
+              theme.bgSection,
 
             borderRadius:
               12,

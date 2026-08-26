@@ -2,16 +2,19 @@ import type React from "react";
 
 export const UI_TYPO = {
   family: "var(--app-ui-font-family)",
-  sizeXs: 10,
-  sizeSm: 11,
-  sizeMeta: 12,
-  sizeBase: 13,
-  sizeTitle: 14,
+
+  sizeXs: 9,
+  sizeSm: 10,
+  sizeMeta: 11,
+  sizeBase: 12,
+  sizeTitle: 13,
+
   weightRegular: 400,
   weightMedium: 500,
   weightSemibold: 600,
   weightBold: 700,
   weightHeavy: 800,
+
   lineTight: 1.1,
   lineBase: 1.3,
   lineRelaxed: 1.4,

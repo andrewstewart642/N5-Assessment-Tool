@@ -48,7 +48,7 @@ export default function Navigation() {
       style={{
         display: "flex",
         alignItems: "center",
-        gap: 6,
+        gap: 4,
       }}
     >
       {NAVIGATION_ITEMS.map((item) => {
@@ -65,12 +65,12 @@ export default function Navigation() {
               border: `1px solid ${
                 active ? theme.controlSelectedBorder : "transparent"
               }`,
-              borderRadius: 12,
-              padding: "8px 12px",
+              borderRadius: 6,
+              padding: "6px 9px",
               fontWeight: active
                 ? UI_TYPO.weightSemibold
                 : UI_TYPO.weightMedium,
-              fontSize: 14,
+              fontSize: UI_TYPO.sizeBase,
               lineHeight: 1,
               boxShadow: active
                 ? `inset 0 0 0 1px ${theme.accentSoft}`

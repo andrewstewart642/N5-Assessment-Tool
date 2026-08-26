@@ -27,13 +27,13 @@ import type {
 import SkillRow from "./SkillRow";
 
 const CATEGORY_STRIPE_HEIGHT =
-  5;
+  3;
 
 const CATEGORY_HEADER_HEIGHT =
-  58;
+  38;
 
 const CATEGORY_ACTION_SLOT_WIDTH =
-  112;
+  84;
 
 type CategorySectionProps = {
   category:
@@ -223,7 +223,7 @@ export default function CategorySection({
   return (
     <div
       style={{
-        marginBottom: 16,
+        marginBottom: 8,
 
         position:
           "relative",
@@ -253,7 +253,7 @@ export default function CategorySection({
           background:
             categoryHovered
               ? theme.controlBgHover
-              : theme.bgElevated,
+              : theme.bgSection,
 
           color:
             theme.textPrimary,
@@ -274,20 +274,13 @@ export default function CategorySection({
             "hidden",
 
           boxShadow:
-            categoryHovered
-              ? "0 10px 22px rgba(15,23,42,0.10)"
-              : "0 0 0 rgba(0,0,0,0)",
+            "none",
 
           transform:
-            categoryHovered
-              ? "scale(1.004)"
-              : "scale(1)",
-
-          transformOrigin:
-            "center center",
+            "none",
 
           transition:
-            "background 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease",
+            "background 0.14s ease",
         }}
       >
         <div
@@ -349,9 +342,9 @@ export default function CategorySection({
               "grid",
 
             gridTemplateColumns:
-              `1fr ${CATEGORY_ACTION_SLOT_WIDTH}px`,
+              "1fr",
 
-            gap: 14,
+            gap: 8,
 
             alignItems:
               "center",
@@ -366,7 +359,7 @@ export default function CategorySection({
               CATEGORY_HEADER_HEIGHT,
 
             padding:
-              "0 14px",
+              "0 10px",
 
             cursor:
               "pointer",
@@ -390,34 +383,54 @@ export default function CategorySection({
             }}
           >
             <span
-              style={{
-                display:
-                  "inline-block",
+                style={{
+                  width: 14,
+                  height: 14,
 
-                width: 18,
+                  display: "grid",
+                  placeItems: "center",
 
-                color:
-                  categoryHovered
-                    ? theme.textSecondary
-                    : theme.textMuted,
+                  color:
+                    categoryHovered
+                      ? theme.textSecondary
+                      : theme.textMuted,
 
-                flex:
-                  "0 0 auto",
+                  flex: "0 0 auto",
 
-                ...UI_TEXT.controlTextStrong,
-
-                transition:
-                  "color 0.18s ease",
-              }}
-            >
-              {collapsed
-                ? "▶"
-                : "▼"}
-            </span>
+                  transition:
+                    "color 0.18s ease",
+                }}
+              >
+                <svg
+                  width="7"
+                  height="7"
+                  viewBox="0 0 8 8"
+                  aria-hidden="true"
+                  style={{
+                    display: "block",
+                  }}
+                >
+                  <path
+                    d={
+                      collapsed
+                        ? "M2 1 L5 4 L2 7"
+                        : "M1 2 L4 5 L7 2"
+                    }
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
 
             <span
               style={{
                 ...UI_TEXT.controlTextStrong,
+                
+                fontSize:
+                  UI_TYPO.sizeMeta,
 
                 color:
                   theme.textPrimary,
@@ -444,109 +457,7 @@ export default function CategorySection({
             </span>
           </div>
 
-          <div
-            style={{
-              width:
-                CATEGORY_ACTION_SLOT_WIDTH,
-
-              display:
-                "flex",
-
-              justifyContent:
-                "flex-end",
-
-              alignItems:
-                "center",
-            }}
-          >
-            <button
-              type="button"
-              onClick={(
-                event
-              ) => {
-                event.stopPropagation();
-
-                if (
-                  !collapsed
-                ) {
-                  onCollapseCategorySkills();
-                }
-              }}
-              style={{
-                padding:
-                  "0 12px",
-
-                borderRadius:
-                  999,
-
-                border:
-                  `1px solid ${theme.borderStandard}`,
-
-                background:
-                  categoryHovered
-                    ? theme.controlBgHover
-                    : theme.controlBg,
-
-                color:
-                  categoryHovered
-                    ? theme.textSecondary
-                    : theme.textMuted,
-
-                cursor:
-                  collapsed
-                    ? "default"
-                    : "pointer",
-
-                height: 30,
-
-                whiteSpace:
-                  "nowrap",
-
-                display:
-                  "inline-flex",
-
-                alignItems:
-                  "center",
-
-                justifyContent:
-                  "center",
-
-                textAlign:
-                  "center",
-
-                opacity:
-                  collapsed
-                    ? 0
-                    : 1,
-
-                pointerEvents:
-                  collapsed
-                    ? "none"
-                    : "auto",
-
-                ...UI_TEXT.buttonTextSmall,
-
-                boxShadow:
-                  categoryHovered
-                    ? "0 4px 12px rgba(15,23,42,0.08)"
-                    : "none",
-
-                transition:
-                  "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease, box-shadow 0.18s ease",
-              }}
-              title={`Collapse expanded skills in ${category}`}
-              aria-hidden={
-                collapsed
-              }
-              tabIndex={
-                collapsed
-                  ? -1
-                  : 0
-              }
-            >
-              Collapse
-            </button>
-          </div>
+          
         </div>
       </div>
 

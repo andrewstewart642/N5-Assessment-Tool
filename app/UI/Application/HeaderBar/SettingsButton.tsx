@@ -17,13 +17,13 @@ export default function SettingsButton({ onClick }: SettingsButtonProps) {
         style={{
           display: "inline-flex",
           alignItems: "center",
-          gap: 8,
-          padding: "10px 14px",
-          borderRadius: 14,
+          gap: 6,
+          padding: "7px 10px",
+          borderRadius: 7,
           background: theme.bgElevated,
           border: `1px solid ${theme.borderStandard}`,
           color: theme.textPrimary,
-          fontSize: 13,
+          fontSize: UI_TYPO.sizeBase,
           fontWeight: UI_TYPO.weightSemibold,
           cursor: "pointer",
           boxShadow: `inset 0 0 0 1px ${theme.accentSoft}`,
@@ -50,7 +50,7 @@ export default function SettingsButton({ onClick }: SettingsButtonProps) {
           event.currentTarget.style.transform = "scale(1)";
         }}
       >
-        <span style={{ fontSize: 14, lineHeight: 1 }}>⚙</span>
+        <span style={{ fontSize: UI_TYPO.sizeTitle, lineHeight: 1 }}>⚙</span>
         <span style={{ lineHeight: 1 }}>Settings</span>
       </button>
     </div>

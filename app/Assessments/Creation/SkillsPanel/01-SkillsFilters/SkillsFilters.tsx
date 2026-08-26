@@ -23,9 +23,9 @@ import {
   UI_TYPO,
 } from "@/app/UI/Application/Typography/Typography";
 
-const CONTROL_HEIGHT = 40;
+const CONTROL_HEIGHT = 32;
 
-const SEGMENT_INSET = 5;
+const SEGMENT_INSET = 3;
 
 const SEGMENT_INNER_HEIGHT =
   CONTROL_HEIGHT -
@@ -41,7 +41,7 @@ function constraintFlashStyle(
   active: boolean
 ): CSSProperties {
   return {
-    borderRadius: 16,
+    borderRadius: 8,
 
     outline: active
       ? "2px solid rgba(239, 68, 68, 0.95)"
@@ -96,30 +96,19 @@ function SegmentedControl<
       role="radiogroup"
       aria-label={ariaLabel}
       style={{
-        display:
-          "inline-flex",
+        display: "inline-flex",
+        alignItems: "center",
 
-        alignItems:
-          "center",
+        gap: 3,
 
-        gap: 6,
-
-        width:
-          "fit-content",
-
-        maxWidth:
-          "100%",
-
+        width: "fit-content",
+        maxWidth: "100%",
         minWidth: 0,
 
-        padding:
-          SEGMENT_INSET,
+        padding: SEGMENT_INSET,
+        height: CONTROL_HEIGHT,
 
-        height:
-          CONTROL_HEIGHT,
-
-        borderRadius:
-          14,
+        borderRadius: 6,
 
         border:
           `1px solid ${theme.borderStandard}`,
@@ -130,98 +119,79 @@ function SegmentedControl<
         boxShadow:
           "inset 0 1px 0 rgba(255,255,255,0.04)",
 
-        boxSizing:
-          "border-box",
+        boxSizing: "border-box",
       }}
     >
-      {options.map(
-        (option) => {
-          const selected =
-            option.value ===
-            value;
+      {options.map((option) => {
+        const selected =
+          option.value === value;
 
-          return (
-            <button
-              key={
-                option.value
-              }
-              type="button"
-              role="radio"
-              aria-checked={
+        return (
+          <button
+            key={option.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            onClick={() =>
+              onChange(option.value)
+            }
+            style={{
+              flex: "0 0 auto",
+
+              height:
+                SEGMENT_INNER_HEIGHT,
+
+              border: "none",
+              borderRadius: 4,
+
+              background:
                 selected
-              }
-              onClick={() =>
-                onChange(
-                  option.value
-                )
-              }
-              style={{
-                flex:
-                  "0 0 auto",
+                  ? theme.controlSelectedBg
+                  : "transparent",
 
-                height:
-                  SEGMENT_INNER_HEIGHT,
+              color:
+                selected
+                  ? theme.textPrimary
+                  : theme.textSecondary,
 
-                border:
-                  "none",
+              cursor: "pointer",
 
-                borderRadius:
-                  10,
+              fontFamily:
+                UI_TYPO.family,
 
-                background:
-                  selected
-                    ? theme.controlSelectedBg
-                    : "transparent",
+              fontWeight:
+                UI_TYPO.weightSemibold,
 
-                color:
-                  selected
-                    ? theme.textPrimary
-                    : theme.textSecondary,
+              fontSize:
+                size === "sm"
+                  ? UI_TYPO.sizeSm
+                  : UI_TYPO.sizeMeta,
 
-                cursor:
-                  "pointer",
+              lineHeight: 1,
 
-                fontFamily:
-                  UI_TYPO.family,
+              whiteSpace: "nowrap",
 
-                fontWeight:
-                  UI_TYPO.weightSemibold,
+              padding: "0 8px",
 
-                fontSize:
-                  size === "sm"
-                    ? UI_TYPO.sizeSm
-                    : UI_TYPO.sizeMeta,
+              boxShadow:
+                selected
+                  ? "0 1px 3px rgba(0,0,0,0.14)"
+                  : "none",
 
-                lineHeight: 1,
+              transform:
+                selected
+                  ? "scale(1.01)"
+                  : "scale(1)",
 
-                whiteSpace:
-                  "nowrap",
-
-                padding:
-                  "0 10px",
-
-                boxShadow:
-                  selected
-                    ? "0 2px 8px rgba(15,23,42,0.10)"
-                    : "none",
-
-                transform:
-                  selected
-                    ? "scale(1.01)"
-                    : "scale(1)",
-
-                transition:
-                  "background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease",
-              }}
-              title={
-                option.label
-              }
-            >
-              {option.label}
-            </button>
-          );
-        }
-      )}
+              transition:
+                "background 0.16s ease, color 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease",
+            }}
+            title={option.label}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -237,16 +207,24 @@ function MiniStepButton({
 
   theme: AppTheme;
 }) {
+  const isUp =
+    label === "Up";
+
   return (
     <button
       type="button"
       aria-label={label}
       onClick={onClick}
       style={{
-        borderRadius: 9,
+        width: 24,
+        height: 14,
+
+        padding: 0,
 
         border:
           `1px solid ${theme.borderStandard}`,
+
+        borderRadius: 4,
 
         background:
           theme.controlBg,
@@ -254,52 +232,42 @@ function MiniStepButton({
         color:
           theme.textMuted,
 
-        cursor:
-          "pointer",
+        cursor: "pointer",
 
-        fontFamily:
-          UI_TYPO.family,
+        display: "grid",
+        placeItems: "center",
 
-        fontWeight:
-          UI_TYPO.weightHeavy,
-
-        width: 30,
-        height: 18,
-
-        display:
-          "grid",
-
-        placeItems:
-          "center",
-
-        padding: 0,
+        boxSizing: "border-box",
 
         lineHeight: 1,
-
-        fontSize: 9,
 
         transition:
           "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
       }}
       title={label}
     >
-      <span
+      <svg
+        width="8"
+        height="5"
+        viewBox="0 0 8 5"
+        aria-hidden="true"
         style={{
-          display:
-            "block",
-
-          lineHeight: 1,
-
-          transform:
-            label === "Up"
-              ? "translateY(-0.5px)"
-              : "translateY(0.5px)",
+          display: "block",
         }}
       >
-        {label === "Up"
-          ? "▲"
-          : "▼"}
-      </span>
+        <path
+          d={
+            isUp
+              ? "M1 4 L4 1 L7 4"
+              : "M1 1 L4 4 L7 1"
+          }
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </button>
   );
 }
@@ -474,15 +442,12 @@ export default function SkillsFilters({
   return (
     <div
       style={{
-        position:
-          "sticky",
-
+        position: "sticky",
         top: 0,
-
         zIndex: 2,
 
         background:
-          theme.bgPage,
+          theme.bgSurface,
 
         borderBottom:
           `1px solid ${theme.borderStandard}`,
@@ -493,77 +458,159 @@ export default function SkillsFilters({
     >
       <div
         style={{
-          display:
-            "grid",
-
-          gap: 12,
+          display: "grid",
+          gap: 10,
         }}
       >
         <div
           style={{
-            display:
-              "grid",
+            display: "grid",
+            gap: 8,
 
-            gridTemplateColumns:
-              "auto 1fr",
-
-            gap: 14,
-
-            alignItems:
-              "start",
-          }}
-        >
-          <div
-            style={{
-              ...UI_TEXT.pageTitle,
-
-              margin: 0,
-
-              letterSpacing:
-                0.2,
-
-              whiteSpace:
-                "nowrap",
-
-              color:
-                theme.textPrimary,
-            }}
-          >
-            Skills Tree
-          </div>
-
-          <div
-            style={{
-              ...UI_TEXT.metadata,
-
-              color:
-                theme.textMuted,
-
-              textAlign:
-                "right",
-
-              whiteSpace:
-                "nowrap",
-            }}
-          >
-            {totalSkillsCount} skills • concepts filtered by Standard
-          </div>
-        </div>
-
-        <div
-          style={{
-            display:
-              "grid",
-
-            gap: 6,
-
-            paddingBottom:
-              10,
+            paddingBottom: 10,
 
             borderBottom:
               `1px solid ${theme.borderStandard}`,
           }}
         >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                display:
+                  "inline-flex",
+
+                alignItems:
+                  "flex-end",
+
+                gap: 30,
+
+                flexShrink: 0,
+              }}
+            >
+              <div
+                style={{
+                  ...UI_TEXT.pageTitle,
+
+                  margin: 0,
+
+                  letterSpacing:
+                    0.2,
+
+                  whiteSpace:
+                    "nowrap",
+
+                  color:
+                    theme.textPrimary,
+                }}
+              >
+                Skills Tree
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setHelperHidden(
+                    !helperHidden
+                  )
+                }
+                style={{
+  border:
+    "none",
+
+  background:
+    "transparent",
+
+  color:
+    theme.textMuted,
+
+  cursor:
+    "pointer",
+
+  padding: 0,
+
+  fontFamily:
+    UI_TYPO.family,
+
+  fontSize: 8,
+
+  fontWeight:
+    UI_TYPO.weightRegular,
+
+  lineHeight: 1,
+
+  whiteSpace:
+    "nowrap",
+
+  textDecoration:
+    "underline",
+
+  textUnderlineOffset: 2,
+
+  textDecorationThickness:
+    "1px",
+
+  marginBottom: 1,
+
+  transition:
+    "color 0.12s ease",
+}}
+                onMouseEnter={(
+                  event
+                ) => {
+                  event.currentTarget.style.color =
+                    theme.textSecondary;
+                }}
+                onMouseLeave={(
+                  event
+                ) => {
+                  event.currentTarget.style.color =
+                    theme.textMuted;
+                }}
+              >
+                {helperHidden
+                  ? "Show guidance"
+                  : "Hide guidance"}
+              </button>
+            </div>
+
+            <div
+              style={{
+                ...UI_TEXT.metadata,
+
+                color:
+                  theme.textMuted,
+
+                textAlign:
+                  "right",
+
+                whiteSpace:
+                  "nowrap",
+
+                marginLeft:
+                  "auto",
+
+                paddingLeft: 14,
+
+                minWidth: 0,
+
+                overflow:
+                  "hidden",
+
+                textOverflow:
+                  "ellipsis",
+              }}
+            >
+              {totalSkillsCount} skills • concepts filtered by Standard
+            </div>
+          </div>
+
           {!helperHidden ? (
             <div
               style={{
@@ -575,127 +622,32 @@ export default function SkillsFilters({
                 textAlign:
                   "left",
 
-                maxWidth:
-                  520,
+                maxWidth: 520,
               }}
             >
               Filter by standard, choose a thinking type, select a paper to add to,
               and generate questions for your assessment. View them in the PDF builder
-              in the right pane.{" "}
-
-              <button
-                type="button"
-                onClick={() =>
-                  setHelperHidden(
-                    true
-                  )
-                }
-                style={{
-                  border:
-                    "none",
-
-                  background:
-                    "transparent",
-
-                  color:
-                    theme.textSecondary,
-
-                  cursor:
-                    "pointer",
-
-                  padding: 0,
-
-                  font:
-                    "inherit",
-
-                  fontWeight:
-                    UI_TYPO.weightSemibold,
-
-                  textDecoration:
-                    "underline",
-
-                  textUnderlineOffset:
-                    2,
-                }}
-              >
-                Hide
-              </button>
+              in the right pane.
             </div>
-          ) : (
-            <div
-              style={{
-                display:
-                  "flex",
-
-                justifyContent:
-                  "flex-start",
-              }}
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setHelperHidden(
-                    false
-                  )
-                }
-                style={{
-                  border:
-                    "none",
-
-                  background:
-                    "transparent",
-
-                  color:
-                    theme.textSecondary,
-
-                  cursor:
-                    "pointer",
-
-                  padding: 0,
-
-                  fontFamily:
-                    UI_TYPO.family,
-
-                  fontSize:
-                    UI_TYPO.sizeMeta,
-
-                  fontWeight:
-                    UI_TYPO.weightSemibold,
-
-                  textDecoration:
-                    "underline",
-
-                  textUnderlineOffset:
-                    2,
-                }}
-              >
-                Show guidance
-              </button>
-            </div>
-          )}
+          ) : null}
         </div>
 
         <div
           style={{
-            display:
-              "grid",
+            display: "grid",
 
             gridTemplateColumns:
               "minmax(0, 1fr) auto",
 
             columnGap: 14,
-
             rowGap: 12,
 
-            alignItems:
-              "end",
+            alignItems: "end",
           }}
         >
           <div
             style={{
-              display:
-                "grid",
-
+              display: "grid",
               gap: 6,
 
               justifyItems:
@@ -755,8 +707,7 @@ export default function SkillsFilters({
                       "A-standard",
                   },
                   {
-                    value:
-                      "C+A",
+                    value: "C+A",
                     label:
                       "A+C-standard",
                   },
@@ -767,9 +718,7 @@ export default function SkillsFilters({
 
           <div
             style={{
-              display:
-                "grid",
-
+              display: "grid",
               gap: 6,
 
               justifyItems:
@@ -796,13 +745,10 @@ export default function SkillsFilters({
 
             <div
               style={{
-                display:
-                  "flex",
+                display: "flex",
+                alignItems: "center",
 
-                alignItems:
-                  "center",
-
-                gap: 8,
+                gap: 6,
 
                 minHeight:
                   CONTROL_HEIGHT,
@@ -810,14 +756,11 @@ export default function SkillsFilters({
             >
               <div
                 style={{
-                  display:
-                    "flex",
-
+                  display: "flex",
                   alignItems:
                     "center",
 
-                  borderRadius:
-                    14,
+                  borderRadius: 6,
 
                   border:
                     `1px solid ${theme.borderStandard}`,
@@ -828,7 +771,7 @@ export default function SkillsFilters({
                   height:
                     CONTROL_HEIGHT,
 
-                  width: 104,
+                  width: 88,
 
                   boxShadow:
                     "inset 0 1px 0 rgba(255,255,255,0.04)",
@@ -883,17 +826,11 @@ export default function SkillsFilters({
                     }
                   }}
                   style={{
-                    width:
-                      "100%",
+                    width: "100%",
+                    height: "100%",
 
-                    height:
-                      "100%",
-
-                    border:
-                      "none",
-
-                    outline:
-                      "none",
+                    border: "none",
+                    outline: "none",
 
                     background:
                       "transparent",
@@ -913,11 +850,10 @@ export default function SkillsFilters({
                     textAlign:
                       "left",
 
-                    lineHeight:
-                      1,
+                    lineHeight: 1,
 
                     padding:
-                      "0 14px",
+                      "0 10px",
 
                     boxSizing:
                       "border-box",
@@ -927,10 +863,9 @@ export default function SkillsFilters({
 
               <div
                 style={{
-                  display:
-                    "grid",
+                  display: "grid",
 
-                  gap: 4,
+                  gap: 2,
 
                   justifyItems:
                     "center",
@@ -960,9 +895,7 @@ export default function SkillsFilters({
 
           <div
             style={{
-              display:
-                "grid",
-
+              display: "grid",
               gap: 6,
 
               justifyItems:
@@ -1017,8 +950,7 @@ export default function SkillsFilters({
                 {
                   value: "ANY",
 
-                  label:
-                    "Any",
+                  label: "Any",
                 },
               ]}
             />
@@ -1026,9 +958,7 @@ export default function SkillsFilters({
 
           <div
             style={{
-              display:
-                "grid",
-
+              display: "grid",
               gap: 6,
 
               justifyItems:

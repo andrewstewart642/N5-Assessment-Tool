@@ -22,6 +22,7 @@ export default function HeaderBar() {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("open-builder-settings"));
       }
+
       return;
     }
 
@@ -31,14 +32,14 @@ export default function HeaderBar() {
   return (
     <header
       style={{
-        height: 56,
+        height: 44,
         borderBottom: `1px solid ${theme.borderStandard}`,
         background: theme.bgSurface,
         display: "grid",
-        gridTemplateColumns: "220px 1fr auto",
+        gridTemplateColumns: "180px 1fr auto",
         alignItems: "center",
-        gap: 16,
-        padding: "0 16px",
+        gap: 12,
+        padding: "0 12px",
         boxSizing: "border-box",
         position: "sticky",
         top: 0,
@@ -46,7 +47,9 @@ export default function HeaderBar() {
       }}
     >
       <Logo />
+
       <Navigation />
+
       <SettingsButton onClick={handleOpenSettings} />
     </header>
   );

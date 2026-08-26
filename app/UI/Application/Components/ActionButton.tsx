@@ -33,6 +33,12 @@ type ActionButtonProps = {
   minWidth?: number;
 
   height?: number;
+
+  borderRadius?: number;
+
+  padding?: string;
+
+  boxSizing?: "border-box" | "content-box";
 };
 
 export default function ActionButton({
@@ -53,12 +59,17 @@ export default function ActionButton({
   minWidth = 140,
 
   height = 40,
+
+  borderRadius = 10,
+
+  padding = "8px 12px",
+
+  boxSizing = "content-box",
 }: ActionButtonProps) {
   const [
     hovered,
     setHovered,
-  ] =
-    useState(false);
+  ] = useState(false);
 
   const isPrimary =
     variant === "primary";
@@ -183,11 +194,11 @@ export default function ActionButton({
 
         height,
 
-        padding:
-          "8px 12px",
+        padding,
 
-        borderRadius:
-          10,
+        boxSizing,
+
+        borderRadius,
 
         border:
           `1px solid ${border}`,

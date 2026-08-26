@@ -33,6 +33,15 @@ type DifficultyStepperProps = {
     AppTheme;
 };
 
+const GROUP_WIDTH =
+  140;
+
+const BUTTON_GAP =
+  8;
+
+const BUTTON_HEIGHT =
+  30;
+
 export default function DifficultyStepper({
   value,
   availableLevels,
@@ -61,10 +70,14 @@ export default function DifficultyStepper({
     enabled: boolean
   ): CSSProperties {
     return {
-      height: 34,
-      width: 56,
+      width:
+        "100%",
 
-      borderRadius: 10,
+      height:
+        BUTTON_HEIGHT,
+
+      borderRadius:
+        5,
 
       border:
         `1px solid ${theme.borderStandard}`,
@@ -99,13 +112,19 @@ export default function DifficultyStepper({
         UI_TYPO.family,
 
       fontWeight:
-        UI_TYPO.weightBold,
+        UI_TYPO.weightMedium,
 
-      fontSize: 20,
+      fontSize:
+        UI_TYPO.sizeMeta,
 
-      lineHeight: 1,
+      lineHeight:
+        1,
 
-      padding: 0,
+      padding:
+        0,
+
+      boxSizing:
+        "border-box",
 
       transition:
         "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, opacity 0.15s ease",
@@ -116,15 +135,19 @@ export default function DifficultyStepper({
     <div
       style={{
         display:
-          "inline-grid",
+          "grid",
 
         gridTemplateColumns:
-          "56px 56px",
+          "1fr 1fr",
 
         alignItems:
           "center",
 
-        gap: 8,
+        gap:
+          BUTTON_GAP,
+
+        width:
+          GROUP_WIDTH,
       }}
       title={
         hasAvailableDifficulty

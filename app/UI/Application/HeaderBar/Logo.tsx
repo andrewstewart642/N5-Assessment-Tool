@@ -9,15 +9,15 @@ export default function Logo() {
     <div style={{ display: "flex", alignItems: "center" }}>
       <div
         style={{
-          width: 150,
-          height: 30,
-          borderRadius: 10,
+          width: 138,
+          height: 26,
+          borderRadius: 6,
           border: `1px dashed ${theme.borderStandard}`,
           background: theme.bgElevated,
           color: theme.textMuted,
           display: "grid",
           placeItems: "center",
-          fontSize: 12,
+          fontSize: UI_TYPO.sizeMeta,
           fontWeight: UI_TYPO.weightMedium,
           lineHeight: 1,
         }}

@@ -1,4 +1,3 @@
-
 import SettingsSection from "../SettingsSection";
 import { useTheme } from "../../Theme/ThemeProvider";
 import type { ThemeModePreference } from "../../Theme/ThemeMode";
@@ -9,9 +8,14 @@ const THEME_OPTIONS: Array<{
   helper: string;
 }> = [
   {
-    value: "system",
-    label: "System",
-    helper: "Match your device setting.",
+    value: "dark",
+    label: "Dark",
+    helper: "Default VecEd appearance.",
+  },
+  {
+    value: "soft-grey",
+    label: "Soft Grey",
+    helper: "Softer dark interface.",
   },
   {
     value: "light",
@@ -19,14 +23,9 @@ const THEME_OPTIONS: Array<{
     helper: "Use the light interface.",
   },
   {
-    value: "soft-grey",
-    label: "Soft Grey",
-    helper: "Lower contrast UI.",
-  },
-  {
-    value: "dark",
-    label: "Dark",
-    helper: "Use dark interface.",
+    value: "system",
+    label: "System",
+    helper: "Match your device setting.",
   },
   {
     value: "custom",

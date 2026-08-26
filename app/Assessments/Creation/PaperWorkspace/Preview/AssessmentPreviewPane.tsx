@@ -212,7 +212,7 @@ export default function AssessmentPreviewPane({
           "24px 18px 18px",
 
         background:
-          theme.bgPage,
+          theme.bgWorkspace,
       }}
     >
       <div

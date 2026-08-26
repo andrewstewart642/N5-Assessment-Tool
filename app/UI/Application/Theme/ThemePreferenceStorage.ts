@@ -12,10 +12,10 @@ import {
 export const CUSTOM_THEME_COLOUR_STORAGE_KEY = "app-custom-theme-colour";
 
 export function readStoredThemePreference(): ThemeModePreference {
-  if (typeof window === "undefined") return "system";
+  if (typeof window === "undefined") return "dark";
 
   const raw = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
-  return isThemeModePreference(raw) ? raw : "system";
+  return isThemeModePreference(raw) ? raw : "dark";
 }
 
 export function writeStoredThemePreference(

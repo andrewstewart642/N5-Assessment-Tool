@@ -37,7 +37,7 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [themePreference, setThemePreferenceState] =
-    useState<ThemeModePreference>("system");
+    useState<ThemeModePreference>("dark");
 
   const [customThemeColour, setCustomThemeColourState] =
     useState<AccentOption>("blue-700");
@@ -95,6 +95,22 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (typeof document === "undefined") return;
 
     document.documentElement.dataset.themeMode = resolvedThemeMode;
+
+    document.documentElement.style.setProperty(
+      "--app-scrollbar-track",
+      theme.bgSurface
+    );
+
+    document.documentElement.style.setProperty(
+      "--app-scrollbar-thumb",
+      theme.borderStandard
+    );
+
+    document.documentElement.style.setProperty(
+      "--app-scrollbar-thumb-hover",
+      theme.textMuted
+    );
+
     document.body.style.background = theme.bgPage;
     document.body.style.color = theme.textPrimary;
   }, [resolvedThemeMode, theme]);

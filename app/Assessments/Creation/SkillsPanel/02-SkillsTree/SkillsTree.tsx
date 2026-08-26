@@ -320,7 +320,7 @@ export default function SkillsTree({
           `1px solid ${theme.borderStandard}`,
 
         background:
-          theme.bgPage,
+          theme.bgSurface,
 
         minHeight: 0,
 

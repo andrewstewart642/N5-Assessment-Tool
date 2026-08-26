@@ -146,151 +146,178 @@ export default function ConceptSelector({
       }}
     >
       <button
-        type="button"
-        onClick={() =>
-          rankedConcepts.length >
-            0 &&
-          setDropdownOpen(
-            (previous) =>
-              !previous
+  type="button"
+  onClick={() =>
+    rankedConcepts.length >
+      0 &&
+    setDropdownOpen(
+      (previous) =>
+        !previous
+    )
+  }
+  disabled={
+    rankedConcepts.length ===
+    0
+  }
+  style={{
+    width: "100%",
+    height: 30,
+
+    borderRadius: 5,
+
+    border:
+      `1px solid ${theme.borderStandard}`,
+
+    background:
+      theme.controlBg,
+
+    color:
+      theme.textPrimary,
+
+    boxSizing:
+      "border-box",
+
+    padding:
+      "0 28px 0 8px",
+
+    display:
+      "flex",
+
+    alignItems:
+      "center",
+
+    minWidth: 0,
+
+    overflow:
+      "hidden",
+
+    cursor:
+      rankedConcepts.length ===
+      0
+        ? "default"
+        : "pointer",
+
+    opacity:
+      rankedConcepts.length ===
+      0
+        ? 0.62
+        : 1,
+
+    position:
+      "relative",
+
+    transition:
+      "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease",
+
+    boxShadow:
+      dropdownOpen
+        ? theme.shadow
+        : "none",
+  }}
+  title={
+    selected
+      ? conceptSelectionText(
+          selected
+        )
+      : "Select skill concept"
+  }
+>
+  <span
+    style={{
+      minWidth: 0,
+
+      overflow:
+        "hidden",
+
+      whiteSpace:
+        "nowrap",
+
+      textOverflow:
+        "ellipsis",
+
+      fontSize:
+        UI_TYPO.sizeSm,
+
+      lineHeight: 1,
+
+      fontWeight:
+        UI_TYPO.weightRegular,
+    }}
+  >
+    {selected ? (
+      <PaperContent
+        parts={
+          conceptInlineParts(
+            selected
           )
         }
-        disabled={
-          rankedConcepts.length ===
-          0
-        }
+      />
+    ) : (
+      <span
         style={{
-          width: "100%",
-          height: 36,
-
-          borderRadius: 10,
-
-          border:
-            `1px solid ${theme.borderStandard}`,
-
-          background:
-            theme.controlBg,
-
           color:
-            theme.textPrimary,
-
-          boxSizing:
-            "border-box",
-
-          padding:
-            "0 34px 0 10px",
-
-          display:
-            "flex",
-
-          alignItems:
-            "center",
-
-          minWidth: 0,
-
-          overflow:
-            "hidden",
-
-          cursor:
-            rankedConcepts.length ===
-            0
-              ? "default"
-              : "pointer",
-
-          opacity:
-            rankedConcepts.length ===
-            0
-              ? 0.62
-              : 1,
-
-          position:
-            "relative",
-
-          transition:
-            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease",
-
-          boxShadow:
-            dropdownOpen
-              ? theme.shadow
-              : "none",
+            theme.textMuted,
         }}
-        title={
-          selected
-            ? conceptSelectionText(
-                selected
-              )
-            : "Select skill concept"
-        }
       >
-        <span
-          style={{
-            minWidth: 0,
+        Select skill concept
+      </span>
+    )}
+  </span>
 
-            overflow:
-              "hidden",
+  <span
+    aria-hidden="true"
+    style={{
+      position:
+        "absolute",
 
-            whiteSpace:
-              "nowrap",
+      right: 9,
 
-            textOverflow:
-              "ellipsis",
+      top: "50%",
 
-            fontSize:
-              UI_TYPO.sizeSm,
+      transform:
+        "translateY(-50%)",
 
-            lineHeight: 1,
+      width: 14,
+      height: 14,
 
-            fontWeight:
-              UI_TYPO.weightSemibold,
-          }}
-        >
-          {selected ? (
-            <PaperContent
-              parts={
-                conceptInlineParts(
-                  selected
-                )
-              }
-            />
-          ) : (
-            <span
-              style={{
-                color:
-                  theme.textMuted,
-              }}
-            >
-              Select skill concept
-            </span>
-          )}
-        </span>
+      display:
+        "grid",
 
-        <span
-          aria-hidden="true"
-          style={{
-            position:
-              "absolute",
+      placeItems:
+        "center",
 
-            right: 10,
+      color:
+        theme.textMuted,
 
-            top: "50%",
-
-            transform:
-              "translateY(-50%)",
-
-            color:
-              theme.textMuted,
-
-            fontSize: 12,
-
-            lineHeight: 1,
-
-            pointerEvents:
-              "none",
-          }}
-        >
-          ▾
-        </span>
-      </button>
+      pointerEvents:
+        "none",
+    }}
+  >
+    <svg
+      width="7"
+      height="7"
+      viewBox="0 0 8 8"
+      aria-hidden="true"
+      style={{
+        display:
+          "block",
+      }}
+    >
+      <path
+        d={
+          dropdownOpen
+            ? "M1 5 L4 2 L7 5"
+            : "M1 2 L4 5 L7 2"
+        }
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  </span>
+</button>
 
       {dropdownOpen ? (
         <div
@@ -307,14 +334,14 @@ export default function ConceptSelector({
             maxWidth:
               "100%",
 
-            maxHeight: 240,
+            maxHeight: 220,
 
             overflowY:
               "auto",
 
-            marginTop: 6,
+            marginTop: 4,
 
-            borderRadius: 12,
+            borderRadius: 6,
 
             border:
               `1px solid ${theme.borderStandard}`,
@@ -323,7 +350,7 @@ export default function ConceptSelector({
               theme.bgElevated,
 
             boxShadow:
-              theme.shadowStrong,
+              theme.shadow,
           }}
         >
           <button
@@ -362,7 +389,7 @@ export default function ConceptSelector({
                 "left",
 
               padding:
-                "10px 12px",
+                "7px 8px",
 
               cursor:
                 "pointer",
@@ -379,7 +406,7 @@ export default function ConceptSelector({
                 UI_TYPO.sizeSm,
 
               fontWeight:
-                UI_TYPO.weightSemibold,
+                UI_TYPO.weightRegular,
 
               lineHeight: 1,
             }}
@@ -472,7 +499,7 @@ export default function ConceptSelector({
                       "left",
 
                     padding:
-                      "10px 12px",
+                      "7px 8px",
 
                     cursor:
                       "pointer",
@@ -548,10 +575,10 @@ export default function ConceptSelector({
                           `1px solid ${theme.borderStandard}`,
 
                         borderRadius:
-                          999,
+                          4,
 
                         padding:
-                          "4px 8px",
+                          "3px 6px",
 
                         background:
                           theme.controlBg,

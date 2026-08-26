@@ -45,6 +45,18 @@ import {
   stepDifficulty,
 } from "./ConceptSelectionRules";
 
+const EDITOR_COLUMN_GAP =
+  8;
+
+const ACTION_WIDTH =
+  140;
+
+const ACTION_HEIGHT =
+  30;
+
+const ACTION_RADIUS =
+  5;
+
 type SkillRowProps = {
   category: string;
 
@@ -226,6 +238,7 @@ export default function SkillRow({
     selected
       ? getConceptRestriction({
           skill,
+
           concept:
             selected,
 
@@ -371,7 +384,8 @@ export default function SkillRow({
           setRowHovered(false)
         }
         style={{
-          width: "100%",
+          width:
+            "100%",
 
           textAlign:
             "left",
@@ -380,12 +394,13 @@ export default function SkillRow({
             "grid",
 
           gridTemplateColumns:
-            "64px 1fr 24px",
+            "36px 1fr 16px",
 
-          gap: 10,
+          gap:
+            8,
 
           padding:
-            "12px 14px 12px 22px",
+            "8px 10px 8px 24px",
 
           background:
             isExpanded ||
@@ -408,7 +423,8 @@ export default function SkillRow({
           boxSizing:
             "border-box",
 
-          minWidth: 0,
+          minWidth:
+            0,
 
           transition:
             "background 0.15s ease",
@@ -420,6 +436,12 @@ export default function SkillRow({
               theme.textMuted,
 
             ...UI_TEXT.controlTextStrong,
+
+            fontSize:
+              UI_TYPO.sizeMeta,
+
+            fontWeight:
+              UI_TYPO.weightMedium,
 
             letterSpacing:
               0.2,
@@ -435,10 +457,14 @@ export default function SkillRow({
             color:
               theme.textPrimary,
 
-            fontWeight:
-              UI_TYPO.weightSemibold,
+            fontSize:
+              UI_TYPO.sizeMeta,
 
-            minWidth: 0,
+            fontWeight:
+              UI_TYPO.weightRegular,
+
+            minWidth:
+              0,
 
             overflow:
               "hidden",
@@ -455,21 +481,51 @@ export default function SkillRow({
 
         <span
           style={{
+            width:
+              16,
+
+            height:
+              16,
+
+            display:
+              "grid",
+
+            placeItems:
+              "center",
+
             color:
               isExpanded ||
               rowHovered
                 ? theme.textSecondary
                 : theme.textMuted,
 
-            ...UI_TEXT.controlTextStrong,
-
             transition:
               "color 0.15s ease",
           }}
         >
-          {isExpanded
-            ? "▾"
-            : "▸"}
+          <svg
+            width="7"
+            height="7"
+            viewBox="0 0 8 8"
+            aria-hidden="true"
+            style={{
+              display:
+                "block",
+            }}
+          >
+            <path
+              d={
+                isExpanded
+                  ? "M1 2 L4 5 L7 2"
+                  : "M2 1 L5 4 L2 7"
+              }
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
       </button>
 
@@ -477,7 +533,7 @@ export default function SkillRow({
         <div
           style={{
             padding:
-              "12px 14px 14px",
+              "9px 10px 10px",
 
             background:
               theme.bgSurface,
@@ -491,7 +547,8 @@ export default function SkillRow({
             gridTemplateColumns:
               "minmax(0, 1fr)",
 
-            rowGap: 12,
+            rowGap:
+              EDITOR_COLUMN_GAP,
 
             position:
               "relative",
@@ -506,12 +563,13 @@ export default function SkillRow({
                 "grid",
 
               gridTemplateColumns:
-                "minmax(0, 1fr) auto",
+                `minmax(0, 1fr) ${ACTION_WIDTH}px`,
 
               columnGap:
-                20,
+                EDITOR_COLUMN_GAP,
 
-              rowGap: 8,
+              rowGap:
+                6,
 
               alignItems:
                 "end",
@@ -522,7 +580,8 @@ export default function SkillRow({
           >
             <div
               style={{
-                minWidth: 0,
+                minWidth:
+                  0,
               }}
             >
               <div
@@ -533,12 +592,14 @@ export default function SkillRow({
                   alignItems:
                     "baseline",
 
-                  gap: 8,
+                  gap:
+                    8,
 
                   marginBottom:
-                    6,
+                    4,
 
-                  minWidth: 0,
+                  minWidth:
+                    0,
                 }}
               >
                 <div
@@ -617,13 +678,13 @@ export default function SkillRow({
             <div
               style={{
                 width:
-                  "fit-content",
+                  ACTION_WIDTH,
 
                 justifySelf:
-                  "end",
+                  "stretch",
 
                 marginLeft:
-                  10,
+                  0,
               }}
             >
               <div
@@ -637,7 +698,7 @@ export default function SkillRow({
                     "nowrap",
 
                   marginBottom:
-                    6,
+                    4,
                 }}
               >
                 Difficulty
@@ -707,15 +768,16 @@ export default function SkillRow({
                 "grid",
 
               gridTemplateColumns:
-                "1fr 1fr",
+                `minmax(0, 1fr) ${ACTION_WIDTH}px`,
 
-              gap: 10,
+              columnGap:
+                EDITOR_COLUMN_GAP,
 
               width:
-                "fit-content",
+                "100%",
 
-              justifySelf:
-                "end",
+              alignItems:
+                "center",
             }}
           >
             <div
@@ -724,6 +786,9 @@ export default function SkillRow({
                   canAdd
                     ? 1
                     : 0.62,
+
+                justifySelf:
+                  "end",
               }}
             >
               <ActionButton
@@ -761,6 +826,20 @@ export default function SkillRow({
                     : primaryBlockReason
                 }
                 variant="primary"
+                width={
+                  ACTION_WIDTH
+                }
+                minWidth={
+                  ACTION_WIDTH
+                }
+                height={
+                  ACTION_HEIGHT
+                }
+                borderRadius={
+                  ACTION_RADIUS
+                }
+                padding="0 10px"
+                boxSizing="border-box"
               />
             </div>
 
@@ -807,6 +886,20 @@ export default function SkillRow({
                     : primaryBlockReason
                 }
                 variant="secondary"
+                width={
+                  ACTION_WIDTH
+                }
+                minWidth={
+                  ACTION_WIDTH
+                }
+                height={
+                  ACTION_HEIGHT
+                }
+                borderRadius={
+                  ACTION_RADIUS
+                }
+                padding="0 10px"
+                boxSizing="border-box"
               />
             </div>
           </div>

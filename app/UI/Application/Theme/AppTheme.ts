@@ -8,6 +8,8 @@ import { ACCENT_MAP, type AccentOption } from "../Colours/AccentPalette";
 type CoreTheme = {
   bgPage: string;
   bgSurface: string;
+  bgSection: string;
+  bgWorkspace: string;
   bgElevated: string;
 
   textPrimary: string;
@@ -93,9 +95,9 @@ function withAppThemeAliases(theme: CoreTheme): Theme {
 
     bgPrimary: theme.bgPage,
     bgSecondary: theme.bgSurface,
-    bgSurfaceAlt: theme.bgElevated,
+    bgSurfaceAlt: theme.bgSection,
 
-    cardBg: theme.bgSurface,
+    cardBg: theme.bgSection,
     cardBgHover: theme.bgElevated,
 
     borderSubtle: theme.borderStandard,
@@ -238,6 +240,14 @@ function generateThemeFromBase(base: string): CoreTheme {
     ? mix(base, "#ffffff", 0.975)
     : mix(base, "#000000", 0.84);
 
+    const bgSection = light
+      ? mix(base, "#ffffff", 0.985)
+      : mix(base, "#000000", 0.80);
+
+    const bgWorkspace = light
+      ? mix(base, "#ffffff", 0.90)
+      : mix(base, "#000000", 0.88);
+
   const bgElevated = light
     ? mix(base, "#ffffff", 0.99)
     : mix(base, "#000000", 0.78);
@@ -271,9 +281,11 @@ function generateThemeFromBase(base: string): CoreTheme {
     : mix(base, "#000000", 0.42);
 
   return {
-    bgPage,
-    bgSurface,
-    bgElevated,
+     bgPage,
+     bgSurface,
+     bgSection,
+     bgWorkspace,
+     bgElevated,
 
     textPrimary,
     textSecondary,
@@ -315,28 +327,31 @@ function generateThemeFromBase(base: string): CoreTheme {
  */
 
 const LIGHT_THEME: CoreTheme = {
-  bgPage: "#f8fafc",
-  bgSurface: "#fcfdff",
+  // Light+ inspired, with stronger application/paper separation.
+  bgPage: "#e9e9e9",
+  bgSurface: "#f3f3f3",
+  bgSection: "#f8f8f8",
+  bgWorkspace: "#eeeeee",
   bgElevated: "#ffffff",
 
-  textPrimary: "#0f172a",
-  textSecondary: "#334155",
-  textMuted: "#64748b",
+  textPrimary: "#2b2b2b",
+  textSecondary: "#616161",
+  textMuted: "#767676",
 
-  borderStandard: "#d7e3f0",
+  borderStandard: "#d6d6d6",
 
-  controlBg: "#f8fbff",
-  controlBgHover: "#eef4fb",
-  controlSelectedBg: "#dbeafe",
-  controlSelectedBorder: "#60a5fa",
+  controlBg: "#ffffff",
+  controlBgHover: "#f0f0f0",
+  controlSelectedBg: "#c7ddef",
+  controlSelectedBorder: "#005fb8",
 
-  accentPrimary: "#60a5fa",
-  accentSoft: "#dbeafe",
+  accentPrimary: "#005fb8",
+  accentSoft: "#dcebf7",
 
-  shadow: "0 6px 18px rgba(15,23,42,0.06)",
-  shadowStrong: "0 18px 40px rgba(15,23,42,0.12)",
+  shadow: "0 2px 8px rgba(0,0,0,0.08)",
+  shadowStrong: "0 8px 24px rgba(0,0,0,0.14)",
 
-  modalOverlay: "rgba(15,23,42,0.16)",
+  modalOverlay: "rgba(0,0,0,0.18)",
 
   paper: "#ffffff",
 
@@ -344,28 +359,31 @@ const LIGHT_THEME: CoreTheme = {
 };
 
 const SOFT_GREY_THEME: CoreTheme = {
-  bgPage: "#eef1f4",
-  bgSurface: "#f5f6f8",
-  bgElevated: "#fbfcfd",
+  // Dark+ inspired.
+  bgPage: "#1e1e1e",
+  bgSurface: "#252526",
+  bgSection: "#2d2d30",
+  bgWorkspace: "#202020",
+  bgElevated: "#333337",
 
-  textPrimary: "#1f2937",
-  textSecondary: "#4b5563",
-  textMuted: "#6b7280",
+  textPrimary: "#d4d4d4",
+  textSecondary: "#cccccc",
+  textMuted: "#9d9d9d",
 
-  borderStandard: "#c7d0db",
+  borderStandard: "#3a3a3a",
 
-  controlBg: "#f2f4f7",
-  controlBgHover: "#e7ebf0",
-  controlSelectedBg: "#d9dee7",
-  controlSelectedBorder: "#8b95a7",
+  controlBg: "#313131",
+  controlBgHover: "#3c3c3c",
+  controlSelectedBg: "#094771",
+  controlSelectedBorder: "#007acc",
 
-  accentPrimary: "#8b95a7",
-  accentSoft: "#d9dee7",
+  accentPrimary: "#007acc",
+  accentSoft: "rgba(0,122,204,0.20)",
 
-  shadow: "0 6px 18px rgba(15,23,42,0.05)",
-  shadowStrong: "0 18px 40px rgba(15,23,42,0.1)",
+  shadow: "0 2px 8px rgba(0,0,0,0.22)",
+  shadowStrong: "0 8px 24px rgba(0,0,0,0.34)",
 
-  modalOverlay: "rgba(15,23,42,0.18)",
+  modalOverlay: "rgba(0,0,0,0.50)",
 
   paper: "#ffffff",
 
@@ -373,26 +391,37 @@ const SOFT_GREY_THEME: CoreTheme = {
 };
 
 const DARK_THEME: CoreTheme = {
-  bgPage: "#0d0d0d",
-  bgSurface: "#171717",
-  bgElevated: "#1f1f1f",
+  // Dark 2026 inspired.
+  bgPage: "#121314",
 
-  textPrimary: "#ececec",
-  textSecondary: "#c5c5d2",
-  textMuted: "#a1a1aa",
+  // Main persistent pane colour.
+  bgSurface: "#191a1b",
 
-  borderStandard: "#3a3a3a",
+  // Internal pane sections/cards.
+  bgSection: "#202122",
 
-  controlBg: "#212121",
-  controlBgHover: "#2a2a2a",
-  controlSelectedBg: "#1f3a68",
-  controlSelectedBorder: "#3b82f6",
+  // Document-working canvas.
+  bgWorkspace: "#151617",
 
-  accentPrimary: "#3b82f6",
-  accentSoft: "#1f3a68",
+  // Floating controls, popovers and raised objects.
+  bgElevated: "#252627",
 
-  shadow: "0 6px 18px rgba(0,0,0,0.28)",
-  shadowStrong: "0 18px 40px rgba(0,0,0,0.48)",
+  textPrimary: "#bbbebf",
+  textSecondary: "#bfbfbf",
+  textMuted: "#8c8c8c",
+
+  borderStandard: "#2a2b2c",
+
+  controlBg: "#202122",
+  controlBgHover: "#292a2b",
+  controlSelectedBg: "#276782",
+  controlSelectedBorder: "#3994bc",
+
+  accentPrimary: "#3994bc",
+  accentSoft: "rgba(57,148,188,0.18)",
+
+  shadow: "0 2px 8px rgba(0,0,0,0.18)",
+  shadowStrong: "0 8px 24px rgba(0,0,0,0.30)",
 
   modalOverlay: "rgba(0,0,0,0.52)",
 

@@ -111,10 +111,26 @@ const THEME_OPTIONS: Array<{
   label: string;
   helper: string;
 }> = [
-  { value: "system", label: "System", helper: "Match your device setting." },
-  { value: "light", label: "Light", helper: "Use the light interface." },
-  { value: "soft-grey", label: "Soft Grey", helper: "Lower contrast UI." },
-  { value: "dark", label: "Dark", helper: "Use dark interface." },
+  {
+    value: "dark",
+    label: "Dark",
+    helper: "Default VecEd appearance.",
+  },
+  {
+    value: "soft-grey",
+    label: "Soft Grey",
+    helper: "Softer dark interface.",
+  },
+  {
+    value: "light",
+    label: "Light",
+    helper: "Use the light interface.",
+  },
+  {
+    value: "system",
+    label: "System",
+    helper: "Match your device setting.",
+  },
   {
     value: "custom",
     label: "Custom",
