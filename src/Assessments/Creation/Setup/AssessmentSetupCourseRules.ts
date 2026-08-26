@@ -6,7 +6,7 @@ import {
   type CoursePaperConfig,
 } from "@/src/Courses/CourseAssessmentConfig";
 
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/src/Assessments/AssessmentTypes";
 
 import type {
   AssessmentType,

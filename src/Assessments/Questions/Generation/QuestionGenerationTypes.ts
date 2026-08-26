@@ -1,6 +1,6 @@
 // shared-types/QuestionGenerationTypes.ts
 
-import type { PaperPart } from "@/shared-types/PaperParts";
+import type { PaperPart } from "@/src/Assessments/Questions/Content/PaperParts";
 import type {
   DifficultyLevel,
   Paper,
@@ -9,14 +9,14 @@ import type {
   SkillDomain,
   SkillPaperSuitability,
   QuestionTopicMarkBreakdown,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 import type {
   WorkedAnswerSet,
-} from "@/shared-types/AnswerGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/AnswerGenerationTypes";
 import type {
   QuestionSelectionFilters,
   QuestionVariantSelectionMeta,
-} from "@/shared-types/QuestionSelectionTypes";
+} from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 export type StandardClassification = "C" | "A" | "Mixed";
 

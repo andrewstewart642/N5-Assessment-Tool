@@ -4,7 +4,7 @@ import type {
   Concept,
   Skill,
   SkillsData,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 
 type ConceptBuildOptions = {

@@ -6,7 +6,7 @@ import {
 
 import type {
   Question,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import {
   ASSESSMENT_CREATION_STORAGE_KEY_PAIRS,

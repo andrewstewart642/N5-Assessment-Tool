@@ -10,7 +10,7 @@ import {
 
 import type {
   Paper,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import {
   A4_PAGE_WIDTH_PX,

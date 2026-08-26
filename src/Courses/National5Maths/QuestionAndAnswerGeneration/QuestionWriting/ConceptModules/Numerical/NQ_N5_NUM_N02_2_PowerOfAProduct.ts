@@ -1,11 +1,11 @@
 
-import type { PaperPart } from "@/shared-types/PaperParts";
-import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+import type { PaperPart } from "@/src/Assessments/Questions/Content/PaperParts";
+import type { DifficultyLevel } from "@/src/Assessments/AssessmentTypes";
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
   GeneratorContext,
-} from "@/shared-types/QuestionGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/QuestionGenerationTypes";
 
 function textPart(value: string): PaperPart {
   return { kind: "text", value };

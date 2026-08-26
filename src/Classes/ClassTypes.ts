@@ -3,7 +3,7 @@ import {
   type CourseCatalogEntry,
   type CourseClassCourseLabel,
 } from "@/src/Courses/CourseCatalog";
-import type { CourseId } from "@/shared-types/AssessmentTypes";
+import type { CourseId } from "@/src/Assessments/AssessmentTypes";
 
 export type CourseOption = CourseClassCourseLabel;
 

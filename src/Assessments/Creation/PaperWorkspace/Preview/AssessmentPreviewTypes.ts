@@ -1,6 +1,6 @@
 import type {
   Question,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 export type AssessmentPreviewPage =
   | {

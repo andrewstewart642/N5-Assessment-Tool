@@ -7,8 +7,8 @@ import type {
   Paper,
   Question,
   SkillPaperSuitability,
-} from "@/shared-types/AssessmentTypes";
-import type { QuestionCalculatorStatus } from "@/shared-types/QuestionSelectionTypes";
+} from "@/src/Assessments/AssessmentTypes";
+import type { QuestionCalculatorStatus } from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 type BuildCalculatorSuitabilityNotesArgs = {
   questions: Question[];

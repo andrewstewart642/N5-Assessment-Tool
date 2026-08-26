@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
-import type { CourseId } from "@/shared-types/AssessmentTypes";
+import type { CourseId } from "@/src/Assessments/AssessmentTypes";
 import {
   getConceptBodyLines,
   getCoverageSkillById,

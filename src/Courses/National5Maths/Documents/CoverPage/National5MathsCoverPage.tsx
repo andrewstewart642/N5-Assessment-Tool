@@ -1,6 +1,6 @@
 import type {
   Paper,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import NationalQualificationsCoverPage from "@/src/UI/Documents/Templates/NationalQualifications/NationalQualificationsCoverPage";
 

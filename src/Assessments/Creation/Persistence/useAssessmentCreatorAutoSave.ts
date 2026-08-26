@@ -17,7 +17,7 @@ import type {
   Question,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type {
   AssessmentPaperBooleanMap,

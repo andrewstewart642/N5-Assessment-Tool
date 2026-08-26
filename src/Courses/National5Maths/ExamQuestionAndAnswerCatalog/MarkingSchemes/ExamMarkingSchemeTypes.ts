@@ -1,7 +1,7 @@
 import type {
   CourseId,
   Paper,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 
 export type ExamMarkingSchemeId =

@@ -4,7 +4,7 @@ import type {
   Paper,
   SkillPaperSuitability,
   SkillsData,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 export type CourseSubjectArea =
   "Mathematics";

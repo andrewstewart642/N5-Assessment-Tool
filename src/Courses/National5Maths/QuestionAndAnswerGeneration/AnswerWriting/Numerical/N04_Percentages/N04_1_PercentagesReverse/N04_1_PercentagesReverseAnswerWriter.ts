@@ -2,7 +2,7 @@ import type {
   WorkedAnswerLine,
   WorkedAnswerMethod,
   WorkedAnswerSet,
-} from "@/shared-types/AnswerGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/AnswerGenerationTypes";
 
 import type {
   GeneratedReversePercentageQuestion,

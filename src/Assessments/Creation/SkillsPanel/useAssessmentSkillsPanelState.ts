@@ -11,7 +11,7 @@ import type {
   Paper,
   Skill,
   StandardFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import { useQuestionTreeRestoration } from "./useQuestionTreeRestoration";
 

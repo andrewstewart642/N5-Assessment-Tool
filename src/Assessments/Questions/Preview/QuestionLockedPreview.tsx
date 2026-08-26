@@ -2,11 +2,11 @@
 
 import type {
   Question,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type {
   PaperPart,
-} from "@/shared-types/PaperParts";
+} from "@/src/Assessments/Questions/Content/PaperParts";
 
 import {
   UI_TYPO,

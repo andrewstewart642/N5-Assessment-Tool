@@ -7,7 +7,7 @@ import {
 import type {
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 export function useAssessmentQuestionControls() {
   const [

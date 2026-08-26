@@ -5,7 +5,7 @@ import {
 import type {
   CourseId,
   Skill,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 type SkillConceptLike = {
   code?: string;

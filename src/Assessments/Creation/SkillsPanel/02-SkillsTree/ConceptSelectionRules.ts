@@ -20,11 +20,11 @@ import type {
   SkillPaperSuitability,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
-import type { PaperPart } from "@/shared-types/PaperParts";
+import type { PaperPart } from "@/src/Assessments/Questions/Content/PaperParts";
 
-import type { QuestionSelectionFilters } from "@/shared-types/QuestionSelectionTypes";
+import type { QuestionSelectionFilters } from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 import type {
   ConstraintPillId,

@@ -4,7 +4,7 @@ import type {
   Question,
   QuestionTopicMarkBreakdown,
   SkillDomain,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 import type {
   CourseAssessmentConfig,
   CourseTopicTarget,

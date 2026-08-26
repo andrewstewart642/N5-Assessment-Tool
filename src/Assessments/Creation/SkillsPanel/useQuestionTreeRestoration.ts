@@ -15,7 +15,7 @@ import type {
   Question,
   Skill,
   StandardFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 type UseQuestionTreeRestorationArgs = {
   activeSkillsData:

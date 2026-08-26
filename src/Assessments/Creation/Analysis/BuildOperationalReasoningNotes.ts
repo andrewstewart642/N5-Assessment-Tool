@@ -3,7 +3,7 @@ import type {
 } from "./AssessmentQualityNotes";
 import { getDefaultCourseAssessmentConfig } from "@/src/Courses/CourseRegistry";
 import type { CourseAssessmentConfig } from "@/src/Courses/CourseAssessmentConfig";
-import type { Paper, Question } from "@/shared-types/AssessmentTypes";
+import type { Paper, Question } from "@/src/Assessments/AssessmentTypes";
 
 type BuildOperationalReasoningNotesArgs = {
   questions: Question[];

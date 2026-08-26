@@ -14,14 +14,14 @@ import type {
   Question,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import {
   isVariantEligibleForFilters,
   type QuestionCalculatorStatus,
   type QuestionSelectionFilters,
   type QuestionVariantSelectionMeta,
-} from "@/shared-types/QuestionSelectionTypes";
+} from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 import type {
   AssessmentEditQuestionDraftByPaper,

@@ -15,11 +15,11 @@ import type {
   Skill,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type {
   QuestionSelectionFilters,
-} from "@/shared-types/QuestionSelectionTypes";
+} from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 

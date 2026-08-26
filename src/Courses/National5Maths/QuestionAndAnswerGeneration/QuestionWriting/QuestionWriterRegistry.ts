@@ -3,22 +3,22 @@ import type {
   DifficultyLevel,
   QuestionSkillLink,
   Skill,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
   GeneratorContext,
-} from "@/shared-types/QuestionGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/QuestionGenerationTypes";
 
 import type {
   QuestionSelectionFilters,
   QuestionVariantSelectionMeta,
-} from "@/shared-types/QuestionSelectionTypes";
+} from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 import {
   isVariantEligibleForFilters,
-} from "@/shared-types/QuestionSelectionTypes";
+} from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 import SurdsConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N01_1_Surds";
 

@@ -13,17 +13,17 @@ import type {
   Paper,
   Skill,
   StandardFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type {
   GeneratedQuestionData,
   GeneratorContext,
   StandardClassification,
-} from "@/shared-types/QuestionGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/QuestionGenerationTypes";
 
 import type {
   PaperPart,
-} from "@/shared-types/PaperParts";
+} from "@/src/Assessments/Questions/Content/PaperParts";
 
 import PaperContent from "@/src/UI/Documents/Components/PaperContent";
 

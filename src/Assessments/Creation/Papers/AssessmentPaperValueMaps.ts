@@ -5,7 +5,7 @@ import type {
 
 import type {
   Paper,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 export type AssessmentPaperValueMap<T> =
   Partial<

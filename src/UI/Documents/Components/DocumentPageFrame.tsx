@@ -4,7 +4,7 @@ import React from "react";
 
 import type {
   Paper,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 export type DocumentFooterLabelMode =
   | "sqa-lower"

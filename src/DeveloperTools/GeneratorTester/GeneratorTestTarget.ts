@@ -1,6 +1,6 @@
 import type {
   ConceptGeneratorModule,
-} from "@/shared-types/QuestionGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/QuestionGenerationTypes";
 
 import AppreciationConceptModule from "@/src/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation";
 

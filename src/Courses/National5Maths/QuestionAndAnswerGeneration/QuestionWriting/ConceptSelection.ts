@@ -3,7 +3,7 @@ import type {
   Skill,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 export function conceptMatchesStandardFilter(
   concept: Concept,

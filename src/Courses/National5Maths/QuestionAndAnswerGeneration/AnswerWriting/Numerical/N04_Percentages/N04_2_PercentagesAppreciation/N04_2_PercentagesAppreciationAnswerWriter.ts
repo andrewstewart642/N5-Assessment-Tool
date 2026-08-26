@@ -2,11 +2,11 @@ import type {
   WorkedAnswerLine,
   WorkedAnswerMethod,
   WorkedAnswerSet,
-} from "@/shared-types/AnswerGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/AnswerGenerationTypes";
 
 import type {
   PaperPart,
-} from "@/shared-types/PaperParts";
+} from "@/src/Assessments/Questions/Content/PaperParts";
 
 import type {
   CompoundPercentageNumericProfile,

@@ -1,6 +1,6 @@
 import type {
   PaperPart,
-} from "@/shared-types/PaperParts";
+} from "@/src/Assessments/Questions/Content/PaperParts";
 
 export type WorkedAnswerLine = {
   id: string;

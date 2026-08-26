@@ -5,7 +5,7 @@ import type {
 
 import type {
   Paper,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type {
   BuildPriority,

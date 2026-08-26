@@ -3,7 +3,7 @@ import type {
 } from "./AssessmentQualityNotes";
 import { getDefaultCourseAssessmentConfig } from "@/src/Courses/CourseRegistry";
 import type { CourseAssessmentConfig } from "@/src/Courses/CourseAssessmentConfig";
-import type { Paper } from "@/shared-types/AssessmentTypes";
+import type { Paper } from "@/src/Assessments/AssessmentTypes";
 import type {
   TopicBalanceAnalysis,
   TopicBalanceRow,

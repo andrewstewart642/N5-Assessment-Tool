@@ -13,7 +13,7 @@ import type { SavedAssessment } from "@/src/Assessments/SavedAssessments/SavedAs
 
 import type {
   Skill,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import {
   getAssessmentLevelLabel,

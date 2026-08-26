@@ -1,7 +1,7 @@
 
 import type {
   Question,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import {
   UI_TYPO,

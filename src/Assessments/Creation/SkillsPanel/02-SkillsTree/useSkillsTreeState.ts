@@ -4,7 +4,7 @@ import {
 
 import type {
   DifficultyLevel,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 type ConceptIndexBySkill =
   Record<string, number>;

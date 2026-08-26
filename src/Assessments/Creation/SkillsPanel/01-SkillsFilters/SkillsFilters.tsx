@@ -14,7 +14,7 @@ import type {
   Paper,
   StandardFilter,
   ThinkingTypeFilter,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type { AppTheme } from "@/src/UI/Application/Theme/AppTheme";
 

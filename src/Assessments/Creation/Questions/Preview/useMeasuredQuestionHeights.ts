@@ -7,7 +7,7 @@ import {
 
 import type {
   Question,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import type {
   AssessmentEditQuestionDraftByPaper,

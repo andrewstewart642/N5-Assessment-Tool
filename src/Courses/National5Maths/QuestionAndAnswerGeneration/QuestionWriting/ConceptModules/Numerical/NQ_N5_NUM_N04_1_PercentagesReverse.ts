@@ -1,11 +1,11 @@
-import type { PaperPart } from "@/shared-types/PaperParts";
-import type { DifficultyLevel } from "@/shared-types/AssessmentTypes";
+import type { PaperPart } from "@/src/Assessments/Questions/Content/PaperParts";
+import type { DifficultyLevel } from "@/src/Assessments/AssessmentTypes";
 
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
   GeneratorContext,
-} from "@/shared-types/QuestionGenerationTypes";
+} from "@/src/Assessments/Questions/Generation/QuestionGenerationTypes";
 
 import {
   generateN5MathsReversePercentageWorkedAnswers,
@@ -13,7 +13,7 @@ import {
 
 import type {
   QuestionVariantSelectionMeta,
-} from "@/shared-types/QuestionSelectionTypes";
+} from "@/src/Assessments/Questions/Selection/QuestionSelectionTypes";
 
 import {
   generateN5MathsReversePercentageQuestion,

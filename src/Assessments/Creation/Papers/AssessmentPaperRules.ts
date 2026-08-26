@@ -7,7 +7,7 @@ import type {
 import type {
   Paper,
   SkillPaperSuitability,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import {
   formatCoursePaperSuitability,

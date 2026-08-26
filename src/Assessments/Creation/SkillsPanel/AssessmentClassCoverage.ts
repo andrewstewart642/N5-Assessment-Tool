@@ -2,7 +2,7 @@ import { readMyClassesStorageValue } from "@/src/Classes/State/ClassStorage";
 import { normaliseClass } from "@/src/Classes/State/ClassNormalisation";
 import type { SchoolClass } from "@/src/Classes/ClassTypes";
 
-import type { Skill } from "@/shared-types/AssessmentTypes";
+import type { Skill } from "@/src/Assessments/AssessmentTypes";
 
 import {
   normaliseAssessmentLevelId,

@@ -9,7 +9,7 @@ import {
 import type {
   Paper,
   Question,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 import SQAPageFrame from "@/src/UI/Documents/Components/DocumentPageFrame";
 

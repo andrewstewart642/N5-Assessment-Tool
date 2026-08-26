@@ -10,7 +10,7 @@ import {
 import type {
   Paper,
   SkillPaperSuitability,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 const FALLBACK_PAPER_ID: Paper =
   "P1";

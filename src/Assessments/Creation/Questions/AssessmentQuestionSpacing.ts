@@ -4,7 +4,7 @@ import {
 
 import type {
   Question,
-} from "@/shared-types/AssessmentTypes";
+} from "@/src/Assessments/AssessmentTypes";
 
 const DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX =
   48;
