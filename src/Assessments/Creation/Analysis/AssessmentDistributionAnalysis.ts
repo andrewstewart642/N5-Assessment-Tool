@@ -1,5 +1,3 @@
-// app/create-assessment/builder/builder-logic/AssessmentDistributionAnalysis.ts
-
 import type {
   AssessmentTopicCode,
   Paper,

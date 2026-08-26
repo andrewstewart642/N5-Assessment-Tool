@@ -1,4 +1,3 @@
-"use client";
 
 import type {
   Question,
@@ -22,7 +21,7 @@ import {
   QUESTION_MARKS_COLUMN_PX,
   QUESTION_NUMBER_COLUMN_PX,
   QUESTION_TEXT_COLUMN_LEFT_PX,
-} from "./QuestionPreviewLayout";
+} from "@/src/Assessments/Questions/Preview/QuestionPreviewLayout";
 
 type QuestionDraftPreviewProps = {
   index:

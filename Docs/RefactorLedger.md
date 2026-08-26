@@ -1,32 +1,29 @@
 # VecEd Architecture V2 — Refactor Ledger
 
 **Document type:** Live migration status and handoff record
-**Architecture version:** Architecture V2  
-**Status:** Active  
-**Authoritative for:** Current refactor progress, completed migration boundaries,known remaining seams and next work
-**Not authoritative for:** Long-lived architectural rules — see `Architecture.md` and `LockedDecisions.md`
+**Architecture version:** Architecture V2
+**Status:** Active
+**Last major checkpoint:** 26 August 2026
 
 ---
 
 # 1. Purpose
 
-This document answers:
+This document records the current state of the Architecture V2 migration.
 
-> What has actually happened during Architecture V2?
+It answers:
+
+> What has actually been migrated?
 
 > What is now canonical?
 
-> What still depends on legacy source?
+> What remains transitional?
 
-> What was verified?
+> What has been verified?
 
 > What should the next development session do?
 
-It is intentionally not a complete chronological transcript of every file edit.
-
-Small implementation steps should be condensed into meaningful architectural milestones.
-
-The detailed architecture belongs in:
+Long-lived architectural rules belong in:
 
 ```text
 Docs/Architecture.md
@@ -38,28 +35,23 @@ Settled decisions belong in:
 Docs/LockedDecisions.md
 ```
 
-Current physical locations belong in:
+Current physical repository ownership belongs in:
 
 ```text
 Docs/RepositoryMap.md
 ```
 
-This ledger records:
+This ledger is intentionally concise.
 
-```text
-PROGRESS
-CURRENT STATE
-RISKS
-NEXT ACTION
-```
+It records meaningful architectural milestones rather than every individual file edit.
 
 ---
 
 # 2. Current Refactor Status
 
-Architecture V2 is well beyond the initial planning phase.
+Architecture V2 is now well beyond the initial migration stage.
 
-The repository now contains substantial canonical implementation beneath:
+The repository contains substantial canonical implementation beneath:
 
 ```text
 src/
@@ -68,30 +60,53 @@ src/
 └── UI/
 ```
 
-The project remains intentionally transitional.
+The most important recent milestone is:
 
-The current state is best described as:
+> **The historical Assessment Builder implementation has been completely detached from the live application and deleted.**
+
+The only file remaining beneath:
 
 ```text
-V2 architecture established
-+
-major Assessment Creation regions migrated
-+
-legacy source still active around orchestration, settings, Courses,
-Classes, shared types, Compilation and routes
+app/create-assessment/builder/
 ```
 
-The refactor is therefore:
+is:
+
+```text
+page.tsx
+```
+
+because `/create-assessment/builder` remains a live Next.js route.
+
+The feature implementation itself now lives beneath:
+
+```text
+src/Assessments/Creation/
+```
+
+Current overall state:
+
+```text
+Architecture V2 established
++
+Assessment Creation migrated
++
+Compilation migrated to its own Assessment owner
++
+historical Builder implementation removed
++
+remaining legacy root domains still require migration
+```
+
+Architecture V2 remains:
 
 ```text
 IN PROGRESS
 ```
 
-but several major feature boundaries are already complete.
-
 ---
 
-# 3. Current Git Safety Model
+# 3. Git Safety Model
 
 Repository:
 
@@ -117,9 +132,19 @@ Frozen baseline:
 archive/25-08-2026-baseline
 ```
 
-A complete offline Windows copy of the project also exists as an additional preservation layer.
+A complete offline copy of the project also exists.
 
-The archive and offline copy are not normal development locations.
+Historical named migration anchors:
+
+```text
+MIG-001 — Application UI Foundations
+1492b5841be785ebf0a0fc96517cf3480aacb10c
+
+MIG-002 — Application Theme and Settings Architecture
+4664123d6657ae8752817c8ea0569a16d33a0890
+```
+
+Do not work directly on the frozen archive.
 
 ---
 
@@ -127,24 +152,23 @@ The archive and offline copy are not normal development locations.
 
 During active migration, the local working tree may be ahead of connected GitHub.
 
-For current uncommitted state, treat these as authoritative:
+For uncommitted work, authority is:
 
 ```text
+local source
 local grep
 local TypeScript
-local build
-local browser behaviour
+local production build
+browser behaviour
 ```
 
-Connected GitHub remains useful for inspecting the most recently pushed source.
-
-Do not revert local progress merely because remote source has not caught up.
+Connected GitHub remains useful for inspecting pushed state but must not override newer verified local work.
 
 ---
 
-# 5. Refactor Strategy Established
+# 5. Migration Method
 
-The migration strategy has evolved into:
+The preferred Architecture V2 migration sequence is:
 
 ```text
 AUDIT
@@ -164,40 +188,48 @@ SEARCH BROADLY
 DELETE OLD
     ↓
 VERIFY AGAIN
+    ↓
+DOCUMENT
+    ↓
+COMMIT
 ```
 
-This is now preferred over repeatedly moving and editing historical files in place.
+This method has proven safer than moving historical files wholesale.
 
-Temporary adapters are acceptable where they provide a safe migration bridge.
+Temporary compatibility adapters are acceptable when they reduce migration risk.
 
-They must not become permanent duplicate authorities.
+They must not become duplicate permanent authorities.
 
 ---
 
 # 6. Acceptance Criterion Zero
 
-The governing preservation rule remains:
+The governing rule remains:
 
 > Preserve the working application.
 
 Architecture V2 may:
 
-- rewrite;
-- move;
-- rename;
-- split;
-- merge;
-- consolidate;
-- simplify;
-- delete genuinely dead code.
+```text
+move
+rename
+rewrite
+split
+merge
+simplify
+consolidate
+delete genuinely dead code
+```
 
-It must not silently remove working behaviour.
+but must not silently remove working behaviour.
+
+TypeScript passing alone is not sufficient for visual or interaction-sensitive migrations.
 
 ---
 
 # 7. Documentation Foundation — COMPLETE
 
-The Architecture V2 persistent documentation system is established:
+Persistent Architecture V2 documentation is established:
 
 ```text
 AGENTS.md
@@ -210,264 +242,314 @@ Docs/
 └── ChatGPTWorkflow.md
 ```
 
-Earlier versions were created at the beginning of the refactor.
+Responsibilities:
 
-At the current checkpoint they are being completely regenerated to reflect the architecture and migration knowledge gained during implementation.
+```text
+AGENTS.md
+→ mandatory working rules
 
-Current regeneration progress:
+Architecture.md
+→ durable architecture
 
-AGENTS.md              → REWRITTEN
-Architecture.md        → REWRITTEN / SECOND-PASS REVIEWED
-LockedDecisions.md     → REWRITTEN
-RepositoryMap.md       → REWRITTEN
-RefactorLedger.md      → REWRITTEN
-ChatGPTWorkflow.md     → REWRITTEN
-Documentation sanity  → IN PROGRESS
+LockedDecisions.md
+→ binding settled decisions
+
+RepositoryMap.md
+→ current physical repository state
+
+RefactorLedger.md
+→ migration status and handoff
+
+ChatGPTWorkflow.md
+→ practical AI-assisted workflow
+```
 
 ---
 
-# 8. Git / Workspace Foundation — COMPLETE
+# 8. Application UI Architecture — COMPLETE
 
-Architecture V2 uses:
+Canonical application visual ownership exists beneath:
 
 ```text
-existing repository
-+
-refactor/architecture-V2
-+
-src/ migration boundary
-+
-external V2 VS Code workspace
+src/UI/Application/
 ```
 
-The separate complete `N5-Assessment-Tool-V2` application approach was rejected.
-
-The V2 workspace may hide legacy folders visually through `files.exclude`.
-
-This is only an editor convenience.
-
-## Historical migration anchors
-
-Two early Architecture V2 migrations have named Git anchors worth preserving:
+Major implemented areas include:
 
 ```text
-MIG-001 — Application UI Foundations
-Commit: 1492b5841be785ebf0a0fc96517cf3480aacb10c
-
-MIG-002 — Application Theme and Settings Architecture
-Commit: 4664123d6657ae8752817c8ea0569a16d33a0890
-
----
-
-# 9. Early UI Migration — COMPLETE
-
-The first major V2 migration established canonical application visual ownership.
-
-Implemented V2 areas include:
-
-```text
-src/UI/Application/Colours/
-src/UI/Application/Theme/
-src/UI/Application/Typography/
+Colours/
+Theme/
+Typography/
+HeaderBar/
+SettingsDrawer/
 ```
 
-Important canonical sources include concepts such as:
-
-```text
-AccentPalette
-AppTheme
-ThemeMode
-Theme preference persistence
-Typography
-```
-
-Competing visual authorities should continue converging toward these owners.
-
----
-
-# 10. Global Settings Architecture — SUBSTANTIALLY COMPLETE
-
-Canonical global settings ownership now exists under:
-
-```text
-src/UI/Application/SettingsDrawer/
-```
-
-This established the distinction between:
-
-```text
-global application settings
-```
-
-and:
-
-```text
-Assessment settings
-workspace settings
-```
-
-The global Settings entry point belongs to HeaderBar/application UI.
-
-A historical Assessment-specific settings bridge/event may still exist temporarily.
-
-That bridge is transitional and should disappear when the Assessment Settings migration is completed.
-
----
-
-# 11. HeaderBar Migration — COMPLETE
-
-Canonical HeaderBar ownership exists under:
-
-```text
-src/UI/Application/HeaderBar/
-```
-
-The global HeaderBar now has a meaningful V2 decomposition around responsibilities such as:
-
-```text
-HeaderBar
-Logo
-Navigation
-SettingsButton
-```
-
-The previous global header/settings architecture is no longer the canonical owner.
-
----
-
-# 12. Historical Root `ui/` — REMOVED
-
-The old root-level:
+The historical root-level:
 
 ```text
 ui/
 ```
 
-was removed after its V2 responsibilities had moved.
+has been removed.
 
-Canonical visual architecture is now:
+Do not recreate it.
 
-```text
-src/UI/
-├── Application/
-└── Documents/
-```
-
-Do not recreate root `ui/`.
+Application UI and generated-document UI remain separate architectural systems.
 
 ---
 
-# 13. Assessment Setup Migration — SUBSTANTIALLY COMPLETE
+# 9. Assessment Setup — SUBSTANTIALLY COMPLETE
 
-The Assessment Setup workflow has been decomposed into:
+Canonical Setup ownership exists beneath:
 
 ```text
 src/Assessments/Creation/AssessmentSetupPage.tsx
-
 src/Assessments/Creation/Setup/
 ```
 
-Responsibilities now include dedicated ownership for:
+Setup now owns its dedicated:
 
-- setup state;
-- Course/setup rules;
-- target calculations;
-- Class coverage;
-- storage;
-- submission;
-- controls;
-- sections.
+```text
+state
+storage
+submission
+target calculations
+Course/setup rules
+Class coverage loading
+controls
+sections
+```
 
-A redundant duplicate Setup rules implementation was removed during this work.
+The route remains thin.
 
-The Setup page is now primarily orchestration rather than one giant implementation.
+Remaining work around Setup concerns broader Course and Classes ownership rather than rebuilding the Setup feature itself.
 
 ---
 
-# 14. Assessment Creator Route Boundary — COMPLETE
+# 10. Assessment Creator Route — COMPLETE
 
-The substantial Assessment Creation page now lives at:
-
-```text
-src/Assessments/Creation/AssessmentCreatorPage.tsx
-```
-
-The route remains:
+The live route remains:
 
 ```text
 app/create-assessment/builder/page.tsx
 ```
 
-as a thin Next.js wrapper.
-
-A migration temporarily removed this route wrapper, causing:
-
-```text
-/create-assessment/builder
-```
-
-to return 404.
-
-The route was restored and verified.
-
-Important lesson:
-
-> Moving the implementation does not remove the requirement for the Next.js route entry point.
-
----
-
-# 15. `AssessmentCreatorPage.tsx` — MIGRATION IN PROGRESS
-
-The canonical page implementation exists beneath V2:
+It delegates to:
 
 ```text
 src/Assessments/Creation/AssessmentCreatorPage.tsx
 ```
 
-However it remains a large orchestration file and still imports historical Builder modules.
+The route wrapper must remain while the public URL remains:
 
-This is expected at the current stage.
+```text
+/create-assessment/builder
+```
 
-The file should continue losing implementation responsibilities as coherent owners are migrated.
+Important distinction:
 
-Do not split it merely to reduce its line count.
+```text
+route name contains "builder"
+≠
+Builder architecture still exists
+```
 
-Extract meaningful responsibilities.
+The historical Builder implementation has been removed.
 
 ---
 
-# 16. Assessment Question State — COMPLETE V2 OWNER ESTABLISHED
+# 11. Assessment Creation — BUILDER DETACHED
 
-Generic Assessment Creation question state now lives beneath:
-
-```text
-src/Assessments/Creation/Questions/
-```
-
-Known canonical responsibilities include:
+Canonical Assessment Creation ownership exists beneath:
 
 ```text
-AssessmentQuestionDraftTypes.ts
-AssessmentQuestionDrafts.ts
-AssessmentQuestionSpacing.ts
-useAssessmentQuestionState.ts
+src/Assessments/Creation/
 ```
 
-These should remain generic Assessment workflow owners.
+Major implemented areas include:
 
-Course-specific question generation remains separate.
+```text
+Analysis/
+AssessmentSettings/
+HUDBar/
+Papers/
+PaperWorkspace/
+Persistence/
+Questions/
+Setup/
+SkillsPanel/
+TopBar/
+```
+
+Current local auditing confirms no live implementation imports from:
+
+```text
+app/create-assessment/builder/
+```
+
+The old Builder is no longer part of the application dependency graph.
 
 ---
 
-# 17. Assessment Persistence — MAJOR V2 OWNERS ESTABLISHED
+# 12. Assessment Creator Orchestration — BUILDER INDEPENDENT
 
-Important Assessment Creation persistence behaviour has moved beneath:
+Canonical page:
+
+```text
+src/Assessments/Creation/AssessmentCreatorPage.tsx
+```
+
+It coordinates:
+
+```text
+paper state
+Course configuration
+question workflow
+skills state
+settings
+persistence
+quality analysis
+TopBar
+SkillsPanel
+PaperWorkspace
+HUDBar
+```
+
+It is no longer dependent on historical Builder behaviour or logic modules.
+
+Future extraction should occur only when there is a meaningful responsibility to extract.
+
+Do not split the file merely to reduce line count.
+
+---
+
+# 13. Assessment TopBar — COMPLETE
+
+Canonical owner:
+
+```text
+src/Assessments/Creation/TopBar/
+```
+
+The historical Builder TopBar is gone.
+
+Do not recreate a new Builder-style monolith.
+
+---
+
+# 14. SkillsPanel — SUBSTANTIALLY COMPLETE
+
+Canonical Assessment interaction owner:
+
+```text
+src/Assessments/Creation/SkillsPanel/
+```
+
+Architecture distinction:
+
+```text
+Assessment Creation
+→ rendering, filtering and interaction
+
+Course
+→ curriculum and educational knowledge
+```
+
+Course-side curriculum migration still remains.
+
+---
+
+# 15. Assessment Settings — BUILDER DETACHED
+
+Canonical owner:
+
+```text
+src/Assessments/Creation/AssessmentSettings/
+```
+
+Current implementation includes:
+
+```text
+AssessmentSettingsPanel.tsx
+```
+
+The historical Builder Settings components have been removed.
+
+Global application settings remain separate beneath:
+
+```text
+src/UI/Application/
+```
+
+Workspace behaviour belongs to the relevant workspace owner.
+
+Do not recombine these responsibilities into a giant settings implementation.
+
+---
+
+# 16. Assessment Papers — BUILDER DETACHED
+
+Canonical generic Assessment Creation paper ownership exists beneath:
+
+```text
+src/Assessments/Creation/Papers/
+```
+
+Important current responsibilities include:
+
+```text
+AssessmentPaperRules.ts
+AssessmentPaperTargets.ts
+useAssessmentPaperSelection.ts
+```
+
+Course-specific paper knowledge belongs to Course architecture.
+
+Current shared Course paper rules live beneath:
+
+```text
+src/Courses/Papers/CoursePaperRules.ts
+```
+
+The historical Builder paper-selection and target implementation has been removed.
+
+---
+
+# 17. Assessment Analysis — BUILDER DETACHED
+
+Canonical owner:
+
+```text
+src/Assessments/Creation/Analysis/
+```
+
+Current responsibilities include:
+
+```text
+AssessmentDistributionAnalysis.ts
+AssessmentQualityNotes.ts
+BuildCalculatorSuitabilityNotes.ts
+BuildOperationalReasoningNotes.ts
+BuildStandardBalanceNotes.ts
+BuildTopicBalanceNotes.ts
+useAssessmentQualityAnalysis.ts
+```
+
+The historical Builder analysis layer has been removed.
+
+Do not recreate `builder-logic` as a generic analysis owner.
+
+---
+
+# 18. Assessment Persistence — BUILDER DETACHED
+
+Canonical Assessment Creation persistence lives beneath:
 
 ```text
 src/Assessments/Creation/Persistence/
 ```
 
-Known responsibilities include:
+Important responsibilities include:
 
 ```text
 AssessmentCourseSelectionStorage.ts
@@ -475,136 +557,62 @@ useAssessmentCreatorAutoSave.ts
 useAssessmentCreatorSavedAssessment.ts
 ```
 
-Existing storage compatibility has been deliberately preserved.
+Shared Course selection now has canonical ownership beneath:
 
-Persistence migration is not complete repository-wide.
+```text
+src/Courses/Selection/CourseSelectionStorage.ts
+```
+
+`AssessmentCourseSelectionStorage.ts` acts as an Assessment-facing compatibility adapter.
+
+Existing persisted storage keys and shapes remain compatibility contracts.
+
+Historical strings containing `builder` must not be renamed merely because the source architecture has changed.
 
 ---
 
-# 18. Assessment Papers — V2 OWNER ESTABLISHED, MIGRATION CONTINUES
+# 19. Assessment Question Workflow — COMPLETE V2 OWNER
 
-Generic Assessment paper behaviour now has ownership beneath:
+Generic Assessment Creation question workflow exists beneath:
 
 ```text
-src/Assessments/Creation/Papers/
+src/Assessments/Creation/Questions/
 ```
 
-Known responsibilities include paper rules, targets and selection behaviour.
+Important responsibilities include:
 
-Some historical terminology/dependencies still remain.
+```text
+AssessmentQuestionDrafts.ts
+AssessmentQuestionDraftTypes.ts
+AssessmentQuestionSpacing.ts
+useAssessmentDraftWorkflow.ts
+useAssessmentQuestionDraftGeneration.ts
+useAssessmentQuestionState.ts
+useAssessmentQuestionWorkflow.ts
+```
 
-Course-specific educational paper knowledge should continue moving toward the Course domain rather than becoming generic Assessment knowledge.
+Course-specific question generation remains separate.
 
 ---
 
-# 19. SkillsPanel Migration — SUBSTANTIALLY COMPLETE
+# 20. Shared Assessment Question Preview — IMPLEMENTED
 
-Canonical interactive SkillsPanel ownership exists beneath:
+Rendering used by more than one Assessment workflow now has shared ownership beneath:
 
 ```text
-src/Assessments/Creation/SkillsPanel/
+src/Assessments/Questions/Preview/
 ```
 
-The intended distinction is established:
+Current shared files include:
 
 ```text
-Assessment Creation
-→ rendering / filtering / interaction
-
-Course
-→ curriculum definition
-```
-
-The old giant SkillsTree/CategorySection architecture has been decomposed.
-
-Course-side curriculum migration remains incomplete.
-
----
-
-# 20. TopBar Migration — COMPLETE
-
-Canonical TopBar implementation now exists under:
-
-```text
-src/Assessments/Creation/TopBar/
-```
-
-The legacy giant TopBar no longer defines the architecture.
-
-TopBar now represents the Assessment Creation-specific upper controls rather than being confused with the global HeaderBar.
-
----
-
-# 21. Preview Engine Migration — COMPLETE
-
-Historical preview engine files:
-
-```text
-app/create-assessment/builder/builder-preview-engine/BuilderPreviewPane.tsx
-app/create-assessment/builder/builder-preview-engine/BuilderPreviewPageRenderer.tsx
-```
-
-were replaced by:
-
-```text
-src/Assessments/Creation/PaperWorkspace/Preview/
-```
-
-and deleted after dependency checks.
-
-Canonical preview responsibilities now include:
-
-```text
-AssessmentPreviewPane.tsx
-AssessmentPreviewPageRenderer.tsx
-AssessmentPreviewQuestion.tsx
-AssessmentPreviewQuestionPage.tsx
-AssessmentPreviewTypes.ts
-```
-
----
-
-# 22. Question Preview Migration — COMPLETE
-
-Assessment Creation's interactive question rendering has moved away from historical Builder components.
-
-Canonical location:
-
-```text
-src/Assessments/Creation/Questions/Preview/
-```
-
-Current responsibilities include:
-
-```text
-QuestionPreviewLayout.ts
-QuestionMeasureBox.tsx
 QuestionLockedPreview.tsx
-QuestionDraftPreview.tsx
-WorkedAnswerPreview.tsx
+QuestionPreviewLayout.ts
 ```
 
-The migration preserved:
+These were promoted from Creation-specific ownership when Compilation became a second consumer.
 
-- rendered-height measurement;
-- locked question display;
-- draft controls;
-- edit controls;
-- worked-answer display;
-- worked-answer method cycling;
-- PaperContent rendering.
-
-The V2 question preview now consumes:
-
-```text
-src/UI/Documents/Components/PaperContent.tsx
-```
-
-rather than the historical preview content renderer.
-
----
-
-# 23. Important Question Legacy Exception
+Creation and Compilation therefore share an Assessment-owned renderer rather than depending on one another.
 
 The historical:
 
@@ -612,1225 +620,968 @@ The historical:
 app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked.tsx
 ```
 
-is **still active**.
+has been deleted.
 
-It is no longer used by Assessment Creation Preview.
+---
 
-It remains consumed by:
+# 21. PaperWorkspace — COMPLETE
+
+Canonical owner:
+
+```text
+src/Assessments/Creation/PaperWorkspace/
+```
+
+This area owns Assessment Creation's interactive paper workspace and preview behaviour.
+
+The subtree has been verified free of historical Builder implementation imports.
+
+Browser testing previously covered:
+
+```text
+question rendering
+P1/P2 switching
+preview modes
+HUD resize
+notes
+marks
+timings
+Compile navigation
+```
+
+This is a stable V2 boundary.
+
+---
+
+# 22. HUDBar — COMPLETE
+
+Canonical owner:
+
+```text
+src/Assessments/Creation/HUDBar/
+```
+
+Historical Builder HUD implementations have been removed.
+
+The V2 HUD consumes canonical theme, preview and quality-analysis state.
+
+---
+
+# 23. Compilation — MIGRATED TO V2 OWNER
+
+Compilation remains a separate Assessment responsibility.
+
+Canonical implementation:
+
+```text
+src/Assessments/Compilation/AssessmentCompilationPage.tsx
+```
+
+Live route:
 
 ```text
 app/compile-assessment/page.tsx
 ```
 
-Therefore:
+The route is a thin Next.js wrapper.
+
+Compilation now consumes shared V2 owners for:
 
 ```text
-DO NOT DELETE
+Course selection
+→ src/Courses/Selection/CourseSelectionStorage.ts
+
+Course paper rules
+→ src/Courses/Papers/CoursePaperRules.ts
+
+locked question rendering
+→ src/Assessments/Questions/Preview/QuestionLockedPreview.tsx
 ```
 
-until Compilation is migrated.
+Compilation no longer depends on:
 
-This is a key example of why broad consumer searches are mandatory before deletion.
+```text
+app/create-assessment/builder/
+```
+
+Remaining Compilation work concerns transitional dependencies rather than page ownership.
 
 ---
 
-# 24. Document Architecture Discovery
+# 24. Compilation Separation Rule
 
-While migrating Preview, the generated-document architecture was clarified.
+Compilation must remain separate from Assessment Creation.
 
-The correct layers are:
+Correct conceptual relationship:
+
+```text
+Assessment Creation
+        ↓
+persisted / selected assessment state
+        ↓
+Assessment Compilation
+```
+
+Shared behaviour should be promoted to:
+
+```text
+Assessments
+Courses
+UI/Documents
+```
+
+as appropriate.
+
+Do not make:
+
+```text
+Compilation → Creation
+```
+
+or:
+
+```text
+Creation → Compilation
+```
+
+a general architectural dependency.
+
+---
+
+# 25. Course Selection — SHARED OWNER ESTABLISHED
+
+Canonical shared Course-selection persistence:
+
+```text
+src/Courses/Selection/CourseSelectionStorage.ts
+```
+
+It owns the existing active-Course storage contract and historical aliases.
+
+Creation and Compilation can consume this shared owner independently.
+
+Persisted key:
+
+```text
+assessment_builder_active_course_id_v1
+```
+
+must remain unchanged until a deliberate persistence migration says otherwise.
+
+Its historical name is not evidence of a Builder code dependency.
+
+---
+
+# 26. Course Paper Rules — V2 OWNER ESTABLISHED
+
+Canonical Course paper behaviour exists beneath:
+
+```text
+src/Courses/Papers/CoursePaperRules.ts
+```
+
+Responsibilities include:
+
+```text
+available papers
+default paper
+paper configuration
+paper targets
+paper labels
+calculator suitability
+```
+
+Course-specific educational paper knowledge belongs here rather than inside generic Assessment workflow.
+
+---
+
+# 27. Generated Document Architecture — ESTABLISHED
+
+The generated-document layering is:
 
 ```text
 generic document mechanics
         ↓
 qualification-family templates
         ↓
-Course-specific document rules/content
+Course-specific documents
         ↓
-Assessment consumer
+Assessment consumers
 ```
 
-Current concrete chain:
+Current concrete structure includes:
 
 ```text
-A4PageFrame
-        ↓
-NationalQualifications templates
-        ↓
-National5Maths Documents
-        ↓
-Assessment Preview
+src/UI/Documents/
+src/UI/Documents/Templates/NationalQualifications/
+src/Courses/National5Maths/Documents/
 ```
 
-This is now locked Architecture V2.
+Application UI and generated Documents UI remain separate systems.
 
 ---
 
-# 25. Generic Document Layer — IMPLEMENTED
+# 28. Generic Document Layer — IMPLEMENTED
 
-Canonical generic document ownership exists beneath:
+Canonical ownership:
 
 ```text
 src/UI/Documents/
 ```
 
-Important implementations include:
+Important components include:
 
 ```text
-Layout/DocumentUnits.ts
-
 Components/A4PageFrame.tsx
 Components/PaperContent.tsx
+Layout/DocumentUnits.ts
 ```
 
-`DocumentUnits.ts` owns generic physical page calculations such as:
+Some transitional document components may remain until page-layout migration is complete.
 
-```text
-mm → px
-A4 dimensions
-```
-
-`A4PageFrame.tsx` owns generic page mechanics only.
+Do not delete them without a broad consumer audit.
 
 ---
 
-# 26. National Qualifications Template Layer — IMPLEMENTED
+# 29. National Qualifications Templates — IMPLEMENTED
 
-Reusable qualification-family visuals now live beneath:
+Canonical qualification-family visual templates:
 
 ```text
 src/UI/Documents/Templates/NationalQualifications/
 ```
 
-Important components include:
-
-```text
-NationalQualificationsPageFrame.tsx
-NationalQualificationsQuestionPageFrame.tsx
-NationalQualificationsCoverPage.tsx
-```
-
-Responsibilities include shared visual conventions such as:
-
-- corner marks;
-- marks margin;
-- candidate boxes;
-- question margin treatment;
-- page footer;
-- Turn over;
-- qualification cover layout.
-
-These components do not own National 5 Maths-specific paper content.
+They own reusable qualification visuals rather than Course-specific content.
 
 ---
 
-# 27. National 5 Maths Document Layer — IMPLEMENTED
+# 30. National 5 Maths Documents — IMPLEMENTED
 
-Canonical Course document ownership is:
+Canonical owner:
 
 ```text
 src/Courses/National5Maths/Documents/
-├── CourseDocuments.ts
-├── CoverPage/
-│   └── National5MathsCoverPage.tsx
-├── FormulaSheet/
-│   └── National5MathsFormulaSheet.tsx
-└── QuestionPage/
-    └── National5MathsQuestionPage.tsx
 ```
 
-Duplicate earlier National 5 Maths document components were removed after consumer checks.
-
-The Course-specific implementation now composes reusable qualification templates.
-
----
-
-# 28. Course Documents Bundle — IMPLEMENTED
-
-National 5 Maths exposes its page components through:
-
-```text
-src/Courses/National5Maths/Documents/CourseDocuments.ts
-```
-
-providing the conceptual contract:
+Current structure includes Course-specific:
 
 ```text
 CoverPage
 FormulaSheet
 QuestionPage
+CourseDocuments.ts
 ```
 
-This is the current Course document plug-in boundary.
-
-Long-term Assessment consumers should resolve this through the selected Course definition rather than hard-code National 5 Maths throughout generic code.
+Duplicate historical document owners have been removed.
 
 ---
 
-# 29. Document Visual Preservation — VERIFIED DURING MIGRATION
+# 31. National 5 Maths Question Generation — V2 OWNER ESTABLISHED
 
-TypeScript checks were used throughout document migration.
-
-Document changes were also treated as preservation-sensitive because compilation alone cannot verify:
-
-- page dimensions;
-- margins;
-- corner marks;
-- qualification visual elements;
-- formula layout;
-- question layout.
-
-Relevant browser visual checks should remain mandatory for future document-layer migrations.
-
----
-
-# 30. `DocumentPageFrame.tsx` Deletion Mistake — RESOLVED / LESSON RETAINED
-
-During document cleanup:
-
-```text
-src/UI/Documents/Components/DocumentPageFrame.tsx
-```
-
-appeared obsolete from an overly narrow audit and was deleted.
-
-TypeScript immediately exposed:
-
-```text
-app/compile-assessment/page.tsx
-```
-
-as an active consumer.
-
-The file was restored.
-
-Current status:
-
-```text
-DocumentPageFrame.tsx
-→ LEGACY/TRANSITIONAL BUT ACTIVE
-```
-
-Important lesson:
-
-> Never establish deadness from a narrow path-specific search.
-
-Search symbols and consumers broadly before deletion.
-
----
-
-# 31. Compilation Route Discovery — ACTIVE LEGACY FEATURE
-
-The route:
-
-```text
-app/compile-assessment/page.tsx
-```
-
-is live.
-
-It is reached by the Assessment Creator's:
-
-```text
-Compile →
-```
-
-action.
-
-It is not abandoned prototype code.
-
-Current responsibilities include:
-
-- loading current assessment data;
-- selecting paper;
-- selecting page size;
-- paginating questions;
-- rendering compile-preview pages;
-- displaying printable-style questions.
-
----
-
-# 32. Compilation Current Legacy Dependencies
-
-Known live Compilation dependencies include:
-
-```text
-src/UI/Documents/Components/DocumentPageFrame.tsx
-
-app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked.tsx
-
-app/paper-layout/Page-Sizes
-
-app/paper-layout/Reflow-Pages
-
-legacy Builder paper configuration/targets
-```
-
-Compilation also reads the existing assessment-builder localStorage contract.
-
-These dependencies must not be deleted during unrelated Creation cleanup.
-
----
-
-# 33. Compilation Architectural Decision
-
-Compilation is now recognised as a separate Assessment responsibility.
-
-Target conceptual owner:
-
-```text
-src/Assessments/Compilation/
-```
-
-A future bounded migration should establish something like:
-
-```text
-src/Assessments/Compilation/
-└── AssessmentCompilationPage.tsx
-```
-
-with:
-
-```text
-app/compile-assessment/page.tsx
-```
-
-eventually becoming a thin route wrapper.
-
-This migration has **not** yet begun.
-
----
-
-# 34. HUD Migration — COMPLETE
-
-Historical HUD implementation consisted of:
-
-```text
-BuilderBottomHud.tsx
-AssessmentProgressHud.tsx
-UseBuilderProgressHudRows.ts
-```
-
-The V2 replacement was written beneath:
-
-```text
-src/Assessments/Creation/HUDBar/
-```
-
-Canonical local implementation includes:
-
-```text
-AssessmentHUDBar.tsx
-AssessmentProgressPanel.tsx
-useAssessmentProgressRows.ts
-```
-
----
-
-# 35. Assessment Quality Notes — CANONICAL OWNER ESTABLISHED
-
-Historical:
-
-```text
-BuilderNotes
-```
-
-behaviour has received a V2 owner:
-
-```text
-src/Assessments/Creation/Analysis/AssessmentQualityNotes.ts
-```
-
-The historical Builder module may temporarily serve as a compatibility adapter for remaining legacy analysis consumers.
-
-There must be only one actual quality-note implementation.
-
----
-
-# 36. HUD Legacy Files — REMOVED
-
-After switching consumers, broad search confirmed the old HUD files only referenced themselves.
-
-The following were deleted:
-
-```text
-app/create-assessment/builder/builder-behaviour/UseBuilderProgressHudRows.ts
-
-app/create-assessment/builder/components/assessment-progress/AssessmentProgressHud.tsx
-
-app/create-assessment/builder/components/builder-layout/BuilderBottomHud.tsx
-```
-
-Empty legacy folders were eligible for removal where applicable.
-
----
-
-# 37. PaperWorkspace Legacy-Dependency Audit — PASSED
-
-The decisive audit was:
-
-```bash
-grep -RInE 'from "(@/app/create-assessment/builder/|@/math-helpers/)' src/Assessments/Creation/PaperWorkspace
-```
-
-Current result:
-
-```text
-NO MATCHES
-```
-
-This establishes:
-
-```text
-src/Assessments/Creation/PaperWorkspace/
-```
-
-as a canonical V2-clean boundary.
-
-This is one of the most important completed milestones of the refactor so far.
-
----
-
-# 38. PaperWorkspace Smoke Test — PASSED
-
-After Preview, question rendering and HUD migration, the Assessment Creator was manually tested.
-
-Confirmed working:
-
-```text
-P1/P2 switching
-question generation/interactions
-question editing
-question removal
-draft assignment/removal
-Exam / Compact / Answers modes
-worked-answer display
-HUD resizing
-quality notes
-marks/timings
-Compile navigation
-```
-
-The user confirmed the feature was functioning correctly after the migration.
-
-This is the current known-good Assessment Creation checkpoint.
-
----
-
-# 39. Current Assessment Creation Status
-
-The domain can now be summarised as:
-
-```text
-Assessment Setup
-→ substantially migrated
-
-TopBar
-→ migrated
-
-SkillsPanel UI
-→ migrated
-
-Questions / question preview
-→ migrated
-
-PaperWorkspace
-→ migrated and legacy-detached
-
-HUDBar
-→ migrated
-
-Assessment persistence
-→ significant V2 ownership established
-
-Analysis
-→ significant V2 ownership established
-
-Assessment Settings
-→ major remaining seam
-
-AssessmentCreatorPage orchestration
-→ still contains legacy imports
-
-Course integration
-→ transitional
-```
-
----
-
-# 40. Course Migration — IN PROGRESS
-
-Canonical V2 Course source currently exists beneath:
-
-```text
-src/Courses/National5Maths/
-```
-
-Implemented responsibilities include:
-
-```text
-Documents/
-QuestionGeneration/
-```
-
-The broader Course migration is incomplete.
-
----
-
-# 41. National 5 Maths Question Generation — V2 OWNER ESTABLISHED
-
-Course-specific mathematical generation has started moving beneath:
+Canonical Course-specific question generation lives beneath:
 
 ```text
 src/Courses/National5Maths/QuestionGeneration/
 ```
 
-This is the correct V2 owner.
-
-Do not move Course-specific generator knowledge back into generic Assessment Creation.
+Course-specific mathematics must remain outside generic Assessment Creation.
 
 ---
 
-# 42. Remaining Course Architecture
+# 32. Legacy Builder Removal — COMPLETE
 
-Important Course responsibilities still requiring migration include concepts such as:
-
-```text
-CourseRegistry
-CourseDefinition
-SkillsTree
-Papers
-AnswerGeneration
-SourceQuestionCatalog
-SourceMarkingSchemeCatalog
-```
-
-Some or all currently exist in legacy:
-
-```text
-course-data/
-```
-
-or related source.
-
-Do not create duplicate V2 implementations without switching consumers deliberately.
-
----
-
-# 43. Classes — NOT YET MIGRATED
-
-Architectural owner:
-
-```text
-src/Classes/
-```
-
-Current status:
-
-```text
-TARGET — NOT YET IMPLEMENTED
-```
-
-Existing Class functionality remains outside the V2 Classes domain.
-
-This migration should occur later as its own bounded responsibility.
-
----
-
-# 44. Routes — PARTIALLY MIGRATED
-
-Substantial implementations have begun moving into domain files, but routing still physically lives beneath:
-
-```text
-app/
-```
-
-This is intentional.
-
-Examples of routes already delegating to V2 page implementations include Assessment Setup and Assessment Creator.
-
-Full:
-
-```text
-app/
-→
-src/app/
-```
-
-migration remains deferred.
-
----
-
-# 45. `shared-types/` — ACTIVE LEGACY
-
-Many V2 files still consume historical:
-
-```text
-shared-types/
-```
-
-contracts.
-
-This folder must eventually be dismantled by ownership.
-
-Do not simply replace it with:
-
-```text
-src/SharedTypes/
-```
-
-Type migration should occur carefully because these contracts may have many consumers.
-
----
-
-# 46. `math-helpers/` — ACTIVE LEGACY WHERE REMAINING
-
-`math-helpers` is not an accepted permanent V2 owner.
-
-Its contents must migrate according to actual responsibility.
-
-Important achievement:
-
-```text
-PaperWorkspace
-```
-
-no longer directly depends upon it.
-
----
-
-# 47. `course-data/` — ACTIVE LEGACY
-
-`course-data` remains important to the working application.
-
-It contains useful Course information but mixes multiple responsibilities.
-
-Migration should preserve good organisation while separating:
-
-```text
-Course definition
-SkillsTree
-QuestionGeneration
-AnswerGeneration
-Paper rules
-SourceQuestionCatalog
-SourceMarkingSchemeCatalog
-```
-
----
-
-# 48. Legacy Builder Tree — ACTIVE BUT SHRINKING
-
-The historical:
+Historical implementation area:
 
 ```text
 app/create-assessment/builder/
 ```
 
-is no longer the owner of the Assessment Creation feature as a whole.
-
-However it still contains active modules consumed by:
+Previously contained:
 
 ```text
-AssessmentCreatorPage
-Assessment Settings
-Course/paper coordination
-quality analysis
-Compilation
-other unmigrated behaviours
+builder-behaviour/
+builder-definitions/
+builder-logic/
+builder-preview-engine/
+components/
+BuilderStyles
+Builder utilities
+Builder storage modules
+Assessment timing
 ```
 
-Do not attempt one wholesale deletion.
+A broad consumer audit was performed before deletion.
+
+The implementation files were then removed with Git.
+
+Current tracked contents:
+
+```text
+app/create-assessment/builder/page.tsx
+```
+
+only.
+
+This route wrapper is intentionally retained.
+
+The historical implementation must not be recreated.
 
 ---
 
-# 49. Legacy Builder Behaviour — NEXT AUDIT AREA
+# 33. Legacy Builder Removal Verification
 
-Historical area:
-
-```text
-app/create-assessment/builder/builder-behaviour/
-```
-
-still contains several hooks imported by:
-
-```text
-src/Assessments/Creation/AssessmentCreatorPage.tsx
-```
-
-The HUD rows hook has already been successfully removed.
-
-Remaining hooks should be grouped by responsibility before migration.
-
-Do not assume one old hook must become one new hook.
-
----
-
-# 50. Legacy Builder Logic — ACTIVE
-
-Historical:
-
-```text
-app/create-assessment/builder/builder-logic/
-```
-
-contains mixed responsibilities.
-
-Some modules are now adapters.
-
-Some remain genuine active implementations.
-
-This folder must eventually disappear as an architectural owner.
-
-Migration must occur by actual responsibility.
-
----
-
-# 51. Assessment Settings — MAJOR NEXT SEAM
-
-The historical settings implementation remains one of the largest unresolved areas.
-
-It mixes responsibilities historically associated with:
-
-```text
-global appearance
-Assessment document settings
-workspace controls
-```
-
-The V2 architecture already defines their owners:
-
-```text
-global
-→ src/UI/Application/SettingsDrawer/
-
-Assessment
-→ src/Assessments/Creation/AssessmentSettings/
-
-workspace
-→ src/Assessments/Creation/PaperWorkspace/
-```
-
-Do not move the historical giant SettingsPanel unchanged.
-
-This is likely one of the next substantial Assessment Creation migrations.
-
----
-
-# 52. TypeScript Verification Pattern
-
-The routine bounded verification command is:
+After deleting the old implementation:
 
 ```bash
 npx tsc --noEmit
 ```
 
-Silent output means pass.
+passed.
 
-This has been used repeatedly throughout the current migration.
+Then:
+
+```bash
+npm run build
+```
+
+passed.
+
+Production routes successfully generated included:
+
+```text
+/
+/compile-assessment
+/create-assessment
+/create-assessment/builder
+/dev/generator-tester
+/my-assessments
+/my-classes
+/my-classes/[classId]
+```
+
+A browser smoke test also passed.
+
+Verified behaviour included:
+
+```text
+Assessment Creator loads
+existing questions render
+draft questions render
+Answers view renders
+P1/P2 switching works
+question generation works
+question assignment works
+editing works
+remove works
+Compile navigation works
+Compilation loads
+Compilation renders questions
+Compilation paper switching works
+Compilation page-size switching works
+```
+
+This is the strongest proof that the historical Builder implementation was genuinely dead.
 
 ---
 
-# 53. Next.js Generated-Type Issue
+# 34. Builder Reference Audit
 
-Moving routes can leave stale generated validators beneath:
+After deletion:
+
+```bash
+git ls-files app/create-assessment/builder
+```
+
+returned only:
+
+```text
+app/create-assessment/builder/page.tsx
+```
+
+A broad source-path search for:
+
+```text
+app/create-assessment/builder
+```
+
+outside that route returned no implementation references.
+
+Public route strings such as:
+
+```text
+/create-assessment/builder
+```
+
+remain legitimate.
+
+Do not confuse route-string usage with historical source dependency.
+
+---
+
+# 35. Important Dead-Code Lesson
+
+A previous migration briefly deleted an apparently obsolete document component after too narrow a search.
+
+TypeScript exposed a surviving Compilation consumer.
+
+The file was restored.
+
+The permanent rule is:
+
+> A narrow search is not proof of deadness.
+
+Before deletion, search broadly for:
+
+```text
+path
+filename
+symbol
+export
+component
+hook
+adapter
+dynamic import
+route consumer
+persistence use
+```
+
+across relevant repository roots.
+
+---
+
+# 36. Current Major Remaining Legacy Seams
+
+The Builder is no longer one of the remaining seams.
+
+Major unfinished areas now include:
+
+```text
+app/paper-layout/
+
+course-data/
+
+shared-types/
+
+remaining math-helpers/
+
+Classes ownership
+
+legacy application pages outside Assessment Creation
+
+developer generator ownership
+
+remaining persistence consolidation
+
+transitional document dependencies
+
+routing/source-root consolidation
+```
+
+These must be migrated by responsibility.
+
+Do not move entire legacy folders beneath `src` merely to make the repository look tidy.
+
+---
+
+# 37. `app/paper-layout/` — NEXT STRONG CANDIDATE
+
+Current V2 code still consumes historical page-layout behaviour.
+
+Known concerns include:
+
+```text
+page sizing
+question spacing
+reflow / pagination
+Compilation layout behaviour
+document mechanics
+```
+
+The next bounded audit should establish:
+
+```text
+which behaviour is generic document mechanics
+which belongs to Assessment
+which belongs to Compilation
+which belongs to Course
+which is dead
+```
+
+Likely current consumers include Assessment Creation question spacing and Compilation.
+
+Do not move the folder wholesale.
+
+---
+
+# 38. `course-data/` — LEGACY ACTIVE
+
+Historical Course configuration/data remains active.
+
+Target ownership is beneath:
+
+```text
+src/Courses/
+```
+
+Important future Course concepts include:
+
+```text
+CourseDefinition
+CourseRegistry
+SkillsTree
+paper definitions
+question-generation knowledge
+answer-generation knowledge
+source question catalogues
+source marking-scheme catalogues
+```
+
+Create only real owners when responsibilities are migrated.
+
+Do not create speculative empty architecture.
+
+---
+
+# 39. `shared-types/` — LEGACY ACTIVE
+
+Historical shared type buckets remain widely consumed.
+
+Do not replace:
+
+```text
+shared-types/
+```
+
+with:
+
+```text
+src/SharedTypes/
+```
+
+as a cosmetic move.
+
+Types should migrate to the domain that owns the concept.
+
+Because type dependencies are broad, migration requires deliberate consumer mapping.
+
+---
+
+# 40. `math-helpers/` — LEGACY WHERE REMAINING
+
+`math-helpers/` is not an accepted long-term V2 owner.
+
+Remaining contents must be assigned according to actual responsibility:
+
+```text
+Course
+Assessment
+Documents
+other genuine domain
+```
+
+Do not create a new generic helper bucket under `src`.
+
+---
+
+# 41. Classes — NOT YET FULLY MIGRATED
+
+The target domain:
+
+```text
+src/Classes/
+```
+
+should be created only when real Class implementation is migrated.
+
+Current legacy Class pages remain active.
+
+Do not create empty scaffolding merely to complete the visual tree.
+
+---
+
+# 42. Route Tree
+
+Root:
+
+```text
+app/
+```
+
+remains the active Next.js route tree.
+
+Thin route wrappers are valid framework infrastructure.
+
+Architecture V2 completion does not mean deleting every file beneath `app/`.
+
+The important distinction is:
+
+```text
+app/
+→ routing
+
+src/
+→ substantial application implementation
+```
+
+A future `src/app` routing migration may be considered separately if useful.
+
+Do not combine it with unrelated domain migrations.
+
+---
+
+# 43. TypeScript Alias
+
+Current alias:
+
+```json
+"@/*": ["./*"]
+```
+
+remains transitional because both root legacy source and `src` are still consumed.
+
+Do not change the alias until remaining root-level dependencies have been reduced sufficiently.
+
+---
+
+# 44. Next.js Generated Files
+
+Never manually edit:
 
 ```text
 .next/
 ```
 
-Known recovery procedure:
+When route movement produces stale diagnostics, use:
 
 ```bash
 npx next typegen
 npx tsc --noEmit
 ```
 
-If needed, regenerate `.next`.
+If necessary, regenerate `.next`.
 
-Never manually edit `.next` source.
-
-If terminal TypeScript passes while VS Code still reports old errors:
-
-```text
-Developer: Reload Window
-```
-
-has successfully cleared stale editor diagnostics.
+Terminal TypeScript is more authoritative than stale VS Code diagnostics.
 
 ---
 
-# 54. Browser Verification Pattern
+# 45. Client Boundary Rule
 
-For meaningful visual or interaction migrations, TypeScript is followed by targeted browser verification.
+Do not add:
 
-Relevant Assessment Creation checks include:
-
-```text
-route opens
-P1/P2
-questions
-editing
-preview modes
-zoom/navigation
-HUD
-save state
-Compile
+```ts
+"use client";
 ```
 
-Document-layer changes additionally require visual paper inspection.
+automatically to internal hooks or modules.
+
+Only genuine client entry boundaries should carry it when required.
+
+Adding it unnecessarily can create Next.js serializability warnings such as:
+
+```text
+ts(71007)
+```
+
+Internal hooks consumed beneath an existing client boundary should normally remain ordinary modules.
 
 ---
 
-# 55. Dead-Code Audit Rule Established Through Experience
+# 46. Persisted Compatibility Rule
 
-The migration produced a concrete lesson:
+Source naming cleanup and persisted-data migration are separate concerns.
 
-```text
-NARROW SEARCH
-≠
-PROOF OF DEADNESS
-```
-
-Before deleting a legacy implementation, search:
+Historical storage keys such as those containing:
 
 ```text
-filename
-exported symbol
-component name
-adapter name
-known alias
-route consumer
+assessment_builder
 ```
 
-across:
+must remain until a deliberate compatibility migration changes them.
 
-```text
-app
-src
-```
-
-as relevant.
-
-This rule prevented further accidental removals after the `DocumentPageFrame` incident.
+Do not rename persisted keys merely to remove historical terminology from source code.
 
 ---
 
-# 56. Current Protected Legacy Files / Features
+# 47. Naming Rule
 
-At this checkpoint, the following are known active and must not be deleted casually:
+Architecture V2 prefers meaningful PascalCase source naming.
 
-```text
-app/compile-assessment/page.tsx
+Historical names may remain temporarily where renaming would add risk without changing ownership.
 
-src/UI/Documents/Components/DocumentPageFrame.tsx
+Naming cleanup should be performed separately from responsibility migration when appropriate.
 
-app/create-assessment/builder/components/assessment-preview/PaperQuestionLocked.tsx
-
-remaining Builder behaviour imported by AssessmentCreatorPage
-
-remaining Builder logic imported by V2 source
-
-active course-data
-
-active shared-types
-
-active persistence contracts
-```
+Do not perform unrelated renames during destructive deletion phases.
 
 ---
 
-# 57. Current Removed / Superseded Implementations
+# 48. Current Verification State
 
-Important obsolete implementations already removed include:
+At the 26 August 2026 Builder-removal checkpoint:
 
 ```text
-root ui/
+Builder implementation consumer audit
+→ PASS
 
-legacy Builder preview engine
+Builder implementation deletion
+→ COMPLETE
 
-legacy Builder TopBar ownership
+TypeScript
+→ PASS
 
-legacy Builder BottomHud
+Production build
+→ PASS
 
-legacy AssessmentProgressHud
+Assessment Creator browser smoke
+→ PASS
 
-legacy UseBuilderProgressHudRows
+Compilation browser smoke
+→ PASS
 
-dead old question-preview components where no other consumer remained
+RepositoryMap whitespace check
+→ PASS
 
-duplicate National5Maths document owners
+RepositoryMap stale Builder/Compilation language audit
+→ PASS
 ```
 
-Do not recreate these merely because older commits or conversations reference them.
+The application is currently working after the Builder removal.
 
 ---
 
-# 58. Current Canonical V2 Areas
+# 49. Current Canonical Navigation
 
-At this checkpoint, strong canonical ownership exists for:
-
-```text
-src/UI/Application/
-
-src/UI/Documents/
-
-src/UI/Documents/Templates/NationalQualifications/
-
-src/Courses/National5Maths/Documents/
-
-src/Courses/National5Maths/QuestionGeneration/
-
-src/Assessments/Creation/Setup/
-
-src/Assessments/Creation/TopBar/
-
-src/Assessments/Creation/SkillsPanel/
-
-src/Assessments/Creation/Questions/
-
-src/Assessments/Creation/PaperWorkspace/
-
-src/Assessments/Creation/HUDBar/
-
-src/Assessments/Creation/Analysis/
-
-src/Assessments/Creation/Persistence/
-```
-
-Canonical ownership does not necessarily mean the whole surrounding repository has zero legacy dependencies.
-
----
-
-# 59. Most Important Current Milestone
-
-The current milestone is:
-
-> **Assessment Creation's PaperWorkspace is fully detached from the legacy Builder tree.**
-
-Specifically:
+Use these as starting points:
 
 ```text
-src/Assessments/Creation/PaperWorkspace/
-```
+Assessment Creator
+→ src/Assessments/Creation/AssessmentCreatorPage.tsx
 
-has no direct imports from:
+Assessment Setup
+→ src/Assessments/Creation/Setup/
 
-```text
-app/create-assessment/builder/
-math-helpers/
-```
-
-and its migrated behaviour has passed browser testing.
-
-This should be treated as a stable boundary going forward.
-
----
-
-# 60. Current Recommended Next Investigation
-
-The next broad audit should begin at:
-
-```text
-src/Assessments/Creation/AssessmentCreatorPage.tsx
-```
-
-Search remaining legacy dependencies such as:
-
-```text
-@/app/create-assessment/builder/
-@/math-helpers/
-@/course-data/
-@/shared-types/
-```
-
-Then group them by responsibility.
-
-Do **not** migrate every import in one pass.
-
-Likely clusters include:
-
-```text
 Assessment Settings
-paper behaviour
-remaining Builder behaviour hooks
-quality-analysis implementation
-Course configuration
-persistence compatibility
+→ src/Assessments/Creation/AssessmentSettings/
+
+Assessment TopBar
+→ src/Assessments/Creation/TopBar/
+
+Assessment SkillsPanel
+→ src/Assessments/Creation/SkillsPanel/
+
+Assessment Papers
+→ src/Assessments/Creation/Papers/
+
+Assessment PaperWorkspace
+→ src/Assessments/Creation/PaperWorkspace/
+
+Assessment question workflow
+→ src/Assessments/Creation/Questions/
+
+shared Assessment question preview
+→ src/Assessments/Questions/Preview/
+
+Assessment Analysis
+→ src/Assessments/Creation/Analysis/
+
+Assessment Persistence
+→ src/Assessments/Creation/Persistence/
+
+Assessment Compilation
+→ src/Assessments/Compilation/
+
+shared Course selection
+→ src/Courses/Selection/
+
+Course paper rules
+→ src/Courses/Papers/
+
+National 5 Maths question generation
+→ src/Courses/National5Maths/QuestionGeneration/
+
+National 5 Maths documents
+→ src/Courses/National5Maths/Documents/
+
+application theme
+→ src/UI/Application/Theme/
+
+application HeaderBar
+→ src/UI/Application/HeaderBar/
+
+application settings
+→ src/UI/Application/SettingsDrawer/
+
+generic document components
+→ src/UI/Documents/Components/
+
+document layout
+→ src/UI/Documents/Layout/
+
+National Qualifications templates
+→ src/UI/Documents/Templates/NationalQualifications/
 ```
 
-Choose the next bounded owner after seeing the dependency map.
-
 ---
 
-# 61. Recommended Immediate Next Migration Candidate
-
-Based on the current architecture, one of the strongest next candidates is:
-
-```text
-Assessment Settings
-```
-
-because:
-
-- it remains a large legacy seam;
-- V2 ownership is already defined;
-- global Settings architecture already exists;
-- PaperWorkspace is now clean;
-- the giant settings implementation still mixes unrelated responsibilities.
-
-However, confirm remaining `AssessmentCreatorPage.tsx` legacy imports first before committing to the exact order.
-
----
-
-# 62. Compilation Is Deferred Deliberately
-
-Do not migrate Compilation merely because its legacy dependencies become visible during Creation cleanup.
-
-Compilation deserves its own bounded phase.
-
-Before migration, audit:
-
-```text
-route implementation
-storage handoff
-paper selection
-page-size behaviour
-pagination
-question rendering
-document frame
-Course document integration
-```
-
-Only then establish the V2 Compilation structure.
-
----
-
-# 63. Classes Are Deferred Deliberately
-
-The Classes architecture is settled but has not yet become the most urgent dependency boundary.
-
-Do not create:
-
-```text
-src/Classes/
-```
-
-as empty scaffolding.
-
-Create it when migrating real Class implementation.
-
----
-
-# 64. `src/app` Migration Is Deferred Deliberately
-
-Root `app/` remains the active Next.js route tree.
-
-Moving routes to:
-
-```text
-src/app/
-```
-
-should happen as a dedicated routing migration when enough feature implementation already lives beneath `src`.
-
-Do not combine it with unrelated domain work.
-
----
-
-# 65. Alias Migration Is Deferred Deliberately
-
-Current:
-
-```json
-"@/*": ["./*"]
-```
-
-still supports both legacy and V2 source.
-
-Changing the alias to treat `src` as root should wait until legacy imports are sufficiently reduced.
-
-Premature alias migration would create broad unrelated breakage.
-
----
-
-# 66. Current Risks
-
-The principal architectural risks remaining are:
-
-### Legacy orchestration coupling
-
-`AssessmentCreatorPage.tsx` still depends on historical Builder modules.
-
-### Settings coupling
-
-The historical settings implementation still mixes ownership categories.
-
-### Course coupling
-
-Generic Assessment behaviour still relies on legacy Course configuration/data structures.
-
-### Type coupling
-
-`shared-types` remains widely consumed.
-
-### Compilation coupling
-
-The live Compilation route still consumes historical preview/paper implementations.
-
-### Persistence compatibility
-
-Storage keys/shapes must survive source migration.
-
-### Route migration
-
-Root `app/` remains active and cannot be mechanically relocated.
-
----
-
-# 67. Things Future Sessions Must Not Assume
+# 50. Things Future Sessions Must Not Assume
 
 Do not assume:
 
 ```text
-everything beneath src is fully legacy-free
+everything beneath src is fully migration-complete
 
-everything beneath app is dead
+everything beneath app is obsolete
 
-PaperQuestionLocked is dead
+route names containing "builder" imply Builder architecture
 
-DocumentPageFrame is dead
+historical persisted "builder" strings should be renamed
 
-Compilation is unused
+all app/paper-layout code belongs together
 
-CourseRegistry already exists
+all course-data belongs in one future file
 
-src/Classes already exists
+shared-types should become src/SharedTypes
 
-src/app already exists
+math-helpers should become src/Helpers
 
-Higher Maths architecture should be created now
+Compilation belongs inside Creation
 
-all Builder modules should be renamed one-for-one
+every hook requires "use client"
 
-TypeScript passing proves document visuals are preserved
+TypeScript passing proves visual preservation
+
+GitHub always reflects the latest local state
 ```
 
 Inspect first.
 
 ---
 
-# 68. Things Future Sessions May Treat as Established
+# 51. Things Future Sessions May Treat as Established
 
 Future sessions may rely on:
 
 ```text
 Architecture V2 ownership philosophy
 
-PascalCase architectural naming
+preservation as acceptance criterion zero
 
-thin page.tsx rule
+thin page.tsx wrappers
 
 HeaderBar / TopBar / HUDBar / PaperWorkspace terminology
 
-Application vs Documents UI split
+Application UI vs Documents UI separation
 
 Course ownership of educational knowledge
 
-Assessment ownership of generic creation workflow
-
-write-new migration strategy
-
-broad search before deletion
-
-PaperWorkspace V2-clean boundary
-
-National Qualifications document template layer
-
-National5Maths Course Documents layer
+Assessment ownership of generic workflow
 
 Compilation as a separate Assessment responsibility
+
+shared Course selection ownership
+
+shared Course paper-rule ownership
+
+Assessment-wide locked-question preview ownership
+
+historical Builder implementation removed
+
+write-new before delete-old strategy
+
+broad consumer search before deletion
+
+persisted key compatibility rule
+
+no speculative empty domains
+
+no generic Helpers/Shared/Common buckets without justification
 ```
 
 unless explicitly reconsidered.
 
 ---
 
-# 69. Documentation Checkpoint — 26 August 2026
+# 52. Immediate Next Task
 
-This ledger regeneration records the end of the current major PaperWorkspace migration phase.
-
-At this checkpoint:
+The strongest next migration candidate is:
 
 ```text
-TypeScript
-→ PASS
-
-PaperWorkspace legacy-import audit
-→ PASS
-
-legacy HUD reference audit
-→ PASS after deletion
-
-Assessment Creator browser smoke test
-→ PASS
-
-Compile navigation
-→ PASS
+app/paper-layout/
 ```
 
-The project is in a working state.
+Begin with an inventory and dependency audit.
 
-Documentation regeneration is being performed before beginning the next major migration boundary.
+Recommended first command:
+
+```bash
+find app/paper-layout -type f | sort
+```
+
+Then map all consumers across:
+
+```text
+app
+src
+```
+
+before deciding owners or deleting anything.
+
+Likely ownership destinations may include:
+
+```text
+src/UI/Documents/
+src/Assessments/
+src/Assessments/Compilation/
+src/Courses/
+```
+
+but these must be determined from actual responsibilities.
+
+Do not predetermine a one-folder-to-one-folder move.
 
 ---
 
-# 70. Commit Status for This Checkpoint
-
-The documentation regeneration currently represents local working-tree changes until committed/pushed.
-
-Do not invent a commit SHA before the documentation checkpoint has actually been committed.
-
-After the next meaningful commit, Git history remains the authoritative exact record of the source snapshot.
-
----
-
-# 71. Suggested New-Session Handoff
+# 53. Current Handoff Summary
 
 A fresh development session should be able to begin with:
 
 ```text
 Architecture V2 is active on refactor/architecture-V2.
 
-The current major completed milestone is the Assessment Creation
-PaperWorkspace migration.
+Assessment Creation has been fully detached from the historical Builder
+implementation.
 
-src/Assessments/Creation/PaperWorkspace/ has been verified to contain
-no direct legacy Builder or math-helpers imports.
+The old Builder implementation beneath app/create-assessment/builder/
+has been deleted. Only page.tsx remains as the live Next.js route wrapper.
 
-TopBar, question Preview and HUDBar have canonical V2 owners.
+Assessment Creation lives beneath src/Assessments/Creation/.
 
-The live Compilation route remains legacy and must not be deleted.
+Compilation now lives beneath src/Assessments/Compilation/ and its
+app/compile-assessment/page.tsx route is a thin wrapper.
 
-The next task is to audit remaining legacy imports in
-src/Assessments/Creation/AssessmentCreatorPage.tsx and choose the next
-coherent migration cluster, likely Assessment Settings or another
-remaining Builder behaviour group.
+Creation and Compilation share locked-question rendering through
+src/Assessments/Questions/Preview/.
 
-Preserve behaviour. Write new before deleting old. Search broadly before
-deletion.
+Shared Course selection lives beneath src/Courses/Selection/.
+
+Course paper rules live beneath src/Courses/Papers/.
+
+After the Builder deletion, TypeScript, the production build and browser
+smoke testing all passed.
+
+The next strong migration target is app/paper-layout/.
+
+Preserve behaviour. Audit broadly. Establish the real owner. Write new.
+Switch consumers. Verify. Delete old only after proving deadness.
 ```
-
-That is sufficient to resume without reconstructing this conversation.
 
 ---
 
-# 72. Refactor Completion Criteria
+# 54. Refactor Completion Criteria
 
 Architecture V2 should not be considered complete until, at minimum:
 
 ```text
-src is the authoritative application source tree
+src is the authoritative application implementation tree
 
 major route files are thin wrappers
 
@@ -1844,7 +1595,7 @@ Assessment Creation is Course-independent
 
 Classes have explicit ownership
 
-settings are fully separated by responsibility
+settings are separated by responsibility
 
 application visual truth has one authority
 
@@ -1857,41 +1608,10 @@ persistence ownership is clear
 legacy root application source no longer fundamentally supports V2
 ```
 
+Several of these criteria are now complete.
+
+The principal remaining work is concentrated in the other historical root-level source areas.
+
 Completion does not require every file to be tiny or every local value to become an abstraction.
 
 ---
-
-# 73. Current Next Action
-
-After completing this documentation sanity review:
-
-1. Review the documentation diff for accidental omissions or contradictions.
-
-2. Commit the documentation checkpoint.
-
-3. Audit direct legacy imports in:
-   src/Assessments/Creation/AssessmentCreatorPage.tsx
-
-4. Group the results by architectural responsibility.
-
-5. Select one bounded migration.
-
-6. Continue Architecture V2.
-
----
-
-# 74. Final Handoff Rule
-
-Do not leave a major architectural milestone only in conversation history.
-
-At each meaningful checkpoint, this ledger should make it possible for a new session to answer:
-
-```text
-WHAT IS CANONICAL?
-WHAT IS STILL LEGACY?
-WHAT WAS VERIFIED?
-WHAT MUST NOT BE DELETED?
-WHAT SHOULD HAPPEN NEXT?
-```
-
-If it can answer those five questions accurately, it is doing its job.

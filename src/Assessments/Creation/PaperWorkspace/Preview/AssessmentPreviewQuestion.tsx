@@ -2,7 +2,7 @@ import QuestionMeasureBox from "../../Questions/Preview/QuestionMeasureBox";
 
 import QuestionDraftPreview from "../../Questions/Preview/QuestionDraftPreview";
 
-import QuestionLockedPreview from "../../Questions/Preview/QuestionLockedPreview";
+import QuestionLockedPreview from "@/src/Assessments/Questions/Preview/QuestionLockedPreview";
 
 import WorkedAnswerPreview from "../../Questions/Preview/WorkedAnswerPreview";
 

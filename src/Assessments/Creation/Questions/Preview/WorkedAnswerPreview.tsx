@@ -1,4 +1,3 @@
-"use client";
 
 import type {
   Question,
@@ -14,7 +13,7 @@ import {
   QUESTION_COLUMN_GAP_PX,
   QUESTION_MARKS_COLUMN_PX,
   QUESTION_NUMBER_COLUMN_PX,
-} from "./QuestionPreviewLayout";
+} from "@/src/Assessments/Questions/Preview/QuestionPreviewLayout";
 
 function splitAtFirstEquals(
   value: string
