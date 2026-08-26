@@ -2,11 +2,14 @@
 
 import Link from "next/link";
 import { use, useEffect, useMemo, useState } from "react";
+
 import { getAllCoverageSkills } from "./Coverage/ClassCoverageHelpers";
 import { useClasses } from "./State/useClasses";
 import CoverageTree from "./Coverage/ClassCoverageTree";
 import CoverageDetails from "./Coverage/ClassCoverageDetails";
+
 import { getTheme } from "@/app/UI/Application/Theme/AppTheme";
+
 import {
   getSystemPrefersDark,
   isThemeModePreference,
@@ -49,94 +52,174 @@ export default function ClassPage({ params }: Props) {
     function readResolvedMode(): ResolvedThemeMode {
       if (typeof window === "undefined") return "dark";
 
-      const stored = window.localStorage.getItem(THEME_MODE_STORAGE_KEY);
+      const stored = window.localStorage.getItem(
+        THEME_MODE_STORAGE_KEY
+      );
 
-      const preference: ThemeModePreference = isThemeModePreference(stored)
-        ? stored
-        : "system";
+      const preference: ThemeModePreference =
+        isThemeModePreference(stored)
+          ? stored
+          : "system";
 
-      return resolveThemeMode(preference, getSystemPrefersDark());
+      return resolveThemeMode(
+        preference,
+        getSystemPrefersDark()
+      );
     }
 
-    setResolvedMode(readResolvedMode());
+    setResolvedMode(
+      readResolvedMode()
+    );
 
     if (typeof window === "undefined") return;
 
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const mediaQuery =
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      );
 
     function handleChange() {
-      setResolvedMode(readResolvedMode());
+      setResolvedMode(
+        readResolvedMode()
+      );
     }
 
-    window.addEventListener("storage", handleChange);
-    mediaQuery.addEventListener("change", handleChange);
+    window.addEventListener(
+      "storage",
+      handleChange
+    );
+
+    mediaQuery.addEventListener(
+      "change",
+      handleChange
+    );
 
     return () => {
-      window.removeEventListener("storage", handleChange);
-      mediaQuery.removeEventListener("change", handleChange);
+      window.removeEventListener(
+        "storage",
+        handleChange
+      );
+
+      mediaQuery.removeEventListener(
+        "change",
+        handleChange
+      );
     };
   }, []);
 
   const theme = useMemo(() => {
     const baseTheme = getTheme({
-      mode: resolvedMode as "light" | "dark" | "soft-grey" | "custom",
+      mode:
+        resolvedMode as
+          | "light"
+          | "dark"
+          | "soft-grey"
+          | "custom",
     });
 
     return {
       ...baseTheme,
-
-      // Compatibility aliases for older My Classes components.
-      bgPrimary: baseTheme.bgPage,
-      cardBg: baseTheme.bgSurface,
-      borderSubtle: baseTheme.borderStandard,
-      divider: baseTheme.borderStandard,
-      success: baseTheme.accentPrimary,
-      scrollbarThumb: baseTheme.borderStandard,
+      success:
+        baseTheme.accentPrimary,
     };
   }, [resolvedMode]);
 
-  const { hasLoaded, getClassById, updateCompletedSkills } = useClasses();
+  const {
+    hasLoaded,
+    getClassById,
+    updateCompletedSkills,
+  } = useClasses();
 
-  const schoolClass = getClassById(classId);
-  const [selectedSkillId, setSelectedSkillId] = useState<string | null>(null);
+  const schoolClass =
+    getClassById(classId);
 
-  const totalSkills = useMemo(
-    () =>
-      schoolClass
-        ? getAllCoverageSkills(
-            schoolClass.courseId
-          ).length
-        : 0,
-    [schoolClass?.courseId]
-  );
-  const completedCount = schoolClass?.completedSkillIds.length ?? 0;
+  const [
+    selectedSkillId,
+    setSelectedSkillId,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const totalSkills =
+    useMemo(
+      () =>
+        schoolClass
+          ? getAllCoverageSkills(
+              schoolClass.courseId
+            ).length
+          : 0,
+      [
+        schoolClass?.courseId,
+      ]
+    );
+
+  const completedCount =
+    schoolClass
+      ?.completedSkillIds
+      .length ?? 0;
+
   const progressPct =
-    totalSkills > 0 ? (completedCount / totalSkills) * 100 : 0;
+    totalSkills > 0
+      ? (
+          completedCount /
+          totalSkills
+        ) * 100
+      : 0;
 
-  function handleToggleSkill(skillId: string) {
+  function handleToggleSkill(
+    skillId: string
+  ) {
     if (!schoolClass) return;
 
-    const isAlreadyCompleted = schoolClass.completedSkillIds.includes(skillId);
+    const isAlreadyCompleted =
+      schoolClass
+        .completedSkillIds
+        .includes(skillId);
 
-    const nextCompletedSkillIds = isAlreadyCompleted
-      ? schoolClass.completedSkillIds.filter((id) => id !== skillId)
-      : [...schoolClass.completedSkillIds, skillId];
+    const nextCompletedSkillIds =
+      isAlreadyCompleted
+        ? schoolClass
+            .completedSkillIds
+            .filter(
+              (id) =>
+                id !== skillId
+            )
+        : [
+            ...schoolClass
+              .completedSkillIds,
+            skillId,
+          ];
 
     updateCompletedSkills({
-      classId: schoolClass.id,
-      completedSkillIds: nextCompletedSkillIds,
+      classId:
+        schoolClass.id,
+
+      completedSkillIds:
+        nextCompletedSkillIds,
     });
   }
 
   return (
     <main
       style={{
-        minHeight: "100%",
-        background: theme.bgPrimary,
-        color: theme.textPrimary,
-        padding: 24,
-        boxSizing: "border-box",
-        fontFamily: "var(--app-ui-font-family)",
+        minHeight:
+          "100%",
+
+        background:
+          theme.bgPrimary,
+
+        color:
+          theme.textPrimary,
+
+        padding:
+          24,
+
+        boxSizing:
+          "border-box",
+
+        fontFamily:
+          "var(--app-ui-font-family)",
       }}
     >
       <style jsx global>{`
@@ -170,23 +253,43 @@ export default function ClassPage({ params }: Props) {
 
       <div
         style={{
-          maxWidth: 1240,
-          margin: "0 auto",
-          display: "grid",
-          gap: 18,
+          maxWidth:
+            1240,
+
+          margin:
+            "0 auto",
+
+          display:
+            "grid",
+
+          gap:
+            18,
         }}
       >
         <div>
           <Link
             href="/my-classes"
             style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 8,
-              textDecoration: "none",
-              color: theme.textSecondary,
-              fontSize: 14,
-              fontWeight: 600,
+              display:
+                "inline-flex",
+
+              alignItems:
+                "center",
+
+              gap:
+                8,
+
+              textDecoration:
+                "none",
+
+              color:
+                theme.textSecondary,
+
+              fontSize:
+                14,
+
+              fontWeight:
+                600,
             }}
           >
             ← Back to My Classes
@@ -196,13 +299,26 @@ export default function ClassPage({ params }: Props) {
         {!hasLoaded ? (
           <div
             style={{
-              border: `1px solid ${theme.borderSubtle}`,
-              borderRadius: 22,
-              padding: 22,
-              background: theme.cardBg,
-              color: theme.textSecondary,
-              fontSize: 15,
-              lineHeight: 1.45,
+              border:
+                `1px solid ${theme.borderSubtle}`,
+
+              borderRadius:
+                22,
+
+              padding:
+                22,
+
+              background:
+                theme.cardBg,
+
+              color:
+                theme.textSecondary,
+
+              fontSize:
+                15,
+
+              lineHeight:
+                1.45,
             }}
           >
             Loading class...
@@ -210,20 +326,38 @@ export default function ClassPage({ params }: Props) {
         ) : !schoolClass ? (
           <div
             style={{
-              border: `1px solid ${theme.borderSubtle}`,
-              borderRadius: 22,
-              padding: 22,
-              background: theme.cardBg,
-              display: "grid",
-              gap: 10,
+              border:
+                `1px solid ${theme.borderSubtle}`,
+
+              borderRadius:
+                22,
+
+              padding:
+                22,
+
+              background:
+                theme.cardBg,
+
+              display:
+                "grid",
+
+              gap:
+                10,
             }}
           >
             <div
               style={{
-                fontSize: 28,
-                fontWeight: 700,
-                lineHeight: 1.1,
-                color: theme.textPrimary,
+                fontSize:
+                  28,
+
+                fontWeight:
+                  700,
+
+                lineHeight:
+                  1.1,
+
+                color:
+                  theme.textPrimary,
               }}
             >
               Class not found
@@ -231,9 +365,14 @@ export default function ClassPage({ params }: Props) {
 
             <div
               style={{
-                fontSize: 15,
-                lineHeight: 1.45,
-                color: theme.textSecondary,
+                fontSize:
+                  15,
+
+                lineHeight:
+                  1.45,
+
+                color:
+                  theme.textSecondary,
               }}
             >
               This class could not be found. It may have been removed or not
@@ -244,36 +383,68 @@ export default function ClassPage({ params }: Props) {
           <>
             <section
               style={{
-                border: `1px solid ${theme.borderSubtle}`,
-                borderRadius: 22,
-                padding: "18px 24px",
-                background: theme.cardBg,
-                minHeight: 126,
+                border:
+                  `1px solid ${theme.borderSubtle}`,
+
+                borderRadius:
+                  22,
+
+                padding:
+                  "18px 24px",
+
+                background:
+                  theme.cardBg,
+
+                minHeight:
+                  126,
               }}
             >
               <div
                 style={{
-                  display: "flex",
-                  alignItems: "stretch",
-                  justifyContent: "space-between",
-                  gap: 18,
-                  flexWrap: "wrap",
+                  display:
+                    "flex",
+
+                  alignItems:
+                    "stretch",
+
+                  justifyContent:
+                    "space-between",
+
+                  gap:
+                    18,
+
+                  flexWrap:
+                    "wrap",
                 }}
               >
                 <div
                   style={{
-                    display: "grid",
-                    alignContent: "start",
-                    gap: 12,
-                    minHeight: 88,
+                    display:
+                      "grid",
+
+                    alignContent:
+                      "start",
+
+                    gap:
+                      12,
+
+                    minHeight:
+                      88,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 40,
-                      fontWeight: 700,
-                      lineHeight: 1,
-                      color: theme.textPrimary,
+                      fontSize:
+                        40,
+
+                      fontWeight:
+                        700,
+
+                      lineHeight:
+                        1,
+
+                      color:
+                        theme.textPrimary,
                     }}
                   >
                     {schoolClass.name}
@@ -281,9 +452,14 @@ export default function ClassPage({ params }: Props) {
 
                   <div
                     style={{
-                      fontSize: 15,
-                      lineHeight: 1.3,
-                      color: theme.textSecondary,
+                      fontSize:
+                        15,
+
+                      lineHeight:
+                        1.3,
+
+                      color:
+                        theme.textSecondary,
                     }}
                   >
                     {schoolClass.course}
@@ -291,84 +467,168 @@ export default function ClassPage({ params }: Props) {
 
                   <div
                     style={{
-                      fontSize: 14,
-                      lineHeight: 1.35,
-                      color: theme.textMuted,
+                      fontSize:
+                        14,
+
+                      lineHeight:
+                        1.35,
+
+                      color:
+                        theme.textMuted,
                     }}
                   >
-                    {[schoolClass.level, schoolClass.teacher]
+                    {[
+                      schoolClass.level,
+                      schoolClass.teacher,
+                    ]
                       .filter(Boolean)
-                      .join(" • ") || "No extra details yet"}
+                      .join(" • ") ||
+                      "No extra details yet"}
                   </div>
                 </div>
 
                 <div
                   style={{
-                    minWidth: 300,
-                    display: "grid",
-                    justifyItems: "end",
-                    alignContent: "center",
-                    gap: 10,
+                    minWidth:
+                      300,
+
+                    display:
+                      "grid",
+
+                    justifyItems:
+                      "end",
+
+                    alignContent:
+                      "center",
+
+                    gap:
+                      10,
                   }}
                 >
                   <div
                     style={{
-                      position: "relative",
-                      width: 300,
-                      maxWidth: "100%",
-                      height: 42,
-                      borderRadius: 999,
-                      overflow: "hidden",
-                      border: `1px solid ${theme.borderSubtle}`,
-                      background: theme.controlBg,
-                      boxShadow: `inset 0 0 0 1px ${theme.borderSubtle}`,
+                      position:
+                        "relative",
+
+                      width:
+                        300,
+
+                      maxWidth:
+                        "100%",
+
+                      height:
+                        42,
+
+                      borderRadius:
+                        999,
+
+                      overflow:
+                        "hidden",
+
+                      border:
+                        `1px solid ${theme.borderSubtle}`,
+
+                      background:
+                        theme.controlBg,
+
+                      boxShadow:
+                        `inset 0 0 0 1px ${theme.borderSubtle}`,
                     }}
                   >
                     <div
                       style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        width: `${progressPct}%`,
-                        borderRadius: 999,
-                        background: `${theme.success}33`,
-                        boxShadow: `0 0 18px ${theme.success}22`,
-                        transition: "width 220ms ease",
+                        position:
+                          "absolute",
+
+                        top:
+                          0,
+
+                        left:
+                          0,
+
+                        bottom:
+                          0,
+
+                        width:
+                          `${progressPct}%`,
+
+                        borderRadius:
+                          999,
+
+                        background:
+                          `${theme.success}33`,
+
+                        boxShadow:
+                          `0 0 18px ${theme.success}22`,
+
+                        transition:
+                          "width 220ms ease",
                       }}
                     />
 
                     <div
                       style={{
-                        position: "absolute",
-                        inset: 0,
-                        display: "grid",
-                        placeItems: "center",
-                        fontSize: 15,
-                        fontWeight: 700,
-                        lineHeight: 1.2,
-                        color: theme.textPrimary,
+                        position:
+                          "absolute",
+
+                        inset:
+                          0,
+
+                        display:
+                          "grid",
+
+                        placeItems:
+                          "center",
+
+                        fontSize:
+                          15,
+
+                        fontWeight:
+                          700,
+
+                        lineHeight:
+                          1.2,
+
+                        color:
+                          theme.textPrimary,
+
                         textShadow:
-                          resolvedMode === "dark"
+                          resolvedMode ===
+                          "dark"
                             ? "0 1px 0 rgba(0,0,0,0.22)"
                             : "none",
-                        whiteSpace: "nowrap",
-                        pointerEvents: "none",
+
+                        whiteSpace:
+                          "nowrap",
+
+                        pointerEvents:
+                          "none",
                       }}
                     >
-                      {completedCount} / {totalSkills} skills covered
+                      {completedCount} /{" "}
+                      {totalSkills} skills covered
                     </div>
                   </div>
 
                   <div
                     style={{
-                      fontSize: 12,
-                      lineHeight: 1.25,
-                      color: theme.textMuted,
-                      textAlign: "right",
+                      fontSize:
+                        12,
+
+                      lineHeight:
+                        1.25,
+
+                      color:
+                        theme.textMuted,
+
+                      textAlign:
+                        "right",
                     }}
                   >
-                    Last updated {formatLastUpdated(schoolClass.updatedAt)}
+                    Last updated{" "}
+                    {formatLastUpdated(
+                      schoolClass.updatedAt
+                    )}
                   </div>
                 </div>
               </div>
@@ -376,53 +636,100 @@ export default function ClassPage({ params }: Props) {
 
             <section
               style={{
-                display: "grid",
+                display:
+                  "grid",
+
                 gridTemplateColumns:
                   "minmax(0, 1fr) 1px minmax(380px, 0.78fr)",
-                gap: 0,
-                alignItems: "stretch",
+
+                gap:
+                  0,
+
+                alignItems:
+                  "stretch",
               }}
             >
               <CoverageTree
-                courseId={schoolClass.courseId}
-                selectedSkillId={selectedSkillId}
-                onSelectSkillId={setSelectedSkillId}
-                completedSkillIds={schoolClass.completedSkillIds}
-                onToggleSkillId={handleToggleSkill}
-                theme={theme}
+                courseId={
+                  schoolClass.courseId
+                }
+                selectedSkillId={
+                  selectedSkillId
+                }
+                onSelectSkillId={
+                  setSelectedSkillId
+                }
+                completedSkillIds={
+                  schoolClass.completedSkillIds
+                }
+                onToggleSkillId={
+                  handleToggleSkill
+                }
+                theme={
+                  theme
+                }
               />
 
               <div
                 style={{
-                  background: theme.divider,
-                  borderRadius: 999,
-                  margin: "6px 10px",
+                  background:
+                    theme.divider,
+
+                  borderRadius:
+                    999,
+
+                  margin:
+                    "6px 10px",
                 }}
               />
 
               <CoverageDetails
-                courseId={schoolClass.courseId}
-                selectedSkillId={selectedSkillId}
-                theme={theme}
+                courseId={
+                  schoolClass.courseId
+                }
+                selectedSkillId={
+                  selectedSkillId
+                }
+                theme={
+                  theme
+                }
               />
             </section>
 
             <section
               style={{
-                border: `1px solid ${theme.borderSubtle}`,
-                borderRadius: 22,
-                padding: 24,
-                background: theme.cardBg,
-                display: "grid",
-                gap: 10,
+                border:
+                  `1px solid ${theme.borderSubtle}`,
+
+                borderRadius:
+                  22,
+
+                padding:
+                  24,
+
+                background:
+                  theme.cardBg,
+
+                display:
+                  "grid",
+
+                gap:
+                  10,
               }}
             >
               <div
                 style={{
-                  fontSize: 20,
-                  fontWeight: 700,
-                  lineHeight: 1.15,
-                  color: theme.textPrimary,
+                  fontSize:
+                    20,
+
+                  fontWeight:
+                    700,
+
+                  lineHeight:
+                    1.15,
+
+                  color:
+                    theme.textPrimary,
                 }}
               >
                 Class Actions
@@ -430,9 +737,14 @@ export default function ClassPage({ params }: Props) {
 
               <div
                 style={{
-                  fontSize: 14,
-                  lineHeight: 1.45,
-                  color: theme.textMuted,
+                  fontSize:
+                    14,
+
+                  lineHeight:
+                    1.45,
+
+                  color:
+                    theme.textMuted,
                 }}
               >
                 Safer class actions like delete can live here later, rather than
