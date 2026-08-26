@@ -65,10 +65,6 @@ app/DeveloperTools/
 
 → runtime developer utilities
 
-Tools/
-
-→ repository tooling and historical migrations
-
 The architecture should express responsibility directly rather than requiring historical knowledge.
 
 3. Acceptance Criterion Zero: Preserve Behaviour
