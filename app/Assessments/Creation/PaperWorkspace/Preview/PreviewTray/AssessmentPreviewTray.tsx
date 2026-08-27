@@ -5,12 +5,24 @@ import {
 } from "react";
 
 import type {
+  Paper,
+} from "@/app/Assessments/AssessmentTypes";
+
+import type {
+  AssessmentPaperStringMap,
+} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+
+import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
 import type {
   AssessmentPreviewViewMode,
 } from "../../PreviewViewMode";
+
+import type {
+  PaperSittingOption,
+} from "./PaperSittingControls";
 
 import PreviewTrayTab, {
   PREVIEW_TRAY_TAB_WIDTH,
@@ -20,9 +32,11 @@ import SettingsTrayContent from "./SettingsTrayContent";
 
 import ViewTrayContent from "./ViewTrayContent";
 
+
 type PreviewTraySection =
   | "settings"
   | "view";
+
 
 type AssessmentPreviewTrayProps = {
   theme:
@@ -81,7 +95,45 @@ type AssessmentPreviewTrayProps = {
     next:
       boolean
   ) => void;
+
+
+  paperOptions:
+    PaperSittingOption[];
+
+  coverDateByPaper:
+    AssessmentPaperStringMap;
+
+  startTimeByPaper:
+    AssessmentPaperStringMap;
+
+  endTimeByPaper:
+    AssessmentPaperStringMap;
+
+  onCoverDateChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
+
+  onStartTimeChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
+
+  onEndTimeChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
 };
+
 
 const TRAY_PANEL_WIDTH =
   300;
@@ -98,22 +150,40 @@ const VIEW_TAB_HEIGHT =
 const TAB_GAP =
   3;
 
+
 export default function AssessmentPreviewTray({
   theme,
+
   previewViewMode,
   onPreviewViewModeChange,
+
   showHud,
   onShowHudChange,
+
   onResetLayout,
   onResetZoom,
+
   includeCoverSheet,
   onIncludeCoverSheetChange,
+
   includeFormulaSheet,
   onIncludeFormulaSheetChange,
+
   showCoverDateTime,
   onShowCoverDateTimeChange,
+
   showCandidateNumber,
   onShowCandidateNumberChange,
+
+  paperOptions,
+
+  coverDateByPaper,
+  startTimeByPaper,
+  endTimeByPaper,
+
+  onCoverDateChange,
+  onStartTimeChange,
+  onEndTimeChange,
 }: AssessmentPreviewTrayProps) {
   const [
     open,
@@ -135,6 +205,7 @@ export default function AssessmentPreviewTray({
     useRef<HTMLDivElement | null>(
       null
     );
+
 
   useEffect(() => {
     function handlePointerDown(
@@ -161,6 +232,7 @@ export default function AssessmentPreviewTray({
       );
     }
 
+
     function handleKeyDown(
       event:
         KeyboardEvent
@@ -175,6 +247,7 @@ export default function AssessmentPreviewTray({
       }
     }
 
+
     window.addEventListener(
       "mousedown",
       handlePointerDown
@@ -184,6 +257,7 @@ export default function AssessmentPreviewTray({
       "keydown",
       handleKeyDown
     );
+
 
     return () => {
       window.removeEventListener(
@@ -199,6 +273,7 @@ export default function AssessmentPreviewTray({
   }, [
     open,
   ]);
+
 
   function handleTabClick(
     section:
@@ -233,6 +308,7 @@ export default function AssessmentPreviewTray({
       section
     );
   }
+
 
   return (
     <div
@@ -392,6 +468,9 @@ export default function AssessmentPreviewTray({
 
             scrollbarColor:
               `${theme.textMuted} transparent`,
+
+            scrollBehavior:
+              "smooth",
           }}
         >
           {activeSection ===
@@ -400,21 +479,27 @@ export default function AssessmentPreviewTray({
               theme={
                 theme
               }
+
               previewViewMode={
                 previewViewMode
               }
+
               onPreviewViewModeChange={
                 onPreviewViewModeChange
               }
+
               showHud={
                 showHud
               }
+
               onShowHudChange={
                 onShowHudChange
               }
+
               onResetLayout={
                 onResetLayout
               }
+
               onResetZoom={
                 onResetZoom
               }
@@ -424,29 +509,65 @@ export default function AssessmentPreviewTray({
               theme={
                 theme
               }
+
               includeCoverSheet={
                 includeCoverSheet
               }
+
               onIncludeCoverSheetChange={
                 onIncludeCoverSheetChange
               }
+
               includeFormulaSheet={
                 includeFormulaSheet
               }
+
               onIncludeFormulaSheetChange={
                 onIncludeFormulaSheetChange
               }
+
               showCoverDateTime={
                 showCoverDateTime
               }
+
               onShowCoverDateTimeChange={
                 onShowCoverDateTimeChange
               }
+
               showCandidateNumber={
                 showCandidateNumber
               }
+
               onShowCandidateNumberChange={
                 onShowCandidateNumberChange
+              }
+
+              paperOptions={
+                paperOptions
+              }
+
+              coverDateByPaper={
+                coverDateByPaper
+              }
+
+              startTimeByPaper={
+                startTimeByPaper
+              }
+
+              endTimeByPaper={
+                endTimeByPaper
+              }
+
+              onCoverDateChange={
+                onCoverDateChange
+              }
+
+              onStartTimeChange={
+                onStartTimeChange
+              }
+
+              onEndTimeChange={
+                onEndTimeChange
               }
             />
           )}

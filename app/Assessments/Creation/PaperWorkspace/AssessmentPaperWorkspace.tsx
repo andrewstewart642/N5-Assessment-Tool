@@ -3,6 +3,14 @@ import type {
 } from "react";
 
 import type {
+  Paper,
+} from "@/app/Assessments/AssessmentTypes";
+
+import type {
+  AssessmentPaperStringMap,
+} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+
+import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
@@ -33,6 +41,10 @@ import {
 import AssessmentPreviewPane from "./Preview/AssessmentPreviewPane";
 
 import AssessmentPreviewTray from "./Preview/PreviewTray/AssessmentPreviewTray";
+
+import type {
+  PaperSittingOption,
+} from "./Preview/PreviewTray/PaperSittingControls";
 
 import AssessmentSaveStatusPill from "./Preview/AssessmentSaveStatusPill";
 
@@ -139,6 +151,43 @@ type SettingsControlsProps = {
   onShowCandidateNumberChange: (
     next:
       boolean
+  ) => void;
+
+
+  paperOptions:
+    PaperSittingOption[];
+
+  coverDateByPaper:
+    AssessmentPaperStringMap;
+
+  startTimeByPaper:
+    AssessmentPaperStringMap;
+
+  endTimeByPaper:
+    AssessmentPaperStringMap;
+
+  onCoverDateChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
+
+  onStartTimeChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
+
+  onEndTimeChange: (
+    paper:
+      Paper,
+
+    next:
+      string
   ) => void;
 };
 
@@ -516,6 +565,34 @@ export default function AssessmentPaperWorkspace({
 
             onShowCandidateNumberChange={
               settingsControlsProps.onShowCandidateNumberChange
+            }
+
+            paperOptions={
+              settingsControlsProps.paperOptions
+            }
+
+            coverDateByPaper={
+              settingsControlsProps.coverDateByPaper
+            }
+
+            startTimeByPaper={
+              settingsControlsProps.startTimeByPaper
+            }
+
+            endTimeByPaper={
+              settingsControlsProps.endTimeByPaper
+            }
+
+            onCoverDateChange={
+              settingsControlsProps.onCoverDateChange
+            }
+
+            onStartTimeChange={
+              settingsControlsProps.onStartTimeChange
+            }
+
+            onEndTimeChange={
+              settingsControlsProps.onEndTimeChange
             }
           />
         </div>

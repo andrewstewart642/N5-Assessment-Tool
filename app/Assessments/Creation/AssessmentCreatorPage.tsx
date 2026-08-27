@@ -96,6 +96,11 @@ import {
 } from "./Papers/AssessmentPaperIntendedTiming";
 
 import {
+  getAssessmentPaperLabel,
+  getAssessmentPapers,
+} from "./Papers/AssessmentPaperRules";
+
+import {
   useAssessmentPaperAutomaticTiming,
 } from "./Papers/useAssessmentPaperAutomaticTiming";
 
@@ -230,6 +235,30 @@ function AssessmentCreatorContent() {
       () =>
         courseConfig.skillTree ??
         {},
+      [
+        courseConfig,
+      ]
+    );
+
+  const paperSittingOptions =
+    useMemo(
+      () =>
+        getAssessmentPapers(
+          courseConfig
+        ).map(
+          (
+            paper
+          ) => ({
+            id:
+              paper,
+
+            label:
+              getAssessmentPaperLabel(
+                paper,
+                courseConfig
+              ),
+          })
+        ),
       [
         courseConfig,
       ]
@@ -518,6 +547,8 @@ function AssessmentCreatorContent() {
 
     setStartTimeForPaper,
     setEndTimeForPaper,
+
+    setManualEndTimeForPaper,
 
     setCoverDateForPaper,
     setCoverDateCustomForPaper,
@@ -812,9 +843,6 @@ function AssessmentCreatorContent() {
 
   /*
    * Intended sitting duration
-   *
-   * This is based on the assessment SETUP —
-   * never the current live marks shown in HUD.
    */
 
   const intendedDurationMinutesByPaper =
@@ -1427,11 +1455,6 @@ function AssessmentCreatorContent() {
 
               assessmentDate,
 
-              /*
-               * Manual TopBar date edits now use
-               * the same permanent-link semantics
-               * as the forthcoming tray.
-               */
               setAssessmentDate:
                 setPrimaryCoverDate,
 
@@ -1520,6 +1543,46 @@ function AssessmentCreatorContent() {
 
               onShowCandidateNumberChange:
                 setShowScottishCandidateNumberBox,
+
+              paperOptions:
+                paperSittingOptions,
+
+              coverDateByPaper,
+
+              startTimeByPaper,
+
+              endTimeByPaper,
+
+              onCoverDateChange: (
+                paper,
+                next
+              ) =>
+                setCoverDateForPaper(
+                  paper,
+                  next
+                ),
+
+              onStartTimeChange: (
+                paper,
+                next
+              ) =>
+                setStartTimeForPaper(
+                  paper,
+                  next
+                ),
+
+              /*
+               * Every tray edit to End is a
+               * deliberate teacher override.
+               */
+              onEndTimeChange: (
+                paper,
+                next
+              ) =>
+                setManualEndTimeForPaper(
+                  paper,
+                  next
+                ),
             }}
 
             previewProps={{
@@ -1644,11 +1707,6 @@ function AssessmentCreatorContent() {
             assessmentDate
           }
 
-          /*
-           * The old Settings drawer temporarily
-           * stays wired, but now obeys the new
-           * linked-date state model too.
-           */
           setAssessmentDate={
             setPrimaryCoverDate
           }

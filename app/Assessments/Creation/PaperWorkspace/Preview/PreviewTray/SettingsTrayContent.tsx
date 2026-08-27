@@ -1,4 +1,12 @@
 import type {
+  Paper,
+} from "@/app/Assessments/AssessmentTypes";
+
+import type {
+  AssessmentPaperStringMap,
+} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+
+import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
@@ -6,7 +14,12 @@ import {
   UI_TEXT,
 } from "@/app/UI/Application/Typography/Typography";
 
+import PaperSittingControls, {
+  type PaperSittingOption,
+} from "./PaperSittingControls";
+
 import PreviewTrayToggleRow from "./PreviewTrayToggleRow";
+
 
 type SettingsTrayContentProps = {
   theme:
@@ -43,18 +56,70 @@ type SettingsTrayContentProps = {
     next:
       boolean
   ) => void;
+
+
+  paperOptions:
+    PaperSittingOption[];
+
+  coverDateByPaper:
+    AssessmentPaperStringMap;
+
+  startTimeByPaper:
+    AssessmentPaperStringMap;
+
+  endTimeByPaper:
+    AssessmentPaperStringMap;
+
+  onCoverDateChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
+
+  onStartTimeChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
+
+  onEndTimeChange: (
+    paper:
+      Paper,
+
+    next:
+      string
+  ) => void;
 };
+
 
 export default function SettingsTrayContent({
   theme,
+
   includeCoverSheet,
   onIncludeCoverSheetChange,
+
   includeFormulaSheet,
   onIncludeFormulaSheetChange,
+
   showCoverDateTime,
   onShowCoverDateTimeChange,
+
   showCandidateNumber,
   onShowCandidateNumberChange,
+
+  paperOptions,
+
+  coverDateByPaper,
+  startTimeByPaper,
+  endTimeByPaper,
+
+  onCoverDateChange,
+  onStartTimeChange,
+  onEndTimeChange,
 }: SettingsTrayContentProps) {
   return (
     <div
@@ -147,18 +212,45 @@ export default function SettingsTrayContent({
             2,
 
           paddingTop:
-            9,
+            10,
 
           borderTop:
             `1px solid ${theme.borderStandard}`,
-
-          ...UI_TEXT.helper,
-
-          color:
-            theme.textMuted,
         }}
       >
-        These options change the compiled paper.
+        <PaperSittingControls
+          paperOptions={
+            paperOptions
+          }
+
+          coverDateByPaper={
+            coverDateByPaper
+          }
+
+          startTimeByPaper={
+            startTimeByPaper
+          }
+
+          endTimeByPaper={
+            endTimeByPaper
+          }
+
+          onCoverDateChange={
+            onCoverDateChange
+          }
+
+          onStartTimeChange={
+            onStartTimeChange
+          }
+
+          onEndTimeChange={
+            onEndTimeChange
+          }
+
+          theme={
+            theme
+          }
+        />
       </div>
     </div>
   );
