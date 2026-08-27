@@ -1,26 +1,10 @@
 
-import {
-  Fira_Sans,
-} from "next/font/google";
-
 import NationalQualificationsPageFrame from "./NationalQualificationsPageFrame";
 
 import {
   mmToPx,
 } from "../../Layout/DocumentUnits";
 
-const firaSans =
-  Fira_Sans({
-    subsets: [
-      "latin",
-    ],
-
-    weight: [
-      "400",
-      "600",
-      "700",
-    ],
-  });
 
 export type NationalQualificationsCoverPageProps = {
   totalMarks:
@@ -394,10 +378,7 @@ export default function NationalQualificationsCoverPage({
       }
     >
       <div
-        className={
-          firaSans.className
-        }
-        style={{
+         style={{
           position:
             "relative",
 

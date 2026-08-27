@@ -8,13 +8,18 @@ import type {
 
 import NationalQualificationsQuestionPageFrame from "@/app/UI/Documents/Templates/NationalQualifications/NationalQualificationsQuestionPageFrame";
 
-type National5MathsQuestionPageProps = {
-  children?: ReactNode;
+
+export type National5MathsQuestionPageProps = {
+  children?:
+    ReactNode;
 
   paper:
     Paper;
 
   pageNumber:
+    number;
+
+  totalMarks?:
     number;
 
   isFirstQuestionPage?:
@@ -30,19 +35,36 @@ type National5MathsQuestionPageProps = {
     number;
 };
 
+
 export default function National5MathsQuestionPage({
   children,
   paper,
   pageNumber,
-  isFirstQuestionPage = false,
-  showTurnOver = true,
-  viewerScale = 1,
-  outerPaddingPx = 18,
+  totalMarks,
+  isFirstQuestionPage =
+    false,
+  showTurnOver =
+    true,
+  viewerScale =
+    1,
+  outerPaddingPx =
+    18,
 }: National5MathsQuestionPageProps) {
-  const totalMarks =
-    paper === "P1"
+  const fallbackTotalMarks =
+    paper ===
+      "P1"
       ? 40
       : 50;
+
+  const resolvedTotalMarks =
+    typeof totalMarks ===
+      "number" &&
+    Number.isFinite(
+      totalMarks
+    )
+      ? totalMarks
+      : fallbackTotalMarks;
+
 
   const questionHeader =
     isFirstQuestionPage
@@ -55,7 +77,7 @@ export default function National5MathsQuestionPage({
             }}
           >
             Total marks —{" "}
-            {totalMarks}
+            {resolvedTotalMarks}
           </div>
 
           <div
@@ -70,6 +92,7 @@ export default function National5MathsQuestionPage({
         </>
       )
       : undefined;
+
 
   return (
     <NationalQualificationsQuestionPageFrame

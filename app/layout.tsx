@@ -2,11 +2,6 @@ import type {
   Metadata,
 } from "next";
 
-import {
-  Geist,
-  Geist_Mono,
-} from "next/font/google";
-
 import "katex/dist/katex.min.css";
 import "@/app/UI/Application/Styles/ApplicationGlobals.css";
 
@@ -22,28 +17,6 @@ import {
   APPLICATION_ACTIVITY_RAIL_WIDTH,
   APPLICATION_HEADER_HEIGHT,
 } from "@/app/UI/Application/Shell/ApplicationShellTokens";
-
-
-const geistSans =
-  Geist({
-    variable:
-      "--font-geist-sans",
-
-    subsets: [
-      "latin",
-    ],
-  });
-
-
-const geistMono =
-  Geist_Mono({
-    variable:
-      "--font-geist-mono",
-
-    subsets: [
-      "latin",
-    ],
-  });
 
 
 export const metadata:
@@ -65,7 +38,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={
           {
             "--app-ui-font-family":

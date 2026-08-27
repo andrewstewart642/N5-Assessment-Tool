@@ -5,7 +5,7 @@ import {
 import AssessmentCompilationPage from "@/app/Assessments/Compilation/AssessmentCompilationPage";
 import AssessmentCreatorPage from "@/app/Assessments/Creation/AssessmentCreatorPage";
 import AssessmentSetupPage from "@/app/Assessments/Creation/AssessmentSetupPage";
-import MyAssessmentsPage from "@/app/Assessments/MyAssessments/MyAssessmentsPage";
+import MyAssessmentsPage from "@/app/MyAssessments/MyAssessmentsPage";
 
 import ClassDetailsPage from "@/app/Classes/ClassDetailsPage";
 import MyClassesPage from "@/app/Classes/MyClassesPage";
