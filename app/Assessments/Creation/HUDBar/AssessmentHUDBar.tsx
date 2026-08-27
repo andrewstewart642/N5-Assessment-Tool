@@ -12,17 +12,16 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
-import {
-  UI_TEXT,
-} from "@/app/UI/Application/Typography/Typography";
-
 import type {
   AssessmentQualityNote,
 } from "../Analysis/AssessmentQualityNotes";
 
+import AssessmentCompileButton from "./AssessmentCompileButton";
+
 import AssessmentProgressPanel, {
   type AssessmentProgressPanelPaperRow,
 } from "./AssessmentProgressPanel";
+
 
 export type AssessmentHUDBarProps = {
   theme:
@@ -39,8 +38,11 @@ export type AssessmentHUDBarProps = {
 
   hudResizeStartRef:
     MutableRefObject<{
-      startY: number;
-      startHeight: number;
+      startY:
+        number;
+
+      startHeight:
+        number;
     } | null>;
 
   setIsDraggingHud:
@@ -61,8 +63,16 @@ export type AssessmentHUDBarProps = {
     >;
 };
 
+
 const HUD_PANE_RADIUS =
   6;
+
+const COMPILE_RIGHT_OFFSET =
+  10;
+
+const COMPILE_BOTTOM_OFFSET =
+  10;
+
 
 export default function AssessmentHUDBar({
   theme,
@@ -75,8 +85,10 @@ export default function AssessmentHUDBar({
 }: AssessmentHUDBarProps) {
   const bottomOffset =
     showProgressPanel
-      ? hudHeight + 14
-      : 14;
+      ? hudHeight +
+        COMPILE_BOTTOM_OFFSET
+      : COMPILE_BOTTOM_OFFSET;
+
 
   return (
     <>
@@ -86,7 +98,7 @@ export default function AssessmentHUDBar({
             "absolute",
 
           right:
-            14,
+            COMPILE_RIGHT_OFFSET,
 
           bottom:
             bottomOffset,
@@ -107,42 +119,14 @@ export default function AssessmentHUDBar({
             10,
         }}
       >
-        <button
-          type="button"
+        <AssessmentCompileButton
+          theme={
+            theme
+          }
           onClick={
             routerPushCompile
           }
-          style={{
-            border:
-              `1px solid ${theme.borderStandard}`,
-
-            background:
-              theme.bgElevated,
-
-            color:
-              theme.textSecondary,
-
-            borderRadius:
-              16,
-
-            padding:
-              "10px 14px",
-
-            cursor:
-              "pointer",
-
-            boxShadow:
-              theme.shadow,
-
-            transition:
-              "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease",
-
-            ...UI_TEXT.buttonText,
-          }}
-          title="Compile assessment into printable pages"
-        >
-          Compile →
-        </button>
+        />
       </div>
 
       {showProgressPanel ? (

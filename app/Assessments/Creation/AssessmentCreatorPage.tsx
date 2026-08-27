@@ -1305,10 +1305,13 @@ function AssessmentCreatorContent() {
       <main
         style={{
           height:
-            "100vh",
+            "100%",
 
           maxHeight:
-            "100vh",
+            "100%",
+
+          minHeight:
+          0,
 
           background:
             theme.bgPage,

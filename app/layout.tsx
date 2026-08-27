@@ -16,7 +16,13 @@ import {
   SettingsProvider,
 } from "@/app/UI/Application/Settings/ApplicationSettings";
 
-import SettingsDrawer from "@/app/UI/Application/SettingsDrawer/SettingsDrawer";
+import ApplicationActivityRail from "@/app/UI/Application/Shell/ApplicationActivityRail";
+
+import {
+  APPLICATION_ACTIVITY_RAIL_WIDTH,
+  APPLICATION_HEADER_HEIGHT,
+} from "@/app/UI/Application/Shell/ApplicationShellTokens";
+
 
 const geistSans =
   Geist({
@@ -28,6 +34,7 @@ const geistSans =
     ],
   });
 
+
 const geistMono =
   Geist_Mono({
     variable:
@@ -38,6 +45,7 @@ const geistMono =
     ],
   });
 
+
 export const metadata:
   Metadata = {
     title:
@@ -46,6 +54,7 @@ export const metadata:
     description:
       "Create and manage National 5 maths assessments.",
   };
+
 
 export default function RootLayout({
   children,
@@ -77,8 +86,17 @@ export default function RootLayout({
             margin:
               0,
 
+            width:
+              "100%",
+
+            height:
+              "100dvh",
+
             minHeight:
               "100vh",
+
+            overflow:
+              "hidden",
 
             background:
               "#0b0f14",
@@ -88,29 +106,75 @@ export default function RootLayout({
         <SettingsProvider>
           <div
             style={{
+              width:
+                "100%",
+
+              height:
+                "100dvh",
+
+              minWidth:
+                0,
+
               minHeight:
-                "100vh",
+                0,
 
               display:
                 "grid",
 
               gridTemplateRows:
-                "48px 1fr",
+                `${APPLICATION_HEADER_HEIGHT}px minmax(0, 1fr)`,
+
+              overflow:
+                "hidden",
             }}
           >
             <HeaderBar />
 
             <div
               style={{
+                minWidth:
+                  0,
+
                 minHeight:
                   0,
+
+                display:
+                  "grid",
+
+                gridTemplateColumns:
+                  `${APPLICATION_ACTIVITY_RAIL_WIDTH}px minmax(0, 1fr)`,
+
+                overflow:
+                  "hidden",
+
+                position:
+                  "relative",
               }}
             >
-              {children}
+              <ApplicationActivityRail />
+
+              <div
+                style={{
+                  minWidth:
+                    0,
+
+                  minHeight:
+                    0,
+
+                  height:
+                    "100%",
+
+                  position:
+                    "relative",
+
+                  overflow:
+                    "auto",
+                }}
+              >
+                {children}
+              </div>
             </div>
           </div>
-
-          <SettingsDrawer />
         </SettingsProvider>
       </body>
     </html>

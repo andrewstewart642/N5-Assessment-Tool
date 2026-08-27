@@ -1,56 +1,101 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import {
+  APPLICATION_HEADER_HEIGHT,
+} from "../Shell/ApplicationShellTokens";
 
-import { useSettingsDrawer } from "../SettingsDrawer/SettingsDrawerProvider";
-import { useTheme } from "../Theme/ThemeProvider";
+import {
+  useTheme,
+} from "../Theme/ThemeProvider";
 
 import Logo from "./Logo";
+
 import Navigation from "./Navigation";
-import SettingsButton from "./SettingsButton";
+
+
+const HEADER_SIDE_REGION_WIDTH =
+  180;
+
 
 export default function HeaderBar() {
-  const pathname = usePathname();
-  const { theme } = useTheme();
-  const { openSettings } = useSettingsDrawer();
+  const {
+    theme,
+  } =
+    useTheme();
 
-  function handleOpenSettings() {
-    // Temporary compatibility behaviour.
-    // Builder settings will receive its own access during the
-    // Assessment Creation migration.
-    if (pathname.startsWith("/create-assessment/builder")) {
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new Event("open-builder-settings"));
-      }
-
-      return;
-    }
-
-    openSettings();
-  }
 
   return (
     <header
       style={{
-        height: 44,
-        borderBottom: `1px solid ${theme.borderStandard}`,
-        background: theme.bgSurface,
-        display: "grid",
-        gridTemplateColumns: "180px 1fr auto",
-        alignItems: "center",
-        gap: 12,
-        padding: "0 12px",
-        boxSizing: "border-box",
-        position: "sticky",
-        top: 0,
-        zIndex: 100,
+        width:
+          "100%",
+
+        height:
+          APPLICATION_HEADER_HEIGHT,
+
+        minWidth:
+          0,
+
+        borderBottomWidth:
+          1,
+
+        borderBottomStyle:
+          "solid",
+
+        borderBottomColor:
+          theme.borderStandard,
+
+        background:
+          theme.bgSurface,
+
+        display:
+          "grid",
+
+        gridTemplateColumns:
+          `${HEADER_SIDE_REGION_WIDTH}px minmax(0, 1fr) ${HEADER_SIDE_REGION_WIDTH}px`,
+
+        alignItems:
+          "center",
+
+        gap:
+          12,
+
+        padding:
+          "0 12px",
+
+        boxSizing:
+          "border-box",
+
+        position:
+          "relative",
+
+        zIndex:
+          300,
       }}
     >
       <Logo />
 
       <Navigation />
 
-      <SettingsButton onClick={handleOpenSettings} />
+      {/*
+       * Intentionally empty.
+       *
+       * The right-hand Header region is reserved
+       * for future application/account controls.
+       *
+       * Global Settings now belongs exclusively
+       * to the application Activity Rail.
+       */}
+      <div
+        aria-hidden="true"
+        style={{
+          width:
+            "100%",
+
+          height:
+            "100%",
+        }}
+      />
     </header>
   );
 }
