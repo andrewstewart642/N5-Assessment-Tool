@@ -2,7 +2,9 @@ import type {
   ComponentProps,
 } from "react";
 
-import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
+import type {
+  AppTheme,
+} from "@/app/UI/Application/Theme/AppTheme";
 
 import SkillsTree from "./02-SkillsTree/SkillsTree";
 
@@ -12,7 +14,8 @@ type SkillsTreeProps =
   >;
 
 type AssessmentSkillsPanelProps = {
-  theme: AppTheme;
+  theme:
+    AppTheme;
 
   skillsTreeProps:
     Omit<
@@ -26,9 +29,42 @@ export default function AssessmentSkillsPanel({
   skillsTreeProps,
 }: AssessmentSkillsPanelProps) {
   return (
-    <SkillsTree
-      {...skillsTreeProps}
-      theme={theme}
-    />
+    <section
+      style={{
+        minWidth:
+          0,
+
+        minHeight:
+          0,
+
+        height:
+          "100%",
+
+        display:
+          "grid",
+
+        gridTemplateRows:
+          "minmax(0, 1fr)",
+
+        overflow:
+          "hidden",
+
+        background:
+          theme.bgPage,
+
+        padding:
+          "4px 0 4px 4px",
+
+        boxSizing:
+          "border-box",
+      }}
+    >
+      <SkillsTree
+        {...skillsTreeProps}
+        theme={
+          theme
+        }
+      />
+    </section>
   );
 }

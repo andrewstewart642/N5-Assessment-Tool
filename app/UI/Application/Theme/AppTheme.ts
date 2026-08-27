@@ -328,7 +328,7 @@ function generateThemeFromBase(base: string): CoreTheme {
 
 const LIGHT_THEME: CoreTheme = {
   // Light+ inspired, with stronger application/paper separation.
-  bgPage: "#e9e9e9",
+  bgPage: "#eeeeee",
   bgSurface: "#f3f3f3",
   bgSection: "#f8f8f8",
   bgWorkspace: "#eeeeee",
@@ -360,7 +360,7 @@ const LIGHT_THEME: CoreTheme = {
 
 const SOFT_GREY_THEME: CoreTheme = {
   // Dark+ inspired.
-  bgPage: "#1e1e1e",
+  bgPage: "#232324",
   bgSurface: "#252526",
   bgSection: "#2d2d30",
   bgWorkspace: "#202020",
@@ -392,7 +392,7 @@ const SOFT_GREY_THEME: CoreTheme = {
 
 const DARK_THEME: CoreTheme = {
   // Dark 2026 inspired.
-  bgPage: "#121314",
+  bgPage: "#171819",
 
   // Main persistent pane colour.
   bgSurface: "#191a1b",

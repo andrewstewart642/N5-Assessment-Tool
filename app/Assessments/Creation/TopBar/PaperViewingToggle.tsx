@@ -6,45 +6,50 @@ import type {
   Paper,
 } from "@/app/Assessments/AssessmentTypes";
 
-import {
-  INTERACTION,
-} from "@/app/UI/Application/Motion/InteractionTokens";
-
 import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
+
+import {
+  UI_TYPO,
+} from "@/app/UI/Application/Typography/Typography";
 
 import {
   getAssessmentPaperConfig,
   getAssessmentPapers,
 } from "../Papers/AssessmentPaperRules";
 
+import {
+  TOP_BAR_CONTROL_HEIGHT,
+  TOP_BAR_CONTROL_RADIUS,
+  TOP_BAR_SELECTED_RADIUS,
+} from "./AssessmentTopBarTokens";
+
 type PaperViewingToggleProps = {
-  value: Paper;
+  value:
+    Paper;
 
   onChange: (
     paper: Paper
   ) => void;
 
-  theme: AppTheme;
+  theme:
+    AppTheme;
 };
 
 type PaperViewingToggleButtonProps = {
-  label: string;
+  label:
+    string;
 
-  active: boolean;
+  active:
+    boolean;
 
   onClick:
     () => void;
 
-  theme: AppTheme;
+  theme:
+    AppTheme;
 };
-
-const CONTROL_HEIGHT =
-  32;
-
-const CONTROL_RADIUS =
-  10;
 
 function PaperViewingToggleButton({
   label,
@@ -57,10 +62,6 @@ function PaperViewingToggleButton({
     setHovered,
   ] =
     useState(false);
-
-  const showLift =
-    hovered &&
-    !active;
 
   return (
     <button
@@ -83,30 +84,13 @@ function PaperViewingToggleButton({
           "100%",
 
         padding:
-          "0 12px",
-
-        borderRadius:
-          8,
+          "0 8px",
 
         border:
           "none",
 
-        cursor:
-          "pointer",
-
-        fontSize:
-          13,
-
-        fontWeight:
-          600,
-
-        fontFamily:
-          "inherit",
-
-        color:
-          active
-            ? theme.textPrimary
-            : theme.textMuted,
+        borderRadius:
+          TOP_BAR_SELECTED_RADIUS,
 
         background:
           active
@@ -115,14 +99,30 @@ function PaperViewingToggleButton({
               ? theme.controlBgHover
               : "transparent",
 
+        color:
+          active
+            ? theme.textPrimary
+            : theme.textSecondary,
+
+        cursor:
+          "pointer",
+
         display:
-          "flex",
+          "grid",
 
-        alignItems:
+        placeItems:
           "center",
 
-        justifyContent:
-          "center",
+        fontFamily:
+          UI_TYPO.family,
+
+        fontSize:
+          UI_TYPO.sizeBase,
+
+        fontWeight:
+          active
+            ? UI_TYPO.weightSemibold
+            : UI_TYPO.weightMedium,
 
         lineHeight:
           1,
@@ -131,17 +131,7 @@ function PaperViewingToggleButton({
           "nowrap",
 
         transition:
-          INTERACTION.transition.smooth,
-
-        transform:
-          showLift
-            ? INTERACTION.lift.subtle.transform
-            : "scale(1)",
-
-        boxShadow:
-          showLift
-            ? INTERACTION.lift.subtle.shadow
-            : "0 0 0 rgba(0,0,0,0)",
+          "background 0.15s ease, color 0.15s ease",
       }}
     >
       {label}
@@ -159,35 +149,46 @@ export default function PaperViewingToggle({
 
   return (
     <div
+      role="radiogroup"
+      aria-label="Paper being viewed"
       style={{
         display:
           "inline-flex",
 
+        alignItems:
+          "center",
+
+        gap:
+          2,
+
         height:
-          CONTROL_HEIGHT,
+          TOP_BAR_CONTROL_HEIGHT,
+
+        padding:
+          3,
+
+        boxSizing:
+          "border-box",
 
         borderRadius:
-          CONTROL_RADIUS,
-
-        background:
-          theme.controlBg,
+          TOP_BAR_CONTROL_RADIUS,
 
         border:
           `1px solid ${theme.borderStandard}`,
 
-        padding: 2,
-
-        boxSizing:
-          "border-box",
+        background:
+          theme.controlBg,
       }}
     >
       {paperOptions.map(
-        (paper) => {
+        (
+          paper
+        ) => {
           const active =
-            value ===
-            paper;
+            paper ===
+            value;
 
-          const paperConfig =
+          const config =
             getAssessmentPaperConfig(
               paper
             );
@@ -198,7 +199,7 @@ export default function PaperViewingToggle({
                 paper
               }
               label={
-                paperConfig.label
+                config.label
               }
               active={
                 active

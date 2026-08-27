@@ -12,20 +12,22 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
-import {
-  UI_TYPO,
-} from "@/app/UI/Application/Typography/Typography";
-
 import AssessmentDateField from "./AssessmentDateField";
 
 import AssessmentMetaField from "./AssessmentMetaField";
 
+import AssessmentTopBarField from "./AssessmentTopBarField";
+
+import {
+  TOP_BAR_COLUMN_GAP,
+  TOP_BAR_HORIZONTAL_PADDING,
+} from "./AssessmentTopBarTokens";
+
 import PaperViewingToggle from "./PaperViewingToggle";
 
-import PreviewZoomControls from "./PreviewZoomControls";
-
 type AssessmentTopBarProps = {
-  theme: AppTheme;
+  theme:
+    AppTheme;
 
   assessmentName:
     string;
@@ -88,21 +90,6 @@ type AssessmentTopBarProps = {
 
   onSelectCompleteCourseCoverage:
     () => void;
-
-  zoomPct:
-    number;
-
-  zoomIn:
-    () => void;
-
-  zoomOut:
-    () => void;
-
-  currentViewerPage:
-    number;
-
-  totalViewerPages:
-    number;
 };
 
 export default function AssessmentTopBar({
@@ -128,18 +115,33 @@ export default function AssessmentTopBar({
   availableClasses,
   selectedClassIds,
   useCompleteCourseCoverage,
+
   onToggleClass,
   onSelectCompleteCourseCoverage,
-
-  zoomPct,
-  zoomIn,
-  zoomOut,
-  currentViewerPage,
-  totalViewerPages,
 }: AssessmentTopBarProps) {
   return (
     <div
       style={{
+        height:
+          "100%",
+
+        minWidth:
+          0,
+
+        boxSizing:
+          "border-box",
+
+        /*
+         * No fixed vertical padding.
+         *
+         * The complete label/control stack is centred
+         * inside the TopBar, which guarantees equal
+         * visual space above and below regardless of
+         * the exact label line-height.
+         */
+        padding:
+          `0 ${TOP_BAR_HORIZONTAL_PADDING}px`,
+
         borderBottom:
           `1px solid ${theme.borderStandard}`,
 
@@ -149,261 +151,113 @@ export default function AssessmentTopBar({
         display:
           "grid",
 
-        gridTemplateRows:
-          "auto auto",
+        gridTemplateColumns:
+          "minmax(160px, 1.25fr) minmax(170px, 1fr) 150px max-content",
 
-        rowGap:
-          10,
+        columnGap:
+          TOP_BAR_COLUMN_GAP,
 
-        padding:
-          "8px 12px 60px",
-
-        boxSizing:
-          "border-box",
-
-        minHeight:
-          0,
+        alignItems:
+          "center",
 
         position:
           "relative",
-
-        zIndex:
-          5,
       }}
     >
-      <div
-        style={{
-          display:
-            "flex",
-
-          alignItems:
-            "flex-start",
-
-          gap:
-            12,
-
-          minWidth:
-            0,
-        }}
-      >
-        <div
-          style={{
-            display:
-              "flex",
-
-            alignItems:
-              "flex-start",
-
-            gap:
-              12,
-
-            flex:
-              "1 1 auto",
-
-            minWidth:
-              0,
-          }}
-        >
-          <div
-            style={{
-              flex:
-                "1.2 1 0",
-
-              minWidth:
-                0,
-            }}
-          >
-            <AssessmentMetaField
-              label="Name"
-              value={
-                assessmentName
-              }
-              onChange={
-                setAssessmentName
-              }
-              onFocus={
-                handleAssessmentNameFocus
-              }
-              onBlur={
-                handleAssessmentNameBlur
-              }
-              theme={
-                theme
-              }
-            />
-          </div>
-
-          <div
-            style={{
-              flex:
-                "1 1 0",
-
-              minWidth:
-                0,
-            }}
-          >
-            <ClassCoverageSelect
-              levelLabel={
-                classLevelLabel
-              }
-              classes={
-                availableClasses
-              }
-              selectedClassIds={
-                selectedClassIds
-              }
-              useCompleteCourseCoverage={
-                useCompleteCourseCoverage
-              }
-              onToggleClass={
-                onToggleClass
-              }
-              onSelectCompleteCourseCoverage={
-                onSelectCompleteCourseCoverage
-              }
-              label="Class"
-              emptyText="Select classes"
-              disabledText="No level"
-              completeCoverageSummaryText="Complete course"
-              hideHelperText
-              compact
-              width="100%"
-              dropdownWidth={
-                340
-              }
-              zIndex={
-                320
-              }
-              theme={
-                theme
-              }
-            />
-          </div>
-        </div>
-
-        <div
-          style={{
-            display:
-              "flex",
-
-            alignItems:
-              "flex-start",
-
-            gap:
-              12,
-
-            flex:
-              "0 0 auto",
-
-            minWidth:
-              0,
-          }}
-        >
-          <AssessmentDateField
-            theme={
-              theme
-            }
-            assessmentDate={
-              assessmentDate
-            }
-            setAssessmentDate={
-              setAssessmentDate
-            }
-            builderCalendarOpen={
-              builderCalendarOpen
-            }
-            setBuilderCalendarOpen={
-              setBuilderCalendarOpen
-            }
-            builderDateFieldRef={
-              builderDateFieldRef
-            }
-          />
-
-          <div
-            style={{
-              display:
-                "grid",
-
-              gap:
-                4,
-
-              width:
-                "fit-content",
-
-              fontFamily:
-                UI_TYPO.family,
-            }}
-          >
-            <span
-              style={{
-                fontSize:
-                  12,
-
-                fontWeight:
-                  UI_TYPO.weightMedium,
-
-                color:
-                  theme.textMuted,
-
-                lineHeight:
-                  1.2,
-
-                whiteSpace:
-                  "nowrap",
-              }}
-            >
-              Viewing
-            </span>
-
-            <div
-              style={{
-                height:
-                  32,
-
-                display:
-                  "flex",
-
-                alignItems:
-                  "center",
-              }}
-            >
-              <PaperViewingToggle
-                value={
-                  viewPaper
-                }
-                onChange={
-                  setViewPaper
-                }
-                theme={
-                  theme
-                }
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <PreviewZoomControls
+      <AssessmentMetaField
+        label="Name"
+        value={
+          assessmentName
+        }
+        onChange={
+          setAssessmentName
+        }
+        onFocus={
+          handleAssessmentNameFocus
+        }
+        onBlur={
+          handleAssessmentNameBlur
+        }
         theme={
           theme
         }
-        zoomPct={
-          zoomPct
+      />
+
+      <ClassCoverageSelect
+        levelLabel={
+          classLevelLabel
         }
-        zoomIn={
-          zoomIn
+        classes={
+          availableClasses
         }
-        zoomOut={
-          zoomOut
+        selectedClassIds={
+          selectedClassIds
         }
-        currentViewerPage={
-          currentViewerPage
+        useCompleteCourseCoverage={
+          useCompleteCourseCoverage
         }
-        totalViewerPages={
-          totalViewerPages
+        onToggleClass={
+          onToggleClass
+        }
+        onSelectCompleteCourseCoverage={
+          onSelectCompleteCourseCoverage
+        }
+        label="Class"
+        emptyText="Select classes"
+        disabledText="No level"
+        completeCoverageSummaryText="Complete course"
+        hideHelperText
+        compact
+        width="100%"
+        dropdownWidth="min(300px, calc(100vw - 32px))"
+        zIndex={
+          320
+        }
+        theme={
+          theme
         }
       />
+
+      <AssessmentDateField
+        theme={
+          theme
+        }
+        assessmentDate={
+          assessmentDate
+        }
+        setAssessmentDate={
+          setAssessmentDate
+        }
+        builderCalendarOpen={
+          builderCalendarOpen
+        }
+        setBuilderCalendarOpen={
+          setBuilderCalendarOpen
+        }
+        builderDateFieldRef={
+          builderDateFieldRef
+        }
+      />
+
+      <AssessmentTopBarField
+        label="Viewing"
+        theme={
+          theme
+        }
+        width="fit-content"
+      >
+        <PaperViewingToggle
+          value={
+            viewPaper
+          }
+          onChange={
+            setViewPaper
+          }
+          theme={
+            theme
+          }
+        />
+      </AssessmentTopBarField>
     </div>
   );
 }

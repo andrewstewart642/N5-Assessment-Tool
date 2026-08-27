@@ -2,22 +2,27 @@ import {
   useState,
 } from "react";
 
-import {
-  INTERACTION,
-} from "@/app/UI/Application/Motion/InteractionTokens";
-
 import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
 import {
-  UI_TYPO,
+  UI_TEXT,
 } from "@/app/UI/Application/Typography/Typography";
 
-type AssessmentMetaFieldProps = {
-  label: string;
+import AssessmentTopBarField from "./AssessmentTopBarField";
 
-  value: string;
+import {
+  TOP_BAR_CONTROL_HEIGHT,
+  TOP_BAR_CONTROL_RADIUS,
+} from "./AssessmentTopBarTokens";
+
+type AssessmentMetaFieldProps = {
+  label:
+    string;
+
+  value:
+    string;
 
   onChange: (
     value: string
@@ -29,131 +34,12 @@ type AssessmentMetaFieldProps = {
   onBlur?:
     () => void;
 
-  width?: number;
+  width?:
+    number;
 
-  theme: AppTheme;
+  theme:
+    AppTheme;
 };
-
-const CONTROL_HEIGHT =
-  32;
-
-const LABEL_GAP =
-  4;
-
-const CONTROL_RADIUS =
-  10;
-
-function getLabelStyle(
-  theme: AppTheme
-): React.CSSProperties {
-  return {
-    fontSize: 12,
-
-    fontWeight:
-      UI_TYPO.weightMedium,
-
-    color:
-      theme.textMuted,
-
-    lineHeight: 1.2,
-
-    whiteSpace:
-      "nowrap",
-  };
-}
-
-function getInputShellStyle(
-  hovered: boolean,
-  focused: boolean
-): React.CSSProperties {
-  const active =
-    hovered ||
-    focused;
-
-  return {
-    width:
-      "100%",
-
-    borderRadius:
-      CONTROL_RADIUS,
-
-    transform:
-      active
-        ? INTERACTION.lift.subtle.transform
-        : "scale(1)",
-
-    boxShadow:
-      active
-        ? INTERACTION.lift.subtle.shadow
-        : "0 0 0 rgba(0,0,0,0)",
-
-    transition:
-      INTERACTION.transition.smooth,
-  };
-}
-
-function getInputStyle(
-  theme: AppTheme,
-  hovered: boolean,
-  focused: boolean
-): React.CSSProperties {
-  const active =
-    hovered ||
-    focused;
-
-  return {
-    height:
-      CONTROL_HEIGHT,
-
-    borderRadius:
-      CONTROL_RADIUS,
-
-    border:
-      `1px solid ${
-        active
-          ? theme.controlSelectedBorder
-          : theme.borderStandard
-      }`,
-
-    background:
-      active
-        ? theme.controlBgHover
-        : theme.bgElevated,
-
-    color:
-      theme.textPrimary,
-
-    padding:
-      "0 10px",
-
-    fontSize: 13,
-
-    fontFamily:
-      UI_TYPO.family,
-
-    fontWeight:
-      UI_TYPO.weightSemibold,
-
-    minWidth: 0,
-
-    width:
-      "100%",
-
-    boxSizing:
-      "border-box",
-
-    outline:
-      "none",
-
-    boxShadow:
-      active
-        ? "inset 0 1px 0 rgba(255,255,255,0.06)"
-        : "inset 0 1px 0 rgba(255,255,255,0.04)",
-
-    transition:
-      INTERACTION.transition.smooth,
-  };
-}
 
 export default function AssessmentMetaField({
   label,
@@ -176,40 +62,36 @@ export default function AssessmentMetaField({
   ] =
     useState(false);
 
+  const active =
+    hovered ||
+    focused;
+
   return (
-    <label
-      style={{
-        display:
-          "grid",
-
-        gap:
-          LABEL_GAP,
-
-        minWidth: 0,
-
-        width:
-          width ??
-          "auto",
-
-        fontFamily:
-          UI_TYPO.family,
-      }}
+    <AssessmentTopBarField
+      label={
+        label
+      }
+      theme={
+        theme
+      }
+      width={
+        width ??
+        "100%"
+      }
     >
-      <span
-        style={
-          getLabelStyle(
-            theme
-          )
+      <input
+        type="text"
+        aria-label={
+          label
         }
-      >
-        {label}
-      </span>
-
-      <div
-        style={
-          getInputShellStyle(
-            hovered,
-            focused
+        value={
+          value
+        }
+        onChange={(
+          event
+        ) =>
+          onChange(
+            event.target.value
           )
         }
         onMouseEnter={() =>
@@ -222,42 +104,63 @@ export default function AssessmentMetaField({
             false
           )
         }
-      >
-        <input
-          type="text"
-          value={
-            value
-          }
-          onChange={(
-            event
-          ) =>
-            onChange(
-              event.target.value
-            )
-          }
-          onFocus={() => {
-            setFocused(
-              true
-            );
+        onFocus={() => {
+          setFocused(
+            true
+          );
 
-            onFocus?.();
-          }}
-          onBlur={() => {
-            setFocused(
-              false
-            );
+          onFocus?.();
+        }}
+        onBlur={() => {
+          setFocused(
+            false
+          );
 
-            onBlur?.();
-          }}
-          style={
-            getInputStyle(
-              theme,
-              hovered,
-              focused
-            )
-          }
-        />
-      </div>
-    </label>
+          onBlur?.();
+        }}
+        style={{
+          width:
+            "100%",
+
+          height:
+            TOP_BAR_CONTROL_HEIGHT,
+
+          minWidth:
+            0,
+
+          boxSizing:
+            "border-box",
+
+          borderRadius:
+            TOP_BAR_CONTROL_RADIUS,
+
+          border:
+            `1px solid ${
+              active
+                ? theme.controlSelectedBorder
+                : theme.borderStandard
+            }`,
+
+          background:
+            active
+              ? theme.controlBgHover
+              : theme.controlBg,
+
+          color:
+            theme.textPrimary,
+
+          padding:
+            "0 8px",
+
+          outline:
+            "none",
+
+          ...UI_TEXT.controlText,
+
+          transition:
+            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+        }}
+      />
+    </AssessmentTopBarField>
   );
 }

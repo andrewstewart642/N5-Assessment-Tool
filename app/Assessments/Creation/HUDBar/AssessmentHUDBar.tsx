@@ -1,4 +1,3 @@
-
 import type {
   Dispatch,
   MutableRefObject,
@@ -78,13 +77,14 @@ export type AssessmentHUDBarProps = {
     () => void;
 };
 
+const HUD_PANE_RADIUS =
+  6;
+
 export default function AssessmentHUDBar({
   theme,
   routerPushCompile,
   showProgressPanel,
   hudHeight,
-  hudResizeStartRef,
-  setIsDraggingHud,
   viewPaper,
   paperRows,
   qualityNotes,
@@ -262,11 +262,20 @@ export default function AssessmentHUDBar({
       {showProgressPanel ? (
         <div
           style={{
-            borderTop:
+            border:
               `1px solid ${theme.borderStandard}`,
+
+            borderRadius:
+              HUD_PANE_RADIUS,
+
+            minWidth:
+              0,
 
             minHeight:
               0,
+
+            width:
+              "100%",
 
             height:
               "100%",
@@ -279,91 +288,21 @@ export default function AssessmentHUDBar({
 
             background:
               theme.bgSurface,
+
+            boxSizing:
+              "border-box",
           }}
         >
-          <div
-            onMouseDown={(
-              event
-            ) => {
-              event.preventDefault();
-              event.stopPropagation();
-
-              hudResizeStartRef.current =
-                {
-                  startY:
-                    event.clientY,
-
-                  startHeight:
-                    hudHeight,
-                };
-
-              setIsDraggingHud(
-                true
-              );
-            }}
-            title="Drag to resize notes panel"
-            style={{
-              position:
-                "absolute",
-
-              top:
-                0,
-
-              left:
-                0,
-
-              right:
-                0,
-
-              height:
-                12,
-
-              cursor:
-                "row-resize",
-
-              zIndex:
-                3,
-
-              display:
-                "flex",
-
-              justifyContent:
-                "center",
-
-              alignItems:
-                "center",
-
-              userSelect:
-                "none",
-
-              WebkitUserSelect:
-                "none",
-            }}
-          >
-            <div
-              style={{
-                width:
-                  54,
-
-                height:
-                  4,
-
-                borderRadius:
-                  999,
-
-                background:
-                  theme.borderStandard,
-              }}
-            />
-          </div>
-
           <div
             style={{
               position:
                 "absolute",
 
               inset:
-                "12px 0 0 0",
+                0,
+
+              minWidth:
+                0,
 
               minHeight:
                 0,

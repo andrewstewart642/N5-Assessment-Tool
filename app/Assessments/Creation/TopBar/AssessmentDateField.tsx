@@ -4,20 +4,24 @@ import {
 
 import CalendarPicker from "@/app/UI/Application/Components/CalendarPicker";
 
-import {
-  INTERACTION,
-} from "@/app/UI/Application/Motion/InteractionTokens";
-
 import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
 import {
-  UI_TYPO,
+  UI_TEXT,
 } from "@/app/UI/Application/Typography/Typography";
 
+import AssessmentTopBarField from "./AssessmentTopBarField";
+
+import {
+  TOP_BAR_CONTROL_HEIGHT,
+  TOP_BAR_CONTROL_RADIUS,
+} from "./AssessmentTopBarTokens";
+
 type AssessmentDateFieldProps = {
-  theme: AppTheme;
+  theme:
+    AppTheme;
 
   assessmentDate:
     string;
@@ -40,15 +44,6 @@ type AssessmentDateFieldProps = {
       HTMLDivElement | null
     >;
 };
-
-const CONTROL_HEIGHT =
-  32;
-
-const LABEL_GAP =
-  4;
-
-const CONTROL_RADIUS =
-  10;
 
 function formatAssessmentDateDisplay(
   value: string
@@ -74,164 +69,56 @@ function formatAssessmentDateDisplay(
   ] =
     isoMatch;
 
-  const utcDate =
-    new Date(
-      Date.UTC(
-        Number(
-          year
-        ),
-        Number(
-          month
-        ) - 1,
-        Number(
-          day
-        )
-      )
-    );
+  return `${day}/${month}/${year}`;
+}
 
-  if (
-    Number.isNaN(
-      utcDate.getTime()
-    )
-  ) {
-    return value;
-  }
+function CalendarIcon() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 16 16"
+      aria-hidden="true"
+      style={{
+        display:
+          "block",
+      }}
+    >
+      <rect
+        x="2.25"
+        y="3.5"
+        width="11.5"
+        height="10"
+        rx="1.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
 
-  return utcDate.toLocaleDateString(
-    "en-GB",
-    {
-      day:
-        "2-digit",
+      <path
+        d="M2.5 6.25H13.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+      />
 
-      month:
-        "short",
+      <path
+        d="M5 2.25V4.5M11 2.25V4.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
 
-      year:
-        "numeric",
-
-      timeZone:
-        "UTC",
-    }
+      <path
+        d="M5 8.5H6M7.5 8.5H8.5M10 8.5H11M5 11H6M7.5 11H8.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+      />
+    </svg>
   );
-}
-
-function fieldLabelStyle(
-  theme: AppTheme
-): React.CSSProperties {
-  return {
-    fontSize:
-      12,
-
-    fontWeight:
-      UI_TYPO.weightMedium,
-
-    color:
-      theme.textMuted,
-
-    lineHeight:
-      1.2,
-
-    whiteSpace:
-      "nowrap",
-  };
-}
-
-function getDateShellStyle(
-  hovered: boolean,
-  focused: boolean
-): React.CSSProperties {
-  const active =
-    hovered ||
-    focused;
-
-  return {
-    width:
-      "100%",
-
-    borderRadius:
-      CONTROL_RADIUS,
-
-    transform:
-      active
-        ? INTERACTION.lift.subtle.transform
-        : "scale(1)",
-
-    boxShadow:
-      active
-        ? INTERACTION.lift.subtle.shadow
-        : "0 0 0 rgba(0,0,0,0)",
-
-    transition:
-      INTERACTION.transition.smooth,
-  };
-}
-
-function inputStyle(
-  theme: AppTheme,
-  hovered: boolean,
-  focused: boolean
-): React.CSSProperties {
-  const active =
-    hovered ||
-    focused;
-
-  return {
-    height:
-      CONTROL_HEIGHT,
-
-    borderRadius:
-      CONTROL_RADIUS,
-
-    border:
-      `1px solid ${
-        active
-          ? theme.controlSelectedBorder
-          : theme.borderStandard
-      }`,
-
-    background:
-      active
-        ? theme.controlBgHover
-        : theme.bgSurface,
-
-    color:
-      theme.textPrimary,
-
-    padding:
-      "0 34px 0 10px",
-
-    fontSize:
-      13,
-
-    fontFamily:
-      UI_TYPO.family,
-
-    fontWeight:
-      UI_TYPO.weightSemibold,
-
-    minWidth:
-      0,
-
-    width:
-      "100%",
-
-    boxSizing:
-      "border-box",
-
-    outline:
-      "none",
-
-    boxShadow:
-      active
-        ? "inset 0 1px 0 rgba(255,255,255,0.06)"
-        : "inset 0 1px 0 rgba(255,255,255,0.04)",
-
-    transition:
-      INTERACTION.transition.smooth,
-
-    cursor:
-      "pointer",
-  };
 }
 
 export default function AssessmentDateField({
@@ -265,75 +152,55 @@ export default function AssessmentDateField({
       assessmentDate
     );
 
+  const active =
+    hovered ||
+    focused ||
+    builderCalendarOpen;
+
   return (
     <div
       ref={
         builderDateFieldRef
       }
       style={{
-        display:
-          "grid",
-
-        gap:
-          LABEL_GAP,
+        width:
+          150,
 
         minWidth:
           0,
 
-        width:
-          150,
-
-        fontFamily:
-          UI_TYPO.family,
-
-        flex:
-          "0 0 auto",
-
         position:
           "relative",
-
-        zIndex:
-          builderCalendarOpen
-            ? 200
-            : "auto",
       }}
     >
-      <span
-        style={
-          fieldLabelStyle(
-            theme
-          )
-        }
-      >
-        Assessment Date
-      </span>
-
-      <div
-        style={
-          getDateShellStyle(
-            hovered,
-            focused
-          )
-        }
-        onMouseEnter={() =>
-          setHovered(
-            true
-          )
-        }
-        onMouseLeave={() =>
-          setHovered(
-            false
-          )
+      <AssessmentTopBarField
+        label="Assessment Date"
+        theme={
+          theme
         }
       >
         <div
+          onMouseEnter={() =>
+            setHovered(
+              true
+            )
+          }
+          onMouseLeave={() =>
+            setHovered(
+              false
+            )
+          }
           style={{
             position:
               "relative",
+
+            width:
+              "100%",
           }}
         >
           <input
             type="text"
+            aria-label="Assessment Date"
             value={
               formattedDate
             }
@@ -357,17 +224,53 @@ export default function AssessmentDateField({
                 true
               )
             }
-            style={
-              inputStyle(
-                theme,
-                hovered,
-                focused
-              )
-            }
+            style={{
+              width:
+                "100%",
+
+              height:
+                TOP_BAR_CONTROL_HEIGHT,
+
+              boxSizing:
+                "border-box",
+
+              borderRadius:
+                TOP_BAR_CONTROL_RADIUS,
+
+              border:
+                `1px solid ${
+                  active
+                    ? theme.controlSelectedBorder
+                    : theme.borderStandard
+                }`,
+
+              background:
+                active
+                  ? theme.controlBgHover
+                  : theme.controlBg,
+
+              color:
+                theme.textPrimary,
+
+              padding:
+                "0 30px 0 8px",
+
+              outline:
+                "none",
+
+              cursor:
+                "pointer",
+
+              ...UI_TEXT.controlText,
+
+              transition:
+                "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+            }}
           />
 
           <button
             type="button"
+            aria-label="Open calendar"
             onClick={() =>
               setBuilderCalendarOpen(
                 (
@@ -391,68 +294,56 @@ export default function AssessmentDateField({
                 "absolute",
 
               right:
-                5,
+                3,
 
               top:
                 "50%",
 
               transform:
-                calendarButtonHovered
-                  ? "translateY(-50%) scale(1.04)"
-                  : "translateY(-50%) scale(1)",
+                "translateY(-50%)",
 
               width:
-                22,
+                26,
 
               height:
-                22,
+                26,
 
-              borderRadius:
-                7,
+              padding:
+                0,
 
               border:
-                `1px solid ${
-                  calendarButtonHovered
-                    ? theme.controlSelectedBorder
-                    : theme.borderStandard
-                }`,
+                "none",
+
+              borderRadius:
+                4,
 
               background:
                 calendarButtonHovered
                   ? theme.controlBgHover
-                  : theme.controlBg,
+                  : "transparent",
 
               color:
-                theme.textMuted,
+                calendarButtonHovered
+                  ? theme.textSecondary
+                  : theme.textMuted,
 
               cursor:
                 "pointer",
 
               display:
-                "flex",
+                "grid",
 
-              alignItems:
+              placeItems:
                 "center",
-
-              justifyContent:
-                "center",
-
-              fontSize:
-                12,
 
               transition:
-                INTERACTION.transition.smooth,
-
-              boxShadow:
-                calendarButtonHovered
-                  ? INTERACTION.lift.subtle.shadow
-                  : "0 0 0 rgba(0,0,0,0)",
+                "background 0.15s ease, color 0.15s ease",
             }}
           >
-            🗓️
+            <CalendarIcon />
           </button>
         </div>
-      </div>
+      </AssessmentTopBarField>
 
       {builderCalendarOpen ? (
         <div
@@ -461,16 +352,16 @@ export default function AssessmentDateField({
               "absolute",
 
             top:
-              "calc(100% + 10px)",
+              "calc(100% + 6px)",
 
-            left:
+            right:
               0,
 
             zIndex:
               300,
 
             width:
-              320,
+              260,
           }}
         >
           <CalendarPicker

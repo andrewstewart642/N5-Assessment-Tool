@@ -1364,17 +1364,19 @@ function AssessmentCreatorContent() {
 
               onSelectCompleteCourseCoverage:
                 handleSelectCompleteCourseCoverage,
-
-              zoomPct,
-
-              zoomIn,
-
-              zoomOut,
-
-              currentViewerPage,
-
-              totalViewerPages,
             }}
+
+            previewChromeProps={{
+  zoomPct,
+
+  zoomIn,
+
+  zoomOut,
+
+  currentViewerPage,
+
+  totalViewerPages,
+}}
 
             previewProps={{
               previewPaneRef,

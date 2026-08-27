@@ -26,7 +26,9 @@ import type {
   QuestionSelectionFilters,
 } from "@/app/Assessments/Questions/Selection/QuestionSelectionTypes";
 
-import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
+import type {
+  AppTheme,
+} from "@/app/UI/Application/Theme/AppTheme";
 
 import {
   UI_TEXT,
@@ -35,12 +37,6 @@ import {
 import SkillsFilters, {
   type ConstraintPillId,
 } from "../01-SkillsFilters/SkillsFilters";
-
-import SkillsTreeScrollbar from "./SkillsTreeScrollbar";
-
-import {
-  useSkillsTreeOverlayScrollbar,
-} from "./useSkillsTreeOverlayScrollbar";
 
 type SkillsTreeProps = {
   skillsData:
@@ -53,87 +49,114 @@ type SkillsTreeProps = {
     StandardFilter;
 
   setStandardFilter: (
-    value: StandardFilter
+    value:
+      StandardFilter
   ) => void;
 
   thinkingTypeFilter:
     ThinkingTypeFilter;
 
   setThinkingTypeFilter: (
-    value: ThinkingTypeFilter
+    value:
+      ThinkingTypeFilter
   ) => void;
 
-  targetMarks: number;
+  targetMarks:
+    number;
 
   setTargetMarks: (
-    value: number
+    value:
+      number
   ) => void;
 
-  minTargetMarks: number;
+  minTargetMarks:
+    number;
 
-  maxTargetMarks: number;
+  maxTargetMarks:
+    number;
 
-  activePaper: Paper;
+  activePaper:
+    Paper;
 
   setActivePaper: (
-    paper: Paper
+    paper:
+      Paper
   ) => void;
 
   collapsedCategories:
-    Record<string, boolean>;
+    Record<
+      string,
+      boolean
+    >;
 
   toggleCategory: (
-    categoryName: string
+    categoryName:
+      string
   ) => void;
 
   expandedSkillIds:
     string[];
 
   toggleSkillRow: (
-    skillId: string
+    skillId:
+      string
   ) => void;
 
   collapseAllSkills:
     () => void;
 
   getConceptIndex: (
-    skillId: string
+    skillId:
+      string
   ) => number;
 
   setConceptIndex: (
-    skillId: string,
-    nextIndex: number
+    skillId:
+      string,
+    nextIndex:
+      number
   ) => void;
 
   getDifficulty: (
-    skillId: string
+    skillId:
+      string
   ) => DifficultyLevel;
 
   setDifficulty: (
-    skillId: string,
+    skillId:
+      string,
     next:
       DifficultyLevel
   ) => void;
 
   addQuestionToPaper: (
-    category: string,
-    skill: Skill,
-    concept: string,
+    category:
+      string,
+    skill:
+      Skill,
+    concept:
+      string,
     difficulty:
       DifficultyLevel,
-    paper: Paper
+    paper:
+      Paper
   ) => void;
 
   regenerateQuestionToPaper: (
-    category: string,
-    skill: Skill,
-    concept: string,
+    category:
+      string,
+    skill:
+      Skill,
+    concept:
+      string,
     difficulty:
       DifficultyLevel,
-    paper: Paper
+    paper:
+      Paper
   ) => void;
 
-  theme: AppTheme;
+  theme:
+    AppTheme;
 };
 
 export default function SkillsTree({
@@ -177,7 +200,9 @@ export default function SkillsTree({
     flashingConstraint,
     setFlashingConstraint,
   ] =
-    useState<ConstraintPillId | null>(
+    useState<
+      ConstraintPillId | null
+    >(
       null
     );
 
@@ -186,7 +211,9 @@ export default function SkillsTree({
       ReturnType<
         typeof setTimeout
       > | null
-    >(null);
+    >(
+      null
+    );
 
   const activePaperConfig =
     getAssessmentPaperConfig(
@@ -211,36 +238,6 @@ export default function SkillsTree({
         activePaperConfig
       ),
   };
-
-  const {
-    scrollRef,
-
-    scrollMetrics,
-
-    trackHovered,
-    thumbHovered,
-    draggingThumb,
-
-    overlayThumbColor,
-
-    handleTrackMouseEnter,
-    handleTrackMouseLeave,
-
-    handleThumbMouseEnter,
-    handleThumbMouseLeave,
-
-    handleTrackPointerDown,
-    handleThumbPointerDown,
-  } =
-    useSkillsTreeOverlayScrollbar({
-      skillsData,
-
-      collapsedCategories,
-
-      expandedSkillIds,
-
-      theme,
-    });
 
   useEffect(() => {
     return () => {
@@ -285,7 +282,8 @@ export default function SkillsTree({
   }
 
   function collapseSkillsInCategory(
-    skills: Skill[]
+    skills:
+      Skill[]
   ) {
     const categoryIds =
       new Set(
@@ -296,7 +294,9 @@ export default function SkillsTree({
       );
 
     categoryIds.forEach(
-      (skillId) => {
+      (
+        skillId
+      ) => {
         if (
           expandedSkillIds.includes(
             skillId
@@ -316,13 +316,23 @@ export default function SkillsTree({
         position:
           "relative",
 
-        borderRight:
+        border:
           `1px solid ${theme.borderStandard}`,
+
+        borderRadius:
+          6,
 
         background:
           theme.bgSurface,
 
-        minHeight: 0,
+        minWidth:
+          0,
+
+        minHeight:
+          0,
+
+        height:
+          "100%",
 
         display:
           "grid",
@@ -333,13 +343,22 @@ export default function SkillsTree({
         overflow:
           "hidden",
 
+        boxSizing:
+          "border-box",
+
         ...UI_TEXT.appRoot,
       }}
     >
       <style jsx global>{`
-        .skills-tree-overlay-scroll {
+        .skills-tree-scroll {
           scrollbar-width: none !important;
           -ms-overflow-style: none !important;
+        }
+
+        .skills-tree-scroll::-webkit-scrollbar {
+          width: 0 !important;
+          height: 0 !important;
+          display: none !important;
         }
 
         @keyframes constraintPulseRed {
@@ -385,27 +404,12 @@ export default function SkillsTree({
             transform: scale(1);
           }
         }
-
-        .skills-tree-overlay-scroll::-webkit-scrollbar {
-          width: 0 !important;
-          height: 0 !important;
-          display: none !important;
-          background: transparent !important;
-        }
-
-        .skills-tree-overlay-scroll::-webkit-scrollbar-track {
-          display: none !important;
-          background: transparent !important;
-        }
-
-        .skills-tree-overlay-scroll::-webkit-scrollbar-thumb {
-          display: none !important;
-          background: transparent !important;
-        }
       `}</style>
 
       <SkillsFilters
-        theme={theme}
+        theme={
+          theme
+        }
 
         totalSkillsCount={
           totalSkillsCount
@@ -457,206 +461,154 @@ export default function SkillsTree({
       />
 
       <div
+        className="skills-tree-scroll"
         style={{
-          position:
-            "relative",
+          minWidth:
+            0,
 
-          minHeight: 0,
+          minHeight:
+            0,
 
           height:
             "100%",
+
+          overflowY:
+            "auto",
+
+          overflowX:
+            "hidden",
+
+          padding:
+            "10px 0 14px 14px",
+
+          boxSizing:
+            "border-box",
         }}
       >
-        <div
-          ref={scrollRef}
-          className="hover-scroll skills-tree-overlay-scroll"
-          style={{
-            minHeight: 0,
+        {Object.entries(
+          skillsData
+        ).map(
+          ([
+            category,
+            skillsUnknown,
+          ]) => {
+            const skills =
+              skillsUnknown as Skill[];
 
-            height:
-              "100%",
+            return (
+              <CategorySection
+                key={
+                  category
+                }
 
-            overflowY:
-              "auto",
+                category={
+                  category
+                }
 
-            padding:
-              "10px 0 14px 14px",
+                skills={
+                  skills
+                }
 
-            boxSizing:
-              "border-box",
-          }}
-        >
-          {Object.entries(
-            skillsData
-          ).map(
-            ([
-              category,
-              skillsUnknown,
-            ]) => {
-              const skills =
-                skillsUnknown as Skill[];
-
-              return (
-                <CategorySection
-                  key={
+                collapsed={
+                  collapsedCategories[
                     category
-                  }
+                  ] ??
+                  false
+                }
 
-                  category={
+                onToggleCategory={() =>
+                  toggleCategory(
                     category
-                  }
+                  )
+                }
 
-                  skills={
+                onCollapseCategorySkills={() =>
+                  collapseSkillsInCategory(
                     skills
-                  }
+                  )
+                }
 
-                  collapsed={
-                    collapsedCategories[
-                      category
-                    ] ??
-                    false
-                  }
+                expandedSkillIds={
+                  expandedSkillIds
+                }
 
-                  onToggleCategory={() =>
-                    toggleCategory(
-                      category
-                    )
-                  }
+                onToggleSkill={
+                  toggleSkillRow
+                }
 
-                  onCollapseCategorySkills={() =>
-                    collapseSkillsInCategory(
-                      skills
-                    )
-                  }
+                standardFilter={
+                  standardFilter
+                }
 
-                  expandedSkillIds={
-                    expandedSkillIds
-                  }
+                thinkingTypeFilter={
+                  thinkingTypeFilter
+                }
 
-                  onToggleSkill={
-                    toggleSkillRow
-                  }
+                targetMarks={
+                  targetMarks
+                }
 
-                  standardFilter={
-                    standardFilter
-                  }
+                selectionFilters={
+                  selectionFilters
+                }
 
-                  thinkingTypeFilter={
-                    thinkingTypeFilter
-                  }
+                getConceptIndex={
+                  getConceptIndex
+                }
 
-                  targetMarks={
-                    targetMarks
-                  }
+                setConceptIndex={
+                  setConceptIndex
+                }
 
-                  selectionFilters={
-                    selectionFilters
-                  }
+                getDifficulty={
+                  getDifficulty
+                }
 
-                  getConceptIndex={
-                    getConceptIndex
-                  }
+                setDifficulty={
+                  setDifficulty
+                }
 
-                  setConceptIndex={
-                    setConceptIndex
-                  }
+                onConstraintBlocked={
+                  triggerConstraintFlash
+                }
 
-                  getDifficulty={
-                    getDifficulty
-                  }
-
-                  setDifficulty={
-                    setDifficulty
-                  }
-
-                  onConstraintBlocked={
-                    triggerConstraintFlash
-                  }
-
-                  onAddQuestion={(
+                onAddQuestion={(
+                  categoryName,
+                  skill,
+                  concept,
+                  difficulty
+                ) =>
+                  addQuestionToPaper(
                     categoryName,
                     skill,
                     concept,
-                    difficulty
-                  ) =>
-                    addQuestionToPaper(
-                      categoryName,
-                      skill,
-                      concept,
-                      difficulty,
-                      activePaper
-                    )
-                  }
+                    difficulty,
+                    activePaper
+                  )
+                }
 
-                  onRegenerateQuestion={(
+                onRegenerateQuestion={(
+                  categoryName,
+                  skill,
+                  concept,
+                  difficulty
+                ) =>
+                  regenerateQuestionToPaper(
                     categoryName,
                     skill,
                     concept,
-                    difficulty
-                  ) =>
-                    regenerateQuestionToPaper(
-                      categoryName,
-                      skill,
-                      concept,
-                      difficulty,
-                      activePaper
-                    )
-                  }
+                    difficulty,
+                    activePaper
+                  )
+                }
 
-                  theme={
-                    theme
-                  }
-                />
-              );
-            }
-          )}
-        </div>
-
-        <SkillsTreeScrollbar
-          scrollMetrics={
-            scrollMetrics
+                theme={
+                  theme
+                }
+              />
+            );
           }
-
-          trackHovered={
-            trackHovered
-          }
-
-          thumbHovered={
-            thumbHovered
-          }
-
-          draggingThumb={
-            draggingThumb
-          }
-
-          overlayThumbColor={
-            overlayThumbColor
-          }
-
-          onTrackMouseEnter={
-            handleTrackMouseEnter
-          }
-
-          onTrackMouseLeave={
-            handleTrackMouseLeave
-          }
-
-          onThumbMouseEnter={
-            handleThumbMouseEnter
-          }
-
-          onThumbMouseLeave={
-            handleThumbMouseLeave
-          }
-
-          onTrackPointerDown={
-            handleTrackPointerDown
-          }
-
-          onThumbPointerDown={
-            handleThumbPointerDown
-          }
-        />
+        )}
       </div>
     </section>
   );

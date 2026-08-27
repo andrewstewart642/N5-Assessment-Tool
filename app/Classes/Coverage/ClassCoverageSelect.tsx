@@ -1,76 +1,167 @@
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { SchoolClass } from "@/app/Classes/ClassTypes";
-import type { Theme } from "@/app/UI/Application/Theme/AppTheme";
-import { UI_TYPO } from "@/app/UI/Application/Typography/Typography";
-import { INTERACTION } from "@/app/UI/Application/Motion/InteractionTokens";
+import type {
+  SchoolClass,
+} from "@/app/Classes/ClassTypes";
+
+import type {
+  Theme,
+} from "@/app/UI/Application/Theme/AppTheme";
+
+import {
+  UI_TEXT,
+  UI_TYPO,
+} from "@/app/UI/Application/Typography/Typography";
 
 type Props = {
-  levelLabel: string | null;
-  classes: SchoolClass[];
-  selectedClassIds: string[];
-  useCompleteCourseCoverage: boolean;
-  onToggleClass: (classId: string) => void;
-  onSelectCompleteCourseCoverage: () => void;
+  levelLabel:
+    string | null;
 
-  label?: string;
-  emptyText?: string;
-  disabledText?: string;
-  completeCoverageSummaryText?: string;
-  hideHelperText?: boolean;
-  compact?: boolean;
-  width?: number | string;
-  dropdownWidth?: number | string;
-  zIndex?: number;
-  theme?: Theme;
+  classes:
+    SchoolClass[];
+
+  selectedClassIds:
+    string[];
+
+  useCompleteCourseCoverage:
+    boolean;
+
+  onToggleClass: (
+    classId: string
+  ) => void;
+
+  onSelectCompleteCourseCoverage:
+    () => void;
+
+  label?:
+    string;
+
+  emptyText?:
+    string;
+
+  disabledText?:
+    string;
+
+  completeCoverageSummaryText?:
+    string;
+
+  hideHelperText?:
+    boolean;
+
+  compact?:
+    boolean;
+
+  width?:
+    number | string;
+
+  dropdownWidth?:
+    number | string;
+
+  zIndex?:
+    number;
+
+  theme?:
+    Theme;
 };
 
-const TOP_BAR_CONTROL_HEIGHT = 32;
-const TOP_BAR_LABEL_GAP = 4;
-const TOP_BAR_RADIUS = 10;
+const CONTROL_HEIGHT =
+  32;
 
-function getSummaryText(args: {
-  classes: SchoolClass[];
-  selectedClassIds: string[];
-  useCompleteCourseCoverage: boolean;
-  completeCoverageSummaryText: string;
+function getSummaryText({
+  classes,
+  selectedClassIds,
+  useCompleteCourseCoverage,
+  completeCoverageSummaryText,
+}: {
+  classes:
+    SchoolClass[];
+
+  selectedClassIds:
+    string[];
+
+  useCompleteCourseCoverage:
+    boolean;
+
+  completeCoverageSummaryText:
+    string;
 }): string {
-  const {
-    classes,
-    selectedClassIds,
-    useCompleteCourseCoverage,
-    completeCoverageSummaryText,
-  } = args;
+  if (
+    useCompleteCourseCoverage
+  ) {
+    return completeCoverageSummaryText;
+  }
 
-  if (useCompleteCourseCoverage) return completeCoverageSummaryText;
-  if (selectedClassIds.length === 0) return "Select classes";
+  if (
+    selectedClassIds.length ===
+    0
+  ) {
+    return "Select classes";
+  }
 
-  const selectedClasses = classes.filter((item) =>
-    selectedClassIds.includes(item.id)
-  );
+  const selectedClasses =
+    classes.filter(
+      (
+        item
+      ) =>
+        selectedClassIds.includes(
+          item.id
+        )
+    );
 
-  if (selectedClasses.length === 1) return selectedClasses[0].name;
-  if (selectedClasses.length === 2) {
+  if (
+    selectedClasses.length ===
+    1
+  ) {
+    return selectedClasses[0]
+      .name;
+  }
+
+  if (
+    selectedClasses.length ===
+    2
+  ) {
     return `${selectedClasses[0].name}, ${selectedClasses[1].name}`;
   }
 
   return `${selectedClasses.length} classes selected`;
 }
 
-function getTriggerShellStyle(
-  hovered: boolean,
-  focused: boolean,
-  disabled: boolean
-): React.CSSProperties {
-  const active = !disabled && (hovered || focused);
-
-  return {
-    width: "100%",
-    borderRadius: TOP_BAR_RADIUS,
-    transform: active ? INTERACTION.lift.subtle.transform : "scale(1)",
-    boxShadow: active ? INTERACTION.lift.subtle.shadow : "0 0 0 rgba(0,0,0,0)",
-    transition: INTERACTION.transition.smooth,
-  };
+function Chevron({
+  open,
+}: {
+  open:
+    boolean;
+}) {
+  return (
+    <svg
+      width="8"
+      height="5"
+      viewBox="0 0 8 5"
+      aria-hidden="true"
+      style={{
+        display:
+          "block",
+      }}
+    >
+      <path
+        d={
+          open
+            ? "M1 4 L4 1 L7 4"
+            : "M1 1 L4 4 L7 1"
+        }
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 }
 
 export default function ClassCoverageSelect({
@@ -78,315 +169,774 @@ export default function ClassCoverageSelect({
   classes,
   selectedClassIds,
   useCompleteCourseCoverage,
+
   onToggleClass,
   onSelectCompleteCourseCoverage,
-  label = "Classes sitting this assessment",
-  emptyText = "Select classes",
-  disabledText = "Choose level first",
-  completeCoverageSummaryText = "Complete course coverage",
-  hideHelperText = false,
-  compact = false,
-  width = "100%",
-  dropdownWidth = "100%",
-  zIndex = 20,
+
+  label =
+    "Classes sitting this assessment",
+
+  emptyText =
+    "Select classes",
+
+  disabledText =
+    "Choose level first",
+
+  completeCoverageSummaryText =
+    "Complete course coverage",
+
+  hideHelperText =
+    false,
+
+  compact =
+    false,
+
+  width =
+    "100%",
+
+  dropdownWidth =
+    "100%",
+
+  zIndex =
+    20,
+
   theme,
 }: Props) {
-  const [open, setOpen] = useState(false);
-  const [triggerHovered, setTriggerHovered] = useState(false);
-  const [triggerFocused, setTriggerFocused] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const [
+    open,
+    setOpen,
+  ] =
+    useState(false);
+
+  const [
+    triggerHovered,
+    setTriggerHovered,
+  ] =
+    useState(false);
+
+  const [
+    triggerFocused,
+    setTriggerFocused,
+  ] =
+    useState(false);
+
+  const [
+    hoveredOption,
+    setHoveredOption,
+  ] =
+    useState<string | null>(
+      null
+    );
+
+  const wrapperRef =
+    useRef<HTMLDivElement | null>(
+      null
+    );
 
   useEffect(() => {
-    function handlePointerDown(event: MouseEvent) {
-      if (!wrapperRef.current) return;
-      if (wrapperRef.current.contains(event.target as Node)) return;
-      setOpen(false);
+    function handlePointerDown(
+      event:
+        MouseEvent
+    ) {
+      if (
+        !wrapperRef.current
+      ) {
+        return;
+      }
+
+      if (
+        wrapperRef.current.contains(
+          event.target as Node
+        )
+      ) {
+        return;
+      }
+
+      setOpen(
+        false
+      );
     }
 
-    function handleEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+    function handleEscape(
+      event:
+        KeyboardEvent
+    ) {
+      if (
+        event.key ===
+        "Escape"
+      ) {
+        setOpen(
+          false
+        );
+      }
     }
 
-    window.addEventListener("mousedown", handlePointerDown);
-    window.addEventListener("keydown", handleEscape);
+    window.addEventListener(
+      "mousedown",
+      handlePointerDown
+    );
+
+    window.addEventListener(
+      "keydown",
+      handleEscape
+    );
 
     return () => {
-      window.removeEventListener("mousedown", handlePointerDown);
-      window.removeEventListener("keydown", handleEscape);
+      window.removeEventListener(
+        "mousedown",
+        handlePointerDown
+      );
+
+      window.removeEventListener(
+        "keydown",
+        handleEscape
+      );
     };
   }, []);
 
-  const summaryText = useMemo(() => {
-    const rawSummary = getSummaryText({
+  const summaryText =
+    useMemo(() => {
+      const rawSummary =
+        getSummaryText({
+          classes,
+          selectedClassIds,
+          useCompleteCourseCoverage,
+          completeCoverageSummaryText,
+        });
+
+      if (
+        !useCompleteCourseCoverage &&
+        selectedClassIds.length ===
+          0
+      ) {
+        return emptyText;
+      }
+
+      return rawSummary;
+    }, [
       classes,
       selectedClassIds,
       useCompleteCourseCoverage,
       completeCoverageSummaryText,
-    });
+      emptyText,
+    ]);
 
-    if (!useCompleteCourseCoverage && selectedClassIds.length === 0) {
-      return emptyText;
-    }
+  const helperText =
+    useMemo(() => {
+      if (
+        useCompleteCourseCoverage
+      ) {
+        return "Builder will show the full course tree.";
+      }
 
-    return rawSummary;
-  }, [
-    classes,
-    selectedClassIds,
-    useCompleteCourseCoverage,
-    completeCoverageSummaryText,
-    emptyText,
-  ]);
+      if (
+        selectedClassIds.length >
+        0
+      ) {
+        return "Builder will only show skills covered by all selected classes.";
+      }
 
-  const helperText = useMemo(() => {
-    if (useCompleteCourseCoverage) {
-      return "Builder will show the full course tree.";
-    }
+      return levelLabel
+        ? "Choose one or more classes, or use complete course coverage."
+        : "Choose a level first.";
+    }, [
+      levelLabel,
+      selectedClassIds.length,
+      useCompleteCourseCoverage,
+    ]);
 
-    if (selectedClassIds.length > 0) {
-      return "Builder will only show skills covered by all selected classes.";
-    }
+  const disabled =
+    !levelLabel;
 
-    return levelLabel
-      ? "Choose one or more classes, or use complete course coverage."
-      : "Choose a level first.";
-  }, [levelLabel, selectedClassIds.length, useCompleteCourseCoverage]);
+  const triggerActive =
+    !disabled &&
+    (
+      triggerHovered ||
+      triggerFocused ||
+      open
+    );
 
-  const labelStyle: React.CSSProperties = {
-    fontSize: 12,
-    fontWeight: UI_TYPO.weightMedium,
-    color: theme ? theme.textMuted : "rgba(214,227,243,0.72)",
-    lineHeight: 1.2,
-    whiteSpace: "nowrap",
-  };
+  const controlRadius =
+    compact
+      ? 6
+      : 10;
 
-  const disabled = !levelLabel;
-  const triggerActive = !disabled && (triggerHovered || triggerFocused || open);
+  const menuRadius =
+    compact
+      ? 6
+      : 16;
 
-  const triggerStyle: React.CSSProperties = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    width: "100%",
-    minWidth: 0,
-    overflow: "hidden",
-    border: theme
-      ? `1px solid ${
-          triggerActive ? theme.controlSelectedBorder : theme.borderStandard
-        }`
-      : "1px solid rgba(255,255,255,0.10)",
-    borderRadius: TOP_BAR_RADIUS,
-    background: theme
-      ? triggerActive
-        ? theme.controlBgHover
-        : theme.controlBg
-      : "rgba(255,255,255,0.02)",
-    padding: "0 10px",
-    height: TOP_BAR_CONTROL_HEIGHT,
-    cursor: disabled ? "not-allowed" : "pointer",
-    color: disabled
-      ? theme?.textMuted ?? "rgba(214,227,243,0.45)"
-      : theme?.textPrimary ?? "#f7fbff",
-    fontSize: 13,
-    fontFamily: UI_TYPO.family,
-    fontWeight: UI_TYPO.weightSemibold,
-    textAlign: "left",
-    boxSizing: "border-box",
-    transition: INTERACTION.transition.smooth,
-    boxShadow: triggerActive
-      ? "inset 0 1px 0 rgba(255,255,255,0.06)"
-      : "inset 0 1px 0 rgba(255,255,255,0.04)",
-  };
+  const rowRadius =
+    compact
+      ? 5
+      : 12;
+
+  const labelStyle:
+    React.CSSProperties =
+    compact
+      ? {
+          ...UI_TEXT.sectionLabel,
+
+          color:
+            theme?.textMuted ??
+            "rgba(214,227,243,0.72)",
+
+          whiteSpace:
+            "nowrap",
+        }
+      : {
+          fontSize:
+            12,
+
+          fontWeight:
+            UI_TYPO.weightMedium,
+
+          color:
+            theme?.textMuted ??
+            "rgba(214,227,243,0.72)",
+
+          lineHeight:
+            1.2,
+
+          whiteSpace:
+            "nowrap",
+        };
 
   return (
     <div
-      ref={wrapperRef}
+      ref={
+        wrapperRef
+      }
       style={{
-        display: "grid",
-        gap: hideHelperText ? TOP_BAR_LABEL_GAP : 6,
-        position: "relative",
+        display:
+          "grid",
+
+        gap:
+          hideHelperText
+            ? compact
+              ? 6
+              : 4
+            : 6,
+
+        position:
+          "relative",
+
         width,
-        minWidth: 0,
-        fontFamily: UI_TYPO.family,
+
+        minWidth:
+          0,
+
+        fontFamily:
+          UI_TYPO.family,
       }}
     >
-      <span style={labelStyle}>{label}</span>
-
-      <div
-        style={getTriggerShellStyle(triggerHovered, triggerFocused || open, disabled)}
-        onMouseEnter={() => setTriggerHovered(true)}
-        onMouseLeave={() => setTriggerHovered(false)}
+      <span
+        style={
+          labelStyle
+        }
       >
-        <button
-          type="button"
-          onClick={() => {
-            if (!levelLabel) return;
-            setOpen((prev) => !prev);
-          }}
-          onFocus={() => setTriggerFocused(true)}
-          onBlur={() => setTriggerFocused(false)}
-          style={triggerStyle}
-        >
-          <span
-            style={{
-              display: "block",
-              flex: "1 1 auto",
-              minWidth: 0,
-              maxWidth: "100%",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {levelLabel ? summaryText : disabledText}
-          </span>
+        {label}
+      </span>
 
-          <span
-            style={{
-              color: theme ? theme.textMuted : "rgba(214,227,243,0.72)",
-              fontSize: 11,
-              transform: open ? "rotate(180deg)" : "rotate(0deg)",
-              transition: "transform 140ms ease",
-              flexShrink: 0,
-              marginLeft: 2,
-              lineHeight: 1,
-            }}
-          >
-            ▾
-          </span>
-        </button>
-      </div>
+      <button
+        type="button"
+        disabled={
+          disabled
+        }
+        onClick={() => {
+          if (
+            !levelLabel
+          ) {
+            return;
+          }
+
+          setOpen(
+            (
+              previous
+            ) =>
+              !previous
+          );
+        }}
+        onFocus={() =>
+          setTriggerFocused(
+            true
+          )
+        }
+        onBlur={() =>
+          setTriggerFocused(
+            false
+          )
+        }
+        onMouseEnter={() =>
+          setTriggerHovered(
+            true
+          )
+        }
+        onMouseLeave={() =>
+          setTriggerHovered(
+            false
+          )
+        }
+        style={{
+          display:
+            "flex",
+
+          alignItems:
+            "center",
+
+          justifyContent:
+            "space-between",
+
+          gap:
+            8,
+
+          width:
+            "100%",
+
+          minWidth:
+            0,
+
+          height:
+            CONTROL_HEIGHT,
+
+          padding:
+            compact
+              ? "0 8px"
+              : "0 10px",
+
+          boxSizing:
+            "border-box",
+
+          overflow:
+            "hidden",
+
+          borderRadius:
+            controlRadius,
+
+          border:
+            `1px solid ${
+              triggerActive
+                ? theme?.controlSelectedBorder ??
+                  "#60a5fa"
+                : theme?.borderStandard ??
+                  "rgba(255,255,255,0.10)"
+            }`,
+
+          background:
+            triggerActive
+              ? theme?.controlBgHover ??
+                "rgba(255,255,255,0.04)"
+              : theme?.controlBg ??
+                "rgba(255,255,255,0.02)",
+
+          color:
+            disabled
+              ? theme?.textMuted ??
+                "rgba(214,227,243,0.45)"
+              : theme?.textPrimary ??
+                "#f7fbff",
+
+          cursor:
+            disabled
+              ? "not-allowed"
+              : "pointer",
+
+          textAlign:
+            "left",
+
+          fontFamily:
+            UI_TYPO.family,
+
+          fontSize:
+            compact
+              ? UI_TYPO.sizeBase
+              : 13,
+
+          fontWeight:
+            compact
+              ? UI_TYPO.weightMedium
+              : UI_TYPO.weightSemibold,
+
+          transition:
+            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease",
+        }}
+      >
+        <span
+          style={{
+            display:
+              "block",
+
+            flex:
+              "1 1 auto",
+
+            minWidth:
+              0,
+
+            overflow:
+              "hidden",
+
+            textOverflow:
+              "ellipsis",
+
+            whiteSpace:
+              "nowrap",
+          }}
+        >
+          {levelLabel
+            ? summaryText
+            : disabledText}
+        </span>
+
+        <span
+          style={{
+            color:
+              theme?.textMuted ??
+              "rgba(214,227,243,0.72)",
+
+            flexShrink:
+              0,
+          }}
+        >
+          <Chevron
+            open={
+              open
+            }
+          />
+        </span>
+      </button>
 
       {!hideHelperText ? (
         <div
           style={{
-            fontSize: 12,
-            lineHeight: 1.4,
-            color: theme ? theme.textMuted : "rgba(214,227,243,0.58)",
+            fontSize:
+              12,
+
+            lineHeight:
+              1.4,
+
+            color:
+              theme?.textMuted ??
+              "rgba(214,227,243,0.58)",
           }}
         >
           {helperText}
         </div>
       ) : null}
 
-      {open && levelLabel ? (
+      {open &&
+      levelLabel ? (
         <div
           style={{
-            position: "absolute",
-            top: hideHelperText ? "calc(100% + 6px)" : "100%",
-            left: 0,
-            width: dropdownWidth,
-            marginTop: hideHelperText ? 0 : 8,
-            border: theme
-              ? `1px solid ${theme.borderStandard}`
-              : "1px solid rgba(255,255,255,0.10)",
-            borderRadius: 16,
-            background: theme?.bgElevated ?? "#121a24",
-            boxShadow: theme?.shadowStrong ?? "0 18px 36px rgba(0,0,0,0.28)",
-            padding: 10,
+            position:
+              "absolute",
+
+            top:
+              hideHelperText
+                ? "calc(100% + 6px)"
+                : "100%",
+
+            left:
+              0,
+
+            width:
+              dropdownWidth,
+
+            marginTop:
+              hideHelperText
+                ? 0
+                : 8,
+
+            boxSizing:
+              "border-box",
+
+            border:
+              `1px solid ${
+                theme?.borderStandard ??
+                "rgba(255,255,255,0.10)"
+              }`,
+
+            borderRadius:
+              menuRadius,
+
+            background:
+              theme?.bgElevated ??
+              "#121a24",
+
+            boxShadow:
+              compact
+                ? theme?.shadow ??
+                  "0 8px 20px rgba(0,0,0,0.22)"
+                : theme?.shadowStrong ??
+                  "0 18px 36px rgba(0,0,0,0.28)",
+
+            padding:
+              compact
+                ? 4
+                : 10,
+
             zIndex,
-            display: "grid",
-            gap: 8,
+
+            display:
+              "grid",
+
+            gap:
+              compact
+                ? 2
+                : 8,
           }}
         >
           <div
             className="hover-scroll"
             style={{
-              maxHeight: 260,
-              overflowY: "auto",
-              display: "grid",
-              gap: 8,
+              maxHeight:
+                compact
+                  ? 220
+                  : 260,
+
+              overflowY:
+                "auto",
+
+              display:
+                "grid",
+
+              gap:
+                compact
+                  ? 2
+                  : 8,
             }}
           >
-            {classes.length > 0 ? (
-              classes.map((schoolClass) => {
-                const checked = selectedClassIds.includes(schoolClass.id);
-                const selectedBg = theme?.controlSelectedBg ?? "rgba(37,99,235,0.16)";
-                const defaultBg = theme?.controlBg ?? "rgba(255,255,255,0.03)";
+            {classes.length >
+            0 ? (
+              classes.map(
+                (
+                  schoolClass
+                ) => {
+                  const checked =
+                    selectedClassIds.includes(
+                      schoolClass.id
+                    );
 
-                return (
-                  <button
-                    key={schoolClass.id}
-                    type="button"
-                    onClick={() => onToggleClass(schoolClass.id)}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "18px minmax(0, 1fr)",
-                      alignItems: "start",
-                      gap: 10,
-                      width: "100%",
-                      border: `1px solid ${
-                        checked
-                          ? theme?.controlSelectedBorder ?? "#60a5fa"
-                          : theme?.borderStandard ?? "rgba(255,255,255,0.08)"
-                      }`,
-                      borderRadius: 12,
-                      background: checked ? selectedBg : defaultBg,
-                      padding: "10px 12px",
-                      cursor: "pointer",
-                      textAlign: "left",
-                      transition: INTERACTION.transition.smooth,
-                    }}
-                  >
-                    <span
-                      aria-hidden="true"
+                  const hovered =
+                    hoveredOption ===
+                    schoolClass.id;
+
+                  return (
+                    <button
+                      key={
+                        schoolClass.id
+                      }
+                      type="button"
+                      onClick={() =>
+                        onToggleClass(
+                          schoolClass.id
+                        )
+                      }
+                      onMouseEnter={() =>
+                        setHoveredOption(
+                          schoolClass.id
+                        )
+                      }
+                      onMouseLeave={() =>
+                        setHoveredOption(
+                          null
+                        )
+                      }
                       style={{
-                        width: 16,
-                        height: 16,
-                        borderRadius: 4,
-                        border: `2px solid ${
+                        display:
+                          "grid",
+
+                        gridTemplateColumns:
+                          compact
+                            ? "16px minmax(0, 1fr)"
+                            : "18px minmax(0, 1fr)",
+
+                        alignItems:
+                          "start",
+
+                        gap:
+                          compact
+                            ? 8
+                            : 10,
+
+                        width:
+                          "100%",
+
+                        boxSizing:
+                          "border-box",
+
+                        border:
+                          `1px solid ${
+                            checked
+                              ? theme?.controlSelectedBorder ??
+                                "#60a5fa"
+                              : compact
+                                ? "transparent"
+                                : theme?.borderStandard ??
+                                  "rgba(255,255,255,0.08)"
+                          }`,
+
+                        borderRadius:
+                          rowRadius,
+
+                        background:
                           checked
-                            ? theme?.controlSelectedBorder ?? "#93c5fd"
-                            : theme?.textMuted ?? "rgba(214,227,243,0.50)"
-                        }`,
-                        background: checked
-                          ? theme?.controlSelectedBorder ?? "#60a5fa"
-                          : "transparent",
-                        boxSizing: "border-box",
-                        marginTop: 1,
+                            ? theme?.controlSelectedBg ??
+                              "rgba(37,99,235,0.16)"
+                            : hovered
+                              ? theme?.controlBgHover ??
+                                "rgba(255,255,255,0.04)"
+                              : compact
+                                ? "transparent"
+                                : theme?.controlBg ??
+                                  "rgba(255,255,255,0.03)",
+
+                        padding:
+                          compact
+                            ? "7px 8px"
+                            : "10px 12px",
+
+                        cursor:
+                          "pointer",
+
+                        textAlign:
+                          "left",
+
+                        transition:
+                          "background 0.15s ease, border-color 0.15s ease",
                       }}
-                    />
+                    >
+                      <span
+                        aria-hidden="true"
+                        style={{
+                          width:
+                            compact
+                              ? 14
+                              : 16,
 
-                    <span style={{ minWidth: 0, display: "grid", gap: 4 }}>
+                          height:
+                            compact
+                              ? 14
+                              : 16,
+
+                          borderRadius:
+                            compact
+                              ? 3
+                              : 4,
+
+                          border:
+                            `1.5px solid ${
+                              checked
+                                ? theme?.controlSelectedBorder ??
+                                  "#93c5fd"
+                                : theme?.textMuted ??
+                                  "rgba(214,227,243,0.50)"
+                            }`,
+
+                          background:
+                            checked
+                              ? theme?.controlSelectedBorder ??
+                                "#60a5fa"
+                              : "transparent",
+
+                          boxSizing:
+                            "border-box",
+
+                          marginTop:
+                            1,
+                        }}
+                      />
+
                       <span
                         style={{
-                          fontSize: 14,
-                          fontWeight: 700,
-                          lineHeight: 1.2,
-                          color: checked
-                            ? theme?.textPrimary ?? "#eaf3ff"
-                            : theme?.textSecondary ?? "#d6e3f3",
-                        }}
-                      >
-                        {schoolClass.name}
-                      </span>
+                          minWidth:
+                            0,
 
-                      <span
-                        style={{
-                          fontSize: 12,
-                          lineHeight: 1.35,
-                          color: theme?.textMuted ?? "rgba(214,227,243,0.60)",
+                          display:
+                            "grid",
+
+                          gap:
+                            compact
+                              ? 2
+                              : 4,
                         }}
                       >
-                        {[schoolClass.level, schoolClass.teacher]
-                          .filter(Boolean)
-                          .join(" • ") || schoolClass.course}
+                        <span
+                          style={{
+                            fontSize:
+                              compact
+                                ? UI_TYPO.sizeBase
+                                : 14,
+
+                            fontWeight:
+                              UI_TYPO.weightSemibold,
+
+                            lineHeight:
+                              1.2,
+
+                            color:
+                              checked
+                                ? theme?.textPrimary ??
+                                  "#eaf3ff"
+                                : theme?.textSecondary ??
+                                  "#d6e3f3",
+                          }}
+                        >
+                          {
+                            schoolClass.name
+                          }
+                        </span>
+
+                        <span
+                          style={{
+                            fontSize:
+                              compact
+                                ? UI_TYPO.sizeMeta
+                                : 12,
+
+                            fontWeight:
+                              UI_TYPO.weightRegular,
+
+                            lineHeight:
+                              1.3,
+
+                            color:
+                              theme?.textMuted ??
+                              "rgba(214,227,243,0.60)",
+                          }}
+                        >
+                          {[
+                            schoolClass.level,
+                            schoolClass.teacher,
+                          ]
+                            .filter(
+                              Boolean
+                            )
+                            .join(
+                              " • "
+                            ) ||
+                            schoolClass.course}
+                        </span>
                       </span>
-                    </span>
-                  </button>
-                );
-              })
+                    </button>
+                  );
+                }
+              )
             ) : (
               <div
                 style={{
-                  border: theme
-                    ? `1px dashed ${theme.borderStandard}`
-                    : "1px dashed rgba(255,255,255,0.10)",
-                  borderRadius: 12,
-                  padding: "12px 14px",
-                  fontSize: 13,
-                  lineHeight: 1.45,
-                  color: theme?.textMuted ?? "rgba(214,227,243,0.58)",
+                  padding:
+                    compact
+                      ? "8px 9px"
+                      : "12px 14px",
+
+                  fontSize:
+                    compact
+                      ? UI_TYPO.sizeMeta
+                      : 13,
+
+                  color:
+                    theme?.textMuted ??
+                    "rgba(214,227,243,0.58)",
                 }}
               >
                 No classes found for this level yet.
@@ -396,64 +946,170 @@ export default function ClassCoverageSelect({
 
           <div
             style={{
-              borderTop: theme
-                ? `1px solid ${theme.borderStandard}`
-                : "1px solid rgba(255,255,255,0.08)",
-              paddingTop: 8,
+              borderTop:
+                `1px solid ${
+                  theme?.borderStandard ??
+                  "rgba(255,255,255,0.08)"
+                }`,
+
+              paddingTop:
+                compact
+                  ? 4
+                  : 8,
             }}
           >
             <button
               type="button"
-              onClick={onSelectCompleteCourseCoverage}
+              onClick={
+                onSelectCompleteCourseCoverage
+              }
+              onMouseEnter={() =>
+                setHoveredOption(
+                  "__complete__"
+                )
+              }
+              onMouseLeave={() =>
+                setHoveredOption(
+                  null
+                )
+              }
               style={{
-                display: "grid",
-                gridTemplateColumns: "18px minmax(0, 1fr)",
-                alignItems: "start",
-                gap: 10,
-                width: "100%",
-                border: `1px solid ${
+                display:
+                  "grid",
+
+                gridTemplateColumns:
+                  compact
+                    ? "16px minmax(0, 1fr)"
+                    : "18px minmax(0, 1fr)",
+
+                alignItems:
+                  "start",
+
+                gap:
+                  compact
+                    ? 8
+                    : 10,
+
+                width:
+                  "100%",
+
+                boxSizing:
+                  "border-box",
+
+                border:
+                  `1px solid ${
+                    useCompleteCourseCoverage
+                      ? theme?.controlSelectedBorder ??
+                        "#60a5fa"
+                      : compact
+                        ? "transparent"
+                        : theme?.borderStandard ??
+                          "rgba(255,255,255,0.08)"
+                  }`,
+
+                borderRadius:
+                  rowRadius,
+
+                background:
                   useCompleteCourseCoverage
-                    ? theme?.controlSelectedBorder ?? "#60a5fa"
-                    : theme?.borderStandard ?? "rgba(255,255,255,0.08)"
-                }`,
-                borderRadius: 12,
-                background: useCompleteCourseCoverage
-                  ? theme?.controlSelectedBg ?? "rgba(37,99,235,0.16)"
-                  : theme?.controlBg ?? "rgba(255,255,255,0.03)",
-                padding: "10px 12px",
-                cursor: "pointer",
-                textAlign: "left",
-                transition: INTERACTION.transition.smooth,
+                    ? theme?.controlSelectedBg ??
+                      "rgba(37,99,235,0.16)"
+                    : hoveredOption ===
+                        "__complete__"
+                      ? theme?.controlBgHover ??
+                        "rgba(255,255,255,0.04)"
+                      : compact
+                        ? "transparent"
+                        : theme?.controlBg ??
+                          "rgba(255,255,255,0.03)",
+
+                padding:
+                  compact
+                    ? "7px 8px"
+                    : "10px 12px",
+
+                cursor:
+                  "pointer",
+
+                textAlign:
+                  "left",
+
+                transition:
+                  "background 0.15s ease, border-color 0.15s ease",
               }}
             >
               <span
                 aria-hidden="true"
                 style={{
-                  width: 16,
-                  height: 16,
-                  borderRadius: 999,
-                  border: `2px solid ${
+                  width:
+                    compact
+                      ? 14
+                      : 16,
+
+                  height:
+                    compact
+                      ? 14
+                      : 16,
+
+                  borderRadius:
+                    999,
+
+                  border:
+                    `1.5px solid ${
+                      useCompleteCourseCoverage
+                        ? theme?.controlSelectedBorder ??
+                          "#93c5fd"
+                        : theme?.textMuted ??
+                          "rgba(214,227,243,0.50)"
+                    }`,
+
+                  background:
                     useCompleteCourseCoverage
-                      ? theme?.controlSelectedBorder ?? "#93c5fd"
-                      : theme?.textMuted ?? "rgba(214,227,243,0.50)"
-                  }`,
-                  background: useCompleteCourseCoverage
-                    ? theme?.controlSelectedBorder ?? "#60a5fa"
-                    : "transparent",
-                  boxSizing: "border-box",
-                  marginTop: 1,
+                      ? theme?.controlSelectedBorder ??
+                        "#60a5fa"
+                      : "transparent",
+
+                  boxSizing:
+                    "border-box",
+
+                  marginTop:
+                    1,
                 }}
               />
 
-              <span style={{ minWidth: 0, display: "grid", gap: 4 }}>
+              <span
+                style={{
+                  minWidth:
+                    0,
+
+                  display:
+                    "grid",
+
+                  gap:
+                    compact
+                      ? 2
+                      : 4,
+                }}
+              >
                 <span
                   style={{
-                    fontSize: 14,
-                    fontWeight: 700,
-                    lineHeight: 1.2,
-                    color: useCompleteCourseCoverage
-                      ? theme?.textPrimary ?? "#eaf3ff"
-                      : theme?.textSecondary ?? "#d6e3f3",
+                    fontSize:
+                      compact
+                        ? UI_TYPO.sizeBase
+                        : 14,
+
+                    fontWeight:
+                      UI_TYPO.weightSemibold,
+
+                    lineHeight:
+                      1.2,
+
+                    color:
+                      useCompleteCourseCoverage
+                        ? theme?.textPrimary ??
+                          "#eaf3ff"
+                        : theme?.textSecondary ??
+                          "#d6e3f3",
                   }}
                 >
                   Show complete course coverage
@@ -461,9 +1117,20 @@ export default function ClassCoverageSelect({
 
                 <span
                   style={{
-                    fontSize: 12,
-                    lineHeight: 1.35,
-                    color: theme?.textMuted ?? "rgba(214,227,243,0.60)",
+                    fontSize:
+                      compact
+                        ? UI_TYPO.sizeMeta
+                        : 12,
+
+                    fontWeight:
+                      UI_TYPO.weightRegular,
+
+                    lineHeight:
+                      1.3,
+
+                    color:
+                      theme?.textMuted ??
+                      "rgba(214,227,243,0.60)",
                   }}
                 >
                   Ignore class coverage filters and show the full course tree.

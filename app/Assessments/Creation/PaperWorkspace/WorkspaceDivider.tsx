@@ -3,14 +3,19 @@ import type {
   SetStateAction,
 } from "react";
 
-import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
+import type {
+  AppTheme,
+} from "@/app/UI/Application/Theme/AppTheme";
 
 type WorkspaceDividerProps = {
-  theme: AppTheme;
+  theme:
+    AppTheme;
 
-  width: number;
+  width:
+    number;
 
-  isDragging: boolean;
+  isDragging:
+    boolean;
 
   setIsDragging:
     Dispatch<
@@ -18,55 +23,117 @@ type WorkspaceDividerProps = {
     >;
 };
 
+const DOT_SIZE =
+  2;
+
+const DOT_GAP =
+  3;
+
 export default function WorkspaceDivider({
   theme,
   width,
   isDragging,
   setIsDragging,
 }: WorkspaceDividerProps) {
-  const dividerColour =
-    isDragging
-      ? theme.accentSoft
-      : theme.borderStandard;
-
   return (
     <div
-      onMouseDown={() =>
-        setIsDragging(true)
-      }
-      onMouseUp={() =>
-        setIsDragging(false)
-      }
+      onMouseDown={(
+        event
+      ) => {
+        event.preventDefault();
+
+        setIsDragging(
+          true
+        );
+      }}
       style={{
         width,
 
+        minWidth:
+          width,
+
+        height:
+          "100%",
+
         background:
-          dividerColour,
+          theme.bgPage,
 
         cursor:
           "col-resize",
 
         position:
           "relative",
+
+        display:
+          "grid",
+
+        placeItems:
+          "center",
+
+        userSelect:
+          "none",
+
+        WebkitUserSelect:
+          "none",
       }}
       title="Drag to resize panes"
     >
       <div
+        aria-hidden="true"
         style={{
-          position:
-            "absolute",
+          display:
+            "grid",
 
-          inset: 0,
+          gridTemplateRows:
+            `repeat(3, ${DOT_SIZE}px)`,
 
-          background:
-            "linear-gradient(to right, transparent 0, transparent 2px, rgba(147,197,253,0.20) 2px, rgba(147,197,253,0.20) 6px, transparent 6px, transparent 100%)",
+          gap:
+            DOT_GAP,
 
-          opacity:
-            isDragging
-              ? 1
-              : 0.3,
+          placeItems:
+            "center",
+
+          pointerEvents:
+            "none",
         }}
-      />
+      >
+        {[
+          0,
+          1,
+          2,
+        ].map(
+          (dot) => (
+            <span
+              key={
+                dot
+              }
+              style={{
+                width:
+                  DOT_SIZE,
+
+                height:
+                  DOT_SIZE,
+
+                borderRadius:
+                  999,
+
+                background:
+                  isDragging
+                    ? theme.accentPrimary
+                    : theme.textMuted,
+
+                opacity:
+                  isDragging
+                    ? 0.9
+                    : 0.48,
+
+                transition:
+                  "background 0.15s ease, opacity 0.15s ease",
+              }}
+            />
+          )
+        )}
+      </div>
     </div>
   );
 }

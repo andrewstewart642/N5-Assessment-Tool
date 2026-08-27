@@ -1,4 +1,3 @@
-
 import {
   useCallback,
   useEffect,
@@ -188,7 +187,7 @@ export function useAssessmentPreviewViewport({
             Math.max(
               0,
               visibleBottom -
-              visibleTop
+                visibleTop
             );
 
           if (
@@ -249,13 +248,56 @@ export function useAssessmentPreviewViewport({
       return;
     }
 
+    const parentElement =
+      element.parentElement;
+
     const calculateFitWidth =
       () => {
-        const width =
+        const elementClientWidth =
           element.clientWidth;
+
+        const elementRectWidth =
+          element
+            .getBoundingClientRect()
+            .width;
+
+        const parentRectWidth =
+          parentElement
+            ? parentElement
+                .getBoundingClientRect()
+                .width
+            : 0;
+
+        /*
+         * The preview is nested inside a framed
+         * editor pane. During a layout transition
+         * the scroll element can briefly report a
+         * tiny/zero width.
+         *
+         * Using the largest valid editor measurement
+         * prevents that transient value from collapsing
+         * fitWidthScale to its minimum.
+         */
+        const width =
+          Math.max(
+            elementClientWidth,
+            elementRectWidth,
+            parentRectWidth
+          );
 
         const horizontalPaddingAllowance =
           40;
+
+        if (
+          !Number.isFinite(
+            width
+          ) ||
+          width <=
+            horizontalPaddingAllowance +
+              120
+        ) {
+          return;
+        }
 
         const nextScale =
           clampNumber(
@@ -273,7 +315,7 @@ export function useAssessmentPreviewViewport({
           (previous) =>
             Math.abs(
               previous -
-              nextScale
+                nextScale
             ) < 0.01
               ? previous
               : nextScale
@@ -281,6 +323,11 @@ export function useAssessmentPreviewViewport({
       };
 
     calculateFitWidth();
+
+    const initialFrame =
+      window.requestAnimationFrame(
+        calculateFitWidth
+      );
 
     const resizeObserver =
       new ResizeObserver(
@@ -293,8 +340,30 @@ export function useAssessmentPreviewViewport({
       element
     );
 
+    if (
+      parentElement
+    ) {
+      resizeObserver.observe(
+        parentElement
+      );
+    }
+
+    window.addEventListener(
+      "resize",
+      calculateFitWidth
+    );
+
     return () => {
+      window.cancelAnimationFrame(
+        initialFrame
+      );
+
       resizeObserver.disconnect();
+
+      window.removeEventListener(
+        "resize",
+        calculateFitWidth
+      );
     };
   }, [
     previewPaneRef,
