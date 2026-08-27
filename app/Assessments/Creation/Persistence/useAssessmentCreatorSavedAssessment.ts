@@ -35,10 +35,12 @@ import type {
   AssessmentQuestionDraftByPaper,
 } from "../Questions/AssessmentQuestionDraftTypes";
 
+
 type StateSetter<T> =
   Dispatch<
     SetStateAction<T>
   >;
+
 
 type UseAssessmentCreatorSavedAssessmentArgs = {
   setCreatedAt:
@@ -119,11 +121,28 @@ type UseAssessmentCreatorSavedAssessmentArgs = {
       AssessmentPaperBooleanMap
     >;
 
+  setDatesUnlinked:
+    StateSetter<boolean>;
+
+  setDateLinkOwnerPaper:
+    StateSetter<
+      Paper | null
+    >;
+
+  setStartTimesUnlinked:
+    StateSetter<boolean>;
+
+  setStartTimeLinkOwnerPaper:
+    StateSetter<
+      Paper | null
+    >;
+
   setEndTimeManuallyEditedByPaper:
     StateSetter<
       AssessmentPaperBooleanMap
     >;
 };
+
 
 export function useAssessmentCreatorSavedAssessment({
   setCreatedAt,
@@ -156,6 +175,12 @@ export function useAssessmentCreatorSavedAssessment({
   setEndTimeByPaper,
 
   setCoverDateCustomByPaper,
+
+  setDatesUnlinked,
+  setDateLinkOwnerPaper,
+
+  setStartTimesUnlinked,
+  setStartTimeLinkOwnerPaper,
 
   setEndTimeManuallyEditedByPaper,
 }: UseAssessmentCreatorSavedAssessmentArgs) {
@@ -205,6 +230,7 @@ export function useAssessmentCreatorSavedAssessment({
       false
     );
 
+
   useEffect(() => {
     const nextAssessmentId =
       getCurrentSavedAssessmentId();
@@ -242,164 +268,229 @@ export function useAssessmentCreatorSavedAssessment({
       return;
     }
 
+    const builder =
+      savedAssessment.builder;
+
+
     setCreatedAt(
       savedAssessment.createdAt
     );
 
     setAssessmentName(
-      savedAssessment.builder
-        .assessmentName
+      builder.assessmentName
     );
 
     setClassName(
-      savedAssessment.builder
-        .className
+      builder.className
     );
 
     setAssessmentDate(
-      savedAssessment.builder
-        .assessmentDate
+      builder.assessmentDate
     );
 
     setStandardFilter(
-      savedAssessment.builder
-        .standardFilter
+      builder.standardFilter
     );
 
     setThinkingTypeFilter(
-      savedAssessment.builder
-        .thinkingTypeFilter
+      builder.thinkingTypeFilter
     );
 
     setTargetMarks(
-      savedAssessment.builder
-        .targetMarks
+      builder.targetMarks
     );
 
     setActivePaper(
-      savedAssessment.builder
-        .activePaper
+      builder.activePaper
     );
 
     setViewPaper(
-      savedAssessment.builder
-        .viewPaper
+      builder.viewPaper
     );
 
+
     setTargetMarksByPaper(
-      savedAssessment.builder
-        .targetMarksByPaper ?? {
+      builder.targetMarksByPaper ?? {
         P1:
-          savedAssessment.builder
-            .p1Target,
+          builder.p1Target,
 
         P2:
-          savedAssessment.builder
-            .p2Target,
+          builder.p2Target,
       }
     );
 
+
     setQuestions(
-      savedAssessment.builder
-        .questions
+      builder.questions
     );
 
     setDraftByPaper(
-      savedAssessment.builder
-        .draftByPaper
+      builder.draftByPaper
     );
 
     setEditDraftByPaper(
-      savedAssessment.builder
-        .editDraftByPaper
+      builder.editDraftByPaper
     );
 
+
     setIncludeCoverSheet(
-      savedAssessment.builder
-        .includeCoverSheet
+      builder.includeCoverSheet
     );
 
     setIncludeFormulaSheet(
-      savedAssessment.builder
-        .includeFormulaSheet
+      builder.includeFormulaSheet
     );
 
     setShowCoverDateTime(
-      savedAssessment.builder
-        .showCoverDateTime
+      builder.showCoverDateTime
     );
 
     setShowScottishCandidateNumberBox(
-      savedAssessment.builder
-        .showScottishCandidateNumberBox
+      builder.showScottishCandidateNumberBox
     );
 
+
     setCoverDateByPaper(
-      savedAssessment.builder
-        .coverDateByPaper ?? {
+      builder.coverDateByPaper ?? {
         P1:
-          savedAssessment.builder
-            .assessmentDate,
+          builder.assessmentDate,
 
         P2:
-          savedAssessment.builder
-            .p2CoverDate,
+          builder.p2CoverDate,
       }
     );
 
     setStartTimeByPaper(
-      savedAssessment.builder
-        .startTimeByPaper ?? {
+      builder.startTimeByPaper ?? {
         P1:
-          savedAssessment.builder
-            .p1StartTime,
+          builder.p1StartTime,
 
         P2:
-          savedAssessment.builder
-            .p2StartTime,
+          builder.p2StartTime,
       }
     );
 
     setEndTimeByPaper(
-      savedAssessment.builder
-        .endTimeByPaper ?? {
+      builder.endTimeByPaper ?? {
         P1:
-          savedAssessment.builder
-            .p1EndTime,
+          builder.p1EndTime,
 
         P2:
-          savedAssessment.builder
-            .p2EndTime,
+          builder.p2EndTime,
       }
     );
 
     setCoverDateCustomByPaper(
-      savedAssessment.builder
-        .coverDateCustomByPaper ?? {
+      builder.coverDateCustomByPaper ?? {
         P1:
           false,
 
         P2:
-          savedAssessment.builder
-            .p2DateCustom,
+          builder.p2DateCustom,
       }
     );
 
-    setEndTimeManuallyEditedByPaper({
-      P1:
-        savedAssessment.builder
-          .p1EndTime
-          .trim()
-          .length >
-        0,
 
-      P2:
-        savedAssessment.builder
-          .p2EndTime
-          .trim()
-          .length >
-        0,
-    });
+    /*
+     * Date linking
+     *
+     * Historical custom P2 dates are treated as
+     * already independent — preserving teacher
+     * intent rather than risking overwrites.
+     */
+
+    const legacyDatesUnlinked =
+      builder.p2DateCustom ||
+      builder
+        .coverDateCustomByPaper
+        ?.P2 ===
+        true;
+
+    const hydratedDatesUnlinked =
+      typeof builder.datesUnlinked ===
+        "boolean"
+        ? builder.datesUnlinked
+        : legacyDatesUnlinked;
+
+    setDatesUnlinked(
+      hydratedDatesUnlinked
+    );
+
+    setDateLinkOwnerPaper(
+      hydratedDatesUnlinked
+        ? null
+        : builder
+            .dateLinkOwnerPaper ??
+          null
+    );
+
+
+    /*
+     * Start-time linking
+     *
+     * Historical assessments where both papers
+     * already contain start values are treated
+     * conservatively as independent.
+     */
+
+    const hasLegacyP1Start =
+      builder.p1StartTime
+        .trim()
+        .length > 0;
+
+    const hasLegacyP2Start =
+      builder.p2StartTime
+        .trim()
+        .length > 0;
+
+    const legacyStartTimesUnlinked =
+      hasLegacyP1Start &&
+      hasLegacyP2Start;
+
+    const hydratedStartTimesUnlinked =
+      typeof builder.startTimesUnlinked ===
+        "boolean"
+        ? builder.startTimesUnlinked
+        : legacyStartTimesUnlinked;
+
+    setStartTimesUnlinked(
+      hydratedStartTimesUnlinked
+    );
+
+    setStartTimeLinkOwnerPaper(
+      hydratedStartTimesUnlinked
+        ? null
+        : builder
+            .startTimeLinkOwnerPaper ??
+          null
+    );
+
+
+    /*
+     * Manual End state
+     *
+     * New saves explicitly preserve this.
+     *
+     * Old saves cannot distinguish generated
+     * versus manual End values, so retain the
+     * historical conservative behaviour.
+     */
+
+    setEndTimeManuallyEditedByPaper(
+      builder
+        .endTimeManuallyEditedByPaper ?? {
+        P1:
+          builder.p1EndTime
+            .trim()
+            .length > 0,
+
+        P2:
+          builder.p2EndTime
+            .trim()
+            .length > 0,
+      }
+    );
+
 
     setSelectedClassIds(
       savedAssessment.setup
@@ -415,6 +506,7 @@ export function useAssessmentCreatorSavedAssessment({
       true
     );
   }, []);
+
 
   return {
     currentAssessmentId,

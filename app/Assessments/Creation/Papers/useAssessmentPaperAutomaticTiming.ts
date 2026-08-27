@@ -1,4 +1,3 @@
-
 import {
   useEffect,
   useMemo,
@@ -13,7 +12,7 @@ import {
 } from "./AssessmentPaperRules";
 
 import {
-  calculateAssessmentPaperEndTime,
+  calculateAssessmentPaperEndTimeFromDuration,
 } from "./AssessmentPaperTiming";
 
 import {
@@ -27,11 +26,12 @@ import {
   type AssessmentPaperStringSetterMap,
 } from "./AssessmentPaperValueMaps";
 
+
 type UseAssessmentPaperAutomaticTimingArgs = {
   courseConfig:
     CourseAssessmentConfig;
 
-  marksByPaper:
+  intendedDurationMinutesByPaper:
     AssessmentPaperNumberMap;
 
   startTimeByPaper:
@@ -44,27 +44,42 @@ type UseAssessmentPaperAutomaticTimingArgs = {
     AssessmentPaperStringSetterMap;
 };
 
+
 export function useAssessmentPaperAutomaticTiming({
   courseConfig,
-  marksByPaper,
+
+  intendedDurationMinutesByPaper,
+
   startTimeByPaper,
+
   endTimeManuallyEditedByPaper,
+
   endTimeSetterByPaper,
 }: UseAssessmentPaperAutomaticTimingArgs) {
   const coursePapers =
-    useMemo(() => {
-      return getAssessmentPapers(
-        courseConfig
-      );
-    }, [
-      courseConfig,
-    ]);
+    useMemo(
+      () => {
+        return getAssessmentPapers(
+          courseConfig
+        );
+      },
+      [
+        courseConfig,
+      ]
+    );
 
   useEffect(() => {
     coursePapers.forEach(
       (
         paper
       ) => {
+        /*
+         * Teacher autonomy wins.
+         *
+         * Once the teacher manually changes the
+         * End field for this paper, automatic
+         * end-time calculation stops touching it.
+         */
         const hasManualEndTime =
           getAssessmentPaperBooleanValue({
             paper,
@@ -111,30 +126,49 @@ export function useAssessmentPaperAutomaticTiming({
           return;
         }
 
-        const marks =
+        /*
+         * Crucially, this value comes from the
+         * assessment's intended setup target.
+         *
+         * It is NOT the marks currently achieved
+         * in the HUD / live question collection.
+         */
+        const durationMinutes =
           getAssessmentPaperNumberValue({
             paper,
 
             valuesByPaper:
-              marksByPaper,
+              intendedDurationMinutesByPaper,
           });
 
+        if (
+          durationMinutes <= 0
+        ) {
+          setEndTime(
+            ""
+          );
+
+          return;
+        }
+
         setEndTime(
-          calculateAssessmentPaperEndTime({
-            paper,
-            marks,
+          calculateAssessmentPaperEndTimeFromDuration({
             startTime,
-            courseConfig,
+
+            durationMinutes,
           })
         );
       }
     );
   }, [
     coursePapers,
-    courseConfig,
-    marksByPaper,
+
+    intendedDurationMinutesByPaper,
+
     startTimeByPaper,
+
     endTimeManuallyEditedByPaper,
+
     endTimeSetterByPaper,
   ]);
 }

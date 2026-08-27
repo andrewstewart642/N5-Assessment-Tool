@@ -1,4 +1,3 @@
-
 import {
   useCallback,
   useMemo,
@@ -29,13 +28,6 @@ import {
   type AssessmentPaperStringSetterMap,
 } from "./AssessmentPaperValueMaps";
 
-type UseAssessmentPaperSittingStateArgs = {
-  courseConfig:
-    CourseAssessmentConfig;
-
-  assessmentDate:
-    string;
-};
 
 type StringSetter =
   Dispatch<
@@ -46,6 +38,19 @@ type BooleanSetter =
   Dispatch<
     SetStateAction<boolean>
   >;
+
+
+type UseAssessmentPaperSittingStateArgs = {
+  courseConfig:
+    CourseAssessmentConfig;
+
+  assessmentDate:
+    string;
+
+  setAssessmentDate:
+    StringSetter;
+};
+
 
 function resolveNextStringValue({
   currentValue,
@@ -65,6 +70,7 @@ function resolveNextStringValue({
     : nextValueOrUpdater;
 }
 
+
 function resolveNextBooleanValue({
   currentValue,
   nextValueOrUpdater,
@@ -83,27 +89,43 @@ function resolveNextBooleanValue({
     : nextValueOrUpdater;
 }
 
+
 export function useAssessmentPaperSittingState({
   courseConfig,
   assessmentDate,
+  setAssessmentDate,
 }: UseAssessmentPaperSittingStateArgs) {
   const coursePapers =
-    useMemo(() => {
-      return getAssessmentPapers(
-        courseConfig
-      );
-    }, [
-      courseConfig,
-    ]);
+    useMemo(
+      () => {
+        return getAssessmentPapers(
+          courseConfig
+        );
+      },
+      [
+        courseConfig,
+      ]
+    );
 
   const firstPaper =
-    coursePapers[0] ??
+    coursePapers[
+      0
+    ] ??
     "P1";
 
   const secondPaper =
-    coursePapers[1] ??
-    coursePapers[0] ??
+    coursePapers[
+      1
+    ] ??
+    coursePapers[
+      0
+    ] ??
     "P2";
+
+
+  /*
+   * Start / End values
+   */
 
   const [
     startTimeByPaper,
@@ -135,6 +157,17 @@ export function useAssessmentPaperSittingState({
         })
     );
 
+
+  /*
+   * Dates
+   *
+   * The first paper continues to use
+   * assessmentDate as the historical base value.
+   *
+   * Other papers only require an override once
+   * the linked-date relationship is broken.
+   */
+
   const [
     coverDateOverrideByPaper,
     setCoverDateOverrideByPaper,
@@ -151,6 +184,60 @@ export function useAssessmentPaperSittingState({
       {}
     );
 
+
+  /*
+   * Permanent link state
+   *
+   * Linked:
+   *   first manual edit drives both papers.
+   *
+   * A manual edit on another paper permanently
+   * breaks the link.
+   *
+   * There is intentionally no relink operation.
+   */
+
+  const [
+    datesUnlinked,
+    setDatesUnlinked,
+  ] =
+    useState(
+      false
+    );
+
+  const [
+    dateLinkOwnerPaper,
+    setDateLinkOwnerPaper,
+  ] =
+    useState<
+      Paper | null
+    >(
+      null
+    );
+
+  const [
+    startTimesUnlinked,
+    setStartTimesUnlinked,
+  ] =
+    useState(
+      false
+    );
+
+  const [
+    startTimeLinkOwnerPaper,
+    setStartTimeLinkOwnerPaper,
+  ] =
+    useState<
+      Paper | null
+    >(
+      null
+    );
+
+
+  /*
+   * Manual End override state
+   */
+
   const [
     endTimeManuallyEditedByPaper,
     setEndTimeManuallyEditedByPaper,
@@ -166,6 +253,7 @@ export function useAssessmentPaperSittingState({
         })
     );
 
+
   const coverDateByPaper =
     useMemo<AssessmentPaperStringMap>(
       () => {
@@ -177,6 +265,13 @@ export function useAssessmentPaperSittingState({
             (
               paper
             ) => {
+              if (
+                paper ===
+                firstPaper
+              ) {
+                return assessmentDate;
+              }
+
               const isCustom =
                 getAssessmentPaperBooleanValue({
                   paper,
@@ -205,50 +300,415 @@ export function useAssessmentPaperSittingState({
       },
       [
         coursePapers,
+        firstPaper,
         assessmentDate,
         coverDateCustomByPaper,
         coverDateOverrideByPaper,
       ]
     );
 
-  const setStartTimeForPaper =
+
+  /*
+   * Manual DATE editing
+   */
+
+  const setCoverDateForPaper =
     useCallback(
       (
-        paper: Paper,
+        paper:
+          Paper,
+
         nextValueOrUpdater:
           SetStateAction<string>
       ) => {
-        setStartTimeByPaper(
-          (
-            previous
-          ) => {
-            const currentValue =
-              getAssessmentPaperStringValue({
-                paper,
+        const currentValue =
+          getAssessmentPaperStringValue({
+            paper,
 
-                valuesByPaper:
-                  previous,
-              });
+            valuesByPaper:
+              coverDateByPaper,
 
-            return {
+            fallback:
+              assessmentDate,
+          });
+
+        const nextValue =
+          resolveNextStringValue({
+            currentValue,
+
+            nextValueOrUpdater,
+          });
+
+        /*
+         * Already unlinked:
+         * modify only the selected paper.
+         */
+        if (
+          datesUnlinked
+        ) {
+          if (
+            paper ===
+            firstPaper
+          ) {
+            setAssessmentDate(
+              nextValue
+            );
+
+            return;
+          }
+
+          setCoverDateOverrideByPaper(
+            (
+              previous
+            ) => ({
               ...previous,
 
               [paper]:
-                resolveNextStringValue({
-                  currentValue,
-                  nextValueOrUpdater,
-                }),
+                nextValue,
+            })
+          );
+
+          setCoverDateCustomByPaper(
+            (
+              previous
+            ) => ({
+              ...previous,
+
+              [paper]:
+                true,
+            })
+          );
+
+          return;
+        }
+
+        /*
+         * Nobody has manually claimed the linked
+         * date yet, OR the same paper is editing
+         * it again.
+         *
+         * Keep every paper linked.
+         */
+        if (
+          dateLinkOwnerPaper ===
+            null ||
+          dateLinkOwnerPaper ===
+            paper
+        ) {
+          if (
+            nextValue.trim()
+          ) {
+            setDateLinkOwnerPaper(
+              paper
+            );
+          }
+
+          setAssessmentDate(
+            nextValue
+          );
+
+          setCoverDateOverrideByPaper(
+            (
+              previous
+            ) => {
+              const nextMap = {
+                ...previous,
+              };
+
+              coursePapers.forEach(
+                (
+                  coursePaper
+                ) => {
+                  if (
+                    coursePaper !==
+                    firstPaper
+                  ) {
+                    nextMap[
+                      coursePaper
+                    ] =
+                      nextValue;
+                  }
+                }
+              );
+
+              return nextMap;
+            }
+          );
+
+          setCoverDateCustomByPaper(
+            (
+              previous
+            ) => {
+              const nextMap = {
+                ...previous,
+              };
+
+              coursePapers.forEach(
+                (
+                  coursePaper
+                ) => {
+                  nextMap[
+                    coursePaper
+                  ] =
+                    false;
+                }
+              );
+
+              return nextMap;
+            }
+          );
+
+          return;
+        }
+
+        /*
+         * Another paper has now been manually
+         * edited.
+         *
+         * This permanently breaks date linking.
+         *
+         * Preserve the currently shared date on
+         * every non-primary paper BEFORE changing
+         * the newly edited paper.
+         */
+        const sharedDate =
+          assessmentDate;
+
+        setDatesUnlinked(
+          true
+        );
+
+        setDateLinkOwnerPaper(
+          null
+        );
+
+        setCoverDateOverrideByPaper(
+          (
+            previous
+          ) => {
+            const nextMap = {
+              ...previous,
             };
+
+            coursePapers.forEach(
+              (
+                coursePaper
+              ) => {
+                if (
+                  coursePaper !==
+                  firstPaper
+                ) {
+                  nextMap[
+                    coursePaper
+                  ] =
+                    sharedDate;
+                }
+              }
+            );
+
+            if (
+              paper !==
+              firstPaper
+            ) {
+              nextMap[
+                paper
+              ] =
+                nextValue;
+            }
+
+            return nextMap;
           }
         );
+
+        setCoverDateCustomByPaper(
+          (
+            previous
+          ) => {
+            const nextMap = {
+              ...previous,
+            };
+
+            coursePapers.forEach(
+              (
+                coursePaper
+              ) => {
+                nextMap[
+                  coursePaper
+                ] =
+                  coursePaper !==
+                  firstPaper;
+              }
+            );
+
+            return nextMap;
+          }
+        );
+
+        if (
+          paper ===
+          firstPaper
+        ) {
+          setAssessmentDate(
+            nextValue
+          );
+        }
       },
-      []
+      [
+        assessmentDate,
+        coverDateByPaper,
+        coursePapers,
+        dateLinkOwnerPaper,
+        datesUnlinked,
+        firstPaper,
+        setAssessmentDate,
+      ]
     );
+
+
+  /*
+   * Manual START editing
+   */
+
+  const setStartTimeForPaper =
+    useCallback(
+      (
+        paper:
+          Paper,
+
+        nextValueOrUpdater:
+          SetStateAction<string>
+      ) => {
+        const currentValue =
+          getAssessmentPaperStringValue({
+            paper,
+
+            valuesByPaper:
+              startTimeByPaper,
+          });
+
+        const nextValue =
+          resolveNextStringValue({
+            currentValue,
+
+            nextValueOrUpdater,
+          });
+
+        /*
+         * Already permanently unlinked.
+         */
+        if (
+          startTimesUnlinked
+        ) {
+          setStartTimeByPaper(
+            (
+              previous
+            ) => ({
+              ...previous,
+
+              [paper]:
+                nextValue,
+            })
+          );
+
+          return;
+        }
+
+        /*
+         * First manual start-time edit, or another
+         * edit by the same paper:
+         *
+         * all papers continue following it.
+         */
+        if (
+          startTimeLinkOwnerPaper ===
+            null ||
+          startTimeLinkOwnerPaper ===
+            paper
+        ) {
+          if (
+            nextValue.trim()
+          ) {
+            setStartTimeLinkOwnerPaper(
+              paper
+            );
+          }
+
+          setStartTimeByPaper(
+            (
+              previous
+            ) => {
+              const nextMap = {
+                ...previous,
+              };
+
+              coursePapers.forEach(
+                (
+                  coursePaper
+                ) => {
+                  nextMap[
+                    coursePaper
+                  ] =
+                    nextValue;
+                }
+              );
+
+              return nextMap;
+            }
+          );
+
+          return;
+        }
+
+        /*
+         * A different paper has now been manually
+         * edited.
+         *
+         * Start-time linking is permanently broken.
+         */
+        setStartTimesUnlinked(
+          true
+        );
+
+        setStartTimeLinkOwnerPaper(
+          null
+        );
+
+        setStartTimeByPaper(
+          (
+            previous
+          ) => ({
+            ...previous,
+
+            [paper]:
+              nextValue,
+          })
+        );
+      },
+      [
+        coursePapers,
+        startTimeByPaper,
+        startTimeLinkOwnerPaper,
+        startTimesUnlinked,
+      ]
+    );
+
+
+  /*
+   * Raw END setter.
+   *
+   * Used by automatic timing as well as the
+   * historical compatibility layer.
+   *
+   * It deliberately does NOT declare the value
+   * manual by itself.
+   */
 
   const setEndTimeForPaper =
     useCallback(
       (
-        paper: Paper,
+        paper:
+          Paper,
+
         nextValueOrUpdater:
           SetStateAction<string>
       ) => {
@@ -270,6 +730,7 @@ export function useAssessmentPaperSittingState({
               [paper]:
                 resolveNextStringValue({
                   currentValue,
+
                   nextValueOrUpdater,
                 }),
             };
@@ -279,44 +740,51 @@ export function useAssessmentPaperSittingState({
       []
     );
 
-  const setCoverDateForPaper =
+
+  /*
+   * Convenience API for the new tray.
+   *
+   * Pass B can call one function when the teacher
+   * manually changes an End value.
+   */
+
+  const setManualEndTimeForPaper =
     useCallback(
       (
-        paper: Paper,
+        paper:
+          Paper,
+
         nextValueOrUpdater:
           SetStateAction<string>
       ) => {
-        setCoverDateOverrideByPaper(
+        setEndTimeManuallyEditedByPaper(
           (
             previous
-          ) => {
-            const currentValue =
-              getAssessmentPaperStringValue({
-                paper,
+          ) => ({
+            ...previous,
 
-                valuesByPaper:
-                  previous,
-              });
+            [paper]:
+              true,
+          })
+        );
 
-            return {
-              ...previous,
-
-              [paper]:
-                resolveNextStringValue({
-                  currentValue,
-                  nextValueOrUpdater,
-                }),
-            };
-          }
+        setEndTimeForPaper(
+          paper,
+          nextValueOrUpdater
         );
       },
-      []
+      [
+        setEndTimeForPaper,
+      ]
     );
+
 
   const setCoverDateCustomForPaper =
     useCallback(
       (
-        paper: Paper,
+        paper:
+          Paper,
+
         nextValueOrUpdater:
           SetStateAction<boolean>
       ) => {
@@ -338,6 +806,7 @@ export function useAssessmentPaperSittingState({
               [paper]:
                 resolveNextBooleanValue({
                   currentValue,
+
                   nextValueOrUpdater,
                 }),
             };
@@ -347,10 +816,13 @@ export function useAssessmentPaperSittingState({
       []
     );
 
+
   const setEndTimeManuallyEditedForPaper =
     useCallback(
       (
-        paper: Paper,
+        paper:
+          Paper,
+
         nextValueOrUpdater:
           SetStateAction<boolean>
       ) => {
@@ -372,6 +844,7 @@ export function useAssessmentPaperSittingState({
               [paper]:
                 resolveNextBooleanValue({
                   currentValue,
+
                   nextValueOrUpdater,
                 }),
             };
@@ -381,12 +854,39 @@ export function useAssessmentPaperSittingState({
       []
     );
 
+
+  /*
+   * Primary-paper manual date setter.
+   *
+   * This lets the existing TopBar date control
+   * participate in the exact same linking rules
+   * as the future Settings tray.
+   */
+
+  const setPrimaryCoverDate:
+    StringSetter =
+      useCallback(
+        (
+          nextValueOrUpdater
+        ) => {
+          setCoverDateForPaper(
+            firstPaper,
+            nextValueOrUpdater
+          );
+        },
+        [
+          firstPaper,
+          setCoverDateForPaper,
+        ]
+      );
+
+
   /*
    * Transitional first/second-paper aliases.
    *
-   * Persistence still exposes historical
-   * P1/P2 fields while that layer is being
-   * migrated.
+   * These are RAW setters because persistence
+   * hydration must never masquerade as a teacher
+   * manually editing the field.
    */
 
   const p1StartTime =
@@ -446,22 +946,44 @@ export function useAssessmentPaperSittingState({
         coverDateCustomByPaper,
     });
 
+
   const setP1StartTime:
     StringSetter =
       useCallback(
         (
           nextValueOrUpdater
         ) => {
-          setStartTimeForPaper(
-            firstPaper,
-            nextValueOrUpdater
+          setStartTimeByPaper(
+            (
+              previous
+            ) => {
+              const currentValue =
+                getAssessmentPaperStringValue({
+                  paper:
+                    firstPaper,
+
+                  valuesByPaper:
+                    previous,
+                });
+
+              return {
+                ...previous,
+
+                [firstPaper]:
+                  resolveNextStringValue({
+                    currentValue,
+
+                    nextValueOrUpdater,
+                  }),
+              };
+            }
           );
         },
         [
           firstPaper,
-          setStartTimeForPaper,
         ]
       );
+
 
   const setP1EndTime:
     StringSetter =
@@ -480,22 +1002,48 @@ export function useAssessmentPaperSittingState({
         ]
       );
 
+
   const setP2CoverDate:
     StringSetter =
       useCallback(
         (
           nextValueOrUpdater
         ) => {
-          setCoverDateForPaper(
-            secondPaper,
-            nextValueOrUpdater
+          setCoverDateOverrideByPaper(
+            (
+              previous
+            ) => {
+              const currentValue =
+                getAssessmentPaperStringValue({
+                  paper:
+                    secondPaper,
+
+                  valuesByPaper:
+                    previous,
+
+                  fallback:
+                    assessmentDate,
+                });
+
+              return {
+                ...previous,
+
+                [secondPaper]:
+                  resolveNextStringValue({
+                    currentValue,
+
+                    nextValueOrUpdater,
+                  }),
+              };
+            }
           );
         },
         [
+          assessmentDate,
           secondPaper,
-          setCoverDateForPaper,
         ]
       );
+
 
   const setP2StartTime:
     StringSetter =
@@ -503,16 +1051,37 @@ export function useAssessmentPaperSittingState({
         (
           nextValueOrUpdater
         ) => {
-          setStartTimeForPaper(
-            secondPaper,
-            nextValueOrUpdater
+          setStartTimeByPaper(
+            (
+              previous
+            ) => {
+              const currentValue =
+                getAssessmentPaperStringValue({
+                  paper:
+                    secondPaper,
+
+                  valuesByPaper:
+                    previous,
+                });
+
+              return {
+                ...previous,
+
+                [secondPaper]:
+                  resolveNextStringValue({
+                    currentValue,
+
+                    nextValueOrUpdater,
+                  }),
+              };
+            }
           );
         },
         [
           secondPaper,
-          setStartTimeForPaper,
         ]
       );
+
 
   const setP2EndTime:
     StringSetter =
@@ -531,22 +1100,64 @@ export function useAssessmentPaperSittingState({
         ]
       );
 
+
   const setP2DateCustom:
     BooleanSetter =
       useCallback(
         (
           nextValueOrUpdater
         ) => {
-          setCoverDateCustomForPaper(
-            secondPaper,
-            nextValueOrUpdater
+          setCoverDateCustomByPaper(
+            (
+              previous
+            ) => {
+              const currentValue =
+                getAssessmentPaperBooleanValue({
+                  paper:
+                    secondPaper,
+
+                  valuesByPaper:
+                    previous,
+                });
+
+              const nextValue =
+                resolveNextBooleanValue({
+                  currentValue,
+
+                  nextValueOrUpdater,
+                });
+
+              /*
+               * Historical persisted custom P2 date
+               * means the papers were already
+               * independently controlled.
+               */
+              if (
+                nextValue
+              ) {
+                setDatesUnlinked(
+                  true
+                );
+
+                setDateLinkOwnerPaper(
+                  null
+                );
+              }
+
+              return {
+                ...previous,
+
+                [secondPaper]:
+                  nextValue,
+              };
+            }
           );
         },
         [
           secondPaper,
-          setCoverDateCustomForPaper,
         ]
       );
+
 
   const setP1EndTimeManuallyEdited:
     BooleanSetter =
@@ -565,6 +1176,7 @@ export function useAssessmentPaperSittingState({
         ]
       );
 
+
   const setP2EndTimeManuallyEdited:
     BooleanSetter =
       useCallback(
@@ -581,6 +1193,7 @@ export function useAssessmentPaperSittingState({
           setEndTimeManuallyEditedForPaper,
         ]
       );
+
 
   const endTimeSetterByPaper =
     useMemo<AssessmentPaperStringSetterMap>(
@@ -611,15 +1224,38 @@ export function useAssessmentPaperSittingState({
       ]
     );
 
+
   return {
     coverDateByPaper,
     startTimeByPaper,
     endTimeByPaper,
 
+    coverDateCustomByPaper,
+
     endTimeManuallyEditedByPaper,
     endTimeSetterByPaper,
 
-    coverDateCustomByPaper,
+
+    /*
+     * New permanent-link state
+     */
+
+    datesUnlinked,
+    setDatesUnlinked,
+
+    dateLinkOwnerPaper,
+    setDateLinkOwnerPaper,
+
+    startTimesUnlinked,
+    setStartTimesUnlinked,
+
+    startTimeLinkOwnerPaper,
+    setStartTimeLinkOwnerPaper,
+
+
+    /*
+     * Raw hydration setters
+     */
 
     setCoverDateByPaper:
       setCoverDateOverrideByPaper,
@@ -631,13 +1267,27 @@ export function useAssessmentPaperSittingState({
 
     setEndTimeManuallyEditedByPaper,
 
+
+    /*
+     * Manual teacher-edit APIs
+     */
+
+    setPrimaryCoverDate,
+
     setStartTimeForPaper,
     setEndTimeForPaper,
+
+    setManualEndTimeForPaper,
 
     setCoverDateForPaper,
     setCoverDateCustomForPaper,
 
     setEndTimeManuallyEditedForPaper,
+
+
+    /*
+     * Compatibility aliases
+     */
 
     p1StartTime,
     p1EndTime,

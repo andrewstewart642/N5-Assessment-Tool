@@ -22,7 +22,9 @@ import type {
   AssessmentQuestionDraftByPaper,
 } from "@/app/Assessments/Creation/Questions/AssessmentQuestionDraftTypes";
 
-import type { CourseId } from "@/app/Courses/CourseTypes";
+import type {
+  CourseId,
+} from "@/app/Courses/CourseTypes";
 
 import type {
   Paper,
@@ -31,18 +33,13 @@ import type {
   ThinkingTypeFilter,
 } from "@/app/Assessments/AssessmentTypes";
 
+
 export type SavedAssessmentStatus =
   | "DRAFT"
   | "COMPLETE";
 
+
 export type SavedAssessmentSetup = {
-  /**
-   * Course-aware foundation field.
-   *
-   * Optional for now so older saved assessments in localStorage do not
-   * immediately become invalid while the app transitions from N5-only to
-   * course-config-driven.
-   */
   courseId?:
     CourseId;
 
@@ -92,6 +89,7 @@ export type SavedAssessmentSetup = {
     boolean;
 };
 
+
 export type SavedAssessmentBuilder = {
   standardFilter:
     StandardFilter;
@@ -108,12 +106,6 @@ export type SavedAssessmentBuilder = {
   viewPaper:
     Paper;
 
-  /**
-   * Generic target map used by the course-config-driven assessment creator.
-   *
-   * The legacy p1Target/p2Target fields remain during the transition so older
-   * saved assessments and older UI paths keep working.
-   */
   targetMarksByPaper?:
     AssessmentTargetMarksByPaper;
 
@@ -153,13 +145,6 @@ export type SavedAssessmentBuilder = {
   assessmentDate:
     string;
 
-  /**
-   * Generic paper sitting metadata used by the course-config-driven
-   * assessment creator.
-   *
-   * The legacy fields below remain during the transition so old saved
-   * assessments can still be loaded safely.
-   */
   coverDateByPaper?:
     AssessmentPaperStringMap;
 
@@ -171,6 +156,40 @@ export type SavedAssessmentBuilder = {
 
   coverDateCustomByPaper?:
     AssessmentPaperBooleanMap;
+
+
+  /*
+   * Paper-sitting link state.
+   *
+   * Optional so historical saved assessments
+   * remain valid.
+   */
+
+  datesUnlinked?:
+    boolean;
+
+  dateLinkOwnerPaper?:
+    Paper | null;
+
+  startTimesUnlinked?:
+    boolean;
+
+  startTimeLinkOwnerPaper?:
+    Paper | null;
+
+
+  /*
+   * Distinguishes an automatically calculated
+   * End value from a teacher override.
+   */
+
+  endTimeManuallyEditedByPaper?:
+    AssessmentPaperBooleanMap;
+
+
+  /*
+   * Transitional historical P1/P2 fields.
+   */
 
   p1StartTime:
     string;
@@ -190,6 +209,7 @@ export type SavedAssessmentBuilder = {
   p2DateCustom:
     boolean;
 };
+
 
 export type SavedAssessment = {
   id:

@@ -92,6 +92,10 @@ import {
 } from "./PaperWorkspace/usePreviewViewMode";
 
 import {
+  buildAssessmentPaperIntendedDurationMinutesByPaper,
+} from "./Papers/AssessmentPaperIntendedTiming";
+
+import {
   useAssessmentPaperAutomaticTiming,
 } from "./Papers/useAssessmentPaperAutomaticTiming";
 
@@ -491,12 +495,26 @@ function AssessmentCreatorContent() {
 
     coverDateCustomByPaper,
 
+    datesUnlinked,
+    setDatesUnlinked,
+
+    dateLinkOwnerPaper,
+    setDateLinkOwnerPaper,
+
+    startTimesUnlinked,
+    setStartTimesUnlinked,
+
+    startTimeLinkOwnerPaper,
+    setStartTimeLinkOwnerPaper,
+
     setCoverDateByPaper,
     setStartTimeByPaper,
     setEndTimeByPaper,
 
     setCoverDateCustomByPaper,
     setEndTimeManuallyEditedByPaper,
+
+    setPrimaryCoverDate,
 
     setStartTimeForPaper,
     setEndTimeForPaper,
@@ -530,6 +548,8 @@ function AssessmentCreatorContent() {
     useAssessmentPaperSittingState({
       courseConfig,
       assessmentDate,
+
+      setAssessmentDate,
     });
 
 
@@ -605,6 +625,7 @@ function AssessmentCreatorContent() {
 
     setQuestions,
   });
+
 
   useAssessmentCreationPersistence({
     leftPaneRatio,
@@ -696,23 +717,6 @@ function AssessmentCreatorContent() {
 
 
   /*
-   * Automatic paper timing
-   */
-
-  useAssessmentPaperAutomaticTiming({
-    courseConfig,
-
-    marksByPaper,
-
-    startTimeByPaper,
-
-    endTimeManuallyEditedByPaper,
-
-    endTimeSetterByPaper,
-  });
-
-
-  /*
    * Assessment-name field behaviour
    */
 
@@ -796,8 +800,85 @@ function AssessmentCreatorContent() {
 
       setCoverDateCustomByPaper,
 
+      setDatesUnlinked,
+      setDateLinkOwnerPaper,
+
+      setStartTimesUnlinked,
+      setStartTimeLinkOwnerPaper,
+
       setEndTimeManuallyEditedByPaper,
     });
+
+
+  /*
+   * Intended sitting duration
+   *
+   * This is based on the assessment SETUP —
+   * never the current live marks shown in HUD.
+   */
+
+  const intendedDurationMinutesByPaper =
+    useMemo(
+      () =>
+        buildAssessmentPaperIntendedDurationMinutesByPaper({
+          courseConfig,
+
+          buildPriority:
+            loadedSavedAssessment
+              ?.setup
+              .buildPriority ??
+            null,
+
+          marksTargetP1:
+            loadedSavedAssessment
+              ?.setup
+              .marksTargetP1 ??
+            null,
+
+          marksTargetP2:
+            loadedSavedAssessment
+              ?.setup
+              .marksTargetP2 ??
+            null,
+
+          timeTargetP1:
+            loadedSavedAssessment
+              ?.setup
+              .timeTargetP1 ??
+            null,
+
+          timeTargetP2:
+            loadedSavedAssessment
+              ?.setup
+              .timeTargetP2 ??
+            null,
+
+          targetMarksByPaper:
+            assessmentTargetMarksByPaper,
+        }),
+      [
+        courseConfig,
+        loadedSavedAssessment,
+        assessmentTargetMarksByPaper,
+      ]
+    );
+
+
+  /*
+   * Automatic End times
+   */
+
+  useAssessmentPaperAutomaticTiming({
+    courseConfig,
+
+    intendedDurationMinutesByPaper,
+
+    startTimeByPaper,
+
+    endTimeManuallyEditedByPaper,
+
+    endTimeSetterByPaper,
+  });
 
 
   /*
@@ -889,6 +970,14 @@ function AssessmentCreatorContent() {
       endTimeByPaper,
 
       coverDateCustomByPaper,
+
+      datesUnlinked,
+      dateLinkOwnerPaper,
+
+      startTimesUnlinked,
+      startTimeLinkOwnerPaper,
+
+      endTimeManuallyEditedByPaper,
 
       p1StartTime,
       p1EndTime,
@@ -1033,6 +1122,7 @@ function AssessmentCreatorContent() {
       viewPaper,
     });
 
+
   useAssessmentPreviewJumpNavigation({
     pendingJumpDraftRef,
 
@@ -1115,6 +1205,7 @@ function AssessmentCreatorContent() {
       fallbackCoverDate:
         assessmentDate,
     });
+
 
   const {
     printSubjectName,
@@ -1336,7 +1427,13 @@ function AssessmentCreatorContent() {
 
               assessmentDate,
 
-              setAssessmentDate,
+              /*
+               * Manual TopBar date edits now use
+               * the same permanent-link semantics
+               * as the forthcoming tray.
+               */
+              setAssessmentDate:
+                setPrimaryCoverDate,
 
               builderCalendarOpen:
                 assessmentCalendarOpen,
@@ -1547,8 +1644,13 @@ function AssessmentCreatorContent() {
             assessmentDate
           }
 
+          /*
+           * The old Settings drawer temporarily
+           * stays wired, but now obeys the new
+           * linked-date state model too.
+           */
           setAssessmentDate={
-            setAssessmentDate
+            setPrimaryCoverDate
           }
 
           coverDateByPaper={

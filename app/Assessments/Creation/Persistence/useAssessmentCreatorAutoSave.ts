@@ -37,6 +37,7 @@ import type {
   AssessmentSaveStatus,
 } from "./AssessmentSaveStatus";
 
+
 type UseAssessmentCreatorAutoSaveArgs = {
   currentAssessmentId:
     string | null;
@@ -113,6 +114,21 @@ type UseAssessmentCreatorAutoSaveArgs = {
   coverDateCustomByPaper:
     AssessmentPaperBooleanMap;
 
+  datesUnlinked:
+    boolean;
+
+  dateLinkOwnerPaper:
+    Paper | null;
+
+  startTimesUnlinked:
+    boolean;
+
+  startTimeLinkOwnerPaper:
+    Paper | null;
+
+  endTimeManuallyEditedByPaper:
+    AssessmentPaperBooleanMap;
+
   p1StartTime:
     string;
 
@@ -138,8 +154,10 @@ type UseAssessmentCreatorAutoSaveArgs = {
     boolean;
 };
 
+
 const MINIMUM_SAVING_DISPLAY_MS =
   2800;
+
 
 export function useAssessmentCreatorAutoSave({
   currentAssessmentId,
@@ -174,6 +192,14 @@ export function useAssessmentCreatorAutoSave({
   startTimeByPaper,
   endTimeByPaper,
   coverDateCustomByPaper,
+
+  datesUnlinked,
+  dateLinkOwnerPaper,
+
+  startTimesUnlinked,
+  startTimeLinkOwnerPaper,
+
+  endTimeManuallyEditedByPaper,
 
   p1StartTime,
   p1EndTime,
@@ -215,12 +241,14 @@ export function useAssessmentCreatorAutoSave({
       false
     );
 
+
   useEffect(() => {
     savedAssessmentRef.current =
       loadedSavedAssessment;
   }, [
     loadedSavedAssessment,
   ]);
+
 
   useEffect(() => {
     if (
@@ -301,6 +329,14 @@ export function useAssessmentCreatorAutoSave({
         endTimeByPaper,
         coverDateCustomByPaper,
 
+        datesUnlinked,
+        dateLinkOwnerPaper,
+
+        startTimesUnlinked,
+        startTimeLinkOwnerPaper,
+
+        endTimeManuallyEditedByPaper,
+
         p1StartTime,
         p1EndTime,
 
@@ -310,6 +346,7 @@ export function useAssessmentCreatorAutoSave({
         p2DateCustom,
       },
     };
+
 
     const isInitialSaveCycle =
       !hasInitialSaveCycleCompletedRef
@@ -326,11 +363,6 @@ export function useAssessmentCreatorAutoSave({
         null;
     }
 
-    /*
-     * Initial hydration should not flash
-     * "Saving..." simply because the builder
-     * has finished loading an existing file.
-     */
     if (
       !isInitialSaveCycle
     ) {
@@ -339,14 +371,8 @@ export function useAssessmentCreatorAutoSave({
       );
     }
 
+
     try {
-      /*
-       * The real persistence operation still
-       * happens immediately.
-       *
-       * The longer visual Saving state below is
-       * presentation only.
-       */
       upsertSavedAssessment(
         nextSavedAssessment
       );
@@ -367,14 +393,6 @@ export function useAssessmentCreatorAutoSave({
         return;
       }
 
-      /*
-       * Keep Saving... visible long enough to
-       * communicate the operation clearly.
-       *
-       * If another change arrives meanwhile this
-       * timeout is cleared above, so the spinner
-       * simply continues rather than restarting.
-       */
       settleTimeoutRef.current =
         setTimeout(
           () => {
@@ -428,6 +446,14 @@ export function useAssessmentCreatorAutoSave({
     endTimeByPaper,
     coverDateCustomByPaper,
 
+    datesUnlinked,
+    dateLinkOwnerPaper,
+
+    startTimesUnlinked,
+    startTimeLinkOwnerPaper,
+
+    endTimeManuallyEditedByPaper,
+
     p1StartTime,
     p1EndTime,
 
@@ -440,6 +466,7 @@ export function useAssessmentCreatorAutoSave({
     useCompleteCourseCoverage,
   ]);
 
+
   useEffect(() => {
     return () => {
       if (
@@ -451,6 +478,7 @@ export function useAssessmentCreatorAutoSave({
       }
     };
   }, []);
+
 
   return {
     saveStatus,
