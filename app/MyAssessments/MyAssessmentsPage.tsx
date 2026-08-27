@@ -26,10 +26,31 @@ import {
 import DeleteAssessmentModal from "./Actions/DeleteAssessmentModal";
 
 import {
+  DEFAULT_ASSESSMENT_LIBRARY_SORT_MODE,
+  DEFAULT_ASSESSMENT_LIBRARY_STATUS_FILTER,
+  DEFAULT_ASSESSMENT_LIBRARY_VIEW_MODE,
+  type AssessmentLibrarySortMode,
+  type AssessmentLibraryStatusFilter,
+  type AssessmentLibraryViewMode,
+} from "./Library/AssessmentLibraryControls";
+
+import {
+  filterSavedAssessmentsForLibrary,
+} from "./Library/AssessmentLibraryFiltering";
+
+import {
   sortSavedAssessmentsForLibrary,
 } from "./Library/AssessmentLibrarySorting";
 
+import AssessmentListView from "./ListView/AssessmentListView";
+
 import AssessmentTile from "./TileView/AssessmentTile";
+
+import AssessmentLibraryToolbar from "./Toolbar/AssessmentLibraryToolbar";
+
+
+const VIEW_MODE_STORAGE_KEY =
+  "my-assessments-view-mode-v1";
 
 
 function duplicateSavedAssessment(
@@ -45,6 +66,7 @@ function duplicateSavedAssessment(
 
   const duplicatedName =
     `${sourceName} (Copy)`;
+
 
   return {
     ...savedAssessment,
@@ -99,6 +121,21 @@ function normaliseSavedAssessments(
 }
 
 
+function readStoredViewMode():
+  AssessmentLibraryViewMode {
+  const stored =
+    window.localStorage.getItem(
+      VIEW_MODE_STORAGE_KEY
+    );
+
+
+  return stored ===
+    "LIST"
+    ? "LIST"
+    : "TILES";
+}
+
+
 export default function MyAssessmentsPage() {
   const {
     theme,
@@ -110,9 +147,7 @@ export default function MyAssessmentsPage() {
     savedAssessments,
     setSavedAssessments,
   ] =
-    useState<
-      SavedAssessment[]
-    >(
+    useState<SavedAssessment[]>(
       []
     );
 
@@ -130,10 +165,44 @@ export default function MyAssessmentsPage() {
     assessmentPendingDelete,
     setAssessmentPendingDelete,
   ] =
-    useState<
-      SavedAssessment | null
-    >(
+    useState<SavedAssessment | null>(
       null
+    );
+
+
+  const [
+    searchText,
+    setSearchText,
+  ] =
+    useState(
+      ""
+    );
+
+
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] =
+    useState<AssessmentLibraryStatusFilter>(
+      DEFAULT_ASSESSMENT_LIBRARY_STATUS_FILTER
+    );
+
+
+  const [
+    sortMode,
+    setSortMode,
+  ] =
+    useState<AssessmentLibrarySortMode>(
+      DEFAULT_ASSESSMENT_LIBRARY_SORT_MODE
+    );
+
+
+  const [
+    viewMode,
+    setViewMode,
+  ] =
+    useState<AssessmentLibraryViewMode>(
+      DEFAULT_ASSESSMENT_LIBRARY_VIEW_MODE
     );
 
 
@@ -143,15 +212,21 @@ export default function MyAssessmentsPage() {
         loadSavedAssessments()
       );
 
+
     saveSavedAssessments(
       loaded
     );
 
+
     setSavedAssessments(
-      sortSavedAssessmentsForLibrary(
-        loaded
-      )
+      loaded
     );
+
+
+    setViewMode(
+      readStoredViewMode()
+    );
+
 
     setHasLoaded(
       true
@@ -169,10 +244,38 @@ export default function MyAssessmentsPage() {
           return "1 assessment";
         }
 
+
         return `${savedAssessments.length} assessments`;
       },
       [
         savedAssessments.length,
+      ]
+    );
+
+
+  const visibleAssessments =
+    useMemo(
+      () => {
+        const filtered =
+          filterSavedAssessmentsForLibrary({
+            savedAssessments,
+
+            searchText,
+
+            statusFilter,
+          });
+
+
+        return sortSavedAssessmentsForLibrary(
+          filtered,
+          sortMode
+        );
+      },
+      [
+        savedAssessments,
+        searchText,
+        statusFilter,
+        sortMode,
       ]
     );
 
@@ -183,14 +286,14 @@ export default function MyAssessmentsPage() {
         loadSavedAssessments()
       );
 
+
     saveSavedAssessments(
       loaded
     );
 
+
     setSavedAssessments(
-      sortSavedAssessmentsForLibrary(
-        loaded
-      )
+      loaded
     );
   }
 
@@ -204,6 +307,7 @@ export default function MyAssessmentsPage() {
         savedAssessment
       )
     );
+
 
     refreshSavedAssessments();
   }
@@ -233,13 +337,16 @@ export default function MyAssessmentsPage() {
       return;
     }
 
+
     deleteSavedAssessment(
       assessmentPendingDelete.id
     );
 
+
     setAssessmentPendingDelete(
       null
     );
+
 
     refreshSavedAssessments();
   }
@@ -257,11 +364,29 @@ export default function MyAssessmentsPage() {
         !savedAssessment.isPinned,
     };
 
+
     upsertSavedAssessment(
       updatedAssessment
     );
 
+
     refreshSavedAssessments();
+  }
+
+
+  function handleViewModeChange(
+    nextViewMode:
+      AssessmentLibraryViewMode
+  ) {
+    setViewMode(
+      nextViewMode
+    );
+
+
+    window.localStorage.setItem(
+      VIEW_MODE_STORAGE_KEY,
+      nextViewMode
+    );
   }
 
 
@@ -303,7 +428,7 @@ export default function MyAssessmentsPage() {
               "grid",
 
             gap:
-              16,
+              12,
           }}
         >
           <section
@@ -356,6 +481,7 @@ export default function MyAssessmentsPage() {
               >
                 My Assessments
               </h1>
+
 
               <div
                 style={{
@@ -444,6 +570,47 @@ export default function MyAssessmentsPage() {
               New assessment
             </Link>
           </section>
+
+
+          {hasLoaded &&
+          savedAssessments.length >
+            0 ? (
+            <AssessmentLibraryToolbar
+              searchText={
+                searchText
+              }
+              statusFilter={
+                statusFilter
+              }
+              sortMode={
+                sortMode
+              }
+              viewMode={
+                viewMode
+              }
+              resultCount={
+                visibleAssessments.length
+              }
+              totalCount={
+                savedAssessments.length
+              }
+              theme={
+                theme
+              }
+              onSearchTextChange={
+                setSearchText
+              }
+              onStatusFilterChange={
+                setStatusFilter
+              }
+              onSortModeChange={
+                setSortMode
+              }
+              onViewModeChange={
+                handleViewModeChange
+              }
+            />
+          ) : null}
 
 
           {!hasLoaded ? (
@@ -540,6 +707,122 @@ export default function MyAssessmentsPage() {
                 you continue into the builder.
               </div>
             </section>
+          ) : visibleAssessments.length ===
+            0 ? (
+            <section
+              style={{
+                padding:
+                  20,
+
+                display:
+                  "grid",
+
+                justifyItems:
+                  "start",
+
+                gap:
+                  8,
+
+                borderWidth:
+                  1,
+
+                borderStyle:
+                  "solid",
+
+                borderColor:
+                  theme.borderStandard,
+
+                borderRadius:
+                  6,
+
+                background:
+                  theme.bgSurface,
+              }}
+            >
+              <div
+                style={{
+                  color:
+                    theme.textPrimary,
+
+                  fontSize:
+                    13,
+
+                  fontWeight:
+                    600,
+                }}
+              >
+                No assessments match these filters
+              </div>
+
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchText(
+                    ""
+                  );
+
+                  setStatusFilter(
+                    "ALL"
+                  );
+                }}
+                style={{
+                  height:
+                    28,
+
+                  padding:
+                    "0 9px",
+
+                  borderWidth:
+                    1,
+
+                  borderStyle:
+                    "solid",
+
+                  borderColor:
+                    theme.borderStandard,
+
+                  borderRadius:
+                    5,
+
+                  background:
+                    theme.controlBg,
+
+                  color:
+                    theme.textSecondary,
+
+                  cursor:
+                    "pointer",
+
+                  fontSize:
+                    11,
+
+                  fontWeight:
+                    600,
+                }}
+              >
+                Clear filters
+              </button>
+            </section>
+          ) : viewMode ===
+            "LIST" ? (
+            <AssessmentListView
+              savedAssessments={
+                visibleAssessments
+              }
+              theme={
+                theme
+              }
+              onDuplicate={
+                handleDuplicate
+              }
+              onDelete={
+                handleRequestDelete
+              }
+              onTogglePinned={
+                handleTogglePinned
+              }
+            />
           ) : (
             <section
               aria-label="Assessment library"
@@ -560,7 +843,7 @@ export default function MyAssessmentsPage() {
                   "stretch",
               }}
             >
-              {savedAssessments.map(
+              {visibleAssessments.map(
                 (
                   savedAssessment
                 ) => (

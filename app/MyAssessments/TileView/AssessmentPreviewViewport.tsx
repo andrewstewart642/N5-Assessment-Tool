@@ -1,4 +1,4 @@
-"use client";
+
 
 import {
   useEffect,
@@ -19,6 +19,8 @@ import {
 } from "@/app/Assessments/Compilation/PDF/Client/useAssessmentPdfAsset";
 
 import AssessmentPdfCanvasViewer from "../Preview/AssessmentPdfCanvasViewer";
+
+import AssessmentPdfPreviewModal from "../Preview/AssessmentPdfPreviewModal";
 
 
 type AssessmentPreviewViewportProps = {
@@ -125,9 +127,13 @@ export default function AssessmentPreviewViewport({
     );
 
 
-  const interactive =
-    typeof onOpenPreview ===
-    "function";
+  const [
+    isPreviewOpen,
+    setIsPreviewOpen,
+  ] =
+    useState(
+      false
+    );
 
 
   useEffect(() => {
@@ -205,172 +211,251 @@ export default function AssessmentPreviewViewport({
     });
 
 
+  const interactive =
+    pdfState.status ===
+    "ready";
+
+
+  const assessmentName =
+    savedAssessment.setup
+      .assessmentName
+      .trim() ||
+    "[Untitled file]";
+
+
+  function handleOpenPreview() {
+    if (
+      pdfState.status !==
+      "ready"
+    ) {
+      return;
+    }
+
+
+    if (
+      onOpenPreview
+    ) {
+      onOpenPreview();
+
+      return;
+    }
+
+
+    setIsPreviewOpen(
+      true
+    );
+  }
+
+
+  function handleClosePreview() {
+    setIsPreviewOpen(
+      false
+    );
+  }
+
+
   return (
-    <div
-      ref={
-        viewportRef
-      }
-      data-assessment-id={
-        savedAssessment.id
-      }
-      aria-label="Assessment document preview"
-      role={
-        interactive
-          ? "button"
-          : "region"
-      }
-      tabIndex={
-        interactive
-          ? 0
-          : undefined
-      }
-      onClick={
-        onOpenPreview
-      }
-      onKeyDown={
-        interactive
-          ? (
-              event
-            ) => {
-              if (
-                event.key ===
-                  "Enter" ||
-                event.key ===
-                  " "
-              ) {
-                event.preventDefault();
-
-                onOpenPreview();
-              }
-            }
-          : undefined
-      }
-      style={{
-        width:
-          "100%",
-
-        height:
-          "100%",
-
-        minWidth:
-          0,
-
-        minHeight:
-          0,
-
-        maxHeight:
-          "100%",
-
-        alignSelf:
-          "stretch",
-
-        boxSizing:
-          "border-box",
-
-        overflowY:
-          "auto",
-
-        overflowX:
-          "hidden",
-
-        overscrollBehavior:
-          "contain",
-
-        scrollbarWidth:
-          "thin",
-
-        scrollbarGutter:
-          "stable",
-
-        scrollbarColor:
-          `${theme.borderStandard} transparent`,
-
-        background:
-          theme.bgSection,
-
-        borderRightWidth:
-          1,
-
-        borderRightStyle:
-          "solid",
-
-        borderRightColor:
-          theme.borderStandard,
-
-        cursor:
+    <>
+      <div
+        ref={
+          viewportRef
+        }
+        data-assessment-id={
+          savedAssessment.id
+        }
+        aria-label={
           interactive
-            ? "zoom-in"
-            : "default",
-      }}
-    >
-      {!shouldLoad ||
-      pdfState.status ===
-        "idle" ||
-      pdfState.status ===
-        "loading" ? (
-        <LoadingIndicator
-          theme={
-            theme
-          }
-        />
-      ) : null}
+            ? "Assessment document preview. Click to enlarge."
+            : "Assessment document preview"
+        }
+        role={
+          interactive
+            ? "button"
+            : "region"
+        }
+        tabIndex={
+          interactive
+            ? 0
+            : undefined
+        }
+        onClick={
+          interactive
+            ? handleOpenPreview
+            : undefined
+        }
+        onKeyDown={
+          interactive
+            ? (
+                event
+              ) => {
+                if (
+                  event.key ===
+                    "Enter" ||
+                  event.key ===
+                    " "
+                ) {
+                  event.preventDefault();
+
+                  handleOpenPreview();
+                }
+              }
+            : undefined
+        }
+        style={{
+          width:
+            "100%",
+
+          height:
+            "100%",
+
+          minWidth:
+            0,
+
+          minHeight:
+            0,
+
+          maxHeight:
+            "100%",
+
+          alignSelf:
+            "stretch",
+
+          boxSizing:
+            "border-box",
+
+          overflowY:
+            "auto",
+
+          overflowX:
+            "hidden",
+
+          overscrollBehavior:
+            "contain",
+
+          scrollbarWidth:
+            "thin",
+
+          scrollbarGutter:
+            "stable",
+
+          scrollbarColor:
+            `${theme.borderStandard} transparent`,
+
+          background:
+            theme.bgSection,
+
+          borderRightWidth:
+            1,
+
+          borderRightStyle:
+            "solid",
+
+          borderRightColor:
+            theme.borderStandard,
+
+          cursor:
+            interactive
+              ? "zoom-in"
+              : "default",
+        }}
+      >
+        {!shouldLoad ||
+        pdfState.status ===
+          "idle" ||
+        pdfState.status ===
+          "loading" ? (
+          <LoadingIndicator
+            theme={
+              theme
+            }
+          />
+        ) : null}
+
+
+        {pdfState.status ===
+        "error" ? (
+          <div
+            title={
+              pdfState.error
+            }
+            style={{
+              width:
+                "100%",
+
+              height:
+                "100%",
+
+              minHeight:
+                0,
+
+              padding:
+                12,
+
+              boxSizing:
+                "border-box",
+
+              display:
+                "grid",
+
+              placeItems:
+                "center",
+
+              background:
+                theme.paper,
+
+              color:
+                "#777",
+
+              fontSize:
+                10,
+
+              textAlign:
+                "center",
+            }}
+          >
+            Preview unavailable
+          </div>
+        ) : null}
+
+
+        {pdfState.status ===
+        "ready" ? (
+          <AssessmentPdfCanvasViewer
+            pdfUrl={
+              pdfState.asset
+                .objectUrl
+            }
+          />
+        ) : null}
+      </div>
 
 
       {pdfState.status ===
-      "error" ? (
-        <div
+      "ready" &&
+      !onOpenPreview ? (
+        <AssessmentPdfPreviewModal
+          open={
+            isPreviewOpen
+          }
           title={
-            pdfState.error
+            assessmentName
           }
-          style={{
-            width:
-              "100%",
-
-            height:
-              "100%",
-
-            minHeight:
-              0,
-
-            padding:
-              12,
-
-            boxSizing:
-              "border-box",
-
-            display:
-              "grid",
-
-            placeItems:
-              "center",
-
-            background:
-              theme.paper,
-
-            color:
-              "#777",
-
-            fontSize:
-              10,
-
-            textAlign:
-              "center",
-          }}
-        >
-          Preview unavailable
-        </div>
-      ) : null}
-
-
-      {pdfState.status ===
-      "ready" ? (
-        <AssessmentPdfCanvasViewer
           pdfUrl={
             pdfState.asset
               .objectUrl
           }
+          pageCount={
+            pdfState.asset
+              .pageCount
+          }
+          theme={
+            theme
+          }
+          onClose={
+            handleClosePreview
+          }
         />
       ) : null}
-    </div>
+    </>
   );
 }

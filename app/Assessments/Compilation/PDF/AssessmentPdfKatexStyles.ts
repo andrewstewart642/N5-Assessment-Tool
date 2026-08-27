@@ -1,27 +1,29 @@
 import {
-  existsSync,
-} from "node:fs";
-
-import {
   readFile,
 } from "node:fs/promises";
 
-import {
-  createRequire,
-} from "node:module";
-
 import path from "node:path";
-
-
-const nodeRequire =
-  createRequire(
-    import.meta.url
-  );
 
 
 let cachedKatexCss:
   Promise<string> | null =
     null;
+
+
+const KATEX_DIST_DIRECTORY =
+  path.join(
+    process.cwd(),
+    "node_modules",
+    "katex",
+    "dist"
+  );
+
+
+const KATEX_CSS_PATH =
+  path.join(
+    KATEX_DIST_DIRECTORY,
+    "katex.min.css"
+  );
 
 
 function getFontMimeType(
@@ -72,107 +74,56 @@ function getFontMimeType(
 }
 
 
-function resolveKatexDistDirectory():
-  string {
-  const candidates:
-    string[] = [];
-
-
+function resolveKatexFontPath(
+  fontReference:
+    string
+): string {
   /*
-   * Prefer resolving the actual KaTeX JavaScript
-   * package rather than asking the bundler to
-   * resolve a CSS asset directly.
+   * KaTeX CSS font references should always
+   * look like:
    *
-   * KaTeX's main package entry lives inside its
-   * dist directory, alongside katex.min.css.
+   * fonts/KaTeX_Main-Regular.woff2
+   *
+   * Reject anything that attempts to escape
+   * the KaTeX distribution directory.
    */
-
-  try {
-    const resolvedKatexEntry =
-      nodeRequire.resolve(
-        "katex"
-      );
-
-
-    if (
-      typeof resolvedKatexEntry ===
-        "string" &&
-      resolvedKatexEntry.trim()
-    ) {
-      candidates.push(
-        path.dirname(
-          resolvedKatexEntry
-        )
-      );
-    }
-  } catch {
-    /*
-     * If package resolution is unavailable in a
-     * particular runtime, fall through to the
-     * normal project node_modules location.
-     */
-  }
-
-
-  candidates.push(
-    path.join(
-      process.cwd(),
-      "node_modules",
-      "katex",
-      "dist"
+  if (
+    !fontReference.startsWith(
+      "fonts/"
+    ) ||
+    fontReference.includes(
+      ".."
+    ) ||
+    path.isAbsolute(
+      fontReference
     )
-  );
-
-
-  for (
-    const candidate
-    of candidates
   ) {
-    const cssPath =
-      path.join(
-        candidate,
-        "katex.min.css"
-      );
-
-
-    if (
-      existsSync(
-        cssPath
-      )
-    ) {
-      return candidate;
-    }
+    throw new Error(
+      `Invalid KaTeX font reference: ${fontReference}`
+    );
   }
 
 
-  throw new Error(
-    [
-      "Unable to locate the KaTeX distribution directory.",
-      "PDF generation requires katex.min.css and its font files.",
-      `Checked: ${candidates.join(", ")}`,
-    ].join(
-      " "
-    )
+  return path.join(
+    KATEX_DIST_DIRECTORY,
+    fontReference
   );
 }
 
 
 async function buildEmbeddedKatexCss():
   Promise<string> {
-  const katexDistDirectory =
-    resolveKatexDistDirectory();
-
-
-  const cssPath =
-    path.join(
-      katexDistDirectory,
-      "katex.min.css"
-    );
-
-
+  /*
+   * The KaTeX distribution is explicitly added
+   * to outputFileTracingIncludes in next.config.
+   *
+   * Turbopack therefore does not need to infer
+   * these runtime filesystem dependencies.
+   */
   const originalCss =
     await readFile(
-      cssPath,
+      /* turbopackIgnore: true */
+      KATEX_CSS_PATH,
       "utf8"
     );
 
@@ -209,14 +160,14 @@ async function buildEmbeddedKatexCss():
           fontReference
         ) => {
           const absoluteFontPath =
-            path.resolve(
-              katexDistDirectory,
+            resolveKatexFontPath(
               fontReference
             );
 
 
           const bytes =
             await readFile(
+              /* turbopackIgnore: true */
               absoluteFontPath
             );
 

@@ -8,8 +8,22 @@ const nextConfig:
     serverExternalPackages: [
       "puppeteer-core",
       "@sparticuz/chromium",
-      "katex",
     ],
+
+
+    /*
+     * The PDF generator reads KaTeX CSS/font
+     * assets directly at runtime.
+     *
+     * Explicitly include only that package's
+     * distribution assets in the PDF route's
+     * server trace.
+     */
+    outputFileTracingIncludes: {
+      "/Assessments/Compilation/PDF/generate": [
+        "./node_modules/katex/dist/**/*",
+      ],
+    },
 
 
     turbopack: {
