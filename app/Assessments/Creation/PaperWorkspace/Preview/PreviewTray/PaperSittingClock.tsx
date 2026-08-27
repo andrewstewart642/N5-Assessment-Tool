@@ -1,15 +1,13 @@
 import {
   useEffect,
+  useRef,
   useState,
+  type PointerEvent,
 } from "react";
 
 import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
-
-import {
-  UI_TEXT,
-} from "@/app/UI/Application/Typography/Typography";
 
 import PreviewTraySegmentedControl from "./PreviewTraySegmentedControl";
 
@@ -19,10 +17,11 @@ import {
   getClockHour12,
   getClockMeridiem,
   parsePaperSittingTime,
+  type PaperSittingTimeParts,
 } from "./PaperSittingTimeUtils";
 
 
-type ClockMode =
+type ClockHand =
   | "hour"
   | "minute";
 
@@ -36,59 +35,56 @@ type PaperSittingClockProps = {
       string
   ) => void;
 
+  onComplete:
+    () => void;
+
   theme:
     AppTheme;
 };
 
 
 const CLOCK_SIZE =
-  162;
+  176;
 
 const CLOCK_CENTRE =
   CLOCK_SIZE /
   2;
 
-const MARKER_SIZE =
-  25;
+const FACE_RADIUS =
+  82;
 
-const MARKER_RADIUS =
-  61;
+const NUMBER_RADIUS =
+  66;
 
-const HAND_LENGTH =
-  48;
+const HOUR_HAND_LENGTH =
+  39;
+
+const MINUTE_HAND_LENGTH =
+  58;
 
 
-function ClockMarker({
-  label,
+function getDefaultClockTime(): PaperSittingTimeParts {
+  return {
+    hour24:
+      9,
+
+    minute:
+      0,
+  };
+}
+
+
+function getPointOnClock({
   angleDegrees,
-  selected,
-  onClick,
-  theme,
+  radius,
 }: {
-  label:
-    string;
-
   angleDegrees:
     number;
 
-  selected:
-    boolean;
-
-  onClick:
-    () => void;
-
-  theme:
-    AppTheme;
+  radius:
+    number;
 }) {
-  const [
-    hovered,
-    setHovered,
-  ] =
-    useState(
-      false
-    );
-
-  const angleRadians =
+  const radians =
     (
       angleDegrees -
       90
@@ -98,207 +94,468 @@ function ClockMarker({
       180
     );
 
-  const left =
-    CLOCK_CENTRE +
-    Math.cos(
-      angleRadians
-    ) *
-      MARKER_RADIUS -
-    MARKER_SIZE /
-      2;
+  return {
+    x:
+      CLOCK_CENTRE +
+      Math.cos(
+        radians
+      ) *
+        radius,
 
-  const top =
-    CLOCK_CENTRE +
-    Math.sin(
-      angleRadians
-    ) *
-      MARKER_RADIUS -
-    MARKER_SIZE /
-      2;
+    y:
+      CLOCK_CENTRE +
+      Math.sin(
+        radians
+      ) *
+        radius,
+  };
+}
 
 
+function normaliseAngle(
+  angle:
+    number
+): number {
   return (
-    <button
-      type="button"
-      onClick={
-        onClick
-      }
-      onMouseEnter={() =>
-        setHovered(
-          true
-        )
-      }
-      onMouseLeave={() =>
-        setHovered(
-          false
-        )
-      }
-      style={{
-        position:
-          "absolute",
-
-        left,
-
-        top,
-
-        width:
-          MARKER_SIZE,
-
-        height:
-          MARKER_SIZE,
-
-        padding:
-          0,
-
-        border:
-          `1px solid ${
-            selected
-              ? theme.controlSelectedBorder
-              : "transparent"
-          }`,
-
-        borderRadius:
-          999,
-
-        background:
-          selected
-            ? theme.controlSelectedBg
-            : hovered
-              ? theme.controlBgHover
-              : "transparent",
-
-        color:
-          selected
-            ? theme.textPrimary
-            : theme.textSecondary,
-
-        cursor:
-          "pointer",
-
-        display:
-          "grid",
-
-        placeItems:
-          "center",
-
-        ...UI_TEXT.helper,
-
-        fontWeight:
-          selected
-            ? 600
-            : 500,
-
-        transition:
-          "background 120ms ease, border-color 120ms ease, color 120ms ease",
-      }}
-    >
-      {label}
-    </button>
-  );
+    (
+      angle %
+      360
+    ) +
+    360
+  ) %
+  360;
 }
 
 
 export default function PaperSittingClock({
   value,
   onChange,
+  onComplete,
   theme,
 }: PaperSittingClockProps) {
-  const [
-    mode,
-    setMode,
-  ] =
-    useState<ClockMode>(
-      "hour"
+  const svgRef =
+    useRef<SVGSVGElement | null>(
+      null
     );
 
+  const dragHandRef =
+    useRef<ClockHand | null>(
+      null
+    );
 
-  const parsed =
-    parsePaperSittingTime(
-      value
-    ) ?? {
-      hour24:
-        9,
+  const draftRef =
+    useRef<PaperSittingTimeParts>(
+      parsePaperSittingTime(
+        value
+      ) ??
+        getDefaultClockTime()
+    );
+
+  const touchedHandsRef =
+    useRef({
+      hour:
+        false,
 
       minute:
-        0,
-    };
+        false,
+    });
 
-
-  const hour12 =
-    getClockHour12(
-      parsed.hour24
-    );
-
-  const meridiem =
-    getClockMeridiem(
-      parsed.hour24
+  const completionSentRef =
+    useRef(
+      false
     );
 
 
-  /*
-   * Returning to another time field should
-   * begin with hour selection again.
-   */
+  const [
+    draft,
+    setDraft,
+  ] =
+    useState<PaperSittingTimeParts>(
+      draftRef.current
+    );
+
+  const [
+    activeDragHand,
+    setActiveDragHand,
+  ] =
+    useState<ClockHand | null>(
+      null
+    );
+
 
   useEffect(() => {
-    setMode(
-      "hour"
+    if (
+      dragHandRef.current
+    ) {
+      return;
+    }
+
+    const parsed =
+      parsePaperSittingTime(
+        value
+      );
+
+    if (
+      !parsed
+    ) {
+      return;
+    }
+
+    draftRef.current =
+      parsed;
+
+    setDraft(
+      parsed
     );
   }, [
     value,
   ]);
 
 
-  const selectedAngle =
-    mode ===
-    "hour"
-      ? (
-          hour12 %
-          12
-        ) *
-        30
-      : parsed.minute *
-        6;
+  const hour12 =
+    getClockHour12(
+      draft.hour24
+    );
+
+  const meridiem =
+    getClockMeridiem(
+      draft.hour24
+    );
 
 
-  function applyHour(
-    nextHour12:
-      number
+  const hourAngle =
+    (
+      hour12 %
+      12
+    ) *
+    30;
+
+  const minuteAngle =
+    draft.minute *
+    6;
+
+
+  const hourTip =
+    getPointOnClock({
+      angleDegrees:
+        hourAngle,
+
+      radius:
+        HOUR_HAND_LENGTH,
+    });
+
+  const minuteTip =
+    getPointOnClock({
+      angleDegrees:
+        minuteAngle,
+
+      radius:
+        MINUTE_HAND_LENGTH,
+    });
+
+
+  function updateDraft(
+    next:
+      PaperSittingTimeParts
   ) {
-    onChange(
-      formatPaperSittingTime({
+    draftRef.current =
+      next;
+
+    setDraft(
+      next
+    );
+  }
+
+
+  function getPointerAngle(
+    event:
+      PointerEvent<SVGSVGElement>
+  ): number | null {
+    const svg =
+      svgRef.current;
+
+    if (
+      !svg
+    ) {
+      return null;
+    }
+
+    const rect =
+      svg.getBoundingClientRect();
+
+    const centreX =
+      rect.left +
+      rect.width /
+        2;
+
+    const centreY =
+      rect.top +
+      rect.height /
+        2;
+
+    const deltaX =
+      event.clientX -
+      centreX;
+
+    const deltaY =
+      event.clientY -
+      centreY;
+
+    const angle =
+      (
+        Math.atan2(
+          deltaY,
+          deltaX
+        ) *
+        180
+      ) /
+        Math.PI +
+      90;
+
+    return normaliseAngle(
+      angle
+    );
+  }
+
+
+  function updateFromPointer({
+    hand,
+    event,
+  }: {
+    hand:
+      ClockHand;
+
+    event:
+      PointerEvent<SVGSVGElement>;
+  }) {
+    const angle =
+      getPointerAngle(
+        event
+      );
+
+    if (
+      angle ===
+      null
+    ) {
+      return;
+    }
+
+    const current =
+      draftRef.current;
+
+
+    if (
+      hand ===
+      "hour"
+    ) {
+      const clockIndex =
+        Math.round(
+          angle /
+            30
+        ) %
+        12;
+
+      const nextHour12 =
+        clockIndex ===
+        0
+          ? 12
+          : clockIndex;
+
+      updateDraft({
+        ...current,
+
         hour24:
           buildHour24FromClock({
             hour12:
               nextHour12,
 
-            meridiem,
+            meridiem:
+              getClockMeridiem(
+                current.hour24
+              ),
           }),
+      });
 
-        minute:
-          parsed.minute,
-      })
+      return;
+    }
+
+
+    const nextMinute =
+      Math.round(
+        angle /
+          6
+      ) %
+      60;
+
+    updateDraft({
+      ...current,
+
+      minute:
+        nextMinute,
+    });
+  }
+
+
+  function startDragging(
+    hand:
+      ClockHand,
+
+    event:
+      PointerEvent<SVGElement>
+  ) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const svg =
+      svgRef.current;
+
+    if (
+      !svg
+    ) {
+      return;
+    }
+
+    dragHandRef.current =
+      hand;
+
+    setActiveDragHand(
+      hand
     );
 
-    setMode(
-      "minute"
+    svg.setPointerCapture(
+      event.pointerId
     );
   }
 
 
-  function applyMinute(
-    nextMinute:
-      number
+  function handlePointerMove(
+    event:
+      PointerEvent<SVGSVGElement>
   ) {
-    onChange(
-      formatPaperSittingTime({
-        hour24:
-          parsed.hour24,
+    const hand =
+      dragHandRef.current;
 
-        minute:
-          nextMinute,
-      })
+    if (
+      !hand
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+
+    updateFromPointer({
+      hand,
+      event,
+    });
+  }
+
+
+  function finishDragging(
+    event:
+      PointerEvent<SVGSVGElement>
+  ) {
+    const hand =
+      dragHandRef.current;
+
+    if (
+      !hand
+    ) {
+      return;
+    }
+
+    updateFromPointer({
+      hand,
+      event,
+    });
+
+    dragHandRef.current =
+      null;
+
+    setActiveDragHand(
+      null
     );
+
+
+    if (
+      event.currentTarget.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId
+      );
+    }
+
+
+    const finalTime =
+      draftRef.current;
+
+    onChange(
+      formatPaperSittingTime(
+        finalTime
+      )
+    );
+
+
+    touchedHandsRef.current = {
+      ...touchedHandsRef.current,
+
+      [hand]:
+        true,
+    };
+
+
+    if (
+      touchedHandsRef.current
+        .hour &&
+      touchedHandsRef.current
+        .minute &&
+      !completionSentRef.current
+    ) {
+      completionSentRef.current =
+        true;
+
+      window.setTimeout(
+        onComplete,
+        140
+      );
+    }
+  }
+
+
+  function cancelDragging(
+    event:
+      PointerEvent<SVGSVGElement>
+  ) {
+    dragHandRef.current =
+      null;
+
+    setActiveDragHand(
+      null
+    );
+
+    if (
+      event.currentTarget.hasPointerCapture(
+        event.pointerId
+      )
+    ) {
+      event.currentTarget.releasePointerCapture(
+        event.pointerId
+      );
+    }
+
+    const restored =
+      parsePaperSittingTime(
+        value
+      );
+
+    if (
+      restored
+    ) {
+      updateDraft(
+        restored
+      );
+    }
   }
 
 
@@ -306,19 +563,32 @@ export default function PaperSittingClock({
     nextMeridiem:
       "AM" | "PM"
   ) {
+    const current =
+      draftRef.current;
+
+    const next = {
+      ...current,
+
+      hour24:
+        buildHour24FromClock({
+          hour12:
+            getClockHour12(
+              current.hour24
+            ),
+
+          meridiem:
+            nextMeridiem,
+        }),
+    };
+
+    updateDraft(
+      next
+    );
+
     onChange(
-      formatPaperSittingTime({
-        hour24:
-          buildHour24FromClock({
-            hour12,
-
-            meridiem:
-              nextMeridiem,
-          }),
-
-        minute:
-          parsed.minute,
-      })
+      formatPaperSittingTime(
+        next
+      )
     );
   }
 
@@ -342,51 +612,9 @@ export default function PaperSittingClock({
       <div
         style={{
           width:
-            "100%",
-
-          display:
-            "grid",
-
-          gridTemplateColumns:
-            "1fr 92px",
-
-          gap:
-            6,
+            104,
         }}
       >
-        <PreviewTraySegmentedControl
-          value={
-            mode
-          }
-          options={[
-            {
-              value:
-                "hour",
-
-              label:
-                "Hour",
-            },
-            {
-              value:
-                "minute",
-
-              label:
-                "Minute",
-            },
-          ]}
-          onChange={(
-            next
-          ) =>
-            setMode(
-              next as ClockMode
-            )
-          }
-          ariaLabel="Clock selection mode"
-          theme={
-            theme
-          }
-        />
-
         <PreviewTraySegmentedControl
           value={
             meridiem
@@ -399,6 +627,7 @@ export default function PaperSittingClock({
               label:
                 "AM",
             },
+
             {
               value:
                 "PM",
@@ -423,213 +652,389 @@ export default function PaperSittingClock({
         />
       </div>
 
-      <div
+      <svg
+        ref={
+          svgRef
+        }
+        width={
+          CLOCK_SIZE
+        }
+        height={
+          CLOCK_SIZE
+        }
+        viewBox={`0 0 ${CLOCK_SIZE} ${CLOCK_SIZE}`}
+        aria-label="Time clock"
+        onPointerMove={
+          handlePointerMove
+        }
+        onPointerUp={
+          finishDragging
+        }
+        onPointerCancel={
+          cancelDragging
+        }
         style={{
-          width:
-            CLOCK_SIZE,
+          display:
+            "block",
 
-          height:
-            CLOCK_SIZE,
+          overflow:
+            "visible",
 
-          position:
-            "relative",
+          touchAction:
+            "none",
 
-          border:
-            `1px solid ${theme.borderStandard}`,
-
-          borderRadius:
-            999,
-
-          background:
-            theme.controlBg,
-
-          boxSizing:
-            "border-box",
+          userSelect:
+            "none",
         }}
       >
-        <div
-          aria-hidden="true"
-          style={{
-            position:
-              "absolute",
-
-            left:
-              "50%",
-
-            top:
-              "50%",
-
-            width:
-              2,
-
-            height:
-              HAND_LENGTH,
-
-            marginLeft:
-              -1,
-
-            marginTop:
-              -HAND_LENGTH,
-
-            borderRadius:
-              2,
-
-            background:
-              theme.accentPrimary,
-
-            opacity:
-              0.62,
-
-            transformOrigin:
-              "50% 100%",
-
-            transform:
-              `rotate(${selectedAngle}deg)`,
-
-            pointerEvents:
-              "none",
-
-            transition:
-              "transform 150ms ease",
-          }}
+        <circle
+          cx={
+            CLOCK_CENTRE
+          }
+          cy={
+            CLOCK_CENTRE
+          }
+          r={
+            FACE_RADIUS
+          }
+          fill={
+            theme.controlBg
+          }
+          stroke={
+            theme.borderStandard
+          }
+          strokeWidth="1"
         />
 
-        <div
-          aria-hidden="true"
-          style={{
-            position:
-              "absolute",
 
-            left:
-              "50%",
+        {Array.from(
+          {
+            length:
+              60,
+          },
+          (
+            _,
+            index
+          ) => {
+            const major =
+              index %
+                5 ===
+              0;
 
-            top:
-              "50%",
+            const angle =
+              index *
+              6;
 
-            width:
-              6,
+            const outer =
+              getPointOnClock({
+                angleDegrees:
+                  angle,
 
-            height:
-              6,
+                radius:
+                  77,
+              });
 
-            marginLeft:
-              -3,
+            const inner =
+              getPointOnClock({
+                angleDegrees:
+                  angle,
 
-            marginTop:
-              -3,
+                radius:
+                  major
+                    ? 72
+                    : 74,
+              });
 
-            borderRadius:
-              999,
+            return (
+              <line
+                key={
+                  index
+                }
+                x1={
+                  inner.x
+                }
+                y1={
+                  inner.y
+                }
+                x2={
+                  outer.x
+                }
+                y2={
+                  outer.y
+                }
+                stroke={
+                  theme.textMuted
+                }
+                strokeWidth={
+                  major
+                    ? 1.2
+                    : 0.7
+                }
+                opacity={
+                  major
+                    ? 0.62
+                    : 0.28
+                }
+              />
+            );
+          }
+        )}
 
-            background:
-              theme.accentPrimary,
 
-            pointerEvents:
-              "none",
-          }}
-        />
+        {Array.from(
+          {
+            length:
+              12,
+          },
+          (
+            _,
+            index
+          ) => {
+            const value12 =
+              index ===
+              0
+                ? 12
+                : index;
 
-        {mode ===
-        "hour"
-          ? Array.from(
-              {
-                length:
-                  12,
-              },
+            const angle =
               (
-                _,
-                index
-              ) => {
-                const value12 =
-                  index ===
-                  0
-                    ? 12
-                    : index;
+                value12 %
+                12
+              ) *
+              30;
 
-                const angle =
-                  (
-                    value12 %
-                    12
-                  ) *
-                  30;
+            const point =
+              getPointOnClock({
+                angleDegrees:
+                  angle,
 
-                return (
-                  <ClockMarker
-                    key={
-                      value12
-                    }
-                    label={
-                      String(
-                        value12
-                      )
-                    }
-                    angleDegrees={
-                      angle
-                    }
-                    selected={
-                      hour12 ===
-                      value12
-                    }
-                    onClick={() =>
-                      applyHour(
-                        value12
-                      )
-                    }
-                    theme={
-                      theme
-                    }
-                  />
-                );
-              }
+                radius:
+                  NUMBER_RADIUS,
+              });
+
+            return (
+              <text
+                key={
+                  value12
+                }
+                x={
+                  point.x
+                }
+                y={
+                  point.y
+                }
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill={
+                  theme.textSecondary
+                }
+                fontSize="10"
+                fontWeight="500"
+                pointerEvents="none"
+              >
+                {value12}
+              </text>
+            );
+          }
+        )}
+
+
+        {/*
+         * Hour hand — shorter and heavier.
+         */}
+
+        <line
+          x1={
+            CLOCK_CENTRE
+          }
+          y1={
+            CLOCK_CENTRE
+          }
+          x2={
+            hourTip.x
+          }
+          y2={
+            hourTip.y
+          }
+          stroke={
+            theme.accentPrimary
+          }
+          strokeWidth="5"
+          strokeLinecap="round"
+          opacity={
+            activeDragHand ===
+            "hour"
+              ? 1
+              : 0.82
+          }
+          pointerEvents="none"
+        />
+
+        <line
+          x1={
+            CLOCK_CENTRE
+          }
+          y1={
+            CLOCK_CENTRE
+          }
+          x2={
+            hourTip.x
+          }
+          y2={
+            hourTip.y
+          }
+          stroke="transparent"
+          strokeWidth="18"
+          strokeLinecap="round"
+          onPointerDown={(
+            event
+          ) =>
+            startDragging(
+              "hour",
+              event
             )
-          : Array.from(
-              {
-                length:
-                  12,
-              },
-              (
-                _,
-                index
-              ) => {
-                const minute =
-                  index *
-                  5;
+          }
+          style={{
+            cursor:
+              "grab",
+          }}
+        />
 
-                const angle =
-                  minute *
-                  6;
+        <circle
+          cx={
+            hourTip.x
+          }
+          cy={
+            hourTip.y
+          }
+          r="6"
+          fill={
+            theme.accentPrimary
+          }
+          stroke={
+            theme.bgElevated
+          }
+          strokeWidth="2"
+          onPointerDown={(
+            event
+          ) =>
+            startDragging(
+              "hour",
+              event
+            )
+          }
+          style={{
+            cursor:
+              "grab",
+          }}
+        />
 
-                return (
-                  <ClockMarker
-                    key={
-                      minute
-                    }
-                    label={String(
-                      minute
-                    ).padStart(
-                      2,
-                      "0"
-                    )}
-                    angleDegrees={
-                      angle
-                    }
-                    selected={
-                      parsed.minute ===
-                      minute
-                    }
-                    onClick={() =>
-                      applyMinute(
-                        minute
-                      )
-                    }
-                    theme={
-                      theme
-                    }
-                  />
-                );
-              }
-            )}
-      </div>
+
+        {/*
+         * Minute hand — longer and lighter.
+         */}
+
+        <line
+          x1={
+            CLOCK_CENTRE
+          }
+          y1={
+            CLOCK_CENTRE
+          }
+          x2={
+            minuteTip.x
+          }
+          y2={
+            minuteTip.y
+          }
+          stroke={
+            theme.accentPrimary
+          }
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          opacity={
+            activeDragHand ===
+            "minute"
+              ? 1
+              : 0.68
+          }
+          pointerEvents="none"
+        />
+
+        <line
+          x1={
+            CLOCK_CENTRE
+          }
+          y1={
+            CLOCK_CENTRE
+          }
+          x2={
+            minuteTip.x
+          }
+          y2={
+            minuteTip.y
+          }
+          stroke="transparent"
+          strokeWidth="15"
+          strokeLinecap="round"
+          onPointerDown={(
+            event
+          ) =>
+            startDragging(
+              "minute",
+              event
+            )
+          }
+          style={{
+            cursor:
+              "grab",
+          }}
+        />
+
+        <circle
+          cx={
+            minuteTip.x
+          }
+          cy={
+            minuteTip.y
+          }
+          r="5"
+          fill={
+            theme.accentPrimary
+          }
+          stroke={
+            theme.bgElevated
+          }
+          strokeWidth="2"
+          onPointerDown={(
+            event
+          ) =>
+            startDragging(
+              "minute",
+              event
+            )
+          }
+          style={{
+            cursor:
+              "grab",
+          }}
+        />
+
+
+        <circle
+          cx={
+            CLOCK_CENTRE
+          }
+          cy={
+            CLOCK_CENTRE
+          }
+          r="4"
+          fill={
+            theme.accentPrimary
+          }
+          pointerEvents="none"
+        />
+      </svg>
     </div>
   );
 }

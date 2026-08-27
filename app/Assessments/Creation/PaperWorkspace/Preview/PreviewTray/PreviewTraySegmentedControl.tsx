@@ -37,6 +37,9 @@ type PreviewTraySegmentedControlProps = {
 
   theme:
     AppTheme;
+
+  height?:
+    number;
 };
 
 
@@ -45,6 +48,7 @@ function SegmentButton({
   selected,
   onClick,
   theme,
+  height,
 }: {
   label:
     string;
@@ -57,6 +61,9 @@ function SegmentButton({
 
   theme:
     AppTheme;
+
+  height:
+    number;
 }) {
   const [
     hovered,
@@ -93,8 +100,7 @@ function SegmentButton({
         minWidth:
           0,
 
-        height:
-          26,
+        height,
 
         padding:
           "0 8px",
@@ -161,7 +167,14 @@ export default function PreviewTraySegmentedControl({
   onChange,
   ariaLabel,
   theme,
+  height = 32,
 }: PreviewTraySegmentedControlProps) {
+  const innerHeight =
+    Math.max(
+      22,
+      height - 6
+    );
+
   return (
     <div
       role="radiogroup"
@@ -175,8 +188,7 @@ export default function PreviewTraySegmentedControl({
         minWidth:
           0,
 
-        height:
-          32,
+        height,
 
         padding:
           3,
@@ -225,6 +237,9 @@ export default function PreviewTraySegmentedControl({
             }
             theme={
               theme
+            }
+            height={
+              innerHeight
             }
           />
         )

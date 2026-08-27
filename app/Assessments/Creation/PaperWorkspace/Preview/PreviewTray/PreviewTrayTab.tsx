@@ -1,5 +1,3 @@
-"use client";
-
 import {
   useState,
 } from "react";
@@ -11,6 +9,7 @@ import type {
 import {
   UI_TEXT,
 } from "@/app/UI/Application/Typography/Typography";
+
 
 type PreviewTrayTabProps = {
   label:
@@ -32,8 +31,10 @@ type PreviewTrayTabProps = {
     AppTheme;
 };
 
+
 export const PREVIEW_TRAY_TAB_WIDTH =
   32;
+
 
 const ACTIVE_OPACITY =
   1;
@@ -43,6 +44,7 @@ const INACTIVE_OPACITY =
 
 const INACTIVE_HOVER_OPACITY =
   0.82;
+
 
 export default function PreviewTrayTab({
   label,
@@ -60,12 +62,14 @@ export default function PreviewTrayTab({
       false
     );
 
+
   const opacity =
     active
       ? ACTIVE_OPACITY
       : hovered
         ? INACTIVE_HOVER_OPACITY
         : INACTIVE_OPACITY;
+
 
   return (
     <button
@@ -104,11 +108,53 @@ export default function PreviewTrayTab({
         boxSizing:
           "border-box",
 
-        border:
-          `1px solid ${theme.borderStandard}`,
 
-        borderRight:
+        /*
+         * Use individual border properties rather
+         * than mixing the `border` shorthand with
+         * `borderRight`.
+         *
+         * The tray panel itself supplies the right
+         * edge, so this divider tab deliberately
+         * has no right border.
+         */
+
+        borderTopWidth:
+          1,
+
+        borderTopStyle:
+          "solid",
+
+        borderTopColor:
+          theme.borderStandard,
+
+        borderBottomWidth:
+          1,
+
+        borderBottomStyle:
+          "solid",
+
+        borderBottomColor:
+          theme.borderStandard,
+
+        borderLeftWidth:
+          1,
+
+        borderLeftStyle:
+          "solid",
+
+        borderLeftColor:
+          theme.borderStandard,
+
+        borderRightWidth:
+          0,
+
+        borderRightStyle:
           "none",
+
+        borderRightColor:
+          "transparent",
+
 
         borderRadius:
           "6px 0 0 6px",
@@ -134,11 +180,6 @@ export default function PreviewTrayTab({
         overflow:
           "hidden",
 
-        /*
-         * The tray itself owns the shadow.
-         * The tabs should feel physically
-         * attached to that tray.
-         */
         boxShadow:
           "none",
 
@@ -146,12 +187,11 @@ export default function PreviewTrayTab({
           "opacity 150ms ease",
           "background 150ms ease",
           "color 150ms ease",
-        ].join(", "),
+        ].join(
+          ", "
+        ),
       }}
     >
-      {/*
-       * Active divider indicator.
-       */}
       {active ? (
         <span
           aria-hidden="true"
@@ -180,18 +220,6 @@ export default function PreviewTrayTab({
         />
       ) : null}
 
-      {/*
-       * Absolutely centre the rotated word.
-       *
-       * Previously the rotated span was still
-       * participating in normal layout before
-       * rotation, which is what could make the
-       * longer "Settings" label look offset or
-       * clipped.
-       *
-       * The label now has one fixed centre point
-       * regardless of its text length.
-       */}
       <span
         style={{
           ...UI_TEXT.controlTextStrong,

@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useRef,
   useState,
 } from "react";
 
@@ -115,11 +114,6 @@ export default function PaperSittingControls({
       "date"
     );
 
-  const sectionRef =
-    useRef<HTMLDivElement | null>(
-      null
-    );
-
 
   useEffect(() => {
     if (
@@ -175,27 +169,11 @@ export default function PaperSittingControls({
     setEditorMode(
       "time"
     );
-
-    requestAnimationFrame(
-      () => {
-        sectionRef.current
-          ?.scrollIntoView({
-            behavior:
-              "smooth",
-
-            block:
-              "start",
-          });
-      }
-    );
   }
 
 
   return (
     <div
-      ref={
-        sectionRef
-      }
       style={{
         width:
           "100%",
@@ -207,86 +185,117 @@ export default function PaperSittingControls({
           "grid",
 
         gap:
-          9,
+          6,
 
-        scrollMarginTop:
-          8,
+        position:
+          "relative",
       }}
     >
       <div
         style={{
-          ...UI_TEXT.sectionLabel,
+          position:
+            "sticky",
 
-          color:
-            theme.textMuted,
+          top:
+            0,
+
+          zIndex:
+            4,
+
+          display:
+            "grid",
+
+          gap:
+            5,
+
+          paddingBottom:
+            6,
+
+          background:
+            theme.bgElevated,
         }}
       >
-        Paper sitting
-      </div>
+        <div
+          style={{
+            ...UI_TEXT.sectionLabel,
 
-      <PreviewTraySegmentedControl
-        value={
-          activePaper
-        }
-        options={
-          paperOptions.map(
-            (
-              option
-            ) => ({
+            color:
+              theme.textMuted,
+          }}
+        >
+          Paper sitting
+        </div>
+
+        <PreviewTraySegmentedControl
+          value={
+            activePaper
+          }
+          options={
+            paperOptions.map(
+              (
+                option
+              ) => ({
+                value:
+                  option.id,
+
+                label:
+                  option.label,
+              })
+            )
+          }
+          onChange={(
+            next
+          ) =>
+            setActivePaper(
+              next as Paper
+            )
+          }
+          ariaLabel="Paper sitting paper"
+          theme={
+            theme
+          }
+          height={
+            30
+          }
+        />
+
+        <PreviewTraySegmentedControl
+          value={
+            editorMode
+          }
+          options={[
+            {
               value:
-                option.id,
+                "date",
 
               label:
-                option.label,
-            })
-          )
-        }
-        onChange={(
-          next
-        ) =>
-          setActivePaper(
-            next as Paper
-          )
-        }
-        ariaLabel="Paper sitting paper"
-        theme={
-          theme
-        }
-      />
+                "Date",
+            },
 
-      <PreviewTraySegmentedControl
-        value={
-          editorMode
-        }
-        options={[
-          {
-            value:
-              "date",
+            {
+              value:
+                "time",
 
-            label:
-              "Date",
-          },
-
-          {
-            value:
-              "time",
-
-            label:
-              "Time",
-          },
-        ]}
-        onChange={(
-          next
-        ) =>
-          setEditorMode(
-            next as PaperSittingEditorMode
-          )
-        }
-        ariaLabel="Paper sitting editor"
-        theme={
-          theme
-        }
-      />
+              label:
+                "Time",
+            },
+          ]}
+          onChange={(
+            next
+          ) =>
+            setEditorMode(
+              next as PaperSittingEditorMode
+            )
+          }
+          ariaLabel="Paper sitting editor"
+          theme={
+            theme
+          }
+          height={
+            30
+          }
+        />
+      </div>
 
       <div
         key={`${activePaper}-${editorMode}`}

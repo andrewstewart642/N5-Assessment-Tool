@@ -4,13 +4,10 @@ import {
   useState,
 } from "react";
 
-import CalendarHeader from "@/app/UI/Application/Components/Calendar/CalendarHeader";
-
-import CalendarMonthGrid from "@/app/UI/Application/Components/Calendar/CalendarMonthGrid";
-
 import {
   formatDateIso,
   getMonthMatrix,
+  isSameDate,
   parseDateText,
 } from "@/app/UI/Application/Components/Calendar/calendarUtils";
 
@@ -20,6 +17,7 @@ import type {
 
 import {
   UI_TEXT,
+  UI_TYPO,
 } from "@/app/UI/Application/Typography/Typography";
 
 
@@ -74,6 +72,112 @@ function formatDateLabel(
 }
 
 
+function CalendarArrow({
+  direction,
+  onClick,
+  theme,
+}: {
+  direction:
+    "previous" |
+    "next";
+
+  onClick:
+    () => void;
+
+  theme:
+    AppTheme;
+}) {
+  const [
+    hovered,
+    setHovered,
+  ] =
+    useState(
+      false
+    );
+
+  const previous =
+    direction ===
+    "previous";
+
+  return (
+    <button
+      type="button"
+      aria-label={
+        previous
+          ? "Previous month"
+          : "Next month"
+      }
+      onClick={
+        onClick
+      }
+      onMouseEnter={() =>
+        setHovered(
+          true
+        )
+      }
+      onMouseLeave={() =>
+        setHovered(
+          false
+        )
+      }
+      style={{
+        width:
+          22,
+
+        height:
+          22,
+
+        padding:
+          0,
+
+        display:
+          "grid",
+
+        placeItems:
+          "center",
+
+        border:
+          `1px solid ${theme.borderStandard}`,
+
+        borderRadius:
+          4,
+
+        background:
+          hovered
+            ? theme.controlBgHover
+            : theme.bgElevated,
+
+        color:
+          theme.textSecondary,
+
+        cursor:
+          "pointer",
+      }}
+    >
+      <svg
+        width="6"
+        height="9"
+        viewBox="0 0 6 9"
+        aria-hidden="true"
+      >
+        <path
+          d={
+            previous
+              ? "M4.75 1 L1.25 4.5 L4.75 8"
+              : "M1.25 1 L4.75 4.5 L1.25 8"
+          }
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  );
+}
+
+
 export default function PaperSittingDateEditor({
   value,
   onChange,
@@ -83,7 +187,10 @@ export default function PaperSittingDateEditor({
   const parsedValue =
     parseDateText(
       value
-    ) ??
+    );
+
+  const initialDate =
+    parsedValue ??
     new Date();
 
   const [
@@ -93,10 +200,18 @@ export default function PaperSittingDateEditor({
     useState(
       () =>
         new Date(
-          parsedValue.getFullYear(),
-          parsedValue.getMonth(),
+          initialDate.getFullYear(),
+          initialDate.getMonth(),
           1
         )
+    );
+
+  const [
+    hoveredDateKey,
+    setHoveredDateKey,
+  ] =
+    useState<string | null>(
+      null
     );
 
 
@@ -139,8 +254,10 @@ export default function PaperSittingDateEditor({
   const selectedDate =
     parseDateText(
       value
-    ) ??
-    parsedValue;
+    );
+
+  const today =
+    new Date();
 
 
   const monthLabel =
@@ -166,16 +283,16 @@ export default function PaperSittingDateEditor({
           "grid",
 
         gap:
-          8,
+          6,
       }}
     >
       <div
         style={{
           height:
-            32,
+            26,
 
           padding:
-            "0 9px",
+            "0 8px",
 
           display:
             "flex",
@@ -196,7 +313,7 @@ export default function PaperSittingDateEditor({
             `1px solid ${theme.borderStandard}`,
 
           borderRadius:
-            6,
+            5,
 
           background:
             theme.controlBg,
@@ -207,7 +324,10 @@ export default function PaperSittingDateEditor({
       >
         <span
           style={{
-            ...UI_TEXT.controlTextStrong,
+            ...UI_TEXT.controlText,
+
+            fontWeight:
+              600,
 
             overflow:
               "hidden",
@@ -225,8 +345,8 @@ export default function PaperSittingDateEditor({
         </span>
 
         <svg
-          width="13"
-          height="13"
+          width="12"
+          height="12"
           viewBox="0 0 16 16"
           aria-hidden="true"
           style={{
@@ -274,7 +394,7 @@ export default function PaperSittingDateEditor({
             "border-box",
 
           padding:
-            7,
+            6,
 
           border:
             `1px solid ${theme.borderStandard}`,
@@ -286,57 +406,288 @@ export default function PaperSittingDateEditor({
             theme.controlBg,
         }}
       >
-        <CalendarHeader
-          theme={
-            theme
-          }
-          monthLabel={
-            monthLabel
-          }
-          onPrevious={() =>
-            setViewDate(
-              new Date(
-                viewDate.getFullYear(),
-                viewDate.getMonth() -
-                  1,
-                1
-              )
-            )
-          }
-          onNext={() =>
-            setViewDate(
-              new Date(
-                viewDate.getFullYear(),
-                viewDate.getMonth() +
-                  1,
-                1
-              )
-            )
-          }
-        />
+        <div
+          style={{
+            display:
+              "grid",
 
-        <CalendarMonthGrid
-          theme={
-            theme
-          }
-          weeks={
-            weeks
-          }
-          selectedDate={
-            selectedDate
-          }
-          onSelect={(
-            date
-          ) => {
-            onChange(
-              formatDateIso(
-                date
-              )
-            );
+            gridTemplateColumns:
+              "22px minmax(0, 1fr) 22px",
 
-            onComplete();
+            alignItems:
+              "center",
+
+            gap:
+              5,
+
+            marginBottom:
+              5,
           }}
-        />
+        >
+          <CalendarArrow
+            direction="previous"
+            onClick={() =>
+              setViewDate(
+                new Date(
+                  viewDate.getFullYear(),
+                  viewDate.getMonth() -
+                    1,
+                  1
+                )
+              )
+            }
+            theme={
+              theme
+            }
+          />
+
+          <div
+            style={{
+              minWidth:
+                0,
+
+              textAlign:
+                "center",
+
+              color:
+                theme.textPrimary,
+
+              fontFamily:
+                UI_TYPO.family,
+
+              fontSize:
+                UI_TYPO.sizeSm,
+
+              fontWeight:
+                UI_TYPO.weightSemibold,
+
+              lineHeight:
+                1.1,
+
+              whiteSpace:
+                "nowrap",
+            }}
+          >
+            {monthLabel}
+          </div>
+
+          <CalendarArrow
+            direction="next"
+            onClick={() =>
+              setViewDate(
+                new Date(
+                  viewDate.getFullYear(),
+                  viewDate.getMonth() +
+                    1,
+                  1
+                )
+              )
+            }
+            theme={
+              theme
+            }
+          />
+        </div>
+
+        <div
+          style={{
+            display:
+              "grid",
+
+            gridTemplateColumns:
+              "repeat(7, minmax(0, 1fr))",
+
+            gap:
+              2,
+
+            marginBottom:
+              2,
+          }}
+        >
+          {[
+            "M",
+            "T",
+            "W",
+            "T",
+            "F",
+            "S",
+            "S",
+          ].map(
+            (
+              label,
+              index
+            ) => (
+              <div
+                key={`${label}-${index}`}
+                style={{
+                  height:
+                    14,
+
+                  display:
+                    "grid",
+
+                  placeItems:
+                    "center",
+
+                  color:
+                    theme.textMuted,
+
+                  fontFamily:
+                    UI_TYPO.family,
+
+                  fontSize:
+                    10,
+
+                  fontWeight:
+                    UI_TYPO.weightMedium,
+                }}
+              >
+                {label}
+              </div>
+            )
+          )}
+        </div>
+
+        <div
+          style={{
+            display:
+              "grid",
+
+            gap:
+              2,
+          }}
+        >
+          {weeks.map(
+            (
+              week,
+              weekIndex
+            ) => (
+              <div
+                key={
+                  weekIndex
+                }
+                style={{
+                  display:
+                    "grid",
+
+                  gridTemplateColumns:
+                    "repeat(7, minmax(0, 1fr))",
+
+                  gap:
+                    2,
+                }}
+              >
+                {week.map(
+                  (
+                    cell
+                  ) => {
+                    const key =
+                      `${cell.date.getFullYear()}-${cell.date.getMonth()}-${cell.date.getDate()}`;
+
+                    const selected =
+                      isSameDate(
+                        cell.date,
+                        selectedDate
+                      );
+
+                    const todayCell =
+                      isSameDate(
+                        cell.date,
+                        today
+                      );
+
+                    const hovered =
+                      hoveredDateKey ===
+                      key;
+
+                    return (
+                      <button
+                        key={
+                          key
+                        }
+                        type="button"
+                        onClick={() => {
+                          onChange(
+                            formatDateIso(
+                              cell.date
+                            )
+                          );
+
+                          onComplete();
+                        }}
+                        onMouseEnter={() =>
+                          setHoveredDateKey(
+                            key
+                          )
+                        }
+                        onMouseLeave={() =>
+                          setHoveredDateKey(
+                            null
+                          )
+                        }
+                        style={{
+                          height:
+                            21,
+
+                          minWidth:
+                            0,
+
+                          padding:
+                            0,
+
+                          border:
+                            `1px solid ${
+                              selected
+                                ? theme.controlSelectedBorder
+                                : todayCell
+                                  ? theme.borderStandard
+                                  : "transparent"
+                            }`,
+
+                          borderRadius:
+                            4,
+
+                          background:
+                            selected
+                              ? theme.controlSelectedBg
+                              : hovered
+                                ? theme.controlBgHover
+                                : "transparent",
+
+                          color:
+                            cell.inCurrentMonth
+                              ? theme.textPrimary
+                              : theme.textMuted,
+
+                          cursor:
+                            "pointer",
+
+                          fontFamily:
+                            UI_TYPO.family,
+
+                          fontSize:
+                            10,
+
+                          fontWeight:
+                            selected
+                              ? UI_TYPO.weightSemibold
+                              : UI_TYPO.weightMedium,
+
+                          transition:
+                            "background 120ms ease, border-color 120ms ease",
+                        }}
+                      >
+                        {
+                          cell.date.getDate()
+                        }
+                      </button>
+                    );
+                  }
+                )}
+              </div>
+            )
+          )}
+        </div>
       </div>
     </div>
   );
