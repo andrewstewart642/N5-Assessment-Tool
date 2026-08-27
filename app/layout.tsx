@@ -95,7 +95,7 @@ export default function RootLayout({
                 "grid",
 
               gridTemplateRows:
-                "56px 1fr",
+                "48px 1fr",
             }}
           >
             <HeaderBar />

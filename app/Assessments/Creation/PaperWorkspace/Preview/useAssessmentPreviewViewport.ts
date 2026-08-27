@@ -67,6 +67,15 @@ function clampNumber(
   );
 }
 
+const DEFAULT_PREVIEW_SCALE =
+  0.8;
+
+const MIN_ZOOM_PCT =
+  60;
+
+const MAX_ZOOM_PCT =
+  200;
+
 export function useAssessmentPreviewViewport({
   previewPaneRef,
   pageWrapperRefs,
@@ -106,18 +115,19 @@ export function useAssessmentPreviewViewport({
     );
 
   const viewerScale =
-    useMemo(() => {
-      return (
-        fitWidthScale *
-        (
-          zoomPct /
-          100
-        )
-      );
-    }, [
-      fitWidthScale,
-      zoomPct,
-    ]);
+  useMemo(() => {
+    return (
+      fitWidthScale *
+      DEFAULT_PREVIEW_SCALE *
+      (
+        zoomPct /
+        100
+      )
+    );
+  }, [
+    fitWidthScale,
+    zoomPct,
+  ]);
 
   const totalViewerPages =
     Math.max(
@@ -401,8 +411,8 @@ export function useAssessmentPreviewViewport({
                     : -5
                 ),
 
-              50,
-              160
+              MIN_ZOOM_PCT,
+              MAX_ZOOM_PCT
             )
         );
       };
@@ -515,8 +525,8 @@ export function useAssessmentPreviewViewport({
         (previous) =>
           clampNumber(
             previous + 5,
-            50,
-            160
+            MIN_ZOOM_PCT,
+            MAX_ZOOM_PCT
           )
       );
     };
@@ -527,8 +537,8 @@ export function useAssessmentPreviewViewport({
         (previous) =>
           clampNumber(
             previous - 5,
-            50,
-            160
+            MIN_ZOOM_PCT,
+            MAX_ZOOM_PCT
           )
       );
     };
