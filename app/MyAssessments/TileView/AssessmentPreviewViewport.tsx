@@ -50,7 +50,7 @@ function LoadingIndicator({
           "100%",
 
         minHeight:
-          310,
+          0,
 
         display:
           "grid",
@@ -179,10 +179,6 @@ export default function AssessmentPreviewViewport({
           observer.disconnect();
         },
         {
-          /*
-           * Begin generation shortly before the
-           * tile actually reaches the viewport.
-           */
           rootMargin:
             "500px 0px",
         }
@@ -256,8 +252,17 @@ export default function AssessmentPreviewViewport({
         height:
           "100%",
 
+        minWidth:
+          0,
+
         minHeight:
-          310,
+          0,
+
+        maxHeight:
+          "100%",
+
+        alignSelf:
+          "stretch",
 
         boxSizing:
           "border-box",
@@ -273,6 +278,9 @@ export default function AssessmentPreviewViewport({
 
         scrollbarWidth:
           "thin",
+
+        scrollbarGutter:
+          "stable",
 
         scrollbarColor:
           `${theme.borderStandard} transparent`,
@@ -322,7 +330,7 @@ export default function AssessmentPreviewViewport({
               "100%",
 
             minHeight:
-              310,
+              0,
 
             padding:
               12,

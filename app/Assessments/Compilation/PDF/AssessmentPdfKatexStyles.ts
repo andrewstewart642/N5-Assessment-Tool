@@ -1,4 +1,8 @@
 import {
+  existsSync,
+} from "node:fs";
+
+import {
   readFile,
 } from "node:fs/promises";
 
@@ -68,17 +72,103 @@ function getFontMimeType(
 }
 
 
+function resolveKatexDistDirectory():
+  string {
+  const candidates:
+    string[] = [];
+
+
+  /*
+   * Prefer resolving the actual KaTeX JavaScript
+   * package rather than asking the bundler to
+   * resolve a CSS asset directly.
+   *
+   * KaTeX's main package entry lives inside its
+   * dist directory, alongside katex.min.css.
+   */
+
+  try {
+    const resolvedKatexEntry =
+      nodeRequire.resolve(
+        "katex"
+      );
+
+
+    if (
+      typeof resolvedKatexEntry ===
+        "string" &&
+      resolvedKatexEntry.trim()
+    ) {
+      candidates.push(
+        path.dirname(
+          resolvedKatexEntry
+        )
+      );
+    }
+  } catch {
+    /*
+     * If package resolution is unavailable in a
+     * particular runtime, fall through to the
+     * normal project node_modules location.
+     */
+  }
+
+
+  candidates.push(
+    path.join(
+      process.cwd(),
+      "node_modules",
+      "katex",
+      "dist"
+    )
+  );
+
+
+  for (
+    const candidate
+    of candidates
+  ) {
+    const cssPath =
+      path.join(
+        candidate,
+        "katex.min.css"
+      );
+
+
+    if (
+      existsSync(
+        cssPath
+      )
+    ) {
+      return candidate;
+    }
+  }
+
+
+  throw new Error(
+    [
+      "Unable to locate the KaTeX distribution directory.",
+      "PDF generation requires katex.min.css and its font files.",
+      `Checked: ${candidates.join(", ")}`,
+    ].join(
+      " "
+    )
+  );
+}
+
+
 async function buildEmbeddedKatexCss():
   Promise<string> {
+  const katexDistDirectory =
+    resolveKatexDistDirectory();
+
+
   const cssPath =
-    nodeRequire.resolve(
-      "katex/dist/katex.min.css"
+    path.join(
+      katexDistDirectory,
+      "katex.min.css"
     );
 
-  const cssDirectory =
-    path.dirname(
-      cssPath
-    );
 
   const originalCss =
     await readFile(
@@ -120,24 +210,28 @@ async function buildEmbeddedKatexCss():
         ) => {
           const absoluteFontPath =
             path.resolve(
-              cssDirectory,
+              katexDistDirectory,
               fontReference
             );
+
 
           const bytes =
             await readFile(
               absoluteFontPath
             );
 
+
           const mimeType =
             getFontMimeType(
               absoluteFontPath
             );
 
+
           const dataUri =
             `data:${mimeType};base64,${bytes.toString(
               "base64"
             )}`;
+
 
           return [
             fontReference,
@@ -168,11 +262,13 @@ async function buildEmbeddedKatexCss():
           fontReference
         );
 
+
       if (
         !dataUri
       ) {
         return original;
       }
+
 
       return `url("${dataUri}")`;
     }
@@ -188,6 +284,7 @@ export function getEmbeddedKatexCss():
     cachedKatexCss =
       buildEmbeddedKatexCss();
   }
+
 
   return cachedKatexCss;
 }

@@ -441,7 +441,13 @@ export default function AssessmentTile({
         minWidth:
           0,
 
+        height:
+          310,
+
         minHeight:
+          310,
+
+        maxHeight:
           310,
 
         position:
@@ -452,6 +458,18 @@ export default function AssessmentTile({
 
         gridTemplateColumns:
           "48% minmax(0, 1fr)",
+
+        /*
+         * Critical for the PDF preview:
+         * the single grid row must be allowed to
+         * shrink instead of adopting the PDF's
+         * full intrinsic height.
+         */
+        gridTemplateRows:
+          "minmax(0, 1fr)",
+
+        alignItems:
+          "stretch",
 
         borderWidth:
           1,
@@ -500,6 +518,15 @@ export default function AssessmentTile({
         style={{
           minWidth:
             0,
+
+          minHeight:
+            0,
+
+          height:
+            "100%",
+
+          overflow:
+            "hidden",
 
           padding:
             "11px 9px 9px",
