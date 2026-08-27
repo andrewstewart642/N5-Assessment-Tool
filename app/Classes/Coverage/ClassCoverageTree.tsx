@@ -1,6 +1,7 @@
-
-
-import { useMemo, useState } from "react";
+import {
+  useMemo,
+  useState,
+} from "react";
 
 import type {
   CourseId,
@@ -10,64 +11,241 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
+import type {
+  ClassCoverageSelection,
+} from "./ClassCoverageSelection";
+
 import {
+  getCategoryAccent,
+  getCategoryCoverage,
   getCoverageCategoryEntries,
-  getCoverageSkillById,
   getSkillCode,
-  getSkillConceptSummary,
+  getSkillCoverage,
   getSkillTitle,
+  getTrackableConcepts,
 } from "./ClassCoverageHelpers";
 
+
 type Props = {
-  courseId: CourseId;
-  selectedSkillId: string | null;
-  onSelectSkillId: (
-    skillId: string | null
-  ) => void;
-  completedSkillIds: string[];
-  onToggleSkillId: (
-    skillId: string
-  ) => void;
-  theme: AppTheme;
+  courseId:
+    CourseId;
+
+  selection:
+    ClassCoverageSelection;
+
+  onSelectionChange:
+    (
+      selection:
+        ClassCoverageSelection
+    ) => void;
+
+  completedSkillIds:
+    string[];
+
+  completedConceptIds:
+    string[];
+
+  onToggleSkillId:
+    (
+      skillId:
+        string
+    ) => void;
+
+  onToggleConceptId:
+    (
+      conceptId:
+        string
+    ) => void;
+
+  theme:
+    AppTheme;
+
+  courseAccent:
+    string;
 };
 
-function getCategoryAccent(
-  categoryName: string,
-  theme: AppTheme
-): string {
-  const name =
-    categoryName.toLowerCase();
 
-  if (name.includes("numerical")) {
-    return theme.skillNumerical;
-  }
+function CoverageCheckbox({
+  checked,
+  partial = false,
+  accent,
+  onClick,
+}: {
+  checked:
+    boolean;
 
-  if (name.includes("algebra")) {
-    return theme.skillAlgebraic;
-  }
+  partial?:
+    boolean;
 
-  if (name.includes("geometric")) {
-    return theme.skillGeometric;
-  }
+  accent:
+    string;
 
-  if (name.includes("trigon")) {
-    return theme.skillTrigonometric;
-  }
+  onClick:
+    () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={
+        checked
+          ? "Mark as not covered"
+          : "Mark as covered"
+      }
+      aria-pressed={
+        checked
+      }
+      onClick={(
+        event
+      ) => {
+        event.stopPropagation();
 
-  if (name.includes("stat")) {
-    return theme.skillStatistical;
-  }
+        onClick();
+      }}
+      style={{
+        width:
+          18,
 
-  return theme.textMuted;
+        height:
+          18,
+
+        padding:
+          0,
+
+        flexShrink:
+          0,
+
+        display:
+          "grid",
+
+        placeItems:
+          "center",
+
+        borderWidth:
+          1,
+
+        borderStyle:
+          "solid",
+
+        borderColor:
+          checked ||
+          partial
+            ? accent
+            : "rgba(148,163,184,0.48)",
+
+        borderRadius:
+          4,
+
+        background:
+          checked
+            ? accent
+            : partial
+              ? `color-mix(
+                  in srgb,
+                  ${accent} 24%,
+                  transparent
+                )`
+              : "transparent",
+
+        color:
+          checked
+            ? "#111111"
+            : accent,
+
+        cursor:
+          "pointer",
+
+        boxSizing:
+          "border-box",
+
+        fontSize:
+          12,
+
+        fontWeight:
+          800,
+
+        lineHeight:
+          1,
+      }}
+    >
+      {checked
+        ? "✓"
+        : partial
+          ? "–"
+          : ""}
+    </button>
+  );
 }
 
-export default function CoverageTree({
+
+function Chevron({
+  open,
+}: {
+  open:
+    boolean;
+}) {
+  return (
+    <svg
+      width="9"
+      height="9"
+      viewBox="0 0 10 10"
+      aria-hidden="true"
+      style={{
+        display:
+          "block",
+
+        transform:
+          open
+            ? "rotate(90deg)"
+            : "rotate(0deg)",
+
+        transition:
+          "transform 120ms ease",
+      }}
+    >
+      <path
+        d="M3.4 2 6.6 5 3.4 8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+
+function InspectArrow() {
+  return (
+    <svg
+      width="8"
+      height="8"
+      viewBox="0 0 10 10"
+      aria-hidden="true"
+    >
+      <path
+        d="M3.4 2 6.6 5 3.4 8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+
+export default function ClassCoverageTree({
   courseId,
-  selectedSkillId,
-  onSelectSkillId,
+  selection,
+  onSelectionChange,
   completedSkillIds,
+  completedConceptIds,
   onToggleSkillId,
+  onToggleConceptId,
   theme,
+  courseAccent,
 }: Props) {
   const categoryEntries =
     useMemo(
@@ -75,60 +253,175 @@ export default function CoverageTree({
         getCoverageCategoryEntries(
           courseId
         ),
-      [courseId]
+      [
+        courseId,
+      ]
     );
+
+
+  /**
+   * Empty sets deliberately mean everything begins
+   * collapsed when the Class page opens.
+   */
+  const [
+    expandedCategories,
+    setExpandedCategories,
+  ] =
+    useState<
+      Set<string>
+    >(
+      () =>
+        new Set()
+    );
+
 
   const [
-    collapsedByCategory,
-    setCollapsedByCategory,
-  ] = useState<
-    Record<string, boolean>
-  >({});
+    expandedSkills,
+    setExpandedSkills,
+  ] =
+    useState<
+      Set<string>
+    >(
+      () =>
+        new Set()
+    );
+
 
   function toggleCategory(
-    categoryName: string
+    categoryName:
+      string
   ) {
-    const isCurrentlyCollapsed =
-      collapsedByCategory[
-        categoryName
-      ] ?? false;
+    setExpandedCategories(
+      (
+        current
+      ) => {
+        const next =
+          new Set(
+            current
+          );
 
-    const nextCollapsed =
-      !isCurrentlyCollapsed;
 
-    if (
-      nextCollapsed &&
-      selectedSkillId
-    ) {
-      const selectedEntry =
-        getCoverageSkillById(
-          courseId,
-          selectedSkillId
-        );
+        if (
+          next.has(
+            categoryName
+          )
+        ) {
+          next.delete(
+            categoryName
+          );
+        } else {
+          next.add(
+            categoryName
+          );
+        }
 
-      if (
-        selectedEntry?.categoryName ===
-        categoryName
-      ) {
-        onSelectSkillId(null);
+
+        return next;
       }
-    }
-
-    setCollapsedByCategory(
-      (current) => ({
-        ...current,
-        [categoryName]:
-          nextCollapsed,
-      })
     );
   }
+
+
+  function toggleSkillExpansion(
+    skillId:
+      string
+  ) {
+    setExpandedSkills(
+      (
+        current
+      ) => {
+        const next =
+          new Set(
+            current
+          );
+
+
+        if (
+          next.has(
+            skillId
+          )
+        ) {
+          next.delete(
+            skillId
+          );
+        } else {
+          next.add(
+            skillId
+          );
+        }
+
+
+        return next;
+      }
+    );
+  }
+
+
+  function selectSkill({
+    skillId,
+    hasNestedConcepts,
+  }: {
+    skillId:
+      string;
+
+    hasNestedConcepts:
+      boolean;
+  }) {
+    onSelectionChange({
+      kind:
+        "skill",
+
+      skillId,
+    });
+
+
+    /**
+     * Selecting a multi-outcome skill also exposes
+     * its children if they are currently hidden.
+     *
+     * This makes the row behave much more like the
+     * Assessment Builder Skills Tree.
+     */
+    if (
+      hasNestedConcepts &&
+      !expandedSkills.has(
+        skillId
+      )
+    ) {
+      setExpandedSkills(
+        (
+          current
+        ) => {
+          const next =
+            new Set(
+              current
+            );
+
+          next.add(
+            skillId
+          );
+
+          return next;
+        }
+      );
+    }
+  }
+
 
   return (
     <div
       style={{
-        display: "grid",
-        gap: 14,
-        minHeight: 0,
+        minWidth:
+          0,
+
+        display:
+          "grid",
+
+        gap:
+          8,
+
+        alignContent:
+          "start",
       }}
     >
       {categoryEntries.map(
@@ -136,51 +429,73 @@ export default function CoverageTree({
           categoryName,
           categorySkills,
         ]) => {
-          const isCollapsed =
-            collapsedByCategory[
+          const categoryOpen =
+            expandedCategories.has(
               categoryName
-            ] ?? false;
-
-          const accent =
-            getCategoryAccent(
-              categoryName,
-              theme
             );
 
-          const categoryCompletedCount =
-            categorySkills.filter(
-              (skill) =>
-                completedSkillIds.includes(
-                  skill.id
-                )
-            ).length;
+
+          const categoryAccent =
+            getCategoryAccent(
+              categoryName
+            );
+
+
+          const categoryProgress =
+            getCategoryCoverage(
+              categorySkills,
+              completedConceptIds,
+              completedSkillIds
+            );
+
 
           return (
             <section
-              key={categoryName}
+              key={
+                categoryName
+              }
               style={{
-                border: `1px solid ${theme.borderSubtle}`,
-                borderRadius: 18,
+                minWidth:
+                  0,
+
+                overflow:
+                  "hidden",
+
+                borderWidth:
+                  1,
+
+                borderStyle:
+                  "solid",
+
+                borderColor:
+                  categoryOpen
+                    ? `color-mix(
+                        in srgb,
+                        ${categoryAccent} 38%,
+                        ${theme.borderStandard}
+                      )`
+                    : theme.borderStandard,
+
+                borderRadius:
+                  6,
+
                 background:
-                  theme.cardBg,
-                overflow: "hidden",
-                position:
-                  "relative",
+                  theme.bgSurface,
+
+                boxShadow:
+                  categoryOpen
+                    ? theme.shadow
+                    : "none",
+
+                transition:
+                  [
+                    "border-color 140ms ease",
+                    "box-shadow 140ms ease",
+                  ].join(
+                    ", "
+                  ),
               }}
             >
-              <div
-                style={{
-                  position:
-                    "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: 4,
-                  background:
-                    accent,
-                }}
-              />
-
               <button
                 type="button"
                 onClick={() =>
@@ -188,296 +503,967 @@ export default function CoverageTree({
                     categoryName
                   )
                 }
+                aria-expanded={
+                  categoryOpen
+                }
                 style={{
-                  width: "100%",
-                  minHeight: 68,
-                  border: "none",
-                  background:
-                    "transparent",
-                  cursor:
-                    "pointer",
+                  width:
+                    "100%",
+
+                  minHeight:
+                    50,
+
                   padding:
-                    "14px 18px 12px 18px",
-                  textAlign:
-                    "left",
+                    "8px 10px 10px",
+
                   boxSizing:
                     "border-box",
+
+                  position:
+                    "relative",
+
+                  overflow:
+                    "hidden",
+
+                  display:
+                    "grid",
+
+                  gridTemplateColumns:
+                    "minmax(0, 1fr) auto",
+
+                  alignItems:
+                    "center",
+
+                  gap:
+                    12,
+
+                  borderWidth:
+                    0,
+
+                  borderStyle:
+                    "solid",
+
+                  borderColor:
+                    "transparent",
+
+                  background:
+                    `linear-gradient(
+                      90deg,
+                      color-mix(
+                        in srgb,
+                        ${categoryAccent} 8%,
+                        ${theme.bgSection}
+                      ) 0%,
+                      ${theme.bgSection} 72%
+                    )`,
+
+                  color:
+                    theme.textPrimary,
+
+                  cursor:
+                    "pointer",
+
+                  fontFamily:
+                    "inherit",
+
+                  textAlign:
+                    "left",
                 }}
               >
                 <div
                   style={{
+                    minWidth:
+                      0,
+
                     display:
-                      "grid",
-                    gridTemplateColumns:
-                      "minmax(0, 1fr) auto",
+                      "flex",
+
                     alignItems:
                       "center",
-                    gap: 14,
+
+                    gap:
+                      8,
+                  }}
+                >
+                  <span
+                    style={{
+                      display:
+                        "grid",
+
+                      placeItems:
+                        "center",
+
+                      color:
+                        categoryAccent,
+                    }}
+                  >
+                    <Chevron
+                      open={
+                        categoryOpen
+                      }
+                    />
+                  </span>
+
+
+                  <span
+                    style={{
+                      minWidth:
+                        0,
+
+                      overflow:
+                        "hidden",
+
+                      color:
+                        theme.textPrimary,
+
+                      fontSize:
+                        13,
+
+                      fontWeight:
+                        700,
+
+                      lineHeight:
+                        1.25,
+
+                      whiteSpace:
+                        "nowrap",
+
+                      textOverflow:
+                        "ellipsis",
+                    }}
+                  >
+                    {categoryName}
+                  </span>
+                </div>
+
+
+                <div
+                  style={{
+                    display:
+                      "flex",
+
+                    alignItems:
+                      "baseline",
+
+                    gap:
+                      6,
+
+                    whiteSpace:
+                      "nowrap",
+                  }}
+                >
+                  <span
+                    style={{
+                      color:
+                        theme.textSecondary,
+
+                      fontSize:
+                        10,
+
+                      fontWeight:
+                        650,
+
+                      fontVariantNumeric:
+                        "tabular-nums",
+                    }}
+                  >
+                    {categoryProgress.completed}
+                    {" / "}
+                    {categoryProgress.total}
+                  </span>
+
+
+                  <span
+                    style={{
+                      color:
+                        theme.textMuted,
+
+                      fontSize:
+                        9.5,
+
+                      fontVariantNumeric:
+                        "tabular-nums",
+                    }}
+                  >
+                    {Math.round(
+                      categoryProgress.progressPct
+                    )}
+                    %
+                  </span>
+                </div>
+
+
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position:
+                      "absolute",
+
+                    left:
+                      0,
+
+                    right:
+                      0,
+
+                    bottom:
+                      0,
+
+                    height:
+                      3,
+
+                    background:
+                      theme.borderStandard,
                   }}
                 >
                   <div
                     style={{
-                      fontSize: 18,
-                      fontWeight: 700,
-                      lineHeight: 1.2,
-                      color:
-                        theme.textPrimary,
-                    }}
-                  >
-                    {isCollapsed
-                      ? "▸"
-                      : "▾"}{" "}
-                    {categoryName}
-                  </div>
+                      width:
+                        `${categoryProgress.progressPct}%`,
 
-                  <div
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 700,
-                      lineHeight: 1.2,
-                      color:
-                        theme.textSecondary,
+                      height:
+                        "100%",
+
+                      background:
+                        categoryAccent,
+
+                      boxShadow:
+                        `0 0 7px color-mix(
+                          in srgb,
+                          ${categoryAccent} 55%,
+                          transparent
+                        )`,
+
+                      transition:
+                        "width 180ms ease",
                     }}
-                  >
-                    {
-                      categoryCompletedCount
-                    }{" "}
-                    /{" "}
-                    {
-                      categorySkills.length
-                    }
-                  </div>
+                  />
                 </div>
               </button>
 
-              {!isCollapsed ? (
+
+              {categoryOpen ? (
                 <div
                   style={{
-                    borderTop: `1px solid ${theme.borderSubtle}`,
+                    borderTopWidth:
+                      1,
+
+                    borderTopStyle:
+                      "solid",
+
+                    borderTopColor:
+                      theme.borderStandard,
                   }}
                 >
                   {categorySkills.map(
                     (
                       skill,
-                      index
+                      skillIndex
                     ) => {
-                      const isSelected =
-                        selectedSkillId ===
-                        skill.id;
-
-                      const isCompleted =
-                        completedSkillIds.includes(
-                          skill.id
-                        );
-
                       const skillCode =
                         getSkillCode(
                           skill
                         );
+
 
                       const skillTitle =
                         getSkillTitle(
                           skill
                         );
 
-                      const tooltipSummary =
-                        getSkillConceptSummary(
+
+                      const trackableConcepts =
+                        getTrackableConcepts(
                           skill
                         );
 
+
+                      const hasNestedConcepts =
+                        trackableConcepts.length >
+                        1;
+
+
+                      const skillOpen =
+                        expandedSkills.has(
+                          skill.id
+                        );
+
+
+                      const skillProgress =
+                        getSkillCoverage(
+                          skill,
+                          completedConceptIds,
+                          completedSkillIds
+                        );
+
+
+                      const skillSelected =
+                        selection?.kind ===
+                          "skill" &&
+                        selection.skillId ===
+                          skill.id;
+
+
+                      const skillPartial =
+                        skillProgress.completed >
+                          0 &&
+                        !skillProgress.isComplete;
+
+
                       return (
-                        <button
+                        <div
                           key={
                             skill.id
                           }
-                          type="button"
-                          title={
-                            tooltipSummary
-                          }
-                          onClick={() =>
-                            onSelectSkillId(
-                              isSelected
-                                ? null
-                                : skill.id
-                            )
-                          }
                           style={{
-                            width:
-                              "100%",
-                            border:
-                              "none",
-                            borderTop:
-                              index ===
+                            borderTopWidth:
+                              skillIndex ===
                               0
-                                ? "none"
-                                : `1px solid ${theme.borderSubtle}`,
+                                ? 0
+                                : 1,
+
+                            borderTopStyle:
+                              "solid",
+
+                            borderTopColor:
+                              theme.borderStandard,
+
                             background:
-                              isCompleted
-                                ? isSelected
-                                  ? `${theme.success}2e`
-                                  : `${theme.success}1c`
-                                : isSelected
-                                  ? theme.controlBgHover
-                                  : "transparent",
-                            padding:
-                              "0 18px",
-                            textAlign:
-                              "left",
-                            cursor:
-                              "pointer",
-                            transition:
-                              "background 140ms ease, box-shadow 140ms ease, transform 140ms ease",
+                              skillSelected
+                                ? `color-mix(
+                                    in srgb,
+                                    ${courseAccent} 10%,
+                                    ${theme.bgSurface}
+                                  )`
+                                : theme.bgSurface,
                           }}
                         >
                           <div
                             style={{
-                              minHeight: 78,
+                              minHeight:
+                                52,
+
+                              padding:
+                                "0 9px",
+
+                              boxSizing:
+                                "border-box",
+
                               display:
                                 "grid",
+
                               gridTemplateColumns:
-                                "34px minmax(0, 1fr) auto",
-                              gap: 14,
+                                "20px minmax(0, 1fr) 58px 26px",
+
                               alignItems:
                                 "center",
+
+                              gap:
+                                8,
                             }}
                           >
-                            <div
-                              onClick={(
-                                event
-                              ) =>
-                                event.stopPropagation()
+                            <CoverageCheckbox
+                              checked={
+                                skillProgress.isComplete
+                              }
+                              partial={
+                                skillPartial
+                              }
+                              accent={
+                                categoryAccent
+                              }
+                              onClick={() =>
+                                onToggleSkillId(
+                                  skill.id
+                                )
+                              }
+                            />
+
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                selectSkill({
+                                  skillId:
+                                    skill.id,
+
+                                  hasNestedConcepts,
+                                })
                               }
                               style={{
+                                minWidth:
+                                  0,
+
+                                minHeight:
+                                  50,
+
+                                padding:
+                                  "6px 0",
+
                                 display:
-                                  "flex",
-                                alignItems:
+                                  "grid",
+
+                                alignContent:
                                   "center",
-                                justifyContent:
-                                  "center",
-                                height:
-                                  "100%",
+
+                                gap:
+                                  3,
+
+                                borderWidth:
+                                  0,
+
+                                borderStyle:
+                                  "solid",
+
+                                borderColor:
+                                  "transparent",
+
+                                background:
+                                  "transparent",
+
+                                color:
+                                  "inherit",
+
+                                cursor:
+                                  "pointer",
+
+                                fontFamily:
+                                  "inherit",
+
+                                textAlign:
+                                  "left",
                               }}
                             >
-                              <input
-                                type="checkbox"
-                                checked={
-                                  isCompleted
+                              <div
+                                style={{
+                                  minWidth:
+                                    0,
+
+                                  display:
+                                    "flex",
+
+                                  alignItems:
+                                    "baseline",
+
+                                  gap:
+                                    7,
+                                }}
+                              >
+                                {skillCode ? (
+                                  <span
+                                    style={{
+                                      flexShrink:
+                                        0,
+
+                                      color:
+                                        categoryAccent,
+
+                                      fontSize:
+                                        10.5,
+
+                                      fontWeight:
+                                        750,
+
+                                      fontVariantNumeric:
+                                        "tabular-nums",
+                                    }}
+                                  >
+                                    {skillCode}
+                                  </span>
+                                ) : null}
+
+
+                                <span
+                                  style={{
+                                    minWidth:
+                                      0,
+
+                                    overflow:
+                                      "hidden",
+
+                                    color:
+                                      theme.textPrimary,
+
+                                    fontSize:
+                                      11.5,
+
+                                    fontWeight:
+                                      skillSelected
+                                        ? 700
+                                        : 600,
+
+                                    lineHeight:
+                                      1.3,
+
+                                    whiteSpace:
+                                      "nowrap",
+
+                                    textOverflow:
+                                      "ellipsis",
+                                  }}
+                                >
+                                  {skillTitle}
+                                </span>
+                              </div>
+
+
+                              <span
+                                style={{
+                                  color:
+                                    theme.textMuted,
+
+                                  fontSize:
+                                    9.5,
+
+                                  fontVariantNumeric:
+                                    "tabular-nums",
+                                }}
+                              >
+                                {skillProgress.completed}
+                                {" / "}
+                                {skillProgress.total}
+                                {" "}
+                                {skillProgress.total ===
+                                1
+                                  ? "outcome"
+                                  : "outcomes"}
+                              </span>
+                            </button>
+
+
+                            <div
+                              style={{
+                                width:
+                                  58,
+
+                                display:
+                                  "grid",
+
+                                gap:
+                                  3,
+                              }}
+                            >
+                              <div
+                                style={{
+                                  height:
+                                    3,
+
+                                  overflow:
+                                    "hidden",
+
+                                  borderRadius:
+                                    3,
+
+                                  background:
+                                    theme.borderStandard,
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    width:
+                                      `${skillProgress.progressPct}%`,
+
+                                    height:
+                                      "100%",
+
+                                    background:
+                                      categoryAccent,
+
+                                    transition:
+                                      "width 180ms ease",
+                                  }}
+                                />
+                              </div>
+
+
+                              {hasNestedConcepts ? (
+                                <span
+                                  style={{
+                                    color:
+                                      theme.textMuted,
+
+                                    fontSize:
+                                      8.5,
+
+                                    textAlign:
+                                      "right",
+
+                                    whiteSpace:
+                                      "nowrap",
+                                  }}
+                                >
+                                  subskills
+                                </span>
+                              ) : null}
+                            </div>
+
+
+                            {hasNestedConcepts ? (
+                              <button
+                                type="button"
+                                aria-label={
+                                  skillOpen
+                                    ? `Collapse ${skillTitle}`
+                                    : `Expand ${skillTitle}`
                                 }
-                                onChange={() =>
-                                  onToggleSkillId(
+                                aria-expanded={
+                                  skillOpen
+                                }
+                                title={
+                                  skillOpen
+                                    ? "Hide subskills"
+                                    : "Show subskills"
+                                }
+                                onClick={() =>
+                                  toggleSkillExpansion(
                                     skill.id
                                   )
                                 }
                                 style={{
-                                  width: 20,
-                                  height: 20,
+                                  width:
+                                    26,
+
+                                  height:
+                                    26,
+
+                                  padding:
+                                    0,
+
+                                  display:
+                                    "grid",
+
+                                  placeItems:
+                                    "center",
+
+                                  borderWidth:
+                                    1,
+
+                                  borderStyle:
+                                    "solid",
+
+                                  borderColor:
+                                    skillOpen
+                                      ? `color-mix(
+                                          in srgb,
+                                          ${categoryAccent} 40%,
+                                          ${theme.borderStandard}
+                                        )`
+                                      : "transparent",
+
+                                  borderRadius:
+                                    4,
+
+                                  background:
+                                    skillOpen
+                                      ? `color-mix(
+                                          in srgb,
+                                          ${categoryAccent} 8%,
+                                          ${theme.bgSection}
+                                        )`
+                                      : "transparent",
+
+                                  color:
+                                    skillOpen
+                                      ? categoryAccent
+                                      : theme.textMuted,
+
                                   cursor:
                                     "pointer",
-                                  accentColor:
-                                    accent,
                                 }}
-                              />
-                            </div>
+                              >
+                                <Chevron
+                                  open={
+                                    skillOpen
+                                  }
+                                />
+                              </button>
+                            ) : (
+                              <span
+                                style={{
+                                  width:
+                                    26,
 
+                                  height:
+                                    26,
+
+                                  display:
+                                    "grid",
+
+                                  placeItems:
+                                    "center",
+
+                                  color:
+                                    theme.textMuted,
+                                }}
+                              >
+                                <InspectArrow />
+                              </span>
+                            )}
+                          </div>
+
+
+                          {hasNestedConcepts &&
+                          skillOpen ? (
                             <div
                               style={{
+                                padding:
+                                  "0 8px 8px 36px",
+
                                 display:
                                   "grid",
-                                gap: 6,
-                                minWidth:
-                                  0,
+
+                                gap:
+                                  3,
                               }}
                             >
                               <div
                                 style={{
-                                  display:
-                                    "flex",
-                                  alignItems:
-                                    "baseline",
-                                  gap: 12,
-                                  flexWrap:
-                                    "wrap",
-                                }}
-                              >
-                                {skillCode ? (
-                                  <div
-                                    style={{
-                                      minWidth:
-                                        32,
-                                      fontSize:
-                                        14,
-                                      fontWeight:
-                                        700,
-                                      lineHeight:
-                                        1.2,
-                                      color:
-                                        isCompleted
-                                          ? theme.success
-                                          : theme.textSecondary,
-                                    }}
-                                  >
-                                    {
-                                      skillCode
-                                    }
-                                  </div>
-                                ) : null}
+                                  padding:
+                                    "5px 8px 4px",
 
-                                <div
-                                  style={{
-                                    fontSize:
-                                      15,
-                                    fontWeight:
-                                      600,
-                                    lineHeight:
-                                      1.35,
-                                    color:
-                                      isCompleted
-                                        ? theme.textPrimary
-                                        : isSelected
-                                          ? theme.textPrimary
-                                          : theme.textPrimary,
-                                  }}
-                                >
-                                  {
-                                    skillTitle
-                                  }
-                                </div>
-                              </div>
-
-                              <div
-                                style={{
-                                  fontSize:
-                                    13,
-                                  lineHeight:
-                                    1.4,
                                   color:
-                                    isCompleted
-                                      ? theme.textSecondary
-                                      : theme.textMuted,
+                                    theme.textMuted,
+
+                                  fontSize:
+                                    8.5,
+
+                                  fontWeight:
+                                    650,
+
+                                  letterSpacing:
+                                    "0.04em",
+
+                                  textTransform:
+                                    "uppercase",
                                 }}
                               >
-                                {isCompleted
-                                  ? "Completed"
-                                  : "Not completed yet"}
+                                Specification subskills
                               </div>
-                            </div>
 
-                            <div
-                              style={{
-                                fontSize:
-                                  14,
-                                fontWeight:
-                                  700,
-                                lineHeight:
-                                  1,
-                                color:
-                                  theme.textMuted,
-                              }}
-                            >
-                              ▸
+
+                              {trackableConcepts.map(
+                                (
+                                  concept
+                                ) => {
+                                  const conceptSelected =
+                                    selection?.kind ===
+                                      "concept" &&
+                                    selection.conceptId ===
+                                      concept.id;
+
+
+                                  const conceptCompleted =
+                                    completedConceptIds.includes(
+                                      concept.id
+                                    );
+
+
+                                  return (
+                                    <div
+                                      key={
+                                        concept.id
+                                      }
+                                      style={{
+                                        minHeight:
+                                          38,
+
+                                        padding:
+                                          "0 7px",
+
+                                        boxSizing:
+                                          "border-box",
+
+                                        display:
+                                          "grid",
+
+                                        gridTemplateColumns:
+                                          "20px minmax(0, 1fr) 18px",
+
+                                        alignItems:
+                                          "center",
+
+                                        gap:
+                                          7,
+
+                                        borderWidth:
+                                          1,
+
+                                        borderStyle:
+                                          "solid",
+
+                                        borderColor:
+                                          conceptSelected
+                                            ? `color-mix(
+                                                in srgb,
+                                                ${categoryAccent} 52%,
+                                                ${theme.borderStandard}
+                                              )`
+                                            : theme.borderStandard,
+
+                                        borderRadius:
+                                          5,
+
+                                        background:
+                                          conceptSelected
+                                            ? `color-mix(
+                                                in srgb,
+                                                ${categoryAccent} 10%,
+                                                ${theme.bgSection}
+                                              )`
+                                            : theme.bgSection,
+                                      }}
+                                    >
+                                      <CoverageCheckbox
+                                        checked={
+                                          conceptCompleted
+                                        }
+                                        accent={
+                                          categoryAccent
+                                        }
+                                        onClick={() =>
+                                          onToggleConceptId(
+                                            concept.id
+                                          )
+                                        }
+                                      />
+
+
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          onSelectionChange({
+                                            kind:
+                                              "concept",
+
+                                            skillId:
+                                              skill.id,
+
+                                            conceptId:
+                                              concept.id,
+                                          })
+                                        }
+                                        style={{
+                                          minWidth:
+                                            0,
+
+                                          minHeight:
+                                            36,
+
+                                          padding:
+                                            0,
+
+                                          display:
+                                            "flex",
+
+                                          alignItems:
+                                            "baseline",
+
+                                          gap:
+                                            7,
+
+                                          borderWidth:
+                                            0,
+
+                                          borderStyle:
+                                            "solid",
+
+                                          borderColor:
+                                            "transparent",
+
+                                          background:
+                                            "transparent",
+
+                                          color:
+                                            "inherit",
+
+                                          cursor:
+                                            "pointer",
+
+                                          fontFamily:
+                                            "inherit",
+
+                                          textAlign:
+                                            "left",
+                                        }}
+                                      >
+                                        <span
+                                          style={{
+                                            flexShrink:
+                                              0,
+
+                                            color:
+                                              categoryAccent,
+
+                                            fontSize:
+                                              10,
+
+                                            fontWeight:
+                                              750,
+
+                                            fontVariantNumeric:
+                                              "tabular-nums",
+                                          }}
+                                        >
+                                          {concept.code}
+                                        </span>
+
+
+                                        <span
+                                          style={{
+                                            minWidth:
+                                              0,
+
+                                            overflow:
+                                              "hidden",
+
+                                            color:
+                                              conceptCompleted
+                                                ? theme.textPrimary
+                                                : theme.textSecondary,
+
+                                            fontSize:
+                                              10.5,
+
+                                            fontWeight:
+                                              conceptSelected
+                                                ? 650
+                                                : 500,
+
+                                            whiteSpace:
+                                              "nowrap",
+
+                                            textOverflow:
+                                              "ellipsis",
+                                          }}
+                                        >
+                                          {concept.shortLabel ||
+                                            concept.label}
+                                        </span>
+                                      </button>
+
+
+                                      <span
+                                        style={{
+                                          display:
+                                            "grid",
+
+                                          placeItems:
+                                            "center",
+
+                                          color:
+                                            conceptSelected
+                                              ? categoryAccent
+                                              : theme.textMuted,
+                                        }}
+                                      >
+                                        <InspectArrow />
+                                      </span>
+                                    </div>
+                                  );
+                                }
+                              )}
                             </div>
-                          </div>
-                        </button>
+                          ) : null}
+                        </div>
                       );
                     }
                   )}
