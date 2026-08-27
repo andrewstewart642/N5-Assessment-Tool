@@ -1,71 +1,184 @@
+import type {
+  AppTheme,
+} from "@/app/UI/Application/Theme/AppTheme";
 
-import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
 
 type Props = {
-  onAddClass: () => void;
-  theme: AppTheme;
+  classCount:
+    number;
+
+  hasLoaded:
+    boolean;
+
+  onAddClass:
+    () => void;
+
+  theme:
+    AppTheme;
 };
 
-export default function Header({ onAddClass, theme }: Props) {
+
+export default function ClassesHeader({
+  classCount,
+  hasLoaded,
+  onAddClass,
+  theme,
+}: Props) {
+  const classCountText =
+    classCount ===
+    1
+      ? "1 class"
+      : `${classCount} classes`;
+
+
   return (
-    <div
+    <section
       style={{
-        maxWidth: 1200,
-        margin: "0 auto",
-        border: `1px solid ${theme.borderSubtle}`,
-        borderRadius: 22,
-        padding: 24,
-        background: theme.cardBg,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 16,
-        flexWrap: "wrap",
+        minWidth:
+          0,
+
+        display:
+          "flex",
+
+        alignItems:
+          "flex-start",
+
+        justifyContent:
+          "space-between",
+
+        gap:
+          16,
+
+        flexWrap:
+          "wrap",
       }}
     >
-      <div>
+      <div
+        style={{
+          display:
+            "grid",
+
+          gap:
+            4,
+        }}
+      >
         <h1
           style={{
-            margin: 0,
-            fontSize: 30,
-            lineHeight: 1.1,
-            fontWeight: 700,
-            color: theme.textPrimary,
+            margin:
+              0,
+
+            color:
+              theme.textPrimary,
+
+            fontSize:
+              30,
+
+            fontWeight:
+              700,
+
+            lineHeight:
+              1.08,
           }}
         >
           My Classes
         </h1>
 
-        <p
+
+        <div
           style={{
-            margin: "8px 0 0 0",
-            color: theme.textSecondary,
-            fontSize: 15,
-            lineHeight: 1.45,
+            color:
+              theme.textSecondary,
+
+            fontSize:
+              13,
+
+            lineHeight:
+              1.35,
           }}
         >
-          Organise classes by course and build assessments more quickly.
-        </p>
+          {hasLoaded
+            ? classCountText
+            : "Loading classes..."}
+        </div>
       </div>
+
 
       <button
         type="button"
-        onClick={onAddClass}
+        onClick={
+          onAddClass
+        }
         style={{
-          border: `1px solid ${theme.borderStandard}`,
-          background: theme.controlBg,
-          color: theme.textPrimary,
-          borderRadius: 14,
-          padding: "11px 16px",
-          cursor: "pointer",
-          fontSize: 14,
-          fontWeight: 600,
-          lineHeight: 1,
-          boxShadow: theme.shadow,
+          height:
+            32,
+
+          padding:
+            "0 11px",
+
+          boxSizing:
+            "border-box",
+
+          display:
+            "inline-flex",
+
+          alignItems:
+            "center",
+
+          justifyContent:
+            "center",
+
+          gap:
+            6,
+
+          borderWidth:
+            1,
+
+          borderStyle:
+            "solid",
+
+          borderColor:
+            theme.controlSelectedBorder,
+
+          borderRadius:
+            6,
+
+          background:
+            theme.controlSelectedBg,
+
+          color:
+            theme.textPrimary,
+
+          cursor:
+            "pointer",
+
+          fontFamily:
+            "inherit",
+
+          fontSize:
+            12,
+
+          fontWeight:
+            600,
+
+          whiteSpace:
+            "nowrap",
         }}
       >
-        + Add Class
+        <span
+          aria-hidden="true"
+          style={{
+            fontSize:
+              14,
+
+            lineHeight:
+              1,
+          }}
+        >
+          +
+        </span>
+
+        New class
       </button>
-    </div>
+    </section>
   );
 }

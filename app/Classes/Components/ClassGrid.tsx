@@ -1,41 +1,125 @@
+import type {
+  AppTheme,
+} from "@/app/UI/Application/Theme/AppTheme";
 
-import ClassTile from "./ClassTile";
+import {
+  getCourseAccentTextColour,
+  getCourseSectionBackground,
+  getCourseSectionBorder,
+} from "@/app/UI/Application/Colours/CourseAccent";
+
+import {
+  useCourseColourPreferences,
+} from "@/app/UI/Application/Colours/useCourseColourPreferences";
+
 import {
   COURSE_OPTIONS,
   type CourseOption,
   type SchoolClass,
 } from "../ClassTypes";
-import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
+
+import ClassTile from "./ClassTile";
+import CourseFamilySettingsControl from "./CourseFamilySettingsControl";
+
 
 type Props = {
-  classesByCourse: Map<CourseOption, SchoolClass[]>;
-  theme: AppTheme;
+  classesByCourse:
+    Map<
+      CourseOption,
+      SchoolClass[]
+    >;
+
+  theme:
+    AppTheme;
 };
 
-export default function ClassGrid({ classesByCourse, theme }: Props) {
-  const totalClasses = COURSE_OPTIONS.reduce((count, course) => {
-    return count + (classesByCourse.get(course)?.length ?? 0);
-  }, 0);
 
-  if (totalClasses === 0) {
+export default function ClassGrid({
+  classesByCourse,
+  theme,
+}: Props) {
+  const {
+    getColour,
+    setColour,
+    resetColour,
+  } =
+    useCourseColourPreferences();
+
+
+  const totalClasses =
+    COURSE_OPTIONS.reduce(
+      (
+        count,
+        course
+      ) =>
+        count +
+        (
+          classesByCourse.get(
+            course
+          )?.length ??
+          0
+        ),
+      0
+    );
+
+
+  if (
+    totalClasses ===
+    0
+  ) {
     return (
       <div
         style={{
-          maxWidth: 1200,
-          margin: "24px auto 0 auto",
-          border: `1px solid ${theme.borderSubtle}`,
-          borderRadius: 22,
-          padding: 28,
-          background: theme.cardBg,
-          color: theme.textPrimary,
+          minHeight:
+            150,
+
+          padding:
+            24,
+
+          boxSizing:
+            "border-box",
+
+          display:
+            "grid",
+
+          alignContent:
+            "center",
+
+          justifyItems:
+            "center",
+
+          gap:
+            6,
+
+          borderWidth:
+            1,
+
+          borderStyle:
+            "solid",
+
+          borderColor:
+            theme.borderStandard,
+
+          borderRadius:
+            6,
+
+          background:
+            theme.bgSurface,
+
+          textAlign:
+            "center",
         }}
       >
         <div
           style={{
-            fontSize: 20,
-            fontWeight: 700,
-            lineHeight: 1.2,
-            marginBottom: 8,
+            color:
+              theme.textPrimary,
+
+            fontSize:
+              15,
+
+            fontWeight:
+              650,
           }}
         >
           No classes yet
@@ -43,87 +127,329 @@ export default function ClassGrid({ classesByCourse, theme }: Props) {
 
         <div
           style={{
-            fontSize: 15,
-            lineHeight: 1.45,
-            color: theme.textSecondary,
+            maxWidth:
+              380,
+
+            color:
+              theme.textMuted,
+
+            fontSize:
+              12,
+
+            lineHeight:
+              1.45,
           }}
         >
-          Add your first class to start organising courses and coverage.
+          Create your first class to track course coverage and build assessments more quickly.
         </div>
       </div>
     );
   }
 
+
   return (
     <div
       style={{
-        maxWidth: 1200,
-        margin: "24px auto 0 auto",
-        display: "grid",
-        gap: 24,
+        minWidth:
+          0,
+
+        display:
+          "grid",
+
+        gap:
+          16,
       }}
     >
-      {COURSE_OPTIONS.map((course) => {
-        const courseClasses = classesByCourse.get(course) ?? [];
-        if (courseClasses.length === 0) return null;
+      {COURSE_OPTIONS.map(
+        (
+          course
+        ) => {
+          const courseClasses =
+            classesByCourse.get(
+              course
+            ) ??
+            [];
 
-        return (
-          <section
-            key={course}
-            style={{
-              display: "grid",
-              gap: 14,
-            }}
-          >
-            <div
+
+          if (
+            courseClasses.length ===
+            0
+          ) {
+            return null;
+          }
+
+
+          const courseId =
+            courseClasses[0]
+              .courseId;
+
+
+          const accent =
+            getColour(
+              courseId
+            );
+
+
+          const accentText =
+            getCourseAccentTextColour(
+              accent,
+              theme
+            );
+
+
+          const sectionBackground =
+            getCourseSectionBackground(
+              accent,
+              theme
+            );
+
+
+          const sectionBorder =
+            getCourseSectionBorder(
+              accent,
+              theme
+            );
+
+
+          return (
+            <section
+              key={
+                course
+              }
               style={{
-                display: "flex",
-                alignItems: "baseline",
-                justifyContent: "space-between",
-                gap: 12,
-                flexWrap: "wrap",
+                minWidth:
+                  0,
+
+                position:
+                  "relative",
+
+                padding:
+                  10,
+
+                boxSizing:
+                  "border-box",
+
+                display:
+                  "grid",
+
+                gap:
+                  10,
+
+                borderWidth:
+                  1,
+
+                borderStyle:
+                  "solid",
+
+                borderColor:
+                  sectionBorder,
+
+                borderRadius:
+                  6,
+
+                background:
+                  sectionBackground,
+
+                boxShadow:
+                  `inset 4px 0 0 ${accent}, ${theme.shadow}`,
               }}
             >
               <div
                 style={{
-                  fontSize: 22,
-                  fontWeight: 700,
-                  lineHeight: 1.2,
-                  color: theme.textPrimary,
+                  minHeight:
+                    30,
+
+                  display:
+                    "flex",
+
+                  alignItems:
+                    "center",
+
+                  justifyContent:
+                    "space-between",
+
+                  gap:
+                    12,
+
+                  padding:
+                    "0 2px 7px 5px",
+
+                  borderBottomWidth:
+                    1,
+
+                  borderBottomStyle:
+                    "solid",
+
+                  borderBottomColor:
+                    sectionBorder,
                 }}
               >
-                {course}
+                <div
+                  style={{
+                    minWidth:
+                      0,
+
+                    display:
+                      "flex",
+
+                    alignItems:
+                      "center",
+
+                    gap:
+                      8,
+                  }}
+                >
+                  <span
+                    aria-hidden="true"
+                    style={{
+                      width:
+                        8,
+
+                      height:
+                        8,
+
+                      flexShrink:
+                        0,
+
+                      borderRadius:
+                        999,
+
+                      background:
+                        accent,
+
+                      boxShadow:
+                        `0 0 9px ${accent}`,
+                    }}
+                  />
+
+
+                  <h2
+                    style={{
+                      margin:
+                        0,
+
+                      color:
+                        accentText,
+
+                      fontSize:
+                        16,
+
+                      fontWeight:
+                        700,
+
+                      lineHeight:
+                        1.25,
+                    }}
+                  >
+                    {course}
+                  </h2>
+                </div>
+
+
+                <div
+                  style={{
+                    display:
+                      "flex",
+
+                    alignItems:
+                      "center",
+
+                    gap:
+                      9,
+                  }}
+                >
+                  <span
+                    style={{
+                      color:
+                        theme.textSecondary,
+
+                      fontSize:
+                        11,
+
+                      fontVariantNumeric:
+                        "tabular-nums",
+
+                      whiteSpace:
+                        "nowrap",
+                    }}
+                  >
+                    {courseClasses.length}
+                    {" "}
+                    {courseClasses.length ===
+                    1
+                      ? "class"
+                      : "classes"}
+                  </span>
+
+
+                  <CourseFamilySettingsControl
+                    courseName={
+                      course
+                    }
+                    accent={
+                      accent
+                    }
+                    theme={
+                      theme
+                    }
+                    onColourChange={(
+                      colour
+                    ) =>
+                      setColour(
+                        courseId,
+                        colour
+                      )
+                    }
+                    onResetColour={() =>
+                      resetColour(
+                        courseId
+                      )
+                    }
+                  />
+                </div>
               </div>
+
 
               <div
                 style={{
-                  fontSize: 13,
-                  lineHeight: 1.35,
-                  color: theme.textMuted,
+                  minWidth:
+                    0,
+
+                  display:
+                    "grid",
+
+                  gridTemplateColumns:
+                    "repeat(auto-fill, minmax(280px, 1fr))",
+
+                  gap:
+                    12,
                 }}
               >
-                {courseClasses.length} class{courseClasses.length === 1 ? "" : "es"}
+                {courseClasses.map(
+                  (
+                    schoolClass
+                  ) => (
+                    <ClassTile
+                      key={
+                        schoolClass.id
+                      }
+                      schoolClass={
+                        schoolClass
+                      }
+                      accent={
+                        accent
+                      }
+                      theme={
+                        theme
+                      }
+                    />
+                  )
+                )}
               </div>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                gap: 16,
-              }}
-            >
-              {courseClasses.map((schoolClass) => (
-                <ClassTile
-                  key={schoolClass.id}
-                  schoolClass={schoolClass}
-                  theme={theme}
-                />
-              ))}
-            </div>
-          </section>
-        );
-      })}
+            </section>
+          );
+        }
+      )}
     </div>
   );
 }
