@@ -10,11 +10,11 @@ import {
   UI_TYPO,
 } from "@/app/UI/Application/Typography/Typography";
 
+import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
+
 import type {
   AssessmentSaveStatus,
 } from "../Persistence/AssessmentSaveStatus";
-
-import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
 
 import AssessmentTopBar from "../TopBar/AssessmentTopBar";
 
@@ -22,21 +22,21 @@ import {
   TOP_BAR_HEIGHT,
 } from "../TopBar/AssessmentTopBarTokens";
 
-import type {
-  AssessmentPreviewViewMode,
-} from "./PreviewViewMode";
-
 import {
   ASSESSMENT_WORKSPACE_HUD_RESIZE_HANDLE_HEIGHT,
 } from "./AssessmentWorkspaceLayout";
 
+import type {
+  AssessmentPreviewViewMode,
+} from "./PreviewViewMode";
+
 import AssessmentPreviewPane from "./Preview/AssessmentPreviewPane";
+
+import AssessmentPreviewTray from "./Preview/PreviewTray/AssessmentPreviewTray";
 
 import AssessmentSaveStatusPill from "./Preview/AssessmentSaveStatusPill";
 
 import PreviewZoomControls from "./Preview/PreviewZoomControls";
-
-import AssessmentViewDock from "./Preview/ViewControls/AssessmentViewDock";
 
 import {
   usePreviewChromeVisibility,
@@ -46,20 +46,24 @@ import {
   usePreviewViewportAnchor,
 } from "./Preview/usePreviewViewportAnchor";
 
+
 type AssessmentTopBarProps =
   ComponentProps<
     typeof AssessmentTopBar
   >;
+
 
 type AssessmentPreviewPaneProps =
   ComponentProps<
     typeof AssessmentPreviewPane
   >;
 
+
 type AssessmentHUDBarProps =
   ComponentProps<
     typeof AssessmentHUDBar
   >;
+
 
 type PreviewChromeProps = {
   zoomPct:
@@ -78,6 +82,7 @@ type PreviewChromeProps = {
     number;
 };
 
+
 type ViewControlsProps = {
   previewViewMode:
     AssessmentPreviewViewMode;
@@ -86,7 +91,22 @@ type ViewControlsProps = {
     mode:
       AssessmentPreviewViewMode
   ) => void;
+
+  showHud:
+    boolean;
+
+  onShowHudChange: (
+    next:
+      boolean
+  ) => void;
+
+  onResetLayout:
+    () => void;
+
+  onResetZoom:
+    () => void;
 };
+
 
 type AssessmentPaperWorkspaceProps = {
   theme:
@@ -127,6 +147,7 @@ type AssessmentPaperWorkspaceProps = {
     >;
 };
 
+
 const PANE_OUTER_GUTTER =
   4;
 
@@ -136,35 +157,19 @@ const PANE_RADIUS =
 const PREVIEW_ZOOM_TOP_GAP =
   8;
 
-/*
- * Future right-edge Settings tab:
- *
- * TOP_BAR_HEIGHT + 8px
- *
- * View deliberately begins beneath that
- * reserved slot so we never need to move
- * it when Settings is introduced.
- */
-const PREVIEW_EDGE_FIRST_TAB_TOP_GAP =
+const PREVIEW_TRAY_TOP_GAP =
   8;
 
-const PREVIEW_EDGE_RESERVED_SETTINGS_HEIGHT =
-  34;
-
-const PREVIEW_EDGE_TAB_GAP =
-  8;
-
-const PREVIEW_VIEW_DOCK_TOP =
+const PREVIEW_TRAY_TOP =
   TOP_BAR_HEIGHT +
-  PREVIEW_EDGE_FIRST_TAB_TOP_GAP +
-  PREVIEW_EDGE_RESERVED_SETTINGS_HEIGHT +
-  PREVIEW_EDGE_TAB_GAP;
+  PREVIEW_TRAY_TOP_GAP;
 
 const RESIZE_DOT_SIZE =
   2;
 
 const RESIZE_DOT_GAP =
   3;
+
 
 export default function AssessmentPaperWorkspace({
   theme,
@@ -180,6 +185,11 @@ export default function AssessmentPaperWorkspace({
   const showHud =
     hudProps.showProgressPanel;
 
+
+  /*
+   * Preserve the user's position in the
+   * document when changing preview modes.
+   */
   const {
     preserveViewport,
   } =
@@ -191,6 +201,10 @@ export default function AssessmentPaperWorkspace({
         previewProps.pageWrapperRefs,
     });
 
+
+  /*
+   * Floating zoom control visibility.
+   */
   const {
     opacity:
       zoomChromeOpacity,
@@ -212,6 +226,7 @@ export default function AssessmentPaperWorkspace({
         7000,
     });
 
+
   function changePreviewViewMode(
     mode:
       AssessmentPreviewViewMode
@@ -231,6 +246,7 @@ export default function AssessmentPaperWorkspace({
       }
     );
   }
+
 
   return (
     <section
@@ -259,6 +275,9 @@ export default function AssessmentPaperWorkspace({
         minHeight:
           0,
 
+        width:
+          "100%",
+
         height:
           "100%",
 
@@ -278,6 +297,9 @@ export default function AssessmentPaperWorkspace({
           UI_TYPO.family,
       }}
     >
+      {/*
+       * Main TopBar + Preview pane.
+       */}
       <div
         style={{
           minWidth:
@@ -324,6 +346,7 @@ export default function AssessmentPaperWorkspace({
           }
         />
 
+
         <AssessmentPreviewPane
           {...previewProps}
           theme={
@@ -334,6 +357,10 @@ export default function AssessmentPaperWorkspace({
           }
         />
 
+
+        {/*
+         * Floating zoom control.
+         */}
         <div
           style={{
             position:
@@ -391,13 +418,21 @@ export default function AssessmentPaperWorkspace({
           />
         </div>
 
+
+        {/*
+         * Shared binder-style Preview tray.
+         *
+         * Settings and View are two tabs on
+         * one physical tray. The tray owns
+         * the slide animation.
+         */}
         <div
           style={{
             position:
               "absolute",
 
             top:
-              PREVIEW_VIEW_DOCK_TOP,
+              PREVIEW_TRAY_TOP,
 
             right:
               -1,
@@ -409,21 +444,42 @@ export default function AssessmentPaperWorkspace({
               "auto",
           }}
         >
-          <AssessmentViewDock
-            theme={
-              theme
-            }
+          <AssessmentPreviewTray
+  theme={
+    theme
+  }
 
-            previewViewMode={
-              viewControlsProps.previewViewMode
-            }
+  previewViewMode={
+    viewControlsProps.previewViewMode
+  }
 
-            onPreviewViewModeChange={
-              changePreviewViewMode
-            }
-          />
+  onPreviewViewModeChange={
+    changePreviewViewMode
+  }
+
+  showHud={
+    viewControlsProps.showHud
+  }
+
+  onShowHudChange={
+    viewControlsProps.onShowHudChange
+  }
+
+  onResetLayout={
+    viewControlsProps.onResetLayout
+  }
+
+  onResetZoom={
+    viewControlsProps.onResetZoom
+  }
+/>
         </div>
 
+
+        {/*
+         * Saved / Saving state remains
+         * attached to the Preview itself.
+         */}
         <AssessmentSaveStatusPill
           theme={
             theme
@@ -434,6 +490,10 @@ export default function AssessmentPaperWorkspace({
         />
       </div>
 
+
+      {/*
+       * HUD resize gutter.
+       */}
       {showHud ? (
         <div
           onMouseDown={(
@@ -545,6 +605,10 @@ export default function AssessmentPaperWorkspace({
         <div />
       )}
 
+
+      {/*
+       * Bottom HUD pane.
+       */}
       <AssessmentHUDBar
         {...hudProps}
         theme={

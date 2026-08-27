@@ -1,3 +1,4 @@
+
 import {
   useState,
 } from "react";
@@ -36,18 +37,18 @@ const VIEW_MODES: Array<{
 }> = [
   {
     value:
-      "EXAM",
-
-    label:
-      "Exam",
-  },
-
-  {
-    value:
       "COMPACT",
 
     label:
       "Compact",
+  },
+
+  {
+    value:
+      "EXAM",
+
+    label:
+      "Exam",
   },
 
   {
@@ -88,6 +89,10 @@ function ViewModeButton({
   return (
     <button
       type="button"
+      role="radio"
+      aria-checked={
+        selected
+      }
       onClick={
         onClick
       }
@@ -102,14 +107,14 @@ function ViewModeButton({
         )
       }
       style={{
-        minWidth:
-          0,
+        flex:
+          "0 0 auto",
 
         height:
-          28,
+          26,
 
         padding:
-          "0 7px",
+          "0 9px",
 
         border:
           "none",
@@ -133,9 +138,12 @@ function ViewModeButton({
           "pointer",
 
         display:
-          "grid",
+          "inline-flex",
 
-        placeItems:
+        alignItems:
+          "center",
+
+        justifyContent:
           "center",
 
         whiteSpace:
@@ -149,7 +157,7 @@ function ViewModeButton({
             : 500,
 
         transition:
-          "background 0.15s ease, color 0.15s ease",
+          "background 150ms ease, color 150ms ease",
       }}
     >
       {label}
@@ -165,13 +173,19 @@ export default function AssessmentViewModeControl({
   return (
     <div
       role="radiogroup"
-      aria-label="Preview view"
+      aria-label="Preview view mode"
       style={{
         width:
+          "fit-content",
+
+        maxWidth:
           "100%",
 
+        minWidth:
+          0,
+
         height:
-          34,
+          32,
 
         padding:
           3,
@@ -180,13 +194,13 @@ export default function AssessmentViewModeControl({
           "border-box",
 
         display:
-          "grid",
+          "inline-flex",
 
-        gridTemplateColumns:
-          "repeat(3, minmax(0, 1fr))",
+        alignItems:
+          "center",
 
         gap:
-          2,
+          3,
 
         border:
           `1px solid ${theme.borderStandard}`,

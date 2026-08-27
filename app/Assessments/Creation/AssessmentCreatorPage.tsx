@@ -1391,11 +1391,23 @@ function AssessmentCreatorContent() {
             }}
 
             viewControlsProps={{
-              previewViewMode,
+                previewViewMode,
 
-              onPreviewViewModeChange:
-                setPreviewViewMode,
-            }}
+                onPreviewViewModeChange:
+                  setPreviewViewMode,
+
+                showHud:
+                  showProgressPanel,
+
+                onShowHudChange:
+                  setShowProgressPanel,
+
+                onResetLayout:
+                  resetLayout,
+
+                onResetZoom:
+                  resetZoom,
+              }}
 
             previewProps={{
               previewPaneRef,
