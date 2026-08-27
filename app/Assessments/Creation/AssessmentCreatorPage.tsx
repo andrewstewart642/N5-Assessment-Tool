@@ -272,13 +272,13 @@ function AssessmentCreatorContent() {
    */
 
   const {
-  previewViewMode,
-  setPreviewViewMode,
+    previewViewMode,
+    setPreviewViewMode,
 
-  suppressPreviewSpacing,
-  showPreviewAnswers,
-} =
-  usePreviewViewMode();
+    suppressPreviewSpacing,
+    showPreviewAnswers,
+  } =
+    usePreviewViewMode();
 
 
   /*
@@ -1094,13 +1094,6 @@ function AssessmentCreatorContent() {
       qualityNotes,
     });
 
-  /*
-   * Preserve the existing visible HUD
-   * behaviour for this migration.
-   *
-   * The merged analysis collection remains
-   * ready for its later HUD integration.
-   */
   void mergedQualityNotes;
 
 
@@ -1391,23 +1384,46 @@ function AssessmentCreatorContent() {
             }}
 
             viewControlsProps={{
-                previewViewMode,
+              previewViewMode,
 
-                onPreviewViewModeChange:
-                  setPreviewViewMode,
+              onPreviewViewModeChange:
+                setPreviewViewMode,
 
-                showHud:
-                  showProgressPanel,
+              showHud:
+                showProgressPanel,
 
-                onShowHudChange:
-                  setShowProgressPanel,
+              onShowHudChange:
+                setShowProgressPanel,
 
-                onResetLayout:
-                  resetLayout,
+              onResetLayout:
+                resetLayout,
 
-                onResetZoom:
-                  resetZoom,
-              }}
+              onResetZoom:
+                resetZoom,
+            }}
+
+            settingsControlsProps={{
+              includeCoverSheet,
+
+              onIncludeCoverSheetChange:
+                setIncludeCoverSheet,
+
+              includeFormulaSheet,
+
+              onIncludeFormulaSheetChange:
+                setIncludeFormulaSheet,
+
+              showCoverDateTime,
+
+              onShowCoverDateTimeChange:
+                setShowCoverDateTime,
+
+              showCandidateNumber:
+                showScottishCandidateNumberBox,
+
+              onShowCandidateNumberChange:
+                setShowScottishCandidateNumberBox,
+            }}
 
             previewProps={{
               previewPaneRef,
@@ -1492,7 +1508,6 @@ function AssessmentCreatorContent() {
                 progressHudPaperRows,
 
               qualityNotes,
-
             }}
           />
         </div>

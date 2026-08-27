@@ -10,11 +10,11 @@ import {
   UI_TYPO,
 } from "@/app/UI/Application/Typography/Typography";
 
-import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
-
 import type {
   AssessmentSaveStatus,
 } from "../Persistence/AssessmentSaveStatus";
+
+import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
 
 import AssessmentTopBar from "../TopBar/AssessmentTopBar";
 
@@ -22,13 +22,13 @@ import {
   TOP_BAR_HEIGHT,
 } from "../TopBar/AssessmentTopBarTokens";
 
-import {
-  ASSESSMENT_WORKSPACE_HUD_RESIZE_HANDLE_HEIGHT,
-} from "./AssessmentWorkspaceLayout";
-
 import type {
   AssessmentPreviewViewMode,
 } from "./PreviewViewMode";
+
+import {
+  ASSESSMENT_WORKSPACE_HUD_RESIZE_HANDLE_HEIGHT,
+} from "./AssessmentWorkspaceLayout";
 
 import AssessmentPreviewPane from "./Preview/AssessmentPreviewPane";
 
@@ -108,6 +108,41 @@ type ViewControlsProps = {
 };
 
 
+type SettingsControlsProps = {
+  includeCoverSheet:
+    boolean;
+
+  onIncludeCoverSheetChange: (
+    next:
+      boolean
+  ) => void;
+
+  includeFormulaSheet:
+    boolean;
+
+  onIncludeFormulaSheetChange: (
+    next:
+      boolean
+  ) => void;
+
+  showCoverDateTime:
+    boolean;
+
+  onShowCoverDateTimeChange: (
+    next:
+      boolean
+  ) => void;
+
+  showCandidateNumber:
+    boolean;
+
+  onShowCandidateNumberChange: (
+    next:
+      boolean
+  ) => void;
+};
+
+
 type AssessmentPaperWorkspaceProps = {
   theme:
     AppTheme;
@@ -132,6 +167,9 @@ type AssessmentPaperWorkspaceProps = {
 
   viewControlsProps:
     ViewControlsProps;
+
+  settingsControlsProps:
+    SettingsControlsProps;
 
   previewProps:
     Omit<
@@ -179,6 +217,7 @@ export default function AssessmentPaperWorkspace({
   topBarProps,
   previewChromeProps,
   viewControlsProps,
+  settingsControlsProps,
   previewProps,
   hudProps,
 }: AssessmentPaperWorkspaceProps) {
@@ -186,10 +225,6 @@ export default function AssessmentPaperWorkspace({
     hudProps.showProgressPanel;
 
 
-  /*
-   * Preserve the user's position in the
-   * document when changing preview modes.
-   */
   const {
     preserveViewport,
   } =
@@ -202,9 +237,6 @@ export default function AssessmentPaperWorkspace({
     });
 
 
-  /*
-   * Floating zoom control visibility.
-   */
   const {
     opacity:
       zoomChromeOpacity,
@@ -275,9 +307,6 @@ export default function AssessmentPaperWorkspace({
         minHeight:
           0,
 
-        width:
-          "100%",
-
         height:
           "100%",
 
@@ -297,9 +326,6 @@ export default function AssessmentPaperWorkspace({
           UI_TYPO.family,
       }}
     >
-      {/*
-       * Main TopBar + Preview pane.
-       */}
       <div
         style={{
           minWidth:
@@ -346,7 +372,6 @@ export default function AssessmentPaperWorkspace({
           }
         />
 
-
         <AssessmentPreviewPane
           {...previewProps}
           theme={
@@ -357,10 +382,6 @@ export default function AssessmentPaperWorkspace({
           }
         />
 
-
-        {/*
-         * Floating zoom control.
-         */}
         <div
           style={{
             position:
@@ -418,14 +439,6 @@ export default function AssessmentPaperWorkspace({
           />
         </div>
 
-
-        {/*
-         * Shared binder-style Preview tray.
-         *
-         * Settings and View are two tabs on
-         * one physical tray. The tray owns
-         * the slide animation.
-         */}
         <div
           style={{
             position:
@@ -445,41 +458,68 @@ export default function AssessmentPaperWorkspace({
           }}
         >
           <AssessmentPreviewTray
-  theme={
-    theme
-  }
+            theme={
+              theme
+            }
 
-  previewViewMode={
-    viewControlsProps.previewViewMode
-  }
+            previewViewMode={
+              viewControlsProps.previewViewMode
+            }
 
-  onPreviewViewModeChange={
-    changePreviewViewMode
-  }
+            onPreviewViewModeChange={
+              changePreviewViewMode
+            }
 
-  showHud={
-    viewControlsProps.showHud
-  }
+            showHud={
+              viewControlsProps.showHud
+            }
 
-  onShowHudChange={
-    viewControlsProps.onShowHudChange
-  }
+            onShowHudChange={
+              viewControlsProps.onShowHudChange
+            }
 
-  onResetLayout={
-    viewControlsProps.onResetLayout
-  }
+            onResetLayout={
+              viewControlsProps.onResetLayout
+            }
 
-  onResetZoom={
-    viewControlsProps.onResetZoom
-  }
-/>
+            onResetZoom={
+              viewControlsProps.onResetZoom
+            }
+
+            includeCoverSheet={
+              settingsControlsProps.includeCoverSheet
+            }
+
+            onIncludeCoverSheetChange={
+              settingsControlsProps.onIncludeCoverSheetChange
+            }
+
+            includeFormulaSheet={
+              settingsControlsProps.includeFormulaSheet
+            }
+
+            onIncludeFormulaSheetChange={
+              settingsControlsProps.onIncludeFormulaSheetChange
+            }
+
+            showCoverDateTime={
+              settingsControlsProps.showCoverDateTime
+            }
+
+            onShowCoverDateTimeChange={
+              settingsControlsProps.onShowCoverDateTimeChange
+            }
+
+            showCandidateNumber={
+              settingsControlsProps.showCandidateNumber
+            }
+
+            onShowCandidateNumberChange={
+              settingsControlsProps.onShowCandidateNumberChange
+            }
+          />
         </div>
 
-
-        {/*
-         * Saved / Saving state remains
-         * attached to the Preview itself.
-         */}
         <AssessmentSaveStatusPill
           theme={
             theme
@@ -490,10 +530,6 @@ export default function AssessmentPaperWorkspace({
         />
       </div>
 
-
-      {/*
-       * HUD resize gutter.
-       */}
       {showHud ? (
         <div
           onMouseDown={(
@@ -605,10 +641,6 @@ export default function AssessmentPaperWorkspace({
         <div />
       )}
 
-
-      {/*
-       * Bottom HUD pane.
-       */}
       <AssessmentHUDBar
         {...hudProps}
         theme={
