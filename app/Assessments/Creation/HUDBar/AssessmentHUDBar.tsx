@@ -20,10 +20,6 @@ import type {
   AssessmentQualityNote,
 } from "../Analysis/AssessmentQualityNotes";
 
-import type {
-  AssessmentPreviewViewMode,
-} from "../PaperWorkspace/PreviewViewMode";
-
 import AssessmentProgressPanel, {
   type AssessmentProgressPanelPaperRow,
 } from "./AssessmentProgressPanel";
@@ -63,18 +59,6 @@ export type AssessmentHUDBarProps = {
       string |
       AssessmentQualityNote
     >;
-
-  saveStateLabel?:
-    string;
-
-  isSaving?:
-    boolean;
-
-  previewViewMode:
-    AssessmentPreviewViewMode;
-
-  onCyclePreviewViewMode:
-    () => void;
 };
 
 const HUD_PANE_RADIUS =
@@ -88,22 +72,11 @@ export default function AssessmentHUDBar({
   viewPaper,
   paperRows,
   qualityNotes,
-  saveStateLabel,
-  isSaving = false,
-  previewViewMode,
-  onCyclePreviewViewMode,
 }: AssessmentHUDBarProps) {
   const bottomOffset =
     showProgressPanel
       ? hudHeight + 14
       : 14;
-
-  const showSaveState =
-    typeof saveStateLabel ===
-      "string" &&
-    saveStateLabel
-      .trim()
-      .length > 0;
 
   return (
     <>
@@ -134,93 +107,6 @@ export default function AssessmentHUDBar({
             10,
         }}
       >
-        {showSaveState ? (
-          <div
-            aria-live="polite"
-            style={{
-              display:
-                "inline-flex",
-
-              alignItems:
-                "center",
-
-              gap:
-                8,
-
-              padding:
-                "6px 10px",
-
-              borderRadius:
-                999,
-
-              border:
-                `1px solid ${theme.borderStandard}`,
-
-              background:
-                theme.bgElevated,
-
-              color:
-                theme.textMuted,
-
-              boxShadow:
-                theme.shadow,
-
-              pointerEvents:
-                "none",
-
-              fontSize:
-                12,
-
-              fontWeight:
-                700,
-
-              lineHeight:
-                1,
-
-              backdropFilter:
-                "blur(8px)",
-
-              WebkitBackdropFilter:
-                "blur(8px)",
-            }}
-          >
-            <span
-              style={{
-                width:
-                  7,
-
-                height:
-                  7,
-
-                borderRadius:
-                  999,
-
-                background:
-                  isSaving
-                    ? theme.accentPrimary
-                    : theme.textMuted,
-
-                boxShadow:
-                  isSaving
-                    ? `0 0 10px ${theme.accentSoft}`
-                    : "0 0 10px rgba(148,163,184,0.28)",
-
-                animation:
-                  isSaving
-                    ? "assessment-save-pulse 1s ease-in-out infinite"
-                    : "none",
-
-                flexShrink:
-                  0,
-              }}
-            />
-
-            <span>
-              {saveStateLabel}
-            </span>
-          </div>
-        ) : null}
-
         <button
           type="button"
           onClick={
@@ -315,20 +201,17 @@ export default function AssessmentHUDBar({
               viewPaper={
                 viewPaper
               }
+
               paperRows={
                 paperRows
               }
+
               notes={
                 qualityNotes
               }
+
               theme={
                 theme
-              }
-              previewViewMode={
-                previewViewMode
-              }
-              onCyclePreviewViewMode={
-                onCyclePreviewViewMode
               }
             />
           </div>
@@ -344,25 +227,6 @@ export default function AssessmentHUDBar({
           }}
         />
       )}
-
-      <style jsx>{`
-        @keyframes assessment-save-pulse {
-          0% {
-            transform: scale(1);
-            opacity: 0.9;
-          }
-
-          50% {
-            transform: scale(1.25);
-            opacity: 1;
-          }
-
-          100% {
-            transform: scale(1);
-            opacity: 0.9;
-          }
-        }
-      `}</style>
     </>
   );
 }

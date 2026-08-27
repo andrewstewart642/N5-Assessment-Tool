@@ -10,6 +10,10 @@ import {
   UI_TYPO,
 } from "@/app/UI/Application/Typography/Typography";
 
+import type {
+  AssessmentSaveStatus,
+} from "../Persistence/AssessmentSaveStatus";
+
 import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
 
 import AssessmentTopBar from "../TopBar/AssessmentTopBar";
@@ -18,13 +22,21 @@ import {
   TOP_BAR_HEIGHT,
 } from "../TopBar/AssessmentTopBarTokens";
 
+import type {
+  AssessmentPreviewViewMode,
+} from "./PreviewViewMode";
+
 import {
   ASSESSMENT_WORKSPACE_HUD_RESIZE_HANDLE_HEIGHT,
 } from "./AssessmentWorkspaceLayout";
 
 import AssessmentPreviewPane from "./Preview/AssessmentPreviewPane";
 
+import AssessmentSaveStatusPill from "./Preview/AssessmentSaveStatusPill";
+
 import PreviewZoomControls from "./Preview/PreviewZoomControls";
+
+import AssessmentViewDock from "./Preview/ViewControls/AssessmentViewDock";
 
 import {
   usePreviewChromeVisibility,
@@ -66,6 +78,16 @@ type PreviewChromeProps = {
     number;
 };
 
+type ViewControlsProps = {
+  previewViewMode:
+    AssessmentPreviewViewMode;
+
+  onPreviewViewModeChange: (
+    mode:
+      AssessmentPreviewViewMode
+  ) => void;
+};
+
 type AssessmentPaperWorkspaceProps = {
   theme:
     AppTheme;
@@ -76,6 +98,9 @@ type AssessmentPaperWorkspaceProps = {
   showPreviewAnswers:
     boolean;
 
+  saveStatus:
+    AssessmentSaveStatus;
+
   topBarProps:
     Omit<
       AssessmentTopBarProps,
@@ -84,6 +109,9 @@ type AssessmentPaperWorkspaceProps = {
 
   previewChromeProps:
     PreviewChromeProps;
+
+  viewControlsProps:
+    ViewControlsProps;
 
   previewProps:
     Omit<
@@ -108,6 +136,30 @@ const PANE_RADIUS =
 const PREVIEW_ZOOM_TOP_GAP =
   8;
 
+/*
+ * Future right-edge Settings tab:
+ *
+ * TOP_BAR_HEIGHT + 8px
+ *
+ * View deliberately begins beneath that
+ * reserved slot so we never need to move
+ * it when Settings is introduced.
+ */
+const PREVIEW_EDGE_FIRST_TAB_TOP_GAP =
+  8;
+
+const PREVIEW_EDGE_RESERVED_SETTINGS_HEIGHT =
+  34;
+
+const PREVIEW_EDGE_TAB_GAP =
+  8;
+
+const PREVIEW_VIEW_DOCK_TOP =
+  TOP_BAR_HEIGHT +
+  PREVIEW_EDGE_FIRST_TAB_TOP_GAP +
+  PREVIEW_EDGE_RESERVED_SETTINGS_HEIGHT +
+  PREVIEW_EDGE_TAB_GAP;
+
 const RESIZE_DOT_SIZE =
   2;
 
@@ -118,8 +170,10 @@ export default function AssessmentPaperWorkspace({
   theme,
   viewerHudRow,
   showPreviewAnswers,
+  saveStatus,
   topBarProps,
   previewChromeProps,
+  viewControlsProps,
   previewProps,
   hudProps,
 }: AssessmentPaperWorkspaceProps) {
@@ -158,9 +212,23 @@ export default function AssessmentPaperWorkspace({
         7000,
     });
 
-  function cyclePreviewViewMode() {
+  function changePreviewViewMode(
+    mode:
+      AssessmentPreviewViewMode
+  ) {
+    if (
+      mode ===
+      viewControlsProps.previewViewMode
+    ) {
+      return;
+    }
+
     preserveViewport(
-      hudProps.onCyclePreviewViewMode
+      () => {
+        viewControlsProps.onPreviewViewModeChange(
+          mode
+        );
+      }
     );
   }
 
@@ -194,16 +262,6 @@ export default function AssessmentPaperWorkspace({
         height:
           "100%",
 
-        /*
-         * Keep the established workbench gutter:
-         *
-         * top    4px
-         * right  4px
-         * bottom 4px
-         *
-         * Left remains zero because the central
-         * 8px resize gutter already owns that gap.
-         */
         padding:
           `${PANE_OUTER_GUTTER}px ${PANE_OUTER_GUTTER}px ${PANE_OUTER_GUTTER}px 0`,
 
@@ -284,14 +342,6 @@ export default function AssessmentPaperWorkspace({
             left:
               "50%",
 
-            /*
-             * The zoom control now belongs wholly
-             * to the Preview.
-             *
-             * Its TOP edge begins 8px beneath the
-             * TopBar/Preview boundary instead of its
-             * centre sitting on that boundary.
-             */
             top:
               TOP_BAR_HEIGHT +
               PREVIEW_ZOOM_TOP_GAP,
@@ -340,6 +390,48 @@ export default function AssessmentPaperWorkspace({
             }
           />
         </div>
+
+        <div
+          style={{
+            position:
+              "absolute",
+
+            top:
+              PREVIEW_VIEW_DOCK_TOP,
+
+            right:
+              -1,
+
+            zIndex:
+              30,
+
+            pointerEvents:
+              "auto",
+          }}
+        >
+          <AssessmentViewDock
+            theme={
+              theme
+            }
+
+            previewViewMode={
+              viewControlsProps.previewViewMode
+            }
+
+            onPreviewViewModeChange={
+              changePreviewViewMode
+            }
+          />
+        </div>
+
+        <AssessmentSaveStatusPill
+          theme={
+            theme
+          }
+          status={
+            saveStatus
+          }
+        />
       </div>
 
       {showHud ? (
@@ -455,9 +547,6 @@ export default function AssessmentPaperWorkspace({
 
       <AssessmentHUDBar
         {...hudProps}
-        onCyclePreviewViewMode={
-          cyclePreviewViewMode
-        }
         theme={
           theme
         }

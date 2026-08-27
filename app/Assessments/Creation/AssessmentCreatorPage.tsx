@@ -272,14 +272,13 @@ function AssessmentCreatorContent() {
    */
 
   const {
-    previewViewMode,
+  previewViewMode,
+  setPreviewViewMode,
 
-    suppressPreviewSpacing,
-    showPreviewAnswers,
-
-    cyclePreviewViewMode,
-  } =
-    usePreviewViewMode();
+  suppressPreviewSpacing,
+  showPreviewAnswers,
+} =
+  usePreviewViewMode();
 
 
   /*
@@ -845,8 +844,7 @@ function AssessmentCreatorContent() {
    */
 
   const {
-    saveStateLabel,
-    isSaving,
+    saveStatus,
   } =
     useAssessmentCreatorAutoSave({
       currentAssessmentId,
@@ -927,7 +925,7 @@ function AssessmentCreatorContent() {
     canSaveEdit,
 
     invalidCommitMessage,
-    } =
+  } =
     useAssessmentQuestionWorkflow({
       courseConfig,
 
@@ -1187,7 +1185,9 @@ function AssessmentCreatorContent() {
   return (
     <>
       <AssessmentCreatorStyles
-        theme={theme}
+        theme={
+          theme
+        }
       />
 
       <main
@@ -1220,7 +1220,9 @@ function AssessmentCreatorContent() {
         }}
       >
         <div
-          ref={layoutRef}
+          ref={
+            layoutRef
+          }
           style={{
             display:
               "grid",
@@ -1242,7 +1244,9 @@ function AssessmentCreatorContent() {
           }}
         >
           <AssessmentSkillsPanel
-            theme={theme}
+            theme={
+              theme
+            }
 
             skillsTreeProps={{
               skillsData:
@@ -1298,7 +1302,9 @@ function AssessmentCreatorContent() {
           />
 
           <WorkspaceDivider
-            theme={theme}
+            theme={
+              theme
+            }
 
             width={
               dividerWidth
@@ -1314,7 +1320,9 @@ function AssessmentCreatorContent() {
           />
 
           <AssessmentPaperWorkspace
-            theme={theme}
+            theme={
+              theme
+            }
 
             viewerHudRow={
               viewerHudRow
@@ -1322,6 +1330,10 @@ function AssessmentCreatorContent() {
 
             showPreviewAnswers={
               showPreviewAnswers
+            }
+
+            saveStatus={
+              saveStatus
             }
 
             topBarProps={{
@@ -1367,16 +1379,23 @@ function AssessmentCreatorContent() {
             }}
 
             previewChromeProps={{
-  zoomPct,
+              zoomPct,
 
-  zoomIn,
+              zoomIn,
 
-  zoomOut,
+              zoomOut,
 
-  currentViewerPage,
+              currentViewerPage,
 
-  totalViewerPages,
-}}
+              totalViewerPages,
+            }}
+
+            viewControlsProps={{
+              previewViewMode,
+
+              onPreviewViewModeChange:
+                setPreviewViewMode,
+            }}
 
             previewProps={{
               previewPaneRef,
@@ -1462,14 +1481,6 @@ function AssessmentCreatorContent() {
 
               qualityNotes,
 
-              saveStateLabel,
-
-              isSaving,
-
-              previewViewMode,
-
-              onCyclePreviewViewMode:
-                cyclePreviewViewMode,
             }}
           />
         </div>
@@ -1485,7 +1496,9 @@ function AssessmentCreatorContent() {
             )
           }
 
-          theme={theme}
+          theme={
+            theme
+          }
 
           includeCoverSheet={
             includeCoverSheet

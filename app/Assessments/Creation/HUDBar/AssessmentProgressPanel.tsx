@@ -1,4 +1,3 @@
-
 import type {
   ReactNode,
 } from "react";
@@ -23,10 +22,6 @@ import {
   type AssessmentQualityNote,
   type AssessmentQualityNoteSeverity,
 } from "../Analysis/AssessmentQualityNotes";
-
-import type {
-  AssessmentPreviewViewMode,
-} from "../PaperWorkspace/PreviewViewMode";
 
 export type AssessmentProgressPanelPaperRow = {
   paper:
@@ -60,12 +55,6 @@ type AssessmentProgressPanelProps = {
 
   theme:
     AppTheme;
-
-  previewViewMode:
-    AssessmentPreviewViewMode;
-
-  onCyclePreviewViewMode:
-    () => void;
 };
 
 function clampInteger(
@@ -120,8 +109,11 @@ function WarningTriangleIcon({
   color,
   fill,
 }: {
-  color: string;
-  fill: string;
+  color:
+    string;
+
+  fill:
+    string;
 }) {
   return (
     <svg
@@ -167,8 +159,11 @@ function WarningDiamondIcon({
   color,
   fill,
 }: {
-  color: string;
-  fill: string;
+  color:
+    string;
+
+  fill:
+    string;
 }) {
   return (
     <svg
@@ -434,18 +429,7 @@ export default function AssessmentProgressPanel({
   paperRows,
   notes,
   theme,
-  previewViewMode,
-  onCyclePreviewViewMode,
 }: AssessmentProgressPanelProps) {
-  const previewViewLabel =
-    previewViewMode ===
-    "EXAM"
-      ? "Exam"
-      : previewViewMode ===
-          "COMPACT"
-        ? "Compact"
-        : "Answers";
-
   const structuredNotes =
     limitAssessmentQualityNotes(
       notes.map(
@@ -603,122 +587,6 @@ export default function AssessmentProgressPanel({
           }}
         >
           Notes
-        </div>
-
-        <div
-          style={{
-            position:
-              "absolute",
-
-            top:
-              6,
-
-            right:
-              12,
-
-            display:
-              "inline-flex",
-
-            alignItems:
-              "center",
-
-            gap:
-              7,
-
-            zIndex:
-              2,
-          }}
-        >
-          <span
-            style={{
-              ...UI_TEXT.sectionTitle,
-
-              color:
-                theme.textSecondary,
-
-              whiteSpace:
-                "nowrap",
-            }}
-          >
-            View
-          </span>
-
-          <button
-            type="button"
-            onClick={
-              onCyclePreviewViewMode
-            }
-            title="Cycle preview view"
-            aria-label={`Preview view: ${previewViewLabel}. Click to change view.`}
-            style={{
-              ...UI_TEXT.controlTextStrong,
-
-              minWidth:
-                78,
-
-              height:
-                24,
-
-              padding:
-                "0 9px",
-
-              display:
-                "inline-flex",
-
-              alignItems:
-                "center",
-
-              justifyContent:
-                "center",
-
-              border:
-                `1px solid ${theme.controlSelectedBorder}`,
-
-              borderRadius:
-                8,
-
-              background:
-                theme.controlSelectedBg,
-
-              color:
-                theme.textOnAccent,
-
-              cursor:
-                "pointer",
-
-              lineHeight:
-                1,
-
-              whiteSpace:
-                "nowrap",
-
-              boxShadow:
-                "0 1px 2px rgba(0,0,0,0.12)",
-
-              transition:
-                "filter 0.15s ease, transform 0.1s ease",
-            }}
-            onMouseDown={(
-              event
-            ) => {
-              event.currentTarget.style.transform =
-                "scale(0.97)";
-            }}
-            onMouseUp={(
-              event
-            ) => {
-              event.currentTarget.style.transform =
-                "scale(1)";
-            }}
-            onMouseLeave={(
-              event
-            ) => {
-              event.currentTarget.style.transform =
-                "scale(1)";
-            }}
-          >
-            {previewViewLabel}
-          </button>
         </div>
 
         <div

@@ -33,6 +33,10 @@ import type {
   AssessmentQuestionDraftByPaper,
 } from "../Questions/AssessmentQuestionDraftTypes";
 
+import type {
+  AssessmentSaveStatus,
+} from "./AssessmentSaveStatus";
+
 type UseAssessmentCreatorAutoSaveArgs = {
   currentAssessmentId:
     string | null;
@@ -134,6 +138,9 @@ type UseAssessmentCreatorAutoSaveArgs = {
     boolean;
 };
 
+const MINIMUM_SAVING_DISPLAY_MS =
+  2800;
+
 export function useAssessmentCreatorAutoSave({
   currentAssessmentId,
   loadedSavedAssessment,
@@ -180,19 +187,11 @@ export function useAssessmentCreatorAutoSave({
   useCompleteCourseCoverage,
 }: UseAssessmentCreatorAutoSaveArgs) {
   const [
-    saveStateLabel,
-    setSaveStateLabel,
+    saveStatus,
+    setSaveStatus,
   ] =
-    useState(
-      "Saved"
-    );
-
-  const [
-    isSaving,
-    setIsSaving,
-  ] =
-    useState(
-      false
+    useState<AssessmentSaveStatus>(
+      "saved"
     );
 
   const savedAssessmentRef =
@@ -202,7 +201,7 @@ export function useAssessmentCreatorAutoSave({
       loadedSavedAssessment
     );
 
-  const saveTimeoutRef =
+  const settleTimeoutRef =
     useRef<
       ReturnType<
         typeof setTimeout
@@ -312,56 +311,88 @@ export function useAssessmentCreatorAutoSave({
       },
     };
 
-    setIsSaving(
-      true
-    );
-
-    setSaveStateLabel(
-      "Saving..."
-    );
-
-    upsertSavedAssessment(
-      nextSavedAssessment
-    );
-
-    savedAssessmentRef.current =
-      nextSavedAssessment;
+    const isInitialSaveCycle =
+      !hasInitialSaveCycleCompletedRef
+        .current;
 
     if (
-      saveTimeoutRef.current
+      settleTimeoutRef.current
     ) {
       clearTimeout(
-        saveTimeoutRef.current
+        settleTimeoutRef.current
+      );
+
+      settleTimeoutRef.current =
+        null;
+    }
+
+    /*
+     * Initial hydration should not flash
+     * "Saving..." simply because the builder
+     * has finished loading an existing file.
+     */
+    if (
+      !isInitialSaveCycle
+    ) {
+      setSaveStatus(
+        "saving"
       );
     }
 
-    if (
-      hasInitialSaveCycleCompletedRef
-        .current
-    ) {
-      saveTimeoutRef.current =
+    try {
+      /*
+       * The real persistence operation still
+       * happens immediately.
+       *
+       * The longer visual Saving state below is
+       * presentation only.
+       */
+      upsertSavedAssessment(
+        nextSavedAssessment
+      );
+
+      savedAssessmentRef.current =
+        nextSavedAssessment;
+
+      if (
+        isInitialSaveCycle
+      ) {
+        hasInitialSaveCycleCompletedRef.current =
+          true;
+
+        setSaveStatus(
+          "saved"
+        );
+
+        return;
+      }
+
+      /*
+       * Keep Saving... visible long enough to
+       * communicate the operation clearly.
+       *
+       * If another change arrives meanwhile this
+       * timeout is cleared above, so the spinner
+       * simply continues rather than restarting.
+       */
+      settleTimeoutRef.current =
         setTimeout(
           () => {
-            setIsSaving(
-              false
+            setSaveStatus(
+              "saved"
             );
 
-            setSaveStateLabel(
-              "Saved"
-            );
+            settleTimeoutRef.current =
+              null;
           },
-          350
+          MINIMUM_SAVING_DISPLAY_MS
         );
-    } else {
+    } catch {
       hasInitialSaveCycleCompletedRef.current =
         true;
 
-      setIsSaving(
-        false
-      );
-
-      setSaveStateLabel(
-        "Saved"
+      setSaveStatus(
+        "error"
       );
     }
   }, [
@@ -412,17 +443,16 @@ export function useAssessmentCreatorAutoSave({
   useEffect(() => {
     return () => {
       if (
-        saveTimeoutRef.current
+        settleTimeoutRef.current
       ) {
         clearTimeout(
-          saveTimeoutRef.current
+          settleTimeoutRef.current
         );
       }
     };
   }, []);
 
   return {
-    saveStateLabel,
-    isSaving,
+    saveStatus,
   };
 }
