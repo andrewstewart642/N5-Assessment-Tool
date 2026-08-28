@@ -3,6 +3,10 @@ import type {
 } from "@/app/Assessments/SavedAssessments/SavedAssessment";
 
 import {
+  resolveSavedAssessmentCourseIdentity,
+} from "@/app/Assessments/SavedAssessments/CourseIdentity";
+
+import {
   getCourseCatalogEntry,
 } from "@/app/Courses/CourseCatalog";
 
@@ -181,20 +185,14 @@ export function formatAssessmentDate(
 export function getAssessmentCourseId(
   savedAssessment:
     SavedAssessment
-): CourseId | null {
-  const course =
-    getCourseCatalogEntry(
-      savedAssessment.setup
-        .courseId ??
-        savedAssessment.setup
-          .levelId
-    );
+): CourseId {
+  return resolveSavedAssessmentCourseIdentity({
+    courseId:
+      savedAssessment.setup.courseId,
 
-
-  return (
-    course?.id ??
-    null
-  );
+    courseIdentityVersion:
+      savedAssessment.setup.courseIdentityVersion,
+  }).courseId;
 }
 
 
@@ -206,13 +204,6 @@ export function getAssessmentCourseLabel(
     getAssessmentCourseId(
       savedAssessment
     );
-
-
-  if (
-    !courseId
-  ) {
-    return "Unknown course";
-  }
 
 
   const course =
@@ -290,7 +281,7 @@ export function getAssessmentCoverageLabel(
 
   if (
     classCount ===
-    0
+      0
   ) {
     return "No class selected";
   }
@@ -298,7 +289,7 @@ export function getAssessmentCoverageLabel(
 
   if (
     classCount ===
-    1
+      1
   ) {
     return "1 class linked";
   }
