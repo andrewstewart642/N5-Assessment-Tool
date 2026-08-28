@@ -21,6 +21,9 @@ export default function HomeProductUpdatesSection({
         minWidth:
           0,
 
+        width:
+          "100%",
+
         padding:
           14,
 
@@ -43,7 +46,11 @@ export default function HomeProductUpdatesSection({
           "solid",
 
         borderColor:
-          theme.borderStandard,
+          `color-mix(
+            in srgb,
+            ${theme.textMuted} 12%,
+            ${theme.borderStandard}
+          )`,
 
         borderRadius:
           6,
@@ -54,13 +61,18 @@ export default function HomeProductUpdatesSection({
             color-mix(
               in srgb,
               ${theme.accentPrimary} 5%,
-              ${theme.bgSurface}
+              ${theme.bgElevated}
             ) 0%,
-            ${theme.bgSurface} 58%
+            ${theme.bgElevated} 58%,
+            color-mix(
+              in srgb,
+              ${theme.bgElevated} 74%,
+              ${theme.bgSurface}
+            ) 100%
           )`,
 
         boxShadow:
-          theme.shadow,
+          `${theme.shadowStrong}, inset 0 1px 0 rgba(255,255,255,0.025)`,
       }}
     >
       <HomeSectionHeader

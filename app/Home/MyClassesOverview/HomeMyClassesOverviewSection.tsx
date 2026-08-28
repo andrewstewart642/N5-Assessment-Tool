@@ -57,21 +57,30 @@ export default function HomeMyClassesOverviewSection({
       )
       .slice(
         0,
-        4
+        3
       );
 
 
   return (
     <section
       style={{
+        width:
+          "100%",
+
+        maxWidth:
+          820,
+
         minWidth:
           0,
 
         padding:
-          14,
+          12,
 
         boxSizing:
           "border-box",
+
+        justifySelf:
+          "start",
 
         display:
           "grid",
@@ -80,7 +89,7 @@ export default function HomeMyClassesOverviewSection({
           "start",
 
         gap:
-          11,
+          9,
 
         borderWidth:
           1,
@@ -89,21 +98,33 @@ export default function HomeMyClassesOverviewSection({
           "solid",
 
         borderColor:
-          theme.borderStandard,
+          `color-mix(
+            in srgb,
+            ${theme.textMuted} 12%,
+            ${theme.borderStandard}
+          )`,
 
         borderRadius:
           6,
 
         background:
-          theme.bgSurface,
+          `linear-gradient(
+            180deg,
+            ${theme.bgElevated} 0%,
+            color-mix(
+              in srgb,
+              ${theme.bgElevated} 72%,
+              ${theme.bgSurface}
+            ) 100%
+          )`,
 
         boxShadow:
-          theme.shadow,
+          `${theme.shadowStrong}, inset 0 1px 0 rgba(255,255,255,0.025)`,
       }}
     >
       <HomeSectionHeader
         title="My classes"
-        subtitle="Recent Course coverage at a glance."
+        subtitle="Recent Course coverage."
         actionLabel="View all classes"
         actionHref="/my-classes"
         theme={
@@ -119,7 +140,7 @@ export default function HomeMyClassesOverviewSection({
               theme.textMuted,
 
             fontSize:
-              10.5,
+              10,
           }}
         >
           Loading classes...
@@ -129,13 +150,13 @@ export default function HomeMyClassesOverviewSection({
         <div
           style={{
             padding:
-              "14px 0",
+              "10px 0",
 
             display:
               "grid",
 
             gap:
-              8,
+              7,
 
             justifyItems:
               "start",
@@ -147,7 +168,7 @@ export default function HomeMyClassesOverviewSection({
                 theme.textSecondary,
 
               fontSize:
-                11,
+                10.5,
             }}
           >
             No classes have been created yet.
@@ -164,7 +185,7 @@ export default function HomeMyClassesOverviewSection({
                 "none",
 
               fontSize:
-                10.5,
+                10,
 
               fontWeight:
                 600,
@@ -210,10 +231,10 @@ export default function HomeMyClassesOverviewSection({
                       0,
 
                     minHeight:
-                      54,
+                      48,
 
                     padding:
-                      "7px 9px 7px 12px",
+                      "6px 8px 6px 11px",
 
                     boxSizing:
                       "border-box",
@@ -228,13 +249,13 @@ export default function HomeMyClassesOverviewSection({
                       "grid",
 
                     gridTemplateColumns:
-                      "minmax(150px, 1fr) minmax(140px, 0.9fr) 90px",
+                      "minmax(130px, 0.9fr) minmax(145px, 1fr) 72px",
 
                     alignItems:
                       "center",
 
                     gap:
-                      12,
+                      10,
 
                     borderWidth:
                       1,
@@ -260,8 +281,12 @@ export default function HomeMyClassesOverviewSection({
                           ${accent} 8%,
                           ${theme.bgSection}
                         ) 0%,
-                        ${theme.bgSection} 46%,
-                        ${theme.bgSurface} 100%
+                        ${theme.bgSection} 50%,
+                        color-mix(
+                          in srgb,
+                          ${theme.bgSection} 76%,
+                          ${theme.bgElevated}
+                        ) 100%
                       )`,
 
                     color:
@@ -304,7 +329,7 @@ export default function HomeMyClassesOverviewSection({
                         "grid",
 
                       gap:
-                        3,
+                        2,
                     }}
                   >
                     <span
@@ -319,7 +344,7 @@ export default function HomeMyClassesOverviewSection({
                           theme.textPrimary,
 
                         fontSize:
-                          12,
+                          11,
 
                         fontWeight:
                           700,
@@ -337,14 +362,26 @@ export default function HomeMyClassesOverviewSection({
 
                     <span
                       style={{
+                        minWidth:
+                          0,
+
+                        overflow:
+                          "hidden",
+
                         color:
                           accent,
 
                         fontSize:
-                          10,
+                          9.5,
 
                         fontWeight:
                           600,
+
+                        whiteSpace:
+                          "nowrap",
+
+                        textOverflow:
+                          "ellipsis",
                       }}
                     >
                       {schoolClass.course}
@@ -361,7 +398,7 @@ export default function HomeMyClassesOverviewSection({
                         "grid",
 
                       gap:
-                        5,
+                        4,
                     }}
                   >
                     <span
@@ -370,10 +407,13 @@ export default function HomeMyClassesOverviewSection({
                           theme.textSecondary,
 
                         fontSize:
-                          10,
+                          9.5,
 
                         fontVariantNumeric:
                           "tabular-nums",
+
+                        whiteSpace:
+                          "nowrap",
                       }}
                     >
                       {coverage.totalSkills >
@@ -429,13 +469,16 @@ export default function HomeMyClassesOverviewSection({
                         theme.textMuted,
 
                       fontSize:
-                        10,
+                        9.5,
 
                       fontWeight:
                         600,
+
+                      whiteSpace:
+                        "nowrap",
                     }}
                   >
-                    Open class →
+                    Open →
                   </span>
                 </Link>
               );

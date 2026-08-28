@@ -251,10 +251,13 @@ export default function HomeUpcomingAssessmentsCalendar({
           0,
 
         minHeight:
-          260,
+          410,
+
+        height:
+          "100%",
 
         padding:
-          14,
+          13,
 
         boxSizing:
           "border-box",
@@ -275,21 +278,33 @@ export default function HomeUpcomingAssessmentsCalendar({
           "solid",
 
         borderColor:
-          theme.borderStandard,
+          `color-mix(
+            in srgb,
+            ${theme.textMuted} 12%,
+            ${theme.borderStandard}
+          )`,
 
         borderRadius:
           6,
 
         background:
-          theme.bgSurface,
+          `linear-gradient(
+            180deg,
+            ${theme.bgElevated} 0%,
+            color-mix(
+              in srgb,
+              ${theme.bgElevated} 72%,
+              ${theme.bgSurface}
+            ) 100%
+          )`,
 
         boxShadow:
-          theme.shadow,
+          `${theme.shadowStrong}, inset 0 1px 0 rgba(255,255,255,0.025)`,
       }}
     >
       <HomeSectionHeader
         title="Upcoming assessments"
-        subtitle="Assessment dates across your classes."
+        subtitle="Plan around what's approaching."
         actionLabel="All assessments"
         actionHref="/my-assessments"
         theme={
@@ -307,10 +322,10 @@ export default function HomeUpcomingAssessmentsCalendar({
             "grid",
 
           gridTemplateColumns:
-            "minmax(250px, 1fr) minmax(190px, 0.72fr)",
+            "minmax(300px, 1fr) minmax(170px, 190px)",
 
           gap:
-            12,
+            13,
         }}
       >
         <div
@@ -322,7 +337,7 @@ export default function HomeUpcomingAssessmentsCalendar({
               "grid",
 
             gap:
-              7,
+              8,
           }}
         >
           <div
@@ -350,10 +365,10 @@ export default function HomeUpcomingAssessmentsCalendar({
               }
               style={{
                 width:
-                  26,
+                  27,
 
                 height:
-                  26,
+                  27,
 
                 padding:
                   0,
@@ -377,10 +392,13 @@ export default function HomeUpcomingAssessmentsCalendar({
                   5,
 
                 background:
-                  theme.controlBg,
+                  theme.bgSection,
 
                 color:
                   theme.textSecondary,
+
+                boxShadow:
+                  theme.shadow,
 
                 cursor:
                   "pointer",
@@ -396,10 +414,10 @@ export default function HomeUpcomingAssessmentsCalendar({
                   theme.textPrimary,
 
                 fontSize:
-                  11,
+                  11.5,
 
                 fontWeight:
-                  650,
+                  700,
               }}
             >
               {monthLabel}
@@ -416,10 +434,10 @@ export default function HomeUpcomingAssessmentsCalendar({
               }
               style={{
                 width:
-                  26,
+                  27,
 
                 height:
-                  26,
+                  27,
 
                 padding:
                   0,
@@ -443,10 +461,13 @@ export default function HomeUpcomingAssessmentsCalendar({
                   5,
 
                 background:
-                  theme.controlBg,
+                  theme.bgSection,
 
                 color:
                   theme.textSecondary,
+
+                boxShadow:
+                  theme.shadow,
 
                 cursor:
                   "pointer",
@@ -466,7 +487,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                 "repeat(7, minmax(0, 1fr))",
 
               gap:
-                3,
+                4,
             }}
           >
             {WEEKDAY_LABELS.map(
@@ -493,7 +514,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                       8.5,
 
                     fontWeight:
-                      650,
+                      700,
                   }}
                 >
                   {label}
@@ -550,10 +571,10 @@ export default function HomeUpcomingAssessmentsCalendar({
                         0,
 
                       height:
-                        30,
+                        36,
 
                       padding:
-                        "3px 4px",
+                        "4px 5px",
 
                       boxSizing:
                         "border-box",
@@ -576,21 +597,30 @@ export default function HomeUpcomingAssessmentsCalendar({
                           : theme.borderStandard,
 
                       borderRadius:
-                        4,
+                        5,
 
                       background:
                         isToday
                           ? `color-mix(
                               in srgb,
-                              ${theme.accentPrimary} 8%,
+                              ${theme.accentPrimary} 11%,
                               ${theme.bgSection}
                             )`
-                          : theme.bgSection,
+                          : `color-mix(
+                              in srgb,
+                              ${theme.bgSection} 86%,
+                              ${theme.bgElevated}
+                            )`,
+
+                      boxShadow:
+                        isToday
+                          ? `0 2px 7px ${theme.accentSoft}`
+                          : "inset 0 1px 0 rgba(255,255,255,0.018)",
 
                       opacity:
                         currentMonth
                           ? 1
-                          : 0.42,
+                          : 0.38,
                     }}
                   >
                     <span
@@ -601,12 +631,12 @@ export default function HomeUpcomingAssessmentsCalendar({
                             : theme.textSecondary,
 
                         fontSize:
-                          8.5,
+                          9,
 
                         fontWeight:
                           isToday
                             ? 700
-                            : 500,
+                            : 550,
 
                         lineHeight:
                           1,
@@ -709,10 +739,10 @@ export default function HomeUpcomingAssessmentsCalendar({
                 theme.textMuted,
 
               fontSize:
-                9,
+                8.5,
 
               fontWeight:
-                700,
+                750,
 
               letterSpacing:
                 "0.05em",
@@ -762,7 +792,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                         0,
 
                       padding:
-                        "7px 8px 7px 10px",
+                        "7px 7px 7px 10px",
 
                       position:
                         "relative",
@@ -774,7 +804,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                         "grid",
 
                       gap:
-                        3,
+                        2,
 
                       borderWidth:
                         1,
@@ -783,7 +813,11 @@ export default function HomeUpcomingAssessmentsCalendar({
                         "solid",
 
                       borderColor:
-                        theme.borderStandard,
+                        `color-mix(
+                          in srgb,
+                          ${accent} 16%,
+                          ${theme.borderStandard}
+                        )`,
 
                       borderRadius:
                         5,
@@ -796,7 +830,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                             ${accent} 8%,
                             ${theme.bgSection}
                           ) 0%,
-                          ${theme.bgSection} 75%
+                          ${theme.bgSection} 78%
                         )`,
 
                       color:
@@ -842,7 +876,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                           theme.textPrimary,
 
                         fontSize:
-                          10.5,
+                          10,
 
                         fontWeight:
                           650,
@@ -866,7 +900,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                           theme.textMuted,
 
                         fontSize:
-                          9.5,
+                          9,
 
                         fontVariantNumeric:
                           "tabular-nums",
@@ -897,7 +931,7 @@ export default function HomeUpcomingAssessmentsCalendar({
                   theme.textMuted,
 
                 fontSize:
-                  10.5,
+                  10,
 
                 lineHeight:
                   1.4,

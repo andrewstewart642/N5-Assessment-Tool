@@ -59,8 +59,8 @@ type Props = {
 };
 
 
-function InsightCard({
-  eyebrow,
+function ForYouRow({
+  label,
   title,
   body,
   accent,
@@ -68,7 +68,7 @@ function InsightCard({
   onClick,
   theme,
 }: {
-  eyebrow:
+  label:
     string;
 
   title:
@@ -102,28 +102,25 @@ function InsightCard({
           0,
 
         minHeight:
-          104,
+          43,
 
         padding:
-          "11px 12px 11px 15px",
+          "6px 8px",
 
         boxSizing:
           "border-box",
 
-        position:
-          "relative",
-
-        overflow:
-          "hidden",
-
         display:
           "grid",
 
-        alignContent:
-          "space-between",
+        gridTemplateColumns:
+          "76px minmax(0, 1fr) 14px",
+
+        alignItems:
+          "center",
 
         gap:
-          10,
+          8,
 
         borderWidth:
           1,
@@ -134,22 +131,27 @@ function InsightCard({
         borderColor:
           `color-mix(
             in srgb,
-            ${accent} 26%,
+            ${accent} 15%,
             ${theme.borderStandard}
           )`,
 
         borderRadius:
-          6,
+          5,
 
         background:
           `linear-gradient(
-            120deg,
+            90deg,
             color-mix(
               in srgb,
-              ${accent} 10%,
+              ${accent} 7%,
               ${theme.bgSection}
             ) 0%,
-            ${theme.bgSurface} 78%
+            ${theme.bgSection} 54%,
+            color-mix(
+              in srgb,
+              ${theme.bgSection} 72%,
+              ${theme.bgElevated}
+            ) 100%
           )`,
 
         color:
@@ -157,33 +159,77 @@ function InsightCard({
 
         textDecoration:
           "none",
-
-        boxShadow:
-          theme.shadow,
       }}
     >
       <div
-        aria-hidden="true"
         style={{
-          position:
-            "absolute",
-
-          left:
+          minWidth:
             0,
 
-          top:
-            0,
+          display:
+            "flex",
 
-          bottom:
-            0,
+          alignItems:
+            "center",
 
-          width:
-            3,
-
-          background:
-            accent,
+          gap:
+            6,
         }}
-      />
+      >
+        <span
+          aria-hidden="true"
+          style={{
+            width:
+              6,
+
+            height:
+              6,
+
+            flexShrink:
+              0,
+
+            borderRadius:
+              999,
+
+            background:
+              accent,
+
+            boxShadow:
+              `0 0 6px ${accent}`,
+          }}
+        />
+
+
+        <span
+          style={{
+            overflow:
+              "hidden",
+
+            color:
+              accent,
+
+            fontSize:
+              8.5,
+
+            fontWeight:
+              750,
+
+            letterSpacing:
+              "0.045em",
+
+            textTransform:
+              "uppercase",
+
+            whiteSpace:
+              "nowrap",
+
+            textOverflow:
+              "ellipsis",
+          }}
+        >
+          {label}
+        </span>
+      </div>
 
 
       <div
@@ -195,32 +241,13 @@ function InsightCard({
             "grid",
 
           gap:
-            4,
+            1,
         }}
       >
         <span
-          style={{
-            color:
-              accent,
-
-            fontSize:
-              9,
-
-            fontWeight:
-              750,
-
-            letterSpacing:
-              "0.055em",
-
-            textTransform:
-              "uppercase",
-          }}
-        >
-          {eyebrow}
-        </span>
-
-
-        <span
+          title={
+            title
+          }
           style={{
             minWidth:
               0,
@@ -232,13 +259,13 @@ function InsightCard({
               theme.textPrimary,
 
             fontSize:
-              12,
+              11,
 
             fontWeight:
-              700,
+              650,
 
             lineHeight:
-              1.3,
+              1.2,
 
             whiteSpace:
               "nowrap",
@@ -253,14 +280,26 @@ function InsightCard({
 
         <span
           style={{
+            minWidth:
+              0,
+
+            overflow:
+              "hidden",
+
             color:
               theme.textMuted,
 
             fontSize:
-              10.5,
+              9.5,
 
             lineHeight:
-              1.35,
+              1.2,
+
+            whiteSpace:
+              "nowrap",
+
+            textOverflow:
+              "ellipsis",
           }}
         >
           {body}
@@ -269,18 +308,22 @@ function InsightCard({
 
 
       <span
+        aria-hidden="true"
         style={{
+          justifySelf:
+            "end",
+
           color:
-            theme.textSecondary,
+            theme.textMuted,
 
           fontSize:
-            10,
+            11,
 
-          fontWeight:
-            600,
+          lineHeight:
+            1,
         }}
       >
-        View →
+        →
       </span>
     </Link>
   );
@@ -330,10 +373,10 @@ export default function HomeForYouSection({
       <section
         style={{
           minHeight:
-            152,
+            196,
 
           padding:
-            14,
+            12,
 
           boxSizing:
             "border-box",
@@ -351,7 +394,10 @@ export default function HomeForYouSection({
             6,
 
           background:
-            theme.bgSurface,
+            theme.bgElevated,
+
+          boxShadow:
+            theme.shadowStrong,
 
           color:
             theme.textMuted,
@@ -400,14 +446,31 @@ export default function HomeForYouSection({
       : null;
 
 
+  const recentProgressText =
+    recentProgress
+      ? recentProgress.progressPct <=
+        0
+        ? `Not started · ${recentProgress.assignedMarks} / ${recentProgress.targetMarks} marks`
+        : recentProgress.progressPct >=
+            100
+          ? `Complete · ${recentProgress.assignedMarks} / ${recentProgress.targetMarks} marks`
+          : `${Math.round(
+              recentProgress.progressPct
+            )}% built · ${recentProgress.assignedMarks} / ${recentProgress.targetMarks} marks`
+      : "";
+
+
   return (
     <section
       style={{
         minWidth:
           0,
 
+        minHeight:
+          196,
+
         padding:
-          12,
+          11,
 
         boxSizing:
           "border-box",
@@ -415,8 +478,11 @@ export default function HomeForYouSection({
         display:
           "grid",
 
+        alignContent:
+          "start",
+
         gap:
-          11,
+          9,
 
         borderWidth:
           1,
@@ -425,26 +491,33 @@ export default function HomeForYouSection({
           "solid",
 
         borderColor:
-          theme.borderStandard,
+          `color-mix(
+            in srgb,
+            ${theme.textMuted} 12%,
+            ${theme.borderStandard}
+          )`,
 
         borderRadius:
           6,
 
         background:
           `linear-gradient(
-            135deg,
+            180deg,
+            ${theme.bgElevated} 0%,
             color-mix(
               in srgb,
-              ${theme.accentPrimary} 4%,
+              ${theme.bgElevated} 74%,
               ${theme.bgSurface}
-            ) 0%,
-            ${theme.bgSurface} 62%
+            ) 100%
           )`,
+
+        boxShadow:
+          `${theme.shadowStrong}, inset 0 1px 0 rgba(255,255,255,0.025)`,
       }}
     >
       <HomeSectionHeader
         title="For you"
-        subtitle="The things most likely to need your attention next."
+        subtitle="What needs your attention next."
         theme={
           theme
         }
@@ -459,25 +532,22 @@ export default function HomeForYouSection({
           display:
             "grid",
 
-          gridTemplateColumns:
-            "repeat(3, minmax(0, 1fr))",
-
           gap:
-            8,
+            5,
         }}
       >
         {recentAssessment &&
         recentProgress ? (
-          <InsightCard
-            eyebrow="Now"
+          <ForYouRow
+            label="Now"
             title={
               getHomeAssessmentName(
                 recentAssessment
               )
             }
-            body={`${Math.round(
-              recentProgress.progressPct
-            )}% built · ${recentProgress.assignedMarks} / ${recentProgress.targetMarks} marks`}
+            body={
+              recentProgressText
+            }
             accent={
               getCourseColour(
                 getHomeAssessmentCourseId(
@@ -496,8 +566,8 @@ export default function HomeForYouSection({
             }
           />
         ) : (
-          <InsightCard
-            eyebrow="Now"
+          <ForYouRow
+            label="Now"
             title="Create your first assessment"
             body="Start building from the Course specification."
             accent={
@@ -513,8 +583,8 @@ export default function HomeForYouSection({
 
         {upcomingAssessment &&
         upcomingDate ? (
-          <InsightCard
-            eyebrow="Coming up"
+          <ForYouRow
+            label="Coming up"
             title={
               getHomeAssessmentName(
                 upcomingAssessment
@@ -549,10 +619,10 @@ export default function HomeForYouSection({
             }
           />
         ) : (
-          <InsightCard
-            eyebrow="Coming up"
+          <ForYouRow
+            label="Coming up"
             title="No upcoming assessment dates"
-            body="Add dates to assessments and they will appear here automatically."
+            body="Add assessment dates to start planning ahead."
             accent={
               theme.accentPrimary
             }
@@ -566,8 +636,8 @@ export default function HomeForYouSection({
 
         {recentClass &&
         classCoverage ? (
-          <InsightCard
-            eyebrow="Class"
+          <ForYouRow
+            label="Class"
             title={
               recentClass.name
             }
@@ -588,10 +658,10 @@ export default function HomeForYouSection({
             }
           />
         ) : (
-          <InsightCard
-            eyebrow="Class"
+          <ForYouRow
+            label="Class"
             title="Set up your classes"
-            body="Track Course coverage and connect assessments to what has been taught."
+            body="Track Course coverage and assessment readiness."
             accent={
               theme.accentPrimary
             }

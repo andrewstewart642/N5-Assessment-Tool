@@ -51,10 +51,13 @@ export default function HomeContinueWorkingSection({
       <section
         style={{
           minHeight:
-            260,
+            196,
 
           padding:
-            14,
+            12,
+
+          boxSizing:
+            "border-box",
 
           borderWidth:
             1,
@@ -69,7 +72,10 @@ export default function HomeContinueWorkingSection({
             6,
 
           background:
-            theme.bgSurface,
+            theme.bgElevated,
+
+          boxShadow:
+            theme.shadowStrong,
 
           color:
             theme.textMuted,
@@ -91,10 +97,10 @@ export default function HomeContinueWorkingSection({
       <section
         style={{
           minHeight:
-            260,
+            196,
 
           padding:
-            14,
+            12,
 
           boxSizing:
             "border-box",
@@ -106,7 +112,7 @@ export default function HomeContinueWorkingSection({
             "space-between",
 
           gap:
-            18,
+            12,
 
           borderWidth:
             1,
@@ -121,7 +127,10 @@ export default function HomeContinueWorkingSection({
             6,
 
           background:
-            theme.bgSurface,
+            theme.bgElevated,
+
+          boxShadow:
+            `${theme.shadowStrong}, inset 0 1px 0 rgba(255,255,255,0.025)`,
         }}
       >
         <HomeSectionHeader
@@ -139,7 +148,7 @@ export default function HomeContinueWorkingSection({
               "grid",
 
             gap:
-              8,
+              6,
 
             justifyItems:
               "start",
@@ -151,7 +160,7 @@ export default function HomeContinueWorkingSection({
                 theme.textPrimary,
 
               fontSize:
-                15,
+                14,
 
               fontWeight:
                 700,
@@ -163,20 +172,17 @@ export default function HomeContinueWorkingSection({
 
           <div
             style={{
-              maxWidth:
-                420,
-
               color:
                 theme.textMuted,
 
               fontSize:
-                11,
+                10,
 
               lineHeight:
-                1.45,
+                1.4,
             }}
           >
-            Create an assessment and your most recently edited work will appear here.
+            Your most recently edited assessment will appear here.
           </div>
 
 
@@ -217,7 +223,7 @@ export default function HomeContinueWorkingSection({
                 "none",
 
               fontSize:
-                11,
+                10.5,
 
               fontWeight:
                 600,
@@ -249,10 +255,10 @@ export default function HomeContinueWorkingSection({
           0,
 
         minHeight:
-          260,
+          196,
 
         padding:
-          14,
+          "11px 12px 11px 15px",
 
         boxSizing:
           "border-box",
@@ -270,7 +276,7 @@ export default function HomeContinueWorkingSection({
           "space-between",
 
         gap:
-          18,
+          9,
 
         borderWidth:
           1,
@@ -293,14 +299,19 @@ export default function HomeContinueWorkingSection({
             135deg,
             color-mix(
               in srgb,
-              ${courseAccent} 10%,
-              ${theme.bgSection}
+              ${courseAccent} 9%,
+              ${theme.bgElevated}
             ) 0%,
-            ${theme.bgSurface} 64%
+            ${theme.bgElevated} 54%,
+            color-mix(
+              in srgb,
+              ${theme.bgElevated} 76%,
+              ${theme.bgSurface}
+            ) 100%
           )`,
 
         boxShadow:
-          theme.shadow,
+          `${theme.shadowStrong}, inset 0 1px 0 rgba(255,255,255,0.025)`,
       }}
     >
       <div
@@ -344,7 +355,13 @@ export default function HomeContinueWorkingSection({
             0,
 
           display:
-            "grid",
+            "flex",
+
+          alignItems:
+            "flex-start",
+
+          justifyContent:
+            "space-between",
 
           gap:
             10,
@@ -356,36 +373,102 @@ export default function HomeContinueWorkingSection({
               0,
 
             display:
-              "flex",
-
-            alignItems:
-              "flex-start",
-
-            justifyContent:
-              "space-between",
+              "grid",
 
             gap:
-              12,
+              3,
           }}
         >
+          <div
+            title={
+              getHomeAssessmentName(
+                assessment
+              )
+            }
+            style={{
+              minWidth:
+                0,
+
+              overflow:
+                "hidden",
+
+              color:
+                theme.textPrimary,
+
+              fontSize:
+                15,
+
+              fontWeight:
+                700,
+
+              lineHeight:
+                1.2,
+
+              whiteSpace:
+                "nowrap",
+
+              textOverflow:
+                "ellipsis",
+            }}
+          >
+            {getHomeAssessmentName(
+              assessment
+            )}
+          </div>
+
+
           <div
             style={{
               minWidth:
                 0,
 
               display:
-                "grid",
+                "flex",
+
+              alignItems:
+                "center",
 
               gap:
                 5,
+
+              color:
+                courseAccent,
+
+              fontSize:
+                10,
+
+              fontWeight:
+                650,
+
+              whiteSpace:
+                "nowrap",
             }}
           >
-            <div
-              title={
-                getHomeAssessmentName(
-                  assessment
-                )
-              }
+            <span
+              aria-hidden="true"
+              style={{
+                width:
+                  6,
+
+                height:
+                  6,
+
+                flexShrink:
+                  0,
+
+                borderRadius:
+                  999,
+
+                background:
+                  courseAccent,
+
+                boxShadow:
+                  `0 0 6px ${courseAccent}`,
+              }}
+            />
+
+
+            <span
               style={{
                 minWidth:
                   0,
@@ -393,294 +476,239 @@ export default function HomeContinueWorkingSection({
                 overflow:
                   "hidden",
 
-                color:
-                  theme.textPrimary,
-
-                fontSize:
-                  18,
-
-                fontWeight:
-                  700,
-
-                lineHeight:
-                  1.2,
-
-                whiteSpace:
-                  "nowrap",
-
                 textOverflow:
                   "ellipsis",
               }}
             >
-              {getHomeAssessmentName(
-                assessment
-              )}
-            </div>
-
-
-            <div
-              style={{
-                display:
-                  "flex",
-
-                alignItems:
-                  "center",
-
-                gap:
-                  6,
-
-                color:
-                  courseAccent,
-
-                fontSize:
-                  10.5,
-
-                fontWeight:
-                  650,
-              }}
-            >
-              <span
-                style={{
-                  width:
-                    6,
-
-                  height:
-                    6,
-
-                  borderRadius:
-                    999,
-
-                  background:
-                    courseAccent,
-
-                  boxShadow:
-                    `0 0 6px ${courseAccent}`,
-                }}
-              />
-
               {getHomeAssessmentCourseLabel(
                 assessment
               )}
-
-              <span
-                style={{
-                  color:
-                    theme.textMuted,
-                }}
-              >
-                ·
-              </span>
-
-              <span
-                style={{
-                  color:
-                    theme.textSecondary,
-                }}
-              >
-                {getHomeAssessmentTypeLabel(
-                  assessment
-                )}
-              </span>
-            </div>
+            </span>
 
 
-            <div
+            <span
               style={{
                 color:
                   theme.textMuted,
-
-                fontSize:
-                  10.5,
               }}
             >
-              {getHomeAssessmentClassLabel(
+              ·
+            </span>
+
+
+            <span
+              style={{
+                color:
+                  theme.textSecondary,
+              }}
+            >
+              {getHomeAssessmentTypeLabel(
                 assessment
               )}
-            </div>
+            </span>
           </div>
 
 
           <div
             style={{
-              minHeight:
-                26,
-
-              padding:
-                "5px 8px",
-
-              display:
-                "inline-flex",
-
-              alignItems:
-                "center",
-
-              gap:
-                6,
-
-              borderWidth:
-                1,
-
-              borderStyle:
-                "solid",
-
-              borderColor:
-                theme.borderStandard,
-
-              borderRadius:
-                6,
-
-              background:
-                theme.bgElevated,
-
               color:
-                complete
-                  ? theme.success
-                  : theme.textSecondary,
-
-              boxShadow:
-                theme.shadow,
+                theme.textMuted,
 
               fontSize:
-                10,
-
-              fontWeight:
-                700,
-
-              whiteSpace:
-                "nowrap",
+                9.5,
             }}
           >
-            <span
-              style={{
-                width:
-                  6,
-
-                height:
-                  6,
-
-                borderRadius:
-                  999,
-
-                background:
-                  complete
-                    ? theme.success
-                    : theme.accentPrimary,
-
-                boxShadow:
-                  complete
-                    ? `0 0 0 2px ${theme.successSoft}`
-                    : `0 0 0 2px ${theme.accentSoft}`,
-              }}
-            />
-
-            {complete
-              ? "Complete"
-              : "Draft"}
+            {getHomeAssessmentClassLabel(
+              assessment
+            )}
           </div>
         </div>
 
 
         <div
           style={{
+            minHeight:
+              24,
+
+            padding:
+              "4px 7px",
+
+            flexShrink:
+              0,
+
             display:
-              "grid",
+              "inline-flex",
+
+            alignItems:
+              "center",
 
             gap:
-              6,
+              5,
+
+            borderWidth:
+              1,
+
+            borderStyle:
+              "solid",
+
+            borderColor:
+              theme.borderStandard,
+
+            borderRadius:
+              5,
+
+            background:
+              theme.bgSection,
+
+            color:
+              complete
+                ? theme.success
+                : theme.textSecondary,
+
+            boxShadow:
+              theme.shadow,
+
+            fontSize:
+              9.5,
+
+            fontWeight:
+              700,
+
+            whiteSpace:
+              "nowrap",
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              width:
+                6,
+
+              height:
+                6,
+
+              borderRadius:
+                999,
+
+              background:
+                complete
+                  ? theme.success
+                  : theme.accentPrimary,
+
+              boxShadow:
+                complete
+                  ? `0 0 0 2px ${theme.successSoft}`
+                  : `0 0 0 2px ${theme.accentSoft}`,
+            }}
+          />
+
+          {complete
+            ? "Complete"
+            : "Draft"}
+        </div>
+      </div>
+
+
+      <div
+        style={{
+          display:
+            "grid",
+
+          gap:
+            5,
+        }}
+      >
+        <div
+          style={{
+            display:
+              "flex",
+
+            alignItems:
+              "baseline",
+
+            justifyContent:
+              "space-between",
+
+            gap:
+              10,
+          }}
+        >
+          <span
+            style={{
+              color:
+                theme.textSecondary,
+
+              fontSize:
+                9.5,
+
+              fontWeight:
+                600,
+            }}
+          >
+            Assessment progress
+          </span>
+
+
+          <span
+            style={{
+              color:
+                theme.textMuted,
+
+              fontSize:
+                9,
+
+              fontVariantNumeric:
+                "tabular-nums",
+            }}
+          >
+            {progress.assignedMarks}
+            {" / "}
+            {progress.targetMarks}
+            {" marks · "}
+            {Math.round(
+              progress.progressPct
+            )}
+            %
+          </span>
+        </div>
+
+
+        <div
+          style={{
+            height:
+              4,
+
+            overflow:
+              "hidden",
+
+            borderRadius:
+              4,
+
+            background:
+              theme.borderStandard,
           }}
         >
           <div
             style={{
-              display:
-                "flex",
+              width:
+                `${progress.progressPct}%`,
 
-              alignItems:
-                "baseline",
-
-              justifyContent:
-                "space-between",
-
-              gap:
-                10,
-            }}
-          >
-            <span
-              style={{
-                color:
-                  theme.textSecondary,
-
-                fontSize:
-                  10.5,
-
-                fontWeight:
-                  600,
-              }}
-            >
-              Assessment progress
-            </span>
-
-
-            <span
-              style={{
-                color:
-                  theme.textMuted,
-
-                fontSize:
-                  10,
-
-                fontVariantNumeric:
-                  "tabular-nums",
-              }}
-            >
-              {progress.assignedMarks}
-              {" / "}
-              {progress.targetMarks}
-              {" marks · "}
-              {Math.round(
-                progress.progressPct
-              )}
-              %
-            </span>
-          </div>
-
-
-          <div
-            style={{
               height:
-                5,
-
-              overflow:
-                "hidden",
+                "100%",
 
               borderRadius:
-                5,
+                4,
 
               background:
-                theme.borderStandard,
+                theme.success,
+
+              boxShadow:
+                `0 0 7px ${theme.successSoft}`,
+
+              transition:
+                "width 180ms ease",
             }}
-          >
-            <div
-              style={{
-                width:
-                  `${progress.progressPct}%`,
-
-                height:
-                  "100%",
-
-                borderRadius:
-                  5,
-
-                background:
-                  theme.success,
-
-                boxShadow:
-                  `0 0 7px ${theme.successSoft}`,
-
-                transition:
-                  "width 180ms ease",
-              }}
-            />
-          </div>
+          />
         </div>
       </div>
 
@@ -694,13 +722,13 @@ export default function HomeContinueWorkingSection({
         }
         style={{
           height:
-            32,
+            29,
 
           width:
             "fit-content",
 
           padding:
-            "0 11px",
+            "0 9px",
 
           display:
             "inline-flex",
@@ -712,7 +740,7 @@ export default function HomeContinueWorkingSection({
             "center",
 
           gap:
-            7,
+            6,
 
           borderWidth:
             1,
@@ -724,7 +752,7 @@ export default function HomeContinueWorkingSection({
             theme.controlSelectedBorder,
 
           borderRadius:
-            6,
+            5,
 
           background:
             theme.controlSelectedBg,
@@ -736,7 +764,7 @@ export default function HomeContinueWorkingSection({
             "none",
 
           fontSize:
-            11,
+            10,
 
           fontWeight:
             650,

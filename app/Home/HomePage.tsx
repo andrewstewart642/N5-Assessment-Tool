@@ -160,13 +160,26 @@ export default function HomePage() {
           "100%",
 
         padding:
-          "24px 16px",
+          "26px 20px 36px",
 
         boxSizing:
           "border-box",
 
         background:
-          theme.bgPage,
+          `linear-gradient(
+            180deg,
+            color-mix(
+              in srgb,
+              ${theme.bgSection} 82%,
+              ${theme.bgPage}
+            ) 0%,
+            color-mix(
+              in srgb,
+              ${theme.bgSection} 58%,
+              ${theme.bgPage}
+            ) 44%,
+            ${theme.bgPage} 100%
+          )`,
 
         color:
           theme.textPrimary,
@@ -190,32 +203,10 @@ export default function HomePage() {
             "grid",
 
           gap:
-            12,
+            24,
         }}
       >
         <HomePageHeader
-          theme={
-            theme
-          }
-        />
-
-
-        <HomeForYouSection
-          assessments={
-            assessments
-          }
-          classes={
-            classes
-          }
-          hasLoaded={
-            everythingHasLoaded
-          }
-          today={
-            today
-          }
-          getCourseColour={
-            getCourseColour
-          }
           theme={
             theme
           }
@@ -231,29 +222,67 @@ export default function HomePage() {
               "grid",
 
             gridTemplateColumns:
-              "minmax(0, 0.92fr) minmax(520px, 1.08fr)",
+              "minmax(380px, 0.8fr) minmax(560px, 1.2fr)",
 
             gap:
-              12,
+              18,
 
             alignItems:
               "stretch",
           }}
         >
-          <HomeContinueWorkingSection
-            assessment={
-              recentAssessment
-            }
-            courseAccent={
-              recentAssessmentAccent
-            }
-            hasLoaded={
-              assessmentsHaveLoaded
-            }
-            theme={
-              theme
-            }
-          />
+          <div
+            style={{
+              minWidth:
+                0,
+
+              display:
+                "grid",
+
+              alignContent:
+                "start",
+
+              gap:
+                18,
+            }}
+          >
+            <HomeForYouSection
+              assessments={
+                assessments
+              }
+              classes={
+                classes
+              }
+              hasLoaded={
+                everythingHasLoaded
+              }
+              today={
+                today
+              }
+              getCourseColour={
+                getCourseColour
+              }
+              theme={
+                theme
+              }
+            />
+
+
+            <HomeContinueWorkingSection
+              assessment={
+                recentAssessment
+              }
+              courseAccent={
+                recentAssessmentAccent
+              }
+              hasLoaded={
+                assessmentsHaveLoaded
+              }
+              theme={
+                theme
+              }
+            />
+          </div>
 
 
           <HomeUpcomingAssessmentsCalendar
@@ -282,13 +311,13 @@ export default function HomePage() {
               "grid",
 
             gridTemplateColumns:
-              "minmax(0, 1.35fr) minmax(300px, 0.65fr)",
+              "minmax(0, 1fr) minmax(360px, 420px)",
 
             gap:
-              12,
+              24,
 
             alignItems:
-              "stretch",
+              "start",
           }}
         >
           <HomeMyClassesOverviewSection
