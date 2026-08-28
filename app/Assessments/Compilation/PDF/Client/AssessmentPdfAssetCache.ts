@@ -2,6 +2,10 @@ import type {
   SavedAssessment,
 } from "@/app/Assessments/SavedAssessments/SavedAssessment";
 
+import {
+  resolveSavedAssessmentCourseIdentity,
+} from "@/app/Assessments/SavedAssessments/CourseIdentity";
+
 
 export type AssessmentPdfAsset = {
   key:
@@ -59,9 +63,20 @@ function getAssessmentPdfCacheKey(
   savedAssessment:
     SavedAssessment
 ): string {
+  const courseIdentity =
+    resolveSavedAssessmentCourseIdentity({
+      courseId:
+        savedAssessment.setup.courseId,
+
+      courseIdentityVersion:
+        savedAssessment.setup.courseIdentityVersion,
+    });
+
   return [
     savedAssessment.id,
     savedAssessment.updatedAt,
+    courseIdentity.courseId,
+    courseIdentity.courseIdentityVersion,
   ].join(
     ":"
   );
@@ -229,7 +244,7 @@ async function generateAssessmentPdfAsset(
 
   if (
     blob.size <=
-    0
+      0
   ) {
     throw new Error(
       "The generated assessment PDF was empty."
@@ -330,7 +345,7 @@ export function getAssessmentPdfAsset(
 ): Promise<AssessmentPdfAsset> {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return Promise.reject(
       new Error(
@@ -395,10 +410,9 @@ export function getAssessmentPdfAsset(
           key
         );
 
-
       if (
         current?.promise ===
-        promise
+          promise
       ) {
         pdfAssetCache.delete(
           key
@@ -425,7 +439,7 @@ export function invalidateAssessmentPdfAsset(
   ) {
     if (
       entry.assessmentId !==
-      assessmentId
+        assessmentId
     ) {
       continue;
     }
