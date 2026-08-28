@@ -4,6 +4,8 @@ import {
 } from "@/app/Courses/CourseRegistry";
 
 import {
+  getDefaultCourseId,
+  isCourseAvailable,
   normaliseCourseId,
 } from "@/app/Courses/CourseCatalog";
 
@@ -24,19 +26,42 @@ import type {
 export const ACTIVE_COURSE_ID_STORAGE_KEY =
   "assessment_builder_active_course_id_v1";
 
+function getSafeSelectableCourseId(
+  value:
+    unknown
+): CourseId {
+  const courseId =
+    normaliseCourseId(
+      value
+    );
+
+  if (
+    courseId &&
+    isCourseAvailable(
+      courseId
+    )
+  ) {
+    return courseId;
+  }
+
+  return getDefaultCourseId();
+}
+
 export function saveSelectedCourseId(
   courseId: CourseId
 ): void {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return;
   }
 
   window.localStorage.setItem(
     ACTIVE_COURSE_ID_STORAGE_KEY,
-    courseId
+    getSafeSelectableCourseId(
+      courseId
+    )
   );
 }
 
@@ -44,22 +69,31 @@ export function getSelectedCourseConfig():
   CourseAssessmentConfig {
   if (
     typeof window !==
-    "undefined"
+      "undefined"
   ) {
-    const storedCourseId =
-      normaliseCourseId(
-        window.localStorage.getItem(
-          ACTIVE_COURSE_ID_STORAGE_KEY
-        )
+    const storedValue =
+      window.localStorage.getItem(
+        ACTIVE_COURSE_ID_STORAGE_KEY
+      );
+
+    const safeCourseId =
+      getSafeSelectableCourseId(
+        storedValue
       );
 
     if (
-      storedCourseId
+      safeCourseId !==
+        storedValue
     ) {
-      return getCourseAssessmentConfigById(
-        storedCourseId
+      window.localStorage.setItem(
+        ACTIVE_COURSE_ID_STORAGE_KEY,
+        safeCourseId
       );
     }
+
+    return getCourseAssessmentConfigById(
+      safeCourseId
+    );
   }
 
   return getDefaultCourseAssessmentConfig();
