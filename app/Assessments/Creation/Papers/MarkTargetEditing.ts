@@ -18,13 +18,13 @@ import type {
 import {
   getAssessmentPapers,
   getDefaultTargetMarksForAssessmentPaper,
-} from "./AssessmentPaperRules";
+} from "./PaperRules";
 
 import {
   buildDefaultAssessmentTargetMarksByPaper,
   normaliseAssessmentTargetMarksByPaper,
   type AssessmentTargetMarksByPaper,
-} from "./AssessmentPaperTargets";
+} from "./MarkTargetCalculations";
 
 type UseAssessmentPaperTargetStateArgs = {
   courseConfig:

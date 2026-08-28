@@ -13,16 +13,16 @@ import type {
 
 import {
   getAssessmentPapers,
-} from "../Papers/AssessmentPaperRules";
+} from "../Papers/PaperRules";
 
 import {
   calculateAssessmentPaperDurationMinutes,
-} from "../Papers/AssessmentPaperTiming";
+} from "../Papers/TimeCalculations";
 
 import {
   getAssessmentPaperNumberValue,
   type AssessmentPaperNumberMap,
-} from "../Papers/AssessmentPaperValueMaps";
+} from "../Papers/PaperSpecificValues";
 
 type QuestionsByPaper =
   Partial<

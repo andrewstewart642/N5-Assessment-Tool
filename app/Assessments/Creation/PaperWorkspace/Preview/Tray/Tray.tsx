@@ -10,7 +10,7 @@ import type {
 
 import type {
   AssessmentPaperStringMap,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+} from "@/app/Assessments/Creation/Papers/PaperSpecificValues";
 
 import type {
   AppTheme,
@@ -18,19 +18,19 @@ import type {
 
 import type {
   AssessmentPreviewViewMode,
-} from "../../PreviewViewMode";
+} from "../../ViewMode";
 
 import type {
   PaperSittingOption,
-} from "./PaperSittingControls";
+} from "./ScheduleEditor";
 
 import PreviewTrayTab, {
   PREVIEW_TRAY_TAB_WIDTH,
-} from "./PreviewTrayTab";
+} from "./Tab";
 
-import SettingsTrayContent from "./SettingsTrayContent";
+import SettingsTrayContent from "./SettingsTab";
 
-import ViewTrayContent from "./ViewTrayContent";
+import ViewTrayContent from "./ViewTab";
 
 
 type PreviewTraySection =

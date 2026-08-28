@@ -37,7 +37,7 @@ import {
   getAssessmentPaperConfig,
   getAssessmentPaperLabel,
   isAssessmentPaperSuitable,
-} from "../Papers/AssessmentPaperRules";
+} from "../Papers/PaperRules";
 
 import {
   applyAssessmentQuestionSpacingBase,

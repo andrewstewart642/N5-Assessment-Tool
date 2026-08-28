@@ -6,7 +6,7 @@ import {
 
 import type {
   AssessmentPreviewViewMode,
-} from "./PreviewViewMode";
+} from "./ViewMode";
 
 export function usePreviewViewMode() {
   const [

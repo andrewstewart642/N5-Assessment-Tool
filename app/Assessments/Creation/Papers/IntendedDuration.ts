@@ -8,19 +8,19 @@ import type {
 
 import type {
   AssessmentTargetMarksByPaper,
-} from "./AssessmentPaperTargets";
+} from "./MarkTargetCalculations";
 
 import {
   getAssessmentPapers,
-} from "./AssessmentPaperRules";
+} from "./PaperRules";
 
 import {
   calculateAssessmentPaperDurationMinutes,
-} from "./AssessmentPaperTiming";
+} from "./TimeCalculations";
 
 import type {
   AssessmentPaperNumberMap,
-} from "./AssessmentPaperValueMaps";
+} from "./PaperSpecificValues";
 
 
 type BuildAssessmentPaperIntendedDurationArgs = {

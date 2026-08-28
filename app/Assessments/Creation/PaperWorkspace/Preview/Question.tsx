@@ -24,7 +24,7 @@ import {
 
 import type {
   AssessmentPreviewRenderById,
-} from "./AssessmentPreviewTypes";
+} from "./PageData";
 
 type AssessmentPreviewQuestionProps = {
   globalIndex:

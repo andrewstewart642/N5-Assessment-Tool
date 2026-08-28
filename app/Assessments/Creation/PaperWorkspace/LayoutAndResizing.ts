@@ -20,7 +20,7 @@ import {
   ASSESSMENT_WORKSPACE_MIN_LEFT_PANE_RATIO,
   ASSESSMENT_WORKSPACE_MIN_PREVIEW_HEIGHT,
   ASSESSMENT_WORKSPACE_TOP_BAR_HEIGHT,
-} from "./AssessmentWorkspaceLayout";
+} from "./Dimensions";
 
 function clampNumber(
   value: number,

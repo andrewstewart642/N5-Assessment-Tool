@@ -13,7 +13,7 @@ import {
 
 import type {
   AssessmentPreviewViewMode,
-} from "../../PreviewViewMode";
+} from "../../ViewMode";
 
 type AssessmentViewModeControlProps = {
   value:

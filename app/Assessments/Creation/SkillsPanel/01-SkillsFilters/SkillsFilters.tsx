@@ -8,7 +8,7 @@ import {
 import {
   getAssessmentPaperConfig,
   getAssessmentPapers,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperRules";
+} from "@/app/Assessments/Creation/Papers/PaperRules";
 
 import type {
   Paper,

@@ -17,7 +17,7 @@ import {
 import {
   getAssessmentPaperConfig,
   getAssessmentPapers,
-} from "../Papers/AssessmentPaperRules";
+} from "../Papers/PaperRules";
 
 import {
   TOP_BAR_CONTROL_HEIGHT,

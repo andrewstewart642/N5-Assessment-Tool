@@ -17,7 +17,7 @@ import {
   getAssessmentStructure,
   getDefaultAssessmentPaper,
   getDefaultTargetMarksForAssessmentPaper,
-} from "./AssessmentPaperRules";
+} from "./PaperRules";
 
 export type AssessmentTargetMarksByPaper =
   Partial<

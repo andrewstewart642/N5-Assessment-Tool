@@ -16,7 +16,7 @@ import type {
 
 import {
   getAssessmentPapers,
-} from "./AssessmentPaperRules";
+} from "./PaperRules";
 
 import {
   buildAssessmentPaperValueMap,
@@ -26,7 +26,7 @@ import {
   type AssessmentPaperBooleanMap,
   type AssessmentPaperStringMap,
   type AssessmentPaperStringSetterMap,
-} from "./AssessmentPaperValueMaps";
+} from "./PaperSpecificValues";
 
 
 type StringSetter =

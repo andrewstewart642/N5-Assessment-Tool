@@ -14,12 +14,12 @@ import type {
   AssessmentEditQuestionDraft,
 } from "../../Questions/DraftTypes";
 
-import AssessmentPreviewQuestion from "./AssessmentPreviewQuestion";
+import AssessmentPreviewQuestion from "./Question";
 
 import type {
   AssessmentPreviewPage,
   AssessmentPreviewRenderById,
-} from "./AssessmentPreviewTypes";
+} from "./PageData";
 
 const National5MathsQuestionPage =
   National5MathsCourseDocuments.QuestionPage;

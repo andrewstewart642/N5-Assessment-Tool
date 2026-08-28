@@ -12,7 +12,7 @@ import {
 
 import type {
   AssessmentPreviewPage,
-} from "./AssessmentPreviewTypes";
+} from "./PageData";
 
 const ASSESSMENT_PREVIEW_A4_CONTENT_HEIGHT_PX =
   980;

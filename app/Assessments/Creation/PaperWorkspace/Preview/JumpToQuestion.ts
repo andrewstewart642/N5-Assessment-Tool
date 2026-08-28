@@ -8,7 +8,7 @@ import type {
 
 import type {
   AssessmentPreviewPage,
-} from "./AssessmentPreviewTypes";
+} from "./PageData";
 
 type PendingJumpRef = {
   current:

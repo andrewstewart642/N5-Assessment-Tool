@@ -6,7 +6,7 @@ import {
 import {
   formatAssessmentPaperSuitability,
   isAssessmentPaperSuitable,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperRules";
+} from "@/app/Assessments/Creation/Papers/PaperRules";
 
 import {
   conceptMatchesThinkingTypeFilter,

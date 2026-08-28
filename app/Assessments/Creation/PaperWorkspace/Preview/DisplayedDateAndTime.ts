@@ -9,7 +9,7 @@ import type {
 import {
   getAssessmentPaperStringValue,
   type AssessmentPaperStringMap,
-} from "../../Papers/AssessmentPaperValueMaps";
+} from "../../Papers/PaperSpecificValues";
 
 import {
   buildAssessmentTimeRange,

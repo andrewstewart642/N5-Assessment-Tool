@@ -13,12 +13,12 @@ import type {
 import {
   buildAssessmentPreviewPages,
   buildAssessmentPreviewQuestionPages,
-} from "./AssessmentPreviewPagination";
+} from "./Pagination";
 
 import type {
   AssessmentPreviewPage,
   AssessmentPreviewRenderById,
-} from "./AssessmentPreviewTypes";
+} from "./PageData";
 
 type UseAssessmentPreviewPagesArgs = {
   assignedForView:

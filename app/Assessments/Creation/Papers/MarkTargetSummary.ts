@@ -10,7 +10,7 @@ import {
   buildAssessmentTargetMarksByPaperFromValues,
   getIncludedAssessmentPapersFromTargets,
   type AssessmentTargetMarksByPaper,
-} from "./AssessmentPaperTargets";
+} from "./MarkTargetCalculations";
 
 type UseAssessmentPaperTargetsArgs = {
   targetMarksByPaper:

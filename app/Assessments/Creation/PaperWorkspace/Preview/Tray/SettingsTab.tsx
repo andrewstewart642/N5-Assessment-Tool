@@ -4,7 +4,7 @@ import type {
 
 import type {
   AssessmentPaperStringMap,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+} from "@/app/Assessments/Creation/Papers/PaperSpecificValues";
 
 import type {
   AppTheme,
@@ -16,9 +16,9 @@ import {
 
 import PaperSittingControls, {
   type PaperSittingOption,
-} from "./PaperSittingControls";
+} from "./ScheduleEditor";
 
-import PreviewTrayToggleRow from "./PreviewTrayToggleRow";
+import PreviewTrayToggleRow from "./ToggleRow";
 
 
 type SettingsTrayContentProps = {

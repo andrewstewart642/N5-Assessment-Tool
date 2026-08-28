@@ -39,76 +39,76 @@ import {
 
 import {
   ASSESSMENT_WORKSPACE_DIVIDER_WIDTH_PX,
-} from "./PaperWorkspace/AssessmentWorkspaceLayout";
+} from "./PaperWorkspace/Dimensions";
 
-import AssessmentPaperWorkspace from "./PaperWorkspace/AssessmentPaperWorkspace";
+import AssessmentPaperWorkspace from "./PaperWorkspace/Workspace";
 
-import WorkspaceDivider from "./PaperWorkspace/WorkspaceDivider";
+import WorkspaceDivider from "./PaperWorkspace/Divider";
 
 import {
   useAssessmentPreviewJumpNavigation,
-} from "./PaperWorkspace/Preview/useAssessmentPreviewJumpNavigation";
+} from "./PaperWorkspace/Preview/JumpToQuestion";
 
 import {
   useAssessmentPaperPrintMetadata,
-} from "./PaperWorkspace/Preview/useAssessmentPaperPrintMetadata";
+} from "./PaperWorkspace/Preview/PrintedPaperDetails";
 
 import {
   useAssessmentPaperViewMetadata,
-} from "./PaperWorkspace/Preview/useAssessmentPaperViewMetadata";
+} from "./PaperWorkspace/Preview/DisplayedDateAndTime";
 
 import {
   useAssessmentPreviewPages,
-} from "./PaperWorkspace/Preview/useAssessmentPreviewPages";
+} from "./PaperWorkspace/Preview/PageAssembly";
 
 import {
   useAssessmentPreviewViewport,
-} from "./PaperWorkspace/Preview/useAssessmentPreviewViewport";
+} from "./PaperWorkspace/Preview/ZoomAndPageTracking";
 
 import {
   useAssessmentWorkspaceLayout,
-} from "./PaperWorkspace/useAssessmentWorkspaceLayout";
+} from "./PaperWorkspace/LayoutAndResizing";
 
 import {
   useBuilderWorkspaceDocumentLock,
-} from "./PaperWorkspace/useBuilderWorkspaceDocumentLock";
+} from "./PaperWorkspace/PageScrollLock";
 
 import {
   useCompactPreviewContent,
-} from "./PaperWorkspace/useCompactPreviewContent";
+} from "./PaperWorkspace/CompactPreviewSpacing";
 
 import {
   usePreviewViewMode,
-} from "./PaperWorkspace/usePreviewViewMode";
+} from "./PaperWorkspace/ViewModeState";
 
 import {
   buildAssessmentPaperIntendedDurationMinutesByPaper,
-} from "./Papers/AssessmentPaperIntendedTiming";
+} from "./Papers/IntendedDuration";
 
 import {
   getAssessmentPaperLabel,
   getAssessmentPapers,
-} from "./Papers/AssessmentPaperRules";
+} from "./Papers/PaperRules";
 
 import {
   useAssessmentPaperAutomaticTiming,
-} from "./Papers/useAssessmentPaperAutomaticTiming";
+} from "./Papers/AutomaticEndTimes";
 
 import {
   useAssessmentPaperSittingState,
-} from "./Papers/useAssessmentPaperSittingState";
+} from "./Papers/SittingSchedule";
 
 import {
   useAssessmentPaperTargets,
-} from "./Papers/useAssessmentPaperTargets";
+} from "./Papers/useMarkTargetCalculations";
 
 import {
   useAssessmentPaperTargetState,
-} from "./Papers/useAssessmentPaperTargetState";
+} from "./Papers/MarkTargetEditing";
 
 import {
   useAssessmentPaperSelection,
-} from "./Papers/useAssessmentPaperSelection";
+} from "./Papers/ActiveAndViewedPaper";
 
 import {
   getAssessmentCreationCourseConfig,

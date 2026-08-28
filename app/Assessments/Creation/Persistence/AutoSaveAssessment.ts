@@ -22,11 +22,11 @@ import type {
 import type {
   AssessmentPaperBooleanMap,
   AssessmentPaperStringMap,
-} from "../Papers/AssessmentPaperValueMaps";
+} from "../Papers/PaperSpecificValues";
 
 import type {
   AssessmentTargetMarksByPaper,
-} from "../Papers/AssessmentPaperTargets";
+} from "../Papers/MarkTargetCalculations";
 
 import type {
   AssessmentEditQuestionDraftByPaper,

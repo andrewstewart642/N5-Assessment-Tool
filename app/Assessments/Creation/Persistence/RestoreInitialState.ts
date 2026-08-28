@@ -23,13 +23,13 @@ import {
   ASSESSMENT_WORKSPACE_DEFAULT_HUD_HEIGHT,
   ASSESSMENT_WORKSPACE_MAX_LEFT_PANE_RATIO,
   ASSESSMENT_WORKSPACE_MIN_LEFT_PANE_RATIO,
-} from "../PaperWorkspace/AssessmentWorkspaceLayout";
+} from "../PaperWorkspace/Dimensions";
 
 import {
   buildAssessmentTargetMarksByPaperFromSetupTargets,
   getInitialAssessmentPaperForStructure,
   type AssessmentTargetMarksByPaper,
-} from "../Papers/AssessmentPaperTargets";
+} from "../Papers/MarkTargetCalculations";
 
 import {
   getAssessmentQuestionSpacingBasePx,

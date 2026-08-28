@@ -10,7 +10,7 @@ import {
   UI_TEXT,
 } from "@/app/UI/Application/Typography/Typography";
 
-import PreviewTrayToggleRow from "./PreviewTrayToggleRow";
+import PreviewTrayToggleRow from "./ToggleRow";
 
 type ViewWorkspaceControlsProps = {
   theme:

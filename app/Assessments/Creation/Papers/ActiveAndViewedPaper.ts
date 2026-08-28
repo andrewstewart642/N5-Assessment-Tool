@@ -16,7 +16,7 @@ import type {
 
 import {
   getDefaultAssessmentPaper,
-} from "./AssessmentPaperRules";
+} from "./PaperRules";
 
 type UseAssessmentPaperSelectionArgs = {
   courseConfig:

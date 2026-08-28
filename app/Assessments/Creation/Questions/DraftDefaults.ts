@@ -9,7 +9,7 @@ import type {
 
 import {
   getAssessmentPapers,
-} from "../Papers/AssessmentPaperRules";
+} from "../Papers/PaperRules";
 
 type AssessmentEditQuestionDraft =
   | null

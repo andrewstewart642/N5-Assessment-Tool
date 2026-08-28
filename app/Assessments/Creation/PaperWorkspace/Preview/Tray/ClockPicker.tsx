@@ -9,7 +9,7 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
-import PreviewTraySegmentedControl from "./PreviewTraySegmentedControl";
+import PreviewTraySegmentedControl from "./SegmentedControl";
 
 import {
   buildHour24FromClock,
@@ -18,7 +18,7 @@ import {
   getClockMeridiem,
   parsePaperSittingTime,
   type PaperSittingTimeParts,
-} from "./PaperSittingTimeUtils";
+} from "./TimeParsingAndFormatting";
 
 
 type ClockHand =

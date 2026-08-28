@@ -7,7 +7,7 @@ import type {
   AssessmentPaperBooleanMap,
   AssessmentPaperNumberMap,
   AssessmentPaperStringMap,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+} from "@/app/Assessments/Creation/Papers/PaperSpecificValues";
 
 import type {
   SavedAssessment,

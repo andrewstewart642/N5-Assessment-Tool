@@ -16,7 +16,7 @@ import {
 
 import type {
   AssessmentPreviewPage,
-} from "./AssessmentPreviewTypes";
+} from "./PageData";
 
 type PreviewPaneRef = {
   current:

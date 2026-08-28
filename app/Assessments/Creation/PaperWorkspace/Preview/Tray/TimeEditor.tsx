@@ -16,7 +16,7 @@ import {
   UI_TEXT,
 } from "@/app/UI/Application/Typography/Typography";
 
-import PreviewTraySegmentedControl from "./PreviewTraySegmentedControl";
+import PreviewTraySegmentedControl from "./SegmentedControl";
 
 import {
   buildHour24FromClock,
@@ -27,7 +27,7 @@ import {
   getPaperSittingTimeDraft,
   parsePaperSittingTime,
   type PaperSittingTimeParts,
-} from "./PaperSittingTimeUtils";
+} from "./TimeParsingAndFormatting";
 
 
 type ActiveTimeField =

@@ -12,7 +12,7 @@ import type {
 
 import {
   getAssessmentPaperConfig,
-} from "../../Papers/AssessmentPaperRules";
+} from "../../Papers/PaperRules";
 
 type UseAssessmentPaperPrintMetadataArgs = {
   paper:

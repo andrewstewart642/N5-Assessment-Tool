@@ -3,7 +3,7 @@ import type {
   RefObject,
 } from "react";
 
-import AssessmentPreviewPageRenderer from "./AssessmentPreviewPageRenderer";
+import AssessmentPreviewPageRenderer from "./PageRenderer";
 
 import type {
   Paper,
@@ -24,7 +24,7 @@ import type {
 import type {
   AssessmentPreviewPage,
   AssessmentPreviewRenderById,
-} from "./AssessmentPreviewTypes";
+} from "./PageData";
 
 type AssessmentPreviewPaneProps = {
   theme: AppTheme;

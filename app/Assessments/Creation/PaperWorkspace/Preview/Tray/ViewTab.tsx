@@ -8,11 +8,11 @@ import {
 
 import type {
   AssessmentPreviewViewMode,
-} from "../../PreviewViewMode";
+} from "../../ViewMode";
 
-import AssessmentViewModeControl from "./AssessmentViewModeControl";
+import AssessmentViewModeControl from "./ViewModeSelector";
 
-import ViewWorkspaceControls from "./ViewWorkspaceControls";
+import ViewWorkspaceControls from "./WorkspaceControls";
 
 type ViewTrayContentProps = {
   theme:

@@ -9,11 +9,11 @@ import type {
 
 import {
   getAssessmentPapers,
-} from "./AssessmentPaperRules";
+} from "./PaperRules";
 
 import {
   calculateAssessmentPaperEndTimeFromDuration,
-} from "./AssessmentPaperTiming";
+} from "./TimeCalculations";
 
 import {
   getAssessmentPaperBooleanValue,
@@ -24,7 +24,7 @@ import {
   type AssessmentPaperNumberMap,
   type AssessmentPaperStringMap,
   type AssessmentPaperStringSetterMap,
-} from "./AssessmentPaperValueMaps";
+} from "./PaperSpecificValues";
 
 
 type UseAssessmentPaperAutomaticTimingArgs = {

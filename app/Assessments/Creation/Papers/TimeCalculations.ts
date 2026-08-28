@@ -8,7 +8,7 @@ import type {
 
 import {
   getAssessmentPaperConfig,
-} from "./AssessmentPaperRules";
+} from "./PaperRules";
 
 
 type ParsedAssessmentTime = {

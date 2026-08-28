@@ -11,11 +11,11 @@ import type {
 import type {
   AssessmentPaperBooleanMap,
   AssessmentPaperStringMap,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+} from "@/app/Assessments/Creation/Papers/PaperSpecificValues";
 
 import type {
   AssessmentTargetMarksByPaper,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperTargets";
+} from "@/app/Assessments/Creation/Papers/MarkTargetCalculations";
 
 import type {
   AssessmentEditQuestionDraftByPaper,

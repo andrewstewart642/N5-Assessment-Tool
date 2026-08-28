@@ -12,7 +12,7 @@ import {
 
 import {
   getAssessmentPaperConfig,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperRules";
+} from "@/app/Assessments/Creation/Papers/PaperRules";
 
 import type {
   DifficultyLevel,

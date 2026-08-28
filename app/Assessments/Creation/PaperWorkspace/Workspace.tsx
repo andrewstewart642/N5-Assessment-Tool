@@ -8,7 +8,7 @@ import type {
 
 import type {
   AssessmentPaperStringMap,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+} from "@/app/Assessments/Creation/Papers/PaperSpecificValues";
 
 import type {
   AppTheme,
@@ -32,31 +32,31 @@ import {
 
 import type {
   AssessmentPreviewViewMode,
-} from "./PreviewViewMode";
+} from "./ViewMode";
 
 import {
   ASSESSMENT_WORKSPACE_HUD_RESIZE_HANDLE_HEIGHT,
-} from "./AssessmentWorkspaceLayout";
+} from "./Dimensions";
 
-import AssessmentPreviewPane from "./Preview/AssessmentPreviewPane";
+import AssessmentPreviewPane from "./Preview/Pane";
 
-import AssessmentPreviewTray from "./Preview/PreviewTray/AssessmentPreviewTray";
+import AssessmentPreviewTray from "./Preview/Tray/Tray";
 
 import type {
   PaperSittingOption,
-} from "./Preview/PreviewTray/PaperSittingControls";
+} from "./Preview/Tray/ScheduleEditor";
 
-import AssessmentSaveStatusPill from "./Preview/AssessmentSaveStatusPill";
+import AssessmentSaveStatusPill from "./Preview/SaveStatusIndicator";
 
-import PreviewZoomControls from "./Preview/PreviewZoomControls";
+import PreviewZoomControls from "./Preview/ZoomControls";
 
 import {
   usePreviewChromeVisibility,
-} from "./Preview/usePreviewChromeVisibility";
+} from "./Preview/FloatingControlsVisibility";
 
 import {
   usePreviewViewportAnchor,
-} from "./Preview/usePreviewViewportAnchor";
+} from "./Preview/ScrollPositionPreservation";
 
 
 type AssessmentTopBarProps =

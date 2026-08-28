@@ -17,13 +17,13 @@ import {
 
 import type {
   AssessmentPaperStringMap,
-} from "@/app/Assessments/Creation/Papers/AssessmentPaperValueMaps";
+} from "@/app/Assessments/Creation/Papers/PaperSpecificValues";
 
-import PaperSittingDateEditor from "./PaperSittingDateEditor";
+import PaperSittingDateEditor from "./DateEditor";
 
-import PaperSittingTimeEditor from "./PaperSittingTimeEditor";
+import PaperSittingTimeEditor from "./TimeEditor";
 
-import PreviewTraySegmentedControl from "./PreviewTraySegmentedControl";
+import PreviewTraySegmentedControl from "./SegmentedControl";
 
 
 type PaperSittingEditorMode =
