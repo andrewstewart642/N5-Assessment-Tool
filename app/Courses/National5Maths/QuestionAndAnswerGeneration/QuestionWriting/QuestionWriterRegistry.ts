@@ -171,15 +171,15 @@ export function getAvailableDifficultiesForConcept(
     concept?.code ??
     selectedConcept;
 
-  const module =
+  const questionModule =
     getModule(conceptCode);
 
-  if (!module) {
+  if (!questionModule) {
     return [];
   }
 
   return [
-    ...module.metadata
+    ...questionModule.metadata
       .difficultyProfile
       .availableLevels,
   ];

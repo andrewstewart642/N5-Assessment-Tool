@@ -1235,7 +1235,7 @@ function SampleCard({
 
 
 export default function GeneratorTesterPage() {
-  const module =
+  const questionModule =
     GENERATOR_TEST_TARGET.module;
 
 
@@ -1260,7 +1260,7 @@ export default function GeneratorTesterPage() {
 
 
   const availableDifficulties =
-    module.metadata
+    questionModule.metadata
       .difficultyProfile
       .availableLevels;
 
@@ -1268,17 +1268,17 @@ export default function GeneratorTesterPage() {
   const initialConceptCode =
     GENERATOR_TEST_TARGET
       .concepts[0]?.code ??
-    module.metadata.conceptCode;
+    questionModule.metadata.conceptCode;
 
 
   const defaultDifficulty =
-    module.metadata
+    questionModule.metadata
       .difficultyProfile
       .defaultLevel;
 
 
   const defaultPaper =
-    module.metadata.capabilities
+    questionModule.metadata.capabilities
       .paperSuitability === "P2"
       ? "P2"
       : "P1";
@@ -1393,7 +1393,7 @@ export default function GeneratorTesterPage() {
 
 
             const generated =
-              module.generate(
+              questionModule.generate(
                 context
               );
 

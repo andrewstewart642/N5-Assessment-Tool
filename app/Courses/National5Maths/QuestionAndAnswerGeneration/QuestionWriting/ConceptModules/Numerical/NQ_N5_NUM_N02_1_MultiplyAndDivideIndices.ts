@@ -110,7 +110,16 @@ function generateQuestion(context: GeneratorContext): GeneratedQuestionData {
   const variable = chooseOne(["a", "b", "x", "y", "m"]);
   const isDivision = Math.random() < 0.5;
 
-  let { m, n } = buildExponents(level, isDivision);
+  const {
+  m: initialM,
+  n,
+} = buildExponents(
+  level,
+  isDivision
+);
+
+let m =
+  initialM;
 
   if (isDivision && m === n) {
     m += 1;
