@@ -1,6 +1,6 @@
-
 import {
   useEffect,
+  useRef,
   type Dispatch,
   type SetStateAction,
 } from "react";
@@ -160,9 +160,6 @@ function clampNumber(
 }
 
 function createAssessmentQuestionId(): string {
-  /*
-   * Preserve the historical ID format.
-   */
   return (
     Math.random()
       .toString(16)
@@ -289,11 +286,33 @@ export function useAssessmentCreatorInitialisation({
 
   setQuestions,
 }: UseAssessmentCreatorInitialisationArgs) {
+  const browserStorageRestoredRef =
+    useRef(false);
+
+  const setupBriefAppliedRef =
+    useRef(false);
+
+  const questionsRestoredRef =
+    useRef(false);
+
   /*
-   * Restore historical Assessment Creator
-   * browser storage.
+   * Restore historical Assessment Creator browser storage once.
+   *
+   * Some transitional setter callbacks depend on state that this hydration
+   * process itself changes. Their identities can therefore change after the
+   * first render. The explicit one-shot guard prevents those identity changes
+   * from causing the hydration effect to re-run indefinitely.
    */
   useEffect(() => {
+    if (
+      browserStorageRestoredRef.current
+    ) {
+      return;
+    }
+
+    browserStorageRestoredRef.current =
+      true;
+
     try {
       const rawPaneRatio =
         readAssessmentCreationStorageValue(
@@ -343,10 +362,6 @@ export function useAssessmentCreatorInitialisation({
             parsed
           )
         ) {
-          /*
-           * Preserve the historical initial
-           * hydration bounds.
-           */
           setHudHeight(
             clampNumber(
               parsed,
@@ -645,10 +660,7 @@ export function useAssessmentCreatorInitialisation({
         );
       }
     } catch {
-      /*
-       * Corrupt browser state must never
-       * prevent Assessment Creation loading.
-       */
+      /* Corrupt browser state must never prevent Assessment Creation loading. */
     }
   }, [
     setAssessmentDate,
@@ -676,9 +688,18 @@ export function useAssessmentCreatorInitialisation({
   ]);
 
   /*
-   * Apply the Setup-screen handoff.
+   * Apply the Setup-screen handoff once.
    */
   useEffect(() => {
+    if (
+      setupBriefAppliedRef.current
+    ) {
+      return;
+    }
+
+    setupBriefAppliedRef.current =
+      true;
+
     const brief =
       loadAssessmentSetupBrief();
 
@@ -820,10 +841,18 @@ export function useAssessmentCreatorInitialisation({
   ]);
 
   /*
-   * Restore the historical lightweight
-   * locally persisted question collection.
+   * Restore the historical lightweight locally persisted question collection once.
    */
   useEffect(() => {
+    if (
+      questionsRestoredRef.current
+    ) {
+      return;
+    }
+
+    questionsRestoredRef.current =
+      true;
+
     try {
       const raw =
         readAssessmentCreationStorageValue(
@@ -859,10 +888,7 @@ export function useAssessmentCreatorInitialisation({
         )
       );
     } catch {
-      /*
-       * Corrupt historical question state
-       * is ignored.
-       */
+      /* Corrupt historical question state is ignored. */
     }
   }, [
     setQuestions,
