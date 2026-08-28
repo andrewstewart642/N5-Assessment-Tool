@@ -7,7 +7,6 @@ import AssessmentPreviewPageRenderer from "./AssessmentPreviewPageRenderer";
 
 import type {
   Paper,
-  Question,
 } from "@/app/Assessments/AssessmentTypes";
 
 import type {

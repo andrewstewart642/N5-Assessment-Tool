@@ -152,30 +152,28 @@ export default function ClassDetailsPage({
 
 
   const coverage =
-    useMemo(
-      () =>
-        schoolClass
-          ? getCourseCoverage(
-              schoolClass.courseId,
-              schoolClass.completedConceptIds,
-              schoolClass.completedSkillIds
-            )
-          : {
-              completedSkills:
-                0,
+  useMemo(
+    () =>
+      schoolClass
+        ? getCourseCoverage(
+            schoolClass.courseId,
+            schoolClass.completedConceptIds,
+            schoolClass.completedSkillIds
+          )
+        : {
+            completedSkills:
+              0,
 
-              totalSkills:
-                0,
+            totalSkills:
+              0,
 
-              progressPct:
-                0,
-            },
-      [
-        schoolClass?.courseId,
-        schoolClass?.completedConceptIds,
-        schoolClass?.completedSkillIds,
-      ]
-    );
+            progressPct:
+              0,
+          },
+    [
+      schoolClass,
+    ]
+  );
 
 
   function handleToggleSkill(

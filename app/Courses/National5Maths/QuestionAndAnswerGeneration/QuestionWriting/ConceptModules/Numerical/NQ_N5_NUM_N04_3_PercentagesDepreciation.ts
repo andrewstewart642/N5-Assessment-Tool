@@ -1,6 +1,5 @@
 
 import type { PaperPart } from "@/app/Assessments/Questions/Content/PaperParts";
-import type { DifficultyLevel } from "@/app/Assessments/AssessmentTypes";
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
@@ -23,7 +22,7 @@ function buildMarks() {
   return { totalMarks: 3, cMarks: 3, aMarks: 0, reasoningMarks: 0 };
 }
 
-function generateQuestion(_: GeneratorContext): GeneratedQuestionData {
+function generateQuestion(): GeneratedQuestionData {
   const principal = randomInt(500, 5000);
   const rate = chooseOne([5, 8, 10, 12, 15, 20]);
   const years = randomInt(2, 5);

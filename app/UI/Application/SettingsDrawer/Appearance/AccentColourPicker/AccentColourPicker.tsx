@@ -1,7 +1,5 @@
 
 import { useMemo } from "react";
-
-import ColourSwatch from "./ColourSwatch";
 import type { Theme } from "../../../Theme/AppTheme";
 import {
   ACCENT_MAP,

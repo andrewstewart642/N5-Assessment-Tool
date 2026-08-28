@@ -12,7 +12,6 @@ import {
 import { getTheme, type Theme } from "./AppTheme";
 import type { AccentOption } from "../Colours/AccentPalette";
 import {
-  getSystemPrefersDark,
   resolveThemeMode,
   type ResolvedThemeMode,
   type ThemeModePreference,

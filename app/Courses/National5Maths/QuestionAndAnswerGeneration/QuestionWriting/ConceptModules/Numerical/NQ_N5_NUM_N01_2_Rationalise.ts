@@ -136,8 +136,6 @@ function simplifyStandaloneRationalisedForm(
 
   const finalNumeratorCoeff = rawNumeratorCoeff / commonFactor;
   const finalDenominator = denominatorRoot / commonFactor;
-  const containsSurd = inside !== 1;
-  const isFraction = finalDenominator > 1;
 
   if (inside === 1) {
     if (finalDenominator === 1) {

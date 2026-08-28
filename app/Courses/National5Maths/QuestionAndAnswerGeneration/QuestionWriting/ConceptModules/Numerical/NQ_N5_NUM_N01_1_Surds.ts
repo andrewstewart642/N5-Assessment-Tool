@@ -1,7 +1,6 @@
 // question-bank/skills/01-numerical/NQ_N5_NUM_N01.1_Surds.ts
 
 import type { PaperPart } from "@/app/Assessments/Questions/Content/PaperParts";
-import type { DifficultyLevel } from "@/app/Assessments/AssessmentTypes";
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,

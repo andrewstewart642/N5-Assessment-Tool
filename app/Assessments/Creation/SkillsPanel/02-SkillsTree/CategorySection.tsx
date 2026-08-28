@@ -32,9 +32,6 @@ const CATEGORY_STRIPE_HEIGHT =
 const CATEGORY_HEADER_HEIGHT =
   38;
 
-const CATEGORY_ACTION_SLOT_WIDTH =
-  84;
-
 type CategorySectionProps = {
   category:
     string;
@@ -177,7 +174,6 @@ export default function CategorySection({
   skills,
   collapsed,
   onToggleCategory,
-  onCollapseCategorySkills,
   expandedSkillIds,
   onToggleSkill,
   standardFilter,
