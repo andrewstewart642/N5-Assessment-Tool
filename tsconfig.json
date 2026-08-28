@@ -37,8 +37,6 @@
     "**/*.mts"
   ],
   "exclude": [
-    "node_modules",
-    "app/Courses/National5Maths/ExamQuestionAndAnswerCatalog/Questions/2025/Paper2/N5Maths2025P2Q14.ts",
-    "app/Courses/National5Maths/ExamQuestionAndAnswerCatalog/MarkingSchemes/2025/Paper2/N5Maths2025P2Q14MS.ts"
+    "node_modules"
   ]
 }
