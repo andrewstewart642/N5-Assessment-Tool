@@ -4,7 +4,7 @@
 **Architecture version:** Architecture V2  
 **Status:** COMPLETE / ARCHIVED AS ACTIVE MIGRATION TRACKER  
 **Architecture V2 final sign-off:** 26 August 2026  
-**Post-sign-off documentation refresh:** 27 August 2026
+**Post-sign-off documentation refresh:** 27–28 August 2026
 
 ---
 
@@ -873,6 +873,8 @@ skillTree
 
 This removed the need for Classes to import National 5 Maths skill data directly.
 
+Later responsibility-first naming changed current physical names such as `ClassTypes.ts`/generic `State` or `Components` concepts; those later names are recorded in current-state docs rather than rewriting this historical migration description.
+
 ---
 
 # 32. Developer Tools Migration
@@ -911,6 +913,8 @@ app/
 The former `src/` tree was removed.
 
 This was not a regression to the old route-owned architecture: product domains now lived directly under the App Router source root with explicit ownership.
+
+This tree is the historical sign-off snapshot. `Home/` and `MyAssessments/` are represented in current-state docs where their post-sign-off/current ownership is recorded.
 
 ---
 
@@ -1057,7 +1061,7 @@ app/
 └── page.tsx
 ```
 
-Shortly after sign-off, `MyAssessments` was promoted to its own first-class root domain during feature-led work. That post-sign-off change belongs in `FeatureHistory.md` and current-state docs rather than being rewritten into the historical sign-off snapshot.
+Shortly after sign-off, `MyAssessments` was promoted to its own first-class root domain during feature-led work. `Home/` also exists as a dedicated root product-area owner in the current repository. Those current/post-sign-off facts belong in current-state docs and Feature History rather than being rewritten into the historical sign-off snapshot.
 
 Current physical truth always belongs in `RepositoryMap.md`.
 
@@ -1088,6 +1092,8 @@ UI/Documents
 ```
 
 The post-sign-off My Assessments promotion later separated the user-facing library UI from `Assessments/SavedAssessments` persistence ownership.
+
+The current Home owner is likewise documented in current-state Architecture/Repository Map rather than retroactively added to this sign-off snapshot.
 
 ---
 
@@ -1211,6 +1217,8 @@ old SettingsDrawer presentation is still canonical
 root Tools/ must exist even when there is no enduring tooling
 
 historical pending-migration sections remain active tasks
+
+historical filenames in this ledger are necessarily current filenames
 ```
 
 This file contains historical state by design.
@@ -1367,3 +1375,74 @@ Docs/FutureFeatures.md
 ```
 
 for ideas/planned/deferred work.
+
+---
+
+# 51. Post-Sign-Off Naming and Discoverability Maintenance — 28 August 2026
+
+After the Architecture V2 migration and initial feature-led work, the repository received a targeted maintenance pass focused on file/folder discoverability.
+
+This was **not** a reopened Architecture V2 migration. The broad ownership model remained intact.
+
+The work proceeded after separate dead/obsolete-file cleanup and lint cleanup, then systematically renamed files/folders where current names still exposed historical context, implementation details or vague responsibilities.
+
+The resulting governing rule became:
+
+> **Folder = context. Filename = responsibility.**
+
+The maintenance pass included areas such as:
+
+```text
+Assessments/Creation/Setup/
+Assessments/Creation/Persistence/
+Assessments/Creation/Questions/
+Assessments/Creation/TopBar/
+Assessments/Creation/HUDBar/
+Assessments/Creation/Papers/
+Assessments/Creation/PaperWorkspace/
+Assessments/Creation/SkillsPanel/
+Assessments/Creation/Feedback/
+Classes/
+MyAssessments/Display/
+MyAssessments/Library/
+```
+
+Important outcomes included:
+
+- hook implementation files no longer use `use...` filenames merely because the exported function is a React hook;
+- exported React hook functions themselves retain required `use...` names;
+- repeated parent-folder prefixes were removed where the folder already provided sufficient context;
+- vague responsibility names were replaced with clearer product/behaviour names;
+- `Classes/Components/` and `Classes/State/` were replaced by current responsibility owners such as `Classes/MyClasses/` and `Classes/Records/`;
+- the Preview Tray folder became the simpler current `PaperWorkspace/Preview/Tray/` owner;
+- meaningful SkillsPanel ordering was intentionally preserved as `01-SkillsFilters/` followed by `02-SkillsTree/` because that order mirrors the page;
+- public routes and persistence compatibility identifiers were deliberately left unchanged.
+
+The pass was repeatedly verified with:
+
+```text
+npx tsc --noEmit
+npm run lint
+git --no-pager diff --check
+```
+
+One practical lesson from the rename pass was that successful `git mv` operations do not themselves guarantee import-path updates. Missing-module TypeScript errors were repaired by updating module-path strings while preserving exported hook symbols.
+
+Another practical shell lesson was that Git Bash's `>` prompt can mean an unfinished quoted command rather than a frozen terminal; `Ctrl+C` safely cancels that incomplete command before retrying with simpler quoting.
+
+Current physical names belong in:
+
+```text
+Docs/RepositoryMap.md
+```
+
+The new naming rule belongs in:
+
+```text
+AGENTS.md
+Docs/Architecture.md
+Docs/LockedDecisions.md
+Docs/ChatGPTWorkflow.md
+```
+
+Earlier filenames/paths in this ledger remain historical evidence and are intentionally not globally rewritten.
