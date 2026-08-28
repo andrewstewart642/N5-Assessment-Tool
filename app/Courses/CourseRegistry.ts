@@ -32,13 +32,34 @@ export const COURSE_REGISTRY:
       NATIONAL5_APPLICATIONS_OF_MATHS_ASSESSMENT_CONFIG,
   };
 
+export function findCourseAssessmentConfigById(
+  courseId: CourseId
+): CourseAssessmentConfig | null {
+  return (
+    COURSE_REGISTRY[
+      courseId
+    ] ??
+    null
+  );
+}
+
+export function hasCourseAssessmentConfig(
+  courseId: CourseId
+): boolean {
+  return (
+    findCourseAssessmentConfigById(
+      courseId
+    ) !== null
+  );
+}
+
 export function getCourseAssessmentConfigById(
   courseId: CourseId
 ): CourseAssessmentConfig {
   const courseConfig =
-    COURSE_REGISTRY[
+    findCourseAssessmentConfigById(
       courseId
-    ];
+    );
 
   if (!courseConfig) {
     throw new Error(
