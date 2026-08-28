@@ -8,12 +8,12 @@ import type {
 } from "@/app/Assessments/SavedAssessments/SavedAssessment";
 
 import {
-  getCourseAssessmentConfigById,
-} from "@/app/Courses/CourseRegistry";
+  resolveSavedAssessmentCourseIdentity,
+} from "@/app/Assessments/SavedAssessments/CourseIdentity";
 
 import {
-  normaliseCourseId,
-} from "@/app/Courses/CourseCatalog";
+  getCourseAssessmentConfigById,
+} from "@/app/Courses/CourseRegistry";
 
 import {
   getCourseAssessmentStructure,
@@ -405,7 +405,7 @@ function buildPages({
 
   if (
     questionPages.length ===
-    0
+      0
   ) {
     pages.push({
       kind:
@@ -458,21 +458,17 @@ export function buildAssessmentCompilationDocument(
   savedAssessment:
     SavedAssessment
 ): AssessmentCompilationDocument {
-  const courseId =
-    normaliseCourseId(
-      savedAssessment.setup
-        .courseId ??
-        savedAssessment.setup
-          .levelId
-    );
+  const courseIdentity =
+    resolveSavedAssessmentCourseIdentity({
+      courseId:
+        savedAssessment.setup.courseId,
 
-  if (
-    !courseId
-  ) {
-    throw new Error(
-      "The saved assessment does not contain a valid course."
-    );
-  }
+      courseIdentityVersion:
+        savedAssessment.setup.courseIdentityVersion,
+    });
+
+  const courseId =
+    courseIdentity.courseId;
 
 
   const courseConfig =
