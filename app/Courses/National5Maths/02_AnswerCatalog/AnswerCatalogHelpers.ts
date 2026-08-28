@@ -1,3 +1,4 @@
+import type { Paper } from "@/app/Assessments/AssessmentTypes";
 import type {
   AnswerGenerationProfile,
   AnswerIntegrityProfile,
@@ -33,23 +34,62 @@ const printedLabelByPdfPage: Record<number, string> = {
   8: "Page eight",
   9: "Page nine",
   10: "Page ten",
+  11: "Page eleven",
+  12: "Page twelve",
+  13: "Page thirteen",
+  14: "Page fourteen",
+  15: "Page fifteen",
+  16: "Page sixteen",
+  17: "Page seventeen",
+  18: "Page eighteen",
+  19: "Page nineteen",
+  20: "Page twenty",
+  21: "Page twenty-one",
+  22: "Page twenty-two",
 };
 
 export const msEvidence = (
   questionNumber: string,
   pdfPage: number,
   evidenceType: "MARKING_SCHEME" | "GENERAL_MARKING_POLICY" = "MARKING_SCHEME",
+  paper: Paper = "P1",
+  year = 2014,
+  printedPageLabel: string | null = null,
 ): CatalogEvidenceRef => ({
-  documentId: "N5_MATH_2014_MS",
+  documentId: `N5_MATH_${year}_MS`,
   pdfPages: [pdfPage],
-  printedPageLabels: [printedLabelByPdfPage[pdfPage] ?? `PDF page ${pdfPage}`],
-  paper: "P1",
+  printedPageLabels: [printedPageLabel ?? (year === 2014 ? printedLabelByPdfPage[pdfPage] ?? `PDF page ${pdfPage}` : `PDF page ${pdfPage}`)],
+  paper,
   questionLocator: evidenceType === "GENERAL_MARKING_POLICY" ? null : `Q${questionNumber}`,
   evidenceType,
-  locatorNote: evidenceType === "GENERAL_MARKING_POLICY" ? "2014 National 5 Mathematics general marking principles." : null,
+  locatorNote: evidenceType === "GENERAL_MARKING_POLICY" ? `${year} National 5 Mathematics ${paper} general marking principles.` : null,
 });
 
-export const generalPolicyEvidence = (): CatalogEvidenceRef => msEvidence("", 2, "GENERAL_MARKING_POLICY");
+type GeneralPolicyLocator = { pdfPages: number[]; printedPageLabels: string[] };
+
+const generalPolicyLocators: Record<number, Record<Paper, GeneralPolicyLocator>> = {
+  2014: {
+    P1: { pdfPages: [2], printedPageLabels: ["Page two"] },
+    P2: { pdfPages: [12], printedPageLabels: ["Page twelve"] },
+  },
+  2024: {
+    P1: { pdfPages: [2, 3, 4], printedPageLabels: ["page 02", "page 03", "page 04"] },
+    P2: { pdfPages: [23, 24, 25], printedPageLabels: ["page 02", "page 03", "page 04"] },
+  },
+};
+
+export const generalPolicyEvidence = (paper: Paper = "P1", year = 2014): CatalogEvidenceRef => {
+  const locator = generalPolicyLocators[year]?.[paper];
+  return {
+    documentId: `N5_MATH_${year}_MS`,
+    pdfPages: locator?.pdfPages ?? [],
+    printedPageLabels: locator?.printedPageLabels ?? [],
+    paper,
+    questionLocator: null,
+    evidenceType: "GENERAL_MARKING_POLICY",
+    locatorNote: `${year} National 5 Mathematics ${paper} general marking principles.`,
+  };
+};
 
 export const catalogValue = <T>(
   value: T,
@@ -87,7 +127,7 @@ export const answerIntegrity = (): AnswerIntegrityProfile => ({
   generatorDecisionsDeferredFromSourceCatalogue: true,
 });
 
-export const answerReviewInProgress = (questionNumber: string): CatalogReviewProfile => ({
+export const answerReviewInProgress = (questionNumber: string, paper: Paper = "P1", year = 2014): CatalogReviewProfile => ({
   status: "IN_PROGRESS",
   sourceFactsComplete: true,
   classificationComplete: true,
@@ -95,11 +135,11 @@ export const answerReviewInProgress = (questionNumber: string): CatalogReviewPro
   counterpartCrossChecked: true,
   visualEvidenceCrossChecked: true,
   unresolvedIssues: [
-    "Cross-corpus consistency analysis remains NOT_REVIEWED until comparable later-year entries exist.",
+    "Cross-corpus consistency analysis remains NOT_REVIEWED until a dedicated comparison pass is completed.",
     "Answer/marking-scheme generation analysis is deliberately deferred from the historical source catalogue.",
   ],
   validationNotes: [
-    `2014 Paper 1 Q${questionNumber} was catalogued from the matching Question and Finalised Marking Instructions as paired evidence.`,
+    `${year} ${paper === "P2" ? "Paper 2" : "Paper 1"} Q${questionNumber} was catalogued from the matching Question and Finalised Marking Instructions as paired evidence.`,
   ],
   reviewedAt: null,
 });
@@ -118,7 +158,7 @@ export const notReviewedConsistency = (
     sampleSize: 0,
     observedPattern: null,
     distinguishingConditions: [],
-    unresolvedQuestions: ["Await comparable catalogue entries before judging consistency."],
+    unresolvedQuestions: ["Cross-corpus consistency analysis has not yet been completed for this comparison key."],
     analysisMayAlterSourceFacts: false,
     provenance: "GENERATION_ANALYSIS",
   },
@@ -126,7 +166,6 @@ export const notReviewedConsistency = (
 
 export const generationNotReviewed = (): CatalogValue<AnswerGenerationProfile> =>
   notReviewed<AnswerGenerationProfile>("Historical marking evidence is being catalogued before answer-generation policy is designed.");
-
 
 export const emptyMethodEquivalence = (): MethodEquivalenceProfile => ({
   equivalentMethodGroups: [],
@@ -163,6 +202,8 @@ export const workingPolicy = (
   correctAnswerWithoutWorking: CorrectAnswerWithoutWorkingProfile,
   workingMandatoryForMarkIds: string[] = [],
   workingMayBeImpliedForMarkIds: string[] = [],
+  paper: Paper = "P1",
+  year = 2014,
 ): WorkingEvidencePolicy => ({
   correctAnswerWithoutWorking,
   partSpecificAnswerOnly: [],
@@ -174,7 +215,10 @@ export const workingPolicy = (
   laterPartCanSupplyEvidence: false,
   earlierPartCanSupplyEvidence: false,
   repeatedSubstitutionAccepted: notReviewed<boolean>(),
-  unsupportedCalculatorAnswerAccepted: notApplicable<boolean>("2014 Paper 1 is non-calculator."),
+  unsupportedCalculatorAnswerAccepted:
+    paper === "P1"
+      ? notApplicable<boolean>(`${year} Paper 1 is non-calculator.`)
+      : notReviewed<boolean>(`${year} Paper 2 permits calculators; retain question-specific evidence about unsupported calculator outputs rather than inferring a paper-wide rule.`),
 });
 
 export const presentationPolicy = (
@@ -247,18 +291,23 @@ export const comparisonKey = (
   comparisonDimensions: string[],
 ): MarkingComparisonKey => ({ id, questionFamilyId, skillIds, markCount, responseTypes, comparisonDimensions });
 
-export const defaultFollowThrough = (evidence: CatalogEvidenceRef[]): MarkNode["followThrough"] => ({
-  allowed: true,
-  fromMarkIds: [],
-  fromQuestionPartIds: [],
-  requiresComparableDifficulty: true,
-  blockedForRequiredResult: false,
-  blockedByInvalidMathematicalState: true,
-  blockedByTrivialisedLaterWork: true,
-  sourceBasis: "GENERAL_POLICY",
-  sourceEvidence: [generalPolicyEvidence(), ...evidence],
-  notes: "General 2014 follow-through principle applies unless a question-specific directive overrides it.",
-});
+export const defaultFollowThrough = (evidence: CatalogEvidenceRef[]): MarkNode["followThrough"] => {
+  const paper: Paper = evidence[0]?.paper === "P2" ? "P2" : "P1";
+  const sourceDocumentId = evidence[0]?.documentId ?? "N5_MATH_2014_MS";
+  const year = Number(sourceDocumentId.match(/N5_MATH_(\d{4})_MS/)?.[1] ?? 2014);
+  return {
+    allowed: true,
+    fromMarkIds: [],
+    fromQuestionPartIds: [],
+    requiresComparableDifficulty: true,
+    blockedForRequiredResult: false,
+    blockedByInvalidMathematicalState: true,
+    blockedByTrivialisedLaterWork: true,
+    sourceBasis: "GENERAL_POLICY",
+    sourceEvidence: [generalPolicyEvidence(paper, year), ...evidence],
+    notes: `General ${year} follow-through principle applies unless a question-specific directive overrides it.`,
+  };
+};
 
 export const noFollowThrough = (evidence: CatalogEvidenceRef[], notes: string | null = null): MarkNode["followThrough"] => ({
   allowed: false,
