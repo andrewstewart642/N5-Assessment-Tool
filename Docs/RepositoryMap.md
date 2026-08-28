@@ -12,6 +12,7 @@ It describes:
 - where shared application UI belongs;
 - where generated-document UI belongs;
 - where Course-specific educational knowledge belongs;
+- where the Home experience belongs;
 - where the My Assessments library belongs;
 - where PDF generation belongs;
 - and where historical migration material belongs.
@@ -63,19 +64,21 @@ app/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
+├── Home/
 ├── MyAssessments/
 ├── UI/
 ├── layout.tsx
 └── page.tsx
 ```
 
-The six primary runtime ownership areas are:
+The seven primary runtime ownership areas are:
 
 ```text
 Assessments/
 Classes/
 Courses/
 DeveloperTools/
+Home/
 MyAssessments/
 UI/
 ```
@@ -182,6 +185,38 @@ app/Assessments/Compilation/PDF/generate/route.ts
 Inside `app/`, filenames such as `page.tsx`, `layout.tsx`, `route.ts`, `loading.tsx`, `error.tsx` and similar Next.js special names must be introduced deliberately.
 
 Ordinary product page implementations should use descriptive names.
+
+---
+
+# Home
+
+## 6A. Home Root
+
+The Home experience is a first-class product area beneath:
+
+```text
+app/Home/
+```
+
+Current high-level structure includes:
+
+```text
+app/Home/
+├── ContinueWorking/
+├── DepartmentActivity/
+├── ForYou/
+├── Header/
+├── HomeDashboardData/
+├── MyClassesOverview/
+├── ProductUpdates/
+├── SharedComponents/
+├── UpcomingAssessments/
+└── HomePage.tsx
+```
+
+Home owns the Home dashboard/page experience and its Home-specific composition/data/presentation.
+
+Reusable application-wide visual infrastructure remains beneath `app/UI/Application/`; the existence of a Home consumer does not move global UI ownership into Home.
 
 ---
 
@@ -353,6 +388,8 @@ useAssessmentPdfAsset.ts
 
 This layer owns reusable generated assessment PDF assets consumed by UI such as My Assessments.
 
+The `useAssessmentPdfAsset.ts` filename predates the later responsibility-first filename rule and may remain until a real reason to touch it; the naming overhaul was targeted rather than a mandate to churn every acceptable existing file indefinitely.
+
 ---
 
 ## 14. Assessment Creation
@@ -391,6 +428,8 @@ app/Assessments/Creation/
 
 These folders represent visible or behavioural areas of Assessment Creation.
 
+The 28 August 2026 naming pass deliberately made child filenames responsibility-readable rather than repeating the entire parent context or exposing implementation details such as `use...` in filenames.
+
 ---
 
 ## 15. Assessment Creation — Setup
@@ -399,6 +438,25 @@ Setup lives beneath:
 
 ```text
 app/Assessments/Creation/Setup/
+```
+
+Current high-level contents include:
+
+```text
+Setup/
+├── Controls/
+├── Sections/
+├── ClassCoverageState.ts
+├── ClassCoverageStorage.ts
+├── ClassLoader.ts
+├── CoursePaperOptions.ts
+├── CourseSelect.tsx
+├── CreateAssessment.ts
+├── FormState.ts
+├── SavedChoices.ts
+├── SetupCard.tsx
+├── TargetCalculations.ts
+└── TargetState.ts
 ```
 
 It owns configuration collected before entering the main Creator.
@@ -417,6 +475,19 @@ The Creator upper control region lives beneath:
 app/Assessments/Creation/TopBar/
 ```
 
+Current files are:
+
+```text
+DateCalendarBehaviour.ts
+DateField.tsx
+Dimensions.ts
+FieldWithLabel.tsx
+NameField.tsx
+NameFieldBehaviour.ts
+PaperSelector.tsx
+TopBar.tsx
+```
+
 It owns assessment metadata and paper/view controls in the upper workspace region.
 
 `TopBar` is distinct from the global application `HeaderBar`.
@@ -431,6 +502,16 @@ The lower Creator status/control region lives beneath:
 app/Assessments/Creation/HUDBar/
 ```
 
+Current responsibility files include:
+
+```text
+CompileButton.tsx
+HUDBar.tsx
+ProgressPanel.tsx
+ProgressMetrics.ts
+ProgressRows.ts
+```
+
 It owns lower workspace status and controls such as Marks & Timings, Notes and the Compile action.
 
 ---
@@ -442,6 +523,23 @@ The Skills Panel lives beneath:
 ```text
 app/Assessments/Creation/SkillsPanel/
 ```
+
+Current high-level structure includes:
+
+```text
+SkillsPanel/
+├── 01-SkillsFilters/
+├── 02-SkillsTree/
+├── AssessmentClassCoverage.ts
+├── AssessmentSkillsPanel.tsx
+├── ClassCoverageState.ts
+├── PanelState.ts
+└── QuestionTreeRestoration.ts
+```
+
+`02-SkillsTree/TreeState.ts` owns the tree's internal React state while the exported hook itself retains React `use...` naming.
+
+The `01-` / `02-` folder ordering is intentional: it mirrors the webpage/product order in which Skills Filters appear above the Skills Tree.
 
 Responsibilities include:
 
@@ -464,7 +562,22 @@ Paper workflow state lives beneath:
 app/Assessments/Creation/Papers/
 ```
 
-Responsibilities include paper selection, target marks, intended timing, paper sitting state, paper-value maps and generic paper workflow.
+Current files are:
+
+```text
+ActiveAndViewedPaper.ts
+AutomaticEndTimes.ts
+IntendedDuration.ts
+MarkTargetCalculations.ts
+MarkTargetEditing.ts
+MarkTargetSummary.ts
+PaperRules.ts
+PaperSpecificValues.ts
+SittingSchedule.ts
+TimeCalculations.ts
+```
+
+Responsibilities include paper selection, target marks, intended timing, paper sitting state, paper-specific values and generic paper workflow.
 
 Course-specific paper rules belong beneath:
 
@@ -482,6 +595,20 @@ The central Creator workspace lives beneath:
 app/Assessments/Creation/PaperWorkspace/
 ```
 
+Current root files are:
+
+```text
+CompactPreviewSpacing.ts
+Dimensions.ts
+Divider.tsx
+LayoutAndResizing.ts
+PageScrollLock.ts
+ViewMode.ts
+ViewModeState.ts
+Workspace.tsx
+Preview/
+```
+
 Responsibilities include workspace layout, split-panel behaviour, preview view mode, divider behaviour, preview viewport behaviour, document locking and preview composition.
 
 Preview-specific implementation belongs beneath:
@@ -490,7 +617,50 @@ Preview-specific implementation belongs beneath:
 app/Assessments/Creation/PaperWorkspace/Preview/
 ```
 
-The shared preview-edge Settings/View tray is part of this interactive workspace/preview responsibility.
+Current Preview responsibilities include:
+
+```text
+DisplayedDateAndTime.ts
+FloatingControlsVisibility.ts
+JumpToQuestion.ts
+PageAssembly.ts
+PageData.ts
+PageRenderer.tsx
+Pagination.ts
+Pane.tsx
+PrintedPaperDetails.ts
+Question.tsx
+QuestionPage.tsx
+SaveStatusIndicator.tsx
+ScrollPositionPreservation.ts
+ZoomAndPageTracking.ts
+ZoomControls.tsx
+Tray/
+```
+
+The shared preview-edge Settings/View tray lives beneath:
+
+```text
+app/Assessments/Creation/PaperWorkspace/Preview/Tray/
+```
+
+Current Tray files are:
+
+```text
+ClockPicker.tsx
+DateEditor.tsx
+ScheduleEditor.tsx
+SegmentedControl.tsx
+SettingsTab.tsx
+Tab.tsx
+TimeEditor.tsx
+TimeParsingAndFormatting.ts
+ToggleRow.tsx
+Tray.tsx
+ViewModeSelector.tsx
+ViewTab.tsx
+WorkspaceControls.tsx
+```
 
 ---
 
@@ -500,6 +670,29 @@ Creation-specific question workflow lives beneath:
 
 ```text
 app/Assessments/Creation/Questions/
+```
+
+Current root files include:
+
+```text
+Actions.ts
+DraftActions.ts
+DraftDefaults.ts
+DraftGeneration.ts
+DraftTypes.ts
+SelectionSettings.ts
+Spacing.ts
+WorkingState.ts
+Preview/
+```
+
+Creator-specific question Preview files are:
+
+```text
+DraftQuestion.tsx
+QuestionHeightMeasurement.tsx
+QuestionHeightTracking.ts
+WorkedAnswer.tsx
 ```
 
 Responsibilities include question state, generated drafts, edit drafts, question controls, question workflow and Creator-specific preview behaviour.
@@ -528,9 +721,39 @@ Creation persistence lives beneath:
 app/Assessments/Creation/Persistence/
 ```
 
-Responsibilities include Creator initialisation, autosave, saved-assessment integration and Creation-specific persistence behaviour.
+Current files are:
+
+```text
+AutoSaveAssessment.ts
+BrowserStorage.ts
+CourseSelection.ts
+LoadSavedAssessment.ts
+RestoreInitialState.ts
+SaveBrowserState.ts
+SaveStatus.ts
+```
+
+Responsibilities include Creator initialisation/restoration, autosave, browser-state persistence, saved-assessment integration and Creation-specific persistence behaviour.
 
 Persisted keys may retain historical names where required for compatibility.
+
+---
+
+## 23A. Assessment Creation — Feedback
+
+Creation feedback state lives beneath:
+
+```text
+app/Assessments/Creation/Feedback/
+```
+
+Current primary module:
+
+```text
+FeedbackState.ts
+```
+
+This owns Creator feedback/quality-note and transient warning state without exposing the implementation detail that it is implemented as a React hook in the filename.
 
 ---
 
@@ -660,6 +883,13 @@ Derived/formatting presentation logic lives beneath:
 app/MyAssessments/Display/
 ```
 
+Current files are:
+
+```text
+LabelsAndDates.ts
+Progress.ts
+```
+
 This area owns library-friendly assessment labels, date/time formatting and progress-display derivation.
 
 It must not become a parallel persistence model.
@@ -672,6 +902,14 @@ Library behaviour lives beneath:
 
 ```text
 app/MyAssessments/Library/
+```
+
+Current files are:
+
+```text
+Filtering.ts
+Sorting.ts
+ViewOptions.ts
 ```
 
 This includes view/filter/sort contracts and library filtering/sorting rules.
@@ -746,30 +984,41 @@ Class-owned functionality lives beneath:
 app/Classes/
 ```
 
-Current high-level structure includes:
+Current high-level structure is:
 
 ```text
-Components/
-Coverage/
-State/
-ClassDetailsPage.tsx
-ClassTypes.ts
-MyClassesPage.tsx
+app/Classes/
+├── Coverage/
+├── MyClasses/
+├── Records/
+├── ClassData.ts
+├── ClassDetailsPage.tsx
+└── MyClassesPage.tsx
 ```
 
 Classes owns saved school classes, metadata, completed-skill coverage, My Classes, Class Details and class persistence.
 
 ---
 
-## 36. Class Components
+## 36. My Classes UI
 
-Reusable class UI lives beneath:
+My Classes-specific UI lives beneath:
 
 ```text
-app/Classes/Components/
+app/Classes/MyClasses/
 ```
 
-Examples include class headers, grids, tiles and add-class interaction.
+Current files are:
+
+```text
+AddClassModal.tsx
+CourseColourSettings.tsx
+Grid.tsx
+PageHeader.tsx
+Tile.tsx
+```
+
+The folder context supplies “My Classes”, so child files use concise responsibility names rather than repeating `Class` in every filename.
 
 ---
 
@@ -779,6 +1028,17 @@ Class coverage functionality lives beneath:
 
 ```text
 app/Classes/Coverage/
+```
+
+Current files are:
+
+```text
+AssessmentClassSelector.tsx
+QuestionExamples.tsx
+SelectedItem.ts
+SelectionDetails.tsx
+SkillsAndProgress.ts
+SkillsTree.tsx
 ```
 
 Coverage resolves educational structure through:
@@ -797,15 +1057,23 @@ This keeps Classes independent of any single qualification implementation.
 
 ---
 
-## 38. Class State
+## 38. Class Records
 
-Class persistence/state lives beneath:
+Class persistence/collection state lives beneath:
 
 ```text
-app/Classes/State/
+app/Classes/Records/
 ```
 
-This area owns storage, normalisation and class-state hooks.
+Current files are:
+
+```text
+BrowserStorage.ts
+Collection.ts
+Normalisation.ts
+```
+
+`Records/` replaces the former generic `State/` folder in current source naming and owns storage, normalisation and the live class collection.
 
 ---
 
@@ -1055,7 +1323,7 @@ These represent two different visual systems.
 
 ## 54. Application UI
 
-Interactive application UI lives beneath:
+Interactive application UI infrastructure lives beneath:
 
 ```text
 app/UI/Application/
@@ -1068,7 +1336,6 @@ Application/
 ├── Colours/
 ├── Components/
 ├── HeaderBar/
-├── Home/
 ├── Motion/
 ├── Settings/
 ├── SettingsDrawer/
@@ -1077,6 +1344,8 @@ Application/
 ├── Theme/
 └── Typography/
 ```
+
+Home-specific product implementation lives beneath `app/Home/`, not `app/UI/Application/Home/`.
 
 Application UI includes navigation, interactive controls, application theming, global settings, shell behaviour and application typography.
 
@@ -1183,6 +1452,8 @@ app/UI/Application/Components/
 
 Examples include action controls, calendar controls and generic drawer primitives.
 
+A generic Application `Components/` folder remains valid because it is an established reusable UI owner; the responsibility-first naming rule is not a blind ban on the word “Components”. New generic buckets still require real shared ownership rather than convenience.
+
 ---
 
 ## 63. Documents UI
@@ -1249,7 +1520,7 @@ generic document primitives
         ↓
 qualification-family templates
         ↓
-Course-specific Documents
+Course Documents
         ↓
 Assessment compilation/consumers
 ```
@@ -1315,7 +1586,7 @@ Repository-level agent instructions live in:
 AGENTS.md
 ```
 
-`FeatureHistory.md` and `FutureFeatures.md` are introduced as part of the post-refactor documentation model; until committed, references to them describe their intended canonical locations.
+All of these files are established canonical documents in the repository.
 
 ---
 
@@ -1347,6 +1618,8 @@ AGENTS.md
 → What must a coding agent know before working here?
 ```
 
+Current-state documentation should be updated when physical owners/names change. Historical docs should retain historically accurate paths and receive clarifying successor/current-state notes rather than blind global rewrites.
+
 ---
 
 # Repository Rules Summary
@@ -1367,6 +1640,9 @@ Classes
 
 Courses
 → educational/domain/Course knowledge
+
+Home
+→ Home-page product experience
 
 UI/Application
 → interactive application presentation
@@ -1441,6 +1717,8 @@ shared-types/
 
 without a durable architectural responsibility.
 
+Likewise, prefer a filename that states a concrete responsibility over a vague helper/utility label.
+
 ---
 
 ## 75. No Shadow Route Architecture
@@ -1479,7 +1757,11 @@ Do not rename persisted keys merely to make source terminology cleaner.
 
 ---
 
-## 78. Naming Rule
+## 78. Naming and Discoverability Rule
+
+The governing source naming rule is:
+
+> **Folder = context. Filename = responsibility.**
 
 Prefer current product terminology such as:
 
@@ -1497,9 +1779,24 @@ MyAssessments
 SavedAssessments
 ```
 
+For files:
+
+- do not prefix filenames with `use` merely because they export React hooks;
+- keep the exported hook's `use...` function name where React requires it;
+- avoid repeating the full parent-folder context in every child filename;
+- retain contextual wording only where removing it would create ambiguity;
+- avoid `Utils`, `Helpers`, `Common`, `Shared` or `Misc` when the actual responsibility can be named;
+- use meaningful ordering prefixes only where order itself communicates real product/curriculum structure.
+
+`SkillsPanel/01-SkillsFilters/` and `SkillsPanel/02-SkillsTree/` are the intentional current example of meaningful ordered folders.
+
 Do not reintroduce old Builder/source architecture solely because public URLs or persisted keys retain historical wording.
 
 Do not infer a current product brand from historical internal identifiers.
+
+The discoverability test is:
+
+> If somebody unfamiliar with the implementation sees only the folder path and filename, can they make a sensible guess about what the file is responsible for?
 
 ---
 
@@ -1513,12 +1810,15 @@ Ask whether the responsibility is:
 - assessment-library workflow;
 - Class data/workflow;
 - Course-specific educational knowledge;
+- Home-page product behaviour;
 - interactive Application UI;
 - generated-document UI;
 - runtime developer tooling;
 - repository tooling.
 
 Place the file according to the answer.
+
+Then name the file for its responsibility within that owner rather than for the implementation mechanism used to build it.
 
 Do not create a new top-level folder merely because no existing filename immediately seems suitable.
 
@@ -1557,6 +1857,9 @@ app/Classes/
 app/Courses/
 → educational/Course knowledge
 
+app/Home/
+→ Home-page product experience
+
 app/UI/
 → presentation systems
 
@@ -1564,6 +1867,6 @@ app/DeveloperTools/
 → runtime developer functionality
 ```
 
-without needing to understand the Architecture V2 migration that produced this structure.
+and should be able to descend into the major feature folders and make a sensible guess about individual file responsibilities from their paths/names.
 
 That clarity is the acceptance standard for future structural work.
