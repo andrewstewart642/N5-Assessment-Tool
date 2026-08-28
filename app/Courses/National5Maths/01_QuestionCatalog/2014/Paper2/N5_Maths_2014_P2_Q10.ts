@@ -1,48 +1,386 @@
-import type{QuestionCatalogEntry} from"../../QuestionCatalogTypes";
-import{catalogValue,notApplicable,qpEvidence,questionReviewInProgress,sourceIsolation,visualOriginality,visualValidation} from"../../QuestionCatalogHelpers";
-const evidence=qpEvidence("10",28,"QUESTION","P2",12);
-const visualEvidence=qpEvidence("10",28,"VISUAL","P2",12);
-export const N5_MATHS_2014_P2_Q10={
-// ============================================================================
-// SECTION 1 — IDENTITY / SOURCE
-// ============================================================================
-identity:{id:"N5_MATH_2014_P2_Q10",schemaVersion:"N5_CATALOG_V2",courseId:"N5_MATH",paperContextId:"N5_MATH_2014_P2_CONTEXT",year:2014,paper:"P2",questionNumber:"10",answerCatalogId:"N5_MATH_2014_P2_Q10_MS"},sourceLayout:{sourcePages:[28],printedPageLabels:["Page 12"],continuesAcrossPages:false,answerSpace:{"category":"FULL_PAGE","estimatedWritingLines":20,"responseSurfaceVisualIds":[],"separateFinalAnswerAreaPresent":false,"notes":"Full-page navigation diagram with separate working areas for the two parts."},sourceEvidence:[evidence]},
-// ============================================================================
-// SECTION 3 — STRUCTURE / CURRICULUM / TASK
-// ============================================================================
-structure:{structureType:"MULTIPART",totalMarks:5,parts:[{"id":"Q10_a","label":"a","marks":3,"primarySkillId":"trig-t04-cosine-rule","secondarySkillIds":[],"conceptIds":["trig-t4-2"],"topic":"TRIG","commandTypes":["CALCULATE"],"responseTypes":["NUMBER"],"dependsOnPartIds":[],"sharedInformationIds":["Q10_INFO_AB","Q10_INFO_BC","Q10_INFO_AC"],"visualElementIds":["VIS_Q10"]},{"id":"Q10_b","label":"b","marks":2,"primarySkillId":"trig-t05-bearings","secondarySkillIds":[],"conceptIds":["trig-t5-1"],"topic":"TRIG","commandTypes":["FIND"],"responseTypes":["NUMBER"],"dependsOnPartIds":["Q10_a"],"sharedInformationIds":["Q10_INFO_BEARING"],"visualElementIds":["VIS_Q10"]}
-],dependencyType:"HENCE",sharedStimulus:true,sharedVisuals:true,sharedGivenData:true,requiredResultProvided:false},curriculum:{"primaryTopic":"TRIG","primarySkillId":"trig-t04-cosine-rule","secondarySkillIds":["trig-t05-bearings"],"primaryConceptId":"trig-t4-2","conceptIds":["trig-t4-2","trig-t5-1"],"paperSuitability":"P2","standardProfile":"A","thinkingProfile":"REASONING","crossSkillQuestion":true,"skillMarkDistribution":{"trig-t04-cosine-rule":3,"trig-t05-bearings":2},"conceptMarkDistribution":{"trig-t4-2":3,"trig-t5-1":2}
-},task:{"commandTypes":["CALCULATE","FIND"],"responseTypes":["NUMBER"],"responseCount":2,"explicitMethodCue":false,"methodRestricted":false,"workingRequestedInPrompt":false,"justificationRequested":false,"contextualConclusionRequested":false,"visualResponseRequired":false},
-// ============================================================================
-// SECTION 6 — MATHEMATICAL STRUCTURE / INFORMATION
-// ============================================================================
-mathematics:{"primaryGoal":"Use the cosine rule to determine an interior triangle angle, then combine that result with parallel north references and the given bearing to find a shaded bearing-related angle.","subgoals":[{"id":"Q10_S1","summary":"Use all three side lengths with the cosine rule to calculate angle ABC.","dependsOnSubgoalIds":[]},{"id":"Q10_S2","summary":"Use the 060-degree bearing and parallel north references to obtain the corresponding angle involving AB at B.","dependsOnSubgoalIds":[]},{"id":"Q10_S3","summary":"Combine that orientation angle with angle ABC to find the shaded angle.","dependsOnSubgoalIds":["Q10_S1","Q10_S2"]}
-],"operationTypes":["SUBSTITUTE","REARRANGE","EVALUATE","INTERPRET"],"requiredFormulaIds":["COSINE_RULE"],"requiredTheoremIds":[],"stageCount":3,"intermediateQuantityTypes":["angle ABC","corresponding/alternate angle from bearing"],"methodSelectionRequired":false,"solutionCountExpected":1,"validitySelectionRequired":false,"representationTransitions":[]},information:[{"id":"Q10_INFO_AB","informationType":"distance","normalisedContent":"AB is 8 km","value":8,"unit":"km","source":"TEXT","explicitness":"EXPLICIT","role":"GIVEN_VALUE","visualElementId":"VIS_Q10","usedByPartIds":["Q10_a","Q10_b"]},{"id":"Q10_INFO_BC","informationType":"distance","normalisedContent":"BC is 11 km","value":11,"unit":"km","source":"TEXT","explicitness":"EXPLICIT","role":"GIVEN_VALUE","visualElementId":"VIS_Q10","usedByPartIds":["Q10_a"]},{"id":"Q10_INFO_AC","informationType":"distance","normalisedContent":"AC is 13 km","value":13,"unit":"km","source":"TEXT","explicitness":"EXPLICIT","role":"GIVEN_VALUE","visualElementId":"VIS_Q10","usedByPartIds":["Q10_a"]},{"id":"Q10_INFO_BEARING","informationType":"bearing","normalisedContent":"B is on bearing 060 degrees from A","value":60,"unit":"degrees","source":"TEXT","explicitness":"EXPLICIT","role":"ORIENTATION","visualElementId":"VIS_Q10","usedByPartIds":["Q10_b"]}
-],reasoning:{"reasoningTypes":["MULTI_STAGE","INFORMATION_MARSHALLING","VISUAL_INTERPRETATION","REPRESENTATION_TRANSLATION"],"difficulty":{"overallDifficulty":"HIGH","methodSelectionLoad":"MEDIUM","arithmeticLoad":"MEDIUM","algebraicLoad":"VERY_LOW","representationLoad":"HIGH","languageLoad":"MEDIUM","contextInterpretationLoad":"MEDIUM","reasoningDepth":"HIGH","dependencyCount":2,"difficultyDrivers":["selecting the cosine rule from three sides","transferring bearing orientation using parallel north lines","combining interior and directional angles correctly"]}
-},numbers:{"numberTypes":["INTEGER","DECIMAL"],"nonCalculatorFriendly":false,"exactAndApproximateMixed":true,"magnitudeNotes":null},parameterDesign:{"deliberatelyConstructedValues":true,"exactResultDesigned":false,"roundingDesigned":false,"factorisableDesigned":false,"perfectSquareDesigned":false,"pythagoreanTripleUsed":false,"niceRatioUsed":false,"validSolutionCountDesigned":null,"parameterConstraints":["three side lengths satisfy triangle inequality","cosine-rule angle is non-degenerate","bearing and triangle placement produce a positive shaded angle below 180 degrees"],"safeVariationAxes":["triangle side lengths","initial bearing","buoy labels","diagram proportions"],"invariantRelationships":["part b depends on part a angle","north references are parallel","bearing measured clockwise from north"],"degeneracyConditionsToAvoid":["collinear triangle","shaded angle zero or reflex when not intended"]},constraints:{"mathematicalDomainConstraints":["Triangle side lengths satisfy triangle inequality."],"contextValidityConstraints":["Bearing uses clockwise-from-north convention."],"calculatorModeConstraints":["Calculator use is permitted on Paper 2."],"methodConstraints":[],"presentationConstraints":[]},answerSpecification:{"answerForm":"APPROXIMATE","simplestFormRequired":false,"rationalDenominatorRequired":false,"positivePowersRequired":false,"scientificNotationRequired":false,"precisionType":"NONE","precisionValue":null,"units":{"dimension":"angle","unitSymbol":"degrees","conversionRequired":false,"unitsExplicitlyRequested":false},"multipleAnswersRequired":2,"domainRestriction":null,"contextualWordsRequired":false,"coordinateOrderRelevant":false,"bracketsRelevant":false,"visualAnswerRequired":false},context:{"contextualised":true,"contextDomain":"boat race navigation","contextRole":"MODEL_DEFINING","namedPeoplePresent":false,"currencyPresent":false,"realWorldUnitsPresent":true,"realismConstrainsAnswer":true,"contextObjects":["boats","buoys","north directions","route triangle"],"contextCanBeSafelyReplaced":true},language:{"informationDensity":"HIGH","scaffoldingLevel":"MEDIUM","bulletStructureUsed":false,"naturalLanguageInterpretationRequired":true,"promptSummary":"Three buoy distances and an initial bearing define a navigation triangle; first calculate an interior angle, then use it to find a shaded directional angle.","styleNotes":null},
-// ============================================================================
-// SECTION 12 — VISUAL EVIDENCE
-// ============================================================================
-visuals:catalogValue({elements:[{id:"VIS_Q10",sourceOrder:1,visualType:"BEARING_DIAGRAM",roles:["ESSENTIAL_DATA","STRUCTURAL_MODEL","ORIENTATION_REFERENCE"],dependency:"REQUIRED_TO_SOLVE",candidateInteraction:"READ_ONLY",textRelationship:"PARTLY_DUPLICATED",scale:{"mode":"SCHEMATIC","measurementFromDrawingPermitted":false,"proportionalAppearanceDesirable":true,"exactGeometryRequiredForRenderer":true,"notes":"Angular orientation must be semantically correct; scale measurement is not the intended method."},orientation:{"verticalDirectionMeaningful":true,"horizontalDirectionMeaningful":true,"northReferenceMeaningful":true,"groundReferenceMeaningful":false,"startPositionMeaningful":false,"rotationDirectionMeaningful":false,"viewpointMeaningful":false,"mirroringSafe":false,"rotationSafe":false},labels:[{"entityId":"Q10_A","role":"POINT_NAME","normalisedValue":"A","placementMathematicallyConstrained":false,"collisionPriority":"HIGH"},{"entityId":"Q10_B","role":"POINT_NAME","normalisedValue":"B","placementMathematicallyConstrained":false,"collisionPriority":"HIGH"},{"entityId":"Q10_C","role":"POINT_NAME","normalisedValue":"C","placementMathematicallyConstrained":false,"collisionPriority":"HIGH"},{"entityId":"Q10_NA","role":"DIRECTION","normalisedValue":"North","placementMathematicallyConstrained":true,"collisionPriority":"HIGH"},{"entityId":"Q10_NB","role":"DIRECTION","normalisedValue":"North","placementMathematicallyConstrained":true,"collisionPriority":"HIGH"}
-],semanticModel:{entities:[{"id":"Q10_A","entityType":"POINT","semanticName":"buoy A","printedLabel":"A","numericValue":null,"symbolicValue":null,"unit":null,"mathematicallyEssential":true,"orientationMeaningful":true,"candidateEditable":false,"attributes":{}
-},{"id":"Q10_B","entityType":"POINT","semanticName":"buoy B","printedLabel":"B","numericValue":null,"symbolicValue":null,"unit":null,"mathematicallyEssential":true,"orientationMeaningful":true,"candidateEditable":false,"attributes":{}
-},{"id":"Q10_C","entityType":"POINT","semanticName":"buoy C","printedLabel":"C","numericValue":null,"symbolicValue":null,"unit":null,"mathematicallyEssential":true,"orientationMeaningful":true,"candidateEditable":false,"attributes":{}
-},{"id":"Q10_NA","entityType":"RAY","semanticName":"north reference at A","printedLabel":"North","numericValue":null,"symbolicValue":null,"unit":null,"mathematicallyEssential":true,"orientationMeaningful":true,"candidateEditable":false,"attributes":{}
-},{"id":"Q10_NB","entityType":"RAY","semanticName":"north reference at B","printedLabel":"North","numericValue":null,"symbolicValue":null,"unit":null,"mathematicallyEssential":true,"orientationMeaningful":true,"candidateEditable":false,"attributes":{}
-},{"id":"Q10_SHADE","entityType":"ANGLE","semanticName":"target shaded bearing-related angle at B","printedLabel":null,"numericValue":null,"symbolicValue":null,"unit":"degrees","mathematicallyEssential":true,"orientationMeaningful":true,"candidateEditable":false,"attributes":{}
-}
-],relations:[{"id":"Q10_R1","relationType":"CONNECTED_TO","fromEntityIds":["Q10_A","Q10_B","Q10_C"],"toEntityIds":[],"normalisedMeaning":"A, B and C form a triangle with side lengths AB=8 km, BC=11 km and AC=13 km.","essentialToSolution":true,"sourceEvidence":[visualEvidence]},{"id":"Q10_R2","relationType":"NORTH_OF","fromEntityIds":["Q10_NA","Q10_NB"],"toEntityIds":["Q10_A","Q10_B"],"normalisedMeaning":"Parallel north references define bearing directions at A and B.","essentialToSolution":true,"sourceEvidence":[visualEvidence]}
-],facts:[{"id":"Q10_F1","factType":"BEARING","normalisedFact":"B is on a bearing of 060 degrees from A.","relatedEntityIds":["Q10_A","Q10_B","Q10_NA"],"explicitness":"EXPLICIT_LABEL","essentialToSolution":true,"sourceEvidence":[visualEvidence]},{"id":"Q10_F2","factType":"DISTANCES","normalisedFact":"AB=8 km, BC=11 km, AC=13 km.","relatedEntityIds":["Q10_A","Q10_B","Q10_C"],"explicitness":"EXPLICIT_LABEL","essentialToSolution":true,"sourceEvidence":[visualEvidence]},{"id":"Q10_F3","factType":"TARGET_ANGLE","normalisedFact":"Part b asks for the shaded angle between the north reference at B and line BC.","relatedEntityIds":["Q10_B","Q10_NB","Q10_SHADE"],"explicitness":"EXPLICIT_SYMBOL","essentialToSolution":true,"sourceEvidence":[visualEvidence]}
-]},layout:{sourcePageNumber:28,sourcePagePosition:"MIDDLE",sourceRelativeWidth:"LARGE",preferredGeneratedAspectRatio:"1:1",minimumReadableWidthMm:null,minimumReadableHeightMm:null,allowInlinePlacement:false,allowFullWidthPlacement:true,labelCollisionSensitive:true},specialisedProfiles:{geometry:catalogValue({"dimension":"2D","shapeFamilies":["TRIANGLE"],"labelledPointIds":["Q10_A","Q10_B","Q10_C"],"rightAnglesPresent":false,"parallelRelationshipsPresent":true,"equalLengthRelationshipsPresent":false,"similarityPresent":false,"congruencePresent":false,"shadedRegionsPresent":true,"auxiliaryLinesPresent":true,"algebraicDimensionsPresent":false,"compoundShapePresent":false},[visualEvidence],"CATALOGUE_CLASSIFICATION","HIGH",null),circle:notApplicable(),graph:notApplicable(),scatter:notApplicable(),table:notApplicable(),vector:notApplicable(),bearing:catalogValue({"locationEntityIds":["Q10_A","Q10_B","Q10_C"],"northReferenceEntityIds":["Q10_NA","Q10_NB"],"bearingsClockwiseFromNorth":true,"routeSegmentsPresent":true,"distancesLabelled":true,"dueDirectionRelationshipsPresent":false,"scaleDrawingProhibited":false},[visualEvidence],"CATALOGUE_CLASSIFICATION","HIGH",null),solid3D:notApplicable(),mechanism:notApplicable(),contextImage:notApplicable(),responseSurface:notApplicable()},generation:{readiness:"PARTIAL",strategy:"PROCEDURAL_SVG",rendererFamilyId:"BEARING_NAVIGATION_TRIANGLE",allowedMediaAssetIds:[],requiredAssetTags:[],semanticInvariants:["three buoy points with side lengths AB, BC and AC","north references at A and B are parallel and upward","AB is 060 degrees clockwise from north at A","target shaded angle is at B between north and BC"],safeVariationAxes:["triangle proportions","buoy labels","line lengths on page","shading style"],unsafeVariations:["reverse bearing direction","place shaded angle on wrong side of north reference","north rays non-parallel"],permittedOrientationChanges:[],permittedStyleChanges:["line weight","label spacing","overall size","non-semantic proportions"],requiredRendererCapabilities:["bearing north rays","triangle distances","angle marker/shading","point labels"],requiredValidationChecks:["all semantic entities and relations resolve","labels agree with generated Question parameters","no clipping or label collision","print remains readable"],provenance:"GENERATION_ANALYSIS"},originality:visualOriginality(),validation:visualValidation(true,true),sourceEvidence:[visualEvidence],confidence:"HIGH",}],visualCount:1,relationships:[],containsEssentialVisualData:true,containsContextImage:false,containsProcedurallyReproducibleDiagram:true,containsResponseSurface:false,generationRequiresMultipleVisuals:false,},[visualEvidence]),
-// ============================================================================
-// SECTION 13 — MODEL / SPECIALISED PROFILES
-// ============================================================================
-mathematicalModel:notApplicable(),specialisedProfiles:{arithmetic:notApplicable(),percentage:notApplicable(),powersSurdsScientific:notApplicable(),algebra:notApplicable(),equationsInequalities:notApplicable(),functionsGraphs:notApplicable(),statistics:notApplicable(),geometryMeasureCircleSimilarity:catalogValue({"geometryFamilies":["TRIANGLE"],"dimensions":["2D"],"compoundShapeOrSolid":false,"similarityUsed":false,"circleGeometryUsed":false,"pythagorasUsed":false,"areaRequired":false,"volumeRequired":false,"surfaceAreaRequired":false},[evidence],"CATALOGUE_CLASSIFICATION","HIGH",null),trigonometry:catalogValue({"trigFunctions":["COS"],"trigContext":"NON_RIGHT_TRIANGLE","angleUnit":"DEGREES","domainStart":null,"domainEnd":null,"domainEndInclusive":null,"quadrantReasoningRequired":false,"inverseTrigRequired":true,"multipleSolutionsRequired":false,"exactTrigValuesRequired":false,"sineRuleUsed":false,"cosineRuleUsed":true,"areaFormulaUsed":false,"calculatorModeSensitive":true},[evidence],"CATALOGUE_CLASSIFICATION","HIGH",null),bearings:catalogValue({"bearingsPresent":true,"threeFigureBearingsRequired":true,"northReferenceRequired":true,"clockwiseFromNorthReasoningRequired":true,"scaleDrawingProhibited":false},[evidence],"CATALOGUE_CLASSIFICATION","HIGH",null),coordinateGeometry:notApplicable(),vectors:notApplicable()},
-// ============================================================================
-// SECTION 15 — FAMILY / SURFACE / GENERATION
-// ============================================================================
-family:{"familyId":"TRIG_COSINE_RULE_THEN_BEARING_ANGLE","subFamilyId":null,"familyConfidence":"HIGH","structuralSignature":["SSS triangle","calculate included/interior angle","given three-figure bearing","parallel north references","derive second directional angle"],"surfaceStyleIds":["BEARING_TRIANGLE_MULTIPART","HENCE_DEPENDENCY"],"relatedFamilyIds":[]},surface:{"abstractOrContextual":"CONTEXTUAL","proseAmount":"HIGH","visualAmount":"HIGH","layoutComplexity":"HIGH","informationOrderCanVarySafely":false,"visualPlacementCanVarySafely":false},generation:{"readiness":"PARTIAL","linkedGeneratorFamilyIds":["TRIG_COSINE_RULE_THEN_BEARING_ANGLE"],"invariantMathematics":["SSS cosine-rule angle feeds bearing geometry","north-reference relationship"],"variableParameters":["three side lengths","initial bearing","point labels","orientation"],"parameterConstraints":["triangle valid","target angle valid and non-degenerate"],"safeContextVariations":["boats/buoys","aircraft/navigation points","survey locations"],"safeRepresentationVariations":["diagram can be redrawn with independent proportions while north semantics remain fixed"],"unsafeVariations":["north lines not parallel","bearing measured from wrong ray"],"difficultyControls":["side-length arithmetic","bearing orientation complexity"],"requiredVisualCapabilities":["bearing navigation renderer","triangle with north references"],"requiredValidationChecks":["mark total and part structure remain valid","generated values satisfy all parameter constraints","required answer form remains attainable","generated instance is mathematically non-degenerate"],"provenance":"GENERATION_ANALYSIS"},
-// ============================================================================
-// SECTION 16 — SOURCE ISOLATION / REVIEW
-// ============================================================================
-sourceIsolation:sourceIsolation(),review:questionReviewInProgress(true,"P2"),} satisfies QuestionCatalogEntry;
+import type { QuestionCatalogEntry } from "../../QuestionCatalogTypes";
+import {
+  catalogValue,
+  notApplicable,
+  qpEvidence,
+  questionReviewInProgress,
+  sourceIsolation,
+  visualOriginality,
+  visualValidation,
+} from "../../QuestionCatalogHelpers";
+
+const evidence = qpEvidence("10", 28, "QUESTION", "P2", 12);
+const visualEvidence = qpEvidence("10", 28, "VISUAL", "P2", 12);
+
+export const N5_MATHS_2014_P2_Q10 = {
+  identity: {
+    id: "N5_MATH_2014_P2_Q10",
+    schemaVersion: "N5_CATALOG_V2",
+    courseId: "N5_MATH",
+    paperContextId: "N5_MATH_2014_P2_CONTEXT",
+    year: 2014,
+    paper: "P2",
+    questionNumber: "10",
+    answerCatalogId: "N5_MATH_2014_P2_Q10_MS",
+  },
+
+  sourceLayout: {
+    sourcePages: [28],
+    printedPageLabels: ["Page 12"],
+    continuesAcrossPages: false,
+    answerSpace: {
+      category: "LARGE",
+      estimatedWritingLines: 9,
+      responseSurfaceVisualIds: [],
+      separateFinalAnswerAreaPresent: false,
+      measurementMethod: "PDF_RENDER",
+      sourceMeasurements: [
+        {
+          id: "Q10_SPACE_A",
+          regionType: "WRITTEN_WORKING",
+          questionPartIds: ["Q10_a"],
+          pdfPageNumber: 28,
+          printedPageLabel: "Page 12",
+          measurementMethod: "PDF_RENDER",
+          renderDpi: 300,
+          pageWidthPx: 2481,
+          pageHeightPx: 3508,
+          topPx: 1590,
+          bottomPx: 2416,
+          leftPx: null,
+          rightPx: null,
+          heightPx: 826,
+          widthPx: null,
+          topPt: 381.53,
+          bottomPt: 579.9,
+          leftPt: null,
+          rightPt: null,
+          heightPt: 198.37,
+          widthPt: null,
+          heightMm: 69.98,
+          widthMm: null,
+          boundaryConvention: "Bottom of part (a) instruction to the top of part (b).",
+          notes: null,
+        },
+        {
+          id: "Q10_SPACE_B",
+          regionType: "WRITTEN_WORKING",
+          questionPartIds: ["Q10_b"],
+          pdfPageNumber: 28,
+          printedPageLabel: "Page 12",
+          measurementMethod: "PDF_RENDER",
+          renderDpi: 300,
+          pageWidthPx: 2481,
+          pageHeightPx: 3508,
+          topPx: 2471,
+          bottomPx: 3119,
+          leftPx: null,
+          rightPx: null,
+          heightPx: 648,
+          widthPx: null,
+          topPt: 593.15,
+          bottomPt: 748.59,
+          leftPt: null,
+          rightPt: null,
+          heightPt: 155.44,
+          widthPt: null,
+          heightMm: 54.84,
+          widthMm: null,
+          boundaryConvention: "Bottom of part (b) instruction to the top of the Total marks line.",
+          notes: null,
+        },
+      ],
+      notes: "Separate working regions follow each part of the navigation problem.",
+    },
+    sourceEvidence: [evidence],
+  },
+
+  structure: {
+    structureType: "MULTIPART",
+    totalMarks: 5,
+    parts: [
+      {
+        id: "Q10_a",
+        label: "a",
+        marks: 3,
+        primarySkillId: "trig-t04-cosine-rule",
+        secondarySkillIds: [],
+        conceptIds: ["trig-t4-2"],
+        topic: "TRIG",
+        commandTypes: ["CALCULATE"],
+        responseTypes: ["NUMBER"],
+        dependsOnPartIds: [],
+        sharedInformationIds: ["Q10_INFO_AB", "Q10_INFO_BC", "Q10_INFO_AC"],
+        visualElementIds: ["VIS_Q10"],
+        standardProfile: "A",
+        thinkingProfile: "OPERATIONAL",
+        calculatorBurden: "CALCULATOR_STRONGLY_EXPECTED",
+      },
+      {
+        id: "Q10_b",
+        label: "b",
+        marks: 2,
+        primarySkillId: "trig-t05-bearings",
+        secondarySkillIds: [],
+        conceptIds: ["trig-t5-1"],
+        topic: "TRIG",
+        commandTypes: ["FIND"],
+        responseTypes: ["NUMBER"],
+        dependsOnPartIds: ["Q10_a"],
+        sharedInformationIds: ["Q10_INFO_BEARING"],
+        visualElementIds: ["VIS_Q10"],
+        standardProfile: "A",
+        thinkingProfile: "REASONING",
+        calculatorBurden: "CALCULATOR_STRONGLY_EXPECTED",
+      },
+    ],
+    dependencyType: "HENCE",
+    sharedStimulus: true,
+    sharedVisuals: true,
+    sharedGivenData: true,
+    requiredResultProvided: false,
+  },
+
+  curriculum: {
+    primaryTopic: "TRIG",
+    primarySkillId: "trig-t04-cosine-rule",
+    secondarySkillIds: ["trig-t05-bearings"],
+    primaryConceptId: "trig-t4-2",
+    conceptIds: ["trig-t4-2", "trig-t5-1"],
+    paperSuitability: "P2",
+    standardProfile: "A",
+    thinkingProfile: "REASONING",
+    crossSkillQuestion: true,
+    skillMarkDistribution: { "trig-t04-cosine-rule": 3, "trig-t05-bearings": 2 },
+    conceptMarkDistribution: { "trig-t4-2": 3, "trig-t5-1": 2 },
+  },
+
+  task: {
+    commandTypes: ["CALCULATE", "FIND"],
+    responseTypes: ["NUMBER"],
+    responseCount: 2,
+    explicitMethodCue: false,
+    methodRestricted: false,
+    workingRequestedInPrompt: false,
+    justificationRequested: false,
+    contextualConclusionRequested: false,
+    visualResponseRequired: false,
+  },
+
+  mathematics: {
+    primaryGoal: "Use the cosine rule for an SSS triangle, then combine the result with bearing geometry.",
+    subgoals: [
+      { id: "Q10_S1", summary: "Calculate angle ABC from the three side lengths.", dependsOnSubgoalIds: [] },
+      { id: "Q10_S2", summary: "Transfer the 060 degree bearing using parallel north references.", dependsOnSubgoalIds: [] },
+      { id: "Q10_S3", summary: "Combine the two angles to obtain the shaded angle.", dependsOnSubgoalIds: ["Q10_S1", "Q10_S2"] },
+    ],
+    operationTypes: ["SUBSTITUTE", "REARRANGE", "EVALUATE", "INTERPRET"],
+    requiredFormulaIds: ["COSINE_RULE"],
+    requiredTheoremIds: [],
+    stageCount: 3,
+    intermediateQuantityTypes: ["angle ABC", "bearing-derived angle"],
+    methodSelectionRequired: false,
+    solutionCountExpected: 1,
+    validitySelectionRequired: false,
+    representationTransitions: [],
+  },
+
+  information: [
+    { id: "Q10_INFO_AB", informationType: "distance", normalisedContent: "AB is 8 km", value: 8, unit: "km", source: "TEXT", explicitness: "EXPLICIT", role: "GIVEN_VALUE", visualElementId: "VIS_Q10", usedByPartIds: ["Q10_a", "Q10_b"] },
+    { id: "Q10_INFO_BC", informationType: "distance", normalisedContent: "BC is 11 km", value: 11, unit: "km", source: "TEXT", explicitness: "EXPLICIT", role: "GIVEN_VALUE", visualElementId: "VIS_Q10", usedByPartIds: ["Q10_a"] },
+    { id: "Q10_INFO_AC", informationType: "distance", normalisedContent: "AC is 13 km", value: 13, unit: "km", source: "TEXT", explicitness: "EXPLICIT", role: "GIVEN_VALUE", visualElementId: "VIS_Q10", usedByPartIds: ["Q10_a"] },
+    { id: "Q10_INFO_BEARING", informationType: "bearing", normalisedContent: "B is on bearing 060 degrees from A", value: 60, unit: "degrees", source: "TEXT", explicitness: "EXPLICIT", role: "ORIENTATION", visualElementId: "VIS_Q10", usedByPartIds: ["Q10_b"] },
+  ],
+
+  reasoning: {
+    reasoningTypes: ["MULTI_STAGE", "INFORMATION_MARSHALLING", "VISUAL_INTERPRETATION", "REPRESENTATION_TRANSLATION"],
+    difficulty: {
+      overallDifficulty: "HIGH",
+      methodSelectionLoad: "MEDIUM",
+      arithmeticLoad: "MEDIUM",
+      algebraicLoad: "VERY_LOW",
+      representationLoad: "HIGH",
+      languageLoad: "MEDIUM",
+      contextInterpretationLoad: "MEDIUM",
+      reasoningDepth: "HIGH",
+      dependencyCount: 2,
+      difficultyDrivers: ["SSS cosine-rule selection", "parallel north references", "bearing-angle combination"],
+    },
+  },
+
+  numbers: {
+    numberTypes: ["INTEGER", "DECIMAL"],
+    nonCalculatorFriendly: false,
+    exactAndApproximateMixed: true,
+    simplificationVisibility: "NOT_APPLICABLE",
+    expectedFinalValueForm: "DECIMAL",
+    intermediateValueSize: "MEDIUM",
+    finalValueSize: "SMALL",
+    dominantInputFormat: "INTEGER",
+    dominantOutputFormat: "DECIMAL",
+    magnitudeNotes: null,
+  },
+
+  calculator: {
+    status: "CALCULATOR_REQUIRED",
+    burden: "CALCULATOR_STRONGLY_EXPECTED",
+    requiredFunctions: ["inverse cosine"],
+    modeSensitive: true,
+    modeRequirements: ["degree mode"],
+    notes: "Inverse cosine is required for the non-special SSS angle.",
+  },
+
+  parameterDesign: {
+    deliberatelyConstructedValues: true,
+    exactResultDesigned: false,
+    roundingDesigned: false,
+    factorisableDesigned: false,
+    perfectSquareDesigned: false,
+    pythagoreanTripleUsed: false,
+    niceRatioUsed: false,
+    validSolutionCountDesigned: null,
+    parameterConstraints: ["side lengths satisfy triangle inequality", "target shaded angle is positive and non-degenerate"],
+    safeVariationAxes: ["three side lengths", "initial bearing", "labels"],
+    invariantRelationships: ["part b uses part a", "north references are parallel", "bearing is clockwise from north"],
+    degeneracyConditionsToAvoid: ["collinear triangle", "zero/reflex target angle"],
+  },
+
+  constraints: {
+    mathematicalDomainConstraints: ["Triangle side lengths satisfy triangle inequality."],
+    contextValidityConstraints: ["Bearing uses clockwise-from-north convention."],
+    calculatorModeConstraints: ["Degree mode is required."],
+    methodConstraints: [],
+    presentationConstraints: [],
+  },
+
+  answerSpecification: {
+    answerForm: "APPROXIMATE",
+    simplestFormRequired: false,
+    rationalDenominatorRequired: false,
+    positivePowersRequired: false,
+    scientificNotationRequired: false,
+    precisionType: "NONE",
+    precisionValue: null,
+    units: { dimension: "angle", unitSymbol: "degrees", conversionRequired: false, unitsExplicitlyRequested: false },
+    multipleAnswersRequired: 2,
+    domainRestriction: null,
+    contextualWordsRequired: false,
+    coordinateOrderRelevant: false,
+    bracketsRelevant: false,
+    visualAnswerRequired: false,
+  },
+
+  context: {
+    contextualised: true,
+    contextDomain: "boat race navigation",
+    contextRole: "MODEL_DEFINING",
+    namedPeoplePresent: false,
+    currencyPresent: false,
+    realWorldUnitsPresent: true,
+    realismConstrainsAnswer: true,
+    contextObjects: ["boats", "buoys", "north references", "route triangle"],
+    contextCanBeSafelyReplaced: true,
+  },
+
+  language: {
+    informationDensity: "HIGH",
+    scaffoldingLevel: "MEDIUM",
+    bulletStructureUsed: false,
+    naturalLanguageInterpretationRequired: true,
+    promptSummary: "An SSS navigation triangle and initial bearing lead from a cosine-rule angle to a second directional angle.",
+    promptStructure: {
+      sentenceCount: 6,
+      promptWordCount: 56,
+      introductionStyle: "NAVIGATION_CONTEXT_AND_BEARING_DIAGRAM_FIRST",
+      relationshipStatementStyle: "BEARING_AND_THREE_SIDE_LENGTHS_DEFINE_ROUTE_TRIANGLE",
+      commandStyle: "CALCULATE_INTERIOR_ANGLE_THEN_HENCE_SHADED_ANGLE",
+      temporalStructure: "SEQUENCE_OF_EVENTS",
+      informationOrder: ["CONTEXT", "BEARING", "THREE_DISTANCES", "ANGLE_ABC", "HENCE_SHADED_ANGLE"],
+      normalisedPromptStructure: ["Introduce three navigation points.", "Supply one bearing and all three side lengths.", "Calculate an interior angle, then use it for the shaded angle."],
+      usesPronounReference: false,
+      lexicalFeatureTags: ["bearing", "cosine rule", "hence", "navigation diagram"],
+      generatorVariationNotes: "Vary a valid SSS triangle and bearing while preserving the north-reference dependency.",
+    },
+    styleNotes: null,
+  },
+
+  visuals: catalogValue({
+    elements: [{
+      id: "VIS_Q10",
+      sourceOrder: 1,
+      visualType: "BEARING_DIAGRAM",
+      roles: ["ESSENTIAL_DATA", "STRUCTURAL_MODEL", "ORIENTATION_REFERENCE"],
+      dependency: "REQUIRED_TO_SOLVE",
+      candidateInteraction: "READ_ONLY",
+      textRelationship: "PARTLY_DUPLICATED",
+      scale: { mode: "SCHEMATIC", measurementFromDrawingPermitted: false, proportionalAppearanceDesirable: true, exactGeometryRequiredForRenderer: true, notes: "Orientation is semantic; scale measurement is not valid." },
+      orientation: { verticalDirectionMeaningful: true, horizontalDirectionMeaningful: true, northReferenceMeaningful: true, groundReferenceMeaningful: false, startPositionMeaningful: false, rotationDirectionMeaningful: false, viewpointMeaningful: false, mirroringSafe: false, rotationSafe: false },
+      labels: [],
+      semanticModel: {
+        entities: [
+          { id: "Q10_A", entityType: "POINT", semanticName: "buoy A", printedLabel: "A", numericValue: null, symbolicValue: null, unit: null, mathematicallyEssential: true, orientationMeaningful: true, candidateEditable: false, attributes: {} },
+          { id: "Q10_B", entityType: "POINT", semanticName: "buoy B", printedLabel: "B", numericValue: null, symbolicValue: null, unit: null, mathematicallyEssential: true, orientationMeaningful: true, candidateEditable: false, attributes: {} },
+          { id: "Q10_C", entityType: "POINT", semanticName: "buoy C", printedLabel: "C", numericValue: null, symbolicValue: null, unit: null, mathematicallyEssential: true, orientationMeaningful: true, candidateEditable: false, attributes: {} },
+          { id: "Q10_NA", entityType: "RAY", semanticName: "north at A", printedLabel: "North", numericValue: null, symbolicValue: null, unit: null, mathematicallyEssential: true, orientationMeaningful: true, candidateEditable: false, attributes: {} },
+          { id: "Q10_NB", entityType: "RAY", semanticName: "north at B", printedLabel: "North", numericValue: null, symbolicValue: null, unit: null, mathematicallyEssential: true, orientationMeaningful: true, candidateEditable: false, attributes: {} },
+        ],
+        relations: [
+          { id: "Q10_R1", relationType: "CONNECTED_TO", fromEntityIds: ["Q10_A", "Q10_B", "Q10_C"], toEntityIds: [], normalisedMeaning: "A, B and C form the supplied SSS triangle.", essentialToSolution: true, sourceEvidence: [visualEvidence] },
+          { id: "Q10_R2", relationType: "PARALLEL_TO", fromEntityIds: ["Q10_NA"], toEntityIds: ["Q10_NB"], normalisedMeaning: "North references at A and B are parallel.", essentialToSolution: true, sourceEvidence: [visualEvidence] },
+        ],
+        facts: [
+          { id: "Q10_F1", factType: "BEARING_AND_DISTANCES", normalisedFact: "AB=8 km on bearing 060 degrees; BC=11 km; AC=13 km.", relatedEntityIds: ["Q10_A", "Q10_B", "Q10_C", "Q10_NA"], explicitness: "EXPLICIT_LABEL", essentialToSolution: true, sourceEvidence: [visualEvidence] },
+          { id: "Q10_F2", factType: "TARGET_ANGLE", normalisedFact: "Part (b) targets the shaded angle at B between north and BC.", relatedEntityIds: ["Q10_B", "Q10_NB", "Q10_C"], explicitness: "EXPLICIT_SYMBOL", essentialToSolution: true, sourceEvidence: [visualEvidence] },
+        ],
+      },
+      layout: { sourcePageNumber: 28, sourcePagePosition: "MIDDLE", sourceRelativeWidth: "LARGE", preferredGeneratedAspectRatio: "1:1", minimumReadableWidthMm: null, minimumReadableHeightMm: null, allowInlinePlacement: false, allowFullWidthPlacement: true, labelCollisionSensitive: true },
+      specialisedProfiles: {
+        geometry: catalogValue({ dimension: "2D", shapeFamilies: ["TRIANGLE"], labelledPointIds: ["Q10_A", "Q10_B", "Q10_C"], rightAnglesPresent: false, parallelRelationshipsPresent: true, equalLengthRelationshipsPresent: false, similarityPresent: false, congruencePresent: false, shadedRegionsPresent: true, auxiliaryLinesPresent: true, algebraicDimensionsPresent: false, compoundShapePresent: false }, [visualEvidence]),
+        circle: notApplicable(), graph: notApplicable(), scatter: notApplicable(), table: notApplicable(), vector: notApplicable(),
+        bearing: catalogValue({ locationEntityIds: ["Q10_A", "Q10_B", "Q10_C"], northReferenceEntityIds: ["Q10_NA", "Q10_NB"], bearingsClockwiseFromNorth: true, routeSegmentsPresent: true, distancesLabelled: true, dueDirectionRelationshipsPresent: false, scaleDrawingProhibited: false }, [visualEvidence]),
+        solid3D: notApplicable(), mechanism: notApplicable(), contextImage: notApplicable(), responseSurface: notApplicable(),
+      },
+      generation: {
+        readiness: "PARTIAL",
+        strategy: "PROCEDURAL_SVG",
+        rendererFamilyId: "BEARING_NAVIGATION_TRIANGLE",
+        allowedMediaAssetIds: [],
+        requiredAssetTags: [],
+        semanticInvariants: ["SSS route triangle", "parallel north rays", "clockwise bearing from north", "target angle at B"],
+        safeVariationAxes: ["triangle proportions", "labels", "line styling"],
+        unsafeVariations: ["reverse bearing direction", "non-parallel north rays", "wrong target-angle side"],
+        permittedOrientationChanges: [],
+        permittedStyleChanges: ["line weight", "spacing", "overall size"],
+        requiredRendererCapabilities: ["triangle", "north rays", "bearing angle", "distance labels"],
+        requiredValidationChecks: ["values and labels agree", "north semantics preserved", "print readable"],
+        provenance: "GENERATION_ANALYSIS",
+      },
+      originality: visualOriginality(),
+      validation: visualValidation(true, true),
+      sourceEvidence: [visualEvidence],
+      confidence: "HIGH",
+    }],
+    visualCount: 1,
+    relationships: [],
+    containsEssentialVisualData: true,
+    containsContextImage: false,
+    containsProcedurallyReproducibleDiagram: true,
+    containsResponseSurface: false,
+    generationRequiresMultipleVisuals: false,
+  }, [visualEvidence]),
+
+  mathematicalModel: notApplicable(),
+  specialisedProfiles: {
+    arithmetic: notApplicable(), percentage: notApplicable(), powersSurdsScientific: notApplicable(), algebra: notApplicable(), equationsInequalities: notApplicable(), functionsGraphs: notApplicable(), statistics: notApplicable(),
+    geometryMeasureCircleSimilarity: catalogValue({ geometryFamilies: ["TRIANGLE"], dimensions: ["2D"], compoundShapeOrSolid: false, similarityUsed: false, circleGeometryUsed: false, pythagorasUsed: false, areaRequired: false, volumeRequired: false, surfaceAreaRequired: false }, [evidence]),
+    trigonometry: catalogValue({ trigFunctions: ["COS"], trigContext: "NON_RIGHT_TRIANGLE", angleUnit: "DEGREES", domainStart: null, domainEnd: null, domainEndInclusive: null, quadrantReasoningRequired: false, inverseTrigRequired: true, multipleSolutionsRequired: false, exactTrigValuesRequired: false, sineRuleUsed: false, cosineRuleUsed: true, areaFormulaUsed: false, calculatorModeSensitive: true }, [evidence]),
+    bearings: catalogValue({ bearingsPresent: true, threeFigureBearingsRequired: true, northReferenceRequired: true, clockwiseFromNorthReasoningRequired: true, scaleDrawingProhibited: false }, [evidence]),
+    coordinateGeometry: notApplicable(), vectors: notApplicable(),
+  },
+
+  family: { familyId: "TRIG_COSINE_RULE_THEN_BEARING_ANGLE", subFamilyId: null, familyConfidence: "HIGH", structuralSignature: ["SSS triangle", "cosine-rule angle", "three-figure bearing", "parallel north references", "hence angle"], surfaceStyleIds: ["BEARING_TRIANGLE_MULTIPART", "HENCE_DEPENDENCY"], relatedFamilyIds: [] },
+  surface: { abstractOrContextual: "CONTEXTUAL", proseAmount: "HIGH", visualAmount: "HIGH", layoutComplexity: "HIGH", informationOrderCanVarySafely: false, visualPlacementCanVarySafely: false },
+  generation: { readiness: "PARTIAL", linkedGeneratorFamilyIds: ["TRIG_COSINE_RULE_THEN_BEARING_ANGLE"], invariantMathematics: ["SSS cosine-rule angle feeds bearing geometry", "parallel north references"], variableParameters: ["side lengths", "bearing", "labels"], parameterConstraints: ["valid non-degenerate triangle and target angle"], safeContextVariations: ["buoys", "navigation points", "survey points"], safeRepresentationVariations: ["original procedural redraw"], unsafeVariations: ["incorrect north/bearing orientation"], difficultyControls: ["SSS arithmetic", "bearing geometry"], requiredVisualCapabilities: ["bearing navigation renderer"], requiredValidationChecks: ["mark structure valid", "parameters valid", "answer attainable", "instance non-degenerate"], provenance: "GENERATION_ANALYSIS" },
+  sourceIsolation: sourceIsolation(),
+  review: questionReviewInProgress(true, "P2"),
+} satisfies QuestionCatalogEntry;
