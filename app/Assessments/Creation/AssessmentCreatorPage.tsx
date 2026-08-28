@@ -25,15 +25,9 @@ import {
   useAssessmentQualityAnalysis,
 } from "./Analysis/useAssessmentQualityAnalysis";
 
-import AssessmentSettings from "./AssessmentSettings/AssessmentSettings";
-
 import {
   getTodayAssessmentDisplayDate,
 } from "./AssessmentSettings/AssessmentDateTime";
-
-import {
-  useAssessmentSettingsDrawer,
-} from "./AssessmentSettings/useAssessmentSettingsDrawer";
 
 import {
   useAssessmentCreationFeedback,
@@ -462,14 +456,6 @@ function AssessmentCreatorContent() {
    */
 
   const [
-    settingsOpen,
-    setSettingsOpen,
-  ] =
-    useState(
-      false
-    );
-
-  const [
     assessmentName,
     setAssessmentName,
   ] =
@@ -546,14 +532,10 @@ function AssessmentCreatorContent() {
     setPrimaryCoverDate,
 
     setStartTimeForPaper,
-    setEndTimeForPaper,
 
     setManualEndTimeForPaper,
 
     setCoverDateForPaper,
-    setCoverDateCustomForPaper,
-
-    setEndTimeManuallyEditedForPaper,
 
     p1StartTime,
     p1EndTime,
@@ -717,14 +699,6 @@ function AssessmentCreatorContent() {
 
     fieldRef:
       assessmentDateFieldRef,
-  });
-
-  useAssessmentSettingsDrawer({
-    open:
-      settingsOpen,
-
-    setOpen:
-      setSettingsOpen,
   });
 
 
@@ -1311,7 +1285,7 @@ function AssessmentCreatorContent() {
             "100%",
 
           minHeight:
-          0,
+            0,
 
           background:
             theme.bgPage,
@@ -1674,114 +1648,6 @@ function AssessmentCreatorContent() {
             }}
           />
         </div>
-
-        <AssessmentSettings
-          open={
-            settingsOpen
-          }
-
-          onClose={() =>
-            setSettingsOpen(
-              false
-            )
-          }
-
-          theme={
-            theme
-          }
-
-          includeCoverSheet={
-            includeCoverSheet
-          }
-
-          setIncludeCoverSheet={
-            setIncludeCoverSheet
-          }
-
-          showCoverDateTime={
-            showCoverDateTime
-          }
-
-          setShowCoverDateTime={
-            setShowCoverDateTime
-          }
-
-          assessmentDate={
-            assessmentDate
-          }
-
-          setAssessmentDate={
-            setPrimaryCoverDate
-          }
-
-          coverDateByPaper={
-            coverDateByPaper
-          }
-
-          startTimeByPaper={
-            startTimeByPaper
-          }
-
-          endTimeByPaper={
-            endTimeByPaper
-          }
-
-          coverDateCustomByPaper={
-            coverDateCustomByPaper
-          }
-
-          setStartTimeForPaper={
-            setStartTimeForPaper
-          }
-
-          setEndTimeForPaper={
-            setEndTimeForPaper
-          }
-
-          setCoverDateForPaper={
-            setCoverDateForPaper
-          }
-
-          setCoverDateCustomForPaper={
-            setCoverDateCustomForPaper
-          }
-
-          setEndTimeManuallyEditedForPaper={
-            setEndTimeManuallyEditedForPaper
-          }
-
-          showScottishCandidateNumberBox={
-            showScottishCandidateNumberBox
-          }
-
-          setShowScottishCandidateNumberBox={
-            setShowScottishCandidateNumberBox
-          }
-
-          includeFormulaSheet={
-            includeFormulaSheet
-          }
-
-          setIncludeFormulaSheet={
-            setIncludeFormulaSheet
-          }
-
-          showProgressPanel={
-            showProgressPanel
-          }
-
-          setShowProgressPanel={
-            setShowProgressPanel
-          }
-
-          resetLayout={
-            resetLayout
-          }
-
-          resetZoom={
-            resetZoom
-          }
-        />
       </main>
     </>
   );
