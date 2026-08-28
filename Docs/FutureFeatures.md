@@ -405,3 +405,136 @@ FA-XXX — Implemented 2026-09-01
 ```
 
 The active future list should remain useful rather than becoming another historical ledger.
+
+---
+
+# National 5 Mathematics Catalogue / Generation Programme — Added 28 August 2026
+
+The following entries capture work that is deliberately **not yet complete** after the 2014 Question Catalogue pilot. The architecture itself is established; these entries describe the next population, reconciliation and retirement stages.
+
+## FA-018 — Populate the Answer Catalogue from historical marking schemes
+
+**Status:** PLANNED  
+**Area:** National 5 Maths / `02_AnswerCatalog`
+
+Catalogue the matching historical answers/marking schemes as first-class evidence paired to each Question Catalogue entry.
+
+The Answer Catalogue should model the marking scheme as a structured evidence system rather than a single linear worked solution. It should support method pathways, mark nodes, dependencies, implied evidence, follow-through, answer-only rules, alternative methods, exactness/rounding, units, notation, diagram evidence, common-result rules and cross-question/general marking policy where the source supports them.
+
+Question and Answer files remain physically separate for navigability while the Question Paper and matching Marking Scheme are analysed as a paired evidence unit.
+
+The 2014 Question entries currently remain `IN_PROGRESS` until their matching Answer/MS catalogue pass is completed and cross-checked.
+
+---
+
+## FA-019 — Extend full-fidelity Question cataloguing across the historical corpus
+
+**Status:** PLANNED  
+**Area:** National 5 Maths / `01_QuestionCatalog`
+
+After the 2014 pilot contracts and workflow have survived the Answer Catalogue stress test, extend the same evidence standard through the remaining historical corpus:
+
+```text
+2015
+2016
+2017
+2018
+2019
+2021
+2022
+2023
+2024
+2025
+```
+
+There is no 2020 National 5 examination paper in the intended corpus because of the COVID cancellation.
+
+The known corpus contains 337 numbered Questions across 2014–2019 and 2021–2025. Population should remain year/paper based and should not trade completeness for speed.
+
+---
+
+## FA-020 — Reconcile the National 5 Maths Skills Tree after corpus cataloguing
+
+**Status:** PLANNED / DEFERRED UNTIL CATALOGUE PHASE COMPLETES  
+**Area:** National 5 Maths / Skills
+
+Historical examination evidence is treated as authoritative evidence of what actually appeared. The project-authored Skills Tree is useful infrastructure but can contain incorrect paper-suitability or classification assumptions.
+
+The 2014 Paper 1 pilot already exposed examples where historical Questions conflict with current Skills Tree paper-suitability metadata.
+
+Do **not** distort catalogue evidence to make it agree with the current Skills Tree. Record the historical fact and flag the mismatch. Reconcile the Skills Tree systematically after enough corpus evidence has been catalogued to make the correction evidence-led rather than reactive.
+
+---
+
+## FA-021 — Populate `03_QuestionGeneration` from catalogue knowledge
+
+**Status:** PLANNED / DEFERRED UNTIL CATALOGUE EVIDENCE IS SUFFICIENT  
+**Area:** National 5 Maths / Question Generation
+
+Build original Question generators from the normalised structural knowledge learned from the historical Question + Answer catalogues.
+
+Generation must consume semantic/catalogued knowledge rather than historical wording or artwork. It should produce Builder/Assessment-native Question objects only after the catalogue layer has described the relevant family, constraints, difficulty, response space, representations and safe parameter variation.
+
+The earlier successful trig-equation prototype remains evidence that catalogue-informed generation is viable, but the new workflow should be populated against the full-fidelity contracts rather than restoring the narrow legacy generation layout.
+
+---
+
+## FA-022 — Populate `04_AnswerGeneration` and downloadable marking-scheme output
+
+**Status:** PLANNED / DEFERRED UNTIL ANSWER CATALOGUE EVIDENCE IS SUFFICIENT  
+**Area:** National 5 Maths / Answer Generation
+
+Generate original worked answers and illustrative marking-scheme structures from catalogued marking knowledge, linked to generated Questions.
+
+The generation layer should preserve legitimate alternative methods, mark dependencies, follow-through and presentation requirements without copying historical marking-scheme wording.
+
+This should ultimately support both in-application answers and downloadable marking-scheme-style documents through the existing document/Compilation architecture.
+
+---
+
+## FA-023 — Build out deterministic visual renderer families and context-asset bank
+
+**Status:** PLANNED / INVESTIGATE DURING GENERATION WORK  
+**Area:** National 5 Maths / `05_VisualAssets`
+
+Implement the renderer families required by the visual evidence catalogue, prioritising deterministic procedural SVG for mathematical schematics such as geometry, circles, graphs, scattergraphs, vectors, bearings, coordinate diagrams, solids and response surfaces.
+
+Context photographs/illustrations should come from an approved/licensed asset bank with licence metadata where a contextual image is useful. Historical source artwork and exact source geometry must not be used as generation templates.
+
+Runtime AI image generation is not required for essential mathematical diagrams.
+
+---
+
+## FA-024 — Retire `National5MathsLegacy` and the temporary TypeScript alias bridge
+
+**Status:** DEFERRED MAINTENANCE / MIGRATION END STATE  
+**Area:** National 5 Maths / Course integration
+
+The current runtime continues to resolve historical National 5 Maths imports through a temporary TypeScript path bridge into:
+
+```text
+app/Courses/National5MathsLegacy/
+```
+
+while the clean workflow architecture is built in:
+
+```text
+app/Courses/National5Maths/
+```
+
+Remove the bridge and legacy tree only after the clean Skills, Course config, Documents, catalogue/generation and runtime consumers have been migrated or replaced and the application is verified end-to-end.
+
+Do not delete the legacy tree merely because Explorer hides it or because the clean catalogue workspace now exists.
+
+---
+
+## FA-025 — Tighten catalogue completeness validation after the pilot transition
+
+**Status:** PLANNED  
+**Area:** National 5 Maths / catalogue contracts
+
+Several evidence fields added during the 2014 pilot are intentionally transitional/optional so the contract could be strengthened without breaking pre-rewrite entries.
+
+Once the pilot Question + Answer passes establish the final evidence standard, tighten validation so reviewed catalogue entries cannot silently omit required response-space measurement, part-demand, calculator, language or other mandatory evidence fields.
+
+Do this after the contract has survived real historical variety rather than prematurely hardening assumptions from one Question family.

@@ -1394,3 +1394,393 @@ Current-state documents (`AGENTS.md`, `Docs/Architecture.md`, `Docs/RepositoryMa
 Historical documents (`Docs/RefactorLedger.md` and historically framed Feature History entries) may retain old paths when those paths accurately describe the state at that time. When useful, add the current successor path rather than pretending the old path never existed.
 
 `Docs/LockedDecisions.md` preserves permanent decision IDs. Superseded decisions remain recorded and are explicitly linked to the newer decision that replaced or clarified them.
+
+---
+
+# PASS 4 — NATIONAL 5 MATHEMATICS CATALOGUE ARCHITECTURE UPDATE — 28 AUGUST 2026
+
+## 64. Current-Path Override for Sections 21–26
+
+Sections 21–26 above are retained because they document the National 5 Maths architecture that was current before the dedicated catalogue/generation transition began. **Their physical National 5 Maths paths are superseded by this Pass 4 section for current work.** Do not delete those earlier sections merely to make this file shorter.
+
+The current transition deliberately separates:
+
+```text
+app/Courses/National5Maths/
+→ clean catalogue / generation architecture being built now
+
+app/Courses/National5MathsLegacy/
+→ preserved former working National 5 Maths implementation used for runtime compatibility during migration
+```
+
+The legacy tree currently contains the former:
+
+```text
+AssessmentConfig.ts
+Documents/
+ExamQuestionAndAnswerCatalog/
+QuestionAndAnswerGeneration/
+Skills/
+```
+
+responsibilities. They are preserved, not endorsed as the destination architecture.
+
+The clean current National 5 Maths workspace is:
+
+```text
+app/Courses/National5Maths/
+├── 01_QuestionCatalog/
+├── 02_AnswerCatalog/
+├── 03_QuestionGeneration/
+├── 04_AnswerGeneration/
+├── 05_VisualAssets/
+├── PaperContexts/
+├── Skills/
+├── CatalogCoreTypes.ts
+└── National5MathsConfig.ts
+```
+
+The numeric prefixes are meaningful workflow ordering and are an intentional exception to the normal rejection of decorative numbering.
+
+---
+
+## 65. National 5 Maths Evidence-to-Generation Workflow
+
+The intended Course-owned knowledge flow is:
+
+```text
+historical Question Paper
+        ↓
+01_QuestionCatalog
+
+historical matching Marking Scheme
+        ↓
+02_AnswerCatalog
+
+Question + Answer structural knowledge
+        ↓
+03_QuestionGeneration
+        ↓
+04_AnswerGeneration
+        ↓
+05_VisualAssets / deterministic renderers / approved context assets
+        ↓
+generic Assessment question/answer contracts
+        ↓
+Assessment Creation / Compilation / PDF
+```
+
+The catalogue is evidence/knowledge architecture. It is **not** a second Builder-native question model and should not be forced to mirror Assessment runtime payloads directly.
+
+Generation adapts catalogued knowledge into the generic Assessment contracts.
+
+---
+
+## 66. Historical Examination Evidence Is Authoritative Evidence
+
+For historical cataloguing, the source Question Paper and matching Marking Scheme are treated as the authority for what actually appeared and how it was marked.
+
+Project-authored structures — including the Skills Tree — may be incomplete or wrong.
+
+Therefore:
+
+```text
+source evidence conflicts with project classification
+        ↓
+record the source fact accurately
+        ↓
+flag the classification mismatch
+        ↓
+fix project-authored metadata later
+```
+
+Never rewrite or distort a historical catalogue entry to make it agree with the current Skills Tree.
+
+The 2014 pilot already exposed paper-suitability mismatches in the current Skills Tree. Skills reconciliation is deliberately deferred until the broader catalogue phase is complete enough to support an evidence-led correction pass.
+
+---
+
+## 67. Question and Marking Scheme Are Paired Evidence
+
+Question Catalogue files and Answer Catalogue files are physically separate for navigability, but the historical Question Paper and matching Marking Scheme are analysed as an atomic evidence pair.
+
+The relationship is conceptually:
+
+```text
+Question source facts
++
+matching marking evidence
++
+paper/general marking policy
+=
+full historical evidence for that numbered Question
+```
+
+A Question entry should therefore link its matching Answer/MS catalogue ID, and its review should not be considered fully counterpart-validated until the matching marking-scheme pass has been completed.
+
+Do not infer marking logic from the Question Paper when a source Marking Scheme exists and has not yet been reviewed.
+
+---
+
+## 68. Historical Corpus and File Naming
+
+The intended National 5 Mathematics examination corpus is:
+
+```text
+2014–2019
+2021–2025
+```
+
+There is no 2020 examination paper in this corpus because of the COVID cancellation.
+
+The known corpus contains 337 numbered Questions across those years.
+
+Question Catalogue files use:
+
+```text
+N5_Maths_YYYY_Px_Qn.ts
+```
+
+Examples:
+
+```text
+N5_Maths_2014_P1_Q1.ts
+N5_Maths_2014_P2_Q13.ts
+```
+
+Matching Answer/Marking Scheme catalogue files use:
+
+```text
+N5_Maths_YYYY_Px_Qn_MS.ts
+```
+
+Question and Answer folders are organised by year and then `Paper1/` / `Paper2/`.
+
+Do not invent a 2020 folder as if a normal examination paper existed.
+
+---
+
+## 69. Universal Catalogue Evidence Rules
+
+`CatalogCoreTypes.ts` defines the common evidence language.
+
+Important rules include:
+
+```text
+VALUE
+NOT_APPLICABLE
+UNKNOWN
+NOT_REVIEWED
+```
+
+These states are not interchangeable. `UNKNOWN` must never be silently treated as `NOT_APPLICABLE`.
+
+Provenance remains explicit:
+
+```text
+SOURCE_FACT
+CATALOGUE_CLASSIFICATION
+GENERATION_ANALYSIS
+```
+
+A catalogue entry should make it possible to distinguish what the source directly establishes, what the project has classified from that evidence, and what has been inferred specifically to support safe future generation.
+
+Evidence references use source document/page/question locators. They do not license storing historical prompt wording as generator content.
+
+---
+
+## 70. Response Space Is First-Class Historical Evidence
+
+Candidate answer/working space must be catalogued as part of Question design.
+
+Do not reduce source spacing to a vague `SMALL` / `LARGE` label when reliable physical measurement is available.
+
+The strengthened Question Catalogue supports multiple measured response regions and records details such as:
+
+```text
+physical PDF page
+printed page label
+measurement method
+render DPI
+page pixel dimensions
+top / bottom / left / right boundaries
+pixel dimensions
+PDF-point dimensions
+millimetre dimensions
+boundary convention
+Question parts served by the region
+response-region type
+```
+
+The 2014 full-fidelity pilot uses controlled 300 dpi source renders for this evidence where appropriate.
+
+Exact historical layout measurements are **evidence about assessment design**. They are not source coordinates that a generator is allowed to copy as historical layout geometry.
+
+---
+
+## 71. Visual Evidence Is a First-Class Subsystem
+
+Do not treat diagrams, graphs, grids, context images or response surfaces as incidental decoration.
+
+Historical visuals must be analysed semantically:
+
+```text
+entities
+relationships
+facts
+orientation
+scale meaning
+labels
+candidate interaction
+response-surface role
+mathematical invariants
+safe variation
+renderer requirements
+```
+
+Essential mathematical visuals should normally be regenerated through deterministic/procedural SVG or equivalent code-driven renderers.
+
+Context photographs/illustrations may use a curated licensed/free asset bank with explicit licence/attribution metadata where appropriate.
+
+Do not pixel-trace, vector-trace, reuse, or feed historical source artwork/geometry into generation.
+
+The generation goal is to reproduce the **mathematical function** of a visual, not its historical artwork.
+
+Runtime AI image generation is not required for essential mathematical schematics.
+
+---
+
+## 72. Copyright / Source Isolation Is Structural
+
+Historical source material is evidence only.
+
+The catalogue/generation boundary must preserve:
+
+```text
+historical prompt wording stored in generator source → NO
+historical marking wording stored in generator source → NO
+historical pixel artwork stored/reused → NO
+historical vector geometry stored/reused → NO
+exact source coordinates reusable by generator → NO
+normalised semantic/mathematical facts usable → YES
+```
+
+Paraphrased structural descriptions, source locators, mathematical relationships and catalogue classifications are allowed because they describe evidence rather than copying the examination content as templates.
+
+---
+
+## 73. Temporary Legacy Runtime Bridge
+
+`tsconfig.json` currently contains a deliberate compatibility bridge:
+
+```text
+@/app/Courses/National5Maths
+@/app/Courses/National5Maths/*
+        ↓
+app/Courses/National5MathsLegacy
+```
+
+The normal root alias `@/*` still exists as well.
+
+This keeps old runtime imports working while the clean `National5Maths` workspace is built.
+
+**Important:** a new clean-workspace file must not assume that `@/app/Courses/National5Maths/...` points to the new folder during this transition. It currently resolves to legacy code.
+
+Use safe relative imports within the clean National 5 Maths catalogue/generation workspace, or introduce a deliberately approved new alias if one becomes necessary.
+
+`.vscode/settings.json` hides `National5MathsLegacy` and `.gitkeep` from normal navigation/search. That is visual convenience only; it does not make legacy code dead or remove it from Git/runtime.
+
+Remove the bridge only after its consumers have migrated and the clean Course implementation is proven.
+
+---
+
+## 74. 2014 Full-Fidelity Question Catalogue Pilot State
+
+The first full pilot is complete for Question Papers:
+
+```text
+2014 Paper 1 → 13 numbered Questions / 40 marks
+2014 Paper 2 → 13 numbered Questions / 50 marks
+```
+
+All 26 numbered 2014 Questions have been re-audited against the strengthened universal Question Catalogue contract.
+
+The entries include the restored legacy strengths — especially exact response-space measurement, part-level demand, calculator burden, richer numerical structure and forensic prompt/language structure — plus the new semantic visual and generation architecture.
+
+The matching 2014 Answer/Marking Scheme catalogue pass has **not** yet been completed. The Question review state should therefore continue to expose counterpart cross-checking as outstanding rather than pretending the paired evidence is finished.
+
+---
+
+## 75. Catalogue Completeness Before Mass Population
+
+Do not mass-populate later years merely because the folder structure exists.
+
+The intended sequence is:
+
+```text
+master Question Catalogue contract
+        ↓
+2014 P1 Question stress test
+        ↓
+2014 P2 Question stress test
+        ↓
+master Answer Catalogue / 2014 Answer stress test
+        ↓
+resolve contract gaps
+        ↓
+then expand through the remaining corpus
+```
+
+When a new source exposes a characteristic not representable by the current contract, improve the master contract and retrofit the pilot before multiplying the omission across hundreds of files.
+
+The legacy narrow pilot is valuable evidence of useful catalogue characteristics. Do not discard a proven legacy feature merely because the new architecture expresses it differently; determine whether its meaning is already represented before deciding it is redundant.
+
+---
+
+## 76. Answer Catalogue Design Direction
+
+The Answer Catalogue is intended to represent historical marking evidence, not merely a final answer string or one worked solution.
+
+It must be able to describe, where supported by source evidence:
+
+```text
+expected answer set
+method pathways
+mark nodes
+mark type / dependency
+implied evidence
+follow-through
+difficulty preservation
+answer-only rules
+working/location requirements
+alternative-method equivalence
+method exclusions / eligibility
+cross-part and cross-question rules
+rounding / exactness
+units / notation / context
+solution selection
+diagram/visual marking
+common-result rules
+special cases
+general marking policy links
+```
+
+Marking schemes should be understood as branching evidence/pathway graphs where necessary, not forced into one linear worked solution.
+
+---
+
+## 77. Current Pass / Next Pass Discipline
+
+At the end of Pass 4:
+
+```text
+Question Catalogue architecture → established
+2014 P1 Question Catalogue → full-fidelity pilot complete
+2014 P2 Question Catalogue → full-fidelity pilot complete
+documentation → reconciled
+Answer Catalogue population → next substantive evidence phase
+Skills Tree reconciliation → deliberately deferred until catalogue phase is mature
+legacy bridge retirement → deliberately deferred until clean runtime migration is proven
+```
+
+Do not silently expand an Answer Catalogue pass into Skills Tree correction, legacy deletion or runtime Course switching unless separately approved.

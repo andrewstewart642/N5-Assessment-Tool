@@ -2573,3 +2573,300 @@ WHEN A LOCKED RULE GENUINELY FAILS, SURFACE THE CONFLICT RATHER THAN DRIFTING.
 A future developer or AI assistant should treat this register as settled project memory, not a list of suggestions to reconsider.
 
 The architecture may evolve deliberately through explicit decisions and evidence. It must not drift accidentally.
+
+---
+
+# PART XXXVIII — NATIONAL 5 MATHEMATICS CATALOGUE / GENERATION DECISIONS
+
+## LD-282 — Historical examination source evidence outranks project-authored classification
+
+**Status:** LOCKED — IMPLEMENTED 28 AUGUST 2026
+
+For historical cataloguing, the actual Question Paper and matching Marking Scheme are authoritative evidence of what appeared and how it was marked.
+
+Project-authored structures such as the Skills Tree, paper-suitability metadata and generation assumptions are fallible.
+
+When they conflict:
+
+```text
+historical source fact
+        ↓
+record accurately
+        ↓
+flag the project-classification mismatch
+        ↓
+reconcile project metadata later
+```
+
+Never distort a historical catalogue entry to preserve a project-authored assumption.
+
+---
+
+## LD-283 — National 5 Maths uses a clean destination workspace plus preserved legacy runtime compatibility during migration
+
+**Status:** LOCKED — IMPLEMENTED 28 AUGUST 2026
+
+The clean destination architecture is:
+
+```text
+app/Courses/National5Maths/
+```
+
+The former working National 5 Maths implementation is preserved during migration at:
+
+```text
+app/Courses/National5MathsLegacy/
+```
+
+The legacy tree remains a compatibility source until its active consumers have migrated and the clean Course implementation is proven end-to-end.
+
+Do not add new catalogue/generation work to the legacy tree merely because current runtime imports still resolve there. Do not delete the legacy tree merely because it is hidden in Explorer.
+
+This is a deliberate bounded write-new migration consistent with LD-017, LD-018 and LD-241.
+
+---
+
+## LD-284 — National 5 Maths catalogue/generation folders use meaningful workflow ordering
+
+**Status:** LOCKED — IMPLEMENTED 28 AUGUST 2026
+
+The destination workflow is:
+
+```text
+01_QuestionCatalog
+        ↓
+02_AnswerCatalog
+        ↓
+03_QuestionGeneration
+        ↓
+04_AnswerGeneration
+        ↓
+05_VisualAssets
+```
+
+These numeric prefixes communicate evidence-to-generation sequence and are intentional meaningful ordering under LD-032/LD-280, not decorative Explorer numbering.
+
+Supporting owners such as `PaperContexts/` and `Skills/` remain unnumbered.
+
+---
+
+## LD-285 — Question and Answer catalogues are physically separate but Question Paper and matching Marking Scheme form one paired evidence unit
+
+**Status:** LOCKED
+
+Question files and Answer/Marking Scheme files remain separate for ownership and navigation.
+
+Historical analysis treats the source Question Paper and matching Marking Scheme as an atomic evidence pair:
+
+```text
+Question source facts
++
+matching marking evidence
++
+paper/general marking policy
+=
+full historical evidence for the numbered Question
+```
+
+Question-only cataloguing is a legitimate intermediate state, but counterpart validation remains incomplete until the matching Answer/MS evidence has been reviewed and cross-checked.
+
+Do not invent marking logic from the Question Paper when the source Marking Scheme exists but has not yet been catalogued.
+
+---
+
+## LD-286 — Catalogue evidence uses explicit typed state, provenance and source isolation
+
+**Status:** LOCKED — IMPLEMENTED 28 AUGUST 2026
+
+The common catalogue evidence model distinguishes:
+
+```text
+VALUE
+NOT_APPLICABLE
+UNKNOWN
+NOT_REVIEWED
+```
+
+`UNKNOWN` and `NOT_APPLICABLE` are not interchangeable.
+
+Provenance distinguishes:
+
+```text
+SOURCE_FACT
+CATALOGUE_CLASSIFICATION
+GENERATION_ANALYSIS
+```
+
+Historical source content is evidence only. Source locators, paraphrased/normalised structure, mathematical facts and semantic relationships may be catalogued; historical prompt wording and marking-scheme wording must not become generation templates.
+
+---
+
+## LD-287 — Exact candidate response space is first-class Question Catalogue evidence
+
+**Status:** LOCKED — IMPLEMENTED 28 AUGUST 2026
+
+The physical answer/working space supplied to candidates is part of historical Question design.
+
+When reliable source measurement is practical, the catalogue records more than broad `SMALL`/`LARGE` categories, including relevant PDF/printed page, measurement method, render DPI, page dimensions, response-region boundaries, px/pt/mm dimensions, boundary convention and the Question part(s) served by each region.
+
+One Question may contain multiple distinct response regions.
+
+Broad categories and estimated writing lines remain useful classifications, but do not replace measurable source geometry.
+
+Historical response-space measurements are evidence about assessment design; they are not reusable historical layout templates for generation.
+
+---
+
+## LD-288 — Historical visuals are catalogued semantically and essential mathematical visuals are regenerated originally
+
+**Status:** LOCKED
+
+Historical diagrams, graphs, grids, context images and response surfaces are first-class evidence.
+
+Catalogue the mathematical/contextual semantics required to understand their function: entities, relationships, facts, labels, scale meaning, orientation, candidate interaction, response-surface role, invariants, safe variation and renderer requirements.
+
+Do not pixel-trace, vector-trace, reuse or feed historical source artwork or exact historical geometry into generation.
+
+Essential mathematical schematics should normally be generated through deterministic procedural SVG or equivalent code-driven rendering from a new specification.
+
+Context photographs/illustrations may use approved original/licensed assets with appropriate licence/source metadata.
+
+Runtime AI image generation is not required for essential mathematical diagrams.
+
+---
+
+## LD-289 — The temporary National 5 Maths TypeScript alias bridge is a compatibility contract
+
+**Status:** LOCKED — TRANSITIONAL
+
+During the migration, `tsconfig.json` deliberately maps:
+
+```text
+@/app/Courses/National5Maths
+@/app/Courses/National5Maths/*
+```
+
+to `app/Courses/National5MathsLegacy`.
+
+Therefore new clean-workspace code must not assume that this alias targets the clean destination folder. Use safe relative imports or a separately approved clean alias while the bridge remains active.
+
+Remove the bridge only after runtime consumers have migrated and the clean Course implementation has been verified.
+
+---
+
+## LD-290 — Skills Tree reconciliation is deferred until catalogue evidence is sufficiently mature
+
+**Status:** LOCKED — DEFERRED PHASE
+
+The current project-authored National 5 Maths Skills Tree may contain incorrect paper-suitability or classification assumptions.
+
+The 2014 Question Catalogue pilot has already exposed historical source evidence that conflicts with current metadata.
+
+During the catalogue phase:
+
+```text
+catalogue the historical source accurately
+→ flag Skills metadata mismatch
+→ continue evidence collection
+```
+
+Do not opportunistically change historical entries to fit the Skills Tree and do not turn each mismatch into an isolated Skills rewrite.
+
+Reconcile the Skills Tree systematically after the catalogue evidence is mature enough to support an evidence-led pass.
+
+---
+
+## LD-291 — National 5 Maths historical corpus and per-Question catalogue filenames are canonical
+
+**Status:** LOCKED
+
+The intended historical examination corpus is:
+
+```text
+2014–2019
+2021–2025
+```
+
+There is no normal 2020 examination paper in this corpus because of the COVID cancellation.
+
+Question files use:
+
+```text
+N5_Maths_YYYY_Px_Qn.ts
+```
+
+Matching Answer/Marking Scheme files use:
+
+```text
+N5_Maths_YYYY_Px_Qn_MS.ts
+```
+
+Files are organised under year and `Paper1/` / `Paper2/`. One numbered historical Question gets one Question catalogue file and one matching Answer/MS catalogue file.
+
+---
+
+## LD-292 — The catalogue is an evidence/knowledge layer, not a second Builder or Question Bank
+
+**Status:** LOCKED
+
+The clean Course catalogue describes historical evidence, normalised structure, classification and safe generation knowledge.
+
+It must not become a parallel runtime Builder-native Question model or revive the retired Question Bank architecture.
+
+The intended direction is:
+
+```text
+Question + Answer catalogue knowledge
+        ↓
+Course-owned Question/Answer generation
+        ↓
+generic Assessment Question/Answer contracts
+        ↓
+Assessment Creation / Compilation / PDF
+```
+
+Generation adapts Course knowledge into Assessment-native content; the catalogue itself remains source-evidence/knowledge architecture.
+
+---
+
+## LD-293 — The Answer Catalogue models marking evidence as pathways and mark nodes rather than forcing one linear worked solution
+
+**Status:** LOCKED DESIGN DIRECTION
+
+Historical marking evidence may require branching method pathways, alternative-method equivalence, mark-node dependencies, implied evidence, follow-through, answer-only rules, working/location requirements, rounding/exactness, units, notation, diagram evidence, cross-part/question rules, common-result rules and general marking policy.
+
+The Answer Catalogue must be able to represent those structures where the source requires them.
+
+Do not reduce a historical Marking Scheme to only a final answer string or one preferred worked solution.
+
+---
+
+# 6. Pass 4 Quick Reference Supplement
+
+```text
+HISTORICAL QUESTION PAPERS + MATCHING MARKING SCHEMES ARE AUTHORITATIVE EVIDENCE.
+
+DO NOT DISTORT SOURCE FACTS TO MATCH THE PROJECT-AUTHORED SKILLS TREE.
+
+QUESTION AND ANSWER CATALOGUES ARE SEPARATE OWNERS BUT ONE PAIRED EVIDENCE SYSTEM.
+
+THE CLEAN NATIONAL5MATHS WORKSPACE IS THE DESTINATION; NATIONAL5MATHSLEGACY IS TEMPORARY RUNTIME COMPATIBILITY.
+
+01 QUESTION CATALOG → 02 ANSWER CATALOG → 03 QUESTION GENERATION → 04 ANSWER GENERATION → 05 VISUAL ASSETS.
+
+CATALOGUE STATES AND PROVENANCE ARE EXPLICIT; UNKNOWN IS NOT NOT_APPLICABLE.
+
+EXACT CANDIDATE RESPONSE-SPACE MEASUREMENT IS FIRST-CLASS QUESTION EVIDENCE.
+
+HISTORICAL VISUALS ARE INTERPRETED SEMANTICALLY; GENERATED MATHEMATICAL VISUALS ARE ORIGINAL AND DETERMINISTIC WHERE PRACTICAL.
+
+HISTORICAL WORDING, ARTWORK AND EXACT SOURCE GEOMETRY DO NOT BECOME GENERATION TEMPLATES.
+
+THE TEMPORARY NATIONAL5MATHS TYPESCRIPT ALIAS CURRENTLY RESOLVES TO LEGACY; CLEAN WORKSPACE CODE MUST NOT ACCIDENTALLY IMPORT THROUGH IT.
+
+SKILLS TREE RECONCILIATION IS DEFERRED UNTIL THE CATALOGUE PHASE IS SUFFICIENTLY MATURE.
+
+THE CATALOGUE IS KNOWLEDGE/EVIDENCE; GENERATION PRODUCES ASSESSMENT-NATIVE CONTENT.
+
+MARKING SCHEMES MAY BE BRANCHING PATHWAY/ MARK-NODE GRAPHS, NOT JUST LINEAR WORKED SOLUTIONS.
+```

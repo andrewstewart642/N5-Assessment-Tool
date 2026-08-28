@@ -1446,3 +1446,198 @@ Docs/ChatGPTWorkflow.md
 ```
 
 Earlier filenames/paths in this ledger remain historical evidence and are intentionally not globally rewritten.
+
+---
+
+# POST-SIGN-OFF APPENDIX — NATIONAL 5 MATHS CATALOGUE ARCHITECTURE — 28 AUGUST 2026
+
+## 52. Why This Appendix Exists
+
+This appendix records a bounded post-sign-off Course migration that materially changes the current National 5 Maths ownership model while preserving the historical Architecture V2 ledger above.
+
+It does **not** reopen Architecture V2 as a repository-wide migration tracker.
+
+The original sections remain unchanged because they accurately describe the repository states and decisions that existed during Architecture V2. Current navigation belongs in `Docs/RepositoryMap.md`; current dependency/ownership truth belongs in `Docs/Architecture.md`.
+
+---
+
+## 53. National 5 Maths Legacy Isolation and Clean Destination Workspace
+
+The previous working National 5 Maths Course implementation was preserved intact beneath:
+
+```text
+app/Courses/National5MathsLegacy/
+```
+
+with its historical responsibilities:
+
+```text
+AssessmentConfig.ts
+Documents/
+ExamQuestionAndAnswerCatalog/
+QuestionAndAnswerGeneration/
+Skills/
+```
+
+A clean destination Course workspace was established at:
+
+```text
+app/Courses/National5Maths/
+├── 01_QuestionCatalog/
+├── 02_AnswerCatalog/
+├── 03_QuestionGeneration/
+├── 04_AnswerGeneration/
+├── 05_VisualAssets/
+├── PaperContexts/
+├── Skills/
+├── CatalogCoreTypes.ts
+└── National5MathsConfig.ts
+```
+
+The transition intentionally preserves the functioning Course implementation while new evidence/generation owners are built and stress-tested.
+
+A temporary TypeScript path bridge keeps historical National 5 Maths runtime imports resolving into `National5MathsLegacy`. Explorer/search hiding of the legacy tree is visual only.
+
+Migration anchor before catalogue population:
+
+```text
+3c1ccfd9dc27c492ddc485b3744a48ecaf25f08e
+```
+
+---
+
+## 54. Pass 1 — Universal Question Catalogue Enrichment
+
+The clean workspace gained a universal Question Catalogue contract and semantic visual architecture designed for the complete National 5 Maths historical corpus.
+
+A deliberate legacy-feature audit then compared the earlier narrow catalogue pilot with the new contract by meaning rather than field name.
+
+That review caught a genuine loss: exact candidate response-space measurement had been weakened to broad size/line estimates.
+
+Pass 1 restored useful additive legacy characteristics including:
+
+```text
+exact response-space geometry
+multiple response regions
+part-level standard/thinking demand
+graded calculator burden
+richer number/fraction structure
+structured compound-percentage stages
+forensic prompt/language structure
+```
+
+while preserving the newer typed evidence, semantic visual, generation-analysis and copyright-isolation architecture.
+
+Pass 1 commit:
+
+```text
+abc652a0791be98f065303569a9e2cf057c017aa
+Enrich Question Catalogue contract with legacy evidence
+```
+
+---
+
+## 55. Pass 2 — 2014 Paper 1 Full-Fidelity Question Catalogue
+
+All 13 numbered Questions from 2014 Paper 1 were re-audited from the historical source and rewritten against the strengthened master catalogue contract.
+
+The pass captured exact response-space evidence, part-level demand, calculator characteristics, richer numerical/prompt structure and semantic visual evidence in addition to the broader V2 catalogue domains.
+
+The source audit also exposed historical evidence that conflicts with some current project-authored Skills Tree paper-suitability assumptions. The historical catalogue was left accurate and those project-metadata mismatches were deferred for later evidence-led Skills reconciliation.
+
+Pass 2 commit:
+
+```text
+6e08e59e646f4f865705444e9b5f1c8e90ec26e0
+Rewrite 2014 Paper 1 catalogue with full evidence
+```
+
+---
+
+## 56. Pass 3 — 2014 Paper 2 Full-Fidelity Question Catalogue
+
+All 13 numbered Questions from 2014 Paper 2 were re-audited to the same full-fidelity standard.
+
+The pass used controlled 300 dpi source measurement for candidate response regions where appropriate and preserved distinct response spaces for multipart Questions rather than collapsing them into rough whole-page estimates.
+
+Paper 2 also stress-tested richer visual families including 3D coordinates, orientation geometry, composite solids, bearings/navigation and a context-image → mathematical circle/chord model.
+
+Pass 3 was deliberately squashed into one clean commit directly after Pass 2:
+
+```text
+545314ce6988105695f9b3f74d4167b9e85ff65a
+Pass 3: rewrite 2014 Paper 2 catalogue with full evidence
+```
+
+At that checkpoint all 26 numbered 2014 Questions were represented in the clean Question Catalogue.
+
+---
+
+## 57. Pass 4 — Documentation Reconciliation
+
+Pass 4 reconciled all canonical project documentation with the new National 5 Maths catalogue/generation transition using the information-preserving documentation rule established by LD-281:
+
+```text
+historical truth
+→ preserve
+
+current truth
+→ update
+
+new rule / decision
+→ add
+
+obsolete contradictory instruction
+→ explicitly supersede or replace
+```
+
+The pass updated:
+
+```text
+AGENTS.md
+Docs/Architecture.md
+Docs/ChatGPTWorkflow.md
+Docs/FeatureHistory.md
+Docs/FutureFeatures.md
+Docs/LockedDecisions.md
+Docs/RefactorLedger.md
+Docs/RepositoryMap.md
+```
+
+Existing Architecture V2 history and prior locked decision IDs were retained. New catalogue decisions were appended with new IDs rather than mutating the historical record.
+
+---
+
+## 58. Current Transition State After Pass 4
+
+The bounded National 5 Maths migration is intentionally incomplete.
+
+Completed:
+
+```text
+clean destination workflow architecture
+universal Question Catalogue contract
+semantic visual catalogue contract
+legacy-evidence enrichment
+2014 Paper 1 Question Catalogue full-fidelity pass
+2014 Paper 2 Question Catalogue full-fidelity pass
+canonical documentation reconciliation
+```
+
+Deliberately outstanding:
+
+```text
+2014 Answer/Marking Scheme Catalogue population
+Question ↔ Answer counterpart cross-check
+remaining historical years 2015–2019 and 2021–2025
+Question Generation population
+Answer Generation population
+deterministic renderer/context-asset population
+Skills Tree reconciliation after catalogue evidence matures
+clean runtime Course integration
+legacy alias/tree retirement after migration is proven
+```
+
+These are bounded post-sign-off Course-development/migration phases, not evidence that the repository-wide Architecture V2 migration was never completed.
+
+Future implementation status belongs primarily in `Docs/FeatureHistory.md` and `Docs/FutureFeatures.md`; this appendix exists only because the Course migration materially clarifies the historical-to-current architecture boundary.

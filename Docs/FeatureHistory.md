@@ -849,3 +849,194 @@ Future ideas, including archive/year organisation, belong in:
 ```text
 Docs/FutureFeatures.md
 ```
+
+---
+
+# 28 August 2026 — National 5 Maths Clean Catalogue / Generation Architecture
+
+**Status:** IMPLEMENTED AS CURRENT TRANSITION ARCHITECTURE
+
+National 5 Mathematics began a preservation-first reorganisation specifically for the historical-evidence → generation programme.
+
+The previous working Course implementation was moved intact to:
+
+```text
+app/Courses/National5MathsLegacy/
+```
+
+with its existing:
+
+```text
+AssessmentConfig.ts
+Documents/
+ExamQuestionAndAnswerCatalog/
+QuestionAndAnswerGeneration/
+Skills/
+```
+
+responsibilities preserved as runtime compatibility source during the transition.
+
+A new clean workflow-driven National 5 Maths workspace was established at:
+
+```text
+app/Courses/National5Maths/
+├── 01_QuestionCatalog/
+├── 02_AnswerCatalog/
+├── 03_QuestionGeneration/
+├── 04_AnswerGeneration/
+├── 05_VisualAssets/
+├── PaperContexts/
+├── Skills/
+├── CatalogCoreTypes.ts
+└── National5MathsConfig.ts
+```
+
+The numeric prefixes are intentional workflow ordering rather than decorative numbering.
+
+A temporary `tsconfig.json` alias bridge keeps historical runtime imports resolving to `National5MathsLegacy` while the clean workspace is populated. VS Code hides the legacy tree for navigation only; the files remain real source and Git-tracked.
+
+This transition preserves the working application while allowing the new catalogue/generation architecture to be built without mutating the only functioning legacy implementation in place.
+
+Primary migration anchor before catalogue population:
+
+```text
+3c1ccfd9dc27c492ddc485b3744a48ecaf25f08e
+```
+
+---
+
+# 28 August 2026 — Universal Question Catalogue V2 Foundation and Legacy-Evidence Enrichment
+
+**Status:** IMPLEMENTED — PASS 1 COMPLETE
+
+The clean National 5 Maths workspace gained a universal Question Catalogue contract designed for the complete historical corpus rather than a narrow single-family pilot.
+
+Primary owners include:
+
+```text
+app/Courses/National5Maths/CatalogCoreTypes.ts
+app/Courses/National5Maths/01_QuestionCatalog/QuestionCatalogTypes.ts
+app/Courses/National5Maths/01_QuestionCatalog/QuestionCatalogHelpers.ts
+app/Courses/National5Maths/05_VisualAssets/VisualCatalogTypes.ts
+```
+
+The contract combines the broader semantic/generation architecture with the strongest useful evidence-capture features from the earlier legacy catalogue pilot.
+
+Important foundations include:
+
+- typed catalogue states: `VALUE`, `NOT_APPLICABLE`, `UNKNOWN`, `NOT_REVIEWED`;
+- confidence and evidence references;
+- explicit `SOURCE_FACT`, `CATALOGUE_CLASSIFICATION` and `GENERATION_ANALYSIS` provenance;
+- paper/question/source locators without storing historical prompt wording;
+- question identity, paper context, parts, marks, Skills/Concepts, mathematical structure, constraints, answer specification, context, representations and generation analysis;
+- specialised mathematical profiles even where a specific Question records `NOT_APPLICABLE`;
+- first-class semantic visual evidence;
+- source-isolation/copyright rules preventing historical wording/artwork/source geometry from becoming generator templates.
+
+The legacy-evidence review caught an important regression before mass cataloguing: exact candidate response-space measurement had been weakened to broad categories/estimated lines in the first V2 draft.
+
+Pass 1 restored exact source-response geometry, including PDF page, printed page, render DPI, page dimensions, response-region coordinates, px/pt/mm measurements, boundary conventions and part-to-region mapping. It also restored genuinely additive legacy characteristics such as part-level standard/thinking demand, graded calculator burden, richer numerical/fraction structure, structured compound-percentage stages and forensic prompt/language structure.
+
+The restored fields were made transitional where necessary so the master contract could strengthen before all pilot entries were rewritten.
+
+Pass 1 commit:
+
+```text
+abc652a0791be98f065303569a9e2cf057c017aa
+Enrich Question Catalogue contract with legacy evidence
+```
+
+---
+
+# 28 August 2026 — 2014 Paper 1 Full-Fidelity Question Catalogue Pilot
+
+**Status:** IMPLEMENTED — PASS 2 COMPLETE
+
+All 13 numbered Questions from the 2014 National 5 Mathematics Paper 1 were re-audited from source and rewritten against the strengthened Question Catalogue contract.
+
+Current location:
+
+```text
+app/Courses/National5Maths/01_QuestionCatalog/2014/Paper1/
+```
+
+Current filename pattern:
+
+```text
+N5_Maths_2014_P1_Q1.ts
+...
+N5_Maths_2014_P1_Q13.ts
+```
+
+The pass captured full source/layout, structural, curriculum, reasoning, numerical, language, visual and generation evidence, including exact candidate response regions rather than rough line-count estimates.
+
+Visual-heavy Questions were catalogued semantically so later generation can reproduce mathematical function without copying source artwork. Examples in the paper include triangle geometry, scatter/best-fit data, quadratic and trigonometric graphs, circle/chord topology and contextual graph material.
+
+The audit also demonstrated an important evidence rule: historical Questions may contradict the project-authored Skills Tree. Such conflicts are recorded as evidence/review issues rather than changing the historical catalogue to fit current metadata. Skills Tree reconciliation is intentionally deferred until the broader catalogue phase has produced enough evidence.
+
+Pass 2 commit:
+
+```text
+6e08e59e646f4f865705444e9b5f1c8e90ec26e0
+Rewrite 2014 Paper 1 catalogue with full evidence
+```
+
+---
+
+# 28 August 2026 — 2014 Paper 2 Full-Fidelity Question Catalogue Pilot
+
+**Status:** IMPLEMENTED — PASS 3 COMPLETE
+
+All 13 numbered Questions from the 2014 National 5 Mathematics Paper 2 were re-audited and rewritten to the same full-fidelity standard as Paper 1.
+
+Current location:
+
+```text
+app/Courses/National5Maths/01_QuestionCatalog/2014/Paper2/
+```
+
+Current filename pattern:
+
+```text
+N5_Maths_2014_P2_Q1.ts
+...
+N5_Maths_2014_P2_Q13.ts
+```
+
+The pass measured real pupil-usable response regions from the source at 300 dpi and kept separate regions for multipart Questions where appropriate. It also populated the restored calculator-demand, part-level demand, numerical structure and prompt-language evidence.
+
+Visual examples include 3D coordinate structure, orientation geometry, composite solids, bearings/navigation and a two-visual context-image → mathematical circle/chord model. These are represented through semantic visual profiles and generation constraints rather than historical artwork reuse.
+
+The Paper 2 work was squashed to one clean commit directly after Pass 2:
+
+```text
+545314ce6988105695f9b3f74d4167b9e85ff65a
+Pass 3: rewrite 2014 Paper 2 catalogue with full evidence
+```
+
+At the end of Pass 3, all 26 numbered 2014 Questions are present in the clean Question Catalogue. Their matching Answer/Marking Scheme catalogue entries remain the next evidence pass, so Question review records correctly remain incomplete with respect to counterpart cross-checking.
+
+---
+
+# 28 August 2026 — Catalogue Architecture Documentation Refurbishment
+
+**Status:** IMPLEMENTED — PASS 4
+
+The canonical repository documentation was reconciled with the National 5 Maths catalogue/generation transition using the project's information-preserving documentation rule.
+
+The pass deliberately retained earlier architectural, feature, workflow and migration information while adding current catalogue truth and explicitly superseding stale current-path descriptions where necessary.
+
+The new documentation records:
+
+- clean `National5Maths` vs compatibility `National5MathsLegacy` ownership;
+- the temporary TypeScript alias bridge;
+- ordered Question → Answer → Question Generation → Answer Generation → Visual Assets workflow;
+- historical Question/Marking Scheme paired-evidence methodology;
+- source-fact authority over project-authored classifications;
+- exact response-space measurement as first-class evidence;
+- semantic visual regeneration and copyright isolation;
+- 2014 P1/P2 pilot completion state;
+- deferred Skills Tree reconciliation;
+- planned Answer Catalogue and wider-corpus phases.
+
+No historical decision IDs, migration entries or feature history were deleted to make the documents look cleaner.

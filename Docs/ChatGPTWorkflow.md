@@ -2082,3 +2082,391 @@ DOCUMENT AT A MEANINGFUL CHECKPOINT
 The purpose of this workflow is no longer merely to finish Architecture V2.
 
 It is to make ongoing feature development predictable enough that a fresh developer or AI-assisted session can continue safely without reconstructing the project's history.
+
+---
+
+# PASS 4 — NATIONAL 5 MATHEMATICS CATALOGUING WORKFLOW — 28 AUGUST 2026
+
+## 97. Current Override for National 5 Maths Question Architecture
+
+Section 44 above is retained because it accurately describes the pre-Pass-4 architecture. For current National 5 Maths catalogue/generation work, its physical paths are superseded by this section.
+
+Current transition state:
+
+```text
+app/Courses/National5Maths/
+→ clean destination catalogue/generation workspace
+
+app/Courses/National5MathsLegacy/
+→ preserved old working Course implementation used by compatibility imports
+```
+
+Do not write new catalogue entries into the legacy `ExamQuestionAndAnswerCatalog` merely because that was the former owner.
+
+Do not write new generation implementation into the legacy `QuestionAndAnswerGeneration` merely because existing runtime consumers still use it.
+
+---
+
+## 98. Catalogue Pass Workflow
+
+For a historical Question Catalogue pass, use this sequence:
+
+```text
+CONFIRM YEAR / PAPER / QUESTION COUNT
+        ↓
+READ PAPER-LEVEL CONTEXT
+        ↓
+READ THE ACTUAL SOURCE QUESTION
+        ↓
+IDENTIFY ALL PARTS / MARKS / GIVEN INFORMATION
+        ↓
+MEASURE CANDIDATE RESPONSE SPACE
+        ↓
+CLASSIFY CURRICULUM / TASK / REASONING / NUMBER STRUCTURE
+        ↓
+ANALYSE LANGUAGE / PROMPT STRUCTURE
+        ↓
+ANALYSE ALL VISUALS SEMANTICALLY
+        ↓
+RECORD SAFE GENERATION INVARIANTS / VARIATION
+        ↓
+LINK SOURCE EVIDENCE
+        ↓
+FLAG UNRESOLVED PROJECT-METADATA CONFLICTS
+        ↓
+TYPE-CHECK / REVIEW THE FULL PAPER PASS
+        ↓
+COMMIT AS A COHERENT PAPER CHECKPOINT
+```
+
+Do not mechanically transform old catalogue files and call that a source re-audit.
+
+A full-fidelity pass returns to the historical source.
+
+---
+
+## 99. Historical Source Is Gospel for Historical Facts
+
+When the source paper disagrees with a project-authored Skills Tree assumption, paper-suitability tag or other classification:
+
+```text
+record historical source truth
+        ↓
+record/flag the mismatch
+        ↓
+do not modify the source fact
+        ↓
+defer taxonomy correction to the approved reconciliation phase
+```
+
+Do not “correct” an old exam Question because the current project taxonomy says the exam should not have contained it.
+
+The catalogue exists partly to discover exactly those incorrect assumptions.
+
+---
+
+## 100. Question + Marking Scheme Operating Rule
+
+Question Paper and matching Marking Scheme should be analysed as a paired evidence unit even though the repository stores them under separate Question and Answer Catalogue owners.
+
+During a Question-only pass:
+
+- record only Question-paper-supported facts as source facts;
+- link the intended Answer/MS catalogue ID;
+- keep counterpart cross-checking incomplete;
+- do not invent marking behaviour to make the Question entry look finished.
+
+During the later Answer/MS pass:
+
+- return to the matching marking scheme;
+- model actual marking pathways/policies;
+- cross-check marks, parts, subgoals, visual evidence and answer requirements back to the Question entry.
+
+---
+
+## 101. Response-Space Measurement Workflow
+
+Response space is a required evidence consideration, not an optional layout note.
+
+When source PDF measurement is practical:
+
+1. use a controlled render (the 2014 pilot used 300 dpi);
+2. record physical PDF page and printed page separately;
+3. define the usable response-region boundary explicitly;
+4. record pixel boundaries/dimensions;
+5. convert/store points and millimetres where supported;
+6. map the region to the Question part(s) it serves;
+7. separate genuinely distinct multipart response regions;
+8. exclude non-usable areas such as page furniture/turn-over markers where appropriate;
+9. retain broad category/estimated lines as secondary classification rather than replacing physical evidence.
+
+The measurement describes the historical assessment design. It must not become a literal source-layout template for generation.
+
+---
+
+## 102. Prompt / Language Analysis Workflow
+
+Historical wording itself should not be copied into generator source.
+
+Instead record normalised characteristics such as:
+
+```text
+sentence count
+prompt word count
+introduction style
+relationship-statement style
+command style
+temporal structure
+information order
+normalised prompt structure
+pronoun/reference behaviour
+lexical/style feature tags
+generator variation notes
+```
+
+The purpose is to learn how Questions are constructed without storing source wording as templates.
+
+---
+
+## 103. Visual Analysis Workflow
+
+For each supplied visual, determine first whether it is:
+
+```text
+mathematical schematic
+context image
+response surface
+candidate-produced / candidate-annotated visual
+multi-visual set
+```
+
+Then catalogue semantics such as:
+
+```text
+entities
+relations
+facts
+dependency
+scale
+orientation
+labels
+dimensions/angles
+candidate interaction
+mark-bearing relevance
+layout/readability
+renderer family
+semantic invariants
+safe variation
+unsafe variation
+validation requirements
+```
+
+Do not store exact historical artwork coordinates for reuse.
+
+If a later generated Question needs a mathematical diagram, generate a new diagram from semantic parameters through deterministic code/SVG where practical.
+
+If it needs context imagery, select/create an approved original/licensed context asset separately from the mathematical schematic.
+
+---
+
+## 104. Typed Catalogue State Workflow
+
+Use catalogue states deliberately:
+
+```text
+VALUE
+→ evidence/classification has a real value
+
+NOT_APPLICABLE
+→ the domain genuinely does not apply
+
+UNKNOWN
+→ the domain may apply but the evidence is insufficient or uncertain
+
+NOT_REVIEWED
+→ the domain has not yet been reviewed
+```
+
+Never use `NOT_APPLICABLE` simply to avoid investigating a difficult field.
+
+Keep provenance explicit between source facts, catalogue classifications and generation analysis.
+
+---
+
+## 105. Legacy Feature Audit Before Removing Catalogue Characteristics
+
+When redesigning a catalogue contract, compare the old and new systems by **meaning**, not field name.
+
+Use this decision pattern:
+
+```text
+old field not present by same name
+        ↓
+has the characteristic been captured elsewhere semantically?
+        ↓
+YES → do not duplicate it
+NO → is the characteristic genuinely useful evidence/generation knowledge?
+        ↓
+YES → add it to the new master contract
+NO → leave it behind deliberately
+```
+
+The response-space regression found during the 2014 pilot is the canonical example of why this check matters.
+
+---
+
+## 106. Contract-First Corpus Expansion
+
+Do not race from 2014 straight through hundreds of Questions if the universal contract is still exposing gaps.
+
+Preferred sequence:
+
+```text
+master contract
+→ one real paper
+→ second paper under different calculator/context conditions
+→ Answer/MS pairing stress test
+→ contract corrections
+→ wider corpus
+```
+
+When a new paper exposes a real missing characteristic, fix the master model and retrofit the pilot before the omission spreads.
+
+---
+
+## 107. Catalogue File Naming / Scope
+
+New Question catalogue files use:
+
+```text
+app/Courses/National5Maths/01_QuestionCatalog/<year>/Paper1/N5_Maths_<year>_P1_Q<n>.ts
+app/Courses/National5Maths/01_QuestionCatalog/<year>/Paper2/N5_Maths_<year>_P2_Q<n>.ts
+```
+
+Matching Answer/MS files use:
+
+```text
+app/Courses/National5Maths/02_AnswerCatalog/<year>/Paper1/N5_Maths_<year>_P1_Q<n>_MS.ts
+app/Courses/National5Maths/02_AnswerCatalog/<year>/Paper2/N5_Maths_<year>_P2_Q<n>_MS.ts
+```
+
+One numbered Question gets one Question catalogue file and one matching Answer/MS catalogue file.
+
+Do not zero-pad Question numbers unless the naming convention is deliberately changed project-wide.
+
+---
+
+## 108. Current Historical Corpus
+
+The intended corpus is:
+
+```text
+2014–2019
+2021–2025
+```
+
+No normal 2020 examination paper is expected because of COVID cancellation.
+
+Treat 2021 Assessment Resource and 2022–2023 Modified paper context explicitly rather than flattening all years into one regime.
+
+The known corpus contains 337 numbered Questions.
+
+---
+
+## 109. Temporary Alias Safety
+
+Current `tsconfig.json` maps:
+
+```text
+@/app/Courses/National5Maths
+@/app/Courses/National5Maths/*
+```
+
+to `National5MathsLegacy`.
+
+Therefore, when writing new clean catalogue/generation code:
+
+```text
+DO NOT assume @/app/Courses/National5Maths/... means the clean folder
+```
+
+Use relative imports inside the clean workspace where appropriate until the bridge is deliberately replaced/removed.
+
+Do not remove the bridge merely because the clean folder exists. The bridge remains a runtime compatibility contract until consumers migrate.
+
+---
+
+## 110. GitHub Connector vs Local VS Code Authentication
+
+Connected GitHub writes and the user's local VS Code account state are separate concerns.
+
+When GitHub connector access can create the requested commit directly, do not require the user to sign into VS Code merely to preserve the repository workflow.
+
+The normal collaboration pattern may be:
+
+```text
+AI session inspects / writes connected GitHub
+        ↓
+verified commit lands on refactor/architecture-V2
+        ↓
+user synchronises local clone with existing Git Bash setup
+```
+
+Do not claim that a VS Code sign-in is required unless a concrete local operation actually requires it.
+
+Use fast-forward pulls for ordinary forward commits. Use `reset --hard` only after deliberate history rewriting and only with an appropriate warning about uncommitted local changes.
+
+---
+
+## 111. Pass Checkpoint Discipline for Catalogue Work
+
+Catalogue work should normally commit at coherent boundaries such as:
+
+```text
+master contract strengthened
+one complete historical paper re-audited
+matching Answer/MS paper completed
+visual renderer family implemented
+Skills reconciliation batch completed
+legacy runtime bridge retired
+```
+
+Avoid one permanent commit per Question when a whole-paper pass is intended. Temporary connector commits may be squashed before handoff if necessary, but prefer a one-clean-commit technique where available to avoid needless remote-history churn.
+
+A final handoff should state:
+
+```text
+what paper/contract was completed
+what remains intentionally outstanding
+final commit SHA
+one safe local sync/check command
+```
+
+---
+
+## 112. Current Catalogue Handoff State After Pass 4
+
+Current completed checkpoints are:
+
+```text
+clean National 5 Maths catalogue/generation workspace → established
+Question Catalogue master contract → strengthened with additive legacy evidence
+2014 Paper 1 Question Catalogue → Q1–Q13 full-fidelity re-audit complete
+2014 Paper 2 Question Catalogue → Q1–Q13 full-fidelity re-audit complete
+visual semantic architecture → master contract established
+project documentation → reconciled to current catalogue architecture
+```
+
+Current deliberately outstanding work includes:
+
+```text
+2014 Answer/Marking Scheme Catalogue population and counterpart cross-check
+remaining historical years
+Question Generation population
+Answer Generation population
+renderer/asset-bank population
+Skills Tree reconciliation after catalogue evidence matures
+legacy runtime migration/bridge retirement
+```
+
+Do not silently mark those outstanding areas complete merely because their destination folders already exist.

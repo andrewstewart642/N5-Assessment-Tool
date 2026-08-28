@@ -1870,3 +1870,284 @@ app/DeveloperTools/
 and should be able to descend into the major feature folders and make a sensible guess about individual file responsibilities from their paths/names.
 
 That clarity is the acceptance standard for future structural work.
+
+---
+
+# PASS 4 — CURRENT NATIONAL 5 MATHEMATICS CATALOGUE MAP — 28 AUGUST 2026
+
+## 82. Current National 5 Maths Map Overrides Sections 47–51
+
+Sections 47–51 above are retained as a record of the immediately preceding National 5 Maths layout, but they no longer describe the current physical `National5Maths/` tree. For current navigation, use this section.
+
+There are now two distinct National 5 Maths areas during the transition:
+
+```text
+app/Courses/National5Maths/
+→ clean destination catalogue/generation workspace
+
+app/Courses/National5MathsLegacy/
+→ preserved former working Course implementation used by runtime compatibility imports
+```
+
+Do not confuse them merely because both are under `app/Courses/`.
+
+---
+
+## 83. Clean National 5 Maths Root
+
+Current clean structure:
+
+```text
+app/Courses/National5Maths/
+├── 01_QuestionCatalog/
+├── 02_AnswerCatalog/
+├── 03_QuestionGeneration/
+├── 04_AnswerGeneration/
+├── 05_VisualAssets/
+├── PaperContexts/
+├── Skills/
+├── CatalogCoreTypes.ts
+└── National5MathsConfig.ts
+```
+
+The numeric prefixes are intentional workflow ordering.
+
+Current core files include:
+
+```text
+CatalogCoreTypes.ts
+01_QuestionCatalog/QuestionCatalogTypes.ts
+01_QuestionCatalog/QuestionCatalogHelpers.ts
+05_VisualAssets/VisualCatalogTypes.ts
+National5MathsConfig.ts
+```
+
+The `02_AnswerCatalog`, `03_QuestionGeneration`, `04_AnswerGeneration`, `PaperContexts` and clean `Skills` areas are destination owners whose population/migration continues in bounded passes.
+
+---
+
+## 84. Preserved National 5 Maths Legacy Root
+
+The previous working Course implementation currently lives at:
+
+```text
+app/Courses/National5MathsLegacy/
+├── AssessmentConfig.ts
+├── Documents/
+├── ExamQuestionAndAnswerCatalog/
+├── QuestionAndAnswerGeneration/
+└── Skills/
+```
+
+This is compatibility source during the migration, not the intended long-term architecture.
+
+Do not add new catalogue/generation work there merely because runtime consumers still resolve into it.
+
+Do not delete it until consumers have been migrated and replacement owners are verified.
+
+---
+
+## 85. Question Catalogue Physical Structure
+
+Question Catalogue root:
+
+```text
+app/Courses/National5Maths/01_QuestionCatalog/
+```
+
+It contains the universal master contract/helpers plus year/paper data.
+
+Historical year structure is intended for:
+
+```text
+2014
+2015
+2016
+2017
+2018
+2019
+2021
+2022
+2023
+2024
+2025
+```
+
+Each year uses:
+
+```text
+Paper1/
+Paper2/
+```
+
+There is no normal 2020 examination-paper catalogue year.
+
+Question filenames use:
+
+```text
+N5_Maths_YYYY_Px_Qn.ts
+```
+
+Current fully populated/re-audited pilot folders are:
+
+```text
+app/Courses/National5Maths/01_QuestionCatalog/2014/Paper1/
+app/Courses/National5Maths/01_QuestionCatalog/2014/Paper2/
+```
+
+with 13 numbered Question files in each.
+
+---
+
+## 86. Answer Catalogue Physical Structure
+
+Answer/Marking Scheme evidence belongs beneath:
+
+```text
+app/Courses/National5Maths/02_AnswerCatalog/
+```
+
+It follows the same year / `Paper1` / `Paper2` organisation as Question Catalogue.
+
+Matching per-Question files use:
+
+```text
+N5_Maths_YYYY_Px_Qn_MS.ts
+```
+
+The Answer Catalogue is the destination for structured historical marking evidence; do not put new marking-scheme catalogue entries back into `National5MathsLegacy/ExamQuestionAndAnswerCatalog`.
+
+---
+
+## 87. Question Generation Physical Owner
+
+New catalogue-informed Course-specific Question generation belongs beneath:
+
+```text
+app/Courses/National5Maths/03_QuestionGeneration/
+```
+
+This is distinct from:
+
+```text
+app/Assessments/Questions/Generation/
+→ generic Assessment generation contracts
+```
+
+and from:
+
+```text
+app/Courses/National5MathsLegacy/QuestionAndAnswerGeneration/
+→ preserved old runtime generation implementation during migration
+```
+
+---
+
+## 88. Answer Generation Physical Owner
+
+New Course-specific Answer generation belongs beneath:
+
+```text
+app/Courses/National5Maths/04_AnswerGeneration/
+```
+
+It will consume paired Question/Answer catalogue knowledge and produce Assessment-native answer/marking output without storing historical marking-scheme wording as templates.
+
+---
+
+## 89. Visual Assets Physical Owner
+
+Visual semantic types, deterministic renderer families and approved context-asset knowledge belong beneath:
+
+```text
+app/Courses/National5Maths/05_VisualAssets/
+```
+
+Current master visual contract:
+
+```text
+app/Courses/National5Maths/05_VisualAssets/VisualCatalogTypes.ts
+```
+
+Mathematical diagrams are intended to be recreated from semantic models through original procedural rendering. Context image assets, when used, require appropriate licence/source metadata.
+
+---
+
+## 90. Paper Contexts
+
+Paper-level historical context belongs beneath:
+
+```text
+app/Courses/National5Maths/PaperContexts/
+```
+
+Paper context is separate from individual Question records because duration, marks, calculator regime, source type and other paper-wide conditions apply across many Questions.
+
+Known corpus regimes include standard papers, the 2021 Assessment Resource and the 2022–2023 Modified papers.
+
+---
+
+## 91. Current Compatibility Alias
+
+`tsconfig.json` currently maps:
+
+```text
+@/app/Courses/National5Maths
+@/app/Courses/National5Maths/*
+```
+
+to:
+
+```text
+./app/Courses/National5MathsLegacy
+./app/Courses/National5MathsLegacy/*
+```
+
+while retaining:
+
+```text
+@/* → ./*
+```
+
+Therefore, during this transition, the historical National5Maths alias does **not** point to the clean destination tree.
+
+New files inside the clean catalogue/generation workspace currently use relative imports where necessary to avoid accidental legacy resolution.
+
+---
+
+## 92. VS Code Legacy Hiding
+
+`.vscode/settings.json` currently hides:
+
+```text
+**/National5MathsLegacy
+**/.gitkeep
+```
+
+and excludes `National5MathsLegacy` from normal search.
+
+This is Explorer/search convenience only.
+
+It does not:
+
+```text
+delete legacy source
+remove it from Git
+change TypeScript resolution
+prove it is unused
+```
+
+---
+
+## 93. Current 2014 Catalogue State
+
+Current clean Question catalogue includes:
+
+```text
+2014 Paper 1 → Q1–Q13
+2014 Paper 2 → Q1–Q13
+```
+
+All 26 entries have been rewritten against the strengthened universal Question Catalogue contract and include source response-space measurement plus the wider semantic/generation evidence model.
+
+Their Answer/MS counterpart files are not yet populated, so counterpart cross-check/review remains outstanding.
