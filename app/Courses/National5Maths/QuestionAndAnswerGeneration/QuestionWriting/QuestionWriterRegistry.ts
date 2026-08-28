@@ -258,20 +258,20 @@ export function getEligibleDifficultiesForConcept(
     concept?.code ??
     selectedConcept;
 
-  const module =
+  const questionModule =
     getModule(conceptCode);
 
-  if (!module) {
+  if (!questionModule) {
     return [];
   }
 
   const availableLevels =
-    module.metadata
+    questionModule.metadata
       .difficultyProfile
       .availableLevels;
 
   const profile =
-    module.metadata
+    questionModule.metadata
       .levelSelectionProfile;
 
   if (
@@ -312,10 +312,10 @@ function resolveGenerationDifficulty(
     concept?.code ??
     selectedConcept;
 
-  const module =
+  const questionModule =
     getModule(conceptCode);
 
-  if (!module) {
+  if (!questionModule) {
     return requestedDifficulty;
   }
 
@@ -324,7 +324,7 @@ function resolveGenerationDifficulty(
   }
 
   const profile =
-    module.metadata
+    questionModule.metadata
       .levelSelectionProfile;
 
   if (!profile) {
@@ -343,7 +343,7 @@ function resolveGenerationDifficulty(
   }
 
   const defaultLevel =
-    module.metadata
+    questionModule.metadata
       .difficultyProfile
       .defaultLevel;
 
@@ -401,11 +401,11 @@ export function buildGenerated(
     context.concept?.code ??
     selectedConcept;
 
-  const module =
+  const questionModule =
     getModule(conceptCode);
 
-  if (module) {
-    return module.generate(
+  if (questionModule) {
+    return questionModule.generate(
       context
     );
   }

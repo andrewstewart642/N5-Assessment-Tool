@@ -105,26 +105,26 @@ function buildTestSkill(
   concepts:
     Concept[]
 ): Skill {
-  const module =
+  const questionModule =
     GENERATOR_TEST_TARGET.module;
 
   return {
     id:
-      `dev-${module.metadata.moduleId}`,
+      `dev-${questionModule.metadata.moduleId}`,
 
     code:
-      module.metadata.skillCode,
+      questionModule.metadata.skillCode,
 
     text:
-      module.metadata.conceptLabel,
+      questionModule.metadata.conceptLabel,
 
     domain:
-      module.metadata.domain,
+      questionModule.metadata.domain,
 
     concepts,
 
     paperSuitability:
-      module.metadata.capabilities
+      questionModule.metadata.capabilities
         .paperSuitability,
   };
 }
