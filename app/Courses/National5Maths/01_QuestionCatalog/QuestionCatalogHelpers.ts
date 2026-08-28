@@ -7,11 +7,17 @@ import type {
   CatalogValue,
 } from "../CatalogCoreTypes";
 
-export const qpEvidence = (questionNumber: string, page: number, evidenceType: "QUESTION" | "VISUAL" = "QUESTION"): CatalogEvidenceRef => ({
+export const qpEvidence = (
+  questionNumber: string,
+  pdfPage: number,
+  evidenceType: "QUESTION" | "VISUAL" = "QUESTION",
+  paper: "P1" | "P2" = "P1",
+  printedPage: number = pdfPage,
+): CatalogEvidenceRef => ({
   documentId: "N5_MATH_2014_QP",
-  pdfPages: [page],
-  printedPageLabels: [`Page ${page}`],
-  paper: "P1",
+  pdfPages: [pdfPage],
+  printedPageLabels: [`Page ${printedPage}`],
+  paper,
   questionLocator: `Q${questionNumber}`,
   evidenceType,
   locatorNote: null,
@@ -34,7 +40,10 @@ export const notApplicable = <T>(notes: string | null = null): CatalogValue<T> =
   notes,
 });
 
-export const questionReviewInProgress = (visualChecked = true): CatalogReviewProfile => ({
+export const questionReviewInProgress = (
+  visualChecked = true,
+  paper: "P1" | "P2" = "P1",
+): CatalogReviewProfile => ({
   status: "IN_PROGRESS",
   sourceFactsComplete: true,
   classificationComplete: true,
@@ -42,7 +51,7 @@ export const questionReviewInProgress = (visualChecked = true): CatalogReviewPro
   counterpartCrossChecked: false,
   visualEvidenceCrossChecked: visualChecked,
   unresolvedIssues: ["Matching Answer/Marking Scheme catalogue pass has not yet been completed."],
-  validationNotes: ["Question-paper evidence and catalogue classification completed for the 2014 Paper 1 pilot pass."],
+  validationNotes: [`Question-paper evidence and catalogue classification completed for the 2014 ${paper === "P1" ? "Paper 1" : "Paper 2"} pilot pass.`],
   reviewedAt: null,
 });
 
