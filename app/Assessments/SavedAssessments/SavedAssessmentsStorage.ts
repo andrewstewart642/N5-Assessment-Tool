@@ -1,5 +1,6 @@
 import {
   DEFAULT_COURSE_ID,
+  findCourseAssessmentConfigById,
   getDefaultCourseAssessmentConfig,
 } from "@/app/Courses/CourseRegistry";
 
@@ -8,6 +9,11 @@ import type {
   AssessmentPaperNumberMap,
   AssessmentPaperStringMap,
 } from "@/app/Assessments/Creation/Papers/PaperSpecificValues";
+
+import {
+  createSavedAssessmentCourseIdentity,
+  resolveSavedAssessmentCourseIdentity,
+} from "./CourseIdentity";
 
 import type {
   SavedAssessment,
@@ -58,7 +64,7 @@ function readStorageWithLegacyFallback({
 }): string | null {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return null;
   }
@@ -70,7 +76,7 @@ function readStorageWithLegacyFallback({
 
   if (
     currentValue !==
-    null
+      null
   ) {
     return currentValue;
   }
@@ -82,7 +88,7 @@ function readStorageWithLegacyFallback({
 
   if (
     legacyValue ===
-    null
+      null
   ) {
     return null;
   }
@@ -209,7 +215,7 @@ function normaliseStringMap(
     ) => {
       if (
         typeof paperValue ===
-        "string"
+          "string"
       ) {
         normalised[
           paper
@@ -246,7 +252,7 @@ function normaliseBooleanMap(
     ) => {
       if (
         typeof paperValue ===
-        "boolean"
+          "boolean"
       ) {
         normalised[
           paper
@@ -260,12 +266,30 @@ function normaliseBooleanMap(
   );
 }
 
-function getDefaultTargetMarksForPaper(
-  paper: string,
-  fallback: number
-): number {
+function getDefaultTargetMarksForPaper({
+  courseId,
+  paper,
+  fallback,
+}: {
+  courseId:
+    SavedAssessment["setup"]["courseId"];
+
+  paper:
+    string;
+
+  fallback:
+    number;
+}): number {
+  const courseConfig =
+    courseId
+      ? findCourseAssessmentConfigById(
+          courseId
+        ) ??
+        getDefaultCourseAssessmentConfig()
+      : getDefaultCourseAssessmentConfig();
+
   const paperConfig =
-    getDefaultCourseAssessmentConfig().papers.find(
+    courseConfig.papers.find(
       (
         coursePaper
       ) =>
@@ -318,6 +342,15 @@ function normaliseSavedAssessment(
   const setup =
     item.setup as SavedAssessment["setup"];
 
+  const courseIdentity =
+    resolveSavedAssessmentCourseIdentity({
+      courseId:
+        setup.courseId,
+
+      courseIdentityVersion:
+        setup.courseIdentityVersion,
+    });
+
   const builder =
     item.builder as Partial<
       SavedAssessment["builder"]
@@ -334,10 +367,16 @@ function normaliseSavedAssessment(
         .P1 ??
         builder.p1Target,
 
-      getDefaultTargetMarksForPaper(
-        "P1",
-        40
-      )
+      getDefaultTargetMarksForPaper({
+        courseId:
+          courseIdentity.courseId,
+
+        paper:
+          "P1",
+
+        fallback:
+          40,
+      })
     );
 
   const p2Target =
@@ -346,10 +385,16 @@ function normaliseSavedAssessment(
         .P2 ??
         builder.p2Target,
 
-      getDefaultTargetMarksForPaper(
-        "P2",
-        50
-      )
+      getDefaultTargetMarksForPaper({
+        courseId:
+          courseIdentity.courseId,
+
+        paper:
+          "P2",
+
+        fallback:
+          50,
+      })
     );
 
   const targetMarksByPaper:
@@ -489,17 +534,7 @@ function normaliseSavedAssessment(
 
     setup: {
       ...setup,
-
-      /**
-       * Backwards compatibility:
-       *
-       * saved assessments created before the course-config refactor will not
-       * have a courseId. For now, those assessments are treated as the active
-       * course because N5 Maths is currently the only complete course config.
-       */
-      courseId:
-        setup.courseId ??
-        DEFAULT_COURSE_ID,
+      ...courseIdentity,
     },
 
     builder: {
@@ -533,7 +568,7 @@ function normaliseSavedAssessment(
 export function loadSavedAssessments(): SavedAssessment[] {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return [];
   }
@@ -590,7 +625,7 @@ export function saveSavedAssessments(
 ) {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return;
   }
@@ -641,7 +676,7 @@ export function upsertSavedAssessment(
 
   if (
     existingIndex ===
-    -1
+      -1
   ) {
     saveSavedAssessments([
       ...allAssessments,
@@ -678,6 +713,12 @@ export function createSavedAssessmentDraft(
   const now =
     Date.now();
 
+  const courseIdentity =
+    createSavedAssessmentCourseIdentity(
+      input.setup.courseId ??
+        DEFAULT_COURSE_ID
+    );
+
   const nextAssessment:
     SavedAssessment = {
       id:
@@ -697,11 +738,7 @@ export function createSavedAssessmentDraft(
 
       setup: {
         ...input.setup,
-
-        courseId:
-          input.setup
-            .courseId ??
-          DEFAULT_COURSE_ID,
+        ...courseIdentity,
       },
 
       builder:
@@ -739,7 +776,7 @@ export function deleteSavedAssessment(
 
   if (
     currentAssessmentId ===
-    assessmentId
+      assessmentId
   ) {
     clearCurrentSavedAssessmentId();
   }
@@ -750,7 +787,7 @@ export function setCurrentSavedAssessmentId(
 ) {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return;
   }
@@ -764,7 +801,7 @@ export function setCurrentSavedAssessmentId(
 export function getCurrentSavedAssessmentId(): string | null {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return null;
   }
@@ -781,7 +818,7 @@ export function getCurrentSavedAssessmentId(): string | null {
 export function clearCurrentSavedAssessmentId() {
   if (
     typeof window ===
-    "undefined"
+      "undefined"
   ) {
     return;
   }
