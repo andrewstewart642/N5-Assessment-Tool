@@ -19,6 +19,7 @@ It explains:
 - application UI architecture;
 - persistence rules;
 - client-boundary rules;
+- naming/discoverability rules;
 - and the standards future structural work must preserve.
 
 For the physical location of individual files and folders, see:
@@ -95,6 +96,12 @@ app/Classes/
 app/Courses/
 → educational and Course-specific knowledge
 
+app/DeveloperTools/
+→ runtime developer utilities
+
+app/Home/
+→ Home-page product experience
+
 app/MyAssessments/
 → user-facing saved-assessment library
 
@@ -103,12 +110,11 @@ app/UI/Application/
 
 app/UI/Documents/
 → generated-document presentation
-
-app/DeveloperTools/
-→ runtime developer utilities
 ```
 
 The architecture should express responsibility directly rather than requiring historical knowledge.
+
+The same standard now applies at file level: folder context should make concise responsibility-based filenames understandable without relying on implementation details such as whether the file exports a React hook.
 
 ---
 
@@ -159,6 +165,7 @@ app/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
+├── Home/
 ├── MyAssessments/
 ├── UI/
 ├── layout.tsx
@@ -217,6 +224,12 @@ and:
 ```
 
 maps to a Classes-owned implementation.
+
+The Home route maps to product implementation beneath:
+
+```text
+app/Home/
+```
 
 URLs describe navigation.
 
@@ -343,6 +356,7 @@ Assessments
 Classes
 Courses
 DeveloperTools
+Home
 MyAssessments
 UI
 ```
@@ -357,6 +371,8 @@ It is not based on:
 - which folder gives the shortest import path.
 
 The owner is the domain whose responsibility the concept represents.
+
+`Home` is a product-area owner for the Home experience, while application-wide reusable visual infrastructure remains under `UI/Application`.
 
 ---
 
@@ -456,6 +472,8 @@ A function should normally live beside the domain that owns the concept it imple
 
 Specific ownership is more valuable than globally short import paths.
 
+The same principle applies to filenames: prefer a concrete responsibility name over a vague `Utils`, `Helpers`, `Common` or `Shared` suffix when the responsibility can be named directly.
+
 ---
 
 # Assessments
@@ -539,6 +557,8 @@ SkillsPanel/
 TopBar/
 ```
 
+The current file naming inside these owners is intentionally responsibility-first. Folder context supplies the domain/region; child filenames describe the job performed within that owner.
+
 ---
 
 ## 17. Assessment Setup
@@ -561,6 +581,8 @@ Responsibilities include concepts such as:
 - formula-sheet options.
 
 Setup should work through Course configuration rather than hard-coding National 5 Maths.
+
+Current responsibility names include concepts such as class-coverage state/storage, class loading, Course/paper options, form state, saved choices, target calculations and target state.
 
 ---
 
@@ -601,6 +623,8 @@ It is distinct from the global application `HeaderBar`.
 
 TopBar concerns include assessment metadata, date controls and active/view paper controls.
 
+The current tree uses responsibility names such as `DateField`, `NameField`, `PaperSelector`, `DateCalendarBehaviour`, `NameFieldBehaviour` and `Dimensions` rather than repeating `AssessmentTopBar` in every filename.
+
 ---
 
 ## 20. HUDBar
@@ -614,6 +638,8 @@ app/Assessments/Creation/HUDBar/
 It owns Creator-specific lower status/control presentation such as Marks & Timings, Notes and the Compile action.
 
 Compile readiness/state may evolve independently without moving the control out of the Creation HUD responsibility.
+
+Current files use concise responsibilities such as `CompileButton`, `ProgressPanel`, `ProgressMetrics` and `ProgressRows` within the `HUDBar/` context.
 
 ---
 
@@ -638,6 +664,15 @@ It may:
 
 It must not own the underlying educational definition of National 5 Maths skills. That belongs to Courses.
 
+The folders:
+
+```text
+01-SkillsFilters/
+02-SkillsTree/
+```
+
+are intentionally ordered to mirror the visual/product flow of the page. This is meaningful ordering, not decorative numbering.
+
 ---
 
 ## 22. Paper State and Sitting State
@@ -653,10 +688,12 @@ This includes generic concerns such as:
 - active paper;
 - viewed paper;
 - paper targets;
-- intended timing;
+- intended duration;
 - selection;
-- paper-value maps;
+- paper-specific values;
 - sitting date/time state.
+
+Current files distinguish responsibilities such as active/viewed paper selection, intended duration, mark-target calculations/editing/summary, automatic end times, sitting schedule and generic time calculations.
 
 Paper sitting currently supports per-paper date/start/end behaviour with deliberate compatibility and linking rules.
 
@@ -693,6 +730,12 @@ Preview implementation specific to the workspace belongs beneath:
 PaperWorkspace/Preview/
 ```
 
+The shared preview-edge tray implementation belongs beneath:
+
+```text
+PaperWorkspace/Preview/Tray/
+```
+
 The workspace may consume generated-document primitives. It does not own those primitives.
 
 ---
@@ -712,6 +755,8 @@ Settings owns paper-content and paper-sitting controls for the assessment being 
 
 View owns preview/display controls such as Compact, Exam, Answers, HUD visibility and layout/zoom reset actions.
 
+The physical implementation is grouped under `PaperWorkspace/Preview/Tray/`, where files such as `SettingsTab`, `ViewTab`, `ScheduleEditor`, `ClockPicker`, `ViewModeSelector` and `WorkspaceControls` describe their responsibilities without repeating `PreviewTray` in every filename.
+
 This tray must not be confused with global application settings.
 
 ---
@@ -725,6 +770,8 @@ app/Assessments/Creation/Questions/
 ```
 
 It owns concerns such as question drafts, generated question state, edit state, question controls, Creator-specific question preview and question workflow.
+
+Current responsibility names include `Actions`, `DraftActions`, `DraftDefaults`, `DraftGeneration`, `DraftTypes`, `SelectionSettings`, `Spacing` and `WorkingState`.
 
 Generic question contracts belong higher in:
 
@@ -774,6 +821,18 @@ Creation persistence belongs beneath:
 
 ```text
 app/Assessments/Creation/Persistence/
+```
+
+Current responsibilities are explicitly visible through filenames such as:
+
+```text
+AutoSaveAssessment.ts
+BrowserStorage.ts
+CourseSelection.ts
+LoadSavedAssessment.ts
+RestoreInitialState.ts
+SaveBrowserState.ts
+SaveStatus.ts
 ```
 
 Persistence is an architectural boundary because browser-saved data survives code refactors.
@@ -1147,7 +1206,14 @@ Formatting and derived display metadata belong beneath:
 app/MyAssessments/Display/
 ```
 
-This may include date/time formatting, Course/type/coverage labels and progress display derivation.
+Current modules are:
+
+```text
+LabelsAndDates.ts
+Progress.ts
+```
+
+This includes date/time formatting, Course/type/coverage labels and progress display derivation.
 
 Display derivation must not become a parallel saved-assessment data model.
 
@@ -1239,14 +1305,30 @@ Classes owns:
 - class persistence;
 - My Classes;
 - Class Details;
-- reusable class UI;
+- My Classes-specific UI;
 - class coverage presentation.
+
+Current high-level structure is:
+
+```text
+app/Classes/
+├── Coverage/
+├── MyClasses/
+├── Records/
+├── ClassData.ts
+├── ClassDetailsPage.tsx
+└── MyClassesPage.tsx
+```
 
 ---
 
 ## 53. Class Types
 
-Class-specific contracts belong in the Classes domain.
+Class-specific contracts belong in the Classes domain, currently centred on:
+
+```text
+app/Classes/ClassData.ts
+```
 
 A Class may reference `CourseId`, but does not own Course identity.
 
@@ -1254,13 +1336,23 @@ Course identity remains defined by Courses.
 
 ---
 
-## 54. Class State
+## 54. Class Records
 
-Class state and persistence belong beneath:
+Class records, browser persistence and collection state belong beneath:
 
 ```text
-app/Classes/State/
+app/Classes/Records/
 ```
+
+Current responsibilities are visible through:
+
+```text
+BrowserStorage.ts
+Collection.ts
+Normalisation.ts
+```
+
+This replaces the older generic `State/` naming in current architecture. Historical references to `Classes/State/` may remain in migration history where they accurately describe an earlier state.
 
 Class storage compatibility should be preserved when existing browser data depends on it.
 
@@ -1273,6 +1365,8 @@ Class coverage belongs beneath:
 ```text
 app/Classes/Coverage/
 ```
+
+Current responsibilities include assessment class selection, selected coverage items/details, question examples, skill/progress derivation and the coverage skills tree.
 
 Class coverage must resolve educational skills through Course configuration.
 
@@ -1550,7 +1644,7 @@ These represent different presentation systems.
 
 ## 73. Application UI
 
-Interactive product UI belongs beneath:
+Interactive product UI infrastructure belongs beneath:
 
 ```text
 app/UI/Application/
@@ -1562,7 +1656,6 @@ Current areas include:
 Colours/
 Components/
 HeaderBar/
-Home/
 Motion/
 Settings/
 SettingsDrawer/
@@ -1571,6 +1664,8 @@ Styles/
 Theme/
 Typography/
 ```
+
+Home-page product implementation is owned by `app/Home/`, not an `Application/Home/` subfolder. Home may consume reusable Application UI where appropriate.
 
 Application UI is allowed to depend on browser interaction where required.
 
@@ -1916,7 +2011,7 @@ The current architecture files take precedence over historical migration wording
 
 ## 95. Naming Architecture
 
-Names should describe current product concepts.
+Names should describe current product concepts and concrete responsibilities.
 
 Preferred terms include:
 
@@ -1939,6 +2034,24 @@ ExamQuestion
 ExamMarkingScheme
 CourseAssessmentConfig
 ```
+
+The governing file/folder naming rule is:
+
+> **Folder = context. Filename = responsibility.**
+
+Implications:
+
+- a filename does not begin with `use` merely because it exports a React hook;
+- exported hook function names still follow React's `useSomething` convention;
+- child filenames should not mechanically repeat the complete parent-folder name;
+- context may remain in a filename when removing it would make the name ambiguous or misleading;
+- vague implementation names such as `Utils`, `Helpers`, `Common`, `Shared` and `Misc` should be replaced by the concrete responsibility where possible;
+- generic folders such as `Components/` or `State/` should not be introduced when a durable responsibility can be named instead;
+- public routes, persistence keys and stored compatibility fields are not renamed merely to match source filenames.
+
+The discoverability test is:
+
+> If somebody unfamiliar with the implementation sees only the folder path and filename, can they make a sensible guess about what the file is responsible for?
 
 Avoid reviving superseded implementation terminology simply because old files, storage keys or internal route parameters still contain it.
 
@@ -2103,6 +2216,8 @@ The principle remains:
 
 > Do not destroy the old path until the new path is proven.
 
+A purely mechanical naming pass may instead use a clear rename map plus import-path repair, provided behaviour/symbol names are not accidentally changed and the full graph is verified afterwards.
+
 ---
 
 ## 102. Verification Standard
@@ -2111,11 +2226,12 @@ Structural source changes should normally be followed by:
 
 ```bash
 npx tsc --noEmit
+npm run lint
 npm run build
 git --no-pager diff --check
 ```
 
-During focused UI iteration, TypeScript plus browser verification may be sufficient between passes, but infrastructure/release-level completion should reach a clean production build.
+During focused UI iteration, TypeScript plus lint/browser verification may be sufficient between passes, but infrastructure/release-level completion should reach a clean production build.
 
 When route/framework changes leave stale `.next` output, regenerate or clear it as appropriate before rewriting correct source.
 
@@ -2227,8 +2343,10 @@ Do not create folders solely to:
 - reduce the number of files visible in Explorer;
 - mirror another feature;
 - reserve space for future work;
-- encode arbitrary numbering;
+- encode arbitrary/decorative numbering;
 - make every file have a unique directory.
+
+Meaningful ordered folders are allowed where order itself communicates real product, visual or curriculum structure.
 
 Many small coherent files are acceptable.
 
@@ -2257,13 +2375,23 @@ This makes repository navigation align with the UI vocabulary used during develo
 
 ---
 
-## 111. Decorative Numbering
+## 111. Meaningful vs Decorative Numbering
 
-Folder numbering should not be introduced merely to force Explorer ordering.
+Folder numbering should not be introduced merely to force arbitrary Explorer ordering.
 
-Existing numbered areas may remain where changing them provides no meaningful ownership benefit.
+Numbering is valid when the order itself carries product/curriculum meaning.
 
-Future architecture should prefer descriptive ownership over decorative ordering.
+The current intentional example is:
+
+```text
+app/Assessments/Creation/SkillsPanel/
+├── 01-SkillsFilters/
+└── 02-SkillsTree/
+```
+
+The ordering mirrors the webpage logic: filters appear before the Skills Tree. Preserve this unless the product structure itself changes.
+
+Future architecture should continue to prefer descriptive ownership over decorative ordering.
 
 ---
 
@@ -2360,6 +2488,8 @@ AGENTS.md
 
 Do not turn one document into all of the others.
 
+Documentation reconciliation is additive/information-preserving by default: preserve historical truth, update current truth, add new decisions, and explicitly supersede contradictory obsolete instructions.
+
 ---
 
 ## 117. Architecture V2 Completion State
@@ -2402,4 +2532,32 @@ A strong current change should therefore:
 - avoid unnecessary client boundaries;
 - avoid speculative folder structure;
 - keep UI and generated-document presentation distinct;
+- use folder/file names that reveal responsibility without implementation archaeology;
 - and update the appropriate living documentation when the product meaningfully changes.
+
+---
+
+## 119. Responsibility-First File Discoverability
+
+The repository-wide naming pass completed on 28 August 2026 established file discoverability as part of architecture rather than cosmetic style.
+
+Examples of the resulting pattern include:
+
+```text
+Persistence/AutoSaveAssessment.ts
+Persistence/RestoreInitialState.ts
+Questions/DraftGeneration.ts
+Papers/AutomaticEndTimes.ts
+TopBar/PaperSelector.tsx
+PaperWorkspace/Preview/ZoomAndPageTracking.ts
+MyAssessments/Library/Filtering.ts
+Classes/Records/Normalisation.ts
+```
+
+The names deliberately avoid exposing implementation details such as “this is a hook” when the responsibility is more useful to a reader.
+
+React hook functions themselves continue to use `use...` names where required by React.
+
+This naming layer is governed by the same ownership principle as the larger architecture: the path should explain what a responsibility is and where it belongs.
+
+A bad filename can also reveal a deeper design problem. If no clear responsibility name fits because a file performs several unrelated jobs, consider whether the file should be decomposed rather than hiding the problem behind a generic name.
