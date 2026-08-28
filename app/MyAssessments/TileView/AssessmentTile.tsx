@@ -8,6 +8,14 @@ import {
   setCurrentSavedAssessmentId,
 } from "@/app/Assessments/SavedAssessments/SavedAssessmentsStorage";
 
+import {
+  getCourseAccentTextColour,
+} from "@/app/UI/Application/Colours/CourseAccent";
+
+import {
+  useCourseColourPreferences,
+} from "@/app/UI/Application/Colours/useCourseColourPreferences";
+
 import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
@@ -21,6 +29,7 @@ import {
   formatDate,
   formatDateTime,
   formatTime,
+  getAssessmentCourseId,
   getAssessmentCourseLabel,
   getAssessmentCoverageLabel,
   getAssessmentStatusLabel,
@@ -137,6 +146,11 @@ function StatusBadge({
             complete
               ? theme.success
               : theme.accentPrimary,
+
+          boxShadow:
+            complete
+              ? `0 0 0 2px ${theme.successSoft}`
+              : `0 0 0 2px ${theme.accentSoft}`,
         }}
       />
 
@@ -396,31 +410,63 @@ export default function AssessmentTile({
   onTogglePinned,
   theme,
 }: AssessmentTileProps) {
+  const {
+    getColour,
+  } =
+    useCourseColourPreferences();
+
+
   const assessmentName =
     savedAssessment.setup
       .assessmentName
       .trim() ||
     "[Untitled file]";
 
+
+  const courseId =
+    getAssessmentCourseId(
+      savedAssessment
+    );
+
+
+  const courseAccent =
+    courseId
+      ? getColour(
+          courseId
+        )
+      : theme.accentPrimary;
+
+
+  const courseAccentText =
+    getCourseAccentTextColour(
+      courseAccent,
+      theme
+    );
+
+
   const courseLabel =
     getAssessmentCourseLabel(
       savedAssessment
     );
+
 
   const assessmentType =
     getAssessmentTypeLabel(
       savedAssessment
     );
 
+
   const coverageLabel =
     getAssessmentCoverageLabel(
       savedAssessment
     );
 
+
   const createdDate =
     formatDate(
       savedAssessment.createdAt
     );
+
 
   const createdDateTime =
     formatDateTime(
@@ -459,12 +505,6 @@ export default function AssessmentTile({
         gridTemplateColumns:
           "48% minmax(0, 1fr)",
 
-        /*
-         * Critical for the PDF preview:
-         * the single grid row must be allowed to
-         * shrink instead of adopting the PDF's
-         * full intrinsic height.
-         */
         gridTemplateRows:
           "minmax(0, 1fr)",
 
@@ -478,7 +518,11 @@ export default function AssessmentTile({
           "solid",
 
         borderColor:
-          theme.borderStandard,
+          `color-mix(
+            in srgb,
+            ${courseAccent} 30%,
+            ${theme.borderStandard}
+          )`,
 
         borderRadius:
           6,
@@ -505,6 +549,7 @@ export default function AssessmentTile({
         }
       />
 
+
       <AssessmentPreviewViewport
         savedAssessment={
           savedAssessment
@@ -513,6 +558,7 @@ export default function AssessmentTile({
           theme
         }
       />
+
 
       <div
         style={{
@@ -529,7 +575,7 @@ export default function AssessmentTile({
             "hidden",
 
           padding:
-            "11px 9px 9px",
+            "11px 9px 9px 13px",
 
           boxSizing:
             "border-box",
@@ -542,6 +588,25 @@ export default function AssessmentTile({
 
           gap:
             7,
+
+          background:
+            `linear-gradient(
+              135deg,
+              color-mix(
+                in srgb,
+                ${courseAccent} 10%,
+                ${theme.bgSection}
+              ) 0%,
+              color-mix(
+                in srgb,
+                ${courseAccent} 5%,
+                ${theme.bgSurface}
+              ) 42%,
+              ${theme.bgSurface} 100%
+            )`,
+
+          boxShadow:
+            `inset 4px 0 0 ${courseAccent}`,
         }}
       >
         <div
@@ -610,6 +675,7 @@ export default function AssessmentTile({
               {assessmentName}
             </div>
 
+
             <PinButton
               pinned={
                 savedAssessment.isPinned
@@ -635,21 +701,108 @@ export default function AssessmentTile({
               overflow:
                 "hidden",
 
+              display:
+                "flex",
+
+              alignItems:
+                "center",
+
+              gap:
+                6,
+
               whiteSpace:
                 "nowrap",
 
               textOverflow:
                 "ellipsis",
-
-              color:
-                theme.textSecondary,
-
-              ...UI_TEXT.controlTextStrong,
             }}
           >
-            {courseLabel}
-            {" · "}
-            {assessmentType}
+            <span
+              aria-hidden="true"
+              style={{
+                width:
+                  7,
+
+                height:
+                  7,
+
+                flexShrink:
+                  0,
+
+                borderRadius:
+                  999,
+
+                background:
+                  courseAccent,
+
+                boxShadow:
+                  `0 0 7px ${courseAccent}`,
+              }}
+            />
+
+
+            <span
+              style={{
+                minWidth:
+                  0,
+
+                overflow:
+                  "hidden",
+
+                color:
+                  courseAccentText,
+
+                whiteSpace:
+                  "nowrap",
+
+                textOverflow:
+                  "ellipsis",
+
+                ...UI_TEXT.controlTextStrong,
+              }}
+            >
+              {courseLabel}
+            </span>
+
+
+            <span
+              aria-hidden="true"
+              style={{
+                flexShrink:
+                  0,
+
+                color:
+                  theme.textMuted,
+
+                ...UI_TEXT.controlTextStrong,
+              }}
+            >
+              ·
+            </span>
+
+
+            <span
+              style={{
+                minWidth:
+                  0,
+
+                overflow:
+                  "hidden",
+
+                color:
+                  theme.textSecondary,
+
+                whiteSpace:
+                  "nowrap",
+
+                textOverflow:
+                  "ellipsis",
+
+                ...UI_TEXT.controlTextStrong,
+              }}
+            >
+              {assessmentType}
+            </span>
           </div>
 
 
@@ -700,6 +853,7 @@ export default function AssessmentTile({
               {coverageLabel}
             </div>
 
+
             <StatusBadge
               savedAssessment={
                 savedAssessment
@@ -725,6 +879,9 @@ export default function AssessmentTile({
             theme={
               theme
             }
+            courseAccent={
+              courseAccent
+            }
           />
         </div>
 
@@ -741,7 +898,11 @@ export default function AssessmentTile({
               "solid",
 
             borderTopColor:
-              theme.borderStandard,
+              `color-mix(
+                in srgb,
+                ${courseAccent} 14%,
+                ${theme.borderStandard}
+              )`,
           }}
         >
           <AssessmentMetadata
@@ -882,6 +1043,7 @@ export default function AssessmentTile({
             Duplicate
           </button>
 
+
           <button
             type="button"
             onClick={() =>
@@ -958,6 +1120,7 @@ export default function AssessmentTile({
           <span>
             Created
           </span>
+
 
           <span
             style={{

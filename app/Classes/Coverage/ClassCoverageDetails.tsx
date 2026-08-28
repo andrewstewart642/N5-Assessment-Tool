@@ -53,91 +53,49 @@ type Props = {
 };
 
 
-function ProgressBar({
-  progressPct,
-  accent,
-  theme,
-}: {
-  progressPct:
-    number;
-
-  accent:
-    string;
-
-  theme:
-    AppTheme;
-}) {
-  return (
-    <div
-      style={{
-        width:
-          "100%",
-
-        height:
-          4,
-
-        overflow:
-          "hidden",
-
-        borderRadius:
-          4,
-
-        background:
-          theme.borderStandard,
-      }}
-    >
-      <div
-        style={{
-          width:
-            `${progressPct}%`,
-
-          height:
-            "100%",
-
-          borderRadius:
-            4,
-
-          background:
-            accent,
-
-          boxShadow:
-            `0 0 7px color-mix(
-              in srgb,
-              ${accent} 55%,
-              transparent
-            )`,
-
-          transition:
-            "width 180ms ease",
-        }}
-      />
-    </div>
-  );
-}
-
-
 function CoverageStatus({
   covered,
   theme,
-  courseAccent,
 }: {
   covered:
     boolean;
 
   theme:
     AppTheme;
-
-  courseAccent:
-    string;
 }) {
+  const colour =
+    covered
+      ? theme.success
+      : theme.danger;
+
+
+  const softColour =
+    covered
+      ? theme.successSoft
+      : theme.dangerSoft;
+
+
+  const label =
+    covered
+      ? "Covered"
+      : "Not yet covered";
+
+
   return (
-    <span
+    <div
+      role="status"
+      aria-label={
+        label
+      }
       style={{
-        height:
-          22,
+        minHeight:
+          26,
 
         padding:
-          "0 7px",
+          "5px 8px",
+
+        boxSizing:
+          "border-box",
 
         display:
           "inline-flex",
@@ -146,7 +104,7 @@ function CoverageStatus({
           "center",
 
         gap:
-          5,
+          7,
 
         borderWidth:
           1,
@@ -155,63 +113,540 @@ function CoverageStatus({
           "solid",
 
         borderColor:
-          covered
-            ? `color-mix(
-                in srgb,
-                ${courseAccent} 48%,
-                ${theme.borderStandard}
-              )`
-            : theme.borderStandard,
+          theme.borderStandard,
 
         borderRadius:
-          4,
+          6,
 
         background:
-          covered
-            ? `color-mix(
-                in srgb,
-                ${courseAccent} 11%,
-                ${theme.bgSection}
-              )`
-            : theme.bgSection,
+          theme.bgElevated,
 
         color:
-          covered
-            ? courseAccent
-            : theme.textMuted,
+          colour,
+
+        boxShadow:
+          theme.shadow,
 
         fontSize:
-          9.5,
+          10,
 
         fontWeight:
-          650,
+          700,
+
+        lineHeight:
+          1,
 
         whiteSpace:
           "nowrap",
       }}
     >
       <span
+        aria-hidden="true"
         style={{
           width:
-            5,
+            7,
 
           height:
-            5,
+            7,
+
+          flexShrink:
+            0,
 
           borderRadius:
             999,
 
           background:
-            covered
-              ? courseAccent
-              : theme.textMuted,
+            colour,
+
+          boxShadow:
+            `0 0 0 2px ${softColour}`,
         }}
       />
 
-      {covered
-        ? "Covered"
-        : "Not covered"}
-    </span>
+      <span>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+
+function DetailsIdentityRow({
+  label,
+  code,
+  title,
+  theme,
+  courseAccent,
+}: {
+  label:
+    string;
+
+  code?:
+    string;
+
+  title:
+    string;
+
+  theme:
+    AppTheme;
+
+  courseAccent:
+    string;
+}) {
+  return (
+    <div
+      style={{
+        minWidth:
+          0,
+
+        display:
+          "grid",
+
+        gridTemplateColumns:
+          "58px 8px minmax(0, 1fr)",
+
+        alignItems:
+          "baseline",
+
+        columnGap:
+          5,
+      }}
+    >
+      <span
+        style={{
+          color:
+            theme.textMuted,
+
+          fontSize:
+            10.5,
+
+          fontWeight:
+            600,
+
+          textAlign:
+            "right",
+
+          whiteSpace:
+            "nowrap",
+        }}
+      >
+        {label}
+      </span>
+
+
+      <span
+        aria-hidden="true"
+        style={{
+          color:
+            theme.textMuted,
+
+          fontSize:
+            10.5,
+
+          fontWeight:
+            600,
+
+          textAlign:
+            "center",
+        }}
+      >
+        :
+      </span>
+
+
+      <div
+        style={{
+          minWidth:
+            0,
+
+          display:
+            "flex",
+
+          alignItems:
+            "baseline",
+
+          gap:
+            6,
+
+          color:
+            theme.textPrimary,
+
+          fontSize:
+            11.5,
+
+          fontWeight:
+            650,
+
+          lineHeight:
+            1.35,
+        }}
+      >
+        {code ? (
+          <span
+            style={{
+              flexShrink:
+                0,
+
+              color:
+                courseAccent,
+
+              fontWeight:
+                750,
+
+              fontVariantNumeric:
+                "tabular-nums",
+            }}
+          >
+            {code}
+          </span>
+        ) : null}
+
+
+        <span
+          style={{
+            minWidth:
+              0,
+
+            overflow:
+              "hidden",
+
+            textOverflow:
+              "ellipsis",
+          }}
+        >
+          {title}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+
+function DetailsHeader({
+  skillCode,
+  skillTitle,
+  subskillCode,
+  subskillTitle,
+  covered,
+  onClear,
+  theme,
+  courseAccent,
+}: {
+  skillCode:
+    string;
+
+  skillTitle:
+    string;
+
+  subskillCode?:
+    string;
+
+  subskillTitle?:
+    string;
+
+  covered:
+    boolean;
+
+  onClear:
+    () => void;
+
+  theme:
+    AppTheme;
+
+  courseAccent:
+    string;
+}) {
+  return (
+    <div
+      style={{
+        minWidth:
+          0,
+
+        display:
+          "grid",
+
+        gap:
+          11,
+
+        paddingBottom:
+          12,
+
+        borderBottomWidth:
+          1,
+
+        borderBottomStyle:
+          "solid",
+
+        borderBottomColor:
+          theme.borderStandard,
+      }}
+    >
+      <div
+        style={{
+          minWidth:
+            0,
+
+          display:
+            "flex",
+
+          alignItems:
+            "center",
+
+          justifyContent:
+            "space-between",
+
+          gap:
+            12,
+        }}
+      >
+        <button
+          type="button"
+          title="Clear selection"
+          aria-label="Clear Skills Details selection"
+          onClick={
+            onClear
+          }
+          style={{
+            padding:
+              0,
+
+            display:
+              "inline-flex",
+
+            alignItems:
+              "center",
+
+            gap:
+              6,
+
+            borderWidth:
+              0,
+
+            background:
+              "transparent",
+
+            color:
+              theme.textSecondary,
+
+            cursor:
+              "pointer",
+
+            fontFamily:
+              "inherit",
+
+            fontSize:
+              11,
+
+            fontWeight:
+              700,
+
+            lineHeight:
+              1.2,
+          }}
+        >
+          <span
+            aria-hidden="true"
+            style={{
+              color:
+                theme.textMuted,
+
+              fontSize:
+                13,
+            }}
+          >
+            ←
+          </span>
+
+          Skills Details
+        </button>
+
+
+        <CoverageStatus
+          covered={
+            covered
+          }
+          theme={
+            theme
+          }
+        />
+      </div>
+
+
+      <div
+        style={{
+          minWidth:
+            0,
+
+          display:
+            "grid",
+
+          gap:
+            5,
+        }}
+      >
+        <DetailsIdentityRow
+          label="Skill"
+          code={
+            skillCode
+          }
+          title={
+            skillTitle
+          }
+          theme={
+            theme
+          }
+          courseAccent={
+            courseAccent
+          }
+        />
+
+
+        <DetailsIdentityRow
+          label="Subskill"
+          code={
+            subskillCode
+          }
+          title={
+            subskillTitle ??
+            "—"
+          }
+          theme={
+            theme
+          }
+          courseAccent={
+            courseAccent
+          }
+        />
+      </div>
+    </div>
+  );
+}
+
+
+function EmptyDetails({
+  theme,
+  courseAccent,
+}: {
+  theme:
+    AppTheme;
+
+  courseAccent:
+    string;
+}) {
+  return (
+    <aside
+      style={{
+        minWidth:
+          0,
+
+        minHeight:
+          280,
+
+        padding:
+          14,
+
+        boxSizing:
+          "border-box",
+
+        display:
+          "grid",
+
+        alignContent:
+          "start",
+
+        gap:
+          14,
+
+        borderWidth:
+          1,
+
+        borderStyle:
+          "solid",
+
+        borderColor:
+          `color-mix(
+            in srgb,
+            ${courseAccent} 24%,
+            ${theme.borderStandard}
+          )`,
+
+        borderRadius:
+          6,
+
+        background:
+          `linear-gradient(
+            145deg,
+            color-mix(
+              in srgb,
+              ${courseAccent} 7%,
+              ${theme.bgSurface}
+            ) 0%,
+            ${theme.bgSurface} 52%
+          )`,
+      }}
+    >
+      <div
+        style={{
+          paddingBottom:
+            11,
+
+          borderBottomWidth:
+            1,
+
+          borderBottomStyle:
+            "solid",
+
+          borderBottomColor:
+            theme.borderStandard,
+
+          color:
+            theme.textSecondary,
+
+          fontSize:
+            11,
+
+          fontWeight:
+            700,
+        }}
+      >
+        Skills Details
+      </div>
+
+
+      <div
+        style={{
+          minHeight:
+            190,
+
+          display:
+            "grid",
+
+          placeItems:
+            "center",
+
+          textAlign:
+            "center",
+        }}
+      >
+        <span
+          style={{
+            maxWidth:
+              300,
+
+            color:
+              theme.textMuted,
+
+            fontSize:
+              10.5,
+
+            lineHeight:
+              1.5,
+          }}
+        >
+          Select a skill or subskill to inspect its representative generated question range.
+        </span>
+      </div>
+    </aside>
   );
 }
 
@@ -263,151 +698,14 @@ export default function ClassCoverageDetails({
     !selectedSkill
   ) {
     return (
-      <aside
-        style={{
-          minWidth:
-            0,
-
-          minHeight:
-            330,
-
-          padding:
-            16,
-
-          boxSizing:
-            "border-box",
-
-          display:
-            "grid",
-
-          alignContent:
-            "center",
-
-          justifyItems:
-            "center",
-
-          gap:
-            8,
-
-          borderWidth:
-            1,
-
-          borderStyle:
-            "solid",
-
-          borderColor:
-            theme.borderStandard,
-
-          borderRadius:
-            6,
-
-          background:
-            `linear-gradient(
-              145deg,
-              color-mix(
-                in srgb,
-                ${courseAccent} 7%,
-                ${theme.bgSurface}
-              ) 0%,
-              ${theme.bgSurface} 55%
-            )`,
-
-          textAlign:
-            "center",
-        }}
-      >
-        <div
-          aria-hidden="true"
-          style={{
-            width:
-              34,
-
-            height:
-              34,
-
-            display:
-              "grid",
-
-            placeItems:
-              "center",
-
-            borderWidth:
-              1,
-
-            borderStyle:
-              "solid",
-
-            borderColor:
-              `color-mix(
-                in srgb,
-                ${courseAccent} 38%,
-                ${theme.borderStandard}
-              )`,
-
-            borderRadius:
-              6,
-
-            background:
-              `color-mix(
-                in srgb,
-                ${courseAccent} 10%,
-                ${theme.bgSection}
-              )`,
-
-            color:
-              courseAccent,
-          }}
-        >
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 18 18"
-          >
-            <path
-              d="M3 3.5h12v11H3zM5.5 6h7M5.5 8.8h7M5.5 11.6h4.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </div>
-
-
-        <div
-          style={{
-            color:
-              theme.textPrimary,
-
-            fontSize:
-              13,
-
-            fontWeight:
-              650,
-          }}
-        >
-          Course specification details
-        </div>
-
-
-        <div
-          style={{
-            maxWidth:
-              330,
-
-            color:
-              theme.textMuted,
-
-            fontSize:
-              10.5,
-
-            lineHeight:
-              1.45,
-          }}
-        >
-          Select a skill or individual subskill to inspect the specification and real generated question range.
-        </div>
-      </aside>
+      <EmptyDetails
+        theme={
+          theme
+        }
+        courseAccent={
+          courseAccent
+        }
+      />
     );
   }
 
@@ -444,8 +742,8 @@ export default function ClassCoverageDetails({
     );
 
 
-  /**
-   * Individual subskill inspector.
+  /*
+   * Individual subskill view.
    */
   if (
     selection.kind ===
@@ -513,246 +811,35 @@ export default function ClassCoverageDetails({
             )`,
         }}
       >
-        <button
-          type="button"
-          onClick={() =>
-            onSelectionChange({
-              kind:
-                "skill",
-
-              skillId:
-                skill.id,
-            })
+        <DetailsHeader
+          skillCode={
+            skillCode
           }
-          style={{
-            width:
-              "fit-content",
-
-            padding:
-              0,
-
-            display:
-              "inline-flex",
-
-            alignItems:
-              "center",
-
-            gap:
-              5,
-
-            borderWidth:
-              0,
-
-            background:
-              "transparent",
-
-            color:
-              theme.textMuted,
-
-            cursor:
-              "pointer",
-
-            fontFamily:
-              "inherit",
-
-            fontSize:
-              9.5,
-
-            fontWeight:
-              600,
-          }}
-        >
-          ← {skillCode} {skillTitle}
-        </button>
-
-
-        <div
-          style={{
-            display:
-              "grid",
-
-            gap:
-              8,
-
-            paddingBottom:
-              12,
-
-            borderBottomWidth:
-              1,
-
-            borderBottomStyle:
-              "solid",
-
-            borderBottomColor:
-              theme.borderStandard,
-          }}
-        >
-          <div
-            style={{
-              display:
-                "flex",
-
-              alignItems:
-                "center",
-
-              justifyContent:
-                "space-between",
-
-              gap:
-                10,
-            }}
-          >
-            <span
-              style={{
-                color:
-                  theme.textMuted,
-
-                fontSize:
-                  9.5,
-
-                fontWeight:
-                  700,
-
-                letterSpacing:
-                  "0.05em",
-
-                textTransform:
-                  "uppercase",
-              }}
-            >
-              Subskill details
-            </span>
-
-
-            <CoverageStatus
-              covered={
-                covered
-              }
-              theme={
-                theme
-              }
-              courseAccent={
-                courseAccent
-              }
-            />
-          </div>
-
-
-          <div
-            style={{
-              display:
-                "flex",
-
-              alignItems:
-                "center",
-
-              gap:
-                8,
-
-              flexWrap:
-                "wrap",
-            }}
-          >
-            <span
-              style={{
-                color:
-                  courseAccent,
-
-                fontSize:
-                  14,
-
-                fontWeight:
-                  750,
-
-                fontVariantNumeric:
-                  "tabular-nums",
-              }}
-            >
-              {concept.code}
-            </span>
-
-
-            <span
-              style={{
-                color:
-                  theme.textPrimary,
-
-                fontSize:
-                  17,
-
-                fontWeight:
-                  700,
-
-                lineHeight:
-                  1.25,
-              }}
-            >
-              {concept.shortLabel ||
-                concept.label}
-            </span>
-          </div>
-        </div>
-
-
-        <div
-          style={{
-            display:
-              "grid",
-
-            gap:
-              7,
-          }}
-        >
-          <div
-            style={{
-              color:
-                theme.textSecondary,
-
-              fontSize:
-                11,
-
-              fontWeight:
-                650,
-            }}
-          >
-            What pupils should be able to do
-          </div>
-
-
-          <div
-            style={{
-              padding:
-                "10px 11px",
-
-              borderWidth:
-                1,
-
-              borderStyle:
-                "solid",
-
-              borderColor:
-                theme.borderStandard,
-
-              borderRadius:
-                5,
-
-              background:
-                theme.bgSection,
-
-              color:
-                theme.textSecondary,
-
-              fontSize:
-                11,
-
-              lineHeight:
-                1.45,
-            }}
-          >
-            {concept.fullDescription ||
-              concept.label}
-          </div>
-        </div>
+          skillTitle={
+            skillTitle
+          }
+          subskillCode={
+            concept.code
+          }
+          subskillTitle={
+            concept.shortLabel ||
+            concept.label
+          }
+          covered={
+            covered
+          }
+          onClear={() =>
+            onSelectionChange(
+              null
+            )
+          }
+          theme={
+            theme
+          }
+          courseAccent={
+            courseAccent
+          }
+        />
 
 
         <ClassCoverageQuestionExamples
@@ -778,9 +865,6 @@ export default function ClassCoverageDetails({
 
         <div
           style={{
-            paddingTop:
-              2,
-
             color:
               theme.textMuted,
 
@@ -788,7 +872,7 @@ export default function ClassCoverageDetails({
               9.5,
 
             lineHeight:
-              1.4,
+              1.45,
           }}
         >
           The examples above represent the available generated range for this subskill. Refresh any example to see another question at the same underlying generator level.
@@ -798,8 +882,13 @@ export default function ClassCoverageDetails({
   }
 
 
-  /**
-   * Parent skill overview.
+  /*
+   * Parent skill view.
+   *
+   * The tree already communicates specification
+   * structure and coverage. The inspector therefore
+   * focuses on what the actual generated assessment
+   * questions look like across the skill.
    */
   return (
     <aside
@@ -850,390 +939,38 @@ export default function ClassCoverageDetails({
           )`,
       }}
     >
-      <div
-        style={{
-          display:
-            "grid",
-
-          gap:
-            7,
-
-          paddingBottom:
-            12,
-
-          borderBottomWidth:
-            1,
-
-          borderBottomStyle:
-            "solid",
-
-          borderBottomColor:
-            theme.borderStandard,
-        }}
-      >
-        <span
-          style={{
-            color:
-              theme.textMuted,
-
-            fontSize:
-              9.5,
-
-            fontWeight:
-              700,
-
-            letterSpacing:
-              "0.05em",
-
-            textTransform:
-              "uppercase",
-          }}
-        >
-          Skill details
-        </span>
-
-
-        <div
-          style={{
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            gap:
-              8,
-
-            flexWrap:
-              "wrap",
-          }}
-        >
-          {skillCode ? (
-            <span
-              style={{
-                color:
-                  courseAccent,
-
-                fontSize:
-                  14,
-
-                fontWeight:
-                  750,
-              }}
-            >
-              {skillCode}
-            </span>
-          ) : null}
-
-
-          <span
-            style={{
-              color:
-                theme.textPrimary,
-
-              fontSize:
-                17,
-
-              fontWeight:
-                700,
-
-              lineHeight:
-                1.25,
-            }}
-          >
-            {skillTitle}
-          </span>
-        </div>
-
-
-        <div
-          style={{
-            display:
-              "flex",
-
-            alignItems:
-              "center",
-
-            justifyContent:
-              "space-between",
-
-            gap:
-              12,
-          }}
-        >
-          <span
-            style={{
-              color:
-                theme.textMuted,
-
-              fontSize:
-                10,
-
-              fontVariantNumeric:
-                "tabular-nums",
-            }}
-          >
-            {skillProgress.completed}
-            {" / "}
-            {skillProgress.total}
-            {" "}
-            {skillProgress.total ===
-            1
-              ? "subskill covered"
-              : "subskills covered"}
-          </span>
-
-
-          <span
-            style={{
-              color:
-                theme.textSecondary,
-
-              fontSize:
-                10,
-
-              fontWeight:
-                650,
-
-              fontVariantNumeric:
-                "tabular-nums",
-            }}
-          >
-            {Math.round(
-              skillProgress.progressPct
-            )}
-            %
-          </span>
-        </div>
-
-
-        <ProgressBar
-          progressPct={
-            skillProgress.progressPct
-          }
-          accent={
-            courseAccent
-          }
-          theme={
-            theme
-          }
-        />
-      </div>
-
-
-      <div
-        style={{
-          display:
-            "grid",
-
-          gap:
-            7,
-        }}
-      >
-        <div
-          style={{
-            color:
-              theme.textSecondary,
-
-            fontSize:
-              11,
-
-            fontWeight:
-              650,
-          }}
-        >
-          Course specification subskills
-        </div>
-
-
-        {trackableConcepts.length >
-        0 ? (
-          <div
-            style={{
-              display:
-                "grid",
-
-              gap:
-                5,
-            }}
-          >
-            {trackableConcepts.map(
-              (
-                concept
-              ) => {
-                const covered =
-                  completedConceptIds.includes(
-                    concept.id
-                  );
-
-
-                return (
-                  <button
-                    key={
-                      concept.id
-                    }
-                    type="button"
-                    onClick={() =>
-                      onSelectionChange({
-                        kind:
-                          "concept",
-
-                        skillId:
-                          skill.id,
-
-                        conceptId:
-                          concept.id,
-                      })
-                    }
-                    style={{
-                      width:
-                        "100%",
-
-                      minHeight:
-                        38,
-
-                      padding:
-                        "7px 9px",
-
-                      boxSizing:
-                        "border-box",
-
-                      display:
-                        "grid",
-
-                      gridTemplateColumns:
-                        "minmax(0, 1fr) auto",
-
-                      alignItems:
-                        "center",
-
-                      gap:
-                        10,
-
-                      borderWidth:
-                        1,
-
-                      borderStyle:
-                        "solid",
-
-                      borderColor:
-                        theme.borderStandard,
-
-                      borderRadius:
-                        5,
-
-                      background:
-                        theme.bgSection,
-
-                      color:
-                        "inherit",
-
-                      cursor:
-                        "pointer",
-
-                      fontFamily:
-                        "inherit",
-
-                      textAlign:
-                        "left",
-                    }}
-                  >
-                    <div
-                      style={{
-                        minWidth:
-                          0,
-
-                        display:
-                          "flex",
-
-                        alignItems:
-                          "center",
-
-                        gap:
-                          7,
-                      }}
-                    >
-                      <span
-                        style={{
-                          flexShrink:
-                            0,
-
-                          color:
-                            courseAccent,
-
-                          fontSize:
-                            10,
-
-                          fontWeight:
-                            750,
-                        }}
-                      >
-                        {concept.code}
-                      </span>
-
-
-                      <span
-                        style={{
-                          minWidth:
-                            0,
-
-                          overflow:
-                            "hidden",
-
-                          color:
-                            theme.textSecondary,
-
-                          fontSize:
-                            10.5,
-
-                          whiteSpace:
-                            "nowrap",
-
-                          textOverflow:
-                            "ellipsis",
-                        }}
-                      >
-                        {concept.shortLabel ||
-                          concept.label}
-                      </span>
-                    </div>
-
-
-                    <span
-                      style={{
-                        width:
-                          7,
-
-                        height:
-                          7,
-
-                        borderRadius:
-                          999,
-
-                        background:
-                          covered
-                            ? courseAccent
-                            : theme.borderStandard,
-
-                        boxShadow:
-                          covered
-                            ? `0 0 6px ${courseAccent}`
-                            : "none",
-                      }}
-                    />
-                  </button>
-                );
-              }
-            )}
-          </div>
-        ) : null}
-      </div>
+      <DetailsHeader
+        skillCode={
+          skillCode
+        }
+        skillTitle={
+          skillTitle
+        }
+        subskillTitle="—"
+        covered={
+          skillProgress.isComplete
+        }
+        onClear={() =>
+          onSelectionChange(
+            null
+          )
+        }
+        theme={
+          theme
+        }
+        courseAccent={
+          courseAccent
+        }
+      />
 
 
       {trackableConcepts.length >
       0 ? (
         <div
           style={{
+            minWidth:
+              0,
+
             display:
               "grid",
 
@@ -1243,9 +980,6 @@ export default function ClassCoverageDetails({
         >
           <div
             style={{
-              paddingTop:
-                2,
-
               color:
                 theme.textSecondary,
 
@@ -1256,7 +990,7 @@ export default function ClassCoverageDetails({
                 650,
             }}
           >
-            Representative questions across this skill
+            Representative question range
           </div>
 
 
@@ -1348,10 +1082,14 @@ export default function ClassCoverageDetails({
 
                       fontWeight:
                         750,
+
+                      fontVariantNumeric:
+                        "tabular-nums",
                     }}
                   >
                     {concept.code}
                   </span>
+
 
                   <span
                     style={{
@@ -1399,6 +1137,22 @@ export default function ClassCoverageDetails({
               </section>
             )
           )}
+
+
+          <div
+            style={{
+              color:
+                theme.textMuted,
+
+              fontSize:
+                9.5,
+
+              lineHeight:
+                1.45,
+            }}
+          >
+            Select an individual subskill to inspect its full generated question range.
+          </div>
         </div>
       ) : (
         <div
@@ -1408,9 +1162,12 @@ export default function ClassCoverageDetails({
 
             fontSize:
               10.5,
+
+            lineHeight:
+              1.45,
           }}
         >
-          No specification subskills are currently recorded for this skill.
+          Generated examples are not currently available for this skill.
         </div>
       )}
     </aside>

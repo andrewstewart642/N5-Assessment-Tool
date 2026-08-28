@@ -31,6 +31,7 @@ export function AssessmentOverallProgressBar({
       savedAssessment
     );
 
+
   return (
     <div
       title={`${Math.round(
@@ -71,7 +72,13 @@ export function AssessmentOverallProgressBar({
             "100%",
 
           background:
-            "#22a447",
+            theme.success,
+
+          boxShadow:
+            progressPct >
+            0
+              ? `0 0 7px ${theme.successSoft}`
+              : "none",
 
           transition:
             "width 180ms ease",
@@ -85,17 +92,22 @@ export function AssessmentOverallProgressBar({
 export default function AssessmentTileProgress({
   savedAssessment,
   theme,
+  courseAccent,
 }: {
   savedAssessment:
     SavedAssessment;
 
   theme:
     AppTheme;
+
+  courseAccent:
+    string;
 }) {
   const paperRows =
     getAssessmentPaperProgress(
       savedAssessment
     );
+
 
   return (
     <div
@@ -143,6 +155,7 @@ export default function AssessmentTileProgress({
               {row.paper}
             </span>
 
+
             <span
               style={{
                 ...UI_TEXT.helper,
@@ -152,12 +165,16 @@ export default function AssessmentTileProgress({
 
                 whiteSpace:
                   "nowrap",
+
+                fontVariantNumeric:
+                  "tabular-nums",
               }}
             >
               {row.assignedMarks}
               {" / "}
               {row.targetMarks}
             </span>
+
 
             <div
               style={{
@@ -174,7 +191,11 @@ export default function AssessmentTileProgress({
                   "hidden",
 
                 background:
-                  theme.borderStandard,
+                  `color-mix(
+                    in srgb,
+                    ${courseAccent} 12%,
+                    ${theme.borderStandard}
+                  )`,
               }}
             >
               <div
@@ -189,7 +210,17 @@ export default function AssessmentTileProgress({
                     3,
 
                   background:
-                    theme.accentPrimary,
+                    courseAccent,
+
+                  boxShadow:
+                    row.progressPct >
+                    0
+                      ? `0 0 6px color-mix(
+                          in srgb,
+                          ${courseAccent} 50%,
+                          transparent
+                        )`
+                      : "none",
 
                   transition:
                     "width 180ms ease",

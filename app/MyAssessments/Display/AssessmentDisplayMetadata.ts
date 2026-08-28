@@ -6,6 +6,10 @@ import {
   getCourseCatalogEntry,
 } from "@/app/Courses/CourseCatalog";
 
+import type {
+  CourseId,
+} from "@/app/Courses/CourseTypes";
+
 
 function formatDateObject(
   date:
@@ -89,6 +93,7 @@ export function formatAssessmentDate(
   const trimmed =
     value.trim();
 
+
   if (
     !trimmed
   ) {
@@ -96,14 +101,11 @@ export function formatAssessmentDate(
   }
 
 
-  /*
-   * Already stored as DD/MM/YYYY.
-   */
-
   const britishDateMatch =
     trimmed.match(
       /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
     );
+
 
   if (
     britishDateMatch
@@ -116,6 +118,7 @@ export function formatAssessmentDate(
     ] =
       britishDateMatch;
 
+
     return `${day.padStart(
       2,
       "0"
@@ -126,14 +129,11 @@ export function formatAssessmentDate(
   }
 
 
-  /*
-   * ISO YYYY-MM-DD.
-   */
-
   const isoDateMatch =
     trimmed.match(
       /^(\d{4})-(\d{1,2})-(\d{1,2})$/
     );
+
 
   if (
     isoDateMatch
@@ -146,6 +146,7 @@ export function formatAssessmentDate(
     ] =
       isoDateMatch;
 
+
     return `${day.padStart(
       2,
       "0"
@@ -156,15 +157,11 @@ export function formatAssessmentDate(
   }
 
 
-  /*
-   * Historical display values such as
-   * "26 Aug 2026".
-   */
-
   const parsedTimestamp =
     Date.parse(
       trimmed
     );
+
 
   if (
     Number.isFinite(
@@ -177,19 +174,14 @@ export function formatAssessmentDate(
   }
 
 
-  /*
-   * Preserve an unknown historical value rather
-   * than silently replacing it.
-   */
-
   return trimmed;
 }
 
 
-export function getAssessmentCourseLabel(
+export function getAssessmentCourseId(
   savedAssessment:
     SavedAssessment
-): string {
+): CourseId | null {
   const course =
     getCourseCatalogEntry(
       savedAssessment.setup
@@ -197,6 +189,37 @@ export function getAssessmentCourseLabel(
         savedAssessment.setup
           .levelId
     );
+
+
+  return (
+    course?.id ??
+    null
+  );
+}
+
+
+export function getAssessmentCourseLabel(
+  savedAssessment:
+    SavedAssessment
+): string {
+  const courseId =
+    getAssessmentCourseId(
+      savedAssessment
+    );
+
+
+  if (
+    !courseId
+  ) {
+    return "Unknown course";
+  }
+
+
+  const course =
+    getCourseCatalogEntry(
+      courseId
+    );
+
 
   return (
     course?.label ??
@@ -245,10 +268,12 @@ export function getAssessmentCoverageLabel(
     return "Full course coverage";
   }
 
+
   const className =
     savedAssessment.setup
       .className
       .trim();
+
 
   if (
     className
@@ -256,10 +281,12 @@ export function getAssessmentCoverageLabel(
     return className;
   }
 
+
   const classCount =
     savedAssessment.setup
       .selectedClassIds
       .length;
+
 
   if (
     classCount ===
@@ -268,12 +295,14 @@ export function getAssessmentCoverageLabel(
     return "No class selected";
   }
 
+
   if (
     classCount ===
     1
   ) {
     return "1 class linked";
   }
+
 
   return `${classCount} classes linked`;
 }
