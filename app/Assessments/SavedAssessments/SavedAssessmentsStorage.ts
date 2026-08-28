@@ -535,6 +535,14 @@ function normaliseSavedAssessment(
     setup: {
       ...setup,
       ...courseIdentity,
+
+      /**
+       * levelId is retained as a compatibility field, but a saved
+       * assessment has one Course identity. Keep the historical field
+       * aligned so it cannot reintroduce a second competing Course value.
+       */
+      levelId:
+        courseIdentity.courseId,
     },
 
     builder: {
@@ -739,6 +747,9 @@ export function createSavedAssessmentDraft(
       setup: {
         ...input.setup,
         ...courseIdentity,
+
+        levelId:
+          courseIdentity.courseId,
       },
 
       builder:
