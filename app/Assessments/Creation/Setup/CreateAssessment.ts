@@ -2,6 +2,10 @@ import type { CourseAssessmentConfig } from "@/app/Courses/CourseAssessmentConfi
 import type { Paper } from "@/app/Assessments/AssessmentTypes";
 
 import {
+  isCourseAvailable,
+} from "@/app/Courses/CourseCatalog";
+
+import {
   createSavedAssessmentDraft,
   setCurrentSavedAssessmentId,
 } from "@/app/Assessments/SavedAssessments/SavedAssessmentsStorage";
@@ -72,6 +76,25 @@ export function createAssessmentFromSetup({
   parsedTimeP1,
   parsedTimeP2,
 }: CreateAssessmentFromSetupArgs): string {
+  if (
+    !isCourseAvailable(
+      courseConfig.courseId
+    )
+  ) {
+    throw new Error(
+      `Assessment Creation is not ready for ${courseConfig.displayName}.`
+    );
+  }
+
+  if (
+    selectedLevelId !==
+      courseConfig.courseId
+  ) {
+    throw new Error(
+      `Assessment setup Course mismatch: selected "${selectedLevelId}" but resolved "${courseConfig.courseId}".`
+    );
+  }
+
   const now = Date.now();
 
   const coursePapers = courseConfig.papers.map((paper) => paper.id);
