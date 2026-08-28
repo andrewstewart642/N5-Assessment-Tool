@@ -155,7 +155,7 @@ export default function QuestionMeasureBox({
         secondRafRef.current =
           null;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     },
     [id]
   );
@@ -205,7 +205,7 @@ export default function QuestionMeasureBox({
         secondRafRef.current =
           null;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     },
     [id]
   );

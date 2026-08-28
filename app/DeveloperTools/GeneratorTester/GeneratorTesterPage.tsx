@@ -72,12 +72,12 @@ function standardFilterFromClassification(
 
 function buildTestConcepts():
   Concept[] {
-  const module =
+  const questionModule =
     GENERATOR_TEST_TARGET.module;
 
   const standard =
     standardFilterFromClassification(
-      module.metadata.capabilities
+      questionModule.metadata.capabilities
         .standardCoverage[0]
     );
 
@@ -1437,7 +1437,7 @@ export default function GeneratorTesterPage() {
       generateSamples();
 
       // Initial generation only.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+       
     },
     []
   );

@@ -206,15 +206,15 @@ export function isDifficultyEligibleForConcept(
     concept?.code ??
     selectedConcept;
 
-  const module =
+  const questionModule =
     getModule(conceptCode);
 
-  if (!module) {
+  if (!questionModule) {
     return true;
   }
 
   const profile =
-    module.metadata
+    questionModule.metadata
       .levelSelectionProfile;
 
   if (!profile) {
@@ -223,7 +223,7 @@ export function isDifficultyEligibleForConcept(
 
   const entries =
     getLevelSelectionEntries(
-      module,
+      questionModule,
       difficulty
     );
 
