@@ -15,46 +15,230 @@
   outline: none;
 }
 
+
 .eventDay {
   transform: translateY(-1px);
 }
 
+
+/*
+ * Today deliberately does not pulse.
+ *
+ * The steady pale halo makes the current date
+ * the fixed visual anchor of the calendar.
+ */
 .today {
   z-index: 3;
 
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.78),
-    0 0 12px rgba(255, 255, 255, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.82),
+    0 0 15px 1px rgba(255, 255, 255, 0.22),
     0 4px 10px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 
-.pulseOne,
-.pulseTwo,
-.pulseThree,
-.pulseFour {
-  animation-duration: var(--calendar-pulse-duration);
-  animation-delay: var(--calendar-pulse-delay);
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-fill-mode: both;
+/*
+ * Assessment glow
+ *
+ * Crucially, box-shadow itself is now STATIC.
+ * We only animate the opacity of this layer.
+ *
+ * Opacity animations are much cheaper for the
+ * browser to composite and should therefore feel
+ * dramatically smoother than animating box-shadow.
+ */
+.glowLayer {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 0;
+
+  border-radius: inherit;
+
+  pointer-events: none;
+
+  opacity: 0.2;
+
+  box-shadow:
+    0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--calendar-layer-colour) 58%,
+        transparent
+      ),
+    0 0 16px 2px
+      color-mix(
+        in srgb,
+        var(--calendar-layer-colour) 46%,
+        transparent
+      ),
+    0 0 23px 3px
+      color-mix(
+        in srgb,
+        var(--calendar-layer-colour) 14%,
+        transparent
+      );
+
+  transform: translateZ(0);
+
+  will-change: opacity;
+
+  animation-duration:
+    var(--calendar-glow-cycle-duration);
+
+  animation-timing-function:
+    linear;
+
+  animation-iteration-count:
+    infinite;
+
+  animation-fill-mode:
+    both;
 }
 
-.pulseOne {
-  animation-name: calendarPulseOne;
+
+/*
+ * One Course:
+ *
+ * 20% → 100% → 20%
+ *
+ * Completely linear in both directions.
+ */
+.glowOne {
+  animation-name:
+    calendarGlowOne;
 }
 
-.pulseTwo {
-  animation-name: calendarPulseTwo;
+
+/*
+ * Multiple Courses:
+ *
+ * Each colour receives one complete pulse slot.
+ * All other colours remain at the 20% baseline.
+ */
+.glowTwo {
+  animation-name:
+    calendarGlowTwo;
 }
 
-.pulseThree {
-  animation-name: calendarPulseThree;
+.glowThree {
+  animation-name:
+    calendarGlowThree;
 }
 
-.pulseFour {
-  animation-name: calendarPulseFour;
+.glowFour {
+  animation-name:
+    calendarGlowFour;
+}
+
+
+/*
+ * All visible cell content sits above the glow layers.
+ */
+.dayContent {
+  position: relative;
+
+  z-index: 1;
+
+  min-width: 0;
+  height: 100%;
+}
+
+
+/*
+ * One colour occupies the complete cycle.
+ */
+@keyframes calendarGlowOne {
+  0% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.2;
+  }
+}
+
+
+/*
+ * Two colours:
+ *
+ * This layer uses the first half of the total
+ * two-colour cycle, then rests at 20%.
+ *
+ * The second layer receives a one-pulse-duration
+ * animation delay from React.
+ */
+@keyframes calendarGlowTwo {
+  0% {
+    opacity: 0.2;
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.2;
+  }
+
+  100% {
+    opacity: 0.2;
+  }
+}
+
+
+/*
+ * Three colours.
+ *
+ * Active pulse occupies exactly one third of
+ * the complete multi-colour cycle.
+ */
+@keyframes calendarGlowThree {
+  0% {
+    opacity: 0.2;
+  }
+
+  16.6667% {
+    opacity: 1;
+  }
+
+  33.3333% {
+    opacity: 0.2;
+  }
+
+  100% {
+    opacity: 0.2;
+  }
+}
+
+
+/*
+ * Four-or-more colours.
+ *
+ * We display the first four unique Course colours.
+ */
+@keyframes calendarGlowFour {
+  0% {
+    opacity: 0.2;
+  }
+
+  12.5% {
+    opacity: 1;
+  }
+
+  25% {
+    opacity: 0.2;
+  }
+
+  100% {
+    opacity: 0.2;
+  }
 }
 
 
@@ -88,268 +272,10 @@
 }
 
 
-/*
- * One Course
- *
- * Entire animation:
- *
- * 0% glow
- *   ↓
- * 100% glow
- *   ↓
- * 0% glow
- */
-@keyframes calendarPulseOne {
-  0%,
-  100% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  }
-
-  50% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23),
-      inset 0 1px 0 rgba(255, 255, 255, 0.035);
-  }
-}
-
-
-/*
- * Two Courses
- *
- * Each Course receives one complete breathing cycle.
- */
-@keyframes calendarPulseTwo {
-  0%,
-  50%,
-  100% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  }
-
-  25% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-
-  75% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-}
-
-
-/*
- * Three Courses
- */
-@keyframes calendarPulseThree {
-  0%,
-  33.333%,
-  66.666%,
-  100% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  }
-
-  16.666% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-
-  50% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-
-  83.333% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-c) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-c) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-}
-
-
-/*
- * Four or more Courses.
- *
- * The first four unique Course colours are represented.
- */
-@keyframes calendarPulseFour {
-  0%,
-  25%,
-  50%,
-  75%,
-  100% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22),
-      inset 0 1px 0 rgba(255, 255, 255, 0.025);
-  }
-
-  12.5% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-
-  37.5% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-
-  62.5% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-c) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-c) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-
-  87.5% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-d) 30%,
-          transparent
-        ),
-      0 0 11px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-d) 24%,
-          transparent
-        ),
-      0 4px 10px rgba(0, 0, 0, 0.23);
-  }
-}
-
-
 @media (prefers-reduced-motion: reduce) {
-  .pulseOne,
-  .pulseTwo,
-  .pulseThree,
-  .pulseFour {
+  .glowLayer {
     animation: none;
-  }
 
-  .eventDay:not(.today) {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 26%,
-          transparent
-        ),
-      0 0 8px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 18%,
-          transparent
-        );
+    opacity: 0.42;
   }
 }

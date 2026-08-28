@@ -63,7 +63,7 @@ type Props = {
 };
 
 
-function getPulseClass(
+function getGlowAnimationClass(
   colourCount:
     number
 ): string {
@@ -71,7 +71,7 @@ function getPulseClass(
     colourCount <=
     1
   ) {
-    return styles.pulseOne;
+    return styles.glowOne;
   }
 
 
@@ -79,7 +79,7 @@ function getPulseClass(
     colourCount ===
     2
   ) {
-    return styles.pulseTwo;
+    return styles.glowTwo;
   }
 
 
@@ -87,11 +87,11 @@ function getPulseClass(
     colourCount ===
     3
   ) {
-    return styles.pulseThree;
+    return styles.glowThree;
   }
 
 
-  return styles.pulseFour;
+  return styles.glowFour;
 }
 
 
@@ -144,6 +144,14 @@ export default function HomeCalendarDay({
     theme.accentPrimary;
 
 
+  /*
+   * One pulse means one complete:
+   *
+   * 20% → 100% → 20%
+   *
+   * Proximity still controls how quickly
+   * that complete throb occurs.
+   */
   const pulseDurationPerColour =
     getCalendarPulseDurationSeconds(
       date,
@@ -151,50 +159,27 @@ export default function HomeCalendarDay({
     );
 
 
-  const colourCycleCount =
+  /*
+   * If several Course colours share a date,
+   * each colour receives one full pulse slot.
+   *
+   * Example with two Courses and a 5s urgency:
+   *
+   * 0–5s   Course A
+   * 5–10s  Course B
+   * 10–15s Course A
+   * ...
+   */
+  const colourCount =
     Math.max(
       uniqueColours.length,
       1
     );
 
 
-  const fullPulseCycleDuration =
+  const fullGlowCycleDuration =
     pulseDurationPerColour *
-    colourCycleCount;
-
-
-  const pulseVariables =
-    {
-      "--calendar-pulse-duration":
-        `${fullPulseCycleDuration}s`,
-
-      "--calendar-pulse-delay":
-        `${-(
-          (
-            date.getDate() %
-            4
-          ) *
-          0.35
-        ).toFixed(
-          2
-        )}s`,
-
-      "--calendar-glow-a":
-        uniqueColours[0] ??
-        primaryAccent,
-
-      "--calendar-glow-b":
-        uniqueColours[1] ??
-        primaryAccent,
-
-      "--calendar-glow-c":
-        uniqueColours[2] ??
-        primaryAccent,
-
-      "--calendar-glow-d":
-        uniqueColours[3] ??
-        primaryAccent,
-    } as CSSProperties;
+    colourCount;
 
 
   const classNames =
@@ -207,13 +192,6 @@ export default function HomeCalendarDay({
 
       isToday
         ? styles.today
-        : "",
-
-      hasAssessments &&
-      !isToday
-        ? getPulseClass(
-            uniqueColours.length
-          )
         : "",
     ]
       .filter(
@@ -254,8 +232,6 @@ export default function HomeCalendarDay({
           : undefined
       }
       style={{
-        ...pulseVariables,
-
         minWidth:
           0,
 
@@ -268,14 +244,11 @@ export default function HomeCalendarDay({
         boxSizing:
           "border-box",
 
+        position:
+          "relative",
+
         display:
           "grid",
-
-        gridTemplateRows:
-          "auto minmax(0, 1fr)",
-
-        gap:
-          2,
 
         borderWidth:
           1,
@@ -285,13 +258,13 @@ export default function HomeCalendarDay({
 
         borderColor:
           isToday
-            ? "rgba(255,255,255,0.62)"
+            ? "rgba(255,255,255,0.68)"
             : hasAssessments
               ? uniqueColours.length ===
                   1
                 ? `color-mix(
                     in srgb,
-                    ${primaryAccent} 34%,
+                    ${primaryAccent} 38%,
                     ${theme.borderStandard}
                   )`
                 : `color-mix(
@@ -340,152 +313,220 @@ export default function HomeCalendarDay({
             : "inherit",
       }}
     >
-      <span
-        style={{
-          color:
-            isToday
-              ? theme.textPrimary
-              : theme.textSecondary,
+      {hasAssessments &&
+      !isToday
+        ? uniqueColours.map(
+            (
+              colour,
+              index
+            ) => {
+              /*
+               * No date-dependent/random offset anymore.
+               *
+               * Every assessment day begins from the exact
+               * same animation phase.
+               *
+               * The only stagger is between multiple Course
+               * colours INSIDE the same date.
+               */
+              const glowStyle =
+                {
+                  "--calendar-layer-colour":
+                    colour,
 
-          fontSize:
-            9,
+                  "--calendar-glow-cycle-duration":
+                    `${fullGlowCycleDuration}s`,
 
-          fontWeight:
-            isToday
-              ? 750
-              : 600,
+                  animationDelay:
+                    `${index *
+                    pulseDurationPerColour}s`,
+                } as CSSProperties;
 
-          lineHeight:
-            1,
-        }}
-      >
-        {date.getDate()}
-      </span>
+
+              return (
+                <span
+                  key={`${colour}-${index}`}
+                  aria-hidden="true"
+                  className={[
+                    styles.glowLayer,
+                    getGlowAnimationClass(
+                      colourCount
+                    ),
+                  ].join(
+                    " "
+                  )}
+                  style={
+                    glowStyle
+                  }
+                />
+              );
+            }
+          )
+        : null}
 
 
       <div
+        className={
+          styles.dayContent
+        }
         style={{
-          minWidth:
-            0,
-
           display:
             "grid",
 
-          alignContent:
-            "end",
+          gridTemplateRows:
+            "auto minmax(0, 1fr)",
 
           gap:
-            1,
+            2,
         }}
       >
-        {visibleAssessments.map(
-          (
-            assessment
-          ) => {
-            const accent =
-              getCourseColour(
-                getHomeAssessmentCourseId(
-                  assessment
-                )
-              );
+        <span
+          style={{
+            color:
+              isToday
+                ? theme.textPrimary
+                : theme.textSecondary,
+
+            fontSize:
+              9,
+
+            fontWeight:
+              isToday
+                ? 750
+                : 600,
+
+            lineHeight:
+              1,
+          }}
+        >
+          {date.getDate()}
+        </span>
 
 
-            return (
-              <div
-                key={
-                  assessment.id
-                }
-                style={{
-                  minWidth:
-                    0,
+        <div
+          style={{
+            minWidth:
+              0,
 
-                  display:
-                    "flex",
+            display:
+              "grid",
 
-                  alignItems:
-                    "center",
+            alignContent:
+              "end",
 
-                  gap:
-                    3,
-
-                  color:
-                    theme.textSecondary,
-
-                  fontSize:
-                    8,
-
-                  lineHeight:
-                    1.05,
-                }}
-              >
-                <span
-                  style={{
-                    width:
-                      4,
-
-                    height:
-                      4,
-
-                    flexShrink:
-                      0,
-
-                    borderRadius:
-                      999,
-
-                    background:
-                      accent,
-                  }}
-                />
+            gap:
+              1,
+          }}
+        >
+          {visibleAssessments.map(
+            (
+              assessment
+            ) => {
+              const accent =
+                getCourseColour(
+                  getHomeAssessmentCourseId(
+                    assessment
+                  )
+                );
 
 
-                <span
+              return (
+                <div
+                  key={
+                    assessment.id
+                  }
                   style={{
                     minWidth:
                       0,
 
-                    overflow:
-                      "hidden",
+                    display:
+                      "flex",
 
-                    whiteSpace:
-                      "nowrap",
+                    alignItems:
+                      "center",
 
-                    textOverflow:
-                      "ellipsis",
+                    gap:
+                      3,
+
+                    color:
+                      theme.textSecondary,
+
+                    fontSize:
+                      8,
+
+                    lineHeight:
+                      1.05,
                   }}
                 >
-                  {getCalendarAssessmentPrimaryClassLabel(
-                    assessment,
-                    classes
-                  )}
-                </span>
-              </div>
-            );
-          }
-        )}
+                  <span
+                    style={{
+                      width:
+                        4,
+
+                      height:
+                        4,
+
+                      flexShrink:
+                        0,
+
+                      borderRadius:
+                        999,
+
+                      background:
+                        accent,
+                    }}
+                  />
 
 
-        {assessments.length >
-        2 ? (
-          <span
-            style={{
-              paddingLeft:
-                7,
+                  <span
+                    style={{
+                      minWidth:
+                        0,
 
-              color:
-                theme.textMuted,
+                      overflow:
+                        "hidden",
 
-              fontSize:
-                7.5,
+                      whiteSpace:
+                        "nowrap",
 
-              lineHeight:
-                1,
-            }}
-          >
-            +
-            {assessments.length -
-              2}
-          </span>
-        ) : null}
+                      textOverflow:
+                        "ellipsis",
+                    }}
+                  >
+                    {getCalendarAssessmentPrimaryClassLabel(
+                      assessment,
+                      classes
+                    )}
+                  </span>
+                </div>
+              );
+            }
+          )}
+
+
+          {assessments.length >
+          2 ? (
+            <span
+              style={{
+                paddingLeft:
+                  7,
+
+                color:
+                  theme.textMuted,
+
+                fontSize:
+                  7.5,
+
+                lineHeight:
+                  1,
+              }}
+            >
+              +
+              {assessments.length -
+                2}
+            </span>
+          ) : null}
+        </div>
       </div>
 
 
