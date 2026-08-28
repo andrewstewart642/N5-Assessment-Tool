@@ -12,6 +12,10 @@ import type {
 } from "@/app/Courses/CourseTypes";
 
 import {
+  getCourseAvailability,
+} from "@/app/Courses/CourseAvailability";
+
+import {
   National5MathsCourseDocuments,
 } from "@/app/Courses/National5Maths/Documents/CourseDocuments";
 
@@ -137,12 +141,27 @@ export function getCourseDocumentSet(
   courseId:
     CourseId
 ): CourseDocumentSet | null {
-  return (
+  const documentSet =
     COURSE_DOCUMENT_REGISTRY[
       courseId
     ] ??
-    null
-  );
+    null;
+
+  const availability =
+    getCourseAvailability(
+      courseId
+    );
+
+  if (
+    availability.printableDocumentsReady &&
+    !documentSet
+  ) {
+    throw new Error(
+      `Course "${courseId}" is declared printable-document ready but has no registered Course document set.`
+    );
+  }
+
+  return documentSet;
 }
 
 
