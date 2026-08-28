@@ -6,6 +6,12 @@ import {
   DEFAULT_COURSE_ID,
 } from "@/app/Courses/CourseRegistry";
 
+import {
+  getCourseAvailability,
+  isCourseAvailableForAssessmentCreation,
+  type CourseReleaseStatus,
+} from "@/app/Courses/CourseAvailability";
+
 export type CourseClassCourseLabel =
   | "National 5 Maths"
   | "National 5 Applications"
@@ -19,17 +25,22 @@ export type CourseCatalogEntry = {
   classCourseLabel:
     CourseClassCourseLabel;
 
-  isAvailable: boolean;
+  releaseStatus:
+    CourseReleaseStatus;
+
+  isAvailable:
+    boolean;
 };
 
-const SUPPORTED_COURSE_IDS:
-  CourseId[] = [
-    "N5_MATH",
-    "N5_APPLICATIONS_MATH",
-  ];
+type CourseCatalogDefinition =
+  Omit<
+    CourseCatalogEntry,
+    | "releaseStatus"
+    | "isAvailable"
+  >;
 
-export const COURSE_CATALOG:
-  CourseCatalogEntry[] = [
+const COURSE_CATALOG_DEFINITIONS:
+  CourseCatalogDefinition[] = [
     {
       id:
         "N5_MATH",
@@ -42,11 +53,6 @@ export const COURSE_CATALOG:
 
       classCourseLabel:
         "National 5 Maths",
-
-      isAvailable:
-        SUPPORTED_COURSE_IDS.includes(
-          "N5_MATH"
-        ),
     },
 
     {
@@ -61,11 +67,6 @@ export const COURSE_CATALOG:
 
       classCourseLabel:
         "National 5 Applications",
-
-      isAvailable:
-        SUPPORTED_COURSE_IDS.includes(
-          "N5_APPLICATIONS_MATH"
-        ),
     },
 
     {
@@ -80,13 +81,33 @@ export const COURSE_CATALOG:
 
       classCourseLabel:
         "Higher Maths",
-
-      isAvailable:
-        SUPPORTED_COURSE_IDS.includes(
-          "HIGHER_MATH"
-        ),
     },
   ];
+
+export const COURSE_CATALOG:
+  CourseCatalogEntry[] =
+    COURSE_CATALOG_DEFINITIONS.map(
+      (
+        definition
+      ) => {
+        const availability =
+          getCourseAvailability(
+            definition.id
+          );
+
+        return {
+          ...definition,
+
+          releaseStatus:
+            availability.releaseStatus,
+
+          isAvailable:
+            isCourseAvailableForAssessmentCreation(
+              definition.id
+            ),
+        };
+      }
+    );
 
 export function normaliseCourseId(
   value:
@@ -113,6 +134,13 @@ export function normaliseCourseId(
     return "HIGHER_MATH";
   }
 
+  if (
+    value ===
+    "ADVANCED_HIGHER_MATH"
+  ) {
+    return "ADVANCED_HIGHER_MATH";
+  }
+
   /**
    * Historical persisted/setup aliases.
    */
@@ -135,6 +163,13 @@ export function normaliseCourseId(
     "HIGHER_MATHS"
   ) {
     return "HIGHER_MATH";
+  }
+
+  if (
+    value ===
+    "ADVANCED_HIGHER_MATHS"
+  ) {
+    return "ADVANCED_HIGHER_MATH";
   }
 
   return null;
@@ -171,7 +206,7 @@ export function getCourseCatalogEntryByClassCourseLabel(
 ): CourseCatalogEntry | null {
   if (
     typeof value !==
-    "string"
+      "string"
   ) {
     return null;
   }
@@ -204,11 +239,16 @@ export function isCourseAvailable(
   value:
     unknown
 ): boolean {
-  return (
-    getCourseCatalogEntry(
+  const courseId =
+    normaliseCourseId(
       value
-    )?.isAvailable ??
-    false
+    );
+
+  return (
+    courseId !== null &&
+    isCourseAvailableForAssessmentCreation(
+      courseId
+    )
   );
 }
 
