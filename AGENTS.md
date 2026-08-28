@@ -138,6 +138,7 @@ app/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
+├── Home/
 ├── MyAssessments/
 ├── UI/
 ├── layout.tsx
@@ -163,6 +164,7 @@ app/Assessments/
 app/Classes/
 app/Courses/
 app/DeveloperTools/
+app/Home/
 app/MyAssessments/
 app/UI/
 ```
@@ -170,6 +172,8 @@ app/UI/
 Use responsibility to decide ownership.
 
 Do not choose an owner merely because it produces the shortest import path.
+
+`app/Home/` owns the Home-page product experience. Reusable application-wide UI used by Home remains owned by `app/UI/Application/` where appropriate.
 
 ---
 
@@ -231,6 +235,8 @@ TopBar/
 ```
 
 Use existing owners before creating new generic folders.
+
+The post-Architecture-V2 naming pass deliberately made these folders responsibility-readable. Within an established folder, prefer concise filenames that describe the responsibility supplied by that folder rather than repeating the whole parent path.
 
 ---
 
@@ -393,6 +399,8 @@ MyAssessmentsPage.tsx
 
 My Assessments owns presentation and interaction for the assessment library, including tile/list views, library controls, assessment metadata display, PDF preview interaction, and user-facing assessment actions.
 
+Current responsibility-readable library modules include `Display/LabelsAndDates.ts`, `Display/Progress.ts`, `Library/Filtering.ts`, `Library/Sorting.ts` and `Library/ViewOptions.ts`.
+
 It should consume saved-assessment and compilation/PDF contracts rather than duplicating them.
 
 ---
@@ -425,6 +433,20 @@ Class-owned functionality belongs beneath:
 ```text
 app/Classes/
 ```
+
+Current high-level structure is:
+
+```text
+app/Classes/
+├── Coverage/
+├── MyClasses/
+├── Records/
+├── ClassData.ts
+├── ClassDetailsPage.tsx
+└── MyClassesPage.tsx
+```
+
+`Records/` owns class browser storage, normalisation and the live class collection. `MyClasses/` owns the My Classes page-specific UI. `Coverage/` owns coverage selection, display and skill-progress behaviour.
 
 Classes owns class data, persistence, coverage, My Classes and Class Details.
 
@@ -620,7 +642,6 @@ Current areas include responsibilities such as:
 Colours/
 Components/
 HeaderBar/
-Home/
 Motion/
 Settings/
 SettingsDrawer/
@@ -629,6 +650,8 @@ Styles/
 Theme/
 Typography/
 ```
+
+Home-page product implementation is owned separately by `app/Home/`; reusable application-level presentation used by Home may still come from `app/UI/Application/`.
 
 The global shell is owned here. `app/layout.tsx` composes the HeaderBar, application Activity Rail and page content region through the application shell tokens.
 
@@ -892,6 +915,9 @@ Classes
 Courses
 → educational/Course knowledge
 
+Home
+→ Home-page product experience
+
 UI/Application
 → interactive application presentation
 
@@ -916,8 +942,8 @@ Examples:
 Course types
 → app/Courses/
 
-Class types
-→ app/Classes/
+Class data/types
+→ app/Classes/ClassData.ts and the Classes domain
 
 Assessment types
 → app/Assessments/
@@ -950,6 +976,8 @@ shared-types/
 without a durable architectural responsibility.
 
 Prefer domain-specific ownership.
+
+The same principle applies to filenames: avoid `SomethingUtils.ts` or `SomethingHelpers.ts` when the file can be named for the concrete responsibility it owns.
 
 ---
 
@@ -1062,6 +1090,8 @@ Avoid large unexplained mutation scripts.
 
 Automation is acceptable for genuinely repetitive mechanical work, but the scope and operation must be clear first.
 
+For file-renaming batches, use `git mv` plus explicit import-path repair rather than broad symbol replacement. A filename change must not accidentally rename exported React hook identifiers or other symbols merely because they share the old filename text.
+
 ---
 
 ## 49. Source File Changes
@@ -1072,6 +1102,8 @@ Use surgical edits when the file is genuinely very large, the change is tiny, an
 
 Preserve surrounding behaviour.
 
+Mechanical file/folder renames are an exception: use a clear rename map, update import paths only, then verify the entire TypeScript graph.
+
 ---
 
 ## 50. Verification Commands
@@ -1080,11 +1112,12 @@ After structural TypeScript/source work, normally run:
 
 ```bash
 npx tsc --noEmit
+npm run lint
 npm run build
 git --no-pager diff --check
 ```
 
-For focused UI passes, TypeScript plus browser verification may be sufficient during iteration, but a clean production build should be obtained before treating infrastructure or release-level work as complete.
+For focused UI passes, TypeScript plus lint/browser verification may be sufficient during iteration, but a clean production build should be obtained before treating infrastructure or release-level work as complete.
 
 Use `git --no-pager ...` for Git output that could otherwise enter a pager during scripted verification.
 
@@ -1266,6 +1299,8 @@ Do not blindly replace historical paths inside `Docs/RefactorLedger.md` if those
 
 History should remain historically accurate.
 
+Documentation reconciliation is information-preserving by default. Add current knowledge, correct current-state falsehoods, and explicitly supersede contradictory rules. Do not remove useful rationale, compatibility notes or historical truth merely to make the documents shorter.
+
 ---
 
 ## 60. Keep Structural and Feature Changes Understandable
@@ -1298,7 +1333,64 @@ Before finishing, ask:
 - Is there one obvious source of truth?
 - Did we avoid creating another compatibility layer unnecessarily?
 - Did we remove old code only after proving it safe?
+- Do folder and filename choices reveal responsibility without requiring implementation knowledge?
 - Does the documentation still match the repository?
 - If this was feature work, is the feature history/backlog now accurate?
 
 If not, the change is not finished.
+
+---
+
+## 62. File and Folder Naming / Discoverability
+
+The repository naming rule is:
+
+> **Folder = context. Filename = responsibility.**
+
+File and folder names optimise for discoverability by responsibility, not implementation mechanism. A developer — or a non-developer who understands the product — should be able to browse the tree and make a sensible guess about what a file owns.
+
+Apply these rules:
+
+- Do not prefix a filename with `use` merely because it exports a React hook. The exported hook function must still obey React convention (`useSomething`), but the filename describes responsibility. Example: `AutoSaveAssessment.ts` may export `useAssessmentCreatorAutoSave`.
+- Do not repeat the entire parent-folder context in every child filename. Prefer `Preview/Pane.tsx` over `Preview/AssessmentPreviewPane.tsx` when the folder already supplies the missing meaning.
+- Keep contextual wording when removing it would make the filename misleading or excessively generic. `Papers/PaperRules.ts` is acceptable when plain `Rules.ts` would lose useful meaning.
+- Prefer responsibility names over implementation-detail names such as `Utils`, `Helpers`, `Common`, `Shared` or `Misc`.
+- Folder names describe durable domains, product regions or coherent responsibilities. Do not introduce a generic `Components/` or `State/` bucket when a more meaningful owner can be named.
+- Meaningful ordering prefixes are allowed where the order itself communicates product/curriculum structure. `SkillsPanel/01-SkillsFilters/` and `SkillsPanel/02-SkillsTree/` intentionally mirror the webpage order and are valid. Decorative numbering remains rejected.
+- A source naming pass does not rename public URLs, localStorage keys, persisted JSON fields or other compatibility identifiers unless a separate deliberate migration is approved.
+
+The practical test is:
+
+> If somebody unfamiliar with the implementation sees only the folder path and filename, can they make a sensible guess about what the file is responsible for?
+
+If not, improve the name or reassess whether the file mixes responsibilities.
+
+---
+
+## 63. Documentation Preservation Rule
+
+Repository documentation is durable project memory.
+
+When reconciling or rewriting documentation:
+
+```text
+historical truth
+→ preserve
+
+current truth
+→ update
+
+new rule / new decision
+→ add
+
+obsolete contradictory instruction
+→ explicitly supersede or replace
+```
+
+Do not delete information merely because it is old if it still explains history, rationale, compatibility or a settled decision.
+
+Current-state documents (`AGENTS.md`, `Docs/Architecture.md`, `Docs/RepositoryMap.md`) must not knowingly retain false current paths or owners.
+
+Historical documents (`Docs/RefactorLedger.md` and historically framed Feature History entries) may retain old paths when those paths accurately describe the state at that time. When useful, add the current successor path rather than pretending the old path never existed.
+
+`Docs/LockedDecisions.md` preserves permanent decision IDs. Superseded decisions remain recorded and are explicitly linked to the newer decision that replaced or clarified them.
