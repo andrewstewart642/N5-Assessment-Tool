@@ -1,0 +1,344 @@
+.calendarDay {
+  position: relative;
+  isolation: isolate;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.calendarDay:hover,
+.calendarDay:focus {
+  z-index: 40;
+  outline: none;
+}
+
+.eventDay {
+  transform: translateY(-1px);
+}
+
+.today {
+  z-index: 3;
+
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.78),
+    0 0 14px rgba(255, 255, 255, 0.20),
+    0 4px 10px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.pulseOne,
+.pulseTwo,
+.pulseThree,
+.pulseFour {
+  animation-duration: var(--calendar-pulse-duration);
+  animation-delay: var(--calendar-pulse-delay);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+.pulseOne {
+  animation-name: calendarPulseOne;
+}
+
+.pulseTwo {
+  animation-name: calendarPulseTwo;
+}
+
+.pulseThree {
+  animation-name: calendarPulseThree;
+}
+
+.pulseFour {
+  animation-name: calendarPulseFour;
+}
+
+.hoverCard {
+  position: absolute;
+
+  width: 250px;
+
+  opacity: 0;
+  visibility: hidden;
+
+  transform: translateY(4px);
+
+  pointer-events: none;
+
+  transition:
+    opacity 130ms ease,
+    transform 130ms ease,
+    visibility 130ms ease;
+
+  z-index: 60;
+}
+
+.calendarDay:hover .hoverCard,
+.calendarDay:focus .hoverCard,
+.calendarDay:focus-within .hoverCard {
+  opacity: 1;
+  visibility: visible;
+
+  transform: translateY(0);
+}
+
+
+@keyframes calendarPulseOne {
+  0%,
+  28%,
+  72%,
+  100% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 34%,
+          transparent
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23),
+      inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+}
+
+
+@keyframes calendarPulseTwo {
+  0%,
+  100% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  }
+
+  22% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 34%,
+          transparent
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
+  }
+
+  48% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  74% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 34%,
+          transparent
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
+  }
+}
+
+
+@keyframes calendarPulseThree {
+  0%,
+  100% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  15% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 34%,
+          transparent
+        );
+  }
+
+  32% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  49% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 34%,
+          transparent
+        );
+  }
+
+  66% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  83% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-c) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-c) 34%,
+          transparent
+        );
+  }
+}
+
+
+@keyframes calendarPulseFour {
+  0%,
+  100% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  11% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 34%,
+          transparent
+        );
+  }
+
+  24% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  37% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 34%,
+          transparent
+        );
+  }
+
+  50% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  63% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-c) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-c) 34%,
+          transparent
+        );
+  }
+
+  76% {
+    box-shadow:
+      0 2px 7px rgba(0, 0, 0, 0.22);
+  }
+
+  89% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-d) 42%,
+          transparent
+        ),
+      0 0 13px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-d) 34%,
+          transparent
+        );
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .pulseOne,
+  .pulseTwo,
+  .pulseThree,
+  .pulseFour {
+    animation: none;
+  }
+
+  .eventDay:not(.today) {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 36%,
+          transparent
+        ),
+      0 0 9px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-a) 24%,
+          transparent
+        );
+  }
+}

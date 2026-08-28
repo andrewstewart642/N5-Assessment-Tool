@@ -32,6 +32,8 @@ import {
 
 import HomeContinueWorkingSection from "./ContinueWorking/HomeContinueWorkingSection";
 
+import HomeDepartmentActivitySection from "./DepartmentActivity/HomeDepartmentActivitySection";
+
 import HomeForYouSection from "./ForYou/HomeForYouSection";
 
 import {
@@ -222,13 +224,13 @@ export default function HomePage() {
               "grid",
 
             gridTemplateColumns:
-              "minmax(380px, 0.8fr) minmax(560px, 1.2fr)",
+              "minmax(380px, 0.8fr) minmax(620px, 1.2fr)",
 
             gap:
               18,
 
             alignItems:
-              "stretch",
+              "start",
           }}
         >
           <div
@@ -289,6 +291,9 @@ export default function HomePage() {
             assessments={
               assessments
             }
+            classes={
+              classes
+            }
             today={
               today
             }
@@ -311,7 +316,7 @@ export default function HomePage() {
               "grid",
 
             gridTemplateColumns:
-              "minmax(0, 1fr) minmax(360px, 420px)",
+              "minmax(460px, 1.12fr) minmax(300px, 0.82fr) minmax(300px, 0.82fr)",
 
             gap:
               24,
@@ -327,6 +332,16 @@ export default function HomePage() {
             hasLoaded={
               classesHaveLoaded
             }
+            getCourseColour={
+              getCourseColour
+            }
+            theme={
+              theme
+            }
+          />
+
+
+          <HomeDepartmentActivitySection
             getCourseColour={
               getCourseColour
             }
