@@ -13,8 +13,9 @@ export const qpEvidence = (
   evidenceType: "QUESTION" | "VISUAL" = "QUESTION",
   paper: "P1" | "P2" = "P1",
   printedPage: number = pdfPage,
+  year = 2014,
 ): CatalogEvidenceRef => ({
-  documentId: "N5_MATH_2014_QP",
+  documentId: `N5_MATH_${year}_QP`,
   pdfPages: [pdfPage],
   printedPageLabels: [`Page ${printedPage}`],
   paper,
@@ -43,15 +44,17 @@ export const notApplicable = <T>(notes: string | null = null): CatalogValue<T> =
 export const questionReviewInProgress = (
   visualChecked = true,
   paper: "P1" | "P2" = "P1",
+  year = 2014,
+  counterpartCrossChecked = false,
 ): CatalogReviewProfile => ({
   status: "IN_PROGRESS",
   sourceFactsComplete: true,
   classificationComplete: true,
   generationAnalysisComplete: false,
-  counterpartCrossChecked: false,
+  counterpartCrossChecked,
   visualEvidenceCrossChecked: visualChecked,
-  unresolvedIssues: ["Matching Answer/Marking Scheme catalogue pass has not yet been completed."],
-  validationNotes: [`Question-paper evidence and catalogue classification completed for the 2014 ${paper === "P1" ? "Paper 1" : "Paper 2"} pilot pass.`],
+  unresolvedIssues: counterpartCrossChecked ? [] : ["Matching Answer/Marking Scheme catalogue pass has not yet been completed."],
+  validationNotes: [`Question-paper evidence and catalogue classification completed for the ${year} ${paper === "P1" ? "Paper 1" : "Paper 2"} pass.`],
   reviewedAt: null,
 });
 
