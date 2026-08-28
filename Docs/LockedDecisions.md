@@ -326,9 +326,25 @@ Use PascalCase for project-owned architectural folders and descriptive source mo
 
 ## LD-030 — Hooks use `useCamelCase`
 
-**Status:** LOCKED
+**Status:** SUPERSEDED FOR FILENAMES BY LD-280; FUNCTION-NAMING PRINCIPLE RETAINED
 
-Example: `useAssessmentProgressRows.ts`.
+React hook **functions/exports** continue to use `useCamelCase` as required by React convention.
+
+The earlier interpretation that hook **filenames** should also begin with `use` is superseded by LD-280. Filenames now describe responsibility rather than implementation mechanism.
+
+Historical example:
+
+```text
+useAssessmentProgressRows.ts
+```
+
+Current responsibility-first filename:
+
+```text
+HUDBar/ProgressRows.ts
+```
+
+while the exported hook function may still be named `useAssessmentProgressRows`.
 
 ---
 
@@ -342,9 +358,11 @@ Real Next.js URL segments may remain lowercase or kebab-case.
 
 ## LD-032 — Number folders only where order is meaningful
 
-**Status:** LOCKED
+**Status:** LOCKED; CURRENT EXAMPLE CLARIFIED BY LD-280
 
 Numbering may communicate genuine curriculum or visual order.
+
+The current deliberate example is `SkillsPanel/01-SkillsFilters/` followed by `SkillsPanel/02-SkillsTree/`, matching the webpage order.
 
 ---
 
@@ -366,7 +384,7 @@ Where meaningful ordering genuinely exists, use forms such as `01-Numerical`.
 
 ## LD-035 — Folder context should reduce unnecessary repetition
 
-**Status:** LOCKED
+**Status:** LOCKED; STRENGTHENED BY LD-280
 
 Do not repeat the complete parent-folder name in every child filename without reason.
 
@@ -374,9 +392,11 @@ Do not repeat the complete parent-folder name in every child filename without re
 
 ## LD-036 — Region root components may repeat meaningful context
 
-**Status:** LOCKED
+**Status:** LOCKED PRINCIPLE; CLARIFIED BY LD-280
 
-A main component may reflect its owning region where this improves clarity, e.g. `AssessmentTopBar` or `AssessmentHUDBar`.
+Context may remain in a filename where removing it would create ambiguity or reduce discoverability, but parent-context repetition is not preferred merely because a file is a region root.
+
+Historical examples included `AssessmentTopBar` and `AssessmentHUDBar`; current responsibility-first filenames are `TopBar/TopBar.tsx` and `HUDBar/HUDBar.tsx` because the folder already supplies the missing context.
 
 ---
 
@@ -706,9 +726,9 @@ Use subfolders where a feature has genuine multi-file responsibility.
 
 ## LD-080 — SkillsPanel may use meaningful visual ordering
 
-**Status:** LOCKED
+**Status:** LOCKED; CURRENT ORDER CLARIFIED BY LD-280
 
-Meaningful numbering may remain where it communicates real visual/curriculum order.
+Meaningful numbering may remain where it communicates real visual/curriculum order. Current `01-SkillsFilters/` → `02-SkillsTree/` ordering mirrors the webpage and is intentional.
 
 ---
 
@@ -1120,7 +1140,7 @@ Prefer meaningful names such as TopicBalance, StandardBalance and AssessmentDist
 
 ## LD-138 — Source renames do not automatically rename persistence keys
 
-**Status:** LOCKED
+**Status:** LOCKED; REAFFIRMED BY LD-280
 
 ---
 
@@ -1144,7 +1164,7 @@ Visible application code should not become more tightly coupled to raw storage A
 
 ## LD-141 — Files live with the domain that owns their responsibility
 
-**Status:** LOCKED
+**Status:** LOCKED; NAMING/DISCOVERABILITY EXTENDED BY LD-280
 
 ---
 
@@ -1421,6 +1441,8 @@ This applied during active Architecture V2. Current feature evolution belongs in
 **Status:** LOCKED
 
 Do not update it after every file move or tiny feature change.
+
+A repository-wide discoverability rule that changes how source should be named in future is architectural truth and should be documented.
 
 ---
 
@@ -1718,7 +1740,7 @@ Silence and implementation convenience are not approval.
 
 ## LD-219 — Superseded decisions retain their IDs/history
 
-**Status:** LOCKED
+**Status:** LOCKED; DOCUMENTATION PRESERVATION EXTENDED BY LD-281
 
 ---
 
@@ -1732,7 +1754,7 @@ Continue numbering from the current highest ID.
 
 ## LD-221 — Approved architecture changes require documentation synchronisation
 
-**Status:** LOCKED; EXPANDED BY LD-269 AND LD-276
+**Status:** LOCKED; EXPANDED BY LD-269, LD-276 AND LD-281
 
 Update the relevant Architecture, Locked Decisions, Repository Map and historical/current feature documentation as appropriate.
 
@@ -1784,7 +1806,7 @@ Update the relevant Architecture, Locked Decisions, Repository Map and historica
 
 ## LD-229 — Product language should lead developers to the correct folder
 
-**Status:** LOCKED SUCCESS CRITERION
+**Status:** LOCKED SUCCESS CRITERION; FILE-LEVEL DISCOVERABILITY EXTENDED BY LD-280
 
 Examples:
 
@@ -1809,7 +1831,7 @@ wrong assessment-library presentation
 
 ## LD-230 — Architecture V2 reduces dependence on historical memory
 
-**Status:** LOCKED SUCCESS CRITERION — ACHIEVED AS BASELINE
+**Status:** LOCKED SUCCESS CRITERION — ACHIEVED AS BASELINE; STRENGTHENED BY LD-280
 
 A new developer should be able to reconstruct ownership from repository structure and documentation.
 
@@ -1833,7 +1855,7 @@ Do not organise primarily around how implementation happened historically.
 
 ## LD-233 — The obvious location should normally be the correct location
 
-**Status:** LOCKED
+**Status:** LOCKED; FILE-LEVEL DISCOVERABILITY EXTENDED BY LD-280
 
 Repository discoverability is an architectural requirement.
 
@@ -1923,7 +1945,7 @@ over repeatedly moving and mutating legacy implementation.
 
 **Status:** LOCKED
 
-Connected GitHub may lag behind local work. When current local migration/feature state is uncommitted, local grep, TypeScript, build and runtime/browser behaviour are authoritative. Remote source is authoritative once refreshed/pushed.
+Connected GitHub may lag behind local work. When current local migration/feature state is uncommitted, local grep, TypeScript, lint, build and runtime/browser behaviour are authoritative. Remote source is authoritative once refreshed/pushed.
 
 ---
 
@@ -1937,9 +1959,11 @@ Do not establish deadness from a narrow path-specific search. Search relevant sy
 
 ## LD-244 — Whole-file replacement is preferred for normal-sized manual edits
 
-**Status:** LOCKED WORKFLOW
+**Status:** LOCKED WORKFLOW; MECHANICAL RENAME EXCEPTION CLARIFIED BY LD-280
 
 When the user is applying source manually, provide complete replacement contents for normal-sized files. Use surgical edits only when the file is unusually large and the required change is genuinely tiny.
+
+A mechanical file/folder rename may instead use `git mv` plus exact import-path repair when implementation contents are intentionally unchanged.
 
 ---
 
@@ -1997,7 +2021,7 @@ A clean TypeScript result cannot establish visual preservation of cover pages, f
 
 ## LD-250 — Documentation updates occur at meaningful checkpoints
 
-**Status:** LOCKED WORKFLOW
+**Status:** LOCKED WORKFLOW; PRESERVATION MODEL CLARIFIED BY LD-281
 
 Do not interrupt every tiny change with documentation edits. Update persistent docs when a meaningful owner/feature/migration/decision/handoff boundary is reached.
 
@@ -2017,7 +2041,7 @@ The authoritative runtime source container is `app/`. There is no separate runti
 
 **Status:** LOCKED — IMPLEMENTED; DOMAIN LIST EXPANDED BY LD-275
 
-The original final-state principal domains were Assessments, Classes, Courses, DeveloperTools and UI. `MyAssessments` was subsequently promoted to a genuine first-class root owner by LD-275.
+The original final-state principal domains were Assessments, Classes, Courses, DeveloperTools and UI. `MyAssessments` was subsequently promoted to a genuine first-class root owner by LD-275. `Home` also exists as a dedicated root product-area owner in current source; this current-state fact is reflected in RepositoryMap/Architecture without rewriting the historical original-domain list.
 
 ---
 
@@ -2126,7 +2150,7 @@ Do not add `"use client"` to internal hooks/child components merely because they
 
 ## LD-265 — Historical paths remain valid inside the Refactor Ledger when they describe history
 
-**Status:** LOCKED
+**Status:** LOCKED; DOCUMENTATION PRESERVATION EXTENDED BY LD-281
 
 Do not blindly rewrite earlier `src/...`, Builder or old-route paths inside `Docs/RefactorLedger.md` when historically accurate. Current-state documents must describe current root `app/` architecture.
 
@@ -2152,6 +2176,7 @@ app/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
+├── Home/
 ├── MyAssessments/
 ├── UI/
 ├── layout.tsx
@@ -2400,6 +2425,79 @@ Historical compatibility identifiers may remain where changing them would risk p
 
 ---
 
+# PART XXXVII — POST-NAMING-OVERHAUL DECISIONS
+
+## LD-280 — File and folder naming optimises for responsibility and discoverability
+
+**Status:** LOCKED — IMPLEMENTED 28 AUGUST 2026
+
+The governing naming rule is:
+
+> **Folder = context. Filename = responsibility.**
+
+The repository should be navigable by people who did not build it. A developer — or a non-developer familiar with the product — should be able to look at a path/filename and make a sensible guess about what the file owns.
+
+Rules:
+
+1. **React hook filenames do not begin with `use` merely because they export a hook.** Exported hook functions themselves continue to use React's required `useSomething` naming convention.
+2. **Do not mechanically repeat the complete parent folder in child filenames.** Folder context should do useful work.
+3. **Keep context when it prevents ambiguity.** A filename may repeat some folder/domain language where removing it would make the name misleading or excessively generic.
+4. **Prefer responsibility names over implementation-detail buckets.** Avoid `Utils`, `Helpers`, `Common`, `Shared`, `Misc` and generic `State`/`Components` ownership where a clearer durable responsibility exists.
+5. **Meaningful ordering is allowed.** `SkillsPanel/01-SkillsFilters/` and `SkillsPanel/02-SkillsTree/` intentionally mirror the page's visual/logical order. Decorative numbering remains rejected.
+6. **Source naming is not persistence/routing migration.** Public URLs, localStorage keys, persisted JSON fields, legacy compatibility identifiers and stored P1/P2/builder terminology are not renamed merely to match source filenames.
+7. **Naming may reveal decomposition problems.** If a file cannot be given a clear responsibility name because it mixes unrelated jobs, consider decomposition rather than hiding the problem behind a generic name.
+
+Current examples include:
+
+```text
+Creation/Persistence/AutoSaveAssessment.ts
+Creation/Persistence/RestoreInitialState.ts
+Creation/Questions/DraftGeneration.ts
+Creation/Papers/AutomaticEndTimes.ts
+Creation/TopBar/PaperSelector.tsx
+Creation/PaperWorkspace/Preview/ZoomAndPageTracking.ts
+Classes/Records/Normalisation.ts
+MyAssessments/Library/Filtering.ts
+```
+
+This decision supersedes the filename interpretation of LD-030 and strengthens LD-035, LD-036, LD-037, LD-080, LD-141, LD-229, LD-230, LD-233 and LD-236.
+
+---
+
+## LD-281 — Documentation reconciliation preserves information by default
+
+**Status:** LOCKED — IMPLEMENTED 28 AUGUST 2026
+
+Repository documentation is durable project memory.
+
+When documentation is reconciled after architectural/source changes, use:
+
+```text
+historical truth
+→ preserve
+
+current truth
+→ update
+
+new rule / decision
+→ add
+
+obsolete contradictory instruction
+→ explicitly supersede or replace
+```
+
+Do not delete information merely because it is old when it still explains rationale, compatibility, history or a settled decision.
+
+Current-state documents (`AGENTS.md`, `Docs/Architecture.md`, `Docs/RepositoryMap.md`) must not knowingly retain false current paths or owners.
+
+Historical documents (`Docs/RefactorLedger.md` and historically framed Feature History entries) may retain old paths when those paths accurately describe the state at that time. Add successor/current-path notes where useful rather than pretending the historical path never existed.
+
+Decision IDs in this file remain permanent. Superseded decisions stay recorded and are linked to their replacement/clarification.
+
+This extends LD-160 through LD-168, LD-219, LD-221, LD-250, LD-265 and LD-276.
+
+---
+
 # 4. Quick Reference
 
 ```text
@@ -2412,6 +2510,14 @@ ROOT app/ IS THE AUTHORITATIVE RUNTIME SOURCE.
 DO NOT RECREATE A src/ APPLICATION TREE.
 
 OWNERSHIP DETERMINES LOCATION.
+
+FOLDER = CONTEXT. FILENAME = RESPONSIBILITY.
+
+DO NOT PREFIX FILES WITH use JUST BECAUSE THEY EXPORT A REACT HOOK; HOOK FUNCTIONS STILL USE use... NAMES.
+
+AVOID REDUNDANT PARENT-FOLDER PREFIXES AND VAGUE Utils/Helpers/Common/Shared/Misc NAMES.
+
+MEANINGFUL ORDERED FOLDERS ARE ALLOWED; DECORATIVE NUMBERING IS NOT.
 
 MYASSESSMENTS OWNS LIBRARY UI; SAVEDASSESSMENTS OWNS PERSISTED DATA.
 
@@ -2441,15 +2547,19 @@ DOCUMENTS USE GENERIC → TEMPLATE → COURSE → CONSUMER LAYERS.
 
 PERSISTENCE HAS EXPLICIT OWNERSHIP.
 
+SOURCE RENAMES DO NOT AUTOMATICALLY RENAME PERSISTENCE OR PUBLIC ROUTES.
+
 DO NOT CREATE SECOND SOURCES OF TRUTH.
 
 DO NOT CREATE SPECULATIVE SOURCE ARCHITECTURE; RECORD IDEAS IN FutureFeatures.md.
 
 LOCAL WORKING STATE IS AUTHORITATIVE WHILE UNCOMMITTED; REFRESHED GITHUB IS AUTHORITATIVE REMOTE STATE.
 
-VERIFY TYPES, BUILD WHERE APPROPRIATE, AND TEST RELEVANT USER BEHAVIOUR.
+VERIFY TYPES, LINT, BUILD WHERE APPROPRIATE, AND TEST RELEVANT USER BEHAVIOUR.
 
 UPDATE DOCUMENTATION AT MEANINGFUL CHECKPOINTS.
+
+DOCUMENTATION RECONCILIATION IS INFORMATION-PRESERVING BY DEFAULT.
 
 DO NOT INFER CURRENT PRODUCT BRANDING FROM HISTORICAL IDENTIFIERS.
 
