@@ -44,6 +44,8 @@ import DepreciationConceptModule from "@/app/Courses/National5Maths/QuestionAndA
 
 import FractionsConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N05_1_Fractions";
 
+import TrigEquationsConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/Trigonometry/NQ_N5_TRIG_T02_2_Equations";
+
 const conceptModules:
   ConceptGeneratorModule[] = [
     SurdsConceptModule,
@@ -58,6 +60,7 @@ const conceptModules:
     AppreciationConceptModule,
     DepreciationConceptModule,
     FractionsConceptModule,
+    TrigEquationsConceptModule,
   ];
 
 export function conceptSelectionText(
