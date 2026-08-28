@@ -144,3 +144,15 @@ export function getCourseDocumentSet(
     null
   );
 }
+
+
+export function hasCourseDocumentSet(
+  courseId:
+    CourseId
+): boolean {
+  return (
+    getCourseDocumentSet(
+      courseId
+    ) !== null
+  );
+}
