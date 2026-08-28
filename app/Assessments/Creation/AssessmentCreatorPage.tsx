@@ -22,10 +22,6 @@ import {
 } from "@/app/UI/Application/Theme/ThemeProvider";
 
 import {
-  useAssessmentQualityAnalysis,
-} from "./Analysis/useAssessmentQualityAnalysis";
-
-import {
   getTodayAssessmentDisplayDate,
 } from "./AssessmentSettings/AssessmentDateTime";
 
@@ -1142,18 +1138,14 @@ function AssessmentCreatorContent() {
    */
 
   const {
-    targetMarksByPaper,
+  targetMarksByPaper,
+} =
+  useAssessmentPaperTargets({
+    targetMarksByPaper:
+      assessmentTargetMarksByPaper,
 
-    includedPapers,
-
-    totalAssessmentMarks,
-  } =
-    useAssessmentPaperTargets({
-      targetMarksByPaper:
-        assessmentTargetMarksByPaper,
-
-      courseConfig,
-    });
+    courseConfig,
+  });
 
   const progressHudPaperRows =
     useAssessmentProgressRows({
@@ -1165,28 +1157,6 @@ function AssessmentCreatorContent() {
 
       minutesByPaper,
     });
-
-
-  /*
-   * Assessment-quality analysis
-   */
-
-  const {
-    mergedQualityNotes,
-  } =
-    useAssessmentQualityAnalysis({
-      questions,
-
-      courseConfig,
-
-      includedPapers,
-
-      totalAssessmentMarks,
-
-      qualityNotes,
-    });
-
-  void mergedQualityNotes;
 
 
   /*
