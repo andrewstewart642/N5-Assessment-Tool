@@ -1,4 +1,5 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -362,40 +363,49 @@ function QuestionExampleCard({
     );
 
 
-  function generateQuestion() {
-    try {
-      setFailed(
-        false
-      );
+  const generateQuestion =
+  useCallback(
+    () => {
+      try {
+        setFailed(
+          false
+        );
 
 
-      setGenerated(
-        provider.generate({
-          skill,
-          concept,
-          difficulty,
-        })
-      );
-    } catch {
-      setGenerated(
-        null
-      );
+        setGenerated(
+          provider.generate({
+            skill,
+            concept,
+            difficulty,
+          })
+        );
+      } catch {
+        setGenerated(
+          null
+        );
 
-      setFailed(
-        true
-      );
-    }
-  }
+        setFailed(
+          true
+        );
+      }
+    },
+    [
+      concept,
+      difficulty,
+      provider,
+      skill,
+    ]
+  );
 
 
-  useEffect(() => {
+useEffect(
+  () => {
     generateQuestion();
-  }, [
-    provider,
-    skill,
-    concept,
-    difficulty,
-  ]);
+  },
+  [
+    generateQuestion,
+  ]
+);
 
 
   return (

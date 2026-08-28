@@ -231,6 +231,18 @@ export function useAssessmentCreatorSavedAssessment({
     );
 
 
+  /*
+   * This is deliberately a one-time hydration.
+   *
+   * Re-running it when setter references change
+   * would risk overwriting teacher edits with the
+   * originally persisted assessment state.
+   *
+   * React state setters are stable, and the
+   * specialised paper-target setter supplied by
+   * useAssessmentPaperTargetState is memoised.
+   */
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const nextAssessmentId =
       getCurrentSavedAssessmentId();
@@ -506,6 +518,7 @@ export function useAssessmentCreatorSavedAssessment({
       true
     );
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
 
   return {

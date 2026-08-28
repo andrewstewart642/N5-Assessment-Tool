@@ -1432,15 +1432,21 @@ export default function GeneratorTesterPage() {
   }
 
 
-  useEffect(
-    () => {
-      generateSamples();
+  /*
+ * Generate the initial tester sample set once.
+ */
+/* eslint-disable react-hooks/exhaustive-deps */
 
-      // Initial generation only.
-       
-    },
-    []
-  );
+useEffect(
+  () => {
+    generateSamples();
+
+    // Initial generation only.
+  },
+  []
+);
+
+/* eslint-enable react-hooks/exhaustive-deps */
 
 
   const failedCount =

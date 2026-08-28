@@ -3,7 +3,6 @@ import type { PaperPart } from "@/app/Assessments/Questions/Content/PaperParts";
 import type {
   ConceptGeneratorModule,
   GeneratedQuestionData,
-  GeneratorContext,
 } from "@/app/Assessments/Questions/Generation/QuestionGenerationTypes";
 
 function textPart(value: string): PaperPart {
