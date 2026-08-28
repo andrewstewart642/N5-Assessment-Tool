@@ -2,15 +2,14 @@
 // NATIONAL 5 MATHS — UNIVERSAL ANSWER / MARKING CATALOGUE CONTRACT
 // ============================================================================
 //
-// Describes how every historical Question can be answered and marked.
+// The Answer Catalogue is an evidence model of historical marking practice.
+// It records what the source marking instructions actually awarded, required,
+// accepted, limited or rejected. It does not harmonise inconsistent years and
+// it does not bend source truth to suit the Builder or a future generator.
 //
-// The Answer Catalogue is NOT merely a worked solution.
-// It models accepted answers, method pathways, individual mark nodes,
-// dependencies, follow-through, visual evidence, common responses,
-// shared rules, precision, units, notation, and Question ↔ marking links.
-//
-// This structure will later drive both Worked Answer generation and
-// full Marking Scheme generation.
+// Historical wording is evidence only. Source facts are normalised/paraphrased
+// and linked back to page/question locators. Cross-corpus consistency analysis
+// is deliberately separate from the historical source record.
 // ============================================================================
 
 import type { CourseId } from "@/app/Courses/CourseTypes";
@@ -18,6 +17,7 @@ import type { Paper } from "@/app/Assessments/AssessmentTypes";
 
 import type {
   CatalogConfidence,
+  CatalogDocumentId,
   CatalogEvidenceRef,
   CatalogGenerationReadiness,
   CatalogProvenance,
@@ -40,13 +40,10 @@ import type {
   QuestionUnitProfile,
 } from "../01_QuestionCatalog/QuestionCatalogTypes";
 
-import type {
-  VisualElementId,
-  VisualCandidateInteraction,
-} from "../05_VisualAssets/VisualCatalogTypes";
+import type { VisualCandidateInteraction, VisualElementId } from "../05_VisualAssets/VisualCatalogTypes";
 
 // ============================================================================
-// SECTION 1 — ANSWER / MARK IDS
+// SECTION 1 — STABLE IDS
 // ============================================================================
 
 export type AnswerCatalogId = string;
@@ -54,12 +51,14 @@ export type MarkNodeId = string;
 export type MethodPathwayId = string;
 export type MethodStepId = string;
 export type AnswerVariantId = string;
-export type AnswerRuleId = string;
+export type SourceDirectiveId = string;
 export type CommonResponseId = string;
 export type VisualMarkingRequirementId = string;
+export type ConsistencyFeatureId = string;
+export type MarkingComparisonKeyId = string;
 
 // ============================================================================
-// SECTION 2 — IDENTITY
+// SECTION 2 — IDENTITY / SOURCE CONTEXT
 // ============================================================================
 
 export type AnswerCatalogIdentity = {
@@ -74,15 +73,53 @@ export type AnswerCatalogIdentity = {
   questionFamilyId: QuestionFamilyId;
 };
 
-// ============================================================================
-// SECTION 3 — SOURCE MARKING CONTEXT
-// ============================================================================
-
 export type AnswerSourceContext = {
+  sourceDocumentId: CatalogDocumentId;
   totalMarks: number;
-  sourcePages: number[];
+  sourcePages: number[];                       /* Physical 1-based PDF pages. */
+  printedPageLabels: string[];
   sourceEvidence: CatalogEvidenceRef[];
   generalMarkingPolicyId: GeneralMarkingPolicyId;
+};
+
+// ============================================================================
+// SECTION 3 — SOURCE DIRECTIVES
+// ============================================================================
+
+export type MarkingSourceLayer =
+  | "GENERAL_POLICY"
+  | "EXPECTED_ANSWER"
+  | "GENERIC_MARK_REQUIREMENT"
+  | "ILLUSTRATIVE_EVIDENCE"
+  | "QUESTION_NOTE"
+  | "COMMON_RESPONSE"
+  | "ALTERNATIVE_METHOD";
+
+export type SourceDirectiveScope = "MARK" | "PART" | "QUESTION" | "QUESTION_GROUP" | "PAPER" | "ASSESSMENT";
+
+export type SourceDirectiveEffect =
+  | "AWARD"
+  | "LIMIT"
+  | "BLOCK"
+  | "ACCEPT"
+  | "REQUIRE"
+  | "FOLLOW_THROUGH"
+  | "IGNORE_PENALTY"
+  | "SELECT_LOWEST_ATTEMPT"
+  | "OTHER";
+
+export type SourceMarkingDirective = {
+  id: SourceDirectiveId;
+  layer: MarkingSourceLayer;
+  scope: SourceDirectiveScope;
+  effect: SourceDirectiveEffect;
+  normalisedSummary: string;                  /* Paraphrase only; never source prose. */
+  appliesToPartIds: QuestionPartId[];
+  appliesToMarkIds: MarkNodeId[];
+  appliesToMethodIds: MethodPathwayId[];
+  marksAwarded: number | null;
+  maximumMarks: number | null;
+  sourceEvidence: CatalogEvidenceRef[];
 };
 
 // ============================================================================
@@ -101,21 +138,17 @@ export type ExpectedAnswerForm =
   | "PROSE"
   | "MIXED";
 
-export type ExpectedPrecisionType =
-  | "NONE"
-  | "DECIMAL_PLACES"
-  | "SIGNIFICANT_FIGURES"
-  | "NEAREST_UNIT"
-  | "RANGE";
+export type ExpectedPrecisionType = "NONE" | "DECIMAL_PLACES" | "SIGNIFICANT_FIGURES" | "NEAREST_UNIT" | "RANGE";
 
 export type ExpectedAnswerVariant = {
-  id: AnswerVariantId;                                               /* Gives the answer form a stable ID. */
-  normalisedAnswer: string;                                          /* Stores concise mathematical/paraphrased answer content. */
-  numericValue: number | null;                                       /* Stores numeric value when meaningful. */
-  answerForm: ExpectedAnswerForm;                                    /* Records response form. */
-  mathematicallyEquivalentToVariantIds: AnswerVariantId[];            /* Links equivalent accepted forms. */
-  conditionsForAcceptance: string[];                                 /* Records conditions under which this form is valid. */
-  notes: string | null;                                               /* Records unusual acceptance detail. */
+  id: AnswerVariantId;
+  normalisedAnswer: string;
+  numericValue: number | null;
+  answerForm: ExpectedAnswerForm;
+  mathematicallyEquivalentToVariantIds: AnswerVariantId[];
+  conditionsForAcceptance: string[];
+  sourceEvidence: CatalogEvidenceRef[];
+  notes: string | null;
 };
 
 export type AnswerExpectedResponseProfile = {
@@ -133,7 +166,7 @@ export type AnswerExpectedResponseProfile = {
 };
 
 // ============================================================================
-// SECTION 5 — MARK TYPES
+// SECTION 5 — MARK-BEARING EVIDENCE
 // ============================================================================
 
 export type MarkType =
@@ -164,7 +197,7 @@ export type MarkEvidenceLocation =
 
 export type MarkEvidenceCondition = {
   id: string;
-  evidenceSummary: string;
+  normalisedEvidence: string;
   acceptedLocations: MarkEvidenceLocation[];
   mayBeImpliedByLaterWork: boolean;
   mayBeImpliedByCorrectFinalAnswer: boolean;
@@ -172,9 +205,11 @@ export type MarkEvidenceCondition = {
   sourceEvidence: CatalogEvidenceRef[];
 };
 
-// ============================================================================
-// SECTION 6 — MARK DEPENDENCIES / FOLLOW-THROUGH
-// ============================================================================
+export type MarkPathwayRequirement = {
+  methodPathwayId: MethodPathwayId;
+  normalisedRequirement: string;
+  sourceEvidence: CatalogEvidenceRef[];
+};
 
 export type MarkDependencyType =
   | "REQUIRES_MARK"
@@ -190,22 +225,23 @@ export type MarkDependencyType =
 export type MarkDependency = {
   type: MarkDependencyType;
   relatedMarkIds: MarkNodeId[];
+  relatedQuestionPartIds: QuestionPartId[];
   conditionSummary: string | null;
+  sourceEvidence: CatalogEvidenceRef[];
 };
 
 export type FollowThroughProfile = {
   allowed: boolean;
   fromMarkIds: MarkNodeId[];
+  fromQuestionPartIds: QuestionPartId[];
   requiresComparableDifficulty: boolean;
   blockedForRequiredResult: boolean;
   blockedByInvalidMathematicalState: boolean;
   blockedByTrivialisedLaterWork: boolean;
+  sourceBasis: "GENERAL_POLICY" | "QUESTION_SPECIFIC" | "BOTH" | "NOT_STATED";
+  sourceEvidence: CatalogEvidenceRef[];
   notes: string | null;
 };
-
-// ============================================================================
-// SECTION 7 — INDIVIDUAL MARK NODE
-// ============================================================================
 
 export type MarkNode = {
   id: MarkNodeId;
@@ -214,11 +250,13 @@ export type MarkNode = {
   questionPartId: QuestionPartId;
   primaryType: MarkType;
   secondaryTypes: MarkType[];
-  genericPurpose: string;
+  officialRequirement: string;                /* Normalised generic source requirement. */
+  illustrativeEvidence: MarkEvidenceCondition[];
+  pathwaySpecificRequirements: MarkPathwayRequirement[];
+  genericPurpose: string;                     /* Catalogue classification, not source wording. */
   linkedSubgoalIds: QuestionSubgoalId[];
   skillIds: string[];
   conceptIds: string[];
-  requiredEvidence: MarkEvidenceCondition[];
   dependencies: MarkDependency[];
   followThrough: FollowThroughProfile;
   eligibilityConditions: string[];
@@ -226,12 +264,13 @@ export type MarkNode = {
   methodPathwayIds: MethodPathwayId[];
   presentationConditions: string[];
   visualRequirementIds: VisualMarkingRequirementId[];
+  sourceDirectiveIds: SourceDirectiveId[];
   sourceEvidence: CatalogEvidenceRef[];
   confidence: CatalogConfidence;
 };
 
 // ============================================================================
-// SECTION 8 — METHOD PATHWAYS
+// SECTION 6 — METHOD PATHWAYS / EQUIVALENCE
 // ============================================================================
 
 export type MethodEvidenceRole =
@@ -244,12 +283,13 @@ export type MethodEvidenceRole =
 export type MethodStep = {
   id: MethodStepId;
   order: number;
-  subgoal: string;
+  normalisedStep: string;
   linkedQuestionSubgoalIds: QuestionSubgoalId[];
   linkedMarkIds: MarkNodeId[];
   dependsOnStepIds: MethodStepId[];
   requiredOperations: string[];
   resultingStateSummary: string | null;
+  sourceEvidence: CatalogEvidenceRef[];
 };
 
 export type MethodPathway = {
@@ -260,21 +300,19 @@ export type MethodPathway = {
   applicabilityConditions: string[];
   steps: MethodStep[];
   markMappingComplete: boolean;
+  sourceTotalAwardRules: SourceDirectiveId[];  /* For source notes that award totals directly. */
   mathematicallyEquivalentMethodIds: MethodPathwayId[];
   materiallyDistinctFromMethodIds: MethodPathwayId[];
   excludedMethodReasons: string[];
   sourceEvidence: CatalogEvidenceRef[];
 };
 
-// ============================================================================
-// SECTION 9 — METHOD EQUIVALENCE / ELIGIBILITY
-// ============================================================================
-
 export type MethodEquivalenceProfile = {
   equivalentMethodGroups: {
     id: string;
     methodIds: MethodPathwayId[];
     equivalenceReason: string;
+    sourceEvidence: CatalogEvidenceRef[];
   }[];
   methodEligibilityRules: {
     id: string;
@@ -282,33 +320,29 @@ export type MethodEquivalenceProfile = {
     condition: string;
     eligible: boolean;
     affectedMarkIds: MarkNodeId[];
+    sourceEvidence: CatalogEvidenceRef[];
   }[];
 };
 
 // ============================================================================
-// SECTION 10 — CORRECT ANSWER WITHOUT WORKING
+// SECTION 7 — ANSWER-ONLY / WORKING POLICY
 // ============================================================================
 
-export type AnswerOnlyTreatment =
-  | "FULL_CREDIT"
-  | "PARTIAL_CREDIT"
-  | "NO_CREDIT"
-  | "NOT_STATED";
+export type AnswerOnlyTreatment = "FULL_CREDIT" | "PARTIAL_CREDIT" | "NO_CREDIT" | "NOT_STATED";
 
 export type CorrectAnswerWithoutWorkingProfile = {
   treatment: AnswerOnlyTreatment;
   marksAwarded: number | null;
   markIdsAwarded: MarkNodeId[];
   conditions: string[];
+  sourceDirectiveIds: SourceDirectiveId[];
+  sourceEvidence: CatalogEvidenceRef[];
   notes: string | null;
 };
 
-// ============================================================================
-// SECTION 11 — WORKING / EVIDENCE POLICY
-// ============================================================================
-
 export type WorkingEvidencePolicy = {
   correctAnswerWithoutWorking: CorrectAnswerWithoutWorkingProfile;
+  partSpecificAnswerOnly: { questionPartId: QuestionPartId; profile: CorrectAnswerWithoutWorkingProfile }[];
   workingMandatoryForMarkIds: MarkNodeId[];
   workingMayBeImpliedForMarkIds: MarkNodeId[];
   diagramWorkCanScore: boolean;
@@ -316,12 +350,12 @@ export type WorkingEvidencePolicy = {
   tableWorkCanScore: boolean;
   laterPartCanSupplyEvidence: boolean;
   earlierPartCanSupplyEvidence: boolean;
-  repeatedSubstitutionAccepted: boolean;
-  unsupportedCalculatorAnswerAccepted: boolean;
+  repeatedSubstitutionAccepted: CatalogValue<boolean>;
+  unsupportedCalculatorAnswerAccepted: CatalogValue<boolean>;
 };
 
 // ============================================================================
-// SECTION 12 — PRECISION / UNITS / NOTATION
+// SECTION 8 — PRECISION / UNITS / NOTATION / PRESENTATION
 // ============================================================================
 
 export type PresentationRequirement =
@@ -329,15 +363,16 @@ export type PresentationRequirement =
   | "REQUIRED_FOR_FULL_CREDIT"
   | "ACCEPTED_VARIATION"
   | "DO_NOT_PENALISE"
+  | "NOT_STATED"
   | "NOT_RELEVANT";
 
 export type PrecisionPolicy = {
   finalPrecisionType: ExpectedPrecisionType;
   finalPrecisionValue: number | null;
   acceptedFinalRange: { min: number; max: number } | null;
-  prematureRoundingAllowed: boolean;
+  prematureRoundingTreatment: "ACCEPT" | "PENALISE" | "FOLLOW_THROUGH" | "NOT_STATED" | "NOT_RELEVANT";
   minimumIntermediatePrecision: string | null;
-  followThroughAfterRoundingError: boolean;
+  sourceEvidence: CatalogEvidenceRef[];
 };
 
 export type PresentationPolicy = {
@@ -348,16 +383,18 @@ export type PresentationPolicy = {
   degreeSymbol: PresentationRequirement;
   coordinateBrackets: PresentationRequirement;
   vectorBrackets: PresentationRequirement;
+  vectorOrientation: PresentationRequirement;
   positivePowers: PresentationRequirement;
   rationalDenominator: PresentationRequirement;
   contextualWording: PresentationRequirement;
   answerLabelling: PresentationRequirement;
   significantNotationRequirements: string[];
   otherConditions: string[];
+  sourceEvidence: CatalogEvidenceRef[];
 };
 
 // ============================================================================
-// SECTION 13 — VISUAL MARKING
+// SECTION 9 — VISUAL MARKING
 // ============================================================================
 
 export type VisualMarkingFeatureType =
@@ -384,7 +421,7 @@ export type VisualMarkingRequirement = {
   visualElementId: VisualElementId;
   interaction: VisualCandidateInteraction;
   featureType: VisualMarkingFeatureType;
-  requirementSummary: string;
+  normalisedRequirement: string;
   supportsMarkIds: MarkNodeId[];
   placementTolerance: string | null;
   shapeTolerance: string | null;
@@ -404,45 +441,7 @@ export type VisualMarkingProfile = {
 };
 
 // ============================================================================
-// SECTION 14 — QUESTION-SPECIFIC MARKING RULES
-// ============================================================================
-
-export type AnswerRuleCategory =
-  | "FOLLOW_THROUGH"
-  | "ROUNDING"
-  | "WRONG_OPERATION"
-  | "WRONG_VALUE"
-  | "METHOD_LIMIT"
-  | "METHOD_EXCLUSION"
-  | "ERROR_LIMIT"
-  | "ANSWER_ONLY"
-  | "PRESENTATION"
-  | "ALTERNATIVE_METHOD"
-  | "SOLUTION_SELECTION"
-  | "EXTRA_SOLUTION"
-  | "CROSS_PART"
-  | "VISUAL"
-  | "OTHER";
-
-export type AnswerRuleOutcome = {
-  marksAwarded: number | null;
-  maximumMarks: number | null;
-  unavailableMarkIds: MarkNodeId[];
-  followThroughMarkIds: MarkNodeId[];
-  unaffectedMarkIds: MarkNodeId[];
-};
-
-export type AnswerRule = {
-  id: AnswerRuleId;
-  category: AnswerRuleCategory;
-  conditionSummary: string;
-  outcome: AnswerRuleOutcome;
-  appliesToMarkIds: MarkNodeId[];
-  sourceEvidence: CatalogEvidenceRef[];
-};
-
-// ============================================================================
-// SECTION 15 — COMMON RESPONSE PATTERNS / ERRORS
+// SECTION 10 — SOURCE-SPECIFIED COMMON RESPONSES
 // ============================================================================
 
 export type CommonResponseCategory =
@@ -456,80 +455,82 @@ export type CommonResponseCategory =
   | "CALCULATOR_MODE_ERROR"
   | "EXTRA_SOLUTION"
   | "VISUAL_ERROR"
+  | "PRESENTATION_ERROR"
   | "OTHER";
 
 export type CommonResponsePattern = {
   id: CommonResponseId;
+  sourceStatus: "EXPLICITLY_LISTED" | "DERIVED_FROM_EXPLICIT_NOTE";
   category: CommonResponseCategory;
   errorFamily: string | null;
-  responseSummary: string;
+  normalisedResponse: string;
   affectedMarkIds: MarkNodeId[];
   marksAwarded: number | null;
   maximumMarks: number | null;
   followThroughAvailable: boolean;
-  linkedRuleIds: AnswerRuleId[];
-  usefulForGeneratorValidation: boolean;
+  sourceDirectiveIds: SourceDirectiveId[];
   sourceEvidence: CatalogEvidenceRef[];
 };
 
 // ============================================================================
-// SECTION 16 — SHARED / CROSS-QUESTION RULES
+// SECTION 11 — SHARED / GENERAL MARKING POLICY
 // ============================================================================
 
-export type SharedRuleScope =
-  | "QUESTION"
-  | "QUESTION_GROUP"
-  | "PAPER"
-  | "ASSESSMENT"
-  | "COURSE_POLICY";
+export type SharedRuleScope = "QUESTION" | "QUESTION_GROUP" | "PAPER" | "ASSESSMENT" | "COURSE_POLICY";
 
 export type SharedRuleCategory =
-  | "CALCULATOR_MODE"
+  | "POSITIVE_MARKING"
+  | "VALID_METHODS"
+  | "FOLLOW_THROUGH"
+  | "TRANSCRIPTION"
+  | "SCORED_OUT_WORK"
+  | "MULTIPLE_ATTEMPTS"
   | "REPEATED_ERROR"
   | "NOTATION"
   | "PRESENTATION"
   | "UNITS"
-  | "MULTIPLE_ATTEMPTS"
   | "OTHER";
 
-export type SharedMarkingRuleRef = {
-  ruleId: SharedMarkingRuleId;
+export type SharedMarkingRule = {
+  id: SharedMarkingRuleId;
   scope: SharedRuleScope;
   category: SharedRuleCategory;
-  affectedQuestionIds: QuestionCatalogId[];
-  penaltyLimit: "ONCE" | "PER_QUESTION" | "PER_OCCURRENCE" | "NONE";
-  applicationSummary: string;
+  normalisedRule: string;
+  penaltyLimit: "ONCE" | "PER_QUESTION" | "PER_OCCURRENCE" | "NONE" | "NOT_APPLICABLE";
   sourceEvidence: CatalogEvidenceRef[];
 };
 
-// ============================================================================
-// SECTION 17 — GENERAL MARKING POLICY
-// ============================================================================
+export type GeneralMarkingPolicyCatalogEntry = {
+  id: GeneralMarkingPolicyId;
+  schemaVersion: CatalogSchemaVersion;
+  courseId: CourseId;
+  year: number;
+  affectedPapers: Paper[];
+  sourceDocumentId: CatalogDocumentId;
+  rules: SharedMarkingRule[];
+  sourceEvidence: CatalogEvidenceRef[];
+  integrity: AnswerIntegrityProfile;
+  review: CatalogReviewProfile;
+};
 
 export type GeneralMarkingPolicyRef = {
   policyId: GeneralMarkingPolicyId;
-  relevantRuleIds: string[];
-  notes: string[];
+  relevantRuleIds: SharedMarkingRuleId[];
+  questionSpecificOverrides: SourceDirectiveId[];
 };
 
 // ============================================================================
-// SECTION 18 — QUESTION ↔ ANSWER/MS BRIDGE
+// SECTION 12 — QUESTION ↔ MARKING-SCHEME BRIDGE
 // ============================================================================
 
-export type PartMarkMap = {
-  questionPartId: QuestionPartId;
-  markIds: MarkNodeId[];
-};
-
-export type SubgoalMarkMap = {
-  questionSubgoalId: QuestionSubgoalId;
-  markIds: MarkNodeId[];
-};
+export type PartMarkMap = { questionPartId: QuestionPartId; markIds: MarkNodeId[] };
+export type SubgoalMarkMap = { questionSubgoalId: QuestionSubgoalId; markIds: MarkNodeId[] };
 
 export type PromptInstructionConsequence = {
   instructionType: string;
   markingConsequence: string;
   affectedMarkIds: MarkNodeId[];
+  sourceEvidence: CatalogEvidenceRef[];
 };
 
 export type InformationEvidenceLink = {
@@ -540,15 +541,17 @@ export type InformationEvidenceLink = {
 
 export type RepresentationEvidenceLink = {
   visualElementId: VisualElementId;
-  evidenceSummary: string;
+  normalisedEvidence: string;
   supportsMarkIds: MarkNodeId[];
 };
 
 export type ErrorPropagationLink = {
   sourceMarkIds: MarkNodeId[];
+  sourceQuestionPartIds: QuestionPartId[];
   affectedMarkIds: MarkNodeId[];
   survivingMarkIds: MarkNodeId[];
   conditionSummary: string;
+  sourceEvidence: CatalogEvidenceRef[];
 };
 
 export type QuestionAnswerRelationship = {
@@ -562,34 +565,117 @@ export type QuestionAnswerRelationship = {
 };
 
 // ============================================================================
-// SECTION 19 — SOURCE MS LAYOUT
+// SECTION 13 — SOURCE MARKING-SCHEME PRESENTATION
 // ============================================================================
 
-export type AnswerSourceMeasurementMethod =
-  | "PDF_RENDER"
-  | "MANUAL_ESTIMATE"
-  | "NOT_MEASURED";
+export type AnswerSourceMeasurementMethod = "PDF_RENDER" | "PDF_NATIVE" | "MANUAL_ESTIMATE" | "NOT_MEASURED";
 
 export type AnswerSourceMeasuredBlock = {
+  id: string;
+  blockRole: "EXPECTED_ANSWER" | "GENERIC_REQUIREMENTS" | "ILLUSTRATIVE_EVIDENCE" | "NOTES" | "FULL_QUESTION_BLOCK" | "OTHER";
   measurementMethod: AnswerSourceMeasurementMethod;
   pdfPageNumber: number | null;
+  printedPageLabel: string | null;
   renderDpi: number | null;
+  pageWidthPx: number | null;
+  pageHeightPx: number | null;
   topPx: number | null;
   bottomPx: number | null;
   leftPx: number | null;
   rightPx: number | null;
+  heightPx: number | null;
+  widthPx: number | null;
+  topPt: number | null;
+  bottomPt: number | null;
+  leftPt: number | null;
+  rightPt: number | null;
+  heightPt: number | null;
+  widthPt: number | null;
   heightMm: number | null;
   widthMm: number | null;
   notes: string | null;
 };
 
-export type AnswerSourceLayoutEvidence = {
-  coreEvidenceBlocks: AnswerSourceMeasuredBlock[];
-  fullQuestionBlocks: AnswerSourceMeasuredBlock[];
+export type AnswerSourcePresentationProfile = {
+  layoutFamily: "TABLE_ROW" | "MULTI_METHOD_TABLE_ROW" | "MULTIPART_TABLE_ROW" | "MULTI_PAGE" | "OTHER";
+  expectedAnswerShown: boolean;
+  genericMarkRequirementsShown: boolean;
+  illustrativeEvidenceShown: boolean;
+  methodBlockCount: number;
+  noteCount: number;
+  explicitlyListedCommonResponseCount: number;
+  sourcePages: number[];
+  measuredBlocks: AnswerSourceMeasuredBlock[];
 };
 
 // ============================================================================
-// SECTION 20 — ANSWER / MARKING GENERATION ANALYSIS
+// SECTION 14 — CROSS-CORPUS CONSISTENCY FINGERPRINT
+// ============================================================================
+
+export type ConsistencyFeatureValue = string | number | boolean | null;
+
+export type ConsistencyFeatureObservation = {
+  featureId: ConsistencyFeatureId;
+  value: ConsistencyFeatureValue;
+  normalisedMeaning: string;
+  provenance: "SOURCE_FACT" | "NORMALISED_SOURCE_FACT";
+  sourceEvidence: CatalogEvidenceRef[];
+};
+
+export type MarkingComparisonKey = {
+  id: MarkingComparisonKeyId;
+  questionFamilyId: QuestionFamilyId;
+  skillIds: string[];
+  markCount: number;
+  responseTypes: QuestionResponseType[];
+  comparisonDimensions: string[];
+};
+
+export type ConsistencyClassification =
+  | "NOT_REVIEWED"
+  | "INSUFFICIENT_EVIDENCE"
+  | "STABLE"
+  | "CONTEXT_CONDITIONED"
+  | "POLICY_REGIME_VARIATION"
+  | "QUESTION_FAMILY_VARIATION"
+  | "ISOLATED_EXCEPTION"
+  | "CONFLICTING_EVIDENCE";
+
+export type CrossCorpusConsistencyAnalysis = {
+  classification: ConsistencyClassification;
+  comparisonKey: MarkingComparisonKey;
+  comparedEntryIds: AnswerCatalogId[];
+  supportingEntryIds: AnswerCatalogId[];
+  contradictingEntryIds: AnswerCatalogId[];
+  sampleSize: number;
+  observedPattern: string | null;
+  distinguishingConditions: string[];
+  unresolvedQuestions: string[];
+  analysisMayAlterSourceFacts: false;
+  provenance: "GENERATION_ANALYSIS";            /* Analysis layer, never historical fact. */
+};
+
+export type MarkingConsistencyProfile = {
+  factualFingerprint: ConsistencyFeatureObservation[];
+  crossCorpusAnalysis: CrossCorpusConsistencyAnalysis;
+};
+
+// ============================================================================
+// SECTION 15 — SOURCE INTEGRITY
+// ============================================================================
+
+export type AnswerIntegrityProfile = {
+  sourceFactsPreservedWithoutHarmonisation: true;
+  unsupportedAssumptionsStoredAsFacts: false;
+  crossCorpusAnalysisMayOverrideSourceFacts: false;
+  historicalMarkingWordingStored: false;
+  historicalSourceGeometryReusableByGenerator: false;
+  builderRequirementsMayOverrideCatalogueTruth: false;
+  generatorDecisionsDeferredFromSourceCatalogue: true;
+};
+
+// ============================================================================
+// SECTION 16 — FUTURE ANSWER / MS GENERATION ANALYSIS
 // ============================================================================
 
 export type AnswerGenerationProfile = {
@@ -601,51 +687,53 @@ export type AnswerGenerationProfile = {
   followThroughTemplateNotes: string[];
   presentationTemplateNotes: string[];
   visualMarkingTemplateNotes: string[];
-  commonErrorFamilyIds: string[];
   requiredValidationChecks: string[];
   provenance: CatalogProvenance;
 };
 
 // ============================================================================
-// SECTION 21 — COMPLETE ANSWER CATALOGUE ENTRY
+// SECTION 17 — COMPLETE ANSWER CATALOGUE ENTRY
 // ============================================================================
 
 export type AnswerCatalogEntry = {
   identity: AnswerCatalogIdentity;
   sourceContext: AnswerSourceContext;
   expectedResponse: AnswerExpectedResponseProfile;
+  sourceDirectives: SourceMarkingDirective[];
   markNodes: MarkNode[];
   methodPathways: MethodPathway[];
   methodEquivalence: MethodEquivalenceProfile;
   workingPolicy: WorkingEvidencePolicy;
   presentationPolicy: PresentationPolicy;
   visualMarking: VisualMarkingProfile;
-  questionSpecificRules: AnswerRule[];
   commonResponses: CommonResponsePattern[];
-  sharedRuleRefs: SharedMarkingRuleRef[];
   generalPolicy: GeneralMarkingPolicyRef;
   relationship: QuestionAnswerRelationship;
-  sourceLayout: CatalogValue<AnswerSourceLayoutEvidence>;
-  generation: AnswerGenerationProfile;
+  sourcePresentation: AnswerSourcePresentationProfile;
+  consistency: MarkingConsistencyProfile;
+  integrity: AnswerIntegrityProfile;
+  generation: CatalogValue<AnswerGenerationProfile>;
   review: CatalogReviewProfile;
 };
 
 // ============================================================================
-// SECTION 22 — ANSWER CATALOGUE VALIDATION INVARIANTS
+// SECTION 18 — VALIDATION INVARIANTS
 // ============================================================================
 
 export const ANSWER_CATALOG_VALIDATION_INVARIANTS = [
-  "Answer identity must resolve to exactly one Question Catalogue entry.",
-  "Answer total marks must equal the sum of all MarkNode mark values.",
-  "Every MarkNode must belong to a valid Question part.",
-  "Every MarkNode skill ID must resolve in the canonical Course Skills Tree.",
-  "Every MethodPathway step dependency must resolve inside its pathway.",
-  "Every MethodPathway capable of full credit must map all marks it claims to support.",
-  "Materially distinct valid methods must be represented explicitly rather than collapsed into one linear solution.",
-  "Follow-through must identify both its source error/evidence and the marks that survive.",
-  "Correct-answer-without-working treatment must be explicit for every reviewed entry.",
-  "Visual mark requirements must resolve to Question visual elements.",
-  "Shared rules must use stable shared rule IDs rather than duplicating paper-wide policy inside individual Questions.",
-  "Generated Answer/MS logic must preserve the exact generated Question parameters rather than recalculating an independent Question.",
-  "Historical marking-scheme prose must not be reproduced verbatim in generator source code.",
+  "Every Answer entry must resolve to exactly one Question Catalogue entry.",
+  "Answer total marks must equal the sum of MarkNode mark values.",
+  "Every MarkNode must resolve to a valid Question part and canonical Course skill/concept.",
+  "Generic source requirements and illustrative source evidence must remain distinguishable.",
+  "Question-specific source notes must be retained as explicit directives rather than absorbed into guesses.",
+  "Common responses may be stored as SOURCE_FACT only when the source explicitly lists them or an explicit source note defines them.",
+  "Correct-answer-without-working treatment must be explicit when stated and NOT_STATED when the source is silent.",
+  "Follow-through must record its source basis and any comparable-difficulty gate.",
+  "Materially distinct valid source methods must be represented as separate pathways.",
+  "Method-specific mark requirements must not be collapsed when the source differentiates them.",
+  "Cross-corpus consistency analysis must never modify, harmonise or replace historical source facts.",
+  "A consistency classification needs explicit comparator entries; otherwise it remains NOT_REVIEWED or INSUFFICIENT_EVIDENCE.",
+  "Question-specific rules override general policy only where the source explicitly supplies the override.",
+  "Historical marking-scheme wording and source geometry are evidence only and must not become generator templates.",
+  "Builder/runtime requirements must not alter the historical catalogue record.",
 ] as const;
