@@ -1,4 +1,9 @@
 import type {
+  CSSProperties,
+  ReactNode,
+} from "react";
+
+import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
@@ -77,7 +82,7 @@ function ViewButton({
     () => void;
 
   children:
-    React.ReactNode;
+    ReactNode;
 }) {
   return (
     <button
@@ -165,7 +170,7 @@ export default function AssessmentLibraryToolbar({
 
 
   const inputStyle:
-    React.CSSProperties = {
+    CSSProperties = {
       height:
         30,
 
@@ -185,19 +190,26 @@ export default function AssessmentLibraryToolbar({
         5,
 
       background:
-        theme.controlBg,
+        `linear-gradient(
+          180deg,
+          ${theme.controlBg} 0%,
+          ${theme.bgSection} 150%
+        )`,
 
       color:
         theme.textPrimary,
 
       fontFamily:
-        "var(--app-ui-font-family)",
+        "inherit",
 
       fontSize:
         12,
 
       outline:
         "none",
+
+      boxShadow:
+        "inset 0 1px 0 rgba(255,255,255,0.025)",
     };
 
 
@@ -233,13 +245,24 @@ export default function AssessmentLibraryToolbar({
           "solid",
 
         borderColor:
-          theme.borderStandard,
+          `color-mix(
+            in srgb,
+            ${theme.accentPrimary} 10%,
+            ${theme.borderStandard}
+          )`,
 
         borderRadius:
           6,
 
         background:
-          theme.bgSurface,
+          `linear-gradient(
+            180deg,
+            ${theme.bgSection} 0%,
+            ${theme.bgSurface} 115%
+          )`,
+
+        boxShadow:
+          theme.shadow,
       }}
     >
       <div
@@ -299,6 +322,7 @@ export default function AssessmentLibraryToolbar({
             strokeLinecap="round"
           />
         </svg>
+
 
         <input
           type="search"
@@ -442,6 +466,9 @@ export default function AssessmentLibraryToolbar({
 
             whiteSpace:
               "nowrap",
+
+            fontVariantNumeric:
+              "tabular-nums",
           }}
         >
           {resultText}
@@ -476,6 +503,9 @@ export default function AssessmentLibraryToolbar({
 
             background:
               theme.controlBg,
+
+            boxShadow:
+              "inset 0 1px 0 rgba(255,255,255,0.025)",
           }}
         >
           <ViewButton

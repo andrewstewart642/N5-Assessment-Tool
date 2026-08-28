@@ -150,7 +150,7 @@ function StatusBadge({
           boxShadow:
             complete
               ? `0 0 0 2px ${theme.successSoft}`
-              : `0 0 0 2px ${theme.accentSoft}`,
+              : "none",
         }}
       />
 
@@ -308,7 +308,7 @@ function AssessmentMetadata({
           8,
 
         rowGap:
-          4,
+          3,
 
         alignItems:
           "baseline",
@@ -575,7 +575,7 @@ export default function AssessmentTile({
             "hidden",
 
           padding:
-            "11px 9px 9px 13px",
+            "10px 9px 6px 13px",
 
           boxSizing:
             "border-box",
@@ -587,7 +587,7 @@ export default function AssessmentTile({
             "column",
 
           gap:
-            7,
+            6,
 
           background:
             `linear-gradient(
@@ -712,9 +712,6 @@ export default function AssessmentTile({
 
               whiteSpace:
                 "nowrap",
-
-              textOverflow:
-                "ellipsis",
             }}
           >
             <span
@@ -740,7 +737,6 @@ export default function AssessmentTile({
               }}
             />
 
-
             <span
               style={{
                 minWidth:
@@ -764,22 +760,15 @@ export default function AssessmentTile({
               {courseLabel}
             </span>
 
-
             <span
               aria-hidden="true"
               style={{
-                flexShrink:
-                  0,
-
                 color:
                   theme.textMuted,
-
-                ...UI_TEXT.controlTextStrong,
               }}
             >
               ·
             </span>
-
 
             <span
               style={{
@@ -869,7 +858,7 @@ export default function AssessmentTile({
         <div
           style={{
             padding:
-              "3px 0 2px",
+              "2px 0",
           }}
         >
           <AssessmentTileProgress
@@ -889,7 +878,7 @@ export default function AssessmentTile({
         <div
           style={{
             paddingTop:
-              7,
+              6,
 
             borderTopWidth:
               1,
@@ -1096,11 +1085,17 @@ export default function AssessmentTile({
             minWidth:
               0,
 
+            minHeight:
+              14,
+
+            flexShrink:
+              0,
+
             display:
               "flex",
 
             alignItems:
-              "baseline",
+              "center",
 
             justifyContent:
               "space-between",
@@ -1115,12 +1110,14 @@ export default function AssessmentTile({
               "tabular-nums",
 
             ...UI_TEXT.helper,
+
+            lineHeight:
+              1.1,
           }}
         >
           <span>
             Created
           </span>
-
 
           <span
             style={{

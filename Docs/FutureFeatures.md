@@ -380,3 +380,7 @@ FA-XXX — Implemented 2026-09-01
 ```
 
 The active future list should remain useful rather than becoming another historical ledger.
+
+
+
+In the side action panel, we could implement a calendar  for teachers so they can see all of the upcoming/planned assessment dates and whether they are completed/ready for print or not. 

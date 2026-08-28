@@ -12,6 +12,14 @@ import {
   setCurrentSavedAssessmentId,
 } from "@/app/Assessments/SavedAssessments/SavedAssessmentsStorage";
 
+import {
+  getCourseAccentTextColour,
+} from "@/app/UI/Application/Colours/CourseAccent";
+
+import {
+  useCourseColourPreferences,
+} from "@/app/UI/Application/Colours/useCourseColourPreferences";
+
 import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
@@ -20,6 +28,7 @@ import {
   formatAssessmentDate,
   formatDate,
   formatTime,
+  getAssessmentCourseId,
   getAssessmentCourseLabel,
   getAssessmentCoverageLabel,
   getAssessmentStatusLabel,
@@ -177,7 +186,7 @@ function CompactActionButton({
           "pointer",
 
         fontFamily:
-          "var(--app-ui-font-family)",
+          "inherit",
 
         fontSize:
           10.5,
@@ -294,6 +303,11 @@ function StatusBadge({
             complete
               ? theme.success
               : theme.accentPrimary,
+
+          boxShadow:
+            complete
+              ? `0 0 0 2px ${theme.successSoft}`
+              : "none",
         }}
       />
 
@@ -308,12 +322,16 @@ function StatusBadge({
 function ProgressCell({
   assessment,
   theme,
+  courseAccent,
 }: {
   assessment:
     SavedAssessment;
 
   theme:
     AppTheme;
+
+  courseAccent:
+    string;
 }) {
   const papers =
     getAssessmentPaperProgress(
@@ -367,7 +385,13 @@ function ProgressCell({
               "100%",
 
             background:
-              "#22a447",
+              theme.success,
+
+            boxShadow:
+              overall >
+              0
+                ? `0 0 6px ${theme.successSoft}`
+                : "none",
 
             transition:
               "width 180ms ease",
@@ -465,7 +489,11 @@ function ProgressCell({
                     2,
 
                   background:
-                    theme.borderStandard,
+                    `color-mix(
+                      in srgb,
+                      ${courseAccent} 12%,
+                      ${theme.borderStandard}
+                    )`,
                 }}
               >
                 <div
@@ -480,7 +508,7 @@ function ProgressCell({
                       2,
 
                     background:
-                      theme.accentPrimary,
+                      courseAccent,
 
                     transition:
                       "width 180ms ease",
@@ -619,6 +647,12 @@ export default function AssessmentListView({
   onDelete,
   onTogglePinned,
 }: AssessmentListViewProps) {
+  const {
+    getColour,
+  } =
+    useCourseColourPreferences();
+
+
   return (
     <section
       aria-label="Assessment list"
@@ -646,6 +680,9 @@ export default function AssessmentListView({
 
         background:
           theme.bgSurface,
+
+        boxShadow:
+          theme.shadow,
       }}
     >
       <div
@@ -691,7 +728,11 @@ export default function AssessmentListView({
               theme.borderStandard,
 
             background:
-              theme.bgSection,
+              `linear-gradient(
+                180deg,
+                ${theme.bgSection} 0%,
+                ${theme.bgSurface} 130%
+              )`,
 
             color:
               theme.textMuted,
@@ -709,21 +750,11 @@ export default function AssessmentListView({
               "0.04em",
           }}
         >
-          <span
-            style={{
-              whiteSpace:
-                "nowrap",
-            }}
-          >
+          <span>
             Assessment
           </span>
 
-          <span
-            style={{
-              whiteSpace:
-                "nowrap",
-            }}
-          >
+          <span>
             Progress
           </span>
 
@@ -731,9 +762,6 @@ export default function AssessmentListView({
             style={{
               textAlign:
                 "center",
-
-              whiteSpace:
-                "nowrap",
             }}
           >
             Assessment date
@@ -743,9 +771,6 @@ export default function AssessmentListView({
             style={{
               textAlign:
                 "right",
-
-              whiteSpace:
-                "nowrap",
             }}
           >
             Last edited
@@ -755,9 +780,6 @@ export default function AssessmentListView({
             style={{
               textAlign:
                 "center",
-
-              whiteSpace:
-                "nowrap",
             }}
           >
             Status
@@ -767,9 +789,6 @@ export default function AssessmentListView({
             style={{
               textAlign:
                 "center",
-
-              whiteSpace:
-                "nowrap",
             }}
           >
             Preview
@@ -779,9 +798,6 @@ export default function AssessmentListView({
             style={{
               textAlign:
                 "right",
-
-              whiteSpace:
-                "nowrap",
             }}
           >
             Actions
@@ -791,13 +807,35 @@ export default function AssessmentListView({
 
         {savedAssessments.map(
           (
-            assessment
+            assessment,
+            index
           ) => {
             const title =
               assessment.setup
                 .assessmentName
                 .trim() ||
               "[Untitled file]";
+
+
+            const courseId =
+              getAssessmentCourseId(
+                assessment
+              );
+
+
+            const courseAccent =
+              courseId
+                ? getColour(
+                    courseId
+                  )
+                : theme.accentPrimary;
+
+
+            const courseAccentText =
+              getCourseAccentTextColour(
+                courseAccent,
+                theme
+              );
 
 
             return (
@@ -810,7 +848,7 @@ export default function AssessmentListView({
                     76,
 
                   padding:
-                    "8px",
+                    "8px 8px 8px 11px",
 
                   boxSizing:
                     "border-box",
@@ -828,13 +866,36 @@ export default function AssessmentListView({
                     LIST_COLUMN_GAP,
 
                   borderBottomWidth:
-                    1,
+                    index ===
+                    savedAssessments.length -
+                      1
+                      ? 0
+                      : 1,
 
                   borderBottomStyle:
                     "solid",
 
                   borderBottomColor:
                     theme.borderStandard,
+
+                  background:
+                    `linear-gradient(
+                      90deg,
+                      color-mix(
+                        in srgb,
+                        ${courseAccent} 8%,
+                        ${theme.bgSurface}
+                      ) 0%,
+                      color-mix(
+                        in srgb,
+                        ${courseAccent} 3%,
+                        ${theme.bgSurface}
+                      ) 22%,
+                      ${theme.bgSurface} 58%
+                    )`,
+
+                  boxShadow:
+                    `inset 3px 0 0 ${courseAccent}`,
                 }}
               >
                 <div
@@ -909,7 +970,7 @@ export default function AssessmentListView({
                             0,
 
                           color:
-                            theme.accentPrimary,
+                            courseAccent,
                         }}
                       >
                         <path
@@ -929,29 +990,114 @@ export default function AssessmentListView({
                       minWidth:
                         0,
 
+                      display:
+                        "flex",
+
+                      alignItems:
+                        "center",
+
+                      gap:
+                        5,
+
                       overflow:
                         "hidden",
 
                       whiteSpace:
                         "nowrap",
-
-                      textOverflow:
-                        "ellipsis",
-
-                      color:
-                        theme.textSecondary,
-
-                      fontSize:
-                        11,
                     }}
                   >
-                    {getAssessmentCourseLabel(
-                      assessment
-                    )}
-                    {" · "}
-                    {getAssessmentTypeLabel(
-                      assessment
-                    )}
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        width:
+                          6,
+
+                        height:
+                          6,
+
+                        flexShrink:
+                          0,
+
+                        borderRadius:
+                          999,
+
+                        background:
+                          courseAccent,
+
+                        boxShadow:
+                          `0 0 6px ${courseAccent}`,
+                      }}
+                    />
+
+
+                    <span
+                      style={{
+                        overflow:
+                          "hidden",
+
+                        color:
+                          courseAccentText,
+
+                        fontSize:
+                          11,
+
+                        fontWeight:
+                          600,
+
+                        whiteSpace:
+                          "nowrap",
+
+                        textOverflow:
+                          "ellipsis",
+                      }}
+                    >
+                      {getAssessmentCourseLabel(
+                        assessment
+                      )}
+                    </span>
+
+
+                    <span
+                      style={{
+                        flexShrink:
+                          0,
+
+                        color:
+                          theme.textMuted,
+
+                        fontSize:
+                          11,
+                      }}
+                    >
+                      ·
+                    </span>
+
+
+                    <span
+                      style={{
+                        minWidth:
+                          0,
+
+                        overflow:
+                          "hidden",
+
+                        color:
+                          theme.textSecondary,
+
+                        fontSize:
+                          11,
+
+                        whiteSpace:
+                          "nowrap",
+
+                        textOverflow:
+                          "ellipsis",
+                      }}
+                    >
+                      {getAssessmentTypeLabel(
+                        assessment
+                      )}
+                    </span>
                   </div>
 
 
@@ -989,6 +1135,9 @@ export default function AssessmentListView({
                   }
                   theme={
                     theme
+                  }
+                  courseAccent={
+                    courseAccent
                   }
                 />
 
