@@ -3,16 +3,21 @@ import {
 } from "next/navigation";
 
 import AssessmentCompilationPage from "@/app/Assessments/Compilation/AssessmentCompilationPage";
+
 import AssessmentCreatorPage from "@/app/Assessments/Creation/AssessmentCreatorPage";
+
 import AssessmentSetupPage from "@/app/Assessments/Creation/AssessmentSetupPage";
+
 import MyAssessmentsPage from "@/app/MyAssessments/MyAssessmentsPage";
 
 import ClassDetailsPage from "@/app/Classes/ClassDetailsPage";
+
 import MyClassesPage from "@/app/Classes/MyClassesPage";
 
 import GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/GeneratorTesterPage";
 
-import HomePage from "@/app/UI/Application/Home/HomePage";
+import HomePage from "@/app/Home/HomePage";
+
 
 type ApplicationPageProps = {
   searchParams:
@@ -25,18 +30,25 @@ type ApplicationPageProps = {
     }>;
 };
 
+
 function firstValue(
   value:
     | string
     | string[]
-    | undefined,
+    | undefined
 ) {
-  if (Array.isArray(value)) {
+  if (
+    Array.isArray(
+      value
+    )
+  ) {
     return value[0];
   }
 
+
   return value;
 }
+
 
 export default async function ApplicationPage({
   searchParams,
@@ -44,16 +56,21 @@ export default async function ApplicationPage({
   const params =
     await searchParams;
 
+
   const route =
     firstValue(
-      params.__vecedRoute,
+      params.__vecedRoute
     );
 
-  if (!route) {
+
+  if (
+    !route
+  ) {
     return (
       <HomePage />
     );
   }
+
 
   if (
     route ===
@@ -64,6 +81,7 @@ export default async function ApplicationPage({
     );
   }
 
+
   if (
     route ===
     "create-assessment"
@@ -72,6 +90,7 @@ export default async function ApplicationPage({
       <AssessmentSetupPage />
     );
   }
+
 
   if (
     route ===
@@ -82,6 +101,7 @@ export default async function ApplicationPage({
     );
   }
 
+
   if (
     route ===
     "my-assessments"
@@ -90,6 +110,7 @@ export default async function ApplicationPage({
       <MyAssessmentsPage />
     );
   }
+
 
   if (
     route ===
@@ -100,30 +121,39 @@ export default async function ApplicationPage({
     );
   }
 
+
   if (
     route ===
     "class-details"
   ) {
     const classId =
       firstValue(
-        params.classId,
+        params.classId
       );
 
-    if (!classId) {
+
+    if (
+      !classId
+    ) {
       notFound();
     }
+
 
     const classParams =
       Promise.resolve({
         classId,
       });
 
+
     return (
       <ClassDetailsPage
-        params={classParams}
+        params={
+          classParams
+        }
       />
     );
   }
+
 
   if (
     route ===
@@ -133,6 +163,7 @@ export default async function ApplicationPage({
       <GeneratorTesterPage />
     );
   }
+
 
   notFound();
 }
