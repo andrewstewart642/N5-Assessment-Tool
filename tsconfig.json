@@ -22,6 +22,12 @@
       }
     ],
     "paths": {
+      "@/app/Courses/National5Maths": [
+        "./app/Courses/National5MathsLegacy"
+      ],
+      "@/app/Courses/National5Maths/*": [
+        "./app/Courses/National5MathsLegacy/*"
+      ],
       "@/*": [
         "./*"
       ]

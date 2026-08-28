@@ -1,0 +1,9 @@
+{
+  "files.exclude": {
+    "**/National5MathsLegacy": true,
+    "**/.gitkeep": true
+  },
+  "search.exclude": {
+    "**/National5MathsLegacy": true
+  }
+}
