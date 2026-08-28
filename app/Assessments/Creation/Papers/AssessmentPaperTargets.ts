@@ -19,11 +19,6 @@ import {
   getDefaultTargetMarksForAssessmentPaper,
 } from "./AssessmentPaperRules";
 
-export type AssessmentPaperTargetInputs = {
-  p1Target: number;
-  p2Target: number;
-};
-
 export type AssessmentTargetMarksByPaper =
   Partial<
     Record<
@@ -31,16 +26,6 @@ export type AssessmentTargetMarksByPaper =
       number
     >
   >;
-
-function buildLegacyPaperTargetInputMap({
-  p1Target,
-  p2Target,
-}: AssessmentPaperTargetInputs): AssessmentTargetMarksByPaper {
-  return {
-    P1: p1Target,
-    P2: p2Target,
-  };
-}
 
 export function buildDefaultAssessmentTargetMarksByPaper(
   courseConfig?:
@@ -144,25 +129,6 @@ export function buildAssessmentTargetMarksByPaperFromValues({
   );
 }
 
-export function buildAssessmentTargetMarksByPaper({
-  p1Target,
-  p2Target,
-  courseConfig,
-}: AssessmentPaperTargetInputs & {
-  courseConfig?:
-    CourseAssessmentConfig;
-}): AssessmentTargetMarksByPaper {
-  return buildAssessmentTargetMarksByPaperFromValues({
-    targetMarksByPaper:
-      buildLegacyPaperTargetInputMap({
-        p1Target,
-        p2Target,
-      }),
-
-    courseConfig,
-  });
-}
-
 export function getIncludedAssessmentPapersFromTargets({
   targetMarksByPaper,
   courseConfig,
@@ -224,9 +190,11 @@ export function estimateMarksFromTimeForAssessmentPaper({
   minutes,
   courseConfig,
 }: {
-  paper: Paper;
+  paper:
+    Paper;
 
-  minutes: number;
+  minutes:
+    number;
 
   courseConfig?:
     CourseAssessmentConfig;
@@ -253,7 +221,8 @@ export function getAssessmentPaperTargetFromSetupTarget({
   timeTarget,
   courseConfig,
 }: {
-  paper: Paper;
+  paper:
+    Paper;
 
   buildPriority:
     BuildPriority;
@@ -369,7 +338,9 @@ export function buildAssessmentTargetMarksByPaperFromSetupTargets({
           paper
         ];
 
-      if (!setupTarget) {
+      if (
+        !setupTarget
+      ) {
         return targets;
       }
 
