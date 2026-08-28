@@ -1,6 +1,7 @@
 .calendarDay {
   position: relative;
   isolation: isolate;
+
   transition:
     transform 160ms ease,
     border-color 160ms ease,
@@ -23,10 +24,11 @@
 
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.78),
-    0 0 14px rgba(255, 255, 255, 0.20),
+    0 0 12px rgba(255, 255, 255, 0.18),
     0 4px 10px rgba(0, 0, 0, 0.22),
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
+
 
 .pulseOne,
 .pulseTwo,
@@ -34,8 +36,9 @@
 .pulseFour {
   animation-duration: var(--calendar-pulse-duration);
   animation-delay: var(--calendar-pulse-delay);
-  animation-timing-function: ease-in-out;
+  animation-timing-function: linear;
   animation-iteration-count: infinite;
+  animation-fill-mode: both;
 }
 
 .pulseOne {
@@ -53,6 +56,7 @@
 .pulseFour {
   animation-name: calendarPulseFour;
 }
+
 
 .hoverCard {
   position: absolute;
@@ -84,10 +88,19 @@
 }
 
 
+/*
+ * One Course
+ *
+ * Entire animation:
+ *
+ * 0% glow
+ *   ↓
+ * 100% glow
+ *   ↓
+ * 0% glow
+ */
 @keyframes calendarPulseOne {
   0%,
-  28%,
-  72%,
   100% {
     box-shadow:
       0 2px 7px rgba(0, 0, 0, 0.22),
@@ -99,13 +112,13 @@
       0 0 0 1px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 42%,
+          var(--calendar-glow-a) 30%,
           transparent
         ),
-      0 0 13px
+      0 0 11px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 34%,
+          var(--calendar-glow-a) 24%,
           transparent
         ),
       0 4px 10px rgba(0, 0, 0, 0.23),
@@ -114,48 +127,49 @@
 }
 
 
+/*
+ * Two Courses
+ *
+ * Each Course receives one complete breathing cycle.
+ */
 @keyframes calendarPulseTwo {
   0%,
+  50%,
   100% {
     box-shadow:
       0 2px 7px rgba(0, 0, 0, 0.22),
       inset 0 1px 0 rgba(255, 255, 255, 0.025);
   }
 
-  22% {
+  25% {
     box-shadow:
       0 0 0 1px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 42%,
+          var(--calendar-glow-a) 30%,
           transparent
         ),
-      0 0 13px
+      0 0 11px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 34%,
+          var(--calendar-glow-a) 24%,
           transparent
         ),
       0 4px 10px rgba(0, 0, 0, 0.23);
   }
 
-  48% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
-  }
-
-  74% {
+  75% {
     box-shadow:
       0 0 0 1px
         color-mix(
           in srgb,
-          var(--calendar-glow-b) 42%,
+          var(--calendar-glow-b) 30%,
           transparent
         ),
-      0 0 13px
+      0 0 11px
         color-mix(
           in srgb,
-          var(--calendar-glow-b) 34%,
+          var(--calendar-glow-b) 24%,
           transparent
         ),
       0 4px 10px rgba(0, 0, 0, 0.23);
@@ -163,157 +177,154 @@
 }
 
 
+/*
+ * Three Courses
+ */
 @keyframes calendarPulseThree {
   0%,
+  33.333%,
+  66.666%,
   100% {
     box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
+      0 2px 7px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.025);
   }
 
-  15% {
+  16.666% {
     box-shadow:
       0 0 0 1px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 42%,
+          var(--calendar-glow-a) 30%,
           transparent
         ),
-      0 0 13px
+      0 0 11px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 34%,
-          transparent
-        );
-  }
-
-  32% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
-  }
-
-  49% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 42%,
+          var(--calendar-glow-a) 24%,
           transparent
         ),
-      0 0 13px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 34%,
-          transparent
-        );
-  }
-
-  66% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
-  }
-
-  83% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-c) 42%,
-          transparent
-        ),
-      0 0 13px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-c) 34%,
-          transparent
-        );
-  }
-}
-
-
-@keyframes calendarPulseFour {
-  0%,
-  100% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
-  }
-
-  11% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 42%,
-          transparent
-        ),
-      0 0 13px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-a) 34%,
-          transparent
-        );
-  }
-
-  24% {
-    box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
-  }
-
-  37% {
-    box-shadow:
-      0 0 0 1px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 42%,
-          transparent
-        ),
-      0 0 13px
-        color-mix(
-          in srgb,
-          var(--calendar-glow-b) 34%,
-          transparent
-        );
+      0 4px 10px rgba(0, 0, 0, 0.23);
   }
 
   50% {
     box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 30%,
+          transparent
+        ),
+      0 0 11px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 24%,
+          transparent
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
   }
 
-  63% {
+  83.333% {
     box-shadow:
       0 0 0 1px
         color-mix(
           in srgb,
-          var(--calendar-glow-c) 42%,
+          var(--calendar-glow-c) 30%,
           transparent
         ),
-      0 0 13px
+      0 0 11px
         color-mix(
           in srgb,
-          var(--calendar-glow-c) 34%,
+          var(--calendar-glow-c) 24%,
           transparent
-        );
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
   }
+}
 
-  76% {
+
+/*
+ * Four or more Courses.
+ *
+ * The first four unique Course colours are represented.
+ */
+@keyframes calendarPulseFour {
+  0%,
+  25%,
+  50%,
+  75%,
+  100% {
     box-shadow:
-      0 2px 7px rgba(0, 0, 0, 0.22);
+      0 2px 7px rgba(0, 0, 0, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.025);
   }
 
-  89% {
+  12.5% {
     box-shadow:
       0 0 0 1px
         color-mix(
           in srgb,
-          var(--calendar-glow-d) 42%,
+          var(--calendar-glow-a) 30%,
           transparent
         ),
-      0 0 13px
+      0 0 11px
         color-mix(
           in srgb,
-          var(--calendar-glow-d) 34%,
+          var(--calendar-glow-a) 24%,
           transparent
-        );
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
+  }
+
+  37.5% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 30%,
+          transparent
+        ),
+      0 0 11px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-b) 24%,
+          transparent
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
+  }
+
+  62.5% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-c) 30%,
+          transparent
+        ),
+      0 0 11px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-c) 24%,
+          transparent
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
+  }
+
+  87.5% {
+    box-shadow:
+      0 0 0 1px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-d) 30%,
+          transparent
+        ),
+      0 0 11px
+        color-mix(
+          in srgb,
+          var(--calendar-glow-d) 24%,
+          transparent
+        ),
+      0 4px 10px rgba(0, 0, 0, 0.23);
   }
 }
 
@@ -331,13 +342,13 @@
       0 0 0 1px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 36%,
+          var(--calendar-glow-a) 26%,
           transparent
         ),
-      0 0 9px
+      0 0 8px
         color-mix(
           in srgb,
-          var(--calendar-glow-a) 24%,
+          var(--calendar-glow-a) 18%,
           transparent
         );
   }

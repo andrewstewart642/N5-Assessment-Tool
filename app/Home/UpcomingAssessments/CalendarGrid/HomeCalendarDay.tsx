@@ -144,25 +144,37 @@ export default function HomeCalendarDay({
     theme.accentPrimary;
 
 
-  const pulseDuration =
+  const pulseDurationPerColour =
     getCalendarPulseDurationSeconds(
       date,
       today
     );
 
 
+  const colourCycleCount =
+    Math.max(
+      uniqueColours.length,
+      1
+    );
+
+
+  const fullPulseCycleDuration =
+    pulseDurationPerColour *
+    colourCycleCount;
+
+
   const pulseVariables =
     {
       "--calendar-pulse-duration":
-        `${pulseDuration}s`,
+        `${fullPulseCycleDuration}s`,
 
       "--calendar-pulse-delay":
         `${-(
           (
             date.getDate() %
-            5
+            4
           ) *
-          0.55
+          0.35
         ).toFixed(
           2
         )}s`,
@@ -248,7 +260,7 @@ export default function HomeCalendarDay({
           0,
 
         height:
-          42,
+          46,
 
         padding:
           "4px 5px",
@@ -279,7 +291,7 @@ export default function HomeCalendarDay({
                   1
                 ? `color-mix(
                     in srgb,
-                    ${primaryAccent} 38%,
+                    ${primaryAccent} 34%,
                     ${theme.borderStandard}
                   )`
                 : `color-mix(
@@ -400,7 +412,7 @@ export default function HomeCalendarDay({
                     theme.textSecondary,
 
                   fontSize:
-                    7.5,
+                    8,
 
                   lineHeight:
                     1.05,
@@ -463,7 +475,7 @@ export default function HomeCalendarDay({
                 theme.textMuted,
 
               fontSize:
-                7,
+                7.5,
 
               lineHeight:
                 1,

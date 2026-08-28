@@ -24,6 +24,7 @@ import {
 
 import {
   getCalendarAssessmentPrimaryClassLabel,
+  getCalendarAssessmentStatus,
   getCalendarAssessmentStatusLabel,
 } from "../HomeAssessmentCalendarHelpers";
 
@@ -43,6 +44,32 @@ type Props = {
 };
 
 
+function getStatusColour(
+  assessment:
+    SavedAssessment,
+
+  theme:
+    AppTheme
+): string {
+  switch (
+    getCalendarAssessmentStatus(
+      assessment
+    )
+  ) {
+    case "COMPLETE":
+    case "READY_FOR_PRINT":
+      return theme.success;
+
+    case "IN_PROGRESS":
+      return theme.warning;
+
+    case "NOT_STARTED":
+    default:
+      return theme.textMuted;
+  }
+}
+
+
 export default function HomeAssessmentTimelineCard({
   assessment,
   classes,
@@ -53,6 +80,20 @@ export default function HomeAssessmentTimelineCard({
     parseHomeAssessmentDate(
       assessment.setup
         .assessmentDate
+    );
+
+
+  const classLabel =
+    getCalendarAssessmentPrimaryClassLabel(
+      assessment,
+      classes
+    );
+
+
+  const statusColour =
+    getStatusColour(
+      assessment,
+      theme
     );
 
 
@@ -68,8 +109,14 @@ export default function HomeAssessmentTimelineCard({
         minWidth:
           0,
 
+        minHeight:
+          60,
+
         padding:
-          "6px 7px 6px 9px",
+          "7px 8px 7px 10px",
+
+        boxSizing:
+          "border-box",
 
         position:
           "relative",
@@ -80,8 +127,11 @@ export default function HomeAssessmentTimelineCard({
         display:
           "grid",
 
+        alignContent:
+          "start",
+
         gap:
-          2,
+          3,
 
         borderWidth:
           1,
@@ -92,7 +142,7 @@ export default function HomeAssessmentTimelineCard({
         borderColor:
           `color-mix(
             in srgb,
-            ${accent} 16%,
+            ${accent} 18%,
             ${theme.borderStandard}
           )`,
 
@@ -142,12 +192,26 @@ export default function HomeAssessmentTimelineCard({
 
 
       <span
+        title={
+          getHomeAssessmentName(
+            assessment
+          )
+        }
         style={{
           minWidth:
             0,
 
           overflow:
             "hidden",
+
+          display:
+            "-webkit-box",
+
+          WebkitBoxOrient:
+            "vertical",
+
+          WebkitLineClamp:
+            2,
 
           color:
             theme.textPrimary,
@@ -156,13 +220,10 @@ export default function HomeAssessmentTimelineCard({
             9.5,
 
           fontWeight:
-            650,
+            700,
 
-          whiteSpace:
-            "nowrap",
-
-          textOverflow:
-            "ellipsis",
+          lineHeight:
+            1.2,
         }}
       >
         {getHomeAssessmentName(
@@ -173,6 +234,32 @@ export default function HomeAssessmentTimelineCard({
 
       <span
         style={{
+          color:
+            theme.textMuted,
+
+          fontSize:
+            8.5,
+
+          fontVariantNumeric:
+            "tabular-nums",
+
+          lineHeight:
+            1.2,
+        }}
+      >
+        {date
+          ? formatHomeShortDate(
+              date
+            )
+          : "No date"}
+      </span>
+
+
+      <span
+        title={
+          classLabel
+        }
+        style={{
           minWidth:
             0,
 
@@ -180,10 +267,16 @@ export default function HomeAssessmentTimelineCard({
             "hidden",
 
           color:
-            theme.textMuted,
+            accent,
 
           fontSize:
             8.5,
+
+          fontWeight:
+            600,
+
+          lineHeight:
+            1.2,
 
           whiteSpace:
             "nowrap",
@@ -192,31 +285,55 @@ export default function HomeAssessmentTimelineCard({
             "ellipsis",
         }}
       >
-        {date
-          ? formatHomeShortDate(
-              date
-            )
-          : "No date"}
-        {" · "}
-        {getCalendarAssessmentPrimaryClassLabel(
-          assessment,
-          classes
-        )}
+        {classLabel}
       </span>
 
 
       <span
         style={{
+          display:
+            "flex",
+
+          alignItems:
+            "center",
+
+          gap:
+            4,
+
           color:
-            theme.textSecondary,
+            statusColour,
 
           fontSize:
             8,
 
           fontWeight:
             600,
+
+          lineHeight:
+            1.2,
         }}
       >
+        <span
+          aria-hidden="true"
+          style={{
+            width:
+              4,
+
+            height:
+              4,
+
+            flexShrink:
+              0,
+
+            borderRadius:
+              999,
+
+            background:
+              "currentColor",
+          }}
+        />
+
+
         {getCalendarAssessmentStatusLabel(
           assessment
         )}

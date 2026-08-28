@@ -102,7 +102,7 @@ function ForYouRow({
           0,
 
         minHeight:
-          43,
+          45,
 
         padding:
           "6px 8px",
@@ -114,7 +114,7 @@ function ForYouRow({
           "grid",
 
         gridTemplateColumns:
-          "76px minmax(0, 1fr) 14px",
+          "100px minmax(0, 1fr) 14px",
 
         alignItems:
           "center",
@@ -202,9 +202,6 @@ function ForYouRow({
 
         <span
           style={{
-            overflow:
-              "hidden",
-
             color:
               accent,
 
@@ -215,16 +212,13 @@ function ForYouRow({
               750,
 
             letterSpacing:
-              "0.045em",
+              "0.04em",
 
             textTransform:
               "uppercase",
 
             whiteSpace:
               "nowrap",
-
-            textOverflow:
-              "ellipsis",
           }}
         >
           {label}
