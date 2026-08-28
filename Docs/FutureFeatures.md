@@ -353,6 +353,31 @@ Do not launch another repository-wide “Course independence refactor” without
 
 ---
 
+# Application Shell / Planning
+
+## FA-017 — Teacher assessment calendar in the side action area
+
+**Status:** IDEA  
+**Area:** Application Shell / My Assessments / assessment planning
+
+Explore a teacher-facing calendar accessible from the application's side action/Activity Rail area so upcoming and planned assessment dates can be viewed at a glance.
+
+The calendar could potentially show whether an assessment is:
+
+```text
+planned/upcoming
+completed
+ready for print
+```
+
+or equivalent meaningful readiness/status information once the assessment lifecycle/finalisation model is defined.
+
+This idea should build on existing assessment dates and library status rather than creating a second assessment record system.
+
+The exact owner, status semantics and interaction should be designed when implementation begins. This entry preserves the earlier loose idea without establishing source architecture prematurely.
+
+---
+
 # Product / UI Ideas to Capture Later
 
 This section intentionally remains lightweight.
@@ -380,7 +405,3 @@ FA-XXX — Implemented 2026-09-01
 ```
 
 The active future list should remain useful rather than becoming another historical ledger.
-
-
-
-In the side action panel, we could implement a calendar  for teachers so they can see all of the upcoming/planned assessment dates and whether they are completed/ready for print or not. 
