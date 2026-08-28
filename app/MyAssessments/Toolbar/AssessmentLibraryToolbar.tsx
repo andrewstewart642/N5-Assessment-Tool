@@ -11,7 +11,7 @@ import type {
   AssessmentLibrarySortMode,
   AssessmentLibraryStatusFilter,
   AssessmentLibraryViewMode,
-} from "../Library/AssessmentLibraryControls";
+} from "../Library/ViewOptions";
 
 
 type AssessmentLibraryToolbarProps = {

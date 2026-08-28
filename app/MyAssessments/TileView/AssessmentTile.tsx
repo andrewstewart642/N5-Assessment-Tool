@@ -34,7 +34,7 @@ import {
   getAssessmentCoverageLabel,
   getAssessmentStatusLabel,
   getAssessmentTypeLabel,
-} from "../Display/AssessmentDisplayMetadata";
+} from "../Display/LabelsAndDates";
 
 import AssessmentPreviewViewport from "./AssessmentPreviewViewport";
 

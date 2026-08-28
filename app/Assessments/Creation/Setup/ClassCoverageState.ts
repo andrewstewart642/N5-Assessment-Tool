@@ -8,7 +8,7 @@ import {
   getDefaultAssessmentLevelId,
   loadAssessmentClassCoverageBrief,
   type AssessmentLevelId,
-} from "./AssessmentClassCoverageStorage";
+} from "./ClassCoverageStorage";
 
 import { loadAssessmentSetupClasses } from "./ClassLoader";
 

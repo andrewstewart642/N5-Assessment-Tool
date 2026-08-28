@@ -13,7 +13,7 @@ import {
 import {
   getAssessmentPaperProgress,
   getOverallProgressPct,
-} from "../Display/AssessmentProgressDisplay";
+} from "../Display/Progress";
 
 
 export function AssessmentOverallProgressBar({

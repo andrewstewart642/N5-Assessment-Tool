@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 
 import { useSettings } from "@/app/UI/Application/Settings/ApplicationSettings";
 
-import type { AssessmentLevelId } from "./Setup/AssessmentClassCoverageStorage";
+import type { AssessmentLevelId } from "./Setup/ClassCoverageStorage";
 
 import { createAssessmentFromSetup } from "./Setup/CreateAssessment";
 
-import { useAssessmentSetupClassCoverage } from "./Setup/useAssessmentSetupClassCoverage";
+import { useAssessmentSetupClassCoverage } from "./Setup/ClassCoverageState";
 import { useAssessmentSetupConfiguration } from "./Setup/FormState";
 import { useAssessmentSetupTargets } from "./Setup/TargetState";
 

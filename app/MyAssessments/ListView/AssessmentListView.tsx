@@ -33,12 +33,12 @@ import {
   getAssessmentCoverageLabel,
   getAssessmentStatusLabel,
   getAssessmentTypeLabel,
-} from "../Display/AssessmentDisplayMetadata";
+} from "../Display/LabelsAndDates";
 
 import {
   getAssessmentPaperProgress,
   getOverallProgressPct,
-} from "../Display/AssessmentProgressDisplay";
+} from "../Display/Progress";
 
 import AssessmentListPreviewButton from "./AssessmentListPreviewButton";
 

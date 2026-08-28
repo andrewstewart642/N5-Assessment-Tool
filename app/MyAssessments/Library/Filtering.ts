@@ -6,11 +6,11 @@ import {
   getAssessmentCourseLabel,
   getAssessmentCoverageLabel,
   getAssessmentTypeLabel,
-} from "../Display/AssessmentDisplayMetadata";
+} from "../Display/LabelsAndDates";
 
 import type {
   AssessmentLibraryStatusFilter,
-} from "./AssessmentLibraryControls";
+} from "./ViewOptions";
 
 
 function normaliseSearchText(

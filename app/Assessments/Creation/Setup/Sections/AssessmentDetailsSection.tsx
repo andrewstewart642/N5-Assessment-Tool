@@ -4,7 +4,7 @@ import type { SchoolClass } from "@/app/Classes/ClassData";
 import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
 import { UI_TYPO } from "@/app/UI/Application/Typography/Typography";
 
-import type { AssessmentLevelId } from "../AssessmentClassCoverageStorage";
+import type { AssessmentLevelId } from "../ClassCoverageStorage";
 import LevelSelect from "../CourseSelect";
 import TextField from "../Controls/TextField";
 

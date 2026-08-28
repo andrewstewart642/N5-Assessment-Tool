@@ -27,15 +27,15 @@ import {
 
 import {
   useAssessmentCreationFeedback,
-} from "./Feedback/useAssessmentCreationFeedback";
+} from "./Feedback/FeedbackState";
 
 import {
   useAssessmentProgressMetrics,
-} from "./HUDBar/useAssessmentProgressMetrics";
+} from "./HUDBar/ProgressMetrics";
 
 import {
   useAssessmentProgressRows,
-} from "./HUDBar/useAssessmentProgressRows";
+} from "./HUDBar/ProgressRows";
 
 import {
   ASSESSMENT_WORKSPACE_DIVIDER_WIDTH_PX,
@@ -100,7 +100,7 @@ import {
 
 import {
   useAssessmentPaperTargets,
-} from "./Papers/useMarkTargetCalculations";
+} from "./Papers/MarkTargetSummary";
 
 import {
   useAssessmentPaperTargetState,
@@ -150,11 +150,11 @@ import AssessmentSkillsPanel from "./SkillsPanel/AssessmentSkillsPanel";
 
 import {
   useAssessmentSkillsCoverage,
-} from "./SkillsPanel/useAssessmentSkillsCoverage";
+} from "./SkillsPanel/ClassCoverageState";
 
 import {
   useAssessmentSkillsPanelState,
-} from "./SkillsPanel/useAssessmentSkillsPanelState";
+} from "./SkillsPanel/PanelState";
 
 import {
   useAssessmentDatePopover,

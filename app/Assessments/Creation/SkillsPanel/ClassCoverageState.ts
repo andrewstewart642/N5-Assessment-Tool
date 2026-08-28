@@ -17,7 +17,7 @@ import type {
 
 import {
   getAssessmentLevelLabel,
-} from "../Setup/AssessmentClassCoverageStorage";
+} from "../Setup/ClassCoverageStorage";
 
 import {
   buildClassCoverageSummary,

@@ -5,7 +5,7 @@ import type {
 
 import {
   useSkillsTreeState,
-} from "./02-SkillsTree/useSkillsTreeState";
+} from "./02-SkillsTree/TreeState";
 
 import type {
   Paper,
@@ -13,7 +13,7 @@ import type {
   StandardFilter,
 } from "@/app/Assessments/AssessmentTypes";
 
-import { useQuestionTreeRestoration } from "./useQuestionTreeRestoration";
+import { useQuestionTreeRestoration } from "./QuestionTreeRestoration";
 
 type UseAssessmentSkillsPanelStateArgs = {
   activeSkillsData:

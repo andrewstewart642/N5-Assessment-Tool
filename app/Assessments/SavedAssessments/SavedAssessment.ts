@@ -1,6 +1,6 @@
 import type {
   AssessmentLevelId,
-} from "@/app/Assessments/Creation/Setup/AssessmentClassCoverageStorage";
+} from "@/app/Assessments/Creation/Setup/ClassCoverageStorage";
 
 import type {
   AssessmentType,

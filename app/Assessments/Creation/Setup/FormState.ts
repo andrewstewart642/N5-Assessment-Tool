@@ -7,7 +7,7 @@ import {
 } from "@/app/Courses/CourseRegistry";
 import type { CourseAssessmentConfig } from "@/app/Courses/CourseAssessmentConfig";
 
-import type { AssessmentLevelId } from "./AssessmentClassCoverageStorage";
+import type { AssessmentLevelId } from "./ClassCoverageStorage";
 
 import type {
   AssessmentType,

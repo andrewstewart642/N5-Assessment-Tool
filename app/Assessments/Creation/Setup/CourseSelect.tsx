@@ -2,7 +2,7 @@ import type { Theme } from "@/app/UI/Application/Theme/AppTheme";
 import {
   ASSESSMENT_LEVEL_OPTIONS,
   type AssessmentLevelId,
-} from "./AssessmentClassCoverageStorage";
+} from "./ClassCoverageStorage";
 
 type Props = {
   value: AssessmentLevelId | null;

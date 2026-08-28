@@ -13,7 +13,7 @@ import type {
 
 import type {
   AssessmentProgressPanelPaperRow,
-} from "./AssessmentProgressPanel";
+} from "./ProgressPanel";
 
 type AssessmentPaperNumberMap =
   Partial<

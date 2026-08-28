@@ -16,11 +16,11 @@ import type {
   AssessmentQualityNote,
 } from "../Analysis/AssessmentQualityNotes";
 
-import AssessmentCompileButton from "./AssessmentCompileButton";
+import AssessmentCompileButton from "./CompileButton";
 
 import AssessmentProgressPanel, {
   type AssessmentProgressPanelPaperRow,
-} from "./AssessmentProgressPanel";
+} from "./ProgressPanel";
 
 
 export type AssessmentHUDBarProps = {

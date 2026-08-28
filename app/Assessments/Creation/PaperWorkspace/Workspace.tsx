@@ -22,7 +22,7 @@ import type {
   AssessmentSaveStatus,
 } from "../Persistence/SaveStatus";
 
-import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
+import AssessmentHUDBar from "../HUDBar/HUDBar";
 
 import AssessmentTopBar from "../TopBar/TopBar";
 

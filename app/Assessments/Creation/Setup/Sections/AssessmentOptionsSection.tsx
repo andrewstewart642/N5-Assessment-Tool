@@ -13,7 +13,7 @@ import {
   structureIncludesPaper,
 } from "../CoursePaperOptions";
 
-import SetupCard from "../AssessmentSetupCard";
+import SetupCard from "../SetupCard";
 import CheckRow from "../Controls/CheckRow";
 import ChoiceRow from "../Controls/ChoiceRow";
 import NumberField from "../Controls/NumberField";

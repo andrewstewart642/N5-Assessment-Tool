@@ -4,7 +4,7 @@ import type {
 
 import type {
   AssessmentLibrarySortMode,
-} from "./AssessmentLibraryControls";
+} from "./ViewOptions";
 
 
 function parseAssessmentDate(

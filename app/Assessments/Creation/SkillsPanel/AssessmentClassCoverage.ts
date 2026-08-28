@@ -7,7 +7,7 @@ import type { Skill } from "@/app/Assessments/AssessmentTypes";
 import {
   normaliseAssessmentLevelId,
   type AssessmentLevelId,
-} from "../Setup/AssessmentClassCoverageStorage";
+} from "../Setup/ClassCoverageStorage";
 
 export function getCourseIdForLevelId(
   levelId: AssessmentLevelId | null

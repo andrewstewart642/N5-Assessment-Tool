@@ -13,7 +13,7 @@ import {
 import {
   saveAssessmentClassCoverageBrief,
   type AssessmentLevelId,
-} from "./AssessmentClassCoverageStorage";
+} from "./ClassCoverageStorage";
 
 import {
   saveAssessmentSetupBrief,
