@@ -8,7 +8,7 @@ import type {
 
 import type {
   AssessmentEditQuestionDraftByPaper,
-} from "../Questions/AssessmentQuestionDraftTypes";
+} from "../Questions/DraftTypes";
 
 const COMPACT_PREVIEW_SPACING_PX = 24;
 

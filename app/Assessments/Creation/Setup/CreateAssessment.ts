@@ -8,7 +8,7 @@ import {
 
 import {
   saveAssessmentCreationCourseId,
-} from "../Persistence/AssessmentCourseSelectionStorage";
+} from "../Persistence/CourseSelection";
 
 import {
   saveAssessmentClassCoverageBrief,
@@ -20,13 +20,13 @@ import {
   type AssessmentType,
   type BuildPriority,
   type PaperStructure,
-} from "./AssessmentSetupStorage";
+} from "./SavedChoices";
 
 import {
   estimateMarksFromTime,
   getDefaultTargetMarks,
   getIncludedPapers,
-} from "./AssessmentSetupCourseRules";
+} from "./CoursePaperOptions";
 
 type CreateAssessmentFromSetupArgs = {
   courseConfig: CourseAssessmentConfig;

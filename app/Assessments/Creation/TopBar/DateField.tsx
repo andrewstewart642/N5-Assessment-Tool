@@ -12,12 +12,12 @@ import {
   UI_TEXT,
 } from "@/app/UI/Application/Typography/Typography";
 
-import AssessmentTopBarField from "./AssessmentTopBarField";
+import AssessmentTopBarField from "./FieldWithLabel";
 
 import {
   TOP_BAR_CONTROL_HEIGHT,
   TOP_BAR_CONTROL_RADIUS,
-} from "./AssessmentTopBarTokens";
+} from "./Dimensions";
 
 type AssessmentDateFieldProps = {
   theme:

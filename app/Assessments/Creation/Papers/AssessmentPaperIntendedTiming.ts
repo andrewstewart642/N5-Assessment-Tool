@@ -4,7 +4,7 @@ import type {
 
 import type {
   BuildPriority,
-} from "../Setup/AssessmentSetupStorage";
+} from "../Setup/SavedChoices";
 
 import type {
   AssessmentTargetMarksByPaper,

@@ -15,7 +15,7 @@ import {
   LEVEL_OPTIONS,
   type CourseOption,
   type LevelOption,
-} from "../ClassTypes";
+} from "../ClassData";
 
 
 type Props = {

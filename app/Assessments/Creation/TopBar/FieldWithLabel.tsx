@@ -13,7 +13,7 @@ import {
 
 import {
   TOP_BAR_FIELD_GAP,
-} from "./AssessmentTopBarTokens";
+} from "./Dimensions";
 
 type AssessmentTopBarFieldProps = {
   label:

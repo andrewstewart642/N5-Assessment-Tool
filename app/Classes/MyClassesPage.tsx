@@ -16,15 +16,15 @@ import {
 import type {
   CourseOption,
   LevelOption,
-} from "./ClassTypes";
+} from "./ClassData";
 
-import AddClassModal from "./Components/AddClassModal";
-import ClassGrid from "./Components/ClassGrid";
-import ClassesHeader from "./Components/ClassesHeader";
+import AddClassModal from "./MyClasses/AddClassModal";
+import ClassGrid from "./MyClasses/Grid";
+import ClassesHeader from "./MyClasses/PageHeader";
 
 import {
   useClasses,
-} from "./State/useClasses";
+} from "./Records/Collection";
 
 
 export default function MyClassesPage() {

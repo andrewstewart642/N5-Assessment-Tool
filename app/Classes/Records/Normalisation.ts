@@ -13,13 +13,13 @@ import {
   deriveCompletedSkillIdsFromConcepts,
   getCompletedConceptIdsForSkillIds,
   normaliseCompletedConceptIdsForCourse,
-} from "../Coverage/ClassCoverageHelpers";
+} from "../Coverage/SkillsAndProgress";
 
 import type {
   CourseOption,
   LevelOption,
   SchoolClass,
-} from "../ClassTypes";
+} from "../ClassData";
 
 
 export function isCourseOption(

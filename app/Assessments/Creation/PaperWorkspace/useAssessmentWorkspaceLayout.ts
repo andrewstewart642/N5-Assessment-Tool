@@ -8,7 +8,7 @@ import {
 
 import {
   ASSESSMENT_CREATION_STORAGE_KEY_PAIRS,
-} from "../Persistence/AssessmentCreationStorageKeys";
+} from "../Persistence/BrowserStorage";
 
 import {
   ASSESSMENT_WORKSPACE_DEFAULT_HUD_HEIGHT,

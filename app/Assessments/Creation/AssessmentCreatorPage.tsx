@@ -112,39 +112,39 @@ import {
 
 import {
   getAssessmentCreationCourseConfig,
-} from "./Persistence/AssessmentCourseSelectionStorage";
+} from "./Persistence/CourseSelection";
 
 import {
   useAssessmentCreationPersistence,
-} from "./Persistence/useAssessmentCreationPersistence";
+} from "./Persistence/SaveBrowserState";
 
 import {
   useAssessmentCreatorAutoSave,
-} from "./Persistence/useAssessmentCreatorAutoSave";
+} from "./Persistence/AutoSaveAssessment";
 
 import {
   useAssessmentCreatorInitialisation,
-} from "./Persistence/useAssessmentCreatorInitialisation";
+} from "./Persistence/RestoreInitialState";
 
 import {
   useAssessmentCreatorSavedAssessment,
-} from "./Persistence/useAssessmentCreatorSavedAssessment";
+} from "./Persistence/LoadSavedAssessment";
 
 import {
   useAssessmentQuestionControls,
-} from "./Questions/useAssessmentQuestionControls";
+} from "./Questions/SelectionSettings";
 
 import {
   useAssessmentQuestionState,
-} from "./Questions/useAssessmentQuestionState";
+} from "./Questions/WorkingState";
 
 import {
   useAssessmentQuestionWorkflow,
-} from "./Questions/useAssessmentQuestionWorkflow";
+} from "./Questions/Actions";
 
 import {
   useMeasuredQuestionHeights,
-} from "./Questions/Preview/useMeasuredQuestionHeights";
+} from "./Questions/Preview/QuestionHeightTracking";
 
 import AssessmentSkillsPanel from "./SkillsPanel/AssessmentSkillsPanel";
 
@@ -158,11 +158,11 @@ import {
 
 import {
   useAssessmentDatePopover,
-} from "./TopBar/useAssessmentDatePopover";
+} from "./TopBar/DateCalendarBehaviour";
 
 import {
   useAssessmentNameField,
-} from "./TopBar/useAssessmentNameField";
+} from "./TopBar/NameFieldBehaviour";
 
 import AssessmentCreatorStyles from "./AssessmentCreatorStyles";
 

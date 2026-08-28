@@ -15,11 +15,11 @@ import type {
 
 import {
   getAllCoverageSkills,
-} from "../Coverage/ClassCoverageHelpers";
+} from "../Coverage/SkillsAndProgress";
 
 import type {
   SchoolClass,
-} from "../ClassTypes";
+} from "../ClassData";
 
 
 type Props = {

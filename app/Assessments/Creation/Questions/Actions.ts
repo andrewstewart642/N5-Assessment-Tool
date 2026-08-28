@@ -26,15 +26,15 @@ import {
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
-} from "./AssessmentQuestionDraftTypes";
+} from "./DraftTypes";
 
 import {
   useAssessmentDraftWorkflow,
-} from "./useAssessmentDraftWorkflow";
+} from "./DraftActions";
 
 import {
   useAssessmentQuestionDraftGeneration,
-} from "./useAssessmentQuestionDraftGeneration";
+} from "./DraftGeneration";
 
 type PendingJumpDraftRef =
   MutableRefObject<

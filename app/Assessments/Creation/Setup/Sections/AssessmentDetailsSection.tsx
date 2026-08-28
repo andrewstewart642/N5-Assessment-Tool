@@ -1,11 +1,11 @@
-import ClassCoverageSelect from "@/app/Classes/Coverage/ClassCoverageSelect";
-import type { SchoolClass } from "@/app/Classes/ClassTypes";
+import ClassCoverageSelect from "@/app/Classes/Coverage/AssessmentClassSelector";
+import type { SchoolClass } from "@/app/Classes/ClassData";
 
 import type { AppTheme } from "@/app/UI/Application/Theme/AppTheme";
 import { UI_TYPO } from "@/app/UI/Application/Typography/Typography";
 
 import type { AssessmentLevelId } from "../AssessmentClassCoverageStorage";
-import LevelSelect from "../LevelSelect";
+import LevelSelect from "../CourseSelect";
 import TextField from "../Controls/TextField";
 
 type AssessmentDetailsSectionProps = {

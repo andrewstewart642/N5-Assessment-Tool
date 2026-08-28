@@ -4,11 +4,11 @@ import type {
 
 import type {
   AssessmentEditQuestionDraft,
-} from "../../Questions/AssessmentQuestionDraftTypes";
+} from "../../Questions/DraftTypes";
 
 import {
   getAssessmentQuestionSpacingBasePx,
-} from "../../Questions/AssessmentQuestionSpacing";
+} from "../../Questions/Spacing";
 
 import type {
   AssessmentPreviewPage,

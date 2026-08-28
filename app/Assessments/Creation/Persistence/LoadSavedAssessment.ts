@@ -33,7 +33,7 @@ import type {
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
-} from "../Questions/AssessmentQuestionDraftTypes";
+} from "../Questions/DraftTypes";
 
 
 type StateSetter<T> =

@@ -1,7 +1,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import type { SchoolClass } from "@/app/Classes/ClassTypes";
+import type { SchoolClass } from "@/app/Classes/ClassData";
 
 import {
   getAssessmentLevelOption,
@@ -10,7 +10,7 @@ import {
   type AssessmentLevelId,
 } from "./AssessmentClassCoverageStorage";
 
-import { loadAssessmentSetupClasses } from "./AssessmentSetupClassLoader";
+import { loadAssessmentSetupClasses } from "./ClassLoader";
 
 export function useAssessmentSetupClassCoverage() {
   const [selectedLevelId, setSelectedLevelId] =

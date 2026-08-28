@@ -12,12 +12,12 @@ import type { AssessmentLevelId } from "./AssessmentClassCoverageStorage";
 import type {
   AssessmentType,
   PaperStructure,
-} from "./AssessmentSetupStorage";
+} from "./SavedChoices";
 
 import {
   isSetupAssessmentType,
   isSetupPaperStructure,
-} from "./AssessmentSetupCourseRules";
+} from "./CoursePaperOptions";
 
 function todayIsoDate(): string {
   return new Date().toISOString().slice(0, 10);

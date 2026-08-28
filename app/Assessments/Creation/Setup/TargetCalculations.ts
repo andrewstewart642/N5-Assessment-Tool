@@ -3,7 +3,7 @@ import type { CourseAssessmentConfig } from "@/app/Courses/CourseAssessmentConfi
 import type {
   BuildPriority,
   PaperStructure,
-} from "./AssessmentSetupStorage";
+} from "./SavedChoices";
 
 import {
   estimateMarksFromTime,
@@ -11,7 +11,7 @@ import {
   getIncludedPapers,
   getPaperLabel,
   structureIncludesPaper,
-} from "./AssessmentSetupCourseRules";
+} from "./CoursePaperOptions";
 
 export function parsePositiveInteger(value: string): number | null {
   const number = Number(value);

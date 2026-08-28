@@ -11,7 +11,7 @@ import type { Paper } from "@/app/Assessments/AssessmentTypes";
 import type {
   AssessmentType,
   PaperStructure,
-} from "./AssessmentSetupStorage";
+} from "./SavedChoices";
 
 export function isSetupAssessmentType(
   value: AssessmentType,

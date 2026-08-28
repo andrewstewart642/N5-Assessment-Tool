@@ -6,7 +6,7 @@ import type {
   AssessmentType,
   BuildPriority,
   PaperStructure,
-} from "@/app/Assessments/Creation/Setup/AssessmentSetupStorage";
+} from "@/app/Assessments/Creation/Setup/SavedChoices";
 
 import type {
   AssessmentPaperBooleanMap,
@@ -20,7 +20,7 @@ import type {
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
-} from "@/app/Assessments/Creation/Questions/AssessmentQuestionDraftTypes";
+} from "@/app/Assessments/Creation/Questions/DraftTypes";
 
 import type {
   CourseId,

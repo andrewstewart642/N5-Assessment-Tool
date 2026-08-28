@@ -8,7 +8,7 @@ import type {
 
 import type {
   SchoolClass,
-} from "@/app/Classes/ClassTypes";
+} from "@/app/Classes/ClassData";
 
 import type {
   CourseId,

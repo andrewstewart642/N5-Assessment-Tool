@@ -20,21 +20,21 @@ import {
   useSettings,
 } from "@/app/UI/Application/Settings/ApplicationSettings";
 
-import ClassCoverageDetails from "./Coverage/ClassCoverageDetails";
+import ClassCoverageDetails from "./Coverage/SelectionDetails";
 
 import type {
   ClassCoverageSelection,
-} from "./Coverage/ClassCoverageSelection";
+} from "./Coverage/SelectedItem";
 
-import ClassCoverageTree from "./Coverage/ClassCoverageTree";
+import ClassCoverageTree from "./Coverage/SkillsTree";
 
 import {
   getCourseCoverage,
-} from "./Coverage/ClassCoverageHelpers";
+} from "./Coverage/SkillsAndProgress";
 
 import {
   useClasses,
-} from "./State/useClasses";
+} from "./Records/Collection";
 
 
 type Props = {

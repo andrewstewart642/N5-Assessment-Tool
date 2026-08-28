@@ -13,7 +13,7 @@ import type {
 
 import type {
   ClassCoverageSelection,
-} from "./ClassCoverageSelection";
+} from "./SelectedItem";
 
 import {
   getCategoryAccent,
@@ -23,7 +23,7 @@ import {
   getSkillCoverage,
   getSkillTitle,
   getTrackableConcepts,
-} from "./ClassCoverageHelpers";
+} from "./SkillsAndProgress";
 
 
 type Props = {

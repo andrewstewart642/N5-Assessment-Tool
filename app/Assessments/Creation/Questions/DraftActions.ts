@@ -13,12 +13,12 @@ import type {
 
 import {
   applyAssessmentQuestionSpacingBase,
-} from "./AssessmentQuestionSpacing";
+} from "./Spacing";
 
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
-} from "./AssessmentQuestionDraftTypes";
+} from "./DraftTypes";
 
 type PendingJumpDraftRef =
   MutableRefObject<

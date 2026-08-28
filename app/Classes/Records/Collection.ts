@@ -9,23 +9,23 @@ import {
   getAllCoverageSkills,
   getTrackableConceptIds,
   normaliseCompletedConceptIdsForCourse,
-} from "../Coverage/ClassCoverageHelpers";
+} from "../Coverage/SkillsAndProgress";
 
 import type {
   CourseOption,
   LevelOption,
   SchoolClass,
-} from "../ClassTypes";
+} from "../ClassData";
 
 import {
   buildNewSchoolClass,
   normaliseClass,
-} from "./ClassNormalisation";
+} from "./Normalisation";
 
 import {
   readMyClassesStorageValue,
   writeMyClassesStorageValue,
-} from "./ClassStorage";
+} from "./BrowserStorage";
 
 
 function makeClassId():

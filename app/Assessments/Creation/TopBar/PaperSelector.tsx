@@ -23,7 +23,7 @@ import {
   TOP_BAR_CONTROL_HEIGHT,
   TOP_BAR_CONTROL_RADIUS,
   TOP_BAR_SELECTED_RADIUS,
-} from "./AssessmentTopBarTokens";
+} from "./Dimensions";
 
 type PaperViewingToggleProps = {
   value:

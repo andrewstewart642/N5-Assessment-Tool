@@ -12,7 +12,7 @@ import type {
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
-} from "../AssessmentQuestionDraftTypes";
+} from "../DraftTypes";
 
 type UseMeasuredQuestionHeightsArgs = {
   questions:

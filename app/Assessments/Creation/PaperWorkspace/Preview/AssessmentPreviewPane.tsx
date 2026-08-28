@@ -19,7 +19,7 @@ import {
 
 import type {
   AssessmentEditQuestionDraft,
-} from "../../Questions/AssessmentQuestionDraftTypes";
+} from "../../Questions/DraftTypes";
 
 import type {
   AssessmentPreviewPage,

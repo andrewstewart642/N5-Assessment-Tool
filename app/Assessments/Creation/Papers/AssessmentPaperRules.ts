@@ -23,7 +23,7 @@ import {
 
 import {
   getAssessmentCreationCourseConfig,
-} from "../Persistence/AssessmentCourseSelectionStorage";
+} from "../Persistence/CourseSelection";
 
 export function getAssessmentPapers(
   courseConfig:

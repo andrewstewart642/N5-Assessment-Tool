@@ -16,7 +16,7 @@ import {
 
 import {
   useClasses,
-} from "@/app/Classes/State/useClasses";
+} from "@/app/Classes/Records/Collection";
 
 import type {
   CourseId,

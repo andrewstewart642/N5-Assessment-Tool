@@ -6,7 +6,7 @@ import type {
 
 import type {
   AssessmentSaveStatus,
-} from "../../Persistence/AssessmentSaveStatus";
+} from "../../Persistence/SaveStatus";
 
 type AssessmentSaveStatusPillProps = {
   theme:

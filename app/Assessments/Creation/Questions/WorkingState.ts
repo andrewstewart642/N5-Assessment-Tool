@@ -18,12 +18,12 @@ import type {
 import {
   buildEmptyAssessmentEditDraftsByPaper,
   buildEmptyAssessmentQuestionDraftsByPaper,
-} from "./AssessmentQuestionDrafts";
+} from "./DraftDefaults";
 
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
-} from "./AssessmentQuestionDraftTypes";
+} from "./DraftTypes";
 
 type UseAssessmentQuestionStateArgs = {
   courseConfig:

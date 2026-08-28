@@ -1,8 +1,8 @@
-import ClassCoverageSelect from "@/app/Classes/Coverage/ClassCoverageSelect";
+import ClassCoverageSelect from "@/app/Classes/Coverage/AssessmentClassSelector";
 
 import type {
   SchoolClass,
-} from "@/app/Classes/ClassTypes";
+} from "@/app/Classes/ClassData";
 
 import type {
   Paper,
@@ -12,18 +12,18 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
-import AssessmentDateField from "./AssessmentDateField";
+import AssessmentDateField from "./DateField";
 
-import AssessmentMetaField from "./AssessmentMetaField";
+import AssessmentMetaField from "./NameField";
 
-import AssessmentTopBarField from "./AssessmentTopBarField";
+import AssessmentTopBarField from "./FieldWithLabel";
 
 import {
   TOP_BAR_COLUMN_GAP,
   TOP_BAR_HORIZONTAL_PADDING,
-} from "./AssessmentTopBarTokens";
+} from "./Dimensions";
 
-import PaperViewingToggle from "./PaperViewingToggle";
+import PaperViewingToggle from "./PaperSelector";
 
 type AssessmentTopBarProps = {
   theme:

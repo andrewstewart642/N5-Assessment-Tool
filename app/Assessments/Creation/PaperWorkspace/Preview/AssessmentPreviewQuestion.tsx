@@ -1,10 +1,10 @@
-import QuestionMeasureBox from "../../Questions/Preview/QuestionMeasureBox";
+import QuestionMeasureBox from "../../Questions/Preview/QuestionHeightMeasurement";
 
-import QuestionDraftPreview from "../../Questions/Preview/QuestionDraftPreview";
+import QuestionDraftPreview from "../../Questions/Preview/DraftQuestion";
 
 import QuestionLockedPreview from "@/app/Assessments/Questions/Preview/QuestionLockedPreview";
 
-import WorkedAnswerPreview from "../../Questions/Preview/WorkedAnswerPreview";
+import WorkedAnswerPreview from "../../Questions/Preview/WorkedAnswer";
 
 import type {
   Question,
@@ -16,11 +16,11 @@ import {
 
 import type {
   AssessmentEditQuestionDraft,
-} from "../../Questions/AssessmentQuestionDraftTypes";
+} from "../../Questions/DraftTypes";
 
 import {
   getAssessmentQuestionSpacingBasePx,
-} from "../../Questions/AssessmentQuestionSpacing";
+} from "../../Questions/Spacing";
 
 import type {
   AssessmentPreviewRenderById,

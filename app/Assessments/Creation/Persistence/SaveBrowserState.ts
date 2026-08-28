@@ -10,7 +10,7 @@ import type {
 import {
   ASSESSMENT_CREATION_STORAGE_KEY_PAIRS,
   writeAssessmentCreationStorageValue,
-} from "./AssessmentCreationStorageKeys";
+} from "./BrowserStorage";
 
 type UseAssessmentCreationPersistenceArgs = {
   leftPaneRatio:

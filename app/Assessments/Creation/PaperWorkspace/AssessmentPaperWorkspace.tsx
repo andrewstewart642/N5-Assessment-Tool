@@ -20,15 +20,15 @@ import {
 
 import type {
   AssessmentSaveStatus,
-} from "../Persistence/AssessmentSaveStatus";
+} from "../Persistence/SaveStatus";
 
 import AssessmentHUDBar from "../HUDBar/AssessmentHUDBar";
 
-import AssessmentTopBar from "../TopBar/AssessmentTopBar";
+import AssessmentTopBar from "../TopBar/TopBar";
 
 import {
   TOP_BAR_HEIGHT,
-} from "../TopBar/AssessmentTopBarTokens";
+} from "../TopBar/Dimensions";
 
 import type {
   AssessmentPreviewViewMode,

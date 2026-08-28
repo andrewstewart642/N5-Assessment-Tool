@@ -8,7 +8,7 @@ import {
   type SetStateAction,
 } from "react";
 
-import type { SchoolClass } from "@/app/Classes/ClassTypes";
+import type { SchoolClass } from "@/app/Classes/ClassData";
 import type { SavedAssessment } from "@/app/Assessments/SavedAssessments/SavedAssessment";
 
 import type {

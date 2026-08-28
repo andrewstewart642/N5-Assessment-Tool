@@ -10,11 +10,11 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
-import ClassCoverageQuestionExamples from "./ClassCoverageQuestionExamples";
+import ClassCoverageQuestionExamples from "./QuestionExamples";
 
 import type {
   ClassCoverageSelection,
-} from "./ClassCoverageSelection";
+} from "./SelectedItem";
 
 import {
   getCoverageConceptById,
@@ -23,7 +23,7 @@ import {
   getSkillCoverage,
   getSkillTitle,
   getTrackableConcepts,
-} from "./ClassCoverageHelpers";
+} from "./SkillsAndProgress";
 
 
 type Props = {

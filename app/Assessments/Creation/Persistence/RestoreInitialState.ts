@@ -33,16 +33,16 @@ import {
 
 import {
   getAssessmentQuestionSpacingBasePx,
-} from "../Questions/AssessmentQuestionSpacing";
+} from "../Questions/Spacing";
 
 import {
   loadAssessmentSetupBrief,
-} from "../Setup/AssessmentSetupStorage";
+} from "../Setup/SavedChoices";
 
 import {
   ASSESSMENT_CREATION_STORAGE_KEY_PAIRS,
   readAssessmentCreationStorageValue,
-} from "./AssessmentCreationStorageKeys";
+} from "./BrowserStorage";
 
 type StringSetter =
   Dispatch<

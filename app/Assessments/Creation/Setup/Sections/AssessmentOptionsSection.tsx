@@ -6,14 +6,14 @@ import type {
   AssessmentType,
   BuildPriority,
   PaperStructure,
-} from "../AssessmentSetupStorage";
+} from "../SavedChoices";
 
 import {
   getPaperLabel,
   structureIncludesPaper,
-} from "../AssessmentSetupCourseRules";
+} from "../CoursePaperOptions";
 
-import SetupCard from "../SetupCard";
+import SetupCard from "../AssessmentSetupCard";
 import CheckRow from "../Controls/CheckRow";
 import ChoiceRow from "../Controls/ChoiceRow";
 import NumberField from "../Controls/NumberField";

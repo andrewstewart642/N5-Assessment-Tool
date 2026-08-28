@@ -16,10 +16,10 @@ import {
   COURSE_OPTIONS,
   type CourseOption,
   type SchoolClass,
-} from "../ClassTypes";
+} from "../ClassData";
 
-import ClassTile from "./ClassTile";
-import CourseFamilySettingsControl from "./CourseFamilySettingsControl";
+import ClassTile from "./Tile";
+import CourseFamilySettingsControl from "./CourseColourSettings";
 
 
 type Props = {

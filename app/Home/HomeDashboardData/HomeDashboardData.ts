@@ -4,11 +4,11 @@ import type {
 
 import type {
   SchoolClass,
-} from "@/app/Classes/ClassTypes";
+} from "@/app/Classes/ClassData";
 
 import {
   getCourseCoverage,
-} from "@/app/Classes/Coverage/ClassCoverageHelpers";
+} from "@/app/Classes/Coverage/SkillsAndProgress";
 
 import {
   getCourseCatalogEntry,

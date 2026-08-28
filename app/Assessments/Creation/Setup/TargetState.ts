@@ -6,19 +6,19 @@ import type { CourseAssessmentConfig } from "@/app/Courses/CourseAssessmentConfi
 import type {
   BuildPriority,
   PaperStructure,
-} from "./AssessmentSetupStorage";
+} from "./SavedChoices";
 
 import {
   getDefaultTargetMarksText,
   getDefaultTargetTimeText,
   structureIncludesPaper,
-} from "./AssessmentSetupCourseRules";
+} from "./CoursePaperOptions";
 
 import {
   areAssessmentTargetsValid,
   buildAssessmentTargetSummary,
   parsePositiveInteger,
-} from "./AssessmentSetupTargetCalculations";
+} from "./TargetCalculations";
 
 type UseAssessmentSetupTargetsArgs = {
   paperStructure: PaperStructure | null;

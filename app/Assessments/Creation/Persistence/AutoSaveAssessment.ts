@@ -31,11 +31,11 @@ import type {
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
-} from "../Questions/AssessmentQuestionDraftTypes";
+} from "../Questions/DraftTypes";
 
 import type {
   AssessmentSaveStatus,
-} from "./AssessmentSaveStatus";
+} from "./SaveStatus";
 
 
 type UseAssessmentCreatorAutoSaveArgs = {

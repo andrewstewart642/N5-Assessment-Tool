@@ -8,7 +8,7 @@ import type {
 
 import type {
   AssessmentEditQuestionDraft,
-} from "../../Questions/AssessmentQuestionDraftTypes";
+} from "../../Questions/DraftTypes";
 
 import {
   buildAssessmentPreviewPages,
