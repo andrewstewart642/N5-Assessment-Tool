@@ -13,10 +13,42 @@ export const N5_MATHS_2014_P2_Q1 = {
 ], printedPageLabels: [
   "Page 3"
 ], continuesAcrossPages: false, answerSpace: {
-  "category": "LARGE",
-  "estimatedWritingLines": 11,
+  "category": "MEDIUM",
+  "estimatedWritingLines": 5,
   "responseSurfaceVisualIds": [],
   "separateFinalAnswerAreaPresent": false,
+  "measurementMethod": "PDF_RENDER",
+  "sourceMeasurements": [
+    {
+      "id": "Q1_SPACE_MAIN",
+      "regionType": "WRITTEN_WORKING",
+      "questionPartIds": [
+        "Q1_MAIN"
+      ],
+      "pdfPageNumber": 19,
+      "printedPageLabel": "Page 3",
+      "measurementMethod": "PDF_RENDER",
+      "renderDpi": 300,
+      "pageWidthPx": 2481,
+      "pageHeightPx": 3508,
+      "topPx": 577,
+      "bottomPx": 1355,
+      "leftPx": null,
+      "rightPx": null,
+      "heightPx": 778,
+      "widthPx": null,
+      "topPt": 138.48,
+      "bottomPt": 325.2,
+      "leftPt": null,
+      "rightPt": null,
+      "heightPt": 186.72,
+      "widthPt": null,
+      "heightMm": 65.87,
+      "widthMm": null,
+      "boundaryConvention": "Bottom of the final nearest-ten instruction to the top of the [Turn over] marker.",
+      "notes": null
+    }
+  ],
   "notes": "A large working area follows the compound-decrease prompt."
 }, sourceEvidence: [evidence] },
 
@@ -42,7 +74,10 @@ export const N5_MATHS_2014_P2_Q1 = {
     ],
     "dependsOnPartIds": [],
     "sharedInformationIds": [],
-    "visualElementIds": []
+    "visualElementIds": [],
+    "standardProfile": "C",
+    "thinkingProfile": "OPERATIONAL",
+    "calculatorBurden": "CALCULATOR_NATURAL"
   }
 ], dependencyType: "INDEPENDENT", sharedStimulus: false, sharedVisuals: false, sharedGivenData: false, requiredResultProvided: false },
   curriculum: {
@@ -81,7 +116,7 @@ export const N5_MATHS_2014_P2_Q1 = {
 },
 
   // ============================================================================
-  // SECTION 6 — MATHEMATICAL STRUCTURE / INFORMATION
+  // SECTION 6 — MATHEMATICAL STRUCTURE / INFORMATION / DEMAND
   // ============================================================================
   mathematics: {
   "primaryGoal": "Apply repeated percentage decrease for three annual periods and round the resulting population to the nearest ten.",
@@ -209,7 +244,23 @@ export const N5_MATHS_2014_P2_Q1 = {
   ],
   "nonCalculatorFriendly": false,
   "exactAndApproximateMixed": true,
-  "magnitudeNotes": null
+  "magnitudeNotes": null,
+  "simplificationVisibility": "NOT_APPLICABLE",
+  "expectedFinalValueForm": "INTEGER",
+  "intermediateValueSize": "MEDIUM",
+  "finalValueSize": "MEDIUM",
+  "dominantInputFormat": "INTEGER",
+  "dominantOutputFormat": "INTEGER"
+},
+  calculator: {
+  "status": "CALCULATOR_ALLOWED",
+  "burden": "CALCULATOR_NATURAL",
+  "requiredFunctions": [
+    "powers"
+  ],
+  "modeSensitive": false,
+  "modeRequirements": [],
+  "notes": "The repeated decimal multiplier is naturally evaluated with a calculator, although the mathematical structure is not calculator-specific."
 },
   parameterDesign: {
   "deliberatelyConstructedValues": true,
@@ -293,7 +344,37 @@ export const N5_MATHS_2014_P2_Q1 = {
   "bulletStructureUsed": false,
   "naturalLanguageInterpretationRequired": true,
   "promptSummary": "A school population is forecast to decrease by a fixed percentage each year; calculate the expected value after three years and round to the nearest ten.",
-  "styleNotes": null
+  "styleNotes": null,
+  "promptStructure": {
+    "sentenceCount": 4,
+    "promptWordCount": 39,
+    "introductionStyle": "CURRENT_COUNT_INTRODUCED_IN_NAMED_INSTITUTION_CONTEXT",
+    "relationshipStatementStyle": "SEPARATE_FORECAST_SENTENCE_STATING_ANNUAL_PERCENTAGE_DECREASE",
+    "commandStyle": "QUESTION_FORM_FUTURE_VALUE_REQUEST_WITH_SEPARATE_ROUNDING_INSTRUCTION",
+    "temporalStructure": "YEAR_ON_YEAR",
+    "informationOrder": [
+      "CURRENT_COUNT",
+      "CONTEXT",
+      "ANNUAL_DECREASE",
+      "PERIOD_COUNT",
+      "FUTURE_VALUE_TARGET",
+      "ROUNDING_INSTRUCTION"
+    ],
+    "normalisedPromptStructure": [
+      "Introduce the current population count in context.",
+      "State a repeated annual percentage decrease.",
+      "Ask for the quantity after a specified number of years.",
+      "State a separate final rounding requirement."
+    ],
+    "usesPronounReference": true,
+    "lexicalFeatureTags": [
+      "forecast language",
+      "annual change",
+      "count context",
+      "explicit rounding"
+    ],
+    "generatorVariationNotes": "Vary institution/population context, initial value, decrease rate, period count and rounding target while preserving compound rather than fixed-amount change."
+  }
 },
 
   // ============================================================================
@@ -318,7 +399,25 @@ export const N5_MATHS_2014_P2_Q1 = {
   "periods": 3,
   "originalValueKnown": true,
   "finalValueKnown": false,
-  "reverseCalculationRequired": false
+  "reverseCalculationRequired": false,
+  "expressionStyles": [
+    "ANNUAL_CHANGE"
+  ],
+  "knownValueRoles": [
+    "INITIAL_VALUE"
+  ],
+  "requestedValueRole": "FINAL_VALUE",
+  "workingStepCount": 1,
+  "inverseCalculationProducesExactResult": false,
+  "compoundRateStructure": "FIXED_RATE",
+  "compoundStages": [
+    {
+      "percentageValue": 15,
+      "multiplier": 0.85,
+      "periods": 3
+    }
+  ],
+  "totalPeriods": 3
 }, [evidence], "CATALOGUE_CLASSIFICATION", "HIGH", null),
       powersSurdsScientific: notApplicable(),
       algebra: notApplicable(),
