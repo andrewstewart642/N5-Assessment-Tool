@@ -43,6 +43,8 @@ Docs/FutureFeatures.md
 
 Add an entry when a future developer would materially benefit from knowing that a capability, workflow or technical foundation changed.
 
+Historical entries may name files/paths that were correct when the entry was written. When a later structural/naming pass changes those paths, preserve the historical statement and add the current successor path where useful rather than rewriting the past.
+
 ---
 
 ## 2. Entry Style
@@ -284,10 +286,16 @@ The Saved indicator also uses a subtle periodic heartbeat without simulating fak
 
 The Creator Compile action was redesigned as a compact workbench control at the lower-right of the HUD region.
 
-Primary component:
+Primary component at the time of implementation:
 
 ```text
 app/Assessments/Creation/HUDBar/AssessmentCompileButton.tsx
+```
+
+Current filename after the 28 August responsibility-first naming pass:
+
+```text
+app/Assessments/Creation/HUDBar/CompileButton.tsx
 ```
 
 The current button uses the selected-control blue family, compact height/radius and a small right arrow.
@@ -323,6 +331,12 @@ Preview Tray
 ```
 
 This interaction is distinct from a generic Drawer or Popover.
+
+The current implementation path after the 28 August naming pass is:
+
+```text
+app/Assessments/Creation/PaperWorkspace/Preview/Tray/
+```
 
 ---
 
@@ -637,6 +651,14 @@ Pinned assessments retain priority within sorting.
 
 Tile/List preference is stored locally so the library remembers the user's chosen presentation.
 
+Current responsibility-first library modules after the 28 August naming pass include:
+
+```text
+app/MyAssessments/Library/ViewOptions.ts
+app/MyAssessments/Library/Filtering.ts
+app/MyAssessments/Library/Sorting.ts
+```
+
 ---
 
 # 27 August 2026 — My Assessments List View
@@ -716,13 +738,111 @@ The documentation reset intentionally preserved useful Architecture V2 rules/his
 
 ---
 
-# Current Pause Point — 27 August 2026
+# 28 August 2026 — Repository Naming and Discoverability Overhaul
 
-The current My Assessments redesign is intentionally paused.
+**Status:** COMPLETE
 
-The page is working well enough to serve as the current product baseline in both Tile and List modes.
+After Architecture V2 ownership was established, the repository received a dedicated file/folder naming pass focused on day-to-day discoverability rather than another architectural migration.
 
-Further My Assessments work should be driven by a real product need rather than polishing the same page indefinitely.
+The governing rule became:
+
+> **Folder = context. Filename = responsibility.**
+
+The objective was that somebody who did not build the project — including a non-coder familiar with the product — should be able to browse a folder and make a sensible guess about what each file does.
+
+The pass deliberately:
+
+- removed `use...` from filenames where it only exposed the implementation detail that a file exports a React hook;
+- retained React `use...` naming for the exported hook functions themselves;
+- removed repeated parent-folder prefixes where the folder already supplied the context;
+- replaced vague implementation-led names with responsibility-led names;
+- avoided creating generic `Helpers`, `Utils`, `Common`, `Shared` or `Misc` owners;
+- retained contextual wording where removing it would make a filename ambiguous;
+- retained meaningful ordered folders where the order itself communicates product structure;
+- preserved public routes, localStorage keys and persisted compatibility fields.
+
+The intentional ordered SkillsPanel folders remain:
+
+```text
+01-SkillsFilters/
+02-SkillsTree/
+```
+
+because their Explorer order mirrors the actual webpage flow.
+
+Major areas touched included:
+
+```text
+app/Assessments/Creation/Setup/
+app/Assessments/Creation/Persistence/
+app/Assessments/Creation/Questions/
+app/Assessments/Creation/TopBar/
+app/Assessments/Creation/HUDBar/
+app/Assessments/Creation/Papers/
+app/Assessments/Creation/PaperWorkspace/
+app/Assessments/Creation/SkillsPanel/
+app/Assessments/Creation/Feedback/
+app/Classes/
+app/MyAssessments/Display/
+app/MyAssessments/Library/
+```
+
+Representative current names include:
+
+```text
+Persistence/AutoSaveAssessment.ts
+Persistence/RestoreInitialState.ts
+Questions/DraftGeneration.ts
+TopBar/PaperSelector.tsx
+Papers/AutomaticEndTimes.ts
+PaperWorkspace/Preview/ZoomAndPageTracking.ts
+Classes/Records/Normalisation.ts
+MyAssessments/Library/Filtering.ts
+```
+
+The pass was behaviour-preserving and was repeatedly verified with TypeScript, ESLint and Git whitespace checks. Import-path issues caused by file moves were repaired without renaming exported hook symbols.
+
+The responsibility-first naming rule is now locked in `Docs/LockedDecisions.md` and documented in `AGENTS.md`, `Architecture.md`, `RepositoryMap.md` and `ChatGPTWorkflow.md`.
+
+---
+
+# 28 August 2026 — Documentation Reconciliation After Naming Overhaul
+
+**Status:** IMPLEMENTED
+
+The repository documentation was reconciled after the naming/discoverability pass.
+
+The reconciliation adopted an information-preserving rule:
+
+```text
+historical truth
+→ preserve
+
+current truth
+→ update
+
+new rule / decision
+→ add
+
+obsolete contradictory instruction
+→ explicitly supersede or replace
+```
+
+Current-state documents were updated to reflect the real post-rename tree, including `app/Home/`, current Classes ownership (`MyClasses/`, `Coverage/`, `Records/`), responsibility-first Assessment Creation filenames and current My Assessments Display/Library names.
+
+Historical migration paths remain intact where they accurately describe earlier repository states.
+
+---
+
+# Current Pause Point — 28 August 2026
+
+The repository-wide file-renaming/discoverability phase is complete.
+
+Further filename changes should now be driven by a real discoverability or responsibility problem rather than continuing to polish already-serviceable names indefinitely.
+
+Feature development and targeted maintenance remain the normal development mode.
+
+The My Assessments redesign also remains intentionally paused at its current working baseline unless a real product need justifies further refinement.
 
 Future ideas, including archive/year organisation, belong in:
 
