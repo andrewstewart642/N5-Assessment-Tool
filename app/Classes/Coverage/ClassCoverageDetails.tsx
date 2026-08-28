@@ -3,19 +3,20 @@ import {
 } from "react";
 
 import type {
+  CourseId,
+} from "@/app/Courses/CourseTypes";
+
+import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
-import type {
-  CourseId,
-} from "@/app/Courses/CourseTypes";
+import ClassCoverageQuestionExamples from "./ClassCoverageQuestionExamples";
 
 import type {
   ClassCoverageSelection,
 } from "./ClassCoverageSelection";
 
 import {
-  getConceptBodyLines,
   getCoverageConceptById,
   getCoverageSkillById,
   getSkillCode,
@@ -115,6 +116,106 @@ function ProgressBar({
 }
 
 
+function CoverageStatus({
+  covered,
+  theme,
+  courseAccent,
+}: {
+  covered:
+    boolean;
+
+  theme:
+    AppTheme;
+
+  courseAccent:
+    string;
+}) {
+  return (
+    <span
+      style={{
+        height:
+          22,
+
+        padding:
+          "0 7px",
+
+        display:
+          "inline-flex",
+
+        alignItems:
+          "center",
+
+        gap:
+          5,
+
+        borderWidth:
+          1,
+
+        borderStyle:
+          "solid",
+
+        borderColor:
+          covered
+            ? `color-mix(
+                in srgb,
+                ${courseAccent} 48%,
+                ${theme.borderStandard}
+              )`
+            : theme.borderStandard,
+
+        borderRadius:
+          4,
+
+        background:
+          covered
+            ? `color-mix(
+                in srgb,
+                ${courseAccent} 11%,
+                ${theme.bgSection}
+              )`
+            : theme.bgSection,
+
+        color:
+          covered
+            ? courseAccent
+            : theme.textMuted,
+
+        fontSize:
+          9.5,
+
+        fontWeight:
+          650,
+
+        whiteSpace:
+          "nowrap",
+      }}
+    >
+      <span
+        style={{
+          width:
+            5,
+
+          height:
+            5,
+
+          borderRadius:
+            999,
+
+          background:
+            covered
+              ? courseAccent
+              : theme.textMuted,
+        }}
+      />
+
+      {covered
+        ? "Covered"
+        : "Not covered"}
+    </span>
+  );
+}
+
+
 export default function ClassCoverageDetails({
   courseId,
   selection,
@@ -175,9 +276,6 @@ export default function ClassCoverageDetails({
 
           boxSizing:
             "border-box",
-
-          overflow:
-            "hidden",
 
           display:
             "grid",
@@ -295,7 +393,7 @@ export default function ClassCoverageDetails({
         <div
           style={{
             maxWidth:
-              310,
+              330,
 
             color:
               theme.textMuted,
@@ -307,7 +405,7 @@ export default function ClassCoverageDetails({
               1.45,
           }}
         >
-          Select a skill or individual subskill to inspect what pupils need to be able to do.
+          Select a skill or individual subskill to inspect the specification and real generated question range.
         </div>
       </aside>
     );
@@ -347,7 +445,7 @@ export default function ClassCoverageDetails({
 
 
   /**
-   * FOCUSED SUBSKILL VIEW
+   * Individual subskill inspector.
    */
   if (
     selection.kind ===
@@ -366,26 +464,11 @@ export default function ClassCoverageDetails({
       );
 
 
-    const bodyLines =
-      getConceptBodyLines(
-        concept
-      ).filter(
-        (
-          line
-        ) =>
-          line.trim() !==
-          concept.label.trim()
-      );
-
-
     return (
       <aside
         style={{
           minWidth:
             0,
-
-          minHeight:
-            330,
 
           padding:
             14,
@@ -411,7 +494,7 @@ export default function ClassCoverageDetails({
           borderColor:
             `color-mix(
               in srgb,
-              ${courseAccent} 24%,
+              ${courseAccent} 28%,
               ${theme.borderStandard}
             )`,
 
@@ -459,12 +542,6 @@ export default function ClassCoverageDetails({
 
             borderWidth:
               0,
-
-            borderStyle:
-              "solid",
-
-            borderColor:
-              "transparent",
 
             background:
               "transparent",
@@ -547,87 +624,17 @@ export default function ClassCoverageDetails({
             </span>
 
 
-            <span
-              style={{
-                height:
-                  22,
-
-                padding:
-                  "0 7px",
-
-                display:
-                  "inline-flex",
-
-                alignItems:
-                  "center",
-
-                gap:
-                  5,
-
-                borderWidth:
-                  1,
-
-                borderStyle:
-                  "solid",
-
-                borderColor:
-                  covered
-                    ? `color-mix(
-                        in srgb,
-                        ${courseAccent} 48%,
-                        ${theme.borderStandard}
-                      )`
-                    : theme.borderStandard,
-
-                borderRadius:
-                  4,
-
-                background:
-                  covered
-                    ? `color-mix(
-                        in srgb,
-                        ${courseAccent} 11%,
-                        ${theme.bgSection}
-                      )`
-                    : theme.bgSection,
-
-                color:
-                  covered
-                    ? courseAccent
-                    : theme.textMuted,
-
-                fontSize:
-                  9.5,
-
-                fontWeight:
-                  650,
-
-                whiteSpace:
-                  "nowrap",
-              }}
-            >
-              <span
-                style={{
-                  width:
-                    5,
-
-                  height:
-                    5,
-
-                  borderRadius:
-                    999,
-
-                  background:
-                    covered
-                      ? courseAccent
-                      : theme.textMuted,
-                }}
-              />
-
-              {covered
-                ? "Covered"
-                : "Not covered"}
-            </span>
+            <CoverageStatus
+              covered={
+                covered
+              }
+              theme={
+                theme
+              }
+              courseAccent={
+                courseAccent
+              }
+            />
           </div>
 
 
@@ -637,7 +644,7 @@ export default function ClassCoverageDetails({
                 "flex",
 
               alignItems:
-                "baseline",
+                "center",
 
               gap:
                 8,
@@ -748,89 +755,43 @@ export default function ClassCoverageDetails({
         </div>
 
 
+        <ClassCoverageQuestionExamples
+          courseId={
+            courseId
+          }
+          skill={
+            skill
+          }
+          concept={
+            concept
+          }
+          theme={
+            theme
+          }
+          courseAccent={
+            courseAccent
+          }
+          displayMode="FULL_RANGE"
+          heading="Representative question range"
+        />
+
+
         <div
           style={{
-            display:
-              "grid",
+            paddingTop:
+              2,
 
-            gap:
-              7,
+            color:
+              theme.textMuted,
+
+            fontSize:
+              9.5,
+
+            lineHeight:
+              1.4,
           }}
         >
-          <div
-            style={{
-              color:
-                theme.textSecondary,
-
-              fontSize:
-                11,
-
-              fontWeight:
-                650,
-            }}
-          >
-            Example / expected forms
-          </div>
-
-
-          {bodyLines.length >
-          0 ? (
-            bodyLines.map(
-              (
-                line,
-                index
-              ) => (
-                <div
-                  key={`${concept.id}-example-${index}`}
-                  style={{
-                    padding:
-                      "10px 11px",
-
-                    borderWidth:
-                      1,
-
-                    borderStyle:
-                      "solid",
-
-                    borderColor:
-                      theme.borderStandard,
-
-                    borderRadius:
-                      5,
-
-                    background:
-                      theme.controlBg,
-
-                    color:
-                      theme.textPrimary,
-
-                    fontSize:
-                      11,
-
-                    lineHeight:
-                      1.45,
-                  }}
-                >
-                  {line}
-                </div>
-              )
-            )
-          ) : (
-            <div
-              style={{
-                color:
-                  theme.textMuted,
-
-                fontSize:
-                  10.5,
-
-                lineHeight:
-                  1.45,
-              }}
-            >
-              No additional examples are currently recorded for this subskill.
-            </div>
-          )}
+          The examples above represent the available generated range for this subskill. Refresh any example to see another question at the same underlying generator level.
         </div>
       </aside>
     );
@@ -838,16 +799,13 @@ export default function ClassCoverageDetails({
 
 
   /**
-   * PARENT SKILL OVERVIEW
+   * Parent skill overview.
    */
   return (
     <aside
       style={{
         minWidth:
           0,
-
-        minHeight:
-          330,
 
         padding:
           14,
@@ -873,7 +831,7 @@ export default function ClassCoverageDetails({
         borderColor:
           `color-mix(
             in srgb,
-            ${courseAccent} 24%,
+            ${courseAccent} 28%,
             ${theme.borderStandard}
           )`,
 
@@ -941,7 +899,7 @@ export default function ClassCoverageDetails({
               "flex",
 
             alignItems:
-              "baseline",
+              "center",
 
             gap:
               8,
@@ -1096,7 +1054,7 @@ export default function ClassCoverageDetails({
                 "grid",
 
               gap:
-                6,
+                5,
             }}
           >
             {trackableConcepts.map(
@@ -1106,18 +1064,6 @@ export default function ClassCoverageDetails({
                 const covered =
                   completedConceptIds.includes(
                     concept.id
-                  );
-
-
-                const examples =
-                  getConceptBodyLines(
-                    concept
-                  ).filter(
-                    (
-                      line
-                    ) =>
-                      line.trim() !==
-                      concept.label.trim()
                   );
 
 
@@ -1143,8 +1089,11 @@ export default function ClassCoverageDetails({
                       width:
                         "100%",
 
+                      minHeight:
+                        38,
+
                       padding:
-                        "9px 10px",
+                        "7px 9px",
 
                       boxSizing:
                         "border-box",
@@ -1152,8 +1101,14 @@ export default function ClassCoverageDetails({
                       display:
                         "grid",
 
+                      gridTemplateColumns:
+                        "minmax(0, 1fr) auto",
+
+                      alignItems:
+                        "center",
+
                       gap:
-                        6,
+                        10,
 
                       borderWidth:
                         1,
@@ -1189,181 +1144,275 @@ export default function ClassCoverageDetails({
                           0,
 
                         display:
-                          "grid",
-
-                        gridTemplateColumns:
-                          "minmax(0, 1fr) auto",
+                          "flex",
 
                         alignItems:
                           "center",
 
                         gap:
-                          10,
+                          7,
                       }}
                     >
-                      <div
+                      <span
                         style={{
-                          minWidth:
+                          flexShrink:
                             0,
 
-                          display:
-                            "flex",
+                          color:
+                            courseAccent,
 
-                          alignItems:
-                            "baseline",
+                          fontSize:
+                            10,
 
-                          gap:
-                            7,
+                          fontWeight:
+                            750,
                         }}
                       >
-                        <span
-                          style={{
-                            flexShrink:
-                              0,
-
-                            color:
-                              courseAccent,
-
-                            fontSize:
-                              10.5,
-
-                            fontWeight:
-                              750,
-                          }}
-                        >
-                          {concept.code}
-                        </span>
-
-
-                        <span
-                          style={{
-                            minWidth:
-                              0,
-
-                            overflow:
-                              "hidden",
-
-                            color:
-                              theme.textPrimary,
-
-                            fontSize:
-                              10.5,
-
-                            fontWeight:
-                              600,
-
-                            whiteSpace:
-                              "nowrap",
-
-                            textOverflow:
-                              "ellipsis",
-                          }}
-                        >
-                          {concept.shortLabel ||
-                            concept.label}
-                        </span>
-                      </div>
+                        {concept.code}
+                      </span>
 
 
                       <span
                         style={{
-                          width:
-                            7,
+                          minWidth:
+                            0,
 
-                          height:
-                            7,
+                          overflow:
+                            "hidden",
 
-                          borderRadius:
-                            999,
+                          color:
+                            theme.textSecondary,
 
-                          background:
-                            covered
-                              ? courseAccent
-                              : theme.borderStandard,
+                          fontSize:
+                            10.5,
 
-                          boxShadow:
-                            covered
-                              ? `0 0 6px ${courseAccent}`
-                              : "none",
+                          whiteSpace:
+                            "nowrap",
+
+                          textOverflow:
+                            "ellipsis",
                         }}
-                      />
+                      >
+                        {concept.shortLabel ||
+                          concept.label}
+                      </span>
                     </div>
 
 
-                    {examples.length >
-                    0 ? (
-                      <div
-                        style={{
-                          display:
-                            "grid",
+                    <span
+                      style={{
+                        width:
+                          7,
 
-                          gap:
-                            3,
+                        height:
+                          7,
 
-                          color:
-                            theme.textMuted,
+                        borderRadius:
+                          999,
 
-                          fontSize:
-                            9.5,
+                        background:
+                          covered
+                            ? courseAccent
+                            : theme.borderStandard,
 
-                          lineHeight:
-                            1.4,
-                        }}
-                      >
-                        {examples
-                          .slice(
-                            0,
-                            2
-                          )
-                          .map(
-                            (
-                              example,
-                              index
-                            ) => (
-                              <span
-                                key={`${concept.id}-summary-${index}`}
-                              >
-                                {example}
-                              </span>
-                            )
-                          )}
-                      </div>
-                    ) : null}
+                        boxShadow:
+                          covered
+                            ? `0 0 6px ${courseAccent}`
+                            : "none",
+                      }}
+                    />
                   </button>
                 );
               }
             )}
           </div>
-        ) : (
+        ) : null}
+      </div>
+
+
+      {trackableConcepts.length >
+      0 ? (
+        <div
+          style={{
+            display:
+              "grid",
+
+            gap:
+              14,
+          }}
+        >
           <div
             style={{
+              paddingTop:
+                2,
+
               color:
-                theme.textMuted,
+                theme.textSecondary,
 
               fontSize:
-                10.5,
+                11,
+
+              fontWeight:
+                650,
             }}
           >
-            No specification subskills are currently recorded for this skill.
+            Representative questions across this skill
           </div>
-        )}
-      </div>
 
 
-      <div
-        style={{
-          color:
-            theme.textMuted,
+          {trackableConcepts.map(
+            (
+              concept,
+              index
+            ) => (
+              <section
+                key={
+                  concept.id
+                }
+                style={{
+                  minWidth:
+                    0,
 
-          fontSize:
-            9.5,
+                  paddingTop:
+                    index ===
+                    0
+                      ? 0
+                      : 12,
 
-          lineHeight:
-            1.4,
-        }}
-      >
-        Select a subskill for its full guidance and examples.
-      </div>
+                  display:
+                    "grid",
+
+                  gap:
+                    7,
+
+                  borderTopWidth:
+                    index ===
+                    0
+                      ? 0
+                      : 1,
+
+                  borderTopStyle:
+                    "solid",
+
+                  borderTopColor:
+                    theme.borderStandard,
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    onSelectionChange({
+                      kind:
+                        "concept",
+
+                      skillId:
+                        skill.id,
+
+                      conceptId:
+                        concept.id,
+                    })
+                  }
+                  style={{
+                    width:
+                      "fit-content",
+
+                    padding:
+                      0,
+
+                    borderWidth:
+                      0,
+
+                    background:
+                      "transparent",
+
+                    color:
+                      "inherit",
+
+                    cursor:
+                      "pointer",
+
+                    fontFamily:
+                      "inherit",
+
+                    textAlign:
+                      "left",
+                  }}
+                >
+                  <span
+                    style={{
+                      color:
+                        courseAccent,
+
+                      fontSize:
+                        10.5,
+
+                      fontWeight:
+                        750,
+                    }}
+                  >
+                    {concept.code}
+                  </span>
+
+                  <span
+                    style={{
+                      marginLeft:
+                        7,
+
+                      color:
+                        theme.textPrimary,
+
+                      fontSize:
+                        10.5,
+
+                      fontWeight:
+                        650,
+                    }}
+                  >
+                    {concept.shortLabel ||
+                      concept.label}
+                  </span>
+                </button>
+
+
+                <ClassCoverageQuestionExamples
+                  courseId={
+                    courseId
+                  }
+                  skill={
+                    skill
+                  }
+                  concept={
+                    concept
+                  }
+                  theme={
+                    theme
+                  }
+                  courseAccent={
+                    courseAccent
+                  }
+                  displayMode="REPRESENTATIVE"
+                  heading=""
+                  questionNumberOffset={
+                    index
+                  }
+                />
+              </section>
+            )
+          )}
+        </div>
+      ) : (
+        <div
+          style={{
+            color:
+              theme.textMuted,
+
+            fontSize:
+              10.5,
+          }}
+        >
+          No specification subskills are currently recorded for this skill.
+        </div>
+      )}
     </aside>
   );
 }

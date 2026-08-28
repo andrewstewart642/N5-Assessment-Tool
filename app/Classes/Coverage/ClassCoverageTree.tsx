@@ -259,10 +259,6 @@ export default function ClassCoverageTree({
     );
 
 
-  /**
-   * Empty sets deliberately mean everything begins
-   * collapsed when the Class page opens.
-   */
   const [
     expandedCategories,
     setExpandedCategories,
@@ -375,13 +371,6 @@ export default function ClassCoverageTree({
     });
 
 
-    /**
-     * Selecting a multi-outcome skill also exposes
-     * its children if they are currently hidden.
-     *
-     * This makes the row behave much more like the
-     * Assessment Builder Skills Tree.
-     */
     if (
       hasNestedConcepts &&
       !expandedSkills.has(
@@ -397,9 +386,11 @@ export default function ClassCoverageTree({
               current
             );
 
+
           next.add(
             skillId
           );
+
 
           return next;
         }
@@ -486,14 +477,6 @@ export default function ClassCoverageTree({
                   categoryOpen
                     ? theme.shadow
                     : "none",
-
-                transition:
-                  [
-                    "border-color 140ms ease",
-                    "box-shadow 140ms ease",
-                  ].join(
-                    ", "
-                  ),
               }}
             >
               <button
@@ -539,12 +522,6 @@ export default function ClassCoverageTree({
 
                   borderWidth:
                     0,
-
-                  borderStyle:
-                    "solid",
-
-                  borderColor:
-                    "transparent",
 
                   background:
                     `linear-gradient(
@@ -622,9 +599,6 @@ export default function ClassCoverageTree({
                       fontWeight:
                         700,
 
-                      lineHeight:
-                        1.25,
-
                       whiteSpace:
                         "nowrap",
 
@@ -647,9 +621,6 @@ export default function ClassCoverageTree({
 
                     gap:
                       6,
-
-                    whiteSpace:
-                      "nowrap",
                   }}
                 >
                   <span
@@ -680,9 +651,6 @@ export default function ClassCoverageTree({
 
                       fontSize:
                         9.5,
-
-                      fontVariantNumeric:
-                        "tabular-nums",
                     }}
                   >
                     {Math.round(
@@ -694,7 +662,6 @@ export default function ClassCoverageTree({
 
 
                 <div
-                  aria-hidden="true"
                   style={{
                     position:
                       "absolute",
@@ -725,16 +692,6 @@ export default function ClassCoverageTree({
 
                       background:
                         categoryAccent,
-
-                      boxShadow:
-                        `0 0 7px color-mix(
-                          in srgb,
-                          ${categoryAccent} 55%,
-                          transparent
-                        )`,
-
-                      transition:
-                        "width 180ms ease",
                     }}
                   />
                 </div>
@@ -911,12 +868,6 @@ export default function ClassCoverageTree({
                                 borderWidth:
                                   0,
 
-                                borderStyle:
-                                  "solid",
-
-                                borderColor:
-                                  "transparent",
-
                                 background:
                                   "transparent",
 
@@ -942,7 +893,7 @@ export default function ClassCoverageTree({
                                     "flex",
 
                                   alignItems:
-                                    "baseline",
+                                    "center",
 
                                   gap:
                                     7,
@@ -962,9 +913,6 @@ export default function ClassCoverageTree({
 
                                       fontWeight:
                                         750,
-
-                                      fontVariantNumeric:
-                                        "tabular-nums",
                                     }}
                                   >
                                     {skillCode}
@@ -991,9 +939,6 @@ export default function ClassCoverageTree({
                                         ? 700
                                         : 600,
 
-                                    lineHeight:
-                                      1.3,
-
                                     whiteSpace:
                                       "nowrap",
 
@@ -1013,9 +958,6 @@ export default function ClassCoverageTree({
 
                                   fontSize:
                                     9.5,
-
-                                  fontVariantNumeric:
-                                    "tabular-nums",
                                 }}
                               >
                                 {skillProgress.completed}
@@ -1067,9 +1009,6 @@ export default function ClassCoverageTree({
 
                                     background:
                                       categoryAccent,
-
-                                    transition:
-                                      "width 180ms ease",
                                   }}
                                 />
                               </div>
@@ -1086,9 +1025,6 @@ export default function ClassCoverageTree({
 
                                     textAlign:
                                       "right",
-
-                                    whiteSpace:
-                                      "nowrap",
                                   }}
                                 >
                                   subskills
@@ -1100,11 +1036,6 @@ export default function ClassCoverageTree({
                             {hasNestedConcepts ? (
                               <button
                                 type="button"
-                                aria-label={
-                                  skillOpen
-                                    ? `Collapse ${skillTitle}`
-                                    : `Expand ${skillTitle}`
-                                }
                                 aria-expanded={
                                   skillOpen
                                 }
@@ -1345,29 +1276,26 @@ export default function ClassCoverageTree({
                                           minWidth:
                                             0,
 
-                                          minHeight:
+                                          height:
                                             36,
 
                                           padding:
                                             0,
 
                                           display:
-                                            "flex",
+                                            "grid",
+
+                                          gridTemplateColumns:
+                                            "54px minmax(0, 1fr)",
 
                                           alignItems:
-                                            "baseline",
+                                            "center",
 
                                           gap:
                                             7,
 
                                           borderWidth:
                                             0,
-
-                                          borderStyle:
-                                            "solid",
-
-                                          borderColor:
-                                            "transparent",
 
                                           background:
                                             "transparent",
@@ -1387,9 +1315,6 @@ export default function ClassCoverageTree({
                                       >
                                         <span
                                           style={{
-                                            flexShrink:
-                                              0,
-
                                             color:
                                               categoryAccent,
 
@@ -1399,8 +1324,14 @@ export default function ClassCoverageTree({
                                             fontWeight:
                                               750,
 
+                                            lineHeight:
+                                              1.2,
+
                                             fontVariantNumeric:
                                               "tabular-nums",
+
+                                            whiteSpace:
+                                              "nowrap",
                                           }}
                                         >
                                           {concept.code}
@@ -1427,6 +1358,9 @@ export default function ClassCoverageTree({
                                               conceptSelected
                                                 ? 650
                                                 : 500,
+
+                                            lineHeight:
+                                              1.2,
 
                                             whiteSpace:
                                               "nowrap",
