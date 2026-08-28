@@ -43,6 +43,15 @@ export type SavedAssessmentSetup = {
   courseId?:
     CourseId;
 
+  /**
+   * Version of the persisted Course-identity contract.
+   *
+   * Optional so historical assessments remain readable. New/normalised
+   * records are stamped by SavedAssessments/CourseIdentity.ts.
+   */
+  courseIdentityVersion?:
+    number;
+
   assessmentType:
     AssessmentType;
 
@@ -79,6 +88,12 @@ export type SavedAssessmentSetup = {
   assessmentDate:
     string;
 
+  /**
+   * Historical setup/coverage field.
+   *
+   * It is retained for persistence compatibility but is not the canonical
+   * Course identity of a saved assessment.
+   */
   levelId:
     AssessmentLevelId | null;
 
