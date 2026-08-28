@@ -68,6 +68,8 @@ IMPLEMENT
         ↓
 TYPE-CHECK
         ↓
+LINT
+        ↓
 BROWSER / RUNTIME VERIFY
         ↓
 BUILD WHEN APPROPRIATE
@@ -201,6 +203,7 @@ During uncommitted local work, prefer:
 ```text
 local grep
 local TypeScript
+local lint
 local build
 local runtime/browser behaviour
 local git diff
@@ -370,6 +373,9 @@ app/Classes/
 app/Courses/
 → educational and Course-specific knowledge
 
+app/Home/
+→ Home-page product experience
+
 app/UI/Application/
 → interactive application presentation
 
@@ -402,6 +408,7 @@ app/
 ├── Classes/
 ├── Courses/
 ├── DeveloperTools/
+├── Home/
 ├── MyAssessments/
 ├── UI/
 ├── layout.tsx
@@ -468,6 +475,7 @@ Do not use them casually inside product folders.
 Ordinary page implementations should use descriptive names such as:
 
 ```text
+HomePage.tsx
 AssessmentCreatorPage.tsx
 AssessmentCompilationPage.tsx
 MyAssessmentsPage.tsx
@@ -565,11 +573,13 @@ Trace the actual contract first.
 
 ## 20. Whole-File Replacement Is the Default Manual Editing Strategy
 
-For a normal-sized source file, provide the complete replacement file.
+For a normal-sized source file, provide the complete replacement file when the user is applying source manually.
 
 Always state the exact repository-relative path.
 
 Complete replacements reduce missed edits, wrong insertion points, malformed imports, partial migrations, formatting drift and conversation overhead.
+
+Mechanical rename batches are a deliberate exception: a clear `git mv` rename map plus exact import-path repair is preferable to rewriting unchanged source files solely to change their paths.
 
 ---
 
@@ -608,6 +618,8 @@ Avoid large unexplained scripts combining auditing, movement, rewriting and dele
 
 Prefer visibility over cleverness.
 
+For rename/import-repair commands, prefer simple exact transformations over clever nested shell quoting. A command that is easy to inspect and recover is better than a shorter opaque command.
+
 ---
 
 ## 23. One Coherent Change at a Time
@@ -642,7 +654,23 @@ Do not ask the user to rerun it merely because it printed nothing.
 
 ---
 
-## 25. Production Build Verification
+## 25. Lint Verification
+
+Use:
+
+```bash
+npm run lint
+```
+
+as a routine source-quality check after coherent TypeScript/source batches.
+
+A clean lint run is part of the current repository baseline.
+
+Lint does not replace TypeScript, runtime testing or build verification; it complements them.
+
+---
+
+## 26. Production Build Verification
 
 Use:
 
@@ -661,11 +689,11 @@ after substantial boundaries such as:
 
 A successful type-check is not always enough.
 
-For small visual iteration, TypeScript + browser verification may be sufficient between passes.
+For small visual iteration, TypeScript + lint + browser verification may be sufficient between passes.
 
 ---
 
-## 26. Development Runtime Verification
+## 27. Development Runtime Verification
 
 Use:
 
@@ -681,7 +709,7 @@ After major architecture/infrastructure work, perform a broader smoke test.
 
 ---
 
-## 27. Next.js Generated-State Recovery
+## 28. Next.js Generated-State Recovery
 
 Route/framework changes can leave stale `.next` output.
 
@@ -700,7 +728,7 @@ Cache deletion is recovery for stale generated state, not a substitute for diagn
 
 ---
 
-## 28. VS Code Stale Diagnostics
+## 29. VS Code Stale Diagnostics
 
 If:
 
@@ -719,7 +747,7 @@ before assuming the source remains broken.
 
 ---
 
-## 29. Git Pager Behaviour
+## 30. Git Pager Behaviour
 
 Some Git commands may open `less`.
 
@@ -737,7 +765,29 @@ git --no-pager diff
 
 ---
 
-## 30. CRLF Warnings
+## 31. Shell Continuation Prompt
+
+In Git Bash, a terminal showing:
+
+```text
+>
+```
+
+instead of the normal `$` prompt often means Bash is waiting for an unfinished quoted/multiline command rather than being frozen.
+
+If the command was pasted incorrectly or the quote state is uncertain, use:
+
+```text
+Ctrl+C
+```
+
+which safely cancels the unfinished command before retrying with simpler quoting.
+
+Do not repeatedly paste more commands into a continuation prompt unless the continuation is intentional.
+
+---
+
+## 32. CRLF Warnings
 
 On Windows, Git may report:
 
@@ -763,7 +813,7 @@ for actual whitespace validation.
 
 ---
 
-## 31. Browser Smoke Tests
+## 33. Browser Smoke Tests
 
 After substantive work, relevant checks may include:
 
@@ -797,7 +847,7 @@ Test areas reasonably affected by the change.
 
 ---
 
-## 32. Browser DevTools for Client/Server Failures
+## 34. Browser DevTools for Client/Server Failures
 
 When browser-visible behaviour depends on a server/API request, use browser DevTools rather than guessing.
 
@@ -822,7 +872,7 @@ Keep explanations concise unless the user asks to learn more.
 
 ---
 
-## 33. Document Rendering Requires Visual Verification
+## 35. Document Rendering Requires Visual Verification
 
 Changes beneath:
 
@@ -841,7 +891,7 @@ Physical document appearance is product behaviour.
 
 ---
 
-## 34. Deletion Happens Last
+## 36. Deletion Happens Last
 
 Preferred deletion sequence:
 
@@ -865,7 +915,7 @@ Never delete first merely because target architecture intends to replace somethi
 
 ---
 
-## 35. Broad Search Before Deletion
+## 37. Broad Search Before Deletion
 
 Before deleting an old file, search by more than one clue where appropriate:
 
@@ -883,7 +933,7 @@ A narrow path-only search is not dead-code proof.
 
 ---
 
-## 36. Self-Reference-Only Results
+## 38. Self-Reference-Only Results
 
 A strong deletion signal is:
 
@@ -900,7 +950,7 @@ Verify again afterwards.
 
 ---
 
-## 37. Empty Folder Cleanup
+## 39. Empty Folder Cleanup
 
 After obsolete files are deleted, remove empty folders when useful.
 
@@ -910,7 +960,7 @@ Do not remove a parent folder that still contains active responsibilities.
 
 ---
 
-## 38. Course Workflow
+## 40. Course Workflow
 
 Distinguish generic Assessment workflow from Course-specific educational knowledge.
 
@@ -938,7 +988,7 @@ generic generated-document primitive
 
 ---
 
-## 39. Course Contracts
+## 41. Course Contracts
 
 Generic features should consume Course knowledge through canonical Course architecture where practical.
 
@@ -958,7 +1008,7 @@ Do not bypass these contracts merely because importing a concrete Course file is
 
 ---
 
-## 40. CourseId Ownership
+## 42. CourseId Ownership
 
 `CourseId` is owned by:
 
@@ -972,7 +1022,7 @@ Do not create convenience re-exports from unrelated domains.
 
 ---
 
-## 41. Course Registry API
+## 43. Course Registry API
 
 Use canonical Course Registry terminology:
 
@@ -987,7 +1037,7 @@ Do not reintroduce retired aliases without a real compatibility requirement.
 
 ---
 
-## 42. National 5 Maths Question Architecture
+## 44. National 5 Maths Question Architecture
 
 Historical exam evidence lives beneath:
 
@@ -1009,7 +1059,7 @@ Do not recreate the retired Question Bank architecture.
 
 ---
 
-## 43. Avoid Course-Specific Generic UI
+## 45. Avoid Course-Specific Generic UI
 
 When generic UI contains concrete Course-name conditions, ask whether the variation belongs in:
 
@@ -1024,7 +1074,7 @@ Do not mechanically remove every Course condition. Establish the correct owner f
 
 ---
 
-## 44. No Hypothetical Course Architecture
+## 46. No Hypothetical Course Architecture
 
 Future Higher/Advanced Higher support should influence boundary quality, not create empty Course trees, placeholder document folders, fake configuration fields or unused registries.
 
@@ -1032,13 +1082,21 @@ Record ideas in `Docs/FutureFeatures.md` until implementation exists.
 
 ---
 
-## 45. Classes Workflow
+## 47. Classes Workflow
 
 Class-owned functionality belongs beneath:
 
 ```text
 app/Classes/
 ```
+
+Current class persistence/collection ownership is:
+
+```text
+app/Classes/Records/
+```
+
+with responsibility-readable modules such as `BrowserStorage.ts`, `Collection.ts` and `Normalisation.ts`.
 
 Classes obtains Course-specific skill knowledge through:
 
@@ -1056,7 +1114,7 @@ Do not make Classes depend directly on a concrete National 5 Maths skills file w
 
 ---
 
-## 46. My Assessments Workflow
+## 48. My Assessments Workflow
 
 The assessment library belongs beneath:
 
@@ -1091,7 +1149,7 @@ List view
 
 ---
 
-## 47. PDF Generation Workflow
+## 49. PDF Generation Workflow
 
 The canonical PDF pipeline belongs to Assessment Compilation.
 
@@ -1121,7 +1179,7 @@ UI consumers should reuse this pipeline/assets rather than invent another render
 
 ---
 
-## 48. Application UI Workflow
+## 50. Application UI Workflow
 
 For interactive visual changes, determine whether the responsibility is global Application UI or feature-specific UI.
 
@@ -1131,13 +1189,19 @@ Global application visual infrastructure belongs beneath:
 app/UI/Application/
 ```
 
+Home-page product composition belongs beneath:
+
+```text
+app/Home/
+```
+
 Feature-specific presentation normally stays with its product owner.
 
 Do not centralise every colour, spacing value or component merely because it is visual.
 
 ---
 
-## 49. Current Workbench UI Direction
+## 51. Current Workbench UI Direction
 
 When refining interactive application UI, preserve the established direction unless the user requests a redesign:
 
@@ -1153,7 +1217,7 @@ Generated assessment documents are a separate visual system.
 
 ---
 
-## 50. Generated-Document Workflow
+## 52. Generated-Document Workflow
 
 For generated document visuals, identify the correct layer:
 
@@ -1185,7 +1249,7 @@ Assessment consumers
 
 ---
 
-## 51. Application UI and Document UI Stay Separate
+## 53. Application UI and Document UI Stay Separate
 
 Code beneath:
 
@@ -1201,7 +1265,7 @@ An Assessment/MyAssessments-owned interactive preview may use Application stylin
 
 ---
 
-## 52. Settings Workflow
+## 54. Settings Workflow
 
 Classify settings by what they affect.
 
@@ -1222,7 +1286,7 @@ The historical global SettingsDrawer is not the preferred owner for new global s
 
 ---
 
-## 53. Preview Tray Workflow
+## 55. Preview Tray Workflow
 
 The shared preview-edge `Preview Tray` is an established Assessment Creator interaction.
 
@@ -1237,11 +1301,17 @@ Settings controls assessment paper-content/sitting presentation.
 
 View controls Compact/Exam/Answers and workspace display/reset actions.
 
+The current implementation lives beneath:
+
+```text
+app/Assessments/Creation/PaperWorkspace/Preview/Tray/
+```
+
 Do not merge Preview Tray settings into global application settings.
 
 ---
 
-## 54. Persistence Workflow
+## 56. Persistence Workflow
 
 Before changing persistence behaviour, identify:
 
@@ -1262,7 +1332,7 @@ A persistence migration is a separate deliberate change.
 
 ---
 
-## 55. Historical Persistence Terminology Is Allowed
+## 57. Historical Persistence Terminology Is Allowed
 
 Persisted data may retain old terminology such as `builder`, `P1`, `P2` or legacy field names when changing it would risk existing user data.
 
@@ -1272,7 +1342,7 @@ Source cleanliness does not override persistence compatibility.
 
 ---
 
-## 56. Hidden Event Coupling
+## 58. Hidden Event Coupling
 
 Prefer explicit dependencies over hidden browser-event coupling.
 
@@ -1292,7 +1362,7 @@ understand event
 
 ---
 
-## 57. Type Ownership
+## 59. Type Ownership
 
 Types live with the concepts they describe.
 
@@ -1302,8 +1372,8 @@ Examples:
 CourseId
 → app/Courses/CourseTypes.ts
 
-Class types
-→ app/Classes/
+Class data/types
+→ app/Classes/ClassData.ts and the Classes domain
 
 Assessment types
 → app/Assessments/
@@ -1319,7 +1389,7 @@ Do not create a global shared-types bucket for convenience.
 
 ---
 
-## 58. Generic Helper Workflow
+## 60. Generic Helper Workflow
 
 Do not respond to ownership uncertainty by creating `Helpers/`, `Utils/`, `Shared/`, `Common/` or `Misc/` buckets.
 
@@ -1329,9 +1399,11 @@ Ask:
 
 A helper function is still owned by the concept it helps.
 
+Likewise, do not hide an unclear file responsibility behind a `Utils`/`Helpers` filename when the real responsibility can be named.
+
 ---
 
-## 59. Large Orchestration Files
+## 61. Large Orchestration Files
 
 Large orchestration files are not automatically architectural failures.
 
@@ -1351,7 +1423,7 @@ Do not create meaningless wrappers solely to reduce line count.
 
 ---
 
-## 60. Client Boundary Workflow
+## 62. Client Boundary Workflow
 
 `"use client"` marks a client entry boundary.
 
@@ -1375,7 +1447,7 @@ A redundant client boundary can cause serialisability warnings for normal functi
 
 ---
 
-## 61. Client-Boundary Audit
+## 63. Client-Boundary Audit
 
 When reviewing `"use client"`:
 
@@ -1390,7 +1462,7 @@ Do not remove directives by filename pattern alone.
 
 ---
 
-## 62. Scope Control
+## 64. Scope Control
 
 If an audit discovers an unrelated problem, record it but do not automatically expand the approved pass.
 
@@ -1400,7 +1472,7 @@ Future/parked work can be recorded in `Docs/FutureFeatures.md` when it is worth 
 
 ---
 
-## 63. Product Change vs Refactor
+## 65. Product Change vs Refactor
 
 Refactoring may expose a better product design.
 
@@ -1410,9 +1482,11 @@ Do not silently introduce a product change while presenting it as architecture c
 
 Conversely, feature-led work may legitimately include a small structural improvement where the feature reveals a clear ownership problem.
 
+A file/folder naming pass should be behaviour-preserving unless a separate product/source change is explicitly approved.
+
 ---
 
-## 64. When Approval Is Required
+## 66. When Approval Is Required
 
 Ask before:
 
@@ -1429,7 +1503,7 @@ Do not ask for approval for every routine implementation step inside an already-
 
 ---
 
-## 65. Communicating Instructions
+## 67. Communicating Instructions
 
 A good implementation message usually contains:
 
@@ -1446,7 +1520,7 @@ The user currently prefers concise explanations during implementation unless the
 
 ---
 
-## 66. Terminal Commands
+## 68. Terminal Commands
 
 Commands should be exact, copyable and run from repository root unless stated otherwise.
 
@@ -1454,6 +1528,7 @@ Useful examples:
 
 ```bash
 npx tsc --noEmit
+npm run lint
 npm run build
 git status --short
 git --no-pager diff --check
@@ -1463,7 +1538,7 @@ State the expected result when it may not be obvious.
 
 ---
 
-## 67. Interpreting Empty Output
+## 69. Interpreting Empty Output
 
 If the expected result is no references/errors, say:
 
@@ -1477,7 +1552,7 @@ Do not make the user rerun a successful empty search without a new reason.
 
 ---
 
-## 68. Failure Handling
+## 70. Failure Handling
 
 If verification fails during a risky migration:
 
@@ -1500,9 +1575,11 @@ Repair from the last known-good boundary.
 
 For feature work, similarly isolate the failing boundary before rewriting unrelated code.
 
+For a pure rename pass, a large set of `Cannot find module` errors immediately after successful `git mv` operations usually means import paths were not repaired; fix paths before assuming the renamed implementation itself is broken. Secondary implicit-`any` errors can be cascading consequences of missing imports/types.
+
 ---
 
-## 69. Commit Checkpoints
+## 71. Commit Checkpoints
 
 A good commit point occurs after a coherent responsibility/feature pass is complete and verified.
 
@@ -1524,7 +1601,7 @@ Commit only when the staged change represents what was actually verified.
 
 ---
 
-## 70. Do Not Mix Unrelated Changes Into a Commit
+## 72. Do Not Mix Unrelated Changes Into a Commit
 
 Before committing, confirm:
 
@@ -1538,7 +1615,7 @@ A commit should tell one understandable story.
 
 ---
 
-## 71. Documentation Timing
+## 73. Documentation Timing
 
 Do not update documentation after every tiny source edit.
 
@@ -1549,13 +1626,14 @@ Update at meaningful checkpoints such as:
 - bounded migration completed;
 - architectural decision changed;
 - substantial feature completed/refined;
+- repository-wide naming/discoverability pass completed;
 - handoff point reached.
 
 Documentation is durable project memory, not a keystroke diary.
 
 ---
 
-## 72. Which Documents to Update
+## 74. Which Documents to Update
 
 Use:
 
@@ -1587,9 +1665,11 @@ AGENTS.md
 
 Do not rewrite history in `RefactorLedger.md` merely because paths later changed.
 
+When a historical Feature History entry names a file that was later renamed, preserve the historical entry and add a current-successor note where useful rather than pretending the later filename existed at the earlier date.
+
 ---
 
-## 73. RefactorLedger Is Historical
+## 75. RefactorLedger Is Historical
 
 `Docs/RefactorLedger.md` is intentionally different from current-state documentation.
 
@@ -1607,7 +1687,7 @@ It is no longer the active product feature tracker.
 
 ---
 
-## 74. FeatureHistory Is the Implemented-Change Record
+## 76. FeatureHistory Is the Implemented-Change Record
 
 Use `Docs/FeatureHistory.md` when a future developer would materially benefit from knowing that a meaningful product or technical capability was added, redesigned or completed.
 
@@ -1615,9 +1695,11 @@ Keep entries concise and outcome-focused.
 
 Do not turn it into a per-commit diary.
 
+Repository-wide structural/naming maintenance may warrant an entry when it materially changes how future developers navigate the codebase.
+
 ---
 
-## 75. FutureFeatures Is the Idea Backlog
+## 77. FutureFeatures Is the Idea Backlog
 
 Use `Docs/FutureFeatures.md` when an idea is worth preserving but is not being implemented immediately.
 
@@ -1632,9 +1714,11 @@ INVESTIGATE
 
 Recording an idea does not create runtime folders, establish architecture or imply approval to implement.
 
+Loose useful ideas should be formalised into a lightweight backlog entry rather than left as an unstructured trailing note.
+
 ---
 
-## 76. End-of-Session Handoff
+## 78. End-of-Session Handoff
 
 A significant session should leave durable context answering relevant questions such as:
 
@@ -1649,11 +1733,11 @@ WHAT IS PARKED FOR LATER?
 
 Use the appropriate docs rather than dumping the entire conversation into repository documentation.
 
-Condense decisions and outcomes.
+Condense decisions and outcomes without deleting useful rationale/history already present in the docs.
 
 ---
 
-## 77. Starting a Fresh Chat
+## 79. Starting a Fresh Chat
 
 A fresh conversation can begin with:
 
@@ -1666,14 +1750,14 @@ Use FeatureHistory for implemented feature context, FutureFeatures for parked id
 
 Inspect the actual current repository before editing.
 
-Preserve working behaviour and follow current ownership architecture.
+Preserve working behaviour and follow current ownership architecture and responsibility-first naming.
 ```
 
 No product/brand name should be inferred from historical internal identifiers.
 
 ---
 
-## 78. Current Assessment Creation Owner
+## 80. Current Assessment Creation Owner
 
 Assessment Creation is owned beneath:
 
@@ -1694,7 +1778,7 @@ Do not recreate a generic Builder architecture.
 
 ---
 
-## 79. Current Compilation Owner
+## 81. Current Compilation Owner
 
 Assessment Compilation is owned beneath:
 
@@ -1717,7 +1801,7 @@ Do not treat Compilation/document dependencies as dead merely because Creation d
 
 ---
 
-## 80. Current Routing Owner
+## 82. Current Routing Owner
 
 Public feature URLs are rewritten in:
 
@@ -1737,7 +1821,7 @@ Do not create duplicate physical feature trees solely to represent public URLs.
 
 ---
 
-## 81. Current Shared Question Preview
+## 83. Current Shared Question Preview
 
 Shared Assessment question preview code belongs beneath:
 
@@ -1753,7 +1837,7 @@ Do not collapse these responsibilities into one generic Preview bucket.
 
 ---
 
-## 82. Current Document Architecture
+## 84. Current Document Architecture
 
 Generated documents use:
 
@@ -1771,7 +1855,7 @@ Keep generic physical-document infrastructure separate from Course-specific docu
 
 ---
 
-## 83. Current Application Shell
+## 85. Current Application Shell
 
 Global application shell ownership is beneath:
 
@@ -1787,7 +1871,21 @@ The HeaderBar right side is intentionally not the global Settings trigger.
 
 ---
 
-## 84. Current My Assessments Owner
+## 86. Current Home Owner
+
+The Home product experience is owned beneath:
+
+```text
+app/Home/
+```
+
+`HomePage.tsx` composes Home-specific areas such as Continue Working, Department Activity, For You, My Classes Overview, Product Updates and Upcoming Assessments.
+
+Do not move Home-specific product composition into `UI/Application` merely because it is visual; reusable global presentation primitives still belong to Application UI.
+
+---
+
+## 87. Current My Assessments Owner
 
 The user-facing assessment library is owned beneath:
 
@@ -1801,9 +1899,19 @@ Tile and List views are both intentional supported modes.
 
 Generated PDF previews consume the canonical Compilation PDF asset pipeline.
 
+Current responsibility-first library files include:
+
+```text
+Display/LabelsAndDates.ts
+Display/Progress.ts
+Library/Filtering.ts
+Library/Sorting.ts
+Library/ViewOptions.ts
+```
+
 ---
 
-## 85. Current Developer Tools Boundary
+## 88. Current Developer Tools Boundary
 
 Runtime developer functionality belongs beneath:
 
@@ -1815,7 +1923,7 @@ Repository maintenance tooling is separate and should only create root `Tools/` 
 
 ---
 
-## 86. No Speculative Architecture
+## 89. No Speculative Architecture
 
 Future ideas such as OCR, AI marking, batch scanning, analytics, Higher Maths and Advanced Higher Maths may influence boundary quality.
 
@@ -1825,7 +1933,7 @@ Record ideas in `Docs/FutureFeatures.md` until implementation begins.
 
 ---
 
-## 87. Privacy-Sensitive Work
+## 90. Privacy-Sensitive Work
 
 The pupil-data approach intentionally separates non-identifying pupil IDs from teacher-local name mapping where appropriate.
 
@@ -1835,15 +1943,15 @@ Changes to the privacy model require explicit product/privacy consideration.
 
 ---
 
-## 88. Definition of a Successful Feature Pass
+## 91. Definition of a Successful Feature Pass
 
-A feature pass is complete when the intended behaviour works, existing relevant behaviour is preserved, TypeScript passes, browser/runtime verification passes where relevant, build passes where infrastructure/release significance requires it, and documentation is updated if the change forms a meaningful checkpoint.
+A feature pass is complete when the intended behaviour works, existing relevant behaviour is preserved, TypeScript passes, lint passes where source is affected, browser/runtime verification passes where relevant, build passes where infrastructure/release significance requires it, and documentation is updated if the change forms a meaningful checkpoint.
 
 A visual feature is not complete merely because TypeScript compiles.
 
 ---
 
-## 89. Definition of a Successful Bounded Migration
+## 92. Definition of a Successful Bounded Migration
 
 A bounded migration is complete when:
 
@@ -1852,6 +1960,7 @@ canonical owner exists
 consumer uses it
 working behaviour is preserved
 TypeScript passes
+lint passes
 build passes where relevant
 runtime behaviour passes where relevant
 old references are searched broadly
@@ -1864,7 +1973,7 @@ If the old implementation still materially supplies the responsibility, the migr
 
 ---
 
-## 90. Definition of a Documentation Checkpoint
+## 93. Definition of a Documentation Checkpoint
 
 A documentation checkpoint is appropriate when a future developer would materially benefit from knowing:
 
@@ -1873,12 +1982,80 @@ this owner is now canonical
 this legacy boundary is gone
 this architectural rule changed
 this meaningful feature now exists/changed
+this repository naming convention is now established
 this future idea should not be forgotten
 ```
 
+Documentation reconciliation is additive by default. Preserve useful information unless it is being explicitly superseded because it is no longer true.
+
 ---
 
-## 91. Final Working Rule
+## 94. File/Folder Naming Workflow
+
+The current naming rule is:
+
+> **Folder = context. Filename = responsibility.**
+
+Before naming or renaming a file, ask:
+
+> If somebody unfamiliar with the implementation sees only this path and filename, can they make a sensible guess about what the file is responsible for?
+
+Rules:
+
+- Do not start filenames with `use` merely because a React hook is exported.
+- Keep the exported hook function itself named `useSomething` where React requires it.
+- Do not mechanically repeat the complete parent folder in every child filename.
+- Keep context in the filename where removing it would create real ambiguity.
+- Avoid vague `Utils`, `Helpers`, `Common`, `Shared` and `Misc` names when a real responsibility can be stated.
+- Meaningful ordered folders are allowed. `SkillsPanel/01-SkillsFilters/` and `SkillsPanel/02-SkillsTree/` intentionally mirror the UI order.
+- Do not use a source-name cleanup to rename persisted keys/public routes/JSON compatibility fields.
+
+For a mechanical rename batch:
+
+```text
+inspect responsibility
+→ decide rename map
+→ git mv files/folders
+→ repair import module paths only
+→ keep exported symbol names unless separately approved
+→ npx tsc --noEmit
+→ npm run lint
+→ git --no-pager diff --check
+```
+
+Avoid broad search/replace commands that can rename hook symbols or unrelated identifiers simply because their text matches the old filename.
+
+---
+
+## 95. Documentation Preservation Workflow
+
+When refreshing repository documentation after architecture/source changes:
+
+```text
+historical truth
+→ preserve
+
+current truth
+→ update
+
+new rule / decision
+→ add
+
+obsolete contradictory instruction
+→ explicitly supersede or replace
+```
+
+Do not optimise documentation by deleting useful rationale, compatibility context or historical evidence.
+
+Current-state docs must not knowingly retain stale current paths.
+
+Historical docs must not be globally rewritten to make the past resemble the present.
+
+Locked decision IDs are permanent; a newer decision supersedes/clarifies the older one explicitly.
+
+---
+
+## 96. Final Working Rule
 
 When unsure how to proceed:
 
