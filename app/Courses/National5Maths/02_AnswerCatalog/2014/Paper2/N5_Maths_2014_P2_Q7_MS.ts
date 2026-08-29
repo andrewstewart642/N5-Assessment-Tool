@@ -1,0 +1,75 @@
+import type { AnswerCatalogEntry } from "../../AnswerCatalogTypes";
+import { N5_MATHS_2014_P2_Q7 as question } from "../../../01_QuestionCatalog/2014/Paper2/N5_Maths_2014_P2_Q7";
+import { GENERAL_2014_RULE_IDS, answerIntegrity, answerOnly, answerReviewInProgress, comparisonKey, consistencyFeature, emptyMethodEquivalence, emptyVisualMarking, generationNotReviewed, markNode, msEvidence, notReviewedConsistency, presentationPolicy, sourcePresentation, unitProfile, workingPolicy } from "../../AnswerCatalogHelpers";
+
+const evidence = msEvidence("7", 18, "MARKING_SCHEME", "P2", 2014);
+const M1 = "N5_MATH_2014_P2_Q7_M1";
+const M2 = "N5_MATH_2014_P2_Q7_M2";
+const M3 = "N5_MATH_2014_P2_Q7_M3";
+const M4 = "N5_MATH_2014_P2_Q7_M4";
+const M5 = "N5_MATH_2014_P2_Q7_M5";
+const P1 = "N5_MATH_2014_P2_Q7_METHOD_CONE_MINUS_HEMISPHERE";
+const D_PRECISION = "N5_MATH_2014_P2_Q7_D_INTERMEDIATE_PRECISION";
+const D_PI = "N5_MATH_2014_P2_Q7_D_PI_VARIATION";
+
+export const N5_MATHS_2014_P2_Q7_MS = {
+  identity: { id: question.identity.answerCatalogId, schemaVersion: "N5_CATALOG_V2", sourceQuestionId: question.identity.id, courseId: question.identity.courseId, paperContextId: question.identity.paperContextId, year: 2014, paper: "P2", questionNumber: "7", questionFamilyId: question.family.familyId },
+  sourceContext: { sourceDocumentId: "N5_MATH_2014_MS", totalMarks: 5, sourcePages: [18], printedPageLabels: ["Page eighteen"], sourceEvidence: [evidence], generalMarkingPolicyId: "N5_MATH_2014_GENERAL_MARKING_POLICY" },
+  expectedResponse: {
+    responseTypes: ["NUMBER"],
+    canonicalAnswers: [{ id: "N5_MATH_2014_P2_Q7_A1", normalisedAnswer: "150 cm^3", numericValue: 150, answerForm: "NUMBER", mathematicallyEquivalentToVariantIds: [], conditionsForAcceptance: ["The final mark requires rounding to two significant figures after sufficiently precise intermediate calculations."], sourceEvidence: [evidence], notes: null }],
+    acceptedEquivalentForms: [], precisionType: "SIGNIFICANT_FIGURES", precisionValue: 2, acceptedRange: null, units: unitProfile("volume", "cm^3"), requiredContextStatement: false, answerCountRequired: 1, invalidRelatedValues: ["39", "120", "110", "160", "360", "460", "80", "250"], extraAnswerTreatment: "QUESTION_SPECIFIC",
+  },
+  sourceDirectives: [
+    { id: D_PI, layer: "QUESTION_NOTE", scope: "QUESTION", effect: "ACCEPT", normalisedSummary: "Legitimate variations in the numerical value used for pi are accepted.", appliesToPartIds: ["Q7_MAIN"], appliesToMarkIds: [M1, M2, M4, M5], appliesToMethodIds: [P1], marksAwarded: null, maximumMarks: null, sourceEvidence: [evidence] },
+    { id: D_PRECISION, layer: "QUESTION_NOTE", scope: "MARK", effect: "REQUIRE", normalisedSummary: "The final rounding mark is available only when every intermediate numerical result retained at least three significant figures.", appliesToPartIds: ["Q7_MAIN"], appliesToMarkIds: [M5], appliesToMethodIds: [P1], marksAwarded: null, maximumMarks: null, sourceEvidence: [evidence] },
+  ],
+  markNodes: [
+    markNode(M1, 1, "Q7_MAIN", "PROCESS", "Substitute the cone dimensions correctly into the cone-volume formula.", "Establish the outer cone volume.", ["geo-g03-standard-solid-volume"], ["geo-g3-1"], ["Q7_S1"], [evidence], { illustrativeEvidence: [{ id: "Q7_M1_E1", normalisedEvidence: "Use radius 4 and height 15 in one-third times pi times radius squared times height, giving approximately 251.32.", acceptedLocations: ["WORKING"], mayBeImpliedByLaterWork: true, mayBeImpliedByCorrectFinalAnswer: false, visualElementIds: ["VIS_Q7"], sourceEvidence: [evidence] }], methodPathwayIds: [P1] }),
+    markNode(M2, 2, "Q7_MAIN", "PROCESS", "Substitute the internal diameter correctly into a sphere or hemisphere volume calculation.", "Establish the inner hemispherical volume from radius 3.7.", ["geo-g03-standard-solid-volume"], ["geo-g3-1"], ["Q7_S2"], [evidence], { illustrativeEvidence: [
+      { id: "Q7_M2_E1", normalisedEvidence: "Calculate the full sphere volume using radius 3.7, approximately 212.17, before halving later.", acceptedLocations: ["WORKING"], mayBeImpliedByLaterWork: true, mayBeImpliedByCorrectFinalAnswer: false, visualElementIds: ["VIS_Q7"], sourceEvidence: [evidence] },
+      { id: "Q7_M2_E2", normalisedEvidence: "Calculate the hemisphere directly as half of the sphere volume, approximately 106.08.", acceptedLocations: ["WORKING"], mayBeImpliedByLaterWork: true, mayBeImpliedByCorrectFinalAnswer: false, visualElementIds: ["VIS_Q7"], sourceEvidence: [evidence] },
+    ], methodPathwayIds: [P1] }),
+    markNode(M3, 3, "Q7_MAIN", "INTERPRETATION", "Recognise that the hemispherical volume must be removed from the cone volume.", "Identify the required composite-volume operation.", ["geo-g03-standard-solid-volume"], ["geo-g3-1"], ["Q7_S3"], [evidence], { illustrativeEvidence: [{ id: "Q7_M3_E1", normalisedEvidence: "Use cone volume minus hemisphere volume.", acceptedLocations: ["WORKING"], mayBeImpliedByLaterWork: true, mayBeImpliedByCorrectFinalAnswer: false, visualElementIds: ["VIS_Q7"], sourceEvidence: [evidence] }], methodPathwayIds: [P1] }),
+    markNode(M4, 4, "Q7_MAIN", "ACCURACY", "Carry out the complete two-volume calculation correctly within a valid strategy.", "Obtain the unrounded remaining volume.", ["geo-g03-standard-solid-volume"], ["geo-g3-1"], ["Q7_S3"], [evidence], { illustrativeEvidence: [{ id: "Q7_M4_E1", normalisedEvidence: "Obtain approximately 145.24 from a valid difference of two volume calculations.", acceptedLocations: ["WORKING"], mayBeImpliedByLaterWork: true, mayBeImpliedByCorrectFinalAnswer: false, visualElementIds: [], sourceEvidence: [evidence] }], eligibilityConditions: ["The calculation must involve the difference or sum of two volume calculations, as specified by the source."], methodPathwayIds: [P1] }),
+    markNode(M5, 5, "Q7_MAIN", "ROUNDING", "Round the final result to two significant figures.", "Apply the source-specified final precision.", ["geo-g03-standard-solid-volume"], ["geo-g3-1"], ["Q7_S4"], [evidence], { illustrativeEvidence: [{ id: "Q7_M5_E1", normalisedEvidence: "Round the eligible unrounded result to 150.", acceptedLocations: ["WORKING", "FINAL_ANSWER"], mayBeImpliedByLaterWork: false, mayBeImpliedByCorrectFinalAnswer: false, visualElementIds: [], sourceEvidence: [evidence] }], eligibilityConditions: ["All intermediate numerical answers must have at least three significant figures."], presentationConditions: ["Final answer is required to two significant figures."], methodPathwayIds: [P1], sourceDirectiveIds: [D_PRECISION] }),
+  ],
+  methodPathways: [{ id: P1, variantId: "OUTER_MINUS_INNER", evidenceRole: "PRIMARY_ILLUSTRATIVE", supportsFullCredit: true, applicabilityConditions: [], steps: [
+    { id: "Q7_P1_S1", order: 1, normalisedStep: "Calculate the cone volume using radius 4 and height 15.", linkedQuestionSubgoalIds: ["Q7_S1"], linkedMarkIds: [M1], dependsOnStepIds: [], requiredOperations: ["VOLUME_CONE"], resultingStateSummary: "Approximately 251.32 cubic centimetres.", sourceEvidence: [evidence] },
+    { id: "Q7_P1_S2", order: 2, normalisedStep: "Calculate the sphere or hemisphere volume using radius 3.7.", linkedQuestionSubgoalIds: ["Q7_S2"], linkedMarkIds: [M2], dependsOnStepIds: [], requiredOperations: ["VOLUME_SPHERE", "HALVE_IF_NEEDED"], resultingStateSummary: "Hemisphere approximately 106.08 cubic centimetres.", sourceEvidence: [evidence] },
+    { id: "Q7_P1_S3", order: 3, normalisedStep: "Subtract the hemispherical volume from the cone volume.", linkedQuestionSubgoalIds: ["Q7_S3"], linkedMarkIds: [M3, M4], dependsOnStepIds: ["Q7_P1_S1", "Q7_P1_S2"], requiredOperations: ["SUBTRACT"], resultingStateSummary: "Approximately 145.24 cubic centimetres.", sourceEvidence: [evidence] },
+    { id: "Q7_P1_S4", order: 4, normalisedStep: "Round the eligible result to two significant figures.", linkedQuestionSubgoalIds: ["Q7_S4"], linkedMarkIds: [M5], dependsOnStepIds: ["Q7_P1_S3"], requiredOperations: ["ROUND"], resultingStateSummary: "150", sourceEvidence: [evidence] },
+  ], markMappingComplete: true, sourceTotalAwardRules: [], mathematicallyEquivalentMethodIds: [], materiallyDistinctFromMethodIds: [], excludedMethodReasons: [], sourceEvidence: [evidence] }],
+  methodEquivalence: emptyMethodEquivalence(),
+  workingPolicy: workingPolicy(answerOnly("NOT_STATED", null, [], [evidence], [], [], "The detailed instructions do not state a general award for the correct final answer without working."), [M1, M2, M3, M4], [], "P2", 2014),
+  presentationPolicy: presentationPolicy([evidence], { precision: { finalPrecisionType: "SIGNIFICANT_FIGURES", finalPrecisionValue: 2, acceptedFinalRange: null, prematureRoundingTreatment: "PENALISE", minimumIntermediatePrecision: "At least 3 significant figures in every intermediate numerical answer for the final rounding mark.", sourceEvidence: [evidence] }, units: "NOT_STATED", otherConditions: ["The source accepts legitimate variations in pi."] }),
+  visualMarking: emptyVisualMarking(),
+  commonResponses: [
+    { id: "Q7_CR_FULL_SPHERE_SUBTRACT", sourceStatus: "EXPLICITLY_LISTED", category: "COMMON_ERROR", errorFamily: "FULL_SPHERE_NOT_HEMISPHERE", normalisedResponse: "Subtract the full sphere volume, producing about 39.", affectedMarkIds: [M3], marksAwarded: 4, maximumMarks: 5, followThroughAvailable: false, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_HEMI_RADIUS_4", sourceStatus: "EXPLICITLY_LISTED", category: "COMMON_ERROR", errorFamily: "WRONG_HEMISPHERE_RADIUS", normalisedResponse: "Use radius 4 for the hemisphere, producing about 120.", affectedMarkIds: [M2], marksAwarded: 4, maximumMarks: 5, followThroughAvailable: true, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_CONE_RADIUS_3_7", sourceStatus: "EXPLICITLY_LISTED", category: "COMMON_ERROR", errorFamily: "WRONG_CONE_RADIUS", normalisedResponse: "Use radius 3.7 for the cone, producing about 110.", affectedMarkIds: [M1], marksAwarded: 4, maximumMarks: 5, followThroughAvailable: true, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_DIAMETERS_AS_RADII", sourceStatus: "EXPLICITLY_LISTED", category: "COMMON_ERROR", errorFamily: "DIAMETER_AS_RADIUS", normalisedResponse: "Use the printed diameters as radii in both volume formulas, producing about 160.", affectedMarkIds: [M1], marksAwarded: 4, maximumMarks: 5, followThroughAvailable: true, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_ADD_HEMISPHERE", sourceStatus: "EXPLICITLY_LISTED", category: "COMMON_ERROR", errorFamily: "ADD_INSTEAD_OF_SUBTRACT", normalisedResponse: "Add the hemisphere volume to the cone volume, producing about 360.", affectedMarkIds: [M3], marksAwarded: 4, maximumMarks: 5, followThroughAvailable: true, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_ADD_FULL_SPHERE", sourceStatus: "EXPLICITLY_LISTED", category: "COMMON_ERROR", errorFamily: "ADD_FULL_SPHERE", normalisedResponse: "Add the full sphere volume to the cone volume, producing about 460.", affectedMarkIds: [M3], marksAwarded: 4, maximumMarks: 5, followThroughAvailable: true, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_BOTH_RADII_WRONG", sourceStatus: "EXPLICITLY_LISTED", category: "COMMON_ERROR", errorFamily: "BOTH_RADII_WRONG", normalisedResponse: "Use 3.7 for the cone radius and 4 for the hemisphere radius, producing about 80.", affectedMarkIds: [M1, M2], marksAwarded: 3, maximumMarks: 5, followThroughAvailable: true, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_CONE_ONLY", sourceStatus: "EXPLICITLY_LISTED", category: "PARTIAL_METHOD", errorFamily: "OMIT_INNER_VOLUME", normalisedResponse: "Calculate only the cone volume and round it to about 250.", affectedMarkIds: [M2, M3, M4], marksAwarded: 2, maximumMarks: 5, followThroughAvailable: false, sourceDirectiveIds: [], sourceEvidence: [evidence] },
+    { id: "Q7_CR_PREMATURE_ROUND", sourceStatus: "EXPLICITLY_LISTED", category: "ROUNDING_ERROR", errorFamily: "INTERMEDIATE_PRECISION_TOO_LOW", normalisedResponse: "Round intermediate volumes to 250 and 110, then subtract to get 140.", affectedMarkIds: [M5], marksAwarded: 4, maximumMarks: 5, followThroughAvailable: false, sourceDirectiveIds: [D_PRECISION], sourceEvidence: [evidence] },
+  ],
+  generalPolicy: { policyId: "N5_MATH_2014_GENERAL_MARKING_POLICY", relevantRuleIds: [...GENERAL_2014_RULE_IDS], questionSpecificOverrides: [D_PI, D_PRECISION] },
+  relationship: {
+    partMarkMap: [{ questionPartId: "Q7_MAIN", markIds: [M1, M2, M3, M4, M5] }],
+    subgoalMarkMap: [{ questionSubgoalId: "Q7_S1", markIds: [M1] }, { questionSubgoalId: "Q7_S2", markIds: [M2] }, { questionSubgoalId: "Q7_S3", markIds: [M3, M4] }, { questionSubgoalId: "Q7_S4", markIds: [M5] }],
+    promptInstructionConsequences: [{ instructionType: "TWO_SIGNIFICANT_FIGURES", markingConsequence: "The fifth mark is the final two-significant-figure rounding mark and additionally requires at least three significant figures in all intermediate answers.", affectedMarkIds: [M5], sourceEvidence: [evidence] }],
+    informationEvidenceMap: [
+      { questionInformationId: "Q7_INFO_CONE_D", usedByMethodIds: [P1], supportsMarkIds: [M1] }, { questionInformationId: "Q7_INFO_CONE_H", usedByMethodIds: [P1], supportsMarkIds: [M1] }, { questionInformationId: "Q7_INFO_HEMI_D", usedByMethodIds: [P1], supportsMarkIds: [M2] }, { questionInformationId: "Q7_INFO_MATERIAL", usedByMethodIds: [P1], supportsMarkIds: [M3, M4] }, { questionInformationId: "Q7_INFO_ROUND", usedByMethodIds: [P1], supportsMarkIds: [M5] },
+    ],
+    representationEvidenceMap: [{ visualElementId: "VIS_Q7", normalisedEvidence: "The composite-solid diagram supports identification of the outer cone and inner hemisphere whose volumes are combined.", supportsMarkIds: [M1, M2, M3] }], crossPartDependencies: [], errorPropagationGraph: [],
+  },
+  sourcePresentation: sourcePresentation([18], "TABLE_ROW", 1, 3, 9),
+  consistency: notReviewedConsistency(comparisonKey("Q7_MARKING_COMPARISON", question.family.familyId, ["geo-g03-standard-solid-volume"], 5, ["NUMBER"], ["composite-volume operation", "radius/diameter errors", "intermediate precision", "final significant figures"]), [
+    consistencyFeature("intermediate_precision_gate_for_final_mark", true, "The final rounding mark is explicitly unavailable unless every intermediate numerical answer has at least three significant figures.", [evidence]),
+    consistencyFeature("listed_single_component_errors_often_preserve_four_marks", true, "Several source-listed single-component errors are explicitly awarded four of five marks when working is shown.", [evidence]),
+    consistencyFeature("correct_answer_without_working_treatment", "NOT_STATED", "The detailed question instructions do not state a general answer-only award for the correct final value.", [evidence]),
+  ]),
+  integrity: answerIntegrity(), generation: generationNotReviewed(), review: answerReviewInProgress("7", "P2", 2014),
+} satisfies AnswerCatalogEntry;
