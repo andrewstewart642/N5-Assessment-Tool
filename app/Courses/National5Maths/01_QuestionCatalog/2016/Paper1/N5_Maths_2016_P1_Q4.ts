@@ -1,0 +1,38 @@
+import { createA8QuestionCatalogEntry } from "../../A8SimultaneousEquationsCatalogFactory";
+
+export const N5_MATHS_2016_P1_Q4 = createA8QuestionCatalogEntry({
+  year: 2016,
+  paper: "P1",
+  questionNumber: "4",
+  pdfPage: 5,
+  printedPageLabel: "Page 05",
+  mode: "CONTEXT_FORM_AND_SOLVE",
+  equations: [{ a: 2, b: 3, c: 9.6 }, { a: 3, b: 4, c: 13.3 }],
+  variableSymbols: ["c", "d"],
+  solution: [1.5, 2.2],
+  numberTypes: ["INTEGER", "DECIMAL", "ALGEBRAIC"],
+  responseRegions: [
+    { id: "Q4_SPACE_A", partIds: ["Q4_a"], topPt: 149.6, bottomPt: 206.0, boundaryConvention: "Bottom of part (a) instruction to the top of part (b)." },
+    { id: "Q4_SPACE_B", partIds: ["Q4_b"], topPt: 257.3, bottomPt: 313.6, boundaryConvention: "Bottom of part (b) instruction to the top of part (c)." },
+    { id: "Q4_SPACE_C", partIds: ["Q4_c"], topPt: 340.4, bottomPt: 746.1, boundaryConvention: "Bottom of part (c) instruction to the Turn-over marker." },
+  ],
+  answerSpaceCategory: "FULL_PAGE",
+  estimatedWritingLines: 18,
+  promptWordCount: 62,
+  promptSentenceCount: 7,
+  algebraicallyExplicit: false,
+  context: {
+    domain: "costume material",
+    objectLabels: ["cloak", "dress"],
+    relationshipLabels: ["first production day", "second production day"],
+    unitDimension: "area",
+    unitSymbol: "m^2",
+    currency: false,
+    namedPeople: true,
+    realWorldUnits: true,
+    firstRelationshipSummary: "Two units of the first garment and three of the second use 9.6 square metres of material.",
+    secondRelationshipSummary: "Three units of the first garment and four of the second use 13.3 square metres of material.",
+    targetSummary: "Determine the material required for one of each garment.",
+    explicitVariableDefinitions: false,
+  },
+});

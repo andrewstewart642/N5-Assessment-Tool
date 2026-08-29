@@ -1,0 +1,38 @@
+import { createA8QuestionCatalogEntry } from "../../A8SimultaneousEquationsCatalogFactory";
+
+export const N5_MATHS_2022_P2_Q4 = createA8QuestionCatalogEntry({
+  year: 2022,
+  paper: "P2",
+  questionNumber: "4",
+  pdfPage: 18,
+  printedPageLabel: "page 05",
+  mode: "CONTEXT_FORM_AND_SOLVE",
+  equations: [{ a: 4, b: 3, c: 4.25 }, { a: 5, b: 2, c: 4.7 }],
+  variableSymbols: ["m", "a"],
+  solution: [0.8, 0.35],
+  numberTypes: ["INTEGER", "DECIMAL", "ALGEBRAIC"],
+  responseRegions: [
+    { id: "Q4_SPACE_A", partIds: ["Q4_a"], topPt: 133.6, bottomPt: 218.3, boundaryConvention: "Bottom of part (a) instruction to the next contextual statement." },
+    { id: "Q4_SPACE_B", partIds: ["Q4_b"], topPt: 278.1, bottomPt: 362.8, boundaryConvention: "Bottom of part (b) instruction to part (c)." },
+    { id: "Q4_SPACE_C", partIds: ["Q4_c"], topPt: 376.3, bottomPt: 774.8, boundaryConvention: "Bottom of part (c) instruction to the top of the footer/barcode block." },
+  ],
+  answerSpaceCategory: "FULL_PAGE",
+  estimatedWritingLines: 17,
+  promptWordCount: 55,
+  promptSentenceCount: 7,
+  algebraicallyExplicit: true,
+  context: {
+    domain: "fruit pricing",
+    objectLabels: ["mango", "apple"],
+    relationshipLabels: ["first purchase", "second purchase"],
+    unitDimension: "currency",
+    unitSymbol: "£",
+    currency: true,
+    namedPeople: true,
+    realWorldUnits: true,
+    firstRelationshipSummary: "Four units of the first fruit and three of the second cost 4.25 pounds in total.",
+    secondRelationshipSummary: "Five units of the first fruit and two of the second cost 4.70 pounds in total.",
+    targetSummary: "Determine the price of one of each fruit.",
+    explicitVariableDefinitions: false,
+  },
+});

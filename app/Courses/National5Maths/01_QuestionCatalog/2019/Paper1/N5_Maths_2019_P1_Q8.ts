@@ -1,0 +1,38 @@
+import { createA8QuestionCatalogEntry } from "../../A8SimultaneousEquationsCatalogFactory";
+
+export const N5_MATHS_2019_P1_Q8 = createA8QuestionCatalogEntry({
+  year: 2019,
+  paper: "P1",
+  questionNumber: "8",
+  pdfPage: 8,
+  printedPageLabel: "page 08",
+  mode: "CONTEXT_FORM_AND_SOLVE",
+  equations: [{ a: 7, b: 3, c: 215 }, { a: 5, b: 4, c: 200 }],
+  variableSymbols: ["c", "g"],
+  solution: [20, 25],
+  numberTypes: ["INTEGER", "ALGEBRAIC"],
+  responseRegions: [
+    { id: "Q8_SPACE_A", partIds: ["Q8_a"], topPt: 130.8, bottomPt: 215.5, boundaryConvention: "Bottom of part (a) instruction to the next contextual statement." },
+    { id: "Q8_SPACE_B", partIds: ["Q8_b"], topPt: 275.2, bottomPt: 359.9, boundaryConvention: "Bottom of part (b) instruction to part (c)." },
+    { id: "Q8_SPACE_C", partIds: ["Q8_c"], topPt: 386.7, bottomPt: 774.8, boundaryConvention: "Bottom of part (c) instruction to the top of the footer/barcode block." },
+  ],
+  answerSpaceCategory: "FULL_PAGE",
+  estimatedWritingLines: 17,
+  promptWordCount: 58,
+  promptSentenceCount: 7,
+  algebraicallyExplicit: false,
+  context: {
+    domain: "bag mass",
+    objectLabels: ["cement bag", "gravel bag"],
+    relationshipLabels: ["first purchase", "second purchase"],
+    unitDimension: "mass",
+    unitSymbol: "kg",
+    currency: false,
+    namedPeople: true,
+    realWorldUnits: true,
+    firstRelationshipSummary: "Seven units of the first bag type and three of the second have a total mass of 215 kilograms.",
+    secondRelationshipSummary: "Five units of the first bag type and four of the second have a total mass of 200 kilograms.",
+    targetSummary: "Determine the mass of one bag of each type.",
+    explicitVariableDefinitions: false,
+  },
+});
