@@ -437,7 +437,9 @@ const A8_TEST_MODULE:
 
             paperSuitability:
               question.paper,
-          },
+          } satisfies NonNullable<
+            GeneratedQuestionData["classification"]
+          >,
 
           sourceSkillCode:
             "A8",
