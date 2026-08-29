@@ -109,10 +109,10 @@ const difficultyCoefficientMax = (difficulty: A8GeneratorDifficulty) => {
 };
 
 /**
- * Construct coefficient pairs that resemble the structural discipline in the
- * historical A8 corpus: coefficients are never ±1, neither row has a common
- * factor, equal coefficients do not create a free elimination route, and no
- * row collapses to a form such as 5x + 5y = ... .
+ * Coefficients follow the historical A8 construction discipline rather than
+ * being arbitrary small integers. In particular, generated rows cannot reduce
+ * immediately, cannot contain coefficient ±1, and cannot create a free
+ * elimination route by matching a coefficient across the two equations.
  */
 const coefficientPair = (
   rng: SeededRandom,
@@ -126,13 +126,9 @@ const coefficientPair = (
     let d = rng.int(2, max);
     let e = rng.int(2, max);
 
-    if (!contextual) {
-      // The supplied abstract corpus commonly uses one negative coefficient,
-      // but also contains all-positive systems. Keep the sign pattern simple.
-      if (rng.chance(0.55)) {
-        if (rng.chance(0.5)) b *= -1;
-        else e *= -1;
-      }
+    if (!contextual && rng.chance(0.55)) {
+      if (rng.chance(0.5)) b *= -1;
+      else e *= -1;
     }
 
     if (Math.abs(a) === Math.abs(b) || Math.abs(d) === Math.abs(e)) continue;
@@ -174,9 +170,7 @@ const abstractSolution = (
     else negativeMagnitude += 0.5;
   }
 
-  if (positive === negativeMagnitude) {
-    positive = clean(positive + (halfInteger ? 1 : 1));
-  }
+  if (positive === negativeMagnitude) positive += 1;
 
   return rng.chance(0.25)
     ? [-negativeMagnitude, positive]
@@ -247,11 +241,8 @@ const promptValue = (context: A8GeneratedContext, value: number) => {
   return `${numeric} ${context.unitPromptLabel}`;
 };
 
-const singularOrPlural = (
-  count: number,
-  singular: string,
-  plural: string,
-) => `${count} ${count === 1 ? singular : plural}`;
+const singularOrPlural = (count: number, singular: string, plural: string) =>
+  `${count} ${count === 1 ? singular : plural}`;
 
 const NAMES = [
   "Amina", "Ben", "Cara", "Dylan", "Eva", "Fraser", "Hana", "Imran",
@@ -282,7 +273,10 @@ const buildContext = (
     itemPluralLabels: [...shell.itemPlural],
     relationshipLabels: ["first relationship", "second relationship", "third relationship"],
     settingLabel: shell.setting,
+    sameSettingLabel: shell.sameSetting,
     resourceLabel: shell.resourceLabel,
+    activityLead: shell.activityLead,
+    activityVerb: shell.activityVerb,
     unitDimension: shell.unitDimension,
     unitSymbol: shell.unitSymbol,
     unitPromptLabel: shell.unitPromptLabel,
@@ -328,10 +322,7 @@ const equationCommand = (variant: number, second: boolean) => {
   return choices[variant % choices.length];
 };
 
-const finalSolveCommand = (
-  context: A8GeneratedContext,
-  paper: A8GeneratorPaper,
-) => {
+const finalSolveCommand = (context: A8GeneratedContext, paper: A8GeneratorPaper) => {
   const [firstItem, secondItem] = context.itemLabels;
   const algebraically = paper === "P2" || context.wordingVariant === 1;
 
@@ -374,24 +365,24 @@ const contextualPrompt = (
   if (context.contextKind === "PURCHASE") {
     if (context.wordingVariant === 0) {
       firstStatement = `${name1} buys ${firstItems} ${context.settingLabel}.\nThe total cost is ${firstTotal}.`;
-      secondStatement = `${name2} buys ${secondItems} ${context.settingLabel.replace(/^at |^from |^for /, (prefix) => prefix)}.\nThe total cost is ${secondTotal}.`;
+      secondStatement = `${name2} buys ${secondItems} ${context.sameSettingLabel}.\nThe total cost is ${secondTotal}.`;
     } else if (context.wordingVariant === 1) {
       firstStatement = `${name1} pays ${firstTotal} for ${firstItems} ${context.settingLabel}.`;
-      secondStatement = `${name2} pays ${secondTotal} for ${secondItems} ${context.sameSettingLabel ?? context.settingLabel}.`;
+      secondStatement = `${name2} pays ${secondTotal} for ${secondItems} ${context.sameSettingLabel}.`;
     } else {
       firstStatement = `${name1} purchases ${firstItems} ${context.settingLabel}.\nAltogether, these cost ${firstTotal}.`;
-      secondStatement = `${name2} purchases ${secondItems} ${context.sameSettingLabel ?? context.settingLabel}.\nAltogether, these cost ${secondTotal}.`;
+      secondStatement = `${name2} purchases ${secondItems} ${context.sameSettingLabel}.\nAltogether, these cost ${secondTotal}.`;
     }
   } else if (context.contextKind === "MASS") {
     if (context.wordingVariant === 0) {
       firstStatement = `${name1} loads ${firstItems} ${context.settingLabel}.\nThe total mass of the load is ${firstTotal}.`;
-      secondStatement = `${name2} loads ${secondItems} ${context.sameSettingLabel ?? context.settingLabel}.\nThe total mass of the load is ${secondTotal}.`;
+      secondStatement = `${name2} loads ${secondItems} ${context.sameSettingLabel}.\nThe total mass of the load is ${secondTotal}.`;
     } else if (context.wordingVariant === 1) {
       firstStatement = `A load prepared by ${name1} contains ${firstItems}.\nIts total mass is ${firstTotal}.`;
       secondStatement = `A second load prepared by ${name2} contains ${secondItems}.\nIts total mass is ${secondTotal}.`;
     } else {
       firstStatement = `${name1} has ${firstItems} ${context.settingLabel}.\nTogether they have a mass of ${firstTotal}.`;
-      secondStatement = `${name2} has ${secondItems} ${context.sameSettingLabel ?? context.settingLabel}.\nTogether they have a mass of ${secondTotal}.`;
+      secondStatement = `${name2} has ${secondItems} ${context.sameSettingLabel}.\nTogether they have a mass of ${secondTotal}.`;
     }
   } else {
     introduction = `${name1} ${context.activityLead ?? "is making two types of item"}.`;
@@ -418,8 +409,7 @@ const contextualPrompt = (
   let cCommand = `(c) ${finalSolveCommand(context, paper)}`;
   if (family === "CONTEXT_DERIVED_TOTAL" && context.derivedCounts && context.derivedTotal !== undefined) {
     const thirdItems = `${singularOrPlural(context.derivedCounts[0], item1, item1Plural)} and ${singularOrPlural(context.derivedCounts[1], item2, item2Plural)}`;
-    const thirdSetting = context.contextKind === "MASS" ? "on a third load" : "in a third order";
-    cCommand = `${name3} has ${thirdItems} ${thirdSetting}.\n(c) Calculate the total ${context.contextKind === "MASS" ? "mass" : "value"} of these items.`;
+    cCommand = `${name3} has ${thirdItems} on a third load.\n(c) Calculate the total mass of these items.`;
   }
 
   const fullPrompt = [
@@ -432,7 +422,7 @@ const contextualPrompt = (
     bCommand,
     "",
     cCommand,
-  ].filter((line, index, all) => line !== "" || (index > 0 && all[index - 1] !== "")).join("\n").trim();
+  ].join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{3,}/g, "\n\n");
 
   return {
     prompt: fullPrompt,
@@ -440,7 +430,7 @@ const contextualPrompt = (
     sections: [
       { label: "a" as const, text: [introduction, variableDefinition, firstStatement, aCommand].filter(Boolean).join("\n"), marks: 1 },
       { label: "b" as const, text: `${secondStatement}\n${bCommand}`, marks: 1 },
-      { label: "c" as const, text: cCommand.replace(/^.*\n\(c\) /, ""), marks: 4 },
+      { label: "c" as const, text: cCommand, marks: 4 },
     ],
   };
 };
@@ -477,7 +467,7 @@ const candidateArithmeticAcceptable = (
     }
 
     if (context?.contextKind === "RESOURCE") {
-      const oneDecimal = (value: number) => Number.isInteger(value * 10);
+      const oneDecimal = (value: number) => Number.isInteger(Math.round(value * 10));
       if (![context.firstTotal, context.secondTotal].every(oneDecimal)) return false;
     }
   }
@@ -485,12 +475,13 @@ const candidateArithmeticAcceptable = (
   return true;
 };
 
-const chooseVariableSymbols = (
-  rng: SeededRandom,
-  family: A8GeneratorFamily,
-): [string, string] => {
-  if (family === "CONTEXT_FORM_AND_SOLVE") return rng.pick<readonly [string, string]>([["x", "y"], ["a", "b"], ["p", "q"]] as const) as [string, string];
-  if (family === "CONTEXT_DERIVED_TOTAL") return rng.pick<readonly [string, string]>([["p", "e"], ["m", "n"], ["x", "y"]] as const) as [string, string];
+const chooseVariableSymbols = (rng: SeededRandom, family: A8GeneratorFamily): [string, string] => {
+  if (family === "CONTEXT_FORM_AND_SOLVE") {
+    return rng.pick<readonly [string, string]>([["x", "y"], ["a", "b"], ["p", "q"]] as const) as [string, string];
+  }
+  if (family === "CONTEXT_DERIVED_TOTAL") {
+    return rng.pick<readonly [string, string]>([["p", "e"], ["m", "n"], ["x", "y"]] as const) as [string, string];
+  }
   return rng.pick<readonly [string, string]>([["x", "y"], ["c", "d"], ["p", "r"], ["m", "n"], ["a", "b"]] as const) as [string, string];
 };
 
@@ -516,20 +507,15 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
   for (let attempt = 0; attempt < 1500; attempt += 1) {
     const coefficients = coefficientPair(rng, difficulty, contextual);
     const availableShells = contextual ? contextShellsFor(paper, derived) : [];
+    if (contextual && availableShells.length === 0) {
+      throw new Error(`No curated A8 contexts are available for ${family} on ${paper}.`);
+    }
     const shell = contextual ? rng.pick(availableShells) : null;
     const solution = shell ? contextualSolution(rng, shell) : abstractSolution(rng, difficulty);
 
     const equations: [A8LinearEquation, A8LinearEquation] = [
-      {
-        a: coefficients[0][0],
-        b: coefficients[0][1],
-        c: clean(coefficients[0][0] * solution[0] + coefficients[0][1] * solution[1]),
-      },
-      {
-        a: coefficients[1][0],
-        b: coefficients[1][1],
-        c: clean(coefficients[1][0] * solution[0] + coefficients[1][1] * solution[1]),
-      },
+      { a: coefficients[0][0], b: coefficients[0][1], c: clean(coefficients[0][0] * solution[0] + coefficients[0][1] * solution[1]) },
+      { a: coefficients[1][0], b: coefficients[1][1], c: clean(coefficients[1][0] * solution[0] + coefficients[1][1] * solution[1]) },
     ];
 
     const determinant = equations[0].a * equations[1].b - equations[1].a * equations[0].b;
