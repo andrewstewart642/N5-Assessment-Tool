@@ -31,7 +31,10 @@ export type A8GeneratedContext = {
   itemPluralLabels: [string, string];
   relationshipLabels: [string, string, string?];
   settingLabel: string;
+  sameSettingLabel: string;
   resourceLabel: string | null;
+  activityLead: string | null;
+  activityVerb: string | null;
   unitDimension: "currency" | "mass" | "area" | "length" | "volume";
   unitSymbol: string;
   unitPromptLabel: string;
