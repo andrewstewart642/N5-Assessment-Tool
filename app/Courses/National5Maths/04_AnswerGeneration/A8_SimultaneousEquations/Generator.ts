@@ -49,8 +49,10 @@ const combinePlan = (plan: A8EliminationPlan): A8LinearEquation => {
 };
 
 const formatContextValue = (context: A8GeneratedContext, value: number) => {
-  const numeric = context.displayDecimals > 0 ? value.toFixed(context.displayDecimals) : formatNumber(value);
-  return context.unitPosition === "PREFIX" ? `${context.unitSymbol}${numeric}` : `${numeric} ${context.unitSymbol}`;
+  if (context.unitPosition === "PREFIX") {
+    return `${context.unitSymbol}${value.toFixed(2)}`;
+  }
+  return `${formatNumber(value)} ${context.unitSymbol}`;
 };
 
 const canonicalEquationAnswers = (question: A8GeneratedQuestion): [string, string] => [
@@ -105,24 +107,50 @@ const markPoints = (question: A8GeneratedQuestion): A8GeneratedMarkPoint[] => {
   ];
 };
 
+const bestSubstitution = (
+  question: A8GeneratedQuestion,
+  solvedIndex: 0 | 1,
+  eliminatedIndex: 0 | 1,
+  firstSolvedValue: number,
+) => question.equations
+  .map((equation, equationIndex) => {
+    const knownContribution = solvedIndex === 0
+      ? equation.a * firstSolvedValue
+      : equation.b * firstSolvedValue;
+    const unknownCoefficient = eliminatedIndex === 0 ? equation.a : equation.b;
+    const numerator = equation.c - knownContribution;
+    const eliminatedValue = clean(numerator / unknownCoefficient);
+    const decimalPenalty = [knownContribution, numerator, eliminatedValue]
+      .filter((value) => !Number.isInteger(value)).length * 4;
+    return {
+      equation,
+      equationIndex,
+      knownContribution,
+      unknownCoefficient,
+      numerator,
+      eliminatedValue,
+      score: Math.abs(unknownCoefficient) * 2 + decimalPenalty + Math.abs(numerator) * 0.02,
+    };
+  })
+  .sort((first, second) => first.score - second.score)[0];
+
 const answerMethod = (
   question: A8GeneratedQuestion,
   plan: A8EliminationPlan,
 ): A8GeneratedAnswerMethod => {
   const variables = question.variableSymbols;
   const combined = combinePlan(plan);
-  const eliminatedIndex = plan.variable === "FIRST" ? 0 : 1;
-  const solvedIndex = eliminatedIndex === 0 ? 1 : 0;
+  const eliminatedIndex: 0 | 1 = plan.variable === "FIRST" ? 0 : 1;
+  const solvedIndex: 0 | 1 = eliminatedIndex === 0 ? 1 : 0;
   const solvedCoefficient = solvedIndex === 0 ? combined.a : combined.b;
   const firstSolvedValue = clean(combined.c / solvedCoefficient);
   const expectedFirstSolvedValue = question.solution[solvedIndex];
   if (Math.abs(firstSolvedValue - expectedFirstSolvedValue) > 1e-8) {
     throw new Error("Generated elimination plan did not solve to the shared question state.");
   }
-  const substituteEquation = question.equations[0];
-  const knownContribution = solvedIndex === 0 ? substituteEquation.a * firstSolvedValue : substituteEquation.b * firstSolvedValue;
-  const unknownCoefficient = eliminatedIndex === 0 ? substituteEquation.a : substituteEquation.b;
-  const eliminatedValue = clean((substituteEquation.c - knownContribution) / unknownCoefficient);
+
+  const substitution = bestSubstitution(question, solvedIndex, eliminatedIndex, firstSolvedValue);
+  const eliminatedValue = substitution.eliminatedValue;
   const solvedValues: [number, number] = eliminatedIndex === 0
     ? [eliminatedValue, firstSolvedValue]
     : [firstSolvedValue, eliminatedValue];
@@ -150,7 +178,7 @@ const answerMethod = (
   });
   lines.push({
     id: `${question.instanceId}-${plan.variable}-SUBSTITUTE`,
-    text: `Substitute ${variables[solvedIndex]} = ${formatNumber(firstSolvedValue)} into an original equation to obtain ${variables[eliminatedIndex]} = ${formatNumber(eliminatedValue)}.`,
+    text: `Substitute ${variables[solvedIndex]} = ${formatNumber(firstSolvedValue)} into equation ${substitution.equationIndex + 1} to obtain ${variables[eliminatedIndex]} = ${formatNumber(eliminatedValue)}.`,
     markNumbers: [secondValueMark],
   });
 
@@ -181,14 +209,14 @@ const answerMethod = (
   };
 };
 
-const methodComplexity = (plan: A8EliminationPlan) => Math.max(plan.firstMultiplier, plan.secondMultiplier) * 10 + plan.firstMultiplier + plan.secondMultiplier;
-
 export const generateA8Answer = (question: A8GeneratedQuestion): A8GeneratedMarkingScheme => {
   const methods: A8GeneratedAnswerMethod[] = [
     answerMethod(question, question.eliminationPlans[0]),
     answerMethod(question, question.eliminationPlans[1]),
   ];
-  const defaultIndex = methodComplexity(question.eliminationPlans[0]) <= methodComplexity(question.eliminationPlans[1]) ? 0 : 1;
+  const defaultIndex = methods.findIndex(
+    (method) => method.eliminatedVariable === question.quality.calibratedRoute.eliminatedVariable,
+  );
   const contextual = !!question.context;
   const derived = question.family === "CONTEXT_DERIVED_TOTAL";
   const answer: A8GeneratedMarkingScheme = {
@@ -201,7 +229,7 @@ export const generateA8Answer = (question: A8GeneratedQuestion): A8GeneratedMark
     finalAnswers: finalAnswers(question),
     markPoints: markPoints(question),
     methods,
-    defaultMethodFamilyId: methods[defaultIndex].methodFamilyId,
+    defaultMethodFamilyId: methods[defaultIndex >= 0 ? defaultIndex : 0].methodFamilyId,
     workingPolicy: {
       unsupportedCorrectAnswerTreatment: "NO_CREDIT",
       algebraicWorkingRequired: true,
@@ -219,7 +247,8 @@ export const generateA8Answer = (question: A8GeneratedQuestion): A8GeneratedMark
     sourceBasis: question.sourceBasis,
     generationNotes: [
       "Question and answer generation consume the same deterministic mathematical state.",
-      "Both displayed methods use coefficient scaling and elimination; guess-and-check and repeated-substitution are deliberately outside the prototype method set.",
+      "The default worked method follows the calibrated written route selected by Question Generation.",
+      "Substitution uses the friendlier original equation for the generated values rather than mechanically using equation 1.",
       "Historical source wording and source layout are not used as generated answer templates.",
     ],
   };
