@@ -7,7 +7,16 @@ export type A8GeneratorFamily =
   | "CONTEXT_DERIVED_TOTAL";
 
 export type A8GeneratorPaper = "P1" | "P2";
-export type A8GeneratorDifficulty = 1 | 2 | 3 | 4 | 5;
+
+/**
+ * A8 exposes three evidence-derived difficulty bands. This is deliberately
+ * skill-specific rather than inheriting a fixed five-level course ladder.
+ */
+export type A8GeneratorDifficulty = 1 | 2 | 3;
+export type A8GeneratorDifficultyBandId =
+  | "LOWER_VALID"
+  | "TYPICAL"
+  | "UPPER_VALID";
 
 export type A8LinearEquation = {
   a: number;
@@ -64,6 +73,14 @@ export type A8GraphVisualSpec = {
 };
 
 export type A8GenerationQualityProfile = {
+  difficultyBandId: A8GeneratorDifficultyBandId;
+  calibrationSourceAnchorIds: string[];
+  familyObservedCount: number;
+  familyObservedTotal: number;
+  familyObservedProportion: number;
+  familyCycleLength: number;
+  familyCycleSlot: number;
+  historicalOverlapChecked: true;
   contextPoolSize: number;
   contextId: string | null;
   contextKind: A8GeneratedContext["contextKind"] | null;
@@ -73,11 +90,20 @@ export type A8GenerationQualityProfile = {
   easiestEliminationMultiplier: number;
   largestScaledCoefficient: number;
   largestScaledConstant: number;
+  calibratedRoute: {
+    eliminatedVariable: "FIRST" | "SECOND";
+    multipliers: [number, number];
+    scaledConstants: [number, number];
+    remainingCoefficient: number;
+    remainingConstant: number;
+    solvedValue: number;
+    routeScore: number;
+  };
   paperArithmeticProfile: "P1_WRITTEN" | "P2_CALCULATOR_AVAILABLE";
 };
 
 export type A8GeneratedQuestion = {
-  generatorId: "A8_SIMULTANEOUS_EQUATIONS_V2";
+  generatorId: "A8_SIMULTANEOUS_EQUATIONS_V3";
   instanceId: string;
   seed: number;
   family: A8GeneratorFamily;
@@ -109,6 +135,11 @@ export type A8GenerateOptions = {
   difficulty?: A8GeneratorDifficulty;
   family?: A8GeneratorFamily;
   paper?: A8GeneratorPaper;
+  /**
+   * Retained for compatibility with the prototype API. Calibrated automatic
+   * sampling now includes single-source families only where their observed
+   * paper/difficulty support permits them.
+   */
   includeExperimentalFamilies?: boolean;
 };
 
