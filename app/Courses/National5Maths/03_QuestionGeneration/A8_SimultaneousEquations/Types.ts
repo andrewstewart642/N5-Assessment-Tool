@@ -57,6 +57,7 @@ export type A8GeneratedContext = {
   derivedTotal?: number;
   promptVariableDefinitions: boolean;
   wordingVariant: number;
+  promptStructureId: string | null;
 };
 
 export type A8GraphVisualSpec = {
@@ -74,6 +75,8 @@ export type A8GraphVisualSpec = {
 
 export type A8GenerationQualityProfile = {
   difficultyBandId: A8GeneratorDifficultyBandId;
+  difficultyScore: number;
+  difficultySignals: string[];
   calibrationSourceAnchorIds: string[];
   familyObservedCount: number;
   familyObservedTotal: number;
@@ -84,6 +87,7 @@ export type A8GenerationQualityProfile = {
   contextPoolSize: number;
   contextId: string | null;
   contextKind: A8GeneratedContext["contextKind"] | null;
+  promptStructureId: string | null;
   rowCommonFactors: [number, number];
   minimumAbsoluteCoefficient: number;
   maximumAbsoluteCoefficient: number;
@@ -99,11 +103,22 @@ export type A8GenerationQualityProfile = {
     solvedValue: number;
     routeScore: number;
   };
+  substitutionRoute: {
+    equationIndex: 0 | 1;
+    knownVariable: "FIRST" | "SECOND";
+    knownValue: number;
+    unknownVariable: "FIRST" | "SECOND";
+    unknownCoefficient: number;
+    knownContribution: number;
+    numerator: number;
+    solvedValue: number;
+    arithmeticScore: number;
+  };
   paperArithmeticProfile: "P1_WRITTEN" | "P2_CALCULATOR_AVAILABLE";
 };
 
 export type A8GeneratedQuestion = {
-  generatorId: "A8_SIMULTANEOUS_EQUATIONS_V3";
+  generatorId: "A8_SIMULTANEOUS_EQUATIONS_V4";
   instanceId: string;
   seed: number;
   family: A8GeneratorFamily;
