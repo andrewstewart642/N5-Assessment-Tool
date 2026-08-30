@@ -62,6 +62,25 @@ export default function AssessmentCreatorStyles({
           transparent;
       }
 
+      /*
+       * Exam/compact preview must show the pupil paper only.
+       * Final answers are teacher-facing and are revealed only in Answers mode.
+       */
+      [data-preview-answers="hidden"]
+        .builder-question-answer {
+        display: none !important;
+      }
+
+      /*
+       * Worked-answer overlays can extend through the response-space region.
+       * Keep the assigned-question Edit control above that teacher-only layer.
+       */
+      [data-preview-answers]
+        button[title="Edit"] {
+        z-index: 50 !important;
+        pointer-events: auto !important;
+      }
+
       .pdf-header {
         padding: 14px;
         display: flex;
