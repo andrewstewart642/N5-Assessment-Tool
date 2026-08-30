@@ -9,9 +9,37 @@ import type {
 const DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX =
   48;
 
+function isA8GeneratedQuestion(
+  question: Question
+): boolean {
+  return Boolean(
+    question.questionCode?.startsWith(
+      "A8-"
+    )
+  );
+}
+
 export function getAssessmentQuestionSpacingBasePx(
   question: Question
 ): number {
+  /*
+   * A8 originally entered the Builder while its unique instance ids still fell
+   * through to the generic 40 px National 5 spacing fallback. Some already
+   * assigned/drafted A8 questions therefore carry that stale spacingBasePx.
+   * Resolve A8 from its stable family-bearing questionCode first so existing
+   * questions repair themselves as soon as the workspace re-renders.
+   */
+  if (
+    isA8GeneratedQuestion(
+      question
+    ) &&
+    question.questionCode
+  ) {
+    return getNational5MathsQuestionSpacingBasePx(
+      question.questionCode
+    );
+  }
+
   const spacingBasePx =
     question.spacingBasePx;
 
@@ -50,6 +78,16 @@ export function applyAssessmentQuestionSpacingBase(
 export function ensureAssessmentQuestionSpacingBase(
   question: Question
 ): Question {
+  if (
+    isA8GeneratedQuestion(
+      question
+    )
+  ) {
+    return applyAssessmentQuestionSpacingBase(
+      question
+    );
+  }
+
   if (
     typeof question.spacingBasePx ===
       "number" &&
