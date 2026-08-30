@@ -51,11 +51,13 @@ const substitutionProfile = (
   route: A8CalibratedRoute,
   equations: [A8LinearEquation, A8LinearEquation],
 ): A8SubstitutionProfile => {
-  const knownVariable = route.eliminatedVariable === "FIRST" ? "SECOND" : "FIRST";
-  const unknownVariable = knownVariable === "FIRST" ? "SECOND" : "FIRST";
+  const knownVariable: A8SubstitutionProfile["knownVariable"] =
+    route.eliminatedVariable === "FIRST" ? "SECOND" : "FIRST";
+  const unknownVariable: A8SubstitutionProfile["unknownVariable"] =
+    knownVariable === "FIRST" ? "SECOND" : "FIRST";
   const knownValue = route.solvedValue;
 
-  const candidates = equations.map((equation, equationIndex) => {
+  const candidates: A8SubstitutionProfile[] = equations.map((equation, equationIndex) => {
     const knownCoefficient = knownVariable === "FIRST" ? equation.a : equation.b;
     const unknownCoefficient = unknownVariable === "FIRST" ? equation.a : equation.b;
     const knownContribution = knownCoefficient * knownValue;
@@ -251,18 +253,11 @@ const classifyDifficulty = (args: {
   solution: [number, number];
   score: number;
 }): A8GeneratorDifficulty => {
-  // These two structures carry extra representation/post-solve demand beyond
-  // the basic A8 process and are therefore kept at the upper valid band.
   if (args.family === "GRAPH_INTERSECTION_SOLVE" || args.family === "CONTEXT_DERIVED_TOTAL") return 3;
 
-  // On Paper 1, a non-half decimal final value is a strong upper-band signal.
-  // It is valid only when the route checker below proves the arithmetic remains
-  // naturally executable without a calculator.
   const hasNonHalfFinal = args.solution.some((value) => !isIntegerOrHalf(value));
   if (args.paper === "P1" && hasNonHalfFinal) return 3;
 
-  // Any fractional final value is at least typical. Whole-number outcomes can
-  // occupy the lower band when the complete scaling/substitution burden is low.
   const hasFractionalFinal = args.solution.some((value) => !Number.isInteger(value));
   if (!hasFractionalFinal && args.score <= 25) return 1;
   if (args.score <= 35) return 2;
@@ -312,12 +307,6 @@ const acceptedAssessment = (
   };
 };
 
-/**
- * The requested level is a selection target, not the source of truth for the
- * candidate's difficulty. A candidate is first checked for A8/SQA validity,
- * then its actual family + arithmetic burden is classified. It is retained
- * only when that independently-derived class matches the requested level.
- */
 export const assessA8CandidateFidelity = (args: {
   difficulty: A8GeneratorDifficulty;
   paper: A8GeneratorPaper;
