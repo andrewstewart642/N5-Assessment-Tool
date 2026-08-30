@@ -9,6 +9,16 @@ import type {
 const DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX =
   48;
 
+/*
+ * Before A8 had family-aware response-space baselines, clean A8 questions
+ * were committed with the National 5 document fallback of 40 px. Treat that
+ * one value as stale historical workspace state. Other explicit values are
+ * intentional preview/state overrides and must be respected (notably the
+ * 24 px Compact-mode spacing).
+ */
+const STALE_A8_SPACING_BASE_PX =
+  40;
+
 function isA8GeneratedQuestion(
   question: Question
 ): boolean {
@@ -19,38 +29,53 @@ function isA8GeneratedQuestion(
   );
 }
 
+function hasExplicitSpacingBasePx(
+  question: Question
+): question is Question & {
+  spacingBasePx: number;
+} {
+  return (
+    typeof question.spacingBasePx ===
+      "number" &&
+    Number.isFinite(
+      question.spacingBasePx
+    )
+  );
+}
+
 export function getAssessmentQuestionSpacingBasePx(
   question: Question
 ): number {
-  /*
-   * A8 originally entered the Builder while its unique instance ids still fell
-   * through to the generic 40 px National 5 spacing fallback. Some already
-   * assigned/drafted A8 questions therefore carry that stale spacingBasePx.
-   * Resolve A8 from its stable family-bearing questionCode first so existing
-   * questions repair themselves as soon as the workspace re-renders.
-   */
-  if (
+  const isA8 =
     isA8GeneratedQuestion(
       question
-    ) &&
+    );
+
+  if (
+    hasExplicitSpacingBasePx(
+      question
+    )
+  ) {
+    if (
+      !isA8 ||
+      question.spacingBasePx !==
+        STALE_A8_SPACING_BASE_PX
+    ) {
+      return question.spacingBasePx;
+    }
+  }
+
+  /*
+   * Repair only the stale A8 40 px value (or a missing value). Compact mode
+   * supplies its own 24 px preview override, which now flows through normally.
+   */
+  if (
+    isA8 &&
     question.questionCode
   ) {
     return getNational5MathsQuestionSpacingBasePx(
       question.questionCode
     );
-  }
-
-  const spacingBasePx =
-    question.spacingBasePx;
-
-  if (
-    typeof spacingBasePx ===
-      "number" &&
-    Number.isFinite(
-      spacingBasePx
-    )
-  ) {
-    return spacingBasePx;
   }
 
   return question.questionCode
@@ -79,20 +104,15 @@ export function ensureAssessmentQuestionSpacingBase(
   question: Question
 ): Question {
   if (
-    isA8GeneratedQuestion(
+    hasExplicitSpacingBasePx(
       question
-    )
-  ) {
-    return applyAssessmentQuestionSpacingBase(
-      question
-    );
-  }
-
-  if (
-    typeof question.spacingBasePx ===
-      "number" &&
-    Number.isFinite(
-      question.spacingBasePx
+    ) &&
+    (
+      !isA8GeneratedQuestion(
+        question
+      ) ||
+      question.spacingBasePx !==
+        STALE_A8_SPACING_BASE_PX
     )
   ) {
     return question;
