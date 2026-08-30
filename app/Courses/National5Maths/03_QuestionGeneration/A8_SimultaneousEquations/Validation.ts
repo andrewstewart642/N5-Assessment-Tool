@@ -8,6 +8,7 @@ import {
   A8_EMPIRICAL_FAMILY_FREQUENCY,
   A8_PAPER_NUMERICAL_CALIBRATION,
 } from "./Evidence";
+import { assessA8CandidateFidelity } from "./Fidelity";
 import type { A8GeneratedQuestion, A8LinearEquation, A8ValidationResult } from "./Types";
 
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
@@ -119,6 +120,14 @@ export const validateA8GeneratedQuestion = (question: A8GeneratedQuestion): A8Va
     }
   }
 
+  if (contextual && (coefficientGcd(first) !== 1 || coefficientGcd(second) !== 1)) {
+    issues.push({
+      severity: "ERROR",
+      code: "CONTEXT_COMMON_COEFFICIENT_FACTOR",
+      message: "Contextual A8 rows should not expose a common coefficient factor such as 6x + 4y.",
+    });
+  }
+
   const calibratedRoute = selectCalibratedA8Route(
     question.eliminationPlans,
     question.family,
@@ -144,6 +153,44 @@ export const validateA8GeneratedQuestion = (question: A8GeneratedQuestion): A8Va
         severity: "ERROR",
         code: "CALIBRATED_ROUTE_DIAGNOSTIC_MISMATCH",
         message: "Stored route diagnostics do not match the calibrated cheapest route.",
+      });
+    }
+
+    const fidelity = assessA8CandidateFidelity({
+      difficulty: question.difficulty,
+      paper: question.paper,
+      family: question.family,
+      equations: question.equations,
+      solution: question.solution,
+      route: calibratedRoute,
+      context: question.context,
+    });
+    if (!fidelity.accepted) {
+      issues.push({
+        severity: "ERROR",
+        code: "DIFFICULTY_FIDELITY_MISMATCH",
+        message: `Generated question does not belong convincingly to its calibrated difficulty band: ${fidelity.signals.join("; ")}`,
+      });
+    }
+    if (!close(fidelity.difficultyScore, question.quality.difficultyScore)) {
+      issues.push({
+        severity: "ERROR",
+        code: "DIFFICULTY_SCORE_MISMATCH",
+        message: "Stored difficulty score does not match the family-specific fidelity assessment.",
+      });
+    }
+    const storedSubstitution = question.quality.substitutionRoute;
+    if (
+      storedSubstitution.equationIndex !== fidelity.substitution.equationIndex ||
+      storedSubstitution.knownVariable !== fidelity.substitution.knownVariable ||
+      storedSubstitution.unknownVariable !== fidelity.substitution.unknownVariable ||
+      !close(storedSubstitution.numerator, fidelity.substitution.numerator) ||
+      !close(storedSubstitution.solvedValue, fidelity.substitution.solvedValue)
+    ) {
+      issues.push({
+        severity: "ERROR",
+        code: "SUBSTITUTION_ROUTE_MISMATCH",
+        message: "Stored substitution diagnostics do not match the cheapest follow-on written route.",
       });
     }
   }
@@ -197,6 +244,9 @@ export const validateA8GeneratedQuestion = (question: A8GeneratedQuestion): A8Va
       }
       if (!question.quality.contextId || question.quality.contextId !== context.contextId) {
         issues.push({ severity: "ERROR", code: "CONTEXT_DIAGNOSTIC_MISMATCH", message: "The quality profile is not attached to the generated contextual shell." });
+      }
+      if (!context.promptStructureId || question.quality.promptStructureId !== context.promptStructureId) {
+        issues.push({ severity: "ERROR", code: "PROMPT_STRUCTURE_MISSING", message: "Contextual generation must record the selected prompt-structure grammar." });
       }
 
       if (question.family === "CONTEXT_FORM_AND_SOLVE" && question.paper === "P2") {
