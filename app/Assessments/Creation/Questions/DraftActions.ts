@@ -226,8 +226,53 @@ export function useAssessmentDraftWorkflow({
             questionIndex
           ];
 
-        restoreTreeForQuestion(
-          original
+        const nextEditState:
+          AssessmentEditQuestionDraftByPaper = {
+            ...editDraftRef.current,
+
+            [original.paper]: {
+              questionIndex,
+
+              original,
+
+              draft: {
+                ...original,
+              },
+            },
+          };
+
+        /*
+         * Editing is a first-class mode, not a side effect of tree restoration.
+         * Commit both the ref and visible state before changing any filters so
+         * Regenerate can immediately see the selected assigned question.
+         */
+        editDraftRef.current =
+          nextEditState;
+
+        setEditDraftByPaper(
+          nextEditState
+        );
+
+        /*
+         * A paper has one active candidate surface. If an unassigned draft was
+         * already present, remove it when the teacher explicitly chooses an
+         * assigned question to edit. This prevents a stale draft being appended
+         * beneath the question being amended.
+         */
+        setDraftByPaper(
+          (
+            previous
+          ) =>
+            previous[
+              original.paper
+            ]
+              ? {
+                  ...previous,
+
+                  [original.paper]:
+                    null,
+                }
+              : previous
         );
 
         pendingJumpDraftRef.current = {
@@ -238,39 +283,21 @@ export function useAssessmentDraftWorkflow({
             original.id,
         };
 
-        setEditDraftByPaper(
-          (
-            previous
-          ) => {
-            const next = {
-              ...previous,
-
-              [original.paper]: {
-                questionIndex,
-
-                original,
-
-                draft: {
-                  ...original,
-                },
-              },
-            };
-
-            /*
-             * Regenerate reads editDraftRef synchronously. Updating the ref in
-             * the same transaction as the visible edit state prevents the
-             * first Regenerate click after Edit from being mistaken for a new
-             * unassigned draft while React's effect has not run yet.
-             */
-            editDraftRef.current =
-              next;
-
-            return next;
-          }
-        );
+        /*
+         * Restoring the Skills Tree is useful, but it must never be allowed to
+         * prevent entry into edit mode. The edit state above is authoritative.
+         */
+        try {
+          restoreTreeForQuestion(
+            original
+          );
+        } catch {
+          // Keep the selected question editable even if tree restoration fails.
+        }
       },
       [
         questions,
+        setDraftByPaper,
         setEditDraftByPaper,
         editDraftRef,
         restoreTreeForQuestion,
@@ -332,22 +359,19 @@ export function useAssessmentDraftWorkflow({
         }
       );
 
+      const nextEditState:
+        AssessmentEditQuestionDraftByPaper = {
+          ...editDraftRef.current,
+
+          [viewPaper]:
+            null,
+        };
+
+      editDraftRef.current =
+        nextEditState;
+
       setEditDraftByPaper(
-        (
-          previous
-        ) => {
-          const next = {
-            ...previous,
-
-            [viewPaper]:
-              null,
-          };
-
-          editDraftRef.current =
-            next;
-
-          return next;
-        }
+        nextEditState
       );
     }, [
       editDraftByPaper,
@@ -388,22 +412,19 @@ export function useAssessmentDraftWorkflow({
           )
       );
 
+      const nextEditState:
+        AssessmentEditQuestionDraftByPaper = {
+          ...editDraftRef.current,
+
+          [viewPaper]:
+            null,
+        };
+
+      editDraftRef.current =
+        nextEditState;
+
       setEditDraftByPaper(
-        (
-          previous
-        ) => {
-          const next = {
-            ...previous,
-
-            [viewPaper]:
-              null,
-          };
-
-          editDraftRef.current =
-            next;
-
-          return next;
-        }
+        nextEditState
       );
     }, [
       editDraftByPaper,
