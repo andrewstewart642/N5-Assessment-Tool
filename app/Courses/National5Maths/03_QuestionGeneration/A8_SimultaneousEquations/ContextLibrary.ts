@@ -129,7 +129,7 @@ const resource = (
  * equations. The pool deliberately avoids arbitrary noun-swapping.
  */
 export const A8_CONTEXT_SHELLS: A8ContextShell[] = [
-  // Purchase / price contexts (30) — calculator-paper only.
+  // Purchase / price contexts (30) - calculator-paper only.
   purchase("CINEMA_TICKETS", ["adult ticket", "child ticket"], ["adult tickets", "child tickets"], "at a cinema", "at the same cinema", range(6, 15, 0.5), range(4, 10, 0.5)),
   purchase("THEATRE_TICKETS", ["adult ticket", "child ticket"], ["adult tickets", "child tickets"], "at a theatre", "at the same theatre", range(12, 30, 0.5), range(6, 18, 0.5)),
   purchase("MUSEUM_TICKETS", ["adult ticket", "junior ticket"], ["adult tickets", "junior tickets"], "at a museum", "at the same museum", range(6, 18, 0.5), range(3, 10, 0.5)),
@@ -161,22 +161,23 @@ export const A8_CONTEXT_SHELLS: A8ContextShell[] = [
   purchase("CANDLE_DIFFUSER", ["candle", "reed diffuser"], ["candles", "reed diffusers"], "at a homeware shop", "at the same homeware shop", range(4, 14, 0.5), range(7, 20, 0.5)),
   purchase("PIZZA_GARLIC_BREAD", ["pizza", "garlic bread"], ["pizzas", "garlic breads"], "from a takeaway", "from the same takeaway", range(7, 15, 0.5), range(2.5, 6, 0.5)),
 
-  // Fixed-mass contexts (15).
+  // Fixed-mass contexts (15). Each shell represents standardised packs/loads
+  // whose unit weights can credibly be treated as fixed within one question.
   mass("CEMENT_GRAVEL_BAGS", ["bag of cement", "bag of gravel"], ["bags of cement", "bags of gravel"], "onto a builder's van", "onto another van", range(15, 35, 5), range(10, 30, 5)),
   mass("SAND_STONE_BAGS", ["bag of sand", "bag of decorative stone"], ["bags of sand", "bags of decorative stone"], "onto a delivery truck", "onto another delivery truck", range(15, 30, 5), range(10, 25, 5)),
   mass("COMPOST_TOPSOIL_BAGS", ["bag of compost", "bag of topsoil"], ["bags of compost", "bags of topsoil"], "onto a garden-centre trolley", "onto another trolley", range(10, 25, 5), range(15, 35, 5)),
   mass("FLOUR_SUGAR_SACKS", ["sack of flour", "sack of sugar"], ["sacks of flour", "sacks of sugar"], "onto a bakery pallet", "onto another pallet", range(10, 30, 5), range(10, 25, 5)),
   mass("POTATO_ONION_SACKS", ["sack of potatoes", "sack of onions"], ["sacks of potatoes", "sacks of onions"], "onto a market trailer", "onto another market trailer", range(15, 35, 5), range(10, 30, 5)),
-  mass("APPLE_PEAR_CRATES", ["crate of apples", "crate of pears"], ["crates of apples", "crates of pears"], "onto a farm van", "onto another farm van", range(8, 24, 2), range(8, 24, 2)),
+  mass("APPLE_PEAR_CRATES", ["crate of apples", "crate of pears"], ["crates of apples", "crates of pears"], "onto a farm van", "onto another farm van", range(10, 25, 5), range(10, 25, 5)),
   mass("TILE_ADHESIVE_PACKS", ["box of tiles", "bag of adhesive"], ["boxes of tiles", "bags of adhesive"], "onto a tradesperson's van", "onto another van", range(12, 30, 2), range(5, 15, 1)),
-  mass("BOOK_MAGAZINE_BOXES", ["box of books", "box of magazines"], ["boxes of books", "boxes of magazines"], "onto a library trolley", "onto another trolley", range(10, 24, 2), range(6, 18, 2)),
-  mass("TOOL_FIXING_CRATES", ["crate of tools", "box of fixings"], ["crates of tools", "boxes of fixings"], "onto a workshop trolley", "onto another trolley", range(12, 30, 2), range(4, 14, 2)),
+  mass("PAPER_ENVELOPE_BOXES", ["box of printer paper", "box of envelopes"], ["boxes of printer paper", "boxes of envelopes"], "onto an office storeroom trolley", "onto another trolley", range(10, 20, 2), range(4, 10, 2)),
+  mass("SEALED_TOOL_FIXING_CRATES", ["sealed crate of tools", "box of fixings"], ["sealed crates of tools", "boxes of fixings"], "onto a workshop trolley", "onto another trolley", range(12, 30, 2), range(4, 14, 2)),
   mass("RICE_LENTIL_SACKS", ["sack of rice", "sack of lentils"], ["sacks of rice", "sacks of lentils"], "onto a storeroom pallet", "onto another pallet", range(10, 30, 5), range(10, 25, 5)),
-  mass("PAINT_VARNISH_TINS", ["tin of paint", "tin of varnish"], ["tins of paint", "tins of varnish"], "onto a decorating trolley", "onto another trolley", range(4, 12, 1), range(2, 8, 1)),
-  mass("WATER_JUICE_CARTONS", ["carton of water bottles", "carton of juice bottles"], ["cartons of water bottles", "cartons of juice bottles"], "onto a catering trolley", "onto another trolley", range(8, 20, 2), range(6, 18, 2)),
+  mass("PLASTER_MORTAR_BAGS", ["bag of plaster", "bag of mortar"], ["bags of plaster", "bags of mortar"], "onto a builder's trolley", "onto another trolley", range(10, 25, 5), range(10, 25, 5)),
+  mass("BOTTLED_WATER_SOFT_DRINK_CASES", ["case of bottled water", "case of soft drinks"], ["cases of bottled water", "cases of soft drinks"], "onto a catering stock trolley", "onto another trolley", range(8, 20, 2), range(6, 18, 2)),
   mass("PAVING_EDGING_STACKS", ["stack of paving slabs", "stack of edging blocks"], ["stacks of paving slabs", "stacks of edging blocks"], "onto a lorry", "onto another lorry", range(120, 360, 20), range(80, 240, 20), ["P2"]),
   mass("TIMBER_POST_BUNDLES", ["bundle of timber boards", "bundle of fence posts"], ["bundles of timber boards", "bundles of fence posts"], "onto a builders' merchant lorry", "onto another lorry", range(40, 120, 10), range(30, 100, 10)),
-  mass("PETFOOD_LITTER_BAGS", ["bag of dog food", "bag of cat litter"], ["bags of dog food", "bags of cat litter"], "onto a pet-shop trolley", "onto another trolley", range(8, 20, 2), range(5, 15, 1)),
+  mass("PETFOOD_LITTER_BAGS", ["bag of dog food", "bag of cat litter"], ["bags of dog food", "bags of cat litter"], "onto a pet-shop trolley", "onto another trolley", range(10, 25, 5), range(5, 15, 5)),
 
   // Resource-use contexts (15).
   resource("CLOAK_DRESS_FABRIC", ["cloak", "dress"], ["cloaks", "dresses"], "is making costumes for a school production", "makes", "fabric", "area", "m²", "square metres", range(1.2, 3.5, 0.1), range(1.2, 3.5, 0.1)),
@@ -185,8 +186,8 @@ export const A8_CONTEXT_SHELLS: A8ContextShell[] = [
   resource("SKIRT_JACKET_FABRIC", ["skirt", "jacket"], ["skirts", "jackets"], "is making clothes for a fashion project", "makes", "fabric", "area", "m²", "square metres", range(0.8, 2, 0.1), range(1.5, 3.5, 0.1)),
   resource("TABLECLOTH_APRON_FABRIC", ["tablecloth", "apron"], ["tablecloths", "aprons"], "is sewing items for a catering company", "sews", "fabric", "area", "m²", "square metres", range(1.5, 4, 0.1), range(0.6, 1.8, 0.1)),
   resource("QUILT_PILLOWCASE_FABRIC", ["quilt cover", "pillowcase"], ["quilt covers", "pillowcases"], "is sewing bedding", "sews", "fabric", "area", "m²", "square metres", range(2, 5, 0.1), range(0.5, 1.4, 0.1)),
-  resource("KITE_WINDSOCK_FABRIC", ["kite", "windsock"], ["kites", "windsocks"], "is making equipment for an outdoor activity day", "makes", "fabric", "area", "m²", "square metres", range(0.5, 1.8, 0.1), range(0.8, 2.2, 0.1)),
-  resource("SPORTS_BIB_FLAG_FABRIC", ["sports bib", "touchline flag"], ["sports bibs", "touchline flags"], "is sewing equipment for a sports club", "sews", "fabric", "area", "m²", "square metres", range(0.4, 1.2, 0.1), range(0.6, 1.6, 0.1)),
+  resource("KITE_WINDSOCK_FABRIC", ["kite", "windsock"], ["kites", "windsocks"], "is making items for an outdoor activity day", "makes", "fabric", "area", "m²", "square metres", range(0.5, 1.8, 0.1), range(0.8, 2.2, 0.1)),
+  resource("SPORTS_BIB_FLAG_FABRIC", ["sports bib", "touchline flag"], ["sports bibs", "touchline flags"], "is making fabric items for a sports club", "makes", "fabric", "area", "m²", "square metres", range(0.4, 1.2, 0.1), range(0.6, 1.6, 0.1)),
   resource("NOTICEBOARD_DISPLAY_FELT", ["noticeboard", "display panel"], ["noticeboards", "display panels"], "is covering display boards for a school", "covers", "felt", "area", "m²", "square metres", range(1, 3.5, 0.1), range(0.8, 2.8, 0.1)),
   resource("SHELF_STOOL_TIMBER", ["shelf unit", "stool"], ["shelf units", "stools"], "is building furniture for a workshop", "builds", "timber", "length", "m", "metres", range(2, 6, 0.1), range(1.5, 4, 0.1)),
   resource("PICTURE_MIRROR_FRAME_TIMBER", ["picture frame", "mirror frame"], ["picture frames", "mirror frames"], "is making wooden frames", "makes", "timber", "length", "m", "metres", range(0.8, 2.5, 0.1), range(1.2, 3.5, 0.1)),
