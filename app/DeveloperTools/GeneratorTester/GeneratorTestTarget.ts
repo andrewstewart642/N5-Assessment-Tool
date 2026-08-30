@@ -30,6 +30,7 @@ export type GeneratorTestTarget = {
   module: ConceptGeneratorModule;
   concepts: GeneratorTestConcept[];
   conceptControlLabel?: string;
+  difficultyLabels?: Record<number, string>;
   supportsSeed?: boolean;
   notes?: string[];
 };
@@ -89,8 +90,6 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
     conceptLabel: "Work with simultaneous equations",
     tags: ["simultaneous equations", "elimination", "A8 vertical slice"],
     difficultyProfile: {
-      // Difficulty count is skill-specific. The A8 calibration pass found three
-      // defensible bands; this is not a course-wide five-level requirement.
       availableLevels: [...A8_SUPPORTED_DIFFICULTY_LEVELS],
       defaultLevel: A8_DEFAULT_DIFFICULTY_LEVEL,
       levelDescriptions: A8_DIFFICULTY_DESCRIPTIONS,
@@ -151,8 +150,6 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
       answerParts: asTextParts(finalAnswer),
       workedAnswers,
       classification: {
-        // A8 is a C+A / mixed-standard skill in the historical catalogue;
-        // difficulty changes arithmetic burden, not the curriculum tier label.
         standard: "Mixed",
         calculatorStatus: question.paper === "P1" ? "NonCalculatorOnly" : "Either",
         structureType: contextual
@@ -171,6 +168,9 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
         validation: { question: "PASSED", answer: "PASSED" },
         seed: question.seed,
         generatorId: question.generatorId,
+        family: question.family,
+        difficulty: question.difficulty,
+        paper: question.paper,
         familyReadiness: question.familyReadiness,
         quality: question.quality,
         determinant: question.determinant,
@@ -195,21 +195,25 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
 export const GENERATOR_TEST_TARGET: GeneratorTestTarget = {
   module: A8_TEST_MODULE,
   conceptControlLabel: "A8 family",
+  difficultyLabels: {
+    1: "Lower valid",
+    2: "Typical",
+    3: "Upper valid",
+  },
   supportsSeed: true,
   concepts: [
     { code: "A8.CORE", label: "Calibrated mix — historical family distribution", papers: ["P1", "P2"] },
     { code: "A8.ABSTRACT", label: "Abstract solve", papers: ["P1"] },
     { code: "A8.CONTEXT", label: "Context: form and solve", papers: ["P1", "P2"] },
-    { code: "A8.GRAPH", label: "Experimental: graph intersection", papers: ["P1"] },
-    { code: "A8.DERIVED", label: "Experimental: contextual derived total", papers: ["P2"] },
+    { code: "A8.GRAPH", label: "Graph + algebraic intersection", papers: ["P1"] },
+    { code: "A8.DERIVED", label: "Context: solve then derived total", papers: ["P2"] },
   ],
   notes: [
-    "A8 has three evidence-derived difficulty bands: Lower valid, Typical and Upper valid. Other skills may expose a different number after their own cross-corpus calibration.",
-    "The Question Generator now consumes the calibration directly: family selection uses the observed paper-conditioned frequency, and unsupported family/difficulty combinations are excluded rather than invented.",
-    "Paper 1 candidates are accepted against the cheapest calibrated written route, including the observed scaling, constant, decimal/roundness and solution-texture envelopes rather than a generic magnitude ceiling.",
-    "Paper 2 normal contextual generation follows the observed purchase/currency texture; the derived-total family stays near its large-round-mass evidence.",
-    "Generated systems are checked against canonical historical system signatures so calibration can be close without regenerating a catalogued SQA system.",
-    "Context generation uses 60 curated semantic shells and a separately mixed context seed to reduce repeated scenarios across adjacent samples.",
-    "Raw output exposes the calibrated band, empirical family frequency, selected written route, historical-overlap check, context, equations, solution and source basis.",
+    "A8 has three evidence-derived difficulty bands: Lower valid, Typical and Upper valid. Each accepted instance must now positively fit its selected band rather than merely stay below a generic maximum.",
+    "Paper 1 resource decimals are accepted only when the complete elimination/substitution route is hand-friendly; arbitrary decimal division is rejected.",
+    "Contextual coefficient rows cannot expose a common factor such as 6x + 4y, while the abstract family keeps historically valid exceptions where the complete equation is not reducible.",
+    "Core family selection follows the observed paper-conditioned mix. Graph questions are rendered procedurally in DeveloperTools when the graph family is selected.",
+    "Context wording now samples several structural grammars per semantic family rather than repeatedly using one sentence frame, while avoiding historical source wording as a reusable template.",
+    "Raw output exposes the calibrated band, difficulty score/signals, prompt structure, selected written route, substitution route and historical-overlap check.",
   ],
 };
