@@ -12,7 +12,6 @@ type Bounds = {
 };
 
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
-const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const lineBoundaryPoints = (equation: A8LinearEquation, bounds: Bounds): Point[] => {
   const points: Point[] = [];
@@ -39,9 +38,6 @@ const lineBoundaryPoints = (equation: A8LinearEquation, bounds: Bounds): Point[]
   return points.slice(0, 2);
 };
 
-const distance = (first: Point, second: Point) =>
-  Math.hypot(first.x - second.x, first.y - second.y);
-
 const distanceFromLine = (point: Point, first: Point, second: Point) => {
   const dx = second.x - first.x;
   const dy = second.y - first.y;
@@ -50,30 +46,65 @@ const distanceFromLine = (point: Point, first: Point, second: Point) => {
   return Math.abs(dy * point.x - dx * point.y + second.x * first.y - second.y * first.x) / denominator;
 };
 
-const formatNumber = (value: number) =>
-  Number.isInteger(value)
-    ? `${value}`
-    : value.toFixed(2).replace(/0+$/, "").replace(/\.$/, "");
+const intercepts = (equation: A8LinearEquation) => ({
+  x: close(equation.a, 0) ? null : equation.c / equation.a,
+  y: close(equation.b, 0) ? null : equation.c / equation.b,
+});
 
-const formatEquation = (
-  equation: A8LinearEquation,
-  variables: [string, string],
-) => {
-  const terms: string[] = [];
-  const append = (coefficient: number, variable: string) => {
-    if (close(coefficient, 0)) return;
-    const magnitude = Math.abs(coefficient);
-    const term = `${close(magnitude, 1) ? "" : formatNumber(magnitude)}${variable}`;
-    if (!terms.length) {
-      terms.push(coefficient < 0 ? `−${term}` : term);
-      return;
-    }
-    terms.push(`${coefficient < 0 ? "−" : "+"} ${term}`);
-  };
+const equationDerivedBounds = (
+  visual: A8GraphVisualSpec,
+  plotWidth: number,
+  plotHeight: number,
+): Bounds => {
+  const [intersectionX, intersectionY] = visual.intersection;
+  const firstIntercepts = intercepts(visual.firstEquation);
+  const secondIntercepts = intercepts(visual.secondEquation);
+  const xCandidates = [
+    0,
+    intersectionX,
+    firstIntercepts.x,
+    secondIntercepts.x,
+  ].filter((value): value is number => value !== null && Number.isFinite(value));
+  const yCandidates = [
+    0,
+    intersectionY,
+    firstIntercepts.y,
+    secondIntercepts.y,
+  ].filter((value): value is number => value !== null && Number.isFinite(value));
 
-  append(equation.a, variables[0]);
-  append(equation.b, variables[1]);
-  return `${terms.join(" ")} = ${formatNumber(equation.c)}`;
+  let xMin = Math.min(-1.5, intersectionX - 2, ...xCandidates);
+  let xMax = Math.max(7, intersectionX + 3, ...xCandidates);
+  let yMin = Math.min(-2, intersectionY - 3, ...yCandidates);
+  let yMax = Math.max(7, intersectionY + 3, ...yCandidates);
+
+  let xRange = Math.max(1, xMax - xMin);
+  let yRange = Math.max(1, yMax - yMin);
+  const xMargin = Math.max(0.8, xRange * 0.06);
+  const yMargin = Math.max(0.8, yRange * 0.08);
+  xMin -= xMargin;
+  xMax += xMargin;
+  yMin -= yMargin;
+  yMax += yMargin;
+
+  xRange = xMax - xMin;
+  yRange = yMax - yMin;
+  const targetAspect = plotWidth / plotHeight;
+  const currentAspect = xRange / yRange;
+
+  // Keep one unit horizontally the same visual size as one unit vertically.
+  // If one dimension needs expanding, favour positive x and negative y so the
+  // axes sit naturally inside the diagram rather than at the bottom-left edge.
+  if (currentAspect < targetAspect) {
+    const extra = yRange * targetAspect - xRange;
+    xMin -= extra * 0.2;
+    xMax += extra * 0.8;
+  } else if (currentAspect > targetAspect) {
+    const extra = xRange / targetAspect - yRange;
+    yMin -= extra * 0.58;
+    yMax += extra * 0.42;
+  }
+
+  return { xMin, xMax, yMin, yMax };
 };
 
 const choosePointLabelOffset = (
@@ -84,62 +115,31 @@ const choosePointLabelOffset = (
   height: number,
 ): Point => {
   const candidates: Point[] = [
-    { x: 16, y: -16 },
-    { x: 18, y: 18 },
-    { x: -18, y: -16 },
-    { x: -20, y: 19 },
-    { x: 2, y: -24 },
-    { x: 2, y: 27 },
-    { x: 27, y: 2 },
-    { x: -27, y: 2 },
+    { x: 18, y: -18 },
+    { x: 20, y: 21 },
+    { x: -20, y: -18 },
+    { x: -22, y: 21 },
+    { x: 3, y: -29 },
+    { x: 3, y: 31 },
+    { x: 31, y: 3 },
+    { x: -31, y: 3 },
   ];
 
   return candidates
     .map((offset) => {
       const labelPoint = { x: intersection.x + offset.x, y: intersection.y + offset.y };
-      const inFrame = labelPoint.x > 12 && labelPoint.x < width - 12 && labelPoint.y > 16 && labelPoint.y < height - 12;
+      const inFrame = labelPoint.x > 14 && labelPoint.x < width - 14 && labelPoint.y > 18 && labelPoint.y < height - 14;
       const lineDistances = [firstLine, secondLine]
         .filter((line) => line.length >= 2)
         .map((line) => distanceFromLine(labelPoint, line[0], line[1]));
       const clearance = lineDistances.length ? Math.min(...lineDistances) : 999;
-      return { offset, score: clearance + (inFrame ? 20 : -40) };
+      return { offset, score: clearance + (inFrame ? 28 : -60) };
     })
     .sort((first, second) => second.score - first.score)[0].offset;
 };
 
-const lineLabelPoint = (
-  points: Point[],
-  intersection: Point,
-  side: 1 | -1,
-  width: number,
-  height: number,
-): Point | null => {
-  if (points.length < 2) return null;
-  const endpoint = distance(points[0], intersection) >= distance(points[1], intersection)
-    ? points[0]
-    : points[1];
-  const dx = endpoint.x - intersection.x;
-  const dy = endpoint.y - intersection.y;
-  const length = Math.hypot(dx, dy) || 1;
-  const px = -dy / length;
-  const py = dx / length;
-  const along = 0.72;
-  const offset = 14 * side;
-
-  return {
-    x: clamp(intersection.x + dx * along + px * offset, 55, width - 55),
-    y: clamp(intersection.y + dy * along + py * offset, 18, height - 18),
-  };
-};
-
 export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }) {
   const [intersectionX, intersectionY] = visual.intersection;
-  const bounds: Bounds = {
-    xMin: 0,
-    yMin: 0,
-    xMax: Math.max(7, Math.ceil(intersectionX + 3)),
-    yMax: Math.max(8, Math.ceil(intersectionY + 3)),
-  };
   const width = 430;
   const height = 290;
   const left = 48;
@@ -148,6 +148,7 @@ export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }
   const bottom = 38;
   const plotWidth = width - left - right;
   const plotHeight = height - top - bottom;
+  const bounds = equationDerivedBounds(visual, plotWidth, plotHeight);
   const sx = (x: number) => left + ((x - bounds.xMin) / (bounds.xMax - bounds.xMin)) * plotWidth;
   const sy = (y: number) => top + plotHeight - ((y - bounds.yMin) / (bounds.yMax - bounds.yMin)) * plotHeight;
   const firstPoints = lineBoundaryPoints(visual.firstEquation, bounds);
@@ -156,8 +157,6 @@ export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }
   const secondScreenPoints = secondPoints.map((point) => ({ x: sx(point.x), y: sy(point.y) }));
   const intersectionScreen = { x: sx(intersectionX), y: sy(intersectionY) };
   const pOffset = choosePointLabelOffset(intersectionScreen, firstScreenPoints, secondScreenPoints, width, height);
-  const firstLabel = lineLabelPoint(firstScreenPoints, intersectionScreen, 1, width, height);
-  const secondLabel = lineLabelPoint(secondScreenPoints, intersectionScreen, -1, width, height);
 
   const renderLine = (points: Point[], key: string) => {
     if (points.length < 2) return null;
@@ -169,28 +168,8 @@ export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }
         x2={sx(points[1].x)}
         y2={sy(points[1].y)}
         stroke="#111111"
-        strokeWidth="2"
+        strokeWidth="1.8"
       />
-    );
-  };
-
-  const renderEquationLabel = (point: Point | null, equation: A8LinearEquation, key: string) => {
-    if (!point) return null;
-    return (
-      <text
-        key={key}
-        x={point.x}
-        y={point.y}
-        textAnchor="middle"
-        fontFamily="Times New Roman, Times, serif"
-        fontSize="14"
-        fill="#111111"
-        stroke="#ffffff"
-        strokeWidth="4"
-        paintOrder="stroke"
-      >
-        {formatEquation(equation, [visual.xVariable, visual.yVariable])}
-      </text>
     );
   };
 
@@ -213,7 +192,7 @@ export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }
           x2={sx(bounds.xMax)}
           y2={sy(0)}
           stroke="#111111"
-          strokeWidth="1.4"
+          strokeWidth="1.3"
           markerEnd="url(#a8-axis-arrow)"
         />
         <line
@@ -222,14 +201,12 @@ export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }
           x2={sx(0)}
           y2={sy(bounds.yMax)}
           stroke="#111111"
-          strokeWidth="1.4"
+          strokeWidth="1.3"
           markerEnd="url(#a8-axis-arrow)"
         />
         {renderLine(firstPoints, "first")}
         {renderLine(secondPoints, "second")}
-        {renderEquationLabel(firstLabel, visual.firstEquation, "first-label")}
-        {renderEquationLabel(secondLabel, visual.secondEquation, "second-label")}
-        <circle cx={intersectionScreen.x} cy={intersectionScreen.y} r="3.5" fill="#111111" />
+        <circle cx={intersectionScreen.x} cy={intersectionScreen.y} r="3.4" fill="#111111" />
         <text
           x={intersectionScreen.x + pOffset.x}
           y={intersectionScreen.y + pOffset.y}
@@ -243,7 +220,7 @@ export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }
         </text>
         <text
           x={sx(bounds.xMax) - 2}
-          y={sy(0) + 25}
+          y={sy(0) + 24}
           textAnchor="end"
           fontFamily="Times New Roman, Times, serif"
           fontStyle="italic"
@@ -264,7 +241,7 @@ export default function A8GraphPreview({ visual }: { visual: A8GraphVisualSpec }
           {visual.yVariable}
         </text>
         <text
-          x={sx(0) - 12}
+          x={sx(0) - 11}
           y={sy(0) + 18}
           fontFamily="Trebuchet MS, Trebuchet, Arial, sans-serif"
           fontSize="12"
