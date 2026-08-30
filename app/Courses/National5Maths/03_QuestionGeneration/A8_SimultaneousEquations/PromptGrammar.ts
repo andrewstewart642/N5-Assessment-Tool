@@ -89,6 +89,35 @@ const COMMON_NAME_MAP: Record<string, string> = {
 
 const commonName = (name: string) => COMMON_NAME_MAP[name] ?? name;
 
+const FEE_BASED_PURCHASE_CONTEXTS = new Set([
+  "SWIMMING_ENTRIES",
+  "ICE_RINK_ENTRIES",
+  "BOWLING_GAMES",
+]);
+
+const isFeeBasedPurchase = (context: A8GeneratedContext) =>
+  FEE_BASED_PURCHASE_CONTEXTS.has(context.contextId);
+
+const feeOrRetailCountsThenCost = (
+  context: A8GeneratedContext,
+  name: string,
+  items: string,
+  setting: string,
+  total: string,
+) => isFeeBasedPurchase(context)
+  ? `${name} pays for ${items} ${setting}.\nThe total cost is ${total}.`
+  : `${name} buys ${items} ${setting}.\nThe total cost is ${total}.`;
+
+const feeOrRetailDirectTotal = (
+  context: A8GeneratedContext,
+  name: string,
+  items: string,
+  setting: string,
+  total: string,
+) => isFeeBasedPurchase(context)
+  ? `${name} pays ${total} for ${items} ${setting}.`
+  : `${name} buys ${items} ${setting} for ${total}.`;
+
 export type A8ContextPromptBuild = {
   prompt: string;
   promptParts: PaperPart[];
@@ -127,7 +156,7 @@ export const buildA8ContextualPrompt = (args: {
     const thirdItems = `${singularOrPlural(thirdCounts[0], item1, item1Plural)} and ${singularOrPlural(thirdCounts[1], item2, item2Plural)}`;
 
     if (variant % 2 === 0) {
-      promptStructureId = "DERIVED_NAMED_LORRIES_NO_VARIABLE_LEAD";
+      promptStructureId = "DERIVED_NAMED_LORRIES_COMPACT";
       firstBlock = `${name1} loads ${firstItems} ${context.settingLabel}.\nTogether they weigh ${firstTotal}.\n(a) ${firstCommand}`;
       secondBlock = `${name2} loads ${secondItems} ${context.sameSettingLabel}.\nTogether they weigh ${secondTotal}.\n(b) ${secondCommand}`;
       finalBlock = `${name3} has ${thirdItems} on a third lorry.\n(c) Calculate the total weight of these items.`;
@@ -146,13 +175,13 @@ export const buildA8ContextualPrompt = (args: {
         break;
       case 1:
         promptStructureId = "PURCHASE_COUNTS_THEN_COST";
-        firstBlock = `${name1} buys ${firstItems} ${context.settingLabel}.\nThe total cost is ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `${name2} buys ${secondItems} ${context.sameSettingLabel}.\nThe total cost is ${secondTotal}.\n(b) ${secondCommand}`;
+        firstBlock = `${feeOrRetailCountsThenCost(context, name1, firstItems, context.settingLabel, firstTotal)}\n(a) ${firstCommand}`;
+        secondBlock = `${feeOrRetailCountsThenCost(context, name2, secondItems, context.sameSettingLabel, secondTotal)}\n(b) ${secondCommand}`;
         break;
       case 2:
         promptStructureId = "PURCHASE_SAME_CUSTOMER_TWO_VISITS";
-        firstBlock = `${name1} buys ${firstItems} ${context.settingLabel} for ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `On another visit, ${name1} buys ${secondItems} ${context.sameSettingLabel} for ${secondTotal}.\n(b) ${secondCommand}`;
+        firstBlock = `${feeOrRetailDirectTotal(context, name1, firstItems, context.settingLabel, firstTotal)}\n(a) ${firstCommand}`;
+        secondBlock = `On another visit, ${feeOrRetailDirectTotal(context, name1, secondItems, context.sameSettingLabel, secondTotal).replace(`${name1} `, "")}\n(b) ${secondCommand}`;
         break;
       case 3:
         promptStructureId = "PURCHASE_COST_SENTENCE_COMPACT";
@@ -160,14 +189,20 @@ export const buildA8ContextualPrompt = (args: {
         secondBlock = `The cost of ${secondItems} ${context.sameSettingLabel} is ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       case 4:
-        promptStructureId = "PURCHASE_SECOND_RELATIONSHIP_IN_PART_B";
-        firstBlock = `${name1} buys ${firstItems} ${context.settingLabel}. They cost ${firstTotal} altogether.\n(a) ${firstCommand}`;
-        secondBlock = `(b) ${name2} buys ${secondItems} ${context.sameSettingLabel} for ${secondTotal}.\n${secondCommand}`;
+        promptStructureId = "PURCHASE_TWO_CUSTOMERS_RELATIONSHIP_FIRST";
+        firstBlock = isFeeBasedPurchase(context)
+          ? `${name1} pays ${firstTotal} for ${firstItems} ${context.settingLabel}.\n(a) ${firstCommand}`
+          : `${name1} buys ${firstItems} ${context.settingLabel}. They cost ${firstTotal} altogether.\n(a) ${firstCommand}`;
+        secondBlock = `${feeOrRetailDirectTotal(context, name2, secondItems, context.sameSettingLabel, secondTotal)}\n(b) ${secondCommand}`;
         break;
       default:
         promptStructureId = "PURCHASE_TWO_CUSTOMERS_COMPACT";
-        firstBlock = `${name1} spends ${firstTotal} on ${firstItems} ${context.settingLabel}.\n(a) ${firstCommand}`;
-        secondBlock = `${name2} spends ${secondTotal} on ${secondItems} ${context.sameSettingLabel}.\n(b) ${secondCommand}`;
+        firstBlock = isFeeBasedPurchase(context)
+          ? `${name1} pays ${firstTotal} for ${firstItems} ${context.settingLabel}.\n(a) ${firstCommand}`
+          : `${name1} spends ${firstTotal} on ${firstItems} ${context.settingLabel}.\n(a) ${firstCommand}`;
+        secondBlock = isFeeBasedPurchase(context)
+          ? `${name2} pays ${secondTotal} for ${secondItems} ${context.sameSettingLabel}.\n(b) ${secondCommand}`
+          : `${name2} spends ${secondTotal} on ${secondItems} ${context.sameSettingLabel}.\n(b) ${secondCommand}`;
         break;
     }
     finalBlock = `(c) ${finalSolveCommand(context, paper)}`;
@@ -194,9 +229,9 @@ export const buildA8ContextualPrompt = (args: {
         secondBlock = `${name2} is transporting ${secondItems} ${onSetting(context.sameSettingLabel)}.\nTogether they weigh ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       case 4:
-        promptStructureId = "MASS_SECOND_RELATIONSHIP_IN_PART_B";
+        promptStructureId = "MASS_TWO_PEOPLE_RELATIONSHIP_FIRST";
         firstBlock = `${name1} loads ${firstItems} ${context.settingLabel}.\nTheir total weight is ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `(b) ${name2} loads ${secondItems} ${context.sameSettingLabel}.\nTheir total weight is ${secondTotal}.\n${secondCommand}`;
+        secondBlock = `${name2} loads ${secondItems} ${context.sameSettingLabel}.\nTheir total weight is ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       default:
         promptStructureId = "MASS_SAME_PERSON_TWO_JOURNEYS";
@@ -230,9 +265,9 @@ export const buildA8ContextualPrompt = (args: {
         secondBlock = `${name2} ${verb} ${secondItems}.\nThe amount of ${context.resourceLabel} used is ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       case 4:
-        promptStructureId = "RESOURCE_SECOND_RELATIONSHIP_IN_PART_B";
+        promptStructureId = "RESOURCE_SAME_PERSON_TWO_OCCASIONS";
         firstBlock = `${name1} ${verb} ${firstItems}, using ${firstTotal} of ${context.resourceLabel}.\n(a) ${firstCommand}`;
-        secondBlock = `(b) On another occasion, ${name1} ${verb} ${secondItems}, using ${secondTotal} of ${context.resourceLabel}.\n${secondCommand}`;
+        secondBlock = `On another occasion, ${name1} ${verb} ${secondItems}, using ${secondTotal} of ${context.resourceLabel}.\n(b) ${secondCommand}`;
         break;
       default:
         promptStructureId = "RESOURCE_REQUIREMENT_STATEMENTS";
