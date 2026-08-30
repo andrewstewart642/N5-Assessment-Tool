@@ -147,10 +147,6 @@ const coefficientMaximum = (
   return 7;
 };
 
-/**
- * Coefficients are candidates only. The route/fidelity checker below decides
- * whether the complete question sits inside the calibrated A8 burden.
- */
 const coefficientPair = (
   rng: SeededRandom,
   family: A8GeneratorFamily,
@@ -229,11 +225,6 @@ const graphSolution = (
   return [first, second];
 };
 
-const valueFromRange = (rng: SeededRandom, valueRange: A8ValueRange) => {
-  const stepCount = Math.round((valueRange.max - valueRange.min) / valueRange.step);
-  return clean(valueRange.min + rng.int(0, stepCount) * valueRange.step);
-};
-
 const contextualValueTextureAccepted = (
   values: [number, number],
   shell: A8ContextShell,
@@ -262,23 +253,62 @@ const contextualValueTextureAccepted = (
   return false;
 };
 
+const calibratedValueStep = (
+  valueRange: A8ValueRange,
+  shell: A8ContextShell,
+  paper: A8GeneratorPaper,
+  family: A8GeneratorFamily,
+  difficulty: A8GeneratorDifficulty,
+) => {
+  if (family === "CONTEXT_DERIVED_TOTAL") return Math.max(valueRange.step, 10);
+  if (paper === "P2") {
+    if (difficulty === 1) return Math.max(valueRange.step, 0.5);
+    if (difficulty === 2) return Math.max(valueRange.step, 0.25);
+    return valueRange.step;
+  }
+  if (shell.kind === "MASS") return Math.max(valueRange.step, 5);
+  if (shell.kind === "RESOURCE" && difficulty === 1) return Math.max(valueRange.step, 0.5);
+  return valueRange.step;
+};
+
+const calibratedValuesFromRange = (
+  valueRange: A8ValueRange,
+  shell: A8ContextShell,
+  paper: A8GeneratorPaper,
+  family: A8GeneratorFamily,
+  difficulty: A8GeneratorDifficulty,
+): number[] => {
+  const step = calibratedValueStep(valueRange, shell, paper, family, difficulty);
+  const firstIndex = Math.ceil((valueRange.min - 1e-9) / step);
+  const lastIndex = Math.floor((valueRange.max + 1e-9) / step);
+  const values: number[] = [];
+  for (let index = firstIndex; index <= lastIndex; index += 1) {
+    const value = clean(index * step);
+    if (value >= valueRange.min - 1e-9 && value <= valueRange.max + 1e-9) values.push(value);
+  }
+  return values;
+};
+
 const contextualSolution = (
   rng: SeededRandom,
   shell: A8ContextShell,
   paper: A8GeneratorPaper,
   family: A8GeneratorFamily,
   difficulty: A8GeneratorDifficulty,
-): [number, number] => {
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    const values: [number, number] = [
-      valueFromRange(rng, shell.valueRanges[0]),
-      valueFromRange(rng, shell.valueRanges[1]),
-    ];
-    if (values[0] <= 0 || values[1] <= 0 || close(values[0], values[1])) continue;
-    if (contextualValueTextureAccepted(values, shell, paper, family, difficulty)) return values;
+): [number, number] | null => {
+  const firstValues = calibratedValuesFromRange(shell.valueRanges[0], shell, paper, family, difficulty);
+  const secondValues = calibratedValuesFromRange(shell.valueRanges[1], shell, paper, family, difficulty);
+  const pairs: [number, number][] = [];
+
+  for (const first of firstValues) {
+    for (const second of secondValues) {
+      const values: [number, number] = [first, second];
+      if (first <= 0 || second <= 0 || close(first, second)) continue;
+      if (contextualValueTextureAccepted(values, shell, paper, family, difficulty)) pairs.push(values);
+    }
   }
 
-  throw new Error(`Unable to choose calibrated values for A8 context ${shell.id}.`);
+  return pairs.length ? rng.pick(pairs) : null;
 };
 
 const formatNumber = (value: number, decimals = 8) => {
@@ -543,11 +573,17 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
     const shell = contextual
       ? shells[positiveModulo(options.seed * 17 + difficulty * 11 + attempt * 5, shells.length)]
       : null;
-    const solution = family === "GRAPH_INTERSECTION_SOLVE"
-      ? graphSolution(attemptRng, difficulty)
-      : shell
-        ? contextualSolution(contextRng, shell, paper, family, difficulty)
-        : abstractSolution(attemptRng, difficulty);
+
+    let solution: [number, number];
+    if (family === "GRAPH_INTERSECTION_SOLVE") {
+      solution = graphSolution(attemptRng, difficulty);
+    } else if (shell) {
+      const contextualCandidate = contextualSolution(contextRng, shell, paper, family, difficulty);
+      if (!contextualCandidate) continue;
+      solution = contextualCandidate;
+    } else {
+      solution = abstractSolution(attemptRng, difficulty);
+    }
 
     const equations: [A8LinearEquation, A8LinearEquation] = [
       {
