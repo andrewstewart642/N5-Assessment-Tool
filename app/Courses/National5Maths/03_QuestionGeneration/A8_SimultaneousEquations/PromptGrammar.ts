@@ -181,7 +181,7 @@ export const buildA8ContextualPrompt = (args: {
       case 2:
         promptStructureId = "PURCHASE_SAME_CUSTOMER_TWO_VISITS";
         firstBlock = `${feeOrRetailDirectTotal(context, name1, firstItems, context.settingLabel, firstTotal)}\n(a) ${firstCommand}`;
-        secondBlock = `On another visit, ${feeOrRetailDirectTotal(context, name1, secondItems, context.sameSettingLabel, secondTotal).replace(`${name1} `, "")}\n(b) ${secondCommand}`;
+        secondBlock = `On another visit, ${feeOrRetailDirectTotal(context, name1, secondItems, context.sameSettingLabel, secondTotal)}\n(b) ${secondCommand}`;
         break;
       case 3:
         promptStructureId = "PURCHASE_COST_SENTENCE_COMPACT";
