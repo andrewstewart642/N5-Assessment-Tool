@@ -27,17 +27,20 @@ const promptValue = (context: A8GeneratedContext, value: number) => {
 const equationCommand = (variant: number, second: boolean) => {
   const firstChoices = [
     "Write down an equation to represent this information.",
-    "Write an equation which represents this information.",
-    "Form an equation from this information.",
+    "Write down an equation which represents this information.",
   ];
   const secondChoices = [
     "Write down a second equation to represent this information.",
-    "Write a second equation which represents this information.",
-    "Form a second equation from this information.",
+    "Write down a second equation which represents this information.",
   ];
   const choices = second ? secondChoices : firstChoices;
   return choices[variant % choices.length];
 };
+
+const derivedEquationCommand = (
+  variables: [string, string],
+  second: boolean,
+) => `Write down ${second ? "a second " : "an "}equation in ${variables[0]} and ${variables[1]} to represent this information.`;
 
 const finalSolveCommand = (context: A8GeneratedContext, paper: A8GeneratorPaper) => {
   const [firstItem, secondItem] = context.itemLabels;
@@ -47,7 +50,7 @@ const finalSolveCommand = (context: A8GeneratedContext, paper: A8GeneratorPaper)
     return `Calculate${algebraicWord} the cost of one ${firstItem} and one ${secondItem}.`;
   }
   if (context.contextKind === "MASS") {
-    return `Calculate${algebraicWord} the mass of one ${firstItem} and one ${secondItem}.`;
+    return `Calculate${algebraicWord} the weight of one ${firstItem} and one ${secondItem}.`;
   }
   return `Calculate${algebraicWord} the amount of ${context.resourceLabel} needed for one ${firstItem} and one ${secondItem}.`;
 };
@@ -70,7 +73,7 @@ export const buildA8ContextualPrompt = (args: {
   names: [string, string, string];
 }): A8ContextPromptBuild => {
   const { context, variables, family, paper, names } = args;
-  const [name1, name2] = names;
+  const [name1, name2, name3] = names;
   const [item1, item2] = context.itemLabels;
   const [item1Plural, item2Plural] = context.itemPluralLabels;
   const firstItems = `${singularOrPlural(context.firstCounts[0], item1, item1Plural)} and ${singularOrPlural(context.firstCounts[1], item2, item2Plural)}`;
@@ -86,25 +89,21 @@ export const buildA8ContextualPrompt = (args: {
   let promptStructureId = "";
 
   if (family === "CONTEXT_DERIVED_TOTAL") {
-    const variableDefinition = `Let ${variables[0]} be the mass of one ${item1} and ${variables[1]} be the mass of one ${item2}.`;
+    const variableDefinition = `Let ${variables[0]} be the weight of ${item1} and ${variables[1]} be the weight of ${item2}.`;
     const thirdCounts = context.derivedCounts ?? [2, 3];
     const thirdItems = `${singularOrPlural(thirdCounts[0], item1, item1Plural)} and ${singularOrPlural(thirdCounts[1], item2, item2Plural)}`;
 
-    if (variant % 3 === 0) {
-      promptStructureId = "DERIVED_LOAD_RELATIONSHIP_THEN_VARIABLES";
-      firstBlock = `A lorry carries ${firstItems}.\nThe total mass of these items is ${firstTotal}.\n${variableDefinition}\n(a) ${firstCommand}`;
-      secondBlock = `A second lorry carries ${secondItems}.\nThe total mass of these items is ${secondTotal}.\n(b) ${secondCommand}`;
-    } else if (variant % 3 === 1) {
-      promptStructureId = "DERIVED_VARIABLES_THEN_TWO_LOADS";
-      firstBlock = `${variableDefinition}\n${name1} loads ${firstItems} onto a lorry.\nTheir total mass is ${firstTotal}.\n(a) ${firstCommand}`;
-      secondBlock = `${name2} loads ${secondItems} onto another lorry.\nTheir total mass is ${secondTotal}.\n(b) ${secondCommand}`;
+    if (variant % 2 === 0) {
+      promptStructureId = "DERIVED_NAMED_LORRIES_COMPACT";
+      firstBlock = `On ${name1}'s lorry there are ${firstItems}.\nTogether they weigh ${firstTotal}.\n${variableDefinition}\n(a) ${derivedEquationCommand(variables, false)}`;
+      secondBlock = `${name2} has ${secondItems} on another lorry.\nTogether they weigh ${secondTotal}.\n(b) ${derivedEquationCommand(variables, true)}`;
+      finalBlock = `${name3} has ${thirdItems} on a third lorry.\n(c) Calculate the total weight of these items.`;
     } else {
-      promptStructureId = "DERIVED_COMPACT_LOAD_STATEMENTS";
-      firstBlock = `${name1} has a load containing ${firstItems}, with a total mass of ${firstTotal}.\n${variableDefinition}\n(a) ${firstCommand}`;
-      secondBlock = `${name2} has another load containing ${secondItems}, with a total mass of ${secondTotal}.\n(b) ${secondCommand}`;
+      promptStructureId = "DERIVED_FIRST_LOAD_THEN_VARIABLES";
+      firstBlock = `${name1} has a lorry carrying ${firstItems}.\nThe total weight is ${firstTotal}.\n${variableDefinition}\n(a) ${derivedEquationCommand(variables, false)}`;
+      secondBlock = `A second lorry carries ${secondItems}.\nThe total weight is ${secondTotal}.\n(b) ${derivedEquationCommand(variables, true)}`;
+      finalBlock = `A third lorry carries ${thirdItems}.\n(c) Calculate the total weight of this load.`;
     }
-
-    finalBlock = `A third load contains ${thirdItems}.\n(c) Calculate the total mass of this load.`;
   } else if (context.contextKind === "PURCHASE") {
     switch (variant) {
       case 0:
@@ -143,33 +142,33 @@ export const buildA8ContextualPrompt = (args: {
     switch (variant) {
       case 0:
         promptStructureId = "MASS_TWO_LOADS_DIRECT";
-        firstBlock = `A load contains ${firstItems}.\nIts total mass is ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `A second load contains ${secondItems}.\nIts total mass is ${secondTotal}.\n(b) ${secondCommand}`;
+        firstBlock = `A load contains ${firstItems}.\nThe total weight is ${firstTotal}.\n(a) ${firstCommand}`;
+        secondBlock = `A second load contains ${secondItems}.\nThe total weight is ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       case 1:
         promptStructureId = "MASS_TWO_PEOPLE_LOADS";
-        firstBlock = `${name1} loads ${firstItems} ${context.settingLabel}.\nThe total mass is ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `${name2} loads ${secondItems} ${context.sameSettingLabel}.\nThe total mass is ${secondTotal}.\n(b) ${secondCommand}`;
+        firstBlock = `${name1} loads ${firstItems} ${context.settingLabel}.\nTogether they weigh ${firstTotal}.\n(a) ${firstCommand}`;
+        secondBlock = `${name2} loads ${secondItems} ${context.sameSettingLabel}.\nTogether they weigh ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       case 2:
         promptStructureId = "MASS_COMPACT_TOTAL_SENTENCE";
-        firstBlock = `${firstItems} have a total mass of ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `${secondItems} have a total mass of ${secondTotal}.\n(b) ${secondCommand}`;
+        firstBlock = `${firstItems} have a total weight of ${firstTotal}.\n(a) ${firstCommand}`;
+        secondBlock = `${secondItems} have a total weight of ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       case 3:
         promptStructureId = "MASS_VEHICLE_RELATIONSHIPS";
-        firstBlock = `${name1} has ${firstItems} on a delivery vehicle. Their total mass is ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `${name2} has ${secondItems} on another delivery vehicle. Their total mass is ${secondTotal}.\n(b) ${secondCommand}`;
+        firstBlock = `${name1} has ${firstItems} on a delivery vehicle. Their total weight is ${firstTotal}.\n(a) ${firstCommand}`;
+        secondBlock = `${name2} has ${secondItems} on another delivery vehicle. Their total weight is ${secondTotal}.\n(b) ${secondCommand}`;
         break;
       case 4:
         promptStructureId = "MASS_SECOND_RELATIONSHIP_IN_PART_B";
-        firstBlock = `A delivery contains ${firstItems} and has a total mass of ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `(b) Another delivery contains ${secondItems} and has a total mass of ${secondTotal}.\n${secondCommand}`;
+        firstBlock = `A delivery contains ${firstItems} and has a total weight of ${firstTotal}.\n(a) ${firstCommand}`;
+        secondBlock = `(b) Another delivery contains ${secondItems} and has a total weight of ${secondTotal}.\n${secondCommand}`;
         break;
       default:
         promptStructureId = "MASS_SAME_SETTING_TWO_LOADS";
-        firstBlock = `${name1} prepares a load of ${firstItems}. It has a total mass of ${firstTotal}.\n(a) ${firstCommand}`;
-        secondBlock = `${name1} prepares another load of ${secondItems}. It has a total mass of ${secondTotal}.\n(b) ${secondCommand}`;
+        firstBlock = `${name1} prepares a load of ${firstItems}. Its total weight is ${firstTotal}.\n(a) ${firstCommand}`;
+        secondBlock = `${name1} prepares another load of ${secondItems}. Its total weight is ${secondTotal}.\n(b) ${secondCommand}`;
         break;
     }
     finalBlock = `(c) ${finalSolveCommand(context, paper)}`;
@@ -182,14 +181,14 @@ export const buildA8ContextualPrompt = (args: {
         secondBlock = `${name1} ${verb} ${secondItems} using ${secondTotal} of ${context.resourceLabel}.\n(b) ${secondCommand}`;
         break;
       case 1:
-        promptStructureId = "RESOURCE_TWO_DAYS";
-        firstBlock = `On Monday, ${name1} ${verb} ${firstItems}.\nThis uses ${firstTotal} of ${context.resourceLabel}.\n(a) ${firstCommand}`;
-        secondBlock = `On Tuesday, ${name1} ${verb} ${secondItems}.\nThis uses ${secondTotal} of ${context.resourceLabel}.\n(b) ${secondCommand}`;
+        promptStructureId = "RESOURCE_SOURCE_LIKE_SEQUENCE";
+        firstBlock = `${name1} is ${resourceActivityPhrase(context)}.\nOn one occasion ${name1} ${verb} ${firstItems}.\nThe amount of ${context.resourceLabel} used is ${firstTotal}.\n(a) ${firstCommand}`;
+        secondBlock = `(b) On another occasion ${name1} ${verb} ${secondItems}.\nThe amount of ${context.resourceLabel} used is ${secondTotal}.\n${secondCommand}`;
         break;
       case 2:
         promptStructureId = "RESOURCE_PURPOSE_INTEGRATED";
-        firstBlock = `While ${resourceActivityPhrase(context)}, ${name1} uses ${firstTotal} of ${context.resourceLabel} to make ${firstItems}.\n(a) ${firstCommand}`;
-        secondBlock = `${name1} uses ${secondTotal} of ${context.resourceLabel} to make ${secondItems}.\n(b) ${secondCommand}`;
+        firstBlock = `${name1} is ${resourceActivityPhrase(context)}.\nTo make ${firstItems}, ${name1} uses ${firstTotal} of ${context.resourceLabel}.\n(a) ${firstCommand}`;
+        secondBlock = `To make ${secondItems}, ${name1} uses ${secondTotal} of ${context.resourceLabel}.\n(b) ${secondCommand}`;
         break;
       case 3:
         promptStructureId = "RESOURCE_TWO_PEOPLE";
