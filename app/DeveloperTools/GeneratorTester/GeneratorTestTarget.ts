@@ -10,6 +10,9 @@ import type { PaperPart } from "@/app/Assessments/Questions/Content/PaperParts";
 // architecture transition, so DeveloperTools reaches the clean workspace by
 // relative import.
 import {
+  A8_DEFAULT_DIFFICULTY_LEVEL,
+  A8_DIFFICULTY_BANDS,
+  A8_SUPPORTED_DIFFICULTY_LEVELS,
   generateA8Question,
   type A8GeneratorFamily,
   type A8GeneratorPaper,
@@ -42,6 +45,36 @@ const TEST_CODE_TO_FAMILY: Record<string, A8GeneratorFamily | "AUTO_CORE"> = {
   "A8.DERIVED": "CONTEXT_DERIVED_TOTAL",
 };
 
+/**
+ * The weighted cycles reproduce the observed paper-conditioned A8 family mix
+ * in every complete cycle rather than relying on independent random draws.
+ *
+ * P1 historical mix: 5 abstract : 2 contextual : 1 graph.
+ * P2 historical mix: 2 contextual : 1 derived-total.
+ */
+const P1_FAMILY_CYCLE: A8GeneratorFamily[] = [
+  "ABSTRACT_SOLVE",
+  "CONTEXT_FORM_AND_SOLVE",
+  "ABSTRACT_SOLVE",
+  "GRAPH_INTERSECTION_SOLVE",
+  "ABSTRACT_SOLVE",
+  "CONTEXT_FORM_AND_SOLVE",
+  "ABSTRACT_SOLVE",
+  "ABSTRACT_SOLVE",
+];
+
+const P2_FAMILY_CYCLE: A8GeneratorFamily[] = [
+  "CONTEXT_FORM_AND_SOLVE",
+  "CONTEXT_DERIVED_TOTAL",
+  "CONTEXT_FORM_AND_SOLVE",
+];
+
+const A8_DIFFICULTY_DESCRIPTIONS = {
+  1: A8_DIFFICULTY_BANDS.find((band) => band.level === 1)?.description ?? "Lower valid A8 burden.",
+  2: A8_DIFFICULTY_BANDS.find((band) => band.level === 2)?.description ?? "Typical A8 burden.",
+  3: A8_DIFFICULTY_BANDS.find((band) => band.level === 3)?.description ?? "Upper valid A8 burden.",
+};
+
 function paperFromContext(context: GeneratorContext): A8GeneratorPaper {
   return context.paper === "P2" ? "P2" : "P1";
 }
@@ -53,10 +86,8 @@ function familyFromContext(context: GeneratorContext, seed: number): A8Generator
 
   if (requested && requested !== "AUTO_CORE") return requested;
 
-  // Only the contextual core family has supplied Paper 2 evidence. On Paper 1
-  // the deterministic seed parity alternates the two core families.
-  if (paperFromContext(context) === "P2") return "CONTEXT_FORM_AND_SOLVE";
-  return seed % 2 === 0 ? "ABSTRACT_SOLVE" : "CONTEXT_FORM_AND_SOLVE";
+  const cycle = paperFromContext(context) === "P2" ? P2_FAMILY_CYCLE : P1_FAMILY_CYCLE;
+  return cycle[Math.abs(seed) % cycle.length] ?? "ABSTRACT_SOLVE";
 }
 
 function answerText(finalAnswers: { partLabel: string; normalisedAnswer: string }[]): string {
@@ -78,15 +109,11 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
     conceptLabel: "Work with simultaneous equations",
     tags: ["simultaneous equations", "elimination", "A8 vertical slice"],
     difficultyProfile: {
-      availableLevels: [1, 2, 3, 4, 5],
-      defaultLevel: 3,
-      levelDescriptions: {
-        1: "Lower written-arithmetic burden with straightforward scaling.",
-        2: "Accessible National 5 elimination with modest coefficient scaling.",
-        3: "Typical National 5 simultaneous-equation construction and solving.",
-        4: "Greater scaling burden with tightly controlled half-integer possibilities in abstract work.",
-        5: "Upper prototype difficulty while remaining inside the historical A8 arithmetic envelope.",
-      },
+      // Difficulty count is skill-specific. The A8 calibration pass found three
+      // defensible bands; this is not a course-wide five-level requirement.
+      availableLevels: [...A8_SUPPORTED_DIFFICULTY_LEVELS],
+      defaultLevel: A8_DEFAULT_DIFFICULTY_LEVEL,
+      levelDescriptions: A8_DIFFICULTY_DESCRIPTIONS,
     },
     capabilities: {
       standardCoverage: ["Mixed"],
@@ -191,16 +218,17 @@ export const GENERATOR_TEST_TARGET: GeneratorTestTarget = {
   conceptControlLabel: "A8 family",
   supportsSeed: true,
   concepts: [
-    { code: "A8.CORE", label: "Core random — abstract/context", papers: ["P1", "P2"] },
+    { code: "A8.CORE", label: "Calibrated mix — historical family distribution", papers: ["P1", "P2"] },
     { code: "A8.ABSTRACT", label: "Abstract solve", papers: ["P1"] },
     { code: "A8.CONTEXT", label: "Context: form and solve", papers: ["P1", "P2"] },
     { code: "A8.GRAPH", label: "Experimental: graph intersection", papers: ["P1"] },
     { code: "A8.DERIVED", label: "Experimental: contextual derived total", papers: ["P2"] },
   ],
   notes: [
-    "Testing the rebuilt A8 simultaneous-equations Question + Answer generators before Assessment Creation wiring.",
-    "Context generation now uses 60 curated semantic shells rather than arbitrary noun substitution; purchase, fixed-mass and resource-use contexts each have context-specific plausible value ranges.",
-    "The number generator rejects coefficient ±1, reducible rows, equal row coefficients and free elimination routes, and it separately constrains Paper 1 intermediate arithmetic.",
-    "Abstract equation systems are emitted as structured display maths. Raw output exposes the seed, context ID, quality profile, equations, solution, elimination plans, mark points and source basis.",
+    "A dedicated A8 cross-corpus calibration pass found three useful difficulty bands: Lower valid, Typical and Upper valid. Other skills may expose a different number of bands after their own analysis.",
+    "Core family selection now follows the observed paper-conditioned mix: P1 uses 5 abstract : 2 contextual : 1 graph; P2 uses 2 contextual : 1 derived-total.",
+    "The calibration records cheapest-route scaling, number texture and Paper 1/Paper 2 arithmetic envelopes for all eleven historical A8 questions. The next generator-tightening pass should enforce those envelopes directly.",
+    "Context generation uses 60 curated semantic shells rather than arbitrary noun substitution; purchase, fixed-mass and resource-use contexts each have context-specific plausible value ranges.",
+    "Raw output exposes the seed, context ID, quality profile, equations, solution, elimination plans, mark points and source basis.",
   ],
 };
