@@ -1,6 +1,6 @@
 "use client";
 
-import type { A8GraphVisualSpec, A8LinearEquation } from "../../Courses/National5Maths/03_QuestionGeneration/A8_SimultaneousEquations";
+import type { A8GraphVisualSpec, A8LinearEquation } from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 
 type Point = { x: number; y: number };
 

@@ -17,8 +17,8 @@ import {
   type A8GeneratorDifficulty,
   type A8GeneratorFamily,
   type A8GeneratorPaper,
-} from "../../Courses/National5Maths/03_QuestionGeneration/A8_SimultaneousEquations";
-import { generateA8Answer } from "../../Courses/National5Maths/04_AnswerGeneration/A8_SimultaneousEquations";
+} from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+import { generateA8Answer } from "../../Courses/National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 
 export type GeneratorTestConcept = {
   code: string;
@@ -40,11 +40,11 @@ type SeededGeneratorContext = GeneratorContext & {
 };
 
 const TEST_CODE_TO_FAMILY: Record<string, A8GeneratorFamily | "CALIBRATED_MIX"> = {
-  "A8.CORE": "CALIBRATED_MIX",
-  "A8.ABSTRACT": "ABSTRACT_SOLVE",
-  "A8.CONTEXT": "CONTEXT_FORM_AND_SOLVE",
-  "A8.GRAPH": "GRAPH_INTERSECTION_SOLVE",
-  "A8.DERIVED": "CONTEXT_DERIVED_TOTAL",
+  "A8": "CALIBRATED_MIX",
+  "A8.1": "ABSTRACT_SOLVE",
+  "A8.2": "CONTEXT_FORM_AND_SOLVE",
+  "A8.3": "GRAPH_INTERSECTION_SOLVE",
+  "A8.4": "CONTEXT_DERIVED_TOTAL",
 };
 
 const A8_DIFFICULTY_DESCRIPTIONS = {
@@ -202,11 +202,11 @@ export const GENERATOR_TEST_TARGET: GeneratorTestTarget = {
   },
   supportsSeed: true,
   concepts: [
-    { code: "A8.CORE", label: "Calibrated mix — historical family distribution", papers: ["P1", "P2"] },
-    { code: "A8.ABSTRACT", label: "Abstract solve", papers: ["P1"] },
-    { code: "A8.CONTEXT", label: "Context: form and solve", papers: ["P1", "P2"] },
-    { code: "A8.GRAPH", label: "Graph + algebraic intersection", papers: ["P1"] },
-    { code: "A8.DERIVED", label: "Context: solve then derived total", papers: ["P2"] },
+    { code: "A8", label: "Mixed simultaneous equations — calibrated historical distribution", papers: ["P1", "P2"] },
+    { code: "A8.1", label: "Solve simultaneous equations algebraically", papers: ["P1"] },
+    { code: "A8.2", label: "Form and solve simultaneous equations from context", papers: ["P1", "P2"] },
+    { code: "A8.3", label: "Find the point of intersection algebraically", papers: ["P1"] },
+    { code: "A8.4", label: "Solve then calculate a further quantity", papers: ["P2"] },
   ],
   notes: [
     "A8 has three evidence-derived difficulty bands: Lower valid, Typical and Upper valid. Each accepted instance must now positively fit its selected band rather than merely stay below a generic maximum.",
