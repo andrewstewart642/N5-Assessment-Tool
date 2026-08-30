@@ -20,6 +20,9 @@ import {
   type A8ContextShell,
   type A8ValueRange,
 } from "./ContextLibrary";
+import { A8_DERIVED_MASS_CONTEXT_SHELLS } from "./DerivedContextLibrary";
+import { assessA8CandidateFidelity, type A8FidelityAssessment } from "./Fidelity";
+import { buildA8ContextualPrompt } from "./PromptGrammar";
 import type {
   A8EliminationPlan,
   A8GenerateOptions,
@@ -66,6 +69,7 @@ const mixSeed = (seed: number, salt: number) => {
   return (value ^ (value >>> 16)) >>> 0;
 };
 
+const positiveModulo = (value: number, modulus: number) => ((value % modulus) + modulus) % modulus;
 const close = (a: number, b: number) => Math.abs(a - b) < 1e-9;
 const gcd = (a: number, b: number): number => b === 0 ? Math.abs(a) : gcd(b, a % b);
 const lcm = (a: number, b: number): number => Math.abs(a * b) / gcd(a, b);
@@ -128,56 +132,57 @@ const choosePaper = (
 const coefficientMaximum = (
   family: A8GeneratorFamily,
   paper: A8GeneratorPaper,
+  difficulty: A8GeneratorDifficulty,
 ) => {
-  if (family === "GRAPH_INTERSECTION_SOLVE") return 4;
+  if (family === "GRAPH_INTERSECTION_SOLVE") return difficulty === 2 ? 3 : 4;
   if (family === "ABSTRACT_SOLVE") {
+    if (difficulty === 1) return 5;
+    if (difficulty === 2) return 6;
     return A8_PAPER_NUMERICAL_CALIBRATION.P1.abstract.absoluteCoefficientRangeObserved[1];
   }
   if (family === "CONTEXT_DERIVED_TOTAL") return 7;
-  return paper === "P1" ? 7 : 5;
+  if (paper === "P2") return difficulty === 1 ? 4 : 5;
+  if (difficulty === 1) return 5;
+  if (difficulty === 2) return 6;
+  return 7;
 };
 
 /**
- * Coefficient generation creates candidates only; the calibrated route checker
- * below decides whether the complete system lies inside the historical A8
- * burden. This deliberately avoids crude rules such as "larger coefficient =
- * harder".
+ * Coefficients are candidates only. The route/fidelity checker below decides
+ * whether the complete question sits inside the calibrated A8 burden.
  */
 const coefficientPair = (
   rng: SeededRandom,
   family: A8GeneratorFamily,
   paper: A8GeneratorPaper,
+  difficulty: A8GeneratorDifficulty,
 ): [[number, number], [number, number]] => {
   const graph = family === "GRAPH_INTERSECTION_SOLVE";
   const contextual = family === "CONTEXT_FORM_AND_SOLVE" || family === "CONTEXT_DERIVED_TOTAL";
   const min = graph ? 1 : 2;
-  const max = coefficientMaximum(family, paper);
+  const max = coefficientMaximum(family, paper, difficulty);
 
-  for (let attempt = 0; attempt < 1500; attempt += 1) {
+  for (let attempt = 0; attempt < 1800; attempt += 1) {
     let a = rng.int(min, max);
     let b = rng.int(min, max);
     let d = rng.int(min, max);
     let e = rng.int(min, max);
 
     if (graph) {
-      // The single graph source contains coefficient 1 and one negative term;
-      // stay close to that representation burden rather than generalising the
-      // abstract-family coefficient restrictions to this family.
       const slot = rng.int(0, 3);
       const values = [a, b, d, e];
       values[slot] = 1;
       [a, b, d, e] = values as [number, number, number, number];
       if (rng.chance(0.5)) b *= -1;
       else e *= -1;
-    } else if (!contextual && rng.chance(0.55)) {
-      // Historical abstract systems use either all-positive coefficients or a
-      // single negative second-variable coefficient.
+    } else if (!contextual && difficulty > 1 && rng.chance(difficulty === 2 ? 0.42 : 0.62)) {
       if (rng.chance(0.5)) b *= -1;
       else e *= -1;
     }
 
     if (Math.abs(a) === Math.abs(b) || Math.abs(d) === Math.abs(e)) continue;
     if (!graph && (Math.abs(a) === Math.abs(d) || Math.abs(b) === Math.abs(e))) continue;
+    if (contextual && (coefficientGcd(a, b) !== 1 || coefficientGcd(d, e) !== 1)) continue;
     if (a * e - d * b === 0) continue;
 
     return [[a, b], [d, e]];
@@ -190,29 +195,37 @@ const abstractSolution = (
   rng: SeededRandom,
   difficulty: A8GeneratorDifficulty,
 ): [number, number] => {
-  if (difficulty === 3 && rng.chance(0.22)) {
-    const firstMagnitude = rng.int(1, 9) / 2;
-    const secondMagnitude = rng.int(2, 10) / 2;
+  if (difficulty === 3 && rng.chance(0.28)) {
+    let firstMagnitude = rng.int(1, 11) / 2;
+    let secondMagnitude = rng.int(2, 10) / 2;
+    if (Number.isInteger(firstMagnitude) && Number.isInteger(secondMagnitude)) firstMagnitude += 0.5;
     return rng.chance(0.5)
       ? [firstMagnitude, -secondMagnitude]
       : [-firstMagnitude, secondMagnitude];
   }
 
-  const positiveMaximum = difficulty === 1 ? 7 : 6;
-  const negativeMaximum = difficulty === 1 ? 4 : 5;
+  const positiveMaximum = difficulty === 1 ? 4 : difficulty === 2 ? 5 : 6;
+  const negativeMaximum = difficulty === 1 ? 3 : difficulty === 2 ? 4 : 5;
   let positive = rng.int(1, positiveMaximum);
   let negative = rng.int(1, negativeMaximum);
-  if (positive === negative) positive = positive === positiveMaximum ? positive - 1 : positive + 1;
+  if (positive === negative) positive = positive === positiveMaximum ? Math.max(1, positive - 1) : positive + 1;
 
-  return rng.chance(0.3) ? [-negative, positive] : [positive, -negative];
+  return rng.chance(0.32) ? [-negative, positive] : [positive, -negative];
 };
 
-const graphSolution = (rng: SeededRandom): [number, number] => {
-  let first = rng.int(1, 11) / 2;
-  let second = rng.int(3, 13) / 2;
+const graphSolution = (
+  rng: SeededRandom,
+  difficulty: A8GeneratorDifficulty,
+): [number, number] => {
+  const firstMinimum = difficulty === 2 ? 2 : 5;
+  const firstMaximum = difficulty === 2 ? 8 : 12;
+  const secondMinimum = difficulty === 2 ? 3 : 7;
+  const secondMaximum = difficulty === 2 ? 10 : 14;
+  let first = rng.int(firstMinimum, firstMaximum) / 2;
+  let second = rng.int(secondMinimum, secondMaximum) / 2;
   if (Number.isInteger(first)) first += 0.5;
   if (Number.isInteger(second)) second += 0.5;
-  if (first === second) second += 1;
+  if (close(first, second)) second += 1;
   return [first, second];
 };
 
@@ -234,14 +247,14 @@ const contextualValueTextureAccepted = (
 
   if (paper === "P2") {
     if (shell.kind !== "PURCHASE") return false;
-    // Lower difficulty uses money values with at most one decimal place; the
-    // other bands may use exact hundredths. This follows the P2 money texture
-    // without making particular context-shell step grids artificially invalid.
-    if (difficulty === 1) return values.every(hasAtMostOneDecimal);
+    if (difficulty === 1) return values.every((value) => isMultipleOf(value, 0.5));
+    if (difficulty === 2) return values.every((value) => isMultipleOf(value, 0.25));
     return values.every(hasAtMostTwoDecimals);
   }
 
-  if (shell.kind === "MASS") return values.every(Number.isInteger);
+  if (shell.kind === "MASS") {
+    return values.every((value) => Number.isInteger(value) && isMultipleOf(value, 5));
+  }
   if (shell.kind === "RESOURCE") {
     if (difficulty === 1) return values.every((value) => isMultipleOf(value, 0.5));
     return values.every(hasAtMostOneDecimal);
@@ -256,7 +269,7 @@ const contextualSolution = (
   family: A8GeneratorFamily,
   difficulty: A8GeneratorDifficulty,
 ): [number, number] => {
-  for (let attempt = 0; attempt < 300; attempt += 1) {
+  for (let attempt = 0; attempt < 500; attempt += 1) {
     const values: [number, number] = [
       valueFromRange(rng, shell.valueRanges[0]),
       valueFromRange(rng, shell.valueRanges[1]),
@@ -273,7 +286,7 @@ const formatNumber = (value: number, decimals = 8) => {
   return value.toFixed(decimals).replace(/0+$/, "").replace(/\.$/, "");
 };
 
-const equationPlain = (equation: A8LinearEquation, variables: [string, string]) => {
+const equationTerms = (equation: A8LinearEquation, variables: [string, string]) => {
   const terms: string[] = [];
   const append = (coefficient: number, variable: string) => {
     if (coefficient === 0) return;
@@ -285,25 +298,22 @@ const equationPlain = (equation: A8LinearEquation, variables: [string, string]) 
 
   append(equation.a, variables[0]);
   append(equation.b, variables[1]);
-  return `${terms.join(" ")} = ${formatNumber(equation.c)}`;
+  return terms.join(" ");
 };
 
-const equationLatex = (equation: A8LinearEquation, variables: [string, string]) =>
-  equationPlain(equation, variables);
+const equationPlain = (equation: A8LinearEquation, variables: [string, string]) =>
+  `${equationTerms(equation, variables)} = ${formatNumber(equation.c)}`;
+
+const equationAlignedLatex = (equation: A8LinearEquation, variables: [string, string]) =>
+  `${equationTerms(equation, variables)} &= ${formatNumber(equation.c)}`;
+
+const systemLatex = (
+  equations: [A8LinearEquation, A8LinearEquation],
+  variables: [string, string],
+) => `\\begin{aligned}${equationAlignedLatex(equations[0], variables)}\\\\${equationAlignedLatex(equations[1], variables)}\\end{aligned}`;
 
 const textPart = (value: string): PaperPart => ({ kind: "text", value });
 const mathPart = (latex: string, displayMode = false): PaperPart => ({ kind: "math", latex, displayMode });
-
-const promptValue = (context: A8GeneratedContext, value: number) => {
-  if (context.unitDimension === "currency") return `£${value.toFixed(2)}`;
-  const numeric = context.displayDecimals > 0
-    ? value.toFixed(context.displayDecimals).replace(/\.0+$/, "")
-    : formatNumber(value);
-  return `${numeric} ${context.unitPromptLabel}`;
-};
-
-const singularOrPlural = (count: number, singular: string, plural: string) =>
-  `${count} ${count === 1 ? singular : plural}`;
 
 const NAMES = [
   "Amina", "Ben", "Cara", "Dylan", "Eva", "Fraser", "Hana", "Imran",
@@ -348,11 +358,12 @@ const buildContext = (
     firstTotal,
     secondTotal,
     promptVariableDefinitions: family === "CONTEXT_DERIVED_TOTAL",
-    wordingVariant: rng.int(0, 2),
+    wordingVariant: rng.int(0, 5),
+    promptStructureId: null,
   };
 
   if (family === "CONTEXT_DERIVED_TOTAL") {
-    for (let attempt = 0; attempt < 100; attempt += 1) {
+    for (let attempt = 0; attempt < 120; attempt += 1) {
       const third: [number, number] = [rng.int(2, 7), rng.int(2, 7)];
       if (third[0] === third[1]) continue;
       if (
@@ -368,127 +379,6 @@ const buildContext = (
   return context;
 };
 
-const equationCommand = (variant: number, second: boolean) => {
-  const choices = second
-    ? [
-        "Write down a second equation which represents this information.",
-        "Write down an equation to represent this information.",
-        "Write a second equation for this information.",
-      ]
-    : [
-        "Write down an equation which represents this information.",
-        "Write down an equation to represent this information.",
-        "Write an equation for this information.",
-      ];
-  return choices[variant % choices.length];
-};
-
-const finalSolveCommand = (context: A8GeneratedContext, paper: A8GeneratorPaper) => {
-  const [firstItem, secondItem] = context.itemLabels;
-  const algebraically = paper === "P2" || context.wordingVariant === 1;
-  const algebraicWord = algebraically ? " algebraically" : "";
-
-  if (context.contextKind === "PURCHASE") {
-    return `Calculate${algebraicWord} the cost of one ${firstItem} and one ${secondItem}.`;
-  }
-  if (context.contextKind === "MASS") {
-    return `Calculate${algebraicWord} the mass of one ${firstItem} and one ${secondItem}.`;
-  }
-  return `Calculate${algebraicWord} the amount of ${context.resourceLabel} needed for one ${firstItem} and one ${secondItem}.`;
-};
-
-const contextualPrompt = (
-  rng: SeededRandom,
-  context: A8GeneratedContext,
-  variables: [string, string],
-  family: A8GeneratorFamily,
-  paper: A8GeneratorPaper,
-) => {
-  const [name1, name2, name3] = distinctNames(rng);
-  const [item1, item2] = context.itemLabels;
-  const [item1Plural, item2Plural] = context.itemPluralLabels;
-  const firstItems = `${singularOrPlural(context.firstCounts[0], item1, item1Plural)} and ${singularOrPlural(context.firstCounts[1], item2, item2Plural)}`;
-  const secondItems = `${singularOrPlural(context.secondCounts[0], item1, item1Plural)} and ${singularOrPlural(context.secondCounts[1], item2, item2Plural)}`;
-  const firstTotal = promptValue(context, context.firstTotal);
-  const secondTotal = promptValue(context, context.secondTotal);
-
-  let introduction = "";
-  let firstStatement = "";
-  let secondStatement = "";
-
-  if (context.contextKind === "PURCHASE") {
-    if (context.wordingVariant === 0) {
-      firstStatement = `${name1} buys ${firstItems} ${context.settingLabel}.\nThe total cost is ${firstTotal}.`;
-      secondStatement = `${name2} buys ${secondItems} ${context.sameSettingLabel}.\nThe total cost is ${secondTotal}.`;
-    } else if (context.wordingVariant === 1) {
-      firstStatement = `${name1} pays ${firstTotal} for ${firstItems} ${context.settingLabel}.`;
-      secondStatement = `${name2} pays ${secondTotal} for ${secondItems} ${context.sameSettingLabel}.`;
-    } else {
-      firstStatement = `${name1} purchases ${firstItems} ${context.settingLabel}.\nAltogether they cost ${firstTotal}.`;
-      secondStatement = `${name2} purchases ${secondItems} ${context.sameSettingLabel}.\nAltogether they cost ${secondTotal}.`;
-    }
-  } else if (context.contextKind === "MASS") {
-    if (context.wordingVariant === 0) {
-      firstStatement = `${name1} loads ${firstItems} ${context.settingLabel}.\nThe total mass is ${firstTotal}.`;
-      secondStatement = `${name2} loads ${secondItems} ${context.sameSettingLabel}.\nThe total mass is ${secondTotal}.`;
-    } else if (context.wordingVariant === 1) {
-      firstStatement = `A load prepared by ${name1} contains ${firstItems}.\nIts total mass is ${firstTotal}.`;
-      secondStatement = `A second load prepared by ${name2} contains ${secondItems}.\nIts total mass is ${secondTotal}.`;
-    } else {
-      firstStatement = `${name1} has ${firstItems} ${context.settingLabel}.\nTogether they have a mass of ${firstTotal}.`;
-      secondStatement = `${name2} has ${secondItems} ${context.sameSettingLabel}.\nTogether they have a mass of ${secondTotal}.`;
-    }
-  } else {
-    introduction = `${name1} ${context.activityLead ?? "is making two types of item"}.`;
-    const verb = context.activityVerb ?? "makes";
-    if (context.wordingVariant === 0) {
-      firstStatement = `In one batch, ${name1} ${verb} ${firstItems}.\nThe total amount of ${context.resourceLabel} used is ${firstTotal}.`;
-      secondStatement = `In another batch, ${name1} ${verb} ${secondItems}.\nThe total amount of ${context.resourceLabel} used is ${secondTotal}.`;
-    } else if (context.wordingVariant === 1) {
-      firstStatement = `On Monday, ${name1} ${verb} ${firstItems}.\nThe total amount of ${context.resourceLabel} used is ${firstTotal}.`;
-      secondStatement = `On Tuesday, ${name1} ${verb} ${secondItems}.\nThe total amount of ${context.resourceLabel} used is ${secondTotal}.`;
-    } else {
-      firstStatement = `For one order, ${name1} ${verb} ${firstItems}.\nThis uses ${firstTotal} of ${context.resourceLabel}.`;
-      secondStatement = `For a second order, ${name1} ${verb} ${secondItems}.\nThis uses ${secondTotal} of ${context.resourceLabel}.`;
-    }
-  }
-
-  const variableDefinition = context.promptVariableDefinitions
-    ? `Let ${variables[0]} be the ${context.contextKind === "MASS" ? "mass" : "value"} of one ${item1} and ${variables[1]} be the ${context.contextKind === "MASS" ? "mass" : "value"} of one ${item2}.`
-    : "";
-
-  const aCommand = `(a) ${equationCommand(context.wordingVariant, false)}`;
-  const bCommand = `(b) ${equationCommand(context.wordingVariant, true)}`;
-  let cCommand = `(c) ${finalSolveCommand(context, paper)}`;
-
-  if (family === "CONTEXT_DERIVED_TOTAL" && context.derivedCounts && context.derivedTotal !== undefined) {
-    const thirdItems = `${singularOrPlural(context.derivedCounts[0], item1, item1Plural)} and ${singularOrPlural(context.derivedCounts[1], item2, item2Plural)}`;
-    cCommand = `${name3} has ${thirdItems} on a third load.\n(c) Calculate the total mass of these items.`;
-  }
-
-  const fullPrompt = [
-    introduction,
-    variableDefinition,
-    firstStatement,
-    aCommand,
-    "",
-    secondStatement,
-    bCommand,
-    "",
-    cCommand,
-  ].join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{3,}/g, "\n\n");
-
-  return {
-    prompt: fullPrompt,
-    promptParts: [textPart(fullPrompt)],
-    sections: [
-      { label: "a" as const, text: [introduction, variableDefinition, firstStatement, aCommand].filter(Boolean).join("\n"), marks: 1 },
-      { label: "b" as const, text: `${secondStatement}\n${bCommand}`, marks: 1 },
-      { label: "c" as const, text: cCommand, marks: 4 },
-    ],
-  };
-};
-
 const equationIsObviouslyReducible = (equation: A8LinearEquation) => {
   if (!Number.isInteger(equation.c)) return false;
   return gcd(coefficientGcd(equation.a, equation.b), Math.abs(Math.round(equation.c))) > 1;
@@ -501,6 +391,11 @@ const routeScaledCoefficientMaximum = (route: A8CalibratedRoute) => Math.max(
   Math.abs(route.plan.scaledSecond.b),
 );
 
+type CalibratedCandidate = {
+  route: A8CalibratedRoute;
+  fidelity: A8FidelityAssessment;
+};
+
 const candidateFitsCalibration = (args: {
   difficulty: A8GeneratorDifficulty;
   paper: A8GeneratorPaper;
@@ -509,7 +404,7 @@ const candidateFitsCalibration = (args: {
   solution: [number, number];
   plans: [A8EliminationPlan, A8EliminationPlan];
   context: A8GeneratedContext | null;
-}): A8CalibratedRoute | null => {
+}): CalibratedCandidate | null => {
   const { difficulty, paper, family, equations, solution, plans, context } = args;
 
   if (equations.some((equation) => close(equation.c, 0))) return null;
@@ -543,6 +438,7 @@ const candidateFitsCalibration = (args: {
 
   if (family === "CONTEXT_FORM_AND_SOLVE") {
     if (!context) return null;
+    if (equations.some((equation) => coefficientGcd(equation.a, equation.b) !== 1)) return null;
 
     if (paper === "P2") {
       if (context.contextKind !== "PURCHASE") return null;
@@ -550,14 +446,13 @@ const candidateFitsCalibration = (args: {
       if (Math.max(...route.scaledConstants) > 500) return null;
     } else if (context.contextKind === "RESOURCE") {
       if (![...solution, context.firstTotal, context.secondTotal, ...route.scaledConstants, route.remainingConstant].every(hasAtMostOneDecimal)) return null;
-      const limit = difficulty === 1 ? 40 : difficulty === 2 ? 60 : 80;
-      if (Math.max(...route.scaledConstants) > limit) return null;
+      if (Math.max(...route.scaledConstants) > 80) return null;
     } else if (context.contextKind === "MASS") {
       if (![...solution, context.firstTotal, context.secondTotal, ...route.scaledConstants].every(Number.isInteger)) return null;
-      const scaledLimit = difficulty === 1 ? 500 : difficulty === 2 ? 900 : 1100;
-      if (Math.max(...route.scaledConstants) > scaledLimit) return null;
+      if (Math.max(...route.scaledConstants) > 1100) return null;
       if (Math.max(context.firstTotal, context.secondTotal) > 350) return null;
-      const largeValues = [context.firstTotal, context.secondTotal, ...route.scaledConstants].filter((value) => Math.abs(value) > 100);
+      const largeValues = [context.firstTotal, context.secondTotal, ...route.scaledConstants]
+        .filter((value) => Math.abs(value) > 100);
       if (!largeValues.every((value) => isMultipleOf(value, 5))) return null;
     } else {
       return null;
@@ -571,12 +466,21 @@ const candidateFitsCalibration = (args: {
     if (!isMultipleOf(context.derivedTotal, 10)) return null;
   }
 
-  return route;
+  const fidelity = assessA8CandidateFidelity({
+    difficulty,
+    paper,
+    family,
+    equations,
+    solution,
+    route,
+    context,
+  });
+  return fidelity.accepted ? { route, fidelity } : null;
 };
 
 const chooseVariableSymbols = (rng: SeededRandom, family: A8GeneratorFamily): [string, string] => {
   if (family === "CONTEXT_FORM_AND_SOLVE") {
-    return rng.pick<readonly [string, string]>([["x", "y"], ["a", "b"], ["p", "q"]] as const) as [string, string];
+    return rng.pick<readonly [string, string]>([["x", "y"], ["a", "b"], ["p", "q"], ["m", "n"]] as const) as [string, string];
   }
   if (family === "CONTEXT_DERIVED_TOTAL") {
     return rng.pick<readonly [string, string]>([["p", "e"], ["m", "n"], ["x", "y"]] as const) as [string, string];
@@ -598,9 +502,9 @@ const contextCandidates = (
   }
 
   if (derived) {
-    shells = shells.filter((shell) =>
+    shells = [...shells, ...A8_DERIVED_MASS_CONTEXT_SHELLS].filter((shell) =>
       shell.kind === "MASS" &&
-      shell.valueRanges.some((range) => range.max >= 100),
+      shell.valueRanges.every((range) => range.max >= 40),
     );
   }
 
@@ -627,27 +531,35 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
     throw new Error(`A8 family ${family} has no supplied historical evidence on ${paper}.`);
   }
 
-  for (let attempt = 0; attempt < 3000; attempt += 1) {
+  for (let attempt = 0; attempt < 5000; attempt += 1) {
     const attemptRng = new SeededRandom(mixSeed(options.seed, 0x51F15EED + attempt * 977));
-    const coefficients = coefficientPair(attemptRng, family, paper);
+    const coefficients = coefficientPair(attemptRng, family, paper, difficulty);
     const shells = contextual ? contextCandidates(paper, family) : [];
     if (contextual && !shells.length) {
       throw new Error(`No calibrated A8 context shells are available for ${family} on ${paper}.`);
     }
 
-    // Context choice uses its own mixed seed so adjacent teacher-facing seeds do
-    // not walk through the same semantic shell cluster.
     const contextRng = new SeededRandom(mixSeed(options.seed, 0xC07E57 + attempt * 193));
-    const shell = contextual ? contextRng.pick(shells) : null;
+    const shell = contextual
+      ? shells[positiveModulo(options.seed * 17 + difficulty * 11 + attempt * 5, shells.length)]
+      : null;
     const solution = family === "GRAPH_INTERSECTION_SOLVE"
-      ? graphSolution(attemptRng)
+      ? graphSolution(attemptRng, difficulty)
       : shell
         ? contextualSolution(contextRng, shell, paper, family, difficulty)
         : abstractSolution(attemptRng, difficulty);
 
     const equations: [A8LinearEquation, A8LinearEquation] = [
-      { a: coefficients[0][0], b: coefficients[0][1], c: clean(coefficients[0][0] * solution[0] + coefficients[0][1] * solution[1]) },
-      { a: coefficients[1][0], b: coefficients[1][1], c: clean(coefficients[1][0] * solution[0] + coefficients[1][1] * solution[1]) },
+      {
+        a: coefficients[0][0],
+        b: coefficients[0][1],
+        c: clean(coefficients[0][0] * solution[0] + coefficients[0][1] * solution[1]),
+      },
+      {
+        a: coefficients[1][0],
+        b: coefficients[1][1],
+        c: clean(coefficients[1][0] * solution[0] + coefficients[1][1] * solution[1]),
+      },
     ];
 
     const determinant = equations[0].a * equations[1].b - equations[1].a * equations[0].b;
@@ -658,7 +570,7 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
       eliminationPlan(equations[0], equations[1], "SECOND"),
     ];
     const context = shell ? buildContext(contextRng, family, shell, coefficients, solution) : null;
-    const calibratedRoute = candidateFitsCalibration({
+    const calibratedCandidate = candidateFitsCalibration({
       difficulty,
       paper,
       family,
@@ -667,23 +579,31 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
       plans,
       context,
     });
-    if (!calibratedRoute) continue;
+    if (!calibratedCandidate) continue;
 
+    const { route: calibratedRoute, fidelity } = calibratedCandidate;
     let prompt: string;
     let promptParts: PaperPart[];
     let promptSections: A8GeneratedQuestion["promptSections"];
     let visual: A8GeneratedQuestion["visual"] = null;
 
     if (context) {
-      const built = contextualPrompt(contextRng, context, variables, family, paper);
+      const built = buildA8ContextualPrompt({
+        context,
+        variables,
+        family,
+        paper,
+        names: distinctNames(contextRng),
+      });
+      context.promptStructureId = built.promptStructureId;
       prompt = built.prompt;
       promptParts = built.promptParts;
       promptSections = built.sections;
     } else if (family === "GRAPH_INTERSECTION_SOLVE") {
-      prompt = `The straight lines with equations ${equationPlain(equations[0], variables)} and ${equationPlain(equations[1], variables)} intersect at P.\nCalculate algebraically the coordinates of P.`;
+      prompt = `The graph shows two straight lines represented by the equations ${equationPlain(equations[0], variables)} and ${equationPlain(equations[1], variables)}.\nCalculate algebraically the coordinates of their point of intersection, P.`;
       promptParts = [
-        textPart("The graph shows two straight lines with equations"),
-        mathPart(`\\begin{aligned}${equationLatex(equations[0], variables)}\\\\${equationLatex(equations[1], variables)}\\end{aligned}`, true),
+        textPart("The graph shows two straight lines represented by the equations"),
+        mathPart(systemLatex(equations, variables), true),
         textPart("Calculate algebraically the coordinates of their point of intersection, P."),
       ];
       promptSections = [{ label: "", text: prompt, marks: 3 }];
@@ -703,13 +623,13 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
       prompt = `Solve algebraically the system of equations\n${equationPlain(equations[0], variables)}\n${equationPlain(equations[1], variables)}`;
       promptParts = [
         textPart("Solve algebraically the system of equations"),
-        mathPart(`\\begin{aligned}${equationLatex(equations[0], variables)}\\\\${equationLatex(equations[1], variables)}\\end{aligned}`, true),
+        mathPart(systemLatex(equations, variables), true),
       ];
       promptSections = [{ label: "", text: prompt, marks: 3 }];
     }
 
     const question: A8GeneratedQuestion = {
-      generatorId: "A8_SIMULTANEOUS_EQUATIONS_V3",
+      generatorId: "A8_SIMULTANEOUS_EQUATIONS_V4",
       instanceId: `A8-${paper}-L${difficulty}-${family}-${options.seed}`,
       seed: options.seed,
       family,
@@ -737,12 +657,15 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
         `Difficulty calibration: ${band.label}.`,
         `Family prior on ${paper}: ${familySelection.observedCount}/${familySelection.observedTotal}.`,
         "Generated mathematical system must not be equivalent to a catalogued historical A8 system.",
+        "Contextual coefficient rows must not have an immediately visible common factor.",
         paper === "P1"
-          ? "The cheapest calibrated elimination route must remain naturally executable by written non-calculator arithmetic."
+          ? "Every accepted decimal/fractional step must remain naturally executable by written non-calculator arithmetic."
           : "Calculator availability may broaden number texture, but values and outcomes must remain deliberately constructed and exact.",
       ],
       quality: {
         difficultyBandId: band.id,
+        difficultyScore: fidelity.difficultyScore,
+        difficultySignals: fidelity.signals,
         calibrationSourceAnchorIds: [...band.sourceAnchors],
         familyObservedCount: familySelection.observedCount,
         familyObservedTotal: familySelection.observedTotal,
@@ -750,9 +673,10 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
         familyCycleLength: familySelection.cycleLength,
         familyCycleSlot: familySelection.cycleSlot,
         historicalOverlapChecked: true,
-        contextPoolSize: A8_CONTEXT_POOL_SIZE,
+        contextPoolSize: A8_CONTEXT_POOL_SIZE + A8_DERIVED_MASS_CONTEXT_SHELLS.length,
         contextId: context?.contextId ?? null,
         contextKind: context?.contextKind ?? null,
+        promptStructureId: context?.promptStructureId ?? null,
         rowCommonFactors: [
           coefficientGcd(equations[0].a, equations[0].b),
           coefficientGcd(equations[1].a, equations[1].b),
@@ -771,6 +695,7 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
           solvedValue: calibratedRoute.solvedValue,
           routeScore: calibratedRoute.routeScore,
         },
+        substitutionRoute: fidelity.substitution,
         paperArithmeticProfile: paper === "P1" ? "P1_WRITTEN" : "P2_CALCULATOR_AVAILABLE",
       },
     };
