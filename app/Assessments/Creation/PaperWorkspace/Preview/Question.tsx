@@ -202,24 +202,51 @@ export default function AssessmentPreviewQuestion({
           style={{
             position:
               "relative",
+
+            zIndex:
+              1,
           }}
         >
-          <QuestionLockedPreview
-            index={
-              globalIndex
-            }
-            question={
-              question
-            }
-          />
+          {/*
+           * Locked paper content is display-only in the Builder. Keeping it
+           * out of the pointer hit-test guarantees that the floating Edit
+           * control remains the interactive surface even when rich prompt
+           * parts/graphs introduce their own rendered layers.
+           */}
+          <div
+            style={{
+              pointerEvents:
+                "none",
+            }}
+          >
+            <QuestionLockedPreview
+              index={
+                globalIndex
+              }
+              question={
+                question
+              }
+            />
+          </div>
 
           <button
             type="button"
-            onClick={() =>
+            data-preview-edit-control="true"
+            onPointerDown={(
+              event
+            ) => {
+              event.stopPropagation();
+            }}
+            onClick={(
+              event
+            ) => {
+              event.preventDefault();
+              event.stopPropagation();
+
               startEditLockedQuestion(
                 question.id
-              )
-            }
+              );
+            }}
             style={{
               position:
                 "absolute",
@@ -230,11 +257,20 @@ export default function AssessmentPreviewQuestion({
               right:
                 86,
 
+              zIndex:
+                100,
+
+              pointerEvents:
+                "auto",
+
+              touchAction:
+                "manipulation",
+
               border:
                 "1px solid rgba(15,23,42,0.25)",
 
               background:
-                "rgba(255,255,255,0.70)",
+                "rgba(255,255,255,0.82)",
 
               color:
                 "rgba(15,23,42,0.75)",
@@ -278,7 +314,8 @@ export default function AssessmentPreviewQuestion({
             "relative",
         }}
       >
-        {showWorkedAnswers ? (
+        {showWorkedAnswers &&
+        kind !== "edit" ? (
           <WorkedAnswerPreview
             question={
               question
