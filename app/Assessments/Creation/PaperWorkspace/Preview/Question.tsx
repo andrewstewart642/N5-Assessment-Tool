@@ -123,6 +123,11 @@ export default function AssessmentPreviewQuestion({
       );
   }
 
+  const beginEdit = () =>
+    startEditLockedQuestion(
+      question.id
+    );
+
   const content =
     kind === "edit" ? (
       <QuestionMeasureBox
@@ -199,6 +204,9 @@ export default function AssessmentPreviewQuestion({
         }
       >
         <div
+          onClick={
+            beginEdit
+          }
           style={{
             position:
               "relative",
@@ -209,9 +217,9 @@ export default function AssessmentPreviewQuestion({
         >
           {/*
            * Locked paper content is display-only in the Builder. Keeping it
-           * out of the pointer hit-test guarantees that the floating Edit
-           * control remains the interactive surface even when rich prompt
-           * parts/graphs introduce their own rendered layers.
+           * out of the pointer hit-test makes the assigned-question surface
+           * itself the fallback edit target and keeps graphs/MathJax from
+           * swallowing the Edit action.
            */}
           <div
             style={{
@@ -232,10 +240,27 @@ export default function AssessmentPreviewQuestion({
           <button
             type="button"
             data-preview-edit-control="true"
+            aria-label={`Edit question ${globalIndex}`}
             onPointerDown={(
               event
             ) => {
+              if (
+                event.button !==
+                0
+              ) {
+                return;
+              }
+
+              event.preventDefault();
               event.stopPropagation();
+
+              /*
+               * Enter edit mode on pointer-down rather than waiting for click.
+               * The locked preview is replaced as soon as editing begins, so
+               * this avoids a click being lost when the button unmounts during
+               * that same interaction.
+               */
+              beginEdit();
             }}
             onClick={(
               event
@@ -243,9 +268,13 @@ export default function AssessmentPreviewQuestion({
               event.preventDefault();
               event.stopPropagation();
 
-              startEditLockedQuestion(
-                question.id
-              );
+              /* Keyboard activation does not produce a pointer-down. */
+              if (
+                event.detail ===
+                0
+              ) {
+                beginEdit();
+              }
             }}
             style={{
               position:
