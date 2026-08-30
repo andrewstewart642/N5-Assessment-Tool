@@ -1,4 +1,3 @@
-
 import {
   useCallback,
   type Dispatch,
@@ -29,6 +28,11 @@ type PendingJumpDraftRef =
     | null
   >;
 
+type EditDraftRef =
+  MutableRefObject<
+    AssessmentEditQuestionDraftByPaper
+  >;
+
 type UseAssessmentDraftWorkflowArgs = {
   viewPaper:
     Paper;
@@ -41,6 +45,9 @@ type UseAssessmentDraftWorkflowArgs = {
 
   editDraftByPaper:
     AssessmentEditQuestionDraftByPaper;
+
+  editDraftRef:
+    EditDraftRef;
 
   setQuestions:
     Dispatch<
@@ -97,6 +104,7 @@ export function useAssessmentDraftWorkflow({
 
   draftByPaper,
   editDraftByPaper,
+  editDraftRef,
 
   setQuestions,
   setDraftByPaper,
@@ -233,24 +241,38 @@ export function useAssessmentDraftWorkflow({
         setEditDraftByPaper(
           (
             previous
-          ) => ({
-            ...previous,
+          ) => {
+            const next = {
+              ...previous,
 
-            [original.paper]: {
-              questionIndex,
+              [original.paper]: {
+                questionIndex,
 
-              original,
+                original,
 
-              draft: {
-                ...original,
+                draft: {
+                  ...original,
+                },
               },
-            },
-          })
+            };
+
+            /*
+             * Regenerate reads editDraftRef synchronously. Updating the ref in
+             * the same transaction as the visible edit state prevents the
+             * first Regenerate click after Edit from being mistaken for a new
+             * unassigned draft while React's effect has not run yet.
+             */
+            editDraftRef.current =
+              next;
+
+            return next;
+          }
         );
       },
       [
         questions,
         setEditDraftByPaper,
+        editDraftRef,
         restoreTreeForQuestion,
         pendingJumpDraftRef,
       ]
@@ -313,12 +335,19 @@ export function useAssessmentDraftWorkflow({
       setEditDraftByPaper(
         (
           previous
-        ) => ({
-          ...previous,
+        ) => {
+          const next = {
+            ...previous,
 
-          [viewPaper]:
-            null,
-        })
+            [viewPaper]:
+              null,
+          };
+
+          editDraftRef.current =
+            next;
+
+          return next;
+        }
       );
     }, [
       editDraftByPaper,
@@ -326,6 +355,7 @@ export function useAssessmentDraftWorkflow({
 
       setQuestions,
       setEditDraftByPaper,
+      editDraftRef,
 
       isQuestionCommitEligible,
       onInvalidCommit,
@@ -361,12 +391,19 @@ export function useAssessmentDraftWorkflow({
       setEditDraftByPaper(
         (
           previous
-        ) => ({
-          ...previous,
+        ) => {
+          const next = {
+            ...previous,
 
-          [viewPaper]:
-            null,
-        })
+            [viewPaper]:
+              null,
+          };
+
+          editDraftRef.current =
+            next;
+
+          return next;
+        }
       );
     }, [
       editDraftByPaper,
@@ -374,6 +411,7 @@ export function useAssessmentDraftWorkflow({
 
       setQuestions,
       setEditDraftByPaper,
+      editDraftRef,
 
       pendingJumpDraftRef,
     ]);
