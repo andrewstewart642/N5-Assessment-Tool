@@ -313,6 +313,7 @@ export function useAssessmentQuestionWorkflow({
       thinkingTypeFilter,
       targetMarks,
 
+      draftByPaper,
       editDraftRef,
 
       setDraftByPaper,
