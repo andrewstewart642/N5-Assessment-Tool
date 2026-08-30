@@ -117,7 +117,7 @@ const choosePaper = (
   if (explicitFamily) {
     const supported = A8_GENERATOR_FAMILY_EVIDENCE[explicitFamily].supportedPapers;
     if (!supported.length) throw new Error(`No paper evidence exists for ${explicitFamily}.`);
-    return supported[Math.abs(seed) % supported.length] ?? supported[0];
+    return supported[Math.abs(seed) % supported.length] as A8GeneratorPaper;
   }
 
   const p1Count = A8_HISTORICAL_ROUTE_FINGERPRINTS.filter((entry) => entry.paper === "P1").length;
@@ -234,8 +234,10 @@ const contextualValueTextureAccepted = (
 
   if (paper === "P2") {
     if (shell.kind !== "PURCHASE") return false;
-    if (difficulty === 1) return values.every((value) => isMultipleOf(value, 0.5));
-    if (difficulty === 2) return values.every((value) => isMultipleOf(value, 0.25));
+    // Lower difficulty uses money values with at most one decimal place; the
+    // other bands may use exact hundredths. This follows the P2 money texture
+    // without making particular context-shell step grids artificially invalid.
+    if (difficulty === 1) return values.every(hasAtMostOneDecimal);
     return values.every(hasAtMostTwoDecimals);
   }
 
