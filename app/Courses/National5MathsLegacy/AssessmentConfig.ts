@@ -2,6 +2,10 @@ import {
   skillsData,
 } from "@/app/Courses/National5Maths/Skills/National5MathsSkills";
 
+import {
+  withA8BuilderConcepts,
+} from "./Skills/A8BuilderSkillBridge";
+
 import type {
   CourseAssessmentConfig,
 } from "@/app/Courses/CourseAssessmentConfig";
@@ -363,5 +367,7 @@ export const NATIONAL5_MATHS_ASSESSMENT_CONFIG:
     ],
 
     skillTree:
-      skillsData,
+      withA8BuilderConcepts(
+        skillsData
+      ),
   };
