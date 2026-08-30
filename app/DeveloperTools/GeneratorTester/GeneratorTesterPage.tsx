@@ -16,14 +16,29 @@ import type {
 } from "@/app/Assessments/Questions/Generation/QuestionGenerationTypes";
 import type { PaperPart } from "@/app/Assessments/Questions/Content/PaperParts";
 import PaperContent from "@/app/UI/Documents/Components/PaperContent";
+import type {
+  A8GenerationQualityProfile,
+  A8GeneratorDifficulty,
+  A8GeneratorFamily,
+  A8GeneratorPaper,
+  A8GraphVisualSpec,
+} from "../../Courses/National5Maths/03_QuestionGeneration/A8_SimultaneousEquations";
+import A8GraphPreview from "./A8GraphPreview";
 import { GENERATOR_TEST_TARGET } from "./GeneratorTestTarget";
-
 
 type GeneratedTestSample = {
   id: string;
   seed: number;
   generated?: GeneratedQuestionData;
   error?: string;
+};
+
+type A8Diagnostics = {
+  family: A8GeneratorFamily;
+  difficulty: A8GeneratorDifficulty;
+  paper: A8GeneratorPaper;
+  quality: A8GenerationQualityProfile;
+  visual: A8GraphVisualSpec | null;
 };
 
 const SAMPLE_COUNT_OPTIONS = [1, 5, 10, 20, 50] as const;
@@ -84,7 +99,13 @@ function displayParts(parts: PaperPart[] | undefined, fallback: string | undefin
   return [{ kind: "text", value: fallback ?? "—" }];
 }
 
-function Chip({ children }: { children: ReactNode }) {
+function a8Diagnostics(generated: GeneratedQuestionData): A8Diagnostics | null {
+  return (
+    generated as GeneratedQuestionData & { a8Diagnostics?: A8Diagnostics }
+  ).a8Diagnostics ?? null;
+}
+
+function Chip({ children, emphasis = false }: { children: ReactNode; emphasis?: boolean }) {
   return (
     <span
       style={{
@@ -92,10 +113,12 @@ function Chip({ children }: { children: ReactNode }) {
         alignItems: "center",
         minHeight: 22,
         padding: "2px 8px",
-        border: "1px solid rgba(148,163,184,0.22)",
+        border: emphasis
+          ? "1px solid rgba(251,191,36,0.42)"
+          : "1px solid rgba(148,163,184,0.22)",
         borderRadius: 999,
-        background: "rgba(255,255,255,0.045)",
-        color: "#cbd5e1",
+        background: emphasis ? "rgba(245,158,11,0.10)" : "rgba(255,255,255,0.045)",
+        color: emphasis ? "#fde68a" : "#cbd5e1",
         fontSize: 10,
         whiteSpace: "nowrap",
       }}
@@ -142,6 +165,7 @@ function CompactClassification({ generated }: { generated: GeneratedQuestionData
   const classification = generated.classification;
   const marks = generated.markBreakdown;
   const totalMarks = generated.marks ?? marks?.totalMarks ?? "—";
+  const diagnostics = a8Diagnostics(generated);
   const items = [
     `${totalMarks} marks`,
     classification?.standard ?? null,
@@ -149,6 +173,8 @@ function CompactClassification({ generated }: { generated: GeneratedQuestionData
     classification?.calculatorStatus ?? null,
     classification?.structureType ?? null,
     classification ? (classification.isReasoning ? "Reasoning" : "Operational") : null,
+    diagnostics?.family?.replaceAll("_", " ") ?? null,
+    diagnostics ? `${diagnostics.quality.difficultyBandId.replaceAll("_", " ")} · score ${diagnostics.quality.difficultyScore}` : null,
     marks ? `C${marks.cMarks} / A${marks.aMarks} / R${marks.reasoningMarks}` : null,
   ].filter(Boolean);
 
@@ -248,6 +274,23 @@ function WorkedAnswers({ generated }: { generated: GeneratedQuestionData }) {
   );
 }
 
+function QuestionPreview({ generated }: { generated: GeneratedQuestionData }) {
+  const parts = displayParts(generated.promptParts, generated.prompt);
+  const visual = a8Diagnostics(generated)?.visual ?? null;
+
+  if (visual && parts.length >= 3) {
+    return (
+      <>
+        <PaperContent parts={parts.slice(0, 2)} />
+        <A8GraphPreview visual={visual} />
+        <PaperContent parts={parts.slice(2)} />
+      </>
+    );
+  }
+
+  return <PaperContent parts={parts} />;
+}
+
 function SampleCard({
   sample,
   index,
@@ -309,6 +352,7 @@ function SampleCard({
         <section>
           <SectionLabel>Question</SectionLabel>
           <div
+            className="a8-question-preview"
             style={{
               padding: "14px 16px",
               borderRadius: 7,
@@ -321,7 +365,7 @@ function SampleCard({
               letterSpacing: 0,
             }}
           >
-            <PaperContent parts={displayParts(generated.promptParts, generated.prompt)} />
+            <QuestionPreview generated={generated} />
           </div>
         </section>
 
@@ -390,25 +434,30 @@ export default function GeneratorTesterPage() {
   const [paper, setPaper] = useState<Paper>("P1");
   const [sampleCount, setSampleCount] = useState<number>(10);
   const [baseSeed, setBaseSeed] = useState<number>(24001);
+  const [lastBatchStartSeed, setLastBatchStartSeed] = useState<number | null>(null);
   const [showWorkedAnswers, setShowWorkedAnswers] = useState(false);
   const [samples, setSamples] = useState<GeneratedTestSample[]>([]);
+  const [controlsDirty, setControlsDirty] = useState(false);
 
   const selectedConcept = concepts.find((concept) => concept.code === selectedConceptCode) ?? concepts[0];
   const selectedTarget = GENERATOR_TEST_TARGET.concepts.find((concept) => concept.code === selectedConceptCode);
   const supportedPapers = selectedTarget?.papers?.length ? selectedTarget.papers : (["P1", "P2"] as Paper[]);
+  const currentDifficultyDescription = questionModule.metadata.difficultyProfile.levelDescriptions?.[difficulty];
 
   useEffect(() => {
-    if (!supportedPapers.includes(paper)) setPaper(supportedPapers[0] ?? "P1");
+    if (!supportedPapers.includes(paper)) {
+      setPaper(supportedPapers[0] ?? "P1");
+      setControlsDirty(true);
+    }
   }, [paper, supportedPapers]);
 
-  function generateSamples() {
+  function buildSamples(startSeed: number): GeneratedTestSample[] {
     if (!selectedConcept) {
-      setSamples([{ id: "missing-concept", seed: baseSeed, error: "No test concept has been configured." }]);
-      return;
+      return [{ id: "missing-concept", seed: startSeed, error: "No test concept has been configured." }];
     }
 
-    const nextSamples = Array.from({ length: sampleCount }, (_, index): GeneratedTestSample => {
-      const sampleSeed = baseSeed + index;
+    return Array.from({ length: sampleCount }, (_, index): GeneratedTestSample => {
+      const sampleSeed = startSeed + index;
       try {
         const context = createGeneratorContext({
           concept: selectedConcept,
@@ -427,20 +476,32 @@ export default function GeneratorTesterPage() {
         };
       }
     });
+  }
 
-    setSamples(nextSamples);
+  function generateNextBatch() {
+    const startSeed = baseSeed;
+    setSamples(buildSamples(startSeed));
+    setLastBatchStartSeed(startSeed);
+    setBaseSeed(startSeed + sampleCount);
+    setControlsDirty(false);
   }
 
   useEffect(() => {
-    generateSamples();
-    // Initial generation only; subsequent runs are explicit so a reviewed batch
-    // does not change underneath the teacher while controls are adjusted.
+    const startSeed = 24001;
+    setSamples(buildSamples(startSeed));
+    setLastBatchStartSeed(startSeed);
+    setBaseSeed(startSeed + 10);
+    // Initial generation only; subsequent runs deliberately advance to a new
+    // seed range each time the Generate button is pressed.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const failedCount = samples.filter((sample) => Boolean(sample.error)).length;
   const workedAnswerCount = samples.filter(
     (sample) => (sample.generated?.workedAnswers?.methods.length ?? 0) > 0,
+  ).length;
+  const graphCount = samples.filter(
+    (sample) => Boolean(sample.generated && a8Diagnostics(sample.generated)?.visual),
   ).length;
 
   const controlStyle = {
@@ -463,6 +524,16 @@ export default function GeneratorTesterPage() {
         fontFamily: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
       }}
     >
+      <style>{`
+        .a8-question-preview .katex-display {
+          margin: 10px 0 12px 30px !important;
+          text-align: left !important;
+        }
+        .a8-question-preview .katex-display > .katex {
+          text-align: left !important;
+        }
+      `}</style>
+
       <div style={{ width: "min(1600px, 100%)", margin: "0 auto" }}>
         <section
           style={{
@@ -481,7 +552,10 @@ export default function GeneratorTesterPage() {
             {GENERATOR_TEST_TARGET.conceptControlLabel ?? "Concept"}
             <select
               value={selectedConceptCode}
-              onChange={(event) => setSelectedConceptCode(event.target.value)}
+              onChange={(event) => {
+                setSelectedConceptCode(event.target.value);
+                setControlsDirty(true);
+              }}
               style={{ ...controlStyle, minWidth: 290 }}
             >
               {GENERATOR_TEST_TARGET.concepts.map((concept) => (
@@ -496,18 +570,30 @@ export default function GeneratorTesterPage() {
             Difficulty
             <select
               value={difficulty}
-              onChange={(event) => setDifficulty(Number(event.target.value) as DifficultyLevel)}
-              style={controlStyle}
+              onChange={(event) => {
+                setDifficulty(Number(event.target.value) as DifficultyLevel);
+                setControlsDirty(true);
+              }}
+              style={{ ...controlStyle, minWidth: 130 }}
             >
               {availableDifficulties.map((level) => (
-                <option key={level} value={level}>Level {level}</option>
+                <option key={level} value={level}>
+                  {GENERATOR_TEST_TARGET.difficultyLabels?.[level] ?? `Level ${level}`} (L{level})
+                </option>
               ))}
             </select>
           </ControlLabel>
 
           <ControlLabel>
             Paper
-            <select value={paper} onChange={(event) => setPaper(event.target.value)} style={controlStyle}>
+            <select
+              value={paper}
+              onChange={(event) => {
+                setPaper(event.target.value as Paper);
+                setControlsDirty(true);
+              }}
+              style={controlStyle}
+            >
               {supportedPapers.map((paperOption) => (
                 <option key={paperOption} value={paperOption}>{paperOption}</option>
               ))}
@@ -518,7 +604,10 @@ export default function GeneratorTesterPage() {
             Samples
             <select
               value={sampleCount}
-              onChange={(event) => setSampleCount(Number(event.target.value))}
+              onChange={(event) => {
+                setSampleCount(Number(event.target.value));
+                setControlsDirty(true);
+              }}
               style={controlStyle}
             >
               {SAMPLE_COUNT_OPTIONS.map((count) => (
@@ -529,7 +618,7 @@ export default function GeneratorTesterPage() {
 
           {GENERATOR_TEST_TARGET.supportsSeed ? (
             <ControlLabel>
-              Base seed
+              Next batch seed
               <input
                 type="number"
                 value={baseSeed}
@@ -541,7 +630,7 @@ export default function GeneratorTesterPage() {
 
           <button
             type="button"
-            onClick={generateSamples}
+            onClick={generateNextBatch}
             style={{
               height: 32,
               padding: "0 14px",
@@ -554,7 +643,7 @@ export default function GeneratorTesterPage() {
               fontWeight: 800,
             }}
           >
-            Generate
+            Generate next batch
           </button>
 
           <button
@@ -576,12 +665,33 @@ export default function GeneratorTesterPage() {
           </button>
 
           <div style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+            {controlsDirty ? <Chip emphasis>Controls changed — generate</Chip> : null}
+            {lastBatchStartSeed !== null ? <Chip>batch {lastBatchStartSeed}–{lastBatchStartSeed + Math.max(samples.length - 1, 0)}</Chip> : null}
             <Chip>{samples.length} generated</Chip>
             <Chip>{failedCount} errors</Chip>
             <Chip>{workedAnswerCount}/{samples.length} worked</Chip>
+            <Chip>{graphCount} graphs</Chip>
             <Chip>L{difficulty}</Chip>
           </div>
         </section>
+
+        {currentDifficultyDescription ? (
+          <section
+            style={{
+              marginBottom: 8,
+              padding: "7px 10px",
+              border: "1px solid rgba(96,165,250,0.18)",
+              borderRadius: 8,
+              background: "rgba(59,130,246,0.04)",
+              color: "#bfdbfe",
+              fontSize: 10,
+              lineHeight: 1.4,
+            }}
+          >
+            <strong>{GENERATOR_TEST_TARGET.difficultyLabels?.[difficulty] ?? `Level ${difficulty}`}:</strong>{" "}
+            {currentDifficultyDescription}
+          </section>
+        ) : null}
 
         {GENERATOR_TEST_TARGET.notes?.length ? (
           <section
