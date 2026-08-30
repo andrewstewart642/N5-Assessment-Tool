@@ -8,6 +8,8 @@ import type {
   PaperPart,
 } from "@/app/Assessments/Questions/Content/PaperParts";
 
+import StraightLineSystemGraph from "./StraightLineSystemGraph";
+
 type PaperContentProps = {
   parts: PaperPart[];
 };
@@ -68,6 +70,18 @@ export default function PaperContent({
                   }
                 />
               </span>
+            );
+          }
+
+          if (
+            part.kind ===
+            "straightLineSystemGraph"
+          ) {
+            return (
+              <StraightLineSystemGraph
+                key={index}
+                graph={part}
+              />
             );
           }
 
