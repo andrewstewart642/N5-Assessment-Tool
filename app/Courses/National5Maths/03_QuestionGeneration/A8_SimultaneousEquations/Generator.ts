@@ -17,6 +17,7 @@ import {
 import {
   A8_CONTEXT_POOL_SIZE,
   contextShellsFor,
+  type A8ContextKind,
   type A8ContextShell,
   type A8ValueRange,
 } from "./ContextLibrary";
@@ -518,17 +519,24 @@ const chooseVariableSymbols = (rng: SeededRandom, family: A8GeneratorFamily): [s
   return rng.pick<readonly [string, string]>([["x", "y"], ["c", "d"], ["p", "r"], ["m", "n"], ["a", "b"]] as const) as [string, string];
 };
 
+const preferredP1ContextKind = (seed: number): Extract<A8ContextKind, "MASS" | "RESOURCE"> =>
+  positiveModulo(mixSeed(seed, 0xA8C07E57), 2) === 0 ? "MASS" : "RESOURCE";
+
 const contextCandidates = (
   paper: A8GeneratorPaper,
   family: A8GeneratorFamily,
+  seed: number,
 ): A8ContextShell[] => {
   const derived = family === "CONTEXT_DERIVED_TOTAL";
   let shells = contextShellsFor(paper, derived);
 
   if (family === "CONTEXT_FORM_AND_SOLVE") {
-    shells = paper === "P2"
-      ? shells.filter((shell) => shell.kind === "PURCHASE")
-      : shells.filter((shell) => shell.kind === "MASS" || shell.kind === "RESOURCE");
+    if (paper === "P2") {
+      shells = shells.filter((shell) => shell.kind === "PURCHASE");
+    } else {
+      const preferredKind = preferredP1ContextKind(seed);
+      shells = shells.filter((shell) => shell.kind === preferredKind);
+    }
   }
 
   if (derived) {
@@ -556,6 +564,9 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
   const rng = new SeededRandom(mixSeed(options.seed, 0xA8C411B));
   const variables = chooseVariableSymbols(rng, family);
   const contextual = family === "CONTEXT_FORM_AND_SOLVE" || family === "CONTEXT_DERIVED_TOTAL";
+  const p1ContextKind = family === "CONTEXT_FORM_AND_SOLVE" && paper === "P1"
+    ? preferredP1ContextKind(options.seed)
+    : null;
 
   if (!evidence.supportedPapers.includes(paper)) {
     throw new Error(`A8 family ${family} has no supplied historical evidence on ${paper}.`);
@@ -564,7 +575,7 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
   for (let attempt = 0; attempt < 5000; attempt += 1) {
     const attemptRng = new SeededRandom(mixSeed(options.seed, 0x51F15EED + attempt * 977));
     const coefficients = coefficientPair(attemptRng, family, paper, difficulty);
-    const shells = contextual ? contextCandidates(paper, family) : [];
+    const shells = contextual ? contextCandidates(paper, family, options.seed) : [];
     if (contextual && !shells.length) {
       throw new Error(`No calibrated A8 context shells are available for ${family} on ${paper}.`);
     }
@@ -692,6 +703,7 @@ export const generateA8Question = (options: A8GenerateOptions): A8GeneratedQuest
         ...A8_GENERATOR_INVARIANTS,
         `Difficulty calibration: ${band.label}.`,
         `Family prior on ${paper}: ${familySelection.observedCount}/${familySelection.observedTotal}.`,
+        ...(p1ContextKind ? [`P1 contextual subfamily prior: ${p1ContextKind} (balanced MASS/RESOURCE cycle).`] : []),
         "Generated mathematical system must not be equivalent to a catalogued historical A8 system.",
         "Contextual coefficient rows must not have an immediately visible common factor.",
         paper === "P1"
