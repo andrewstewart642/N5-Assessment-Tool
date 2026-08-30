@@ -14,6 +14,7 @@ import {
   A8_DIFFICULTY_BANDS,
   A8_SUPPORTED_DIFFICULTY_LEVELS,
   generateA8Question,
+  type A8GeneratorDifficulty,
   type A8GeneratorFamily,
   type A8GeneratorPaper,
 } from "../../Courses/National5Maths/03_QuestionGeneration/A8_SimultaneousEquations";
@@ -37,37 +38,13 @@ type SeededGeneratorContext = GeneratorContext & {
   developerSeed?: number;
 };
 
-const TEST_CODE_TO_FAMILY: Record<string, A8GeneratorFamily | "AUTO_CORE"> = {
-  "A8.CORE": "AUTO_CORE",
+const TEST_CODE_TO_FAMILY: Record<string, A8GeneratorFamily | "CALIBRATED_MIX"> = {
+  "A8.CORE": "CALIBRATED_MIX",
   "A8.ABSTRACT": "ABSTRACT_SOLVE",
   "A8.CONTEXT": "CONTEXT_FORM_AND_SOLVE",
   "A8.GRAPH": "GRAPH_INTERSECTION_SOLVE",
   "A8.DERIVED": "CONTEXT_DERIVED_TOTAL",
 };
-
-/**
- * The weighted cycles reproduce the observed paper-conditioned A8 family mix
- * in every complete cycle rather than relying on independent random draws.
- *
- * P1 historical mix: 5 abstract : 2 contextual : 1 graph.
- * P2 historical mix: 2 contextual : 1 derived-total.
- */
-const P1_FAMILY_CYCLE: A8GeneratorFamily[] = [
-  "ABSTRACT_SOLVE",
-  "CONTEXT_FORM_AND_SOLVE",
-  "ABSTRACT_SOLVE",
-  "GRAPH_INTERSECTION_SOLVE",
-  "ABSTRACT_SOLVE",
-  "CONTEXT_FORM_AND_SOLVE",
-  "ABSTRACT_SOLVE",
-  "ABSTRACT_SOLVE",
-];
-
-const P2_FAMILY_CYCLE: A8GeneratorFamily[] = [
-  "CONTEXT_FORM_AND_SOLVE",
-  "CONTEXT_DERIVED_TOTAL",
-  "CONTEXT_FORM_AND_SOLVE",
-];
 
 const A8_DIFFICULTY_DESCRIPTIONS = {
   1: A8_DIFFICULTY_BANDS.find((band) => band.level === 1)?.description ?? "Lower valid A8 burden.",
@@ -79,15 +56,18 @@ function paperFromContext(context: GeneratorContext): A8GeneratorPaper {
   return context.paper === "P2" ? "P2" : "P1";
 }
 
-function familyFromContext(context: GeneratorContext, seed: number): A8GeneratorFamily {
+function difficultyFromContext(context: GeneratorContext): A8GeneratorDifficulty {
+  if (context.difficulty === 1 || context.difficulty === 2 || context.difficulty === 3) {
+    return context.difficulty;
+  }
+  throw new Error(`A8 exposes only its three calibrated difficulty levels; received level ${context.difficulty}.`);
+}
+
+function explicitFamilyFromContext(context: GeneratorContext): A8GeneratorFamily | undefined {
   const requested = context.concept?.code
     ? TEST_CODE_TO_FAMILY[context.concept.code]
-    : "AUTO_CORE";
-
-  if (requested && requested !== "AUTO_CORE") return requested;
-
-  const cycle = paperFromContext(context) === "P2" ? P2_FAMILY_CYCLE : P1_FAMILY_CYCLE;
-  return cycle[Math.abs(seed) % cycle.length] ?? "ABSTRACT_SOLVE";
+    : "CALIBRATED_MIX";
+  return requested && requested !== "CALIBRATED_MIX" ? requested : undefined;
 }
 
 function answerText(finalAnswers: { partLabel: string; normalisedAnswer: string }[]): string {
@@ -129,15 +109,14 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
   generate: (context) => {
     const seededContext = context as SeededGeneratorContext;
     const seed = seededContext.developerSeed ?? Math.floor(Math.random() * 0x7fffffff);
-    const family = familyFromContext(context, seed);
+    const explicitFamily = explicitFamilyFromContext(context);
 
     const question = generateA8Question({
       seed,
-      difficulty: context.difficulty,
-      family,
+      difficulty: difficultyFromContext(context),
+      ...(explicitFamily ? { family: explicitFamily } : {}),
       paper: paperFromContext(context),
-      includeExperimentalFamilies:
-        family === "GRAPH_INTERSECTION_SOLVE" || family === "CONTEXT_DERIVED_TOTAL",
+      includeExperimentalFamilies: true,
     });
 
     // This also validates the answer against the exact generated question
@@ -225,10 +204,12 @@ export const GENERATOR_TEST_TARGET: GeneratorTestTarget = {
     { code: "A8.DERIVED", label: "Experimental: contextual derived total", papers: ["P2"] },
   ],
   notes: [
-    "A dedicated A8 cross-corpus calibration pass found three useful difficulty bands: Lower valid, Typical and Upper valid. Other skills may expose a different number of bands after their own analysis.",
-    "Core family selection now follows the observed paper-conditioned mix: P1 uses 5 abstract : 2 contextual : 1 graph; P2 uses 2 contextual : 1 derived-total.",
-    "The calibration records cheapest-route scaling, number texture and Paper 1/Paper 2 arithmetic envelopes for all eleven historical A8 questions. The next generator-tightening pass should enforce those envelopes directly.",
-    "Context generation uses 60 curated semantic shells rather than arbitrary noun substitution; purchase, fixed-mass and resource-use contexts each have context-specific plausible value ranges.",
-    "Raw output exposes the seed, context ID, quality profile, equations, solution, elimination plans, mark points and source basis.",
+    "A8 has three evidence-derived difficulty bands: Lower valid, Typical and Upper valid. Other skills may expose a different number after their own cross-corpus calibration.",
+    "The Question Generator now consumes the calibration directly: family selection uses the observed paper-conditioned frequency, and unsupported family/difficulty combinations are excluded rather than invented.",
+    "Paper 1 candidates are accepted against the cheapest calibrated written route, including the observed scaling, constant, decimal/roundness and solution-texture envelopes rather than a generic magnitude ceiling.",
+    "Paper 2 normal contextual generation follows the observed purchase/currency texture; the derived-total family stays near its large-round-mass evidence.",
+    "Generated systems are checked against canonical historical system signatures so calibration can be close without regenerating a catalogued SQA system.",
+    "Context generation uses 60 curated semantic shells and a separately mixed context seed to reduce repeated scenarios across adjacent samples.",
+    "Raw output exposes the calibrated band, empirical family frequency, selected written route, historical-overlap check, context, equations, solution and source basis.",
   ],
 };
