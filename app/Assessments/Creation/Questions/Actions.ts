@@ -1,4 +1,3 @@
-
 import type {
   Dispatch,
   MutableRefObject,
@@ -366,6 +365,7 @@ export function useAssessmentQuestionWorkflow({
 
       draftByPaper,
       editDraftByPaper,
+      editDraftRef,
 
       setQuestions,
       setDraftByPaper,
