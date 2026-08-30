@@ -33,10 +33,28 @@ export const a8DifficultyBand = (difficulty: A8GeneratorDifficulty) => {
   return band;
 };
 
+/**
+ * Generation support is a consumer-facing calibration decision, not a rewrite
+ * of the historical corpus. The graph family is now upper-valid only because
+ * the graph representation adds a marked extra demand beyond the basic
+ * three-mark algebraic solve. The single derived-total family remains upper
+ * only for the same reason: solving the system is not the final mathematical
+ * target.
+ */
+export const A8_GENERATION_DIFFICULTY_SUPPORT_BY_FAMILY: Record<
+  A8GeneratorFamily,
+  A8GeneratorDifficulty[]
+> = {
+  ABSTRACT_SOLVE: [1, 2, 3],
+  CONTEXT_FORM_AND_SOLVE: [1, 2, 3],
+  GRAPH_INTERSECTION_SOLVE: [3],
+  CONTEXT_DERIVED_TOTAL: [3],
+};
+
 export const a8FamilySupportsDifficulty = (
   family: A8GeneratorFamily,
   difficulty: A8GeneratorDifficulty,
-) => A8_DIFFICULTY_SUPPORT_BY_FAMILY[family].includes(difficulty);
+) => A8_GENERATION_DIFFICULTY_SUPPORT_BY_FAMILY[family].includes(difficulty);
 
 type FrequencyCell = {
   family: A8GeneratorFamily;
@@ -54,8 +72,9 @@ const calibratedFrequencyCells = (
 
 /**
  * Smooth weighted round-robin gives a deterministic cycle with the exact
- * observed counts while spreading repeated families through the cycle. This
- * avoids both uniform random sampling and implausible short-run streaks.
+ * observed counts for the families eligible at the requested difficulty. This
+ * keeps the historical prior visible while allowing an easier/harder paper to
+ * alter which structurally harder families are available.
  */
 const weightedCycle = (cells: FrequencyCell[]): A8GeneratorFamily[] => {
   const total = cells.reduce((sum, cell) => sum + cell.count, 0);
@@ -96,7 +115,7 @@ export const selectCalibratedA8Family = (args: {
 
   if (args.explicitFamily) {
     if (!a8FamilySupportsDifficulty(args.explicitFamily, args.difficulty)) {
-      const supported = A8_DIFFICULTY_SUPPORT_BY_FAMILY[args.explicitFamily].join(", ");
+      const supported = A8_GENERATION_DIFFICULTY_SUPPORT_BY_FAMILY[args.explicitFamily].join(", ");
       throw new Error(`${args.explicitFamily} is calibrated only for A8 difficulty level(s) ${supported}.`);
     }
     const observed = A8_EMPIRICAL_FAMILY_FREQUENCY[args.paper]
@@ -119,8 +138,6 @@ export const selectCalibratedA8Family = (args: {
     throw new Error(`No calibrated A8 family is available on ${args.paper} at difficulty ${args.difficulty}.`);
   }
 
-  // Offset avoids tying family choice to other seeded random draws while still
-  // preserving an exact weighted cycle across consecutive teacher-facing seeds.
   const slot = positiveModulo(args.seed + 37, cycle.length);
   const family = cycle[slot];
   const observed = A8_EMPIRICAL_FAMILY_FREQUENCY[args.paper]
@@ -149,8 +166,6 @@ export const calibratedMultiplierKeys = (
   difficulty: A8GeneratorDifficulty,
 ): string[] => {
   if (family === "ABSTRACT_SOLVE") {
-    // All five historical abstract Paper 1 questions use a clean 2-and-3 or
-    // 3-and-2 scaling route. Difficulty changes other burden, not this process.
     return ["2:3"];
   }
   if (family === "GRAPH_INTERSECTION_SOLVE") {
@@ -221,7 +236,6 @@ export const selectCalibratedA8Route = (
 };
 
 const canonicalRow = (equation: A8LinearEquation) => {
-  // A8 generated values are at most hundredths on P2 and tenths on P1.
   const scaled = [equation.a, equation.b, equation.c].map((value) => Math.round(value * 100));
   const divisor = gcdMany(scaled.map(Math.abs)) || 1;
   const reduced = scaled.map((value) => value / divisor);
@@ -250,7 +264,8 @@ export const historicalA8SystemOverlap = (
 
 export const A8_GENERATOR_CALIBRATION = {
   difficultyBands: A8_DIFFICULTY_BANDS,
-  difficultySupportByFamily: A8_DIFFICULTY_SUPPORT_BY_FAMILY,
+  sourceDifficultySupportByFamily: A8_DIFFICULTY_SUPPORT_BY_FAMILY,
+  generationDifficultySupportByFamily: A8_GENERATION_DIFFICULTY_SUPPORT_BY_FAMILY,
   empiricalFamilyFrequency: A8_EMPIRICAL_FAMILY_FREQUENCY,
   paperNumericalCalibration: A8_PAPER_NUMERICAL_CALIBRATION,
 } as const;
