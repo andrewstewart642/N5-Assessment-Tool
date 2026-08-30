@@ -22,7 +22,14 @@ import type {
   A8GeneratorFamily,
   A8GeneratorPaper,
   A8GraphVisualSpec,
-} from "../../Courses/National5Maths/03_QuestionGeneration/A8_SimultaneousEquations";
+} from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+import type {
+  A8GeneratedAnswerProfileId,
+  A8GeneratedMarkPoint,
+  A8GeneratedMarkProfile,
+  A8GeneratedPresentationPolicy,
+  A8GeneratedWorkingPolicy,
+} from "../../Courses/National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 import A8GraphPreview from "./A8GraphPreview";
 import { GENERATOR_TEST_TARGET } from "./GeneratorTestTarget";
 
@@ -39,6 +46,14 @@ type A8Diagnostics = {
   paper: A8GeneratorPaper;
   quality: A8GenerationQualityProfile;
   visual: A8GraphVisualSpec | null;
+  answerGeneratorId: string;
+  answerProfileId: A8GeneratedAnswerProfileId;
+  markProfile: A8GeneratedMarkProfile;
+  profileSourceAnchorIds: string[];
+  markPoints: A8GeneratedMarkPoint[];
+  workingPolicy: A8GeneratedWorkingPolicy;
+  presentationPolicy: A8GeneratedPresentationPolicy;
+  answerGenerationNotes: string[];
 };
 
 const SAMPLE_COUNT_OPTIONS = [1, 5, 10, 20, 50] as const;
@@ -174,6 +189,7 @@ function CompactClassification({ generated }: { generated: GeneratedQuestionData
     classification?.structureType ?? null,
     classification ? (classification.isReasoning ? "Reasoning" : "Operational") : null,
     diagnostics?.family?.replaceAll("_", " ") ?? null,
+    diagnostics?.markProfile?.replaceAll("_", " ") ?? null,
     diagnostics ? `${diagnostics.quality.difficultyBandId.replaceAll("_", " ")} · score ${diagnostics.quality.difficultyScore}` : null,
     marks ? `C${marks.cMarks} / A${marks.aMarks} / R${marks.reasoningMarks}` : null,
   ].filter(Boolean);
@@ -183,6 +199,128 @@ function CompactClassification({ generated }: { generated: GeneratedQuestionData
       {items.join("  •  ")}
     </div>
   );
+}
+
+function MarkingSchemePreview({ generated }: { generated: GeneratedQuestionData }) {
+  const diagnostics = a8Diagnostics(generated);
+  if (!diagnostics || diagnostics.markPoints.length === 0) return null;
+
+  const policyNotes = [
+    `Answer only: ${diagnostics.workingPolicy.unsupportedCorrectAnswerTreatment.replaceAll("_", " ")}`,
+    diagnostics.workingPolicy.excludedPrototypeMethods.length
+      ? `Excluded method: ${diagnostics.workingPolicy.excludedPrototypeMethods.join(", ").replaceAll("_", " ")}`
+      : null,
+    diagnostics.workingPolicy.followThroughRoundedAtLeastDp !== null
+      ? `Follow-through rounding: at least ${diagnostics.workingPolicy.followThroughRoundedAtLeastDp} d.p.`
+      : null,
+    diagnostics.workingPolicy.equationEvidenceCanAppearLater
+      ? "Equation evidence may appear later"
+      : null,
+    diagnostics.presentationPolicy.currencyNearestPennyRequired
+      ? "Nearest-penny communication required"
+      : null,
+    diagnostics.presentationPolicy.reversedCoordinatePairFullCreditWithValidWorking
+      ? "Reversed final coordinate pair can retain full credit with valid working"
+      : null,
+  ].filter((note): note is string => Boolean(note));
+
+  return (
+    <div style={{ display: "grid", gap: 8 }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 6,
+          flexWrap: "wrap",
+          alignItems: "center",
+          padding: "7px 8px",
+          border: "1px solid rgba(148,163,184,0.18)",
+          borderRadius: 8,
+          background: "rgba(255,255,255,0.025)",
+        }}
+      >
+        <Chip emphasis>{diagnostics.answerProfileId.replaceAll("_", " ")}</Chip>
+        <Chip>{diagnostics.markProfile.replaceAll("_", " ")}</Chip>
+        {policyNotes.map((note) => <Chip key={note}>{note}</Chip>)}
+      </div>
+
+      <div
+        style={{
+          overflow: "hidden",
+          border: "1px solid rgba(148,163,184,0.18)",
+          borderRadius: 8,
+          background: "#ffffff",
+          color: "#111827",
+          fontFamily: '"Trebuchet MS", Trebuchet, Arial, sans-serif',
+        }}
+      >
+        {diagnostics.markPoints.map((mark, index) => (
+          <div
+            key={`${mark.markNumber}-${mark.role}`}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "58px 132px minmax(0, 1fr)",
+              borderTop: index === 0 ? "none" : "1px solid #e5e7eb",
+              minHeight: 58,
+            }}
+          >
+            <div
+              style={{
+                padding: "9px 8px",
+                borderRight: "1px solid #e5e7eb",
+                fontSize: 10,
+                fontWeight: 800,
+                textAlign: "center",
+              }}
+            >
+              {mark.partLabel ? `(${mark.partLabel}) ` : ""}m{mark.markNumber}
+            </div>
+            <div
+              style={{
+                padding: "9px 8px",
+                borderRight: "1px solid #e5e7eb",
+                fontSize: 9,
+                fontWeight: 800,
+                lineHeight: 1.3,
+              }}
+            >
+              {mark.role.replaceAll("_", " ")}
+            </div>
+            <div style={{ padding: "9px 10px", fontSize: 10, lineHeight: 1.42 }}>
+              <div style={{ fontWeight: 700 }}>{mark.requirement}</div>
+              {mark.evidenceExamples.length ? (
+                <div style={{ marginTop: 4 }}>
+                  <strong>Evidence:</strong> {mark.evidenceExamples.join("; ")}
+                </div>
+              ) : null}
+              {mark.acceptanceNotes.length ? (
+                <div style={{ marginTop: 4, color: "#475569" }}>
+                  <strong>Accept:</strong> {mark.acceptanceNotes.join(" ")}
+                </div>
+              ) : null}
+              {mark.blockingConditions.length ? (
+                <div style={{ marginTop: 4, color: "#991b1b" }}>
+                  <strong>Do not award when:</strong> {mark.blockingConditions.join(" ")}
+                </div>
+              ) : null}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ color: "#64748b", fontSize: 9, lineHeight: 1.4 }}>
+        Historical profile anchors: {diagnostics.profileSourceAnchorIds.join(", ")}
+      </div>
+    </div>
+  );
+}
+
+function workedMethodLabel(methodFamilyId: string, isDefault: boolean): string {
+  const direction = methodFamilyId === "ELIMINATE_FIRST_VARIABLE"
+    ? "Eliminate the first variable"
+    : methodFamilyId === "ELIMINATE_SECOND_VARIABLE"
+      ? "Eliminate the second variable"
+      : methodFamilyId.replaceAll("_", " ");
+  return isDefault ? `Preferred route — ${direction}` : `Alternative valid route — ${direction}`;
 }
 
 function WorkedAnswers({ generated }: { generated: GeneratedQuestionData }) {
@@ -229,10 +367,10 @@ function WorkedAnswers({ generated }: { generated: GeneratedQuestionData }) {
               }}
             >
               <strong style={{ color: "#e2e8f0", fontSize: 10 }}>
-                {method.methodFamilyId}{isDefault ? "  •  DEFAULT" : ""}
+                {workedMethodLabel(method.methodFamilyId, isDefault)}
               </strong>
               <span style={{ color: "#64748b", fontSize: 9 }}>
-                score {method.evidenceScore.toFixed(2)}
+                validated route
               </span>
             </div>
 
@@ -387,10 +525,16 @@ function SampleCard({
         </section>
 
         {showWorkedAnswers ? (
-          <section>
-            <SectionLabel>Worked answers</SectionLabel>
-            <WorkedAnswers generated={generated} />
-          </section>
+          <>
+            <section>
+              <SectionLabel>Marking scheme</SectionLabel>
+              <MarkingSchemePreview generated={generated} />
+            </section>
+            <section>
+              <SectionLabel>Worked answer routes</SectionLabel>
+              <WorkedAnswers generated={generated} />
+            </section>
+          </>
         ) : null}
 
         <details style={{ borderTop: "1px solid rgba(148,163,184,0.10)", paddingTop: 5 }}>
@@ -661,7 +805,7 @@ export default function GeneratorTesterPage() {
               fontWeight: 700,
             }}
           >
-            {showWorkedAnswers ? "Hide worked answers" : "Show worked answers"}
+            {showWorkedAnswers ? "Hide answer detail" : "Show marking + worked answers"}
           </button>
 
           <div style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>

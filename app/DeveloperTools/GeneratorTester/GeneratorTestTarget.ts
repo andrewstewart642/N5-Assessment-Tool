@@ -168,6 +168,7 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
         validation: { question: "PASSED", answer: "PASSED" },
         seed: question.seed,
         generatorId: question.generatorId,
+        answerGeneratorId: markingScheme.generatorId,
         family: question.family,
         difficulty: question.difficulty,
         paper: question.paper,
@@ -182,9 +183,13 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
         promptSections: question.promptSections,
         sourceBasis: question.sourceBasis,
         generationConstraints: question.generationConstraints,
+        answerProfileId: markingScheme.profileId,
+        markProfile: markingScheme.markProfile,
+        profileSourceAnchorIds: markingScheme.profileSourceAnchorIds,
         markPoints: markingScheme.markPoints,
         workingPolicy: markingScheme.workingPolicy,
         presentationPolicy: markingScheme.presentationPolicy,
+        answerGenerationNotes: markingScheme.generationNotes,
       },
     };
 
@@ -214,6 +219,7 @@ export const GENERATOR_TEST_TARGET: GeneratorTestTarget = {
     "Contextual coefficient rows cannot expose a common factor such as 6x + 4y, while the abstract family keeps historically valid exceptions where the complete equation is not reducible.",
     "Core family selection follows the observed paper-conditioned mix. Graph questions are rendered procedurally in DeveloperTools when the graph family is selected.",
     "Context wording now samples several structural grammars per semantic family rather than repeatedly using one sentence frame, while avoiding historical source wording as a reusable template.",
+    "Answer detail exposes the evidence-calibrated marking profile, mark-by-mark requirements and both validated elimination routes for the exact generated question.",
     "Raw output exposes the calibrated band, difficulty score/signals, prompt structure, selected written route, substitution route and historical-overlap check.",
   ],
 };
