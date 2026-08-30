@@ -46,6 +46,14 @@ import FractionsConceptModule from "@/app/Courses/National5Maths/QuestionAndAnsw
 
 import TrigEquationsConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/Trigonometry/NQ_N5_TRIG_T02_2_Equations";
 
+import {
+  A8BasicConceptModule,
+  A8ContextConceptModule,
+  A8DerivedConceptModule,
+  A8GraphConceptModule,
+  A8MixedConceptModule,
+} from "./ConceptModules/Algebraic/NQ_N5_ALG_A08_SimultaneousEquations";
+
 const conceptModules:
   ConceptGeneratorModule[] = [
     SurdsConceptModule,
@@ -60,6 +68,11 @@ const conceptModules:
     AppreciationConceptModule,
     DepreciationConceptModule,
     FractionsConceptModule,
+    A8MixedConceptModule,
+    A8BasicConceptModule,
+    A8ContextConceptModule,
+    A8GraphConceptModule,
+    A8DerivedConceptModule,
     TrigEquationsConceptModule,
   ];
 
@@ -136,6 +149,10 @@ function buildContext(
 
     selectedConceptText:
       selectedConcept,
+
+    paper:
+      selectionFilters
+        ?.targetPaper,
 
     selectionFilters,
   };
