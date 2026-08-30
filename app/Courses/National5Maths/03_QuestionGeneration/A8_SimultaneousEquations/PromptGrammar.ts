@@ -52,10 +52,8 @@ const finalSolveCommand = (context: A8GeneratedContext, paper: A8GeneratorPaper)
   return `Calculate${algebraicWord} the amount of ${context.resourceLabel} needed for one ${firstItem} and one ${secondItem}.`;
 };
 
-const resourceLead = (context: A8GeneratedContext, name: string) => {
-  const raw = context.activityLead ?? "is making two types of item";
-  return `${name} ${raw}.`;
-};
+const resourceActivityPhrase = (context: A8GeneratedContext) =>
+  (context.activityLead ?? "is working on a practical project").replace(/^is\s+/, "");
 
 export type A8ContextPromptBuild = {
   prompt: string;
@@ -72,7 +70,7 @@ export const buildA8ContextualPrompt = (args: {
   names: [string, string, string];
 }): A8ContextPromptBuild => {
   const { context, variables, family, paper, names } = args;
-  const [name1, name2, name3] = names;
+  const [name1, name2] = names;
   const [item1, item2] = context.itemLabels;
   const [item1Plural, item2Plural] = context.itemPluralLabels;
   const firstItems = `${singularOrPlural(context.firstCounts[0], item1, item1Plural)} and ${singularOrPlural(context.firstCounts[1], item2, item2Plural)}`;
@@ -189,9 +187,9 @@ export const buildA8ContextualPrompt = (args: {
         secondBlock = `On Tuesday, ${name1} ${verb} ${secondItems}.\nThis uses ${secondTotal} of ${context.resourceLabel}.\n(b) ${secondCommand}`;
         break;
       case 2:
-        promptStructureId = "RESOURCE_SHORT_SETUP_THEN_EVENTS";
-        firstBlock = `${resourceLead(context, name1)}\n${name1} ${verb} ${firstItems} using ${firstTotal} of ${context.resourceLabel}.\n(a) ${firstCommand}`;
-        secondBlock = `Later, ${name1} ${verb} ${secondItems} using ${secondTotal} of ${context.resourceLabel}.\n(b) ${secondCommand}`;
+        promptStructureId = "RESOURCE_PURPOSE_INTEGRATED";
+        firstBlock = `While ${resourceActivityPhrase(context)}, ${name1} uses ${firstTotal} of ${context.resourceLabel} to make ${firstItems}.\n(a) ${firstCommand}`;
+        secondBlock = `${name1} uses ${secondTotal} of ${context.resourceLabel} to make ${secondItems}.\n(b) ${secondCommand}`;
         break;
       case 3:
         promptStructureId = "RESOURCE_TWO_PEOPLE";
