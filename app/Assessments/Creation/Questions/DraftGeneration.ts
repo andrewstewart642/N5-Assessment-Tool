@@ -1,4 +1,3 @@
-
 import {
   useCallback,
   type Dispatch,
@@ -74,6 +73,9 @@ type UseAssessmentQuestionDraftGenerationArgs = {
 
   targetMarks:
     number;
+
+  draftByPaper:
+    AssessmentQuestionDraftByPaper;
 
   editDraftRef:
     EditDraftRef;
@@ -380,6 +382,7 @@ export function useAssessmentQuestionDraftGeneration({
   thinkingTypeFilter,
   targetMarks,
 
+  draftByPaper,
   editDraftRef,
 
   setDraftByPaper,
@@ -412,6 +415,18 @@ export function useAssessmentQuestionDraftGeneration({
         paper:
           Paper
       ) => {
+        if (
+          editDraftRef.current[
+            paper
+          ]
+        ) {
+          pushFlash(
+            "Finish or remove the current edit before adding another question to this paper."
+          );
+
+          return;
+        }
+
         warnIfPaperMismatch({
           skill,
           paper,
@@ -561,6 +576,8 @@ export function useAssessmentQuestionDraftGeneration({
         courseId,
         courseConfig,
 
+        editDraftRef,
+
         setDraftByPaper,
         setViewPaper,
 
@@ -589,6 +606,27 @@ export function useAssessmentQuestionDraftGeneration({
         paper:
           Paper
       ) => {
+        const activeEdit =
+          editDraftRef.current[
+            paper
+          ];
+
+        const existingDraft =
+          draftByPaper[
+            paper
+          ];
+
+        if (
+          !activeEdit &&
+          !existingDraft
+        ) {
+          pushFlash(
+            "Nothing is selected to regenerate. Use Edit on an assigned question, or Add Question to create a new draft first."
+          );
+
+          return;
+        }
+
         warnIfPaperMismatch({
           skill,
           paper,
@@ -637,112 +675,98 @@ export function useAssessmentQuestionDraftGeneration({
             targetMarks
           );
 
-        const activeEdit =
-          editDraftRef.current[
-            paper
-          ];
-
         if (
           activeEdit
         ) {
+          const nextDraft =
+            applyAssessmentQuestionSpacingBase({
+              ...activeEdit.draft,
+
+              category,
+
+              courseId,
+
+              skillId:
+                skill.id,
+
+              skillCode:
+                skill.code,
+
+              skillText:
+                skill.text,
+
+              skillDomain:
+                skill.domain,
+
+              primarySkillId:
+                skill.id,
+
+              primaryConceptId:
+                conceptMeta?.id,
+
+              supportingSkillIds:
+                [],
+
+              skillLinks,
+
+              standardFilter,
+
+              concept,
+
+              conceptId:
+                conceptMeta?.id,
+
+              difficulty,
+
+              targetMarks,
+
+              createdAt:
+                Date.now(),
+
+              paper,
+
+              ...generated,
+
+              preferredAnswerMethodFamilyId:
+                resolvePreferredAnswerMethodFamilyId(
+                  activeEdit.draft,
+                  generated
+                ),
+
+              topicMarkBreakdown:
+                generated
+                  .topicMarkBreakdown ??
+                buildSingleTopicMarkBreakdown(
+                  skill.domain,
+                  resolvedMarks
+                ),
+            });
+
+          const nextEditState:
+            AssessmentEditQuestionDraftByPaper = {
+              ...editDraftRef.current,
+
+              [paper]: {
+                ...activeEdit,
+
+                draft:
+                  nextDraft,
+              },
+            };
+
+          editDraftRef.current =
+            nextEditState;
+
           setEditDraftByPaper(
-            (
-              previous
-            ) => {
-              const currentEdit =
-                previous[
-                  paper
-                ];
-
-              if (
-                !currentEdit
-              ) {
-                return previous;
-              }
-
-              const nextDraft =
-                applyAssessmentQuestionSpacingBase({
-                  ...currentEdit.draft,
-
-                  category,
-
-                  courseId,
-
-                  skillId:
-                    skill.id,
-
-                  skillCode:
-                    skill.code,
-
-                  skillText:
-                    skill.text,
-
-                  skillDomain:
-                    skill.domain,
-
-                  primarySkillId:
-                    skill.id,
-
-                  primaryConceptId:
-                    conceptMeta?.id,
-
-                  supportingSkillIds:
-                    [],
-
-                  skillLinks,
-
-                  standardFilter,
-
-                  concept,
-
-                  conceptId:
-                    conceptMeta?.id,
-
-                  difficulty,
-
-                  targetMarks,
-
-                  createdAt:
-                    Date.now(),
-
-                  paper,
-
-                  ...generated,
-
-                  preferredAnswerMethodFamilyId:
-                    resolvePreferredAnswerMethodFamilyId(
-                      currentEdit.draft,
-                      generated
-                    ),
-
-                  topicMarkBreakdown:
-                    generated
-                      .topicMarkBreakdown ??
-                    buildSingleTopicMarkBreakdown(
-                      skill.domain,
-                      resolvedMarks
-                    ),
-                });
-
-              pendingJumpDraftRef.current = {
-                paper,
-
-                draftId:
-                  nextDraft.id,
-              };
-
-              return {
-                ...previous,
-
-                [paper]: {
-                  ...currentEdit,
-
-                  draft:
-                    nextDraft,
-                },
-              };
-            }
+            nextEditState
           );
+
+          pendingJumpDraftRef.current = {
+            paper,
+
+            draftId:
+              nextDraft.id,
+          };
 
           setViewPaper(
             (
@@ -757,94 +781,92 @@ export function useAssessmentQuestionDraftGeneration({
           return;
         }
 
+        if (
+          !existingDraft
+        ) {
+          return;
+        }
+
+        const nextDraft =
+          applyAssessmentQuestionSpacingBase({
+            ...existingDraft,
+
+            category,
+
+            courseId,
+
+            skillId:
+              skill.id,
+
+            skillCode:
+              skill.code,
+
+            skillText:
+              skill.text,
+
+            skillDomain:
+              skill.domain,
+
+            primarySkillId:
+              skill.id,
+
+            primaryConceptId:
+              conceptMeta?.id,
+
+            supportingSkillIds:
+              [],
+
+            skillLinks,
+
+            standardFilter,
+
+            concept,
+
+            conceptId:
+              conceptMeta?.id,
+
+            difficulty,
+
+            targetMarks,
+
+            createdAt:
+              Date.now(),
+
+            paper,
+
+            ...generated,
+
+            preferredAnswerMethodFamilyId:
+              resolvePreferredAnswerMethodFamilyId(
+                existingDraft,
+                generated
+              ),
+
+            topicMarkBreakdown:
+              generated
+                .topicMarkBreakdown ??
+              buildSingleTopicMarkBreakdown(
+                skill.domain,
+                resolvedMarks
+              ),
+          });
+
+        pendingJumpDraftRef.current = {
+          paper,
+
+          draftId:
+            nextDraft.id,
+        };
+
         setDraftByPaper(
           (
             previous
-          ) => {
-            const nextDraft =
-              applyAssessmentQuestionSpacingBase({
-                id:
-                  previous[
-                    paper
-                  ]?.id ??
-                  createAssessmentQuestionId(),
+          ) => ({
+            ...previous,
 
-                category,
-
-                courseId,
-
-                skillId:
-                  skill.id,
-
-                skillCode:
-                  skill.code,
-
-                skillText:
-                  skill.text,
-
-                skillDomain:
-                  skill.domain,
-
-                primarySkillId:
-                  skill.id,
-
-                primaryConceptId:
-                  conceptMeta?.id,
-
-                supportingSkillIds:
-                  [],
-
-                skillLinks,
-
-                standardFilter,
-
-                concept,
-
-                conceptId:
-                  conceptMeta?.id,
-
-                difficulty,
-
-                targetMarks,
-
-                createdAt:
-                  Date.now(),
-
-                paper,
-
-                ...generated,
-
-                preferredAnswerMethodFamilyId:
-                  resolvePreferredAnswerMethodFamilyId(
-                    previous[
-                      paper
-                    ],
-                    generated
-                  ),
-
-                topicMarkBreakdown:
-                  generated
-                    .topicMarkBreakdown ??
-                  buildSingleTopicMarkBreakdown(
-                    skill.domain,
-                    resolvedMarks
-                  ),
-              });
-
-            pendingJumpDraftRef.current = {
-              paper,
-
-              draftId:
-                nextDraft.id,
-            };
-
-            return {
-              ...previous,
-
-              [paper]:
-                nextDraft,
-            };
-          }
+            [paper]:
+              nextDraft,
+          })
         );
 
         setViewPaper(
@@ -865,6 +887,7 @@ export function useAssessmentQuestionDraftGeneration({
         courseId,
         courseConfig,
 
+        draftByPaper,
         editDraftRef,
 
         setEditDraftByPaper,
