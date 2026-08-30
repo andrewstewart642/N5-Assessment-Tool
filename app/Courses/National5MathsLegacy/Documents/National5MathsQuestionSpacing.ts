@@ -89,6 +89,69 @@ export const NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX: Record<
   NUM_FRACTIONS_BRACKETED_SUM_WITH_FRACTION_MULTIPLIER: 335,
 };
 
+/*
+ * A8 simultaneous equations
+ *
+ * The clean A8 generator currently uses a unique instance id as questionCode:
+ *   A8-P1-L2-ABSTRACT_SOLVE-...
+ *   A8-P2-L2-CONTEXT_FORM_AND_SOLVE-...
+ *
+ * That means a simple exact-key lookup would fall back to the generic 40 px
+ * workspace and collapse six-mark questions on top of the next question.
+ * Resolve the A8 family from the stable part of the instance id instead.
+ *
+ * The contextual baseline is anchored to the catalogued 2014 P2 source,
+ * whose three response regions total about 160 mm (roughly 605 CSS px).
+ * The other values preserve the same evidence-led scale while allowing for
+ * the smaller three-mark algebraic/graph families.
+ */
+const A8_ABSTRACT_SOLVE_SPACING_BASE_PX = 420;
+const A8_CONTEXT_FORM_AND_SOLVE_SPACING_BASE_PX = 605;
+const A8_GRAPH_INTERSECTION_SOLVE_SPACING_BASE_PX = 360;
+const A8_CONTEXT_DERIVED_TOTAL_SPACING_BASE_PX = 605;
+
+function getA8QuestionSpacingBasePx(
+  questionCode: string
+): number | null {
+  if (!questionCode.startsWith("A8-")) {
+    return null;
+  }
+
+  if (
+    questionCode.includes(
+      "-CONTEXT_DERIVED_TOTAL-"
+    )
+  ) {
+    return A8_CONTEXT_DERIVED_TOTAL_SPACING_BASE_PX;
+  }
+
+  if (
+    questionCode.includes(
+      "-CONTEXT_FORM_AND_SOLVE-"
+    )
+  ) {
+    return A8_CONTEXT_FORM_AND_SOLVE_SPACING_BASE_PX;
+  }
+
+  if (
+    questionCode.includes(
+      "-GRAPH_INTERSECTION_SOLVE-"
+    )
+  ) {
+    return A8_GRAPH_INTERSECTION_SOLVE_SPACING_BASE_PX;
+  }
+
+  if (
+    questionCode.includes(
+      "-ABSTRACT_SOLVE-"
+    )
+  ) {
+    return A8_ABSTRACT_SOLVE_SPACING_BASE_PX;
+  }
+
+  return null;
+}
+
 const DEFAULT_NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX = 40;
 
 export function getNational5MathsQuestionSpacingBasePx(
@@ -96,6 +159,15 @@ export function getNational5MathsQuestionSpacingBasePx(
 ): number {
   if (!questionCode) {
     return DEFAULT_NATIONAL5_MATHS_QUESTION_SPACING_BASE_PX;
+  }
+
+  const a8Spacing =
+    getA8QuestionSpacingBasePx(
+      questionCode
+    );
+
+  if (a8Spacing !== null) {
+    return a8Spacing;
   }
 
   return (
