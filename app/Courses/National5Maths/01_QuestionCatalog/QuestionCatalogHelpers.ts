@@ -32,7 +32,7 @@ export const catalogValue = <T>(
   notes: string | null = null,
 ): CatalogValue<T> => ({ state: "VALUE", value, confidence, provenance, evidence, notes });
 
-export const notApplicable = <T>(notes: string | null = null): CatalogValue<T> => ({
+export const notApplicable = <T = never>(notes: string | null = null): CatalogValue<T> => ({
   state: "NOT_APPLICABLE",
   value: null,
   confidence: "HIGH",
