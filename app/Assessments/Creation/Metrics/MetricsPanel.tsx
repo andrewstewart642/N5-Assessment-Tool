@@ -26,6 +26,9 @@ import type {
 const METRICS_TEXT_SIZE =
   8;
 
+const METRICS_VALUE_SIZE =
+  7;
+
 const METRICS_META_SIZE =
   7;
 
@@ -102,7 +105,7 @@ function BalanceMetricRow({
         display:
           "grid",
         gap:
-          2,
+          3,
       }}
     >
       <SectionTitle
@@ -122,9 +125,9 @@ function BalanceMetricRow({
           color:
             theme.textSecondary,
           fontSize:
-            METRICS_TEXT_SIZE,
+            METRICS_VALUE_SIZE,
           lineHeight:
-            "9px",
+            "8px",
           fontVariantNumeric:
             "tabular-nums",
         }}
@@ -198,7 +201,7 @@ function TopicMetricRow({
         display:
           "grid",
         gap:
-          2,
+          3,
       }}
     >
       <div
@@ -229,8 +232,10 @@ function TopicMetricRow({
           style={{
             color:
               theme.textPrimary,
+            fontSize:
+              METRICS_VALUE_SIZE,
             fontWeight:
-              500,
+              400,
           }}
         >
           {formatMarks(
@@ -585,7 +590,7 @@ export default function MetricsPanel({
             display:
               "grid",
             gap:
-              7,
+              8,
             boxSizing:
               "border-box",
           }}
@@ -640,7 +645,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                5,
+                6,
             }}
           >
             <SectionTitle
@@ -667,7 +672,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                2,
+                3,
             }}
           >
             <SectionTitle
@@ -687,9 +692,9 @@ export default function MetricsPanel({
                 color:
                   theme.textSecondary,
                 fontSize:
-                  METRICS_TEXT_SIZE,
+                  METRICS_VALUE_SIZE,
                 lineHeight:
-                  "9px",
+                  "8px",
                 fontVariantNumeric:
                   "tabular-nums",
               }}
@@ -703,7 +708,7 @@ export default function MetricsPanel({
                   color:
                     theme.textPrimary,
                   fontWeight:
-                    500,
+                    400,
                 }}
               >
                 {metrics.coverage.percentage.toFixed(1)}%
