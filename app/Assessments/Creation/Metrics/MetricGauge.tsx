@@ -134,9 +134,9 @@ function CurrentMarker({
         transform:
           "translateX(-50%)",
         width:
-          9,
+          10,
         height:
-          16,
+          15,
         pointerEvents:
           "none",
         zIndex:
@@ -148,19 +148,17 @@ function CurrentMarker({
           position:
             "absolute",
           left:
-            3,
+            4.5,
           top:
-            4,
+            6,
           width:
-            3,
+            1,
           height:
-            12,
-          borderRadius:
-            999,
+            9,
           background:
             theme.textPrimary,
-          boxShadow:
-            `0 0 0 1px ${theme.bgSurface}`,
+          opacity:
+            0.9,
         }}
       />
 
@@ -173,19 +171,17 @@ function CurrentMarker({
           top:
             0,
           width:
-            7,
+            8,
           height:
-            7,
+            8,
           borderRadius:
             "50%",
           background:
-            theme.textPrimary,
+            theme.bgSurface,
           border:
-            `1px solid ${theme.bgSurface}`,
+            `1.5px solid ${theme.textPrimary}`,
           boxSizing:
             "border-box",
-          boxShadow:
-            `0 0 0 1px ${theme.textPrimary}`,
         }}
       />
     </div>
@@ -254,7 +250,7 @@ function GaugeLabel({
         top:
           row === "top"
             ? 0
-            : 16,
+            : 21,
         transform:
           "translateX(-50%)",
         color:
@@ -279,12 +275,10 @@ function GaugeLabel({
 function GaugeBar({
   children,
   background,
-  hasBottomLabels,
   theme,
 }: {
   children: React.ReactNode;
   background: string;
-  hasBottomLabels: boolean;
   theme: AppTheme;
 }) {
   return (
@@ -297,13 +291,7 @@ function GaugeBar({
         right:
           0,
         top:
-          hasBottomLabels
-            ? 10
-            : undefined,
-        bottom:
-          hasBottomLabels
-            ? undefined
-            : 0,
+          12,
         height:
           5,
         borderRadius:
@@ -323,12 +311,12 @@ function buildRangeGradient(
 ): string {
   return `linear-gradient(to right,
     ${theme.danger} 0%,
-    ${theme.danger} 9%,
-    ${theme.textMuted} 27%,
-    ${theme.success} 33%,
-    ${theme.success} 67%,
-    ${theme.textMuted} 73%,
-    ${theme.danger} 91%,
+    ${theme.danger} 8%,
+    ${theme.textMuted} 23%,
+    ${theme.success} 30%,
+    ${theme.success} 70%,
+    ${theme.textMuted} 77%,
+    ${theme.danger} 92%,
     ${theme.danger} 100%)`;
 }
 
@@ -350,17 +338,12 @@ export default function MetricGauge(
 
     const dangerEnd =
       clamp(
-        threshold - 10
+        threshold - 12
       );
 
     const neutralPoint =
       clamp(
-        threshold - 3
-      );
-
-    const greenStart =
-      clamp(
-        threshold + 2
+        threshold - 5
       );
 
     const hasBottomLabels =
@@ -375,8 +358,8 @@ export default function MetricGauge(
             "relative",
           height:
             hasBottomLabels
-              ? 24
-              : 15,
+              ? 30
+              : 18,
           width:
             "100%",
         }}
@@ -402,10 +385,7 @@ export default function MetricGauge(
 
         <GaugeBar
           background={
-            `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} ${dangerEnd}%, ${theme.textMuted} ${neutralPoint}%, ${theme.success} ${greenStart}%, ${theme.success} 100%)`
-          }
-          hasBottomLabels={
-            hasBottomLabels
+            `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} ${dangerEnd}%, ${theme.textMuted} ${neutralPoint}%, ${theme.success} ${threshold}%, ${theme.success} 100%)`
           }
           theme={theme}
         >
@@ -466,8 +446,8 @@ export default function MetricGauge(
           "relative",
         height:
           hasBottomLabels
-            ? 24
-            : 15,
+            ? 30
+            : 18,
         width:
           "100%",
       }}
@@ -519,9 +499,6 @@ export default function MetricGauge(
           buildRangeGradient(
             theme
           )
-        }
-        hasBottomLabels={
-          hasBottomLabels
         }
         theme={theme}
       >
