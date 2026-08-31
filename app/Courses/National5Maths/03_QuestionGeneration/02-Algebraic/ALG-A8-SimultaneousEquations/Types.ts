@@ -1,4 +1,5 @@
 import type { PaperPart } from "@/app/Assessments/Questions/Content/PaperParts";
+import type { HistoricalQuestionReferenceProfile } from "../../../CatalogCoreTypes";
 
 export type A8GeneratorFamily =
   | "ABSTRACT_SOLVE"
@@ -140,6 +141,11 @@ export type A8GeneratedQuestion = {
     questionCatalogIds: string[];
     answerCatalogIds: string[];
     comparisonFamily: A8GeneratorFamily;
+    /**
+     * Optional until the Builder reference UI is wired. New generators should
+     * populate this with the closest teacher-facing historical precedent.
+     */
+    historicalReference?: HistoricalQuestionReferenceProfile;
   };
   generationConstraints: string[];
   quality: A8GenerationQualityProfile;
