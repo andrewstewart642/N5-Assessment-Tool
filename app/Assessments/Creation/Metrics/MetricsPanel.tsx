@@ -19,6 +19,12 @@ import type {
   TopicMetricSnapshot,
 } from "./MetricsTypes";
 
+const METRICS_TEXT_SIZE =
+  10;
+
+const METRICS_META_SIZE =
+  9;
+
 function formatMarks(
   value: number
 ): string {
@@ -54,8 +60,12 @@ function SectionTitle({
         ...UI_TEXT.sectionLabel,
         color:
           theme.textSecondary,
+        fontSize:
+          METRICS_META_SIZE,
+        lineHeight:
+          "11px",
         letterSpacing:
-          0.35,
+          0.25,
         textTransform:
           "uppercase",
       }}
@@ -80,7 +90,7 @@ function BalanceMetricRow({
         display:
           "grid",
         gap:
-          7,
+          2,
       }}
     >
       <SectionTitle
@@ -96,10 +106,13 @@ function BalanceMetricRow({
           justifyContent:
             "space-between",
           gap:
-            12,
-          ...UI_TEXT.metadata,
+            8,
           color:
             theme.textSecondary,
+          fontSize:
+            METRICS_TEXT_SIZE,
+          lineHeight:
+            "12px",
           fontVariantNumeric:
             "tabular-nums",
         }}
@@ -137,32 +150,17 @@ function BalanceMetricRow({
         maxPct={
           snapshot.maxRightPct
         }
+        minLabel={
+          `${snapshot.minRightPct.toFixed(0)}%`
+        }
+        targetLabel={
+          `${snapshot.targetRightPct.toFixed(0)}%`
+        }
+        maxLabel={
+          `${snapshot.maxRightPct.toFixed(0)}%`
+        }
         theme={theme}
       />
-
-      <div
-        style={{
-          display:
-            "flex",
-          justifyContent:
-            "space-between",
-          gap:
-            8,
-          ...UI_TEXT.metadata,
-          color:
-            theme.textMuted,
-          fontVariantNumeric:
-            "tabular-nums",
-        }}
-      >
-        <span>
-          valid {snapshot.minRightPct.toFixed(0)}–{snapshot.maxRightPct.toFixed(0)}%
-        </span>
-
-        <span>
-          target {snapshot.targetRightPct.toFixed(0)}%
-        </span>
-      </div>
     </div>
   );
 }
@@ -182,7 +180,7 @@ function TopicMetricRow({
         display:
           "grid",
         gap:
-          6,
+          1,
       }}
     >
       <div
@@ -192,10 +190,13 @@ function TopicMetricRow({
           justifyContent:
             "space-between",
           gap:
-            10,
-          ...UI_TEXT.metadata,
+            8,
           color:
             theme.textSecondary,
+          fontSize:
+            METRICS_TEXT_SIZE,
+          lineHeight:
+            "12px",
           fontVariantNumeric:
             "tabular-nums",
         }}
@@ -227,32 +228,17 @@ function TopicMetricRow({
         maxPct={
           snapshot.policy.maxPct
         }
+        minLabel={
+          `${snapshot.minMarksAchievable}m`
+        }
+        targetLabel={
+          `${snapshot.targetMarksAchievable}m`
+        }
+        maxLabel={
+          `${snapshot.maxMarksAchievable}m`
+        }
         theme={theme}
       />
-
-      <div
-        style={{
-          display:
-            "flex",
-          justifyContent:
-            "space-between",
-          gap:
-            8,
-          ...UI_TEXT.metadata,
-          color:
-            theme.textMuted,
-          fontVariantNumeric:
-            "tabular-nums",
-        }}
-      >
-        <span>
-          valid {snapshot.minMarksAchievable}–{snapshot.maxMarksAchievable} marks
-        </span>
-
-        <span>
-          target {snapshot.targetMarksAchievable}
-        </span>
-      </div>
     </div>
   );
 }
@@ -434,17 +420,17 @@ export default function MetricsPanel({
           className="hover-scroll"
           style={{
             maxHeight:
-              "min(500px, 58vh)",
+              "min(200px, 26vh)",
             overflowY:
               "auto",
             borderTop:
               `1px solid ${theme.borderStandard}`,
             padding:
-              "10px 12px 14px",
+              "5px 12px 7px",
             display:
               "grid",
             gap:
-              16,
+              6,
             boxSizing:
               "border-box",
           }}
@@ -456,10 +442,13 @@ export default function MetricsPanel({
               justifyContent:
                 "space-between",
               gap:
-                10,
-              ...UI_TEXT.metadata,
+                8,
               color:
                 theme.textMuted,
+              fontSize:
+                METRICS_META_SIZE,
+              lineHeight:
+                "11px",
               fontVariantNumeric:
                 "tabular-nums",
             }}
@@ -496,7 +485,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                10,
+                3,
             }}
           >
             <SectionTitle
@@ -523,7 +512,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                7,
+                2,
             }}
           >
             <SectionTitle
@@ -540,9 +529,12 @@ export default function MetricsPanel({
                   "space-between",
                 gap:
                   8,
-                ...UI_TEXT.metadata,
                 color:
                   theme.textSecondary,
+                fontSize:
+                  METRICS_TEXT_SIZE,
+                lineHeight:
+                  "12px",
                 fontVariantNumeric:
                   "tabular-nums",
               }}
@@ -565,6 +557,9 @@ export default function MetricsPanel({
                 metrics.coverage.policy
                   .thresholdPct
               }
+              thresholdLabel={
+                `${metrics.coverage.policy.thresholdPct}%`
+              }
               theme={theme}
             />
 
@@ -576,12 +571,15 @@ export default function MetricsPanel({
                   "space-between",
                 gap:
                   8,
-                ...UI_TEXT.metadata,
                 color:
                   metrics.coverage
                     .thresholdMet
                     ? theme.success
                     : theme.textMuted,
+                fontSize:
+                  METRICS_META_SIZE,
+                lineHeight:
+                  "11px",
               }}
             >
               <span>
@@ -600,16 +598,19 @@ export default function MetricsPanel({
           {invalidQuestionCount > 0 ? (
             <div
               style={{
-                ...UI_TEXT.metadata,
                 color:
                   theme.danger,
                 borderTop:
                   `1px solid ${theme.borderStandard}`,
                 paddingTop:
-                  8,
+                  4,
+                fontSize:
+                  METRICS_META_SIZE,
+                lineHeight:
+                  "11px",
               }}
             >
-              Metrics classification metadata is incomplete for {invalidQuestionCount} assigned question{invalidQuestionCount === 1 ? "" : "s"}.
+              Metrics metadata incomplete for {invalidQuestionCount} assigned question{invalidQuestionCount === 1 ? "" : "s"}.
             </div>
           ) : null}
         </div>
