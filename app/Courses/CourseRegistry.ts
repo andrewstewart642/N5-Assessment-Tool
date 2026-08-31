@@ -8,7 +8,7 @@ import type {
 
 import {
   NATIONAL5_MATHS_ASSESSMENT_CONFIG,
-} from "@/app/Courses/National5Maths/AssessmentConfig";
+} from "./National5Maths/AssessmentConfig";
 
 import {
   NATIONAL5_APPLICATIONS_OF_MATHS_ASSESSMENT_CONFIG,
