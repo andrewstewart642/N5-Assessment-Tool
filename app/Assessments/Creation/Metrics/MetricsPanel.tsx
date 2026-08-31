@@ -35,6 +35,12 @@ const METRICS_META_SIZE =
 const METRICS_MICRO_SIZE =
   6;
 
+const METRICS_LABEL_RAIL =
+  "124px";
+
+const METRICS_ROW_GAP =
+  14;
+
 function formatMarks(
   value: number
 ): string {
@@ -107,39 +113,50 @@ function BalanceMetricRow({
       style={{
         display:
           "grid",
-        gap:
-          6,
+        gridTemplateColumns:
+          `${METRICS_LABEL_RAIL} minmax(0, 1fr)`,
+        columnGap:
+          METRICS_ROW_GAP,
+        alignItems:
+          "center",
+        minWidth:
+          0,
         padding:
-          "2px 0 3px",
+          "3px 0 6px",
       }}
     >
-      <SectionTitle
-        theme={theme}
-      >
-        {snapshot.policy.label}
-      </SectionTitle>
-
       <div
         style={{
           display:
-            "flex",
-          justifyContent:
-            "space-between",
+            "grid",
           gap:
-            8,
-          color:
-            theme.textSecondary,
-          fontSize:
-            METRICS_VALUE_SIZE,
-          lineHeight:
-            "7px",
+            3,
+          minWidth:
+            0,
+          alignSelf:
+            "center",
           fontVariantNumeric:
             "tabular-nums",
-          whiteSpace:
-            "nowrap",
         }}
       >
-        <span>
+        <SectionTitle
+          theme={theme}
+        >
+          {snapshot.policy.label}
+        </SectionTitle>
+
+        <span
+          style={{
+            color:
+              theme.textSecondary,
+            fontSize:
+              METRICS_VALUE_SIZE,
+            lineHeight:
+              "8px",
+            whiteSpace:
+              "nowrap",
+          }}
+        >
           {snapshot.policy.leftLabel}{" "}
           {formatMarks(
             snapshot.leftMarks
@@ -148,7 +165,18 @@ function BalanceMetricRow({
           )}
         </span>
 
-        <span>
+        <span
+          style={{
+            color:
+              theme.textSecondary,
+            fontSize:
+              METRICS_VALUE_SIZE,
+            lineHeight:
+              "8px",
+            whiteSpace:
+              "nowrap",
+          }}
+        >
           {snapshot.policy.rightLabel}{" "}
           {formatMarks(
             snapshot.rightMarks
@@ -160,6 +188,7 @@ function BalanceMetricRow({
 
       <MetricGauge
         mode="range"
+        positionMode="absolute"
         currentPct={
           snapshot.rightPct
         }
@@ -208,13 +237,15 @@ function TopicMetricRow({
         display:
           "grid",
         gridTemplateColumns:
-          "76px minmax(0, 1fr)",
+          `${METRICS_LABEL_RAIL} minmax(0, 1fr)`,
         columnGap:
-          8,
+          METRICS_ROW_GAP,
         alignItems:
           "center",
         minWidth:
           0,
+        padding:
+          "4px 0 8px",
       }}
     >
       <div
@@ -222,7 +253,7 @@ function TopicMetricRow({
           display:
             "grid",
           gap:
-            2,
+            5,
           minWidth:
             0,
           alignSelf:
@@ -238,7 +269,7 @@ function TopicMetricRow({
             fontSize:
               METRICS_TEXT_SIZE,
             lineHeight:
-              "9px",
+              "10px",
             whiteSpace:
               "nowrap",
           }}
@@ -249,11 +280,11 @@ function TopicMetricRow({
         <span
           style={{
             color:
-              theme.textPrimary,
+              theme.textSecondary,
             fontSize:
               METRICS_VALUE_SIZE,
             lineHeight:
-              "7px",
+              "8px",
             fontWeight:
               400,
             whiteSpace:
@@ -669,7 +700,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                4,
+                3,
               paddingTop:
                 2,
             }}
@@ -677,7 +708,7 @@ export default function MetricsPanel({
             <div
               style={{
                 paddingBottom:
-                  2,
+                  4,
               }}
             >
               <SectionTitle
@@ -704,16 +735,30 @@ export default function MetricsPanel({
             style={{
               display:
                 "grid",
-              gap:
-                6,
-              paddingTop:
-                4,
+              gridTemplateColumns:
+                `${METRICS_LABEL_RAIL} minmax(0, 1fr)`,
+              columnGap:
+                METRICS_ROW_GAP,
+              alignItems:
+                "center",
+              minWidth:
+                0,
+              padding:
+                "5px 0 2px",
             }}
           >
             <div
               style={{
-                paddingBottom:
-                  2,
+                display:
+                  "grid",
+                gap:
+                  4,
+                minWidth:
+                  0,
+                alignSelf:
+                  "center",
+                fontVariantNumeric:
+                  "tabular-nums",
               }}
             >
               <SectionTitle
@@ -721,79 +766,91 @@ export default function MetricsPanel({
               >
                 {metrics.coverage.policy.label}
               </SectionTitle>
-            </div>
 
-            <div
-              style={{
-                display:
-                  "flex",
-                justifyContent:
-                  "space-between",
-                gap:
-                  8,
-                color:
-                  theme.textSecondary,
-                fontSize:
-                  METRICS_VALUE_SIZE,
-                lineHeight:
-                  "7px",
-                fontVariantNumeric:
-                  "tabular-nums",
-              }}
-            >
-              <span>
+              <span
+                style={{
+                  color:
+                    theme.textSecondary,
+                  fontSize:
+                    METRICS_VALUE_SIZE,
+                  lineHeight:
+                    "8px",
+                  whiteSpace:
+                    "nowrap",
+                }}
+              >
                 {metrics.coverage.representedUnits} / {metrics.coverage.totalUnits} skills
               </span>
 
-              <span>
+              <span
+                style={{
+                  color:
+                    theme.textSecondary,
+                  fontSize:
+                    METRICS_VALUE_SIZE,
+                  lineHeight:
+                    "8px",
+                }}
+              >
                 {metrics.coverage.percentage.toFixed(1)}%
               </span>
             </div>
 
-            <MetricGauge
-              mode="threshold"
-              currentPct={
-                metrics.coverage.percentage
-              }
-              thresholdPct={
-                metrics.coverage.policy
-                  .thresholdPct
-              }
-              thresholdTopLabel={
-                `${metrics.coverage.policy.thresholdPct}%`
-              }
-              theme={theme}
-            />
-
             <div
               style={{
                 display:
-                  "flex",
-                justifyContent:
-                  "space-between",
+                  "grid",
                 gap:
-                  8,
-                color:
-                  metrics.coverage
-                    .thresholdMet
-                    ? theme.success
-                    : theme.textMuted,
-                fontSize:
-                  METRICS_MICRO_SIZE,
-                lineHeight:
-                  "7px",
+                  3,
+                minWidth:
+                  0,
               }}
             >
-              <span>
-                {metrics.coverage.requiredUnits} skills required
-              </span>
+              <MetricGauge
+                mode="threshold"
+                currentPct={
+                  metrics.coverage.percentage
+                }
+                thresholdPct={
+                  metrics.coverage.policy
+                    .thresholdPct
+                }
+                thresholdTopLabel={
+                  `${metrics.coverage.policy.thresholdPct}%`
+                }
+                theme={theme}
+              />
 
-              <span>
-                {metrics.coverage.thresholdMet
-                  ? "✓ threshold met"
-                  : metrics.coverage.policy.thresholdLabel ??
-                    `${metrics.coverage.policy.thresholdPct}% threshold`}
-              </span>
+              <div
+                style={{
+                  display:
+                    "flex",
+                  justifyContent:
+                    "space-between",
+                  gap:
+                    8,
+                  color:
+                    metrics.coverage
+                      .thresholdMet
+                      ? theme.success
+                      : theme.textMuted,
+                  fontSize:
+                    METRICS_MICRO_SIZE,
+                  lineHeight:
+                    "7px",
+                }}
+              >
+                <span>
+                  {metrics.coverage.requiredUnits} skills required
+                </span>
+
+                <span>
+                  {metrics.coverage.thresholdMet
+                    ? "✓ threshold met"
+                    : metrics.coverage.policy.thresholdLabel ??
+                      `${metrics.coverage.policy.thresholdPct}% threshold`}
+                </span>
+              </div>
             </div>
           </div>
 
