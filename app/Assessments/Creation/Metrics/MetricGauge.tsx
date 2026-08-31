@@ -1,27 +1,26 @@
 import type {
+  CSSProperties,
+  ReactNode,
+} from "react";
+
+import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
 const GAUGE_LABEL_SIZE =
-  5.25;
+  5.5;
 
 const GAUGE_LABEL_LINE_HEIGHT =
   "7px";
 
 const GAUGE_TOP_LABEL_Y =
-  1;
+  0;
 
 const GAUGE_BAR_Y =
-  18;
+  20;
 
 const GAUGE_BOTTOM_LABEL_Y =
-  29;
-
-const GAUGE_WIDTH =
-  "64%";
-
-const GAUGE_MAX_WIDTH =
-  420;
+  32;
 
 function clamp(
   value: number,
@@ -119,6 +118,7 @@ type RangeGaugeProps = {
   minBottomLabel?: string;
   targetBottomLabel?: string;
   maxBottomLabel?: string;
+  positionMode?: "normalised" | "absolute";
   theme: AppTheme;
 };
 
@@ -321,7 +321,7 @@ function GaugeBar({
   background,
   theme,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   background: string;
   theme: AppTheme;
 }) {
@@ -350,7 +350,7 @@ function GaugeBar({
   );
 }
 
-function buildRangeGradient(
+function buildNormalisedRangeGradient(
   theme: AppTheme
 ): string {
   return `linear-gradient(to right,
@@ -364,21 +364,46 @@ function buildRangeGradient(
     ${theme.danger} 100%)`;
 }
 
+function buildAbsoluteRangeGradient({
+  theme,
+  minPosition,
+  maxPosition,
+}: {
+  theme: AppTheme;
+  minPosition: number;
+  maxPosition: number;
+}): string {
+  const dangerLeft =
+    clamp(minPosition - 9);
+  const neutralLeft =
+    clamp(minPosition - 3.5);
+  const neutralRight =
+    clamp(maxPosition + 3.5);
+  const dangerRight =
+    clamp(maxPosition + 9);
+
+  return `linear-gradient(to right,
+    ${theme.danger} 0%,
+    ${theme.danger} ${dangerLeft}%,
+    ${theme.textMuted} ${neutralLeft}%,
+    ${theme.success} ${minPosition}%,
+    ${theme.success} ${maxPosition}%,
+    ${theme.textMuted} ${neutralRight}%,
+    ${theme.danger} ${dangerRight}%,
+    ${theme.danger} 100%)`;
+}
+
 function gaugeFrameStyle(
   height: number
-): React.CSSProperties {
+): CSSProperties {
   return {
     position:
       "relative",
     height,
     width:
-      GAUGE_WIDTH,
-    maxWidth:
-      GAUGE_MAX_WIDTH,
+      "100%",
     minWidth:
       0,
-    marginLeft:
-      "auto",
   };
 }
 
@@ -418,8 +443,8 @@ export default function MetricGauge(
         style={
           gaugeFrameStyle(
             hasBottomLabels
-              ? 40
-              : 27
+              ? 44
+              : 31
           )
         }
       >
@@ -479,19 +504,40 @@ export default function MetricGauge(
     );
   }
 
+  const absolute =
+    props.positionMode ===
+    "absolute";
+
+  const minPosition =
+    absolute
+      ? clamp(props.minPct)
+      : 30;
+
+  const targetPosition =
+    absolute
+      ? clamp(props.targetPct)
+      : 50;
+
+  const maxPosition =
+    absolute
+      ? clamp(props.maxPct)
+      : 70;
+
   const currentPosition =
     props.currentPct === null
       ? null
-      : normaliseRangePosition({
-          value:
-            props.currentPct,
-          min:
-            props.minPct,
-          target:
-            props.targetPct,
-          max:
-            props.maxPct,
-        });
+      : absolute
+        ? clamp(props.currentPct)
+        : normaliseRangePosition({
+            value:
+              props.currentPct,
+            min:
+              props.minPct,
+            target:
+              props.targetPct,
+            max:
+              props.maxPct,
+          });
 
   const hasBottomLabels =
     Boolean(
@@ -505,48 +551,48 @@ export default function MetricGauge(
       style={
         gaugeFrameStyle(
           hasBottomLabels
-            ? 40
-            : 27
+            ? 44
+            : 31
         )
       }
     >
       <GaugeLabel
-        position={30}
+        position={minPosition}
         label={props.minTopLabel}
         row="top"
         theme={theme}
       />
 
       <GaugeLabel
-        position={50}
+        position={targetPosition}
         label={props.targetTopLabel}
         row="top"
         theme={theme}
       />
 
       <GaugeLabel
-        position={70}
+        position={maxPosition}
         label={props.maxTopLabel}
         row="top"
         theme={theme}
       />
 
       <GaugeLabel
-        position={30}
+        position={minPosition}
         label={props.minBottomLabel}
         row="bottom"
         theme={theme}
       />
 
       <GaugeLabel
-        position={50}
+        position={targetPosition}
         label={props.targetBottomLabel}
         row="bottom"
         theme={theme}
       />
 
       <GaugeLabel
-        position={70}
+        position={maxPosition}
         label={props.maxBottomLabel}
         row="bottom"
         theme={theme}
@@ -554,9 +600,15 @@ export default function MetricGauge(
 
       <GaugeBar
         background={
-          buildRangeGradient(
-            theme
-          )
+          absolute
+            ? buildAbsoluteRangeGradient({
+                theme,
+                minPosition,
+                maxPosition,
+              })
+            : buildNormalisedRangeGradient(
+                theme
+              )
         }
         theme={theme}
       >
@@ -566,7 +618,7 @@ export default function MetricGauge(
             position:
               "absolute",
             left:
-              "30%",
+              `${minPosition}%`,
             top:
               -2,
             width:
@@ -586,7 +638,7 @@ export default function MetricGauge(
             position:
               "absolute",
             left:
-              "70%",
+              `${maxPosition}%`,
             top:
               -2,
             width:
@@ -601,7 +653,7 @@ export default function MetricGauge(
         />
 
         <TargetDiamond
-          position={50}
+          position={targetPosition}
           theme={theme}
         />
 
