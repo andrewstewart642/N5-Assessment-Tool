@@ -39,6 +39,9 @@ const METRICS_BALANCE_TEMPLATE =
 const METRICS_TOPIC_TEMPLATE =
   `${METRICS_LABEL_RAIL} ${METRICS_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_TOPIC_TRAILING_RESERVE}`;
 
+const METRICS_COVERAGE_TEMPLATE =
+  `${METRICS_LABEL_RAIL} minmax(0, 1fr) ${METRICS_TOPIC_TRAILING_RESERVE}`;
+
 const GAUGE_ALIGNED_HEIGHT = 42;
 const GAUGE_TOP_TEXT_Y = 0;
 const GAUGE_BOTTOM_TEXT_Y = 31;
@@ -202,11 +205,13 @@ function GaugeAlignedCurrent({
   percentage,
   theme,
   align,
+  emphasise = false,
 }: {
   marks?: number;
   percentage: number | null;
   theme: AppTheme;
   align: "left" | "right";
+  emphasise?: boolean;
 }) {
   return (
     <div
@@ -214,9 +219,14 @@ function GaugeAlignedCurrent({
         position: "relative",
         height: GAUGE_ALIGNED_HEIGHT,
         minWidth: 0,
-        color: theme.textSecondary,
+        color: emphasise
+          ? theme.textPrimary
+          : theme.textSecondary,
         fontSize: METRICS_VALUE_SIZE,
         lineHeight: "7px",
+        fontWeight: emphasise
+          ? UI_TYPO.weightMedium
+          : UI_TYPO.weightRegular,
         fontVariantNumeric: "tabular-nums",
         textAlign: align,
         whiteSpace: "nowrap",
@@ -394,9 +404,10 @@ function TopicMetricRow({
     >
       <span
         style={{
-          color: theme.textSecondary,
+          color: theme.textPrimary,
           fontSize: METRICS_TEXT_SIZE,
           lineHeight: "10px",
+          fontWeight: UI_TYPO.weightSemibold,
           whiteSpace: "nowrap",
         }}
       >
@@ -408,6 +419,7 @@ function TopicMetricRow({
         percentage={snapshot.currentPct}
         theme={theme}
         align="right"
+        emphasise
       />
 
       <MetricGauge
@@ -441,15 +453,120 @@ function CourseCoverageTitle({
         ...UI_TEXT.sectionLabel,
         color: theme.textSecondary,
         fontSize: METRICS_META_SIZE,
-        lineHeight: "7px",
+        lineHeight: "8px",
         letterSpacing: 0.15,
         textTransform: "uppercase",
         display: "grid",
-        gap: 0,
+        gap: 2,
+        alignSelf: "center",
       }}
     >
       <span>Course</span>
       <span>Coverage</span>
+    </div>
+  );
+}
+
+function CourseCoverageMetric({
+  metrics,
+  theme,
+}: {
+  metrics: AssessmentMetricsSnapshot;
+  theme: AppTheme;
+}) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        gap: 5,
+        padding: "7px 0 3px",
+      }}
+    >
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: METRICS_COVERAGE_TEMPLATE,
+          columnGap: METRICS_ROW_GAP,
+          alignItems: "center",
+          minWidth: 0,
+        }}
+      >
+        <CourseCoverageTitle theme={theme} />
+
+        <div
+          style={{
+            position: "relative",
+            minWidth: 0,
+          }}
+        >
+          <span
+            style={{
+              position: "absolute",
+              top: GAUGE_TOP_TEXT_Y,
+              left: "50%",
+              transform: "translateX(-50%)",
+              color: theme.textPrimary,
+              fontSize: METRICS_VALUE_SIZE,
+              lineHeight: "7px",
+              fontWeight: UI_TYPO.weightMedium,
+              fontVariantNumeric: "tabular-nums",
+              whiteSpace: "nowrap",
+              zIndex: 4,
+            }}
+          >
+            {metrics.coverage.percentage.toFixed(1)}%
+          </span>
+
+          <MetricGauge
+            mode="threshold"
+            currentPct={metrics.coverage.percentage}
+            thresholdPct={metrics.coverage.policy.thresholdPct}
+            thresholdTopLabel=""
+            thresholdBottomLabel={`${metrics.coverage.policy.thresholdPct}%`}
+            theme={theme}
+          />
+        </div>
+
+        <span />
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: METRICS_COVERAGE_TEMPLATE,
+          columnGap: METRICS_ROW_GAP,
+          minWidth: 0,
+        }}
+      >
+        <span />
+
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 18,
+            minWidth: 0,
+            color: metrics.coverage.thresholdMet
+              ? theme.success
+              : theme.textMuted,
+            fontSize: METRICS_MICRO_SIZE,
+            lineHeight: "8px",
+            whiteSpace: "nowrap",
+          }}
+        >
+          <span>
+            {metrics.coverage.requiredUnits} skills required
+          </span>
+
+          <span>
+            {metrics.coverage.policy.thresholdLabel ??
+              `${metrics.coverage.policy.thresholdPct}% threshold`}
+          </span>
+        </div>
+
+        <span />
+      </div>
     </div>
   );
 }
@@ -715,99 +832,10 @@ export default function MetricsPanel({
             )}
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gap: 3,
-              padding: "6px 0 2px",
-            }}
-          >
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: METRICS_TOPIC_TEMPLATE,
-                columnGap: METRICS_ROW_GAP,
-                alignItems: "center",
-                minWidth: 0,
-              }}
-            >
-              <CourseCoverageTitle theme={theme} />
-
-              <div
-                style={{
-                  position: "relative",
-                  height: GAUGE_ALIGNED_HEIGHT,
-                  minWidth: 0,
-                  color: theme.textSecondary,
-                  fontSize: METRICS_VALUE_SIZE,
-                  lineHeight: "7px",
-                  fontVariantNumeric: "tabular-nums",
-                  textAlign: "right",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    right: 0,
-                    top: GAUGE_TOP_TEXT_Y,
-                  }}
-                >
-                  {metrics.coverage.percentage.toFixed(1)}%
-                </span>
-              </div>
-
-              <MetricGauge
-                mode="threshold"
-                currentPct={metrics.coverage.percentage}
-                thresholdPct={metrics.coverage.policy.thresholdPct}
-                thresholdTopLabel=""
-                thresholdBottomLabel={`${metrics.coverage.policy.thresholdPct}%`}
-                theme={theme}
-              />
-
-              <span />
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: METRICS_TOPIC_TEMPLATE,
-                columnGap: METRICS_ROW_GAP,
-                minWidth: 0,
-              }}
-            >
-              <span />
-              <span />
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 14,
-                  minWidth: 0,
-                  color: metrics.coverage.thresholdMet
-                    ? theme.success
-                    : theme.textMuted,
-                  fontSize: METRICS_MICRO_SIZE,
-                  lineHeight: "7px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <span>
-                  {metrics.coverage.requiredUnits} skills required
-                </span>
-
-                <span>
-                  {metrics.coverage.policy.thresholdLabel ??
-                    `${metrics.coverage.policy.thresholdPct}% threshold`}
-                </span>
-              </div>
-
-              <span />
-            </div>
-          </div>
+          <CourseCoverageMetric
+            metrics={metrics}
+            theme={theme}
+          />
 
           {invalidQuestionCount > 0 ? (
             <div
