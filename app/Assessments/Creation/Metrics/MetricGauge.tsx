@@ -114,6 +114,20 @@ type MetricGaugeProps =
   | RangeGaugeProps
   | ThresholdGaugeProps;
 
+function getCurrentMarkerTransform(
+  position: number
+): string {
+  if (position <= 0.5) {
+    return "translateX(0)";
+  }
+
+  if (position >= 99.5) {
+    return "translateX(-100%)";
+  }
+
+  return "translateX(-50%)";
+}
+
 function CurrentMarker({
   position,
   theme,
@@ -121,6 +135,9 @@ function CurrentMarker({
   position: number;
   theme: AppTheme;
 }) {
+  const safePosition =
+    clamp(position);
+
   return (
     <div
       aria-hidden="true"
@@ -128,15 +145,17 @@ function CurrentMarker({
         position:
           "absolute",
         left:
-          `${clamp(position)}%`,
+          `${safePosition}%`,
         top:
-          -5,
+          -4,
         transform:
-          "translateX(-50%)",
+          getCurrentMarkerTransform(
+            safePosition
+          ),
         width:
-          10,
+          8,
         height:
-          15,
+          14,
         pointerEvents:
           "none",
         zIndex:
@@ -148,17 +167,17 @@ function CurrentMarker({
           position:
             "absolute",
           left:
-            4.5,
+            3.5,
           top:
             6,
           width:
             1,
           height:
-            9,
+            8,
           background:
             theme.textPrimary,
           opacity:
-            0.9,
+            0.72,
         }}
       />
 
@@ -167,21 +186,23 @@ function CurrentMarker({
           position:
             "absolute",
           left:
-            1,
+            0.5,
           top:
             0,
           width:
-            8,
+            7,
           height:
-            8,
+            7,
           borderRadius:
             "50%",
           background:
-            theme.bgSurface,
+            "transparent",
           border:
-            `1.5px solid ${theme.textPrimary}`,
+            `1px solid ${theme.textPrimary}`,
           boxSizing:
             "border-box",
+          boxShadow:
+            `0 0 0 1px ${theme.bgSurface}`,
         }}
       />
     </div>
@@ -206,15 +227,15 @@ function TargetDiamond({
         top:
           "50%",
         width:
-          6,
+          5,
         height:
-          6,
+          5,
         transform:
           "translate(-50%, -50%) rotate(45deg)",
         background:
           theme.bgSurface,
         border:
-          `1.5px solid ${theme.textPrimary}`,
+          `1px solid ${theme.textPrimary}`,
         boxSizing:
           "border-box",
         zIndex:
@@ -250,7 +271,7 @@ function GaugeLabel({
         top:
           row === "top"
             ? 0
-            : 21,
+            : 25,
         transform:
           "translateX(-50%)",
         color:
@@ -291,7 +312,7 @@ function GaugeBar({
         right:
           0,
         top:
-          12,
+          15,
         height:
           5,
         borderRadius:
@@ -311,12 +332,12 @@ function buildRangeGradient(
 ): string {
   return `linear-gradient(to right,
     ${theme.danger} 0%,
-    ${theme.danger} 8%,
-    ${theme.textMuted} 23%,
+    ${theme.danger} 3%,
+    ${theme.textMuted} 22%,
     ${theme.success} 30%,
     ${theme.success} 70%,
-    ${theme.textMuted} 77%,
-    ${theme.danger} 92%,
+    ${theme.textMuted} 78%,
+    ${theme.danger} 97%,
     ${theme.danger} 100%)`;
 }
 
@@ -338,12 +359,12 @@ export default function MetricGauge(
 
     const dangerEnd =
       clamp(
-        threshold - 12
+        threshold - 16
       );
 
     const neutralPoint =
       clamp(
-        threshold - 5
+        threshold - 7
       );
 
     const hasBottomLabels =
@@ -358,8 +379,8 @@ export default function MetricGauge(
             "relative",
           height:
             hasBottomLabels
-              ? 30
-              : 18,
+              ? 34
+              : 21,
           width:
             "100%",
         }}
@@ -404,6 +425,8 @@ export default function MetricGauge(
                 9,
               background:
                 theme.textSecondary,
+              opacity:
+                0.72,
             }}
           />
 
@@ -446,8 +469,8 @@ export default function MetricGauge(
           "relative",
         height:
           hasBottomLabels
-            ? 30
-            : 18,
+            ? 34
+            : 21,
         width:
           "100%",
       }}
@@ -518,7 +541,7 @@ export default function MetricGauge(
             background:
               theme.textMuted,
             opacity:
-              0.8,
+              0.62,
           }}
         />
 
@@ -538,7 +561,7 @@ export default function MetricGauge(
             background:
               theme.textMuted,
             opacity:
-              0.8,
+              0.62,
           }}
         />
 
