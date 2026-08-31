@@ -30,6 +30,7 @@ const METRICS_MICRO_SIZE = 6;
 
 const METRICS_LABEL_RAIL = "88px";
 const METRICS_CURRENT_RAIL = "64px";
+const METRICS_COVERAGE_CURRENT_RAIL = "52px";
 const METRICS_TOPIC_TRAILING_RESERVE = "12px";
 const METRICS_ROW_GAP = 7;
 
@@ -40,11 +41,12 @@ const METRICS_TOPIC_TEMPLATE =
   `${METRICS_LABEL_RAIL} ${METRICS_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_TOPIC_TRAILING_RESERVE}`;
 
 const METRICS_COVERAGE_TEMPLATE =
-  `${METRICS_LABEL_RAIL} minmax(0, 1fr) ${METRICS_TOPIC_TRAILING_RESERVE}`;
+  `${METRICS_LABEL_RAIL} ${METRICS_COVERAGE_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_TOPIC_TRAILING_RESERVE}`;
 
 const GAUGE_ALIGNED_HEIGHT = 42;
 const GAUGE_TOP_TEXT_Y = 0;
 const GAUGE_BOTTOM_TEXT_Y = 31;
+const GAUGE_BAR_TEXT_Y = 15.5;
 
 /*
  * Balance gauges are deliberately calibrated rather than literal 0–100 axes.
@@ -478,7 +480,7 @@ function CourseCoverageMetric({
     <div
       style={{
         display: "grid",
-        gap: 5,
+        gap: 2,
         padding: "7px 0 3px",
       }}
     >
@@ -496,36 +498,36 @@ function CourseCoverageMetric({
         <div
           style={{
             position: "relative",
+            height: GAUGE_ALIGNED_HEIGHT,
             minWidth: 0,
+            color: theme.textPrimary,
+            fontSize: METRICS_VALUE_SIZE,
+            lineHeight: "7px",
+            fontWeight: UI_TYPO.weightMedium,
+            fontVariantNumeric: "tabular-nums",
+            textAlign: "right",
+            whiteSpace: "nowrap",
           }}
         >
           <span
             style={{
               position: "absolute",
-              top: GAUGE_TOP_TEXT_Y,
-              left: "50%",
-              transform: "translateX(-50%)",
-              color: theme.textPrimary,
-              fontSize: METRICS_VALUE_SIZE,
-              lineHeight: "7px",
-              fontWeight: UI_TYPO.weightMedium,
-              fontVariantNumeric: "tabular-nums",
-              whiteSpace: "nowrap",
-              zIndex: 4,
+              top: GAUGE_BAR_TEXT_Y,
+              right: 0,
             }}
           >
             {metrics.coverage.percentage.toFixed(1)}%
           </span>
-
-          <MetricGauge
-            mode="threshold"
-            currentPct={metrics.coverage.percentage}
-            thresholdPct={metrics.coverage.policy.thresholdPct}
-            thresholdTopLabel=""
-            thresholdBottomLabel={`${metrics.coverage.policy.thresholdPct}%`}
-            theme={theme}
-          />
         </div>
+
+        <MetricGauge
+          mode="threshold"
+          currentPct={metrics.coverage.percentage}
+          thresholdPct={metrics.coverage.policy.thresholdPct}
+          thresholdTopLabel=""
+          thresholdBottomLabel={`${metrics.coverage.policy.thresholdPct}%`}
+          theme={theme}
+        />
 
         <span />
       </div>
@@ -538,6 +540,7 @@ function CourseCoverageMetric({
           minWidth: 0,
         }}
       >
+        <span />
         <span />
 
         <div
