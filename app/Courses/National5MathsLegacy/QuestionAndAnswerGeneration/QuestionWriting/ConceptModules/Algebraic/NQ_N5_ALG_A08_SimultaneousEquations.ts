@@ -46,6 +46,13 @@ type A8BuilderCode =
 
 type A8Level = 1 | 2 | 3;
 
+type A8MetricMarkProfile = {
+  totalMarks: number;
+  cMarks: number;
+  aMarks: number;
+  reasoningMarks: number;
+};
+
 const ALL_FAMILIES: A8GeneratorFamily[] = [
   "ABSTRACT_SOLVE",
   "CONTEXT_FORM_AND_SOLVE",
@@ -59,12 +66,42 @@ const isReasoningFamily = (
   family === "CONTEXT_FORM_AND_SOLVE" ||
   family === "CONTEXT_DERIVED_TOTAL";
 
+/**
+ * Metrics requires every generated mark to have exact ownership.
+ *
+ * The historical A8 catalogue gives contextual questions a stable 1+1+4
+ * scaffold: the two equation-formation marks are C-standard/Operational and
+ * the four-mark solve block carries the mixed-standard, reasoning demand.
+ * For the live mixed-standard bridge we resolve that six-mark profile as
+ * 4 C + 2 A and 2 Operational + 4 Reasoning. The three-mark operational
+ * families use the same mixed-standard 2 C + 1 A weighting.
+ *
+ * This is generator/Builder metadata only; it does not rewrite the historical
+ * catalogue evidence or historical marking schemes.
+ */
+const metricMarksForFamily = (
+  family: A8GeneratorFamily
+): A8MetricMarkProfile =>
+  isReasoningFamily(family)
+    ? {
+        totalMarks: 6,
+        cMarks: 4,
+        aMarks: 2,
+        reasoningMarks: 4,
+      }
+    : {
+        totalMarks: 3,
+        cMarks: 2,
+        aMarks: 1,
+        reasoningMarks: 0,
+      };
+
 const marksForFamily = (
   family: A8GeneratorFamily
 ) =>
-  isReasoningFamily(family)
-    ? 6
-    : 3;
+  metricMarksForFamily(
+    family
+  ).totalMarks;
 
 const structureForFamily = (
   family: A8GeneratorFamily
@@ -85,30 +122,24 @@ const selectionMeta = (
   family: A8GeneratorFamily,
   paper: A8GeneratorPaper,
   templateId = `a8-${family.toLowerCase()}-${paper.toLowerCase()}-l${level}`
-): QuestionVariantSelectionMeta => ({
-  level,
-  templateId,
-  marks: {
-    totalMarks: marksForFamily(family),
+): QuestionVariantSelectionMeta => {
+  const marks =
+    metricMarksForFamily(
+      family
+    );
 
-    // A8's historical C/A ownership has not yet had the dedicated calibration
-    // pass needed to split these marks safely. Keeping both at zero means the
-    // live bridge is selectable under A+C using the known total-mark truth,
-    // without inventing a C-only or A-only allocation.
-    cMarks: 0,
-    aMarks: 0,
-    reasoningMarks:
-      isReasoningFamily(family)
-        ? 1
-        : 0,
-  },
-  standardProfile: "C+A",
-  paperSuitability: paper,
-  calculatorStatus:
-    paper === "P1"
-      ? "NonCalculatorOnly"
-      : "CalculatorAllowed",
-});
+  return {
+    level,
+    templateId,
+    marks,
+    standardProfile: "C+A",
+    paperSuitability: paper,
+    calculatorStatus:
+      paper === "P1"
+        ? "NonCalculatorOnly"
+        : "CalculatorAllowed",
+  };
+};
 
 const entriesForFamilies = (
   level: A8Level,
@@ -222,9 +253,6 @@ const familyMatchesBuilderRequest = (
     return true;
   }
 
-  // Until A8 has a dedicated C/A ownership calibration, the bridge only
-  // claims the combined A+C standard. This is deliberate source honesty rather
-  // than an arbitrary split of historical marks.
   if (
     filters.selectedStandard !==
     "C+A"
@@ -404,11 +432,13 @@ const generateBuilderA8 = (
     resolveDifficulty(
       context.difficulty
     );
+
   const paper =
     resolvePaper(
       context,
       explicitFamily
     );
+
   const seed =
     Math.floor(
       Math.random() * 0x7fffffff
@@ -503,8 +533,8 @@ const generateBuilderA8 = (
     context.concept?.label ??
     "Mixed simultaneous equations";
 
-  const contextual =
-    isReasoningFamily(
+  const metricMarks =
+    metricMarksForFamily(
       question.family
     );
 
@@ -526,6 +556,8 @@ const generateBuilderA8 = (
         finalAnswer
       ),
     workedAnswers,
+    markBreakdown:
+      metricMarks,
     classification: {
       standard: "Mixed",
       calculatorStatus:
@@ -537,7 +569,7 @@ const generateBuilderA8 = (
           question.family
         ),
       isReasoning:
-        contextual,
+        metricMarks.reasoningMarks > 0,
       paperSuitability:
         question.paper,
     },
