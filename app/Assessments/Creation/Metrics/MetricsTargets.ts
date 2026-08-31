@@ -1,5 +1,7 @@
 import type {
+  AssessmentTopicCode,
   Paper,
+  SkillsData,
 } from "@/app/Assessments/AssessmentTypes";
 
 import type {
@@ -38,6 +40,133 @@ export function sumAssessmentTargetMarks({
   );
 }
 
+function getTopicOrderFromSkillsData(
+  skillsData: SkillsData | undefined
+): AssessmentTopicCode[] {
+  if (!skillsData) {
+    return [];
+  }
+
+  const orderedTopics:
+    AssessmentTopicCode[] = [];
+
+  Object.values(
+    skillsData
+  ).forEach(
+    (skills) => {
+      skills.forEach(
+        (skill) => {
+          const domain =
+            skill.domain;
+
+          if (
+            domain &&
+            !orderedTopics.includes(
+              domain
+            )
+          ) {
+            orderedTopics.push(
+              domain
+            );
+          }
+        }
+      );
+    }
+  );
+
+  return orderedTopics;
+}
+
+function orderTopicTargetsForCourse({
+  topicTargets,
+  skillsData,
+}: {
+  topicTargets: CourseTopicTarget[];
+  skillsData: SkillsData | undefined;
+}): CourseTopicTarget[] {
+  const topicOrder =
+    getTopicOrderFromSkillsData(
+      skillsData
+    );
+
+  if (
+    topicOrder.length === 0
+  ) {
+    return topicTargets;
+  }
+
+  const orderIndex =
+    new Map(
+      topicOrder.map(
+        (
+          topic,
+          index
+        ) => [
+          topic,
+          index,
+        ] as const
+      )
+    );
+
+  return topicTargets
+    .map(
+      (
+        target,
+        originalIndex
+      ) => ({
+        target,
+        originalIndex,
+      })
+    )
+    .sort(
+      (
+        first,
+        second
+      ) => {
+        const firstIndex =
+          orderIndex.get(
+            first.target.topic
+          );
+
+        const secondIndex =
+          orderIndex.get(
+            second.target.topic
+          );
+
+        if (
+          firstIndex === undefined &&
+          secondIndex === undefined
+        ) {
+          return (
+            first.originalIndex -
+            second.originalIndex
+          );
+        }
+
+        if (
+          firstIndex === undefined
+        ) {
+          return 1;
+        }
+
+        if (
+          secondIndex === undefined
+        ) {
+          return -1;
+        }
+
+        return (
+          firstIndex -
+          secondIndex
+        );
+      }
+    )
+    .map(
+      ({ target }) =>
+        target
+    );
+}
+
 export function buildTopicMetricPolicies(
   topicTargets: CourseTopicTarget[]
 ): TopicMetricPolicy[] {
@@ -58,6 +187,10 @@ export function buildTopicMetricPolicies(
  * No course identity, paper mark total or subject-specific percentage is
  * embedded here. Courses opt in by supplying assessmentMetrics plus their
  * existing topicTargets.
+ *
+ * Topic rows follow the first occurrence of each domain in the course Skills
+ * Tree so Metrics mirrors the teacher's navigation order without hard-wiring
+ * a subject-specific topic sequence into the generic feature.
  */
 export function buildAssessmentMetricsPolicy(
   courseConfig: CourseAssessmentConfig
@@ -69,6 +202,14 @@ export function buildAssessmentMetricsPolicy(
     return null;
   }
 
+  const orderedTopicTargets =
+    orderTopicTargetsForCourse({
+      topicTargets:
+        courseConfig.topicTargets,
+      skillsData:
+        courseConfig.skillTree,
+    });
+
   return {
     standardBalance: {
       ...config.standardBalance,
@@ -78,7 +219,7 @@ export function buildAssessmentMetricsPolicy(
     },
     topicTargets:
       buildTopicMetricPolicies(
-        courseConfig.topicTargets
+        orderedTopicTargets
       ),
     coverage: {
       ...config.coverage,
