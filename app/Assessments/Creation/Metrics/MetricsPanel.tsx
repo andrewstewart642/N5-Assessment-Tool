@@ -13,6 +13,10 @@ import {
 
 import MetricGauge from "./MetricGauge";
 
+import {
+  useMetricsPanelSizing,
+} from "./MetricsPanelSizing";
+
 import type {
   AssessmentMetricsSnapshot,
   BalanceMetricSnapshot,
@@ -20,10 +24,10 @@ import type {
 } from "./MetricsTypes";
 
 const METRICS_TEXT_SIZE =
-  10;
+  8;
 
 const METRICS_META_SIZE =
-  9;
+  7;
 
 function formatMarks(
   value: number
@@ -71,9 +75,9 @@ function SectionTitle({
         fontSize:
           METRICS_META_SIZE,
         lineHeight:
-          "11px",
+          "8px",
         letterSpacing:
-          0.25,
+          0.15,
         textTransform:
           "uppercase",
       }}
@@ -98,7 +102,7 @@ function BalanceMetricRow({
         display:
           "grid",
         gap:
-          2,
+          1,
       }}
     >
       <SectionTitle
@@ -120,7 +124,7 @@ function BalanceMetricRow({
           fontSize:
             METRICS_TEXT_SIZE,
           lineHeight:
-            "12px",
+            "9px",
           fontVariantNumeric:
             "tabular-nums",
         }}
@@ -194,7 +198,7 @@ function TopicMetricRow({
         display:
           "grid",
         gap:
-          1,
+          0,
       }}
     >
       <div
@@ -203,6 +207,8 @@ function TopicMetricRow({
             "flex",
           justifyContent:
             "space-between",
+          alignItems:
+            "baseline",
           gap:
             8,
           color:
@@ -210,7 +216,7 @@ function TopicMetricRow({
           fontSize:
             METRICS_TEXT_SIZE,
           lineHeight:
-            "12px",
+            "9px",
           fontVariantNumeric:
             "tabular-nums",
         }}
@@ -219,7 +225,14 @@ function TopicMetricRow({
           {snapshot.policy.label}
         </span>
 
-        <span>
+        <span
+          style={{
+            color:
+              theme.textPrimary,
+            fontWeight:
+              700,
+          }}
+        >
           {formatMarks(
             snapshot.marks
           )} marks · {formatPct(
@@ -310,6 +323,48 @@ function ExplorerChevron({
   );
 }
 
+function ResizeDots({
+  theme,
+}: {
+  theme: AppTheme;
+}) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display:
+          "flex",
+        alignItems:
+          "center",
+        justifyContent:
+          "center",
+        gap:
+          2,
+      }}
+    >
+      {[0, 1, 2].map(
+        (dot) => (
+          <span
+            key={dot}
+            style={{
+              width:
+                2,
+              height:
+                2,
+              borderRadius:
+                "50%",
+              background:
+                theme.textMuted,
+              opacity:
+                0.9,
+            }}
+          />
+        )
+      )}
+    </span>
+  );
+}
+
 export default function MetricsPanel({
   metrics,
   theme,
@@ -331,6 +386,15 @@ export default function MetricsPanel({
   ] =
     useState(false);
 
+  const {
+    panelRef,
+    panelHeight,
+    isDragging,
+    beginResize,
+    resetHeight,
+  } =
+    useMetricsPanelSizing();
+
   const invalidQuestionCount =
     new Set(
       metrics.validationIssues
@@ -347,6 +411,7 @@ export default function MetricsPanel({
 
   return (
     <section
+      ref={panelRef}
       style={{
         border:
           `1px solid ${theme.borderStandard}`,
@@ -358,12 +423,22 @@ export default function MetricsPanel({
           theme.bgSurface,
         minHeight:
           0,
+        height:
+          isOpen
+            ? panelHeight
+            : 30,
         overflow:
           "hidden",
         fontFamily:
           UI_TYPO.family,
         boxSizing:
           "border-box",
+        display:
+          "grid",
+        gridTemplateRows:
+          isOpen
+            ? "28px 9px minmax(0, 1fr)"
+            : "28px",
       }}
     >
       <button
@@ -385,7 +460,7 @@ export default function MetricsPanel({
           width:
             "100%",
           height:
-            30,
+            28,
           border:
             "none",
           background:
@@ -450,20 +525,51 @@ export default function MetricsPanel({
 
       {isOpen ? (
         <div
-          className="hover-scroll"
+          role="separator"
+          aria-orientation="horizontal"
+          aria-label="Resize Metrics panel"
+          title="Drag to resize Metrics · double-click to reset"
+          onMouseDown={beginResize}
+          onDoubleClick={resetHeight}
           style={{
-            maxHeight:
-              "min(210px, 27vh)",
-            overflowY:
-              "auto",
+            height:
+              9,
+            cursor:
+              "row-resize",
+            display:
+              "grid",
+            placeItems:
+              "center",
             borderTop:
               `1px solid ${theme.borderStandard}`,
+            background:
+              isDragging
+                ? theme.controlBgHover
+                : "transparent",
+            boxSizing:
+              "border-box",
+          }}
+        >
+          <ResizeDots
+            theme={theme}
+          />
+        </div>
+      ) : null}
+
+      {isOpen ? (
+        <div
+          className="hover-scroll"
+          style={{
+            minHeight:
+              0,
+            overflowY:
+              "auto",
             padding:
-              "5px 12px 7px",
+              "3px 12px 5px",
             display:
               "grid",
             gap:
-              6,
+              4,
             boxSizing:
               "border-box",
           }}
@@ -481,7 +587,7 @@ export default function MetricsPanel({
               fontSize:
                 METRICS_META_SIZE,
               lineHeight:
-                "11px",
+                "8px",
               fontVariantNumeric:
                 "tabular-nums",
             }}
@@ -518,7 +624,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                3,
+                2,
             }}
           >
             <SectionTitle
@@ -545,7 +651,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                2,
+                1,
             }}
           >
             <SectionTitle
@@ -567,7 +673,7 @@ export default function MetricsPanel({
                 fontSize:
                   METRICS_TEXT_SIZE,
                 lineHeight:
-                  "12px",
+                  "9px",
                 fontVariantNumeric:
                   "tabular-nums",
               }}
@@ -576,7 +682,14 @@ export default function MetricsPanel({
                 {metrics.coverage.representedUnits} / {metrics.coverage.totalUnits} skills
               </span>
 
-              <span>
+              <span
+                style={{
+                  color:
+                    theme.textPrimary,
+                  fontWeight:
+                    700,
+                }}
+              >
                 {metrics.coverage.percentage.toFixed(1)}%
               </span>
             </div>
@@ -612,7 +725,7 @@ export default function MetricsPanel({
                 fontSize:
                   METRICS_META_SIZE,
                 lineHeight:
-                  "11px",
+                  "8px",
               }}
             >
               <span>
@@ -636,11 +749,11 @@ export default function MetricsPanel({
                 borderTop:
                   `1px solid ${theme.borderStandard}`,
                 paddingTop:
-                  4,
+                  3,
                 fontSize:
                   METRICS_META_SIZE,
                 lineHeight:
-                  "11px",
+                  "8px",
               }}
             >
               Metrics metadata incomplete for {invalidQuestionCount} assigned question{invalidQuestionCount === 1 ? "" : "s"}.
