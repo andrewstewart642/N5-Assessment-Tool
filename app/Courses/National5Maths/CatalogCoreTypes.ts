@@ -8,12 +8,19 @@ export type SharedMarkingRuleId = string;
 export type GeneratorFamilyId = string;
 export type RendererFamilyId = string;
 export type MediaAssetId = string;
-export type CatalogSchemaVersion = "N5_CATALOG_V2";
+export type CatalogSchemaVersion = "N5_CATALOG_V2" | "N5_CATALOG_V3";
 
 export type CatalogValueState = "VALUE" | "NOT_APPLICABLE" | "UNKNOWN" | "NOT_REVIEWED";
 export type CatalogConfidence = "HIGH" | "MEDIUM" | "LOW";
 export type CatalogProvenance = "SOURCE_FACT" | "CATALOGUE_CLASSIFICATION" | "GENERATION_ANALYSIS";
-export type CatalogEvidenceType = "QUESTION" | "MARKING_SCHEME" | "GENERAL_MARKING_POLICY" | "VISUAL" | "PAPER_CONTEXT";
+export type CatalogEvidenceType =
+  | "QUESTION"
+  | "MARKING_SCHEME"
+  | "GENERAL_MARKING_POLICY"
+  | "VISUAL"
+  | "PAPER_CONTEXT"
+  | "CLASSIFICATION_GUIDANCE"
+  | "FOI_CLASSIFICATION";
 
 export type CatalogEvidenceRef = {
   documentId: CatalogDocumentId;
@@ -31,8 +38,70 @@ export type CatalogValue<T> =
   | { state: "UNKNOWN"; value: null; confidence: CatalogConfidence; provenance: CatalogProvenance; evidence: CatalogEvidenceRef[]; notes: string | null }
   | { state: "NOT_REVIEWED"; value: null; confidence: null; provenance: null; evidence: CatalogEvidenceRef[]; notes: string | null };
 
-export type CatalogSourceDocumentType = "QUESTION_PAPER" | "MARKING_SCHEME" | "ASSESSMENT_RESOURCE" | "MODIFIED_EXAM" | "SPECIMEN" | "OTHER";
+export type CatalogSourceDocumentType =
+  | "QUESTION_PAPER"
+  | "MARKING_SCHEME"
+  | "ASSESSMENT_RESOURCE"
+  | "MODIFIED_EXAM"
+  | "SPECIMEN"
+  | "CLASSIFICATION_GUIDANCE"
+  | "FREEDOM_OF_INFORMATION"
+  | "OTHER";
 export type CatalogSourceDocumentRef = { id: CatalogDocumentId; courseId: CourseId; year: number; paper: Paper | null; documentType: CatalogSourceDocumentType; sourceLocator: string };
+
+// ============================================================================
+// V3 MARK-OWNERSHIP CLASSIFICATION
+// ============================================================================
+
+export type CatalogMarkStandard = "C" | "A";
+export type CatalogMarkThinking = "OPERATIONAL" | "REASONING";
+
+/**
+ * V3 treats each one-mark node as wholly owned by exactly one canonical Skill.
+ * Standard and thinking are also mark-level values. They retain their own
+ * evidence/provenance because SQA/FOI/professional guidance may support one
+ * classification without explicitly supporting the other.
+ */
+export type CatalogMarkClassificationProfile = {
+  primarySkillId: string;
+  standard: CatalogValue<CatalogMarkStandard>;
+  thinking: CatalogValue<CatalogMarkThinking>;
+};
+
+export type CatalogMarkClassificationSummary = {
+  skillMarkDistribution: Record<string, number>;
+  standardMarkDistribution: Record<CatalogMarkStandard, number>;
+  thinkingMarkDistribution: Record<CatalogMarkThinking, number>;
+};
+
+// ============================================================================
+// GENERATED-QUESTION HISTORICAL REFERENCE
+// ============================================================================
+
+export type HistoricalQuestionMatchReason =
+  | "SAME_FAMILY"
+  | "SAME_SKILL"
+  | "SAME_MARK_TARIFF"
+  | "SAME_STANDARD_PROFILE"
+  | "SAME_THINKING_PROFILE"
+  | "SAME_PAPER"
+  | "SIMILAR_STRUCTURE"
+  | "SIMILAR_CONTEXT"
+  | "SIMILAR_NUMERICAL_DEMAND"
+  | "OTHER";
+
+export type HistoricalQuestionReferenceProfile = {
+  primaryQuestionCatalogId: string | null;
+  supportingQuestionCatalogIds: string[];
+  matchReasons: HistoricalQuestionMatchReason[];
+};
+
+/** Converts a canonical catalogue ID into compact teacher-facing source text. */
+export const formatHistoricalQuestionReferenceLabel = (questionCatalogId: string): string | null => {
+  const match = /^N5_MATH_(\d{4})_(P1|P2)_Q(.+)$/.exec(questionCatalogId);
+  if (!match) return null;
+  return `N5 Maths ${match[1]} ${match[2]} Q${match[3]}`;
+};
 
 export type CatalogReviewStatus = "NOT_REVIEWED" | "IN_PROGRESS" | "REVIEWED" | "VALIDATED";
 export type CatalogReviewProfile = {
@@ -66,4 +135,6 @@ export const CATALOG_CORE_VALIDATION_INVARIANTS = [
   "Historical wording and artwork remain source evidence, never generator templates.",
   "SOURCE_FACT, CATALOGUE_CLASSIFICATION and GENERATION_ANALYSIS remain distinguishable.",
   "UNKNOWN must never be silently treated as NOT_APPLICABLE.",
+  "V3 mark classifications assign exactly one primary Skill, one C/A value and one Operational/Reasoning value to each mark.",
+  "Historical-reference links point to catalogue IDs; teacher-facing labels are derived rather than duplicated in generated question data.",
 ] as const;
