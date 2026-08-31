@@ -3,7 +3,7 @@ import type {
 } from "@/app/UI/Application/Theme/AppTheme";
 
 const GAUGE_LABEL_SIZE =
-  5.75;
+  5.25;
 
 const GAUGE_LABEL_LINE_HEIGHT =
   "7px";
@@ -16,6 +16,12 @@ const GAUGE_BAR_Y =
 
 const GAUGE_BOTTOM_LABEL_Y =
   29;
+
+const GAUGE_WIDTH =
+  "64%";
+
+const GAUGE_MAX_WIDTH =
+  420;
 
 function clamp(
   value: number,
@@ -358,6 +364,24 @@ function buildRangeGradient(
     ${theme.danger} 100%)`;
 }
 
+function gaugeFrameStyle(
+  height: number
+): React.CSSProperties {
+  return {
+    position:
+      "relative",
+    height,
+    width:
+      GAUGE_WIDTH,
+    maxWidth:
+      GAUGE_MAX_WIDTH,
+    minWidth:
+      0,
+    marginLeft:
+      "auto",
+  };
+}
+
 export default function MetricGauge(
   props: MetricGaugeProps
 ) {
@@ -391,16 +415,13 @@ export default function MetricGauge(
 
     return (
       <div
-        style={{
-          position:
-            "relative",
-          height:
+        style={
+          gaugeFrameStyle(
             hasBottomLabels
               ? 40
-              : 27,
-          width:
-            "100%",
-        }}
+              : 27
+          )
+        }
       >
         <GaugeLabel
           position={threshold}
@@ -481,16 +502,13 @@ export default function MetricGauge(
 
   return (
     <div
-      style={{
-        position:
-          "relative",
-        height:
+      style={
+        gaugeFrameStyle(
           hasBottomLabels
             ? 40
-            : 27,
-        width:
-          "100%",
-      }}
+            : 27
+        )
+      }
     >
       <GaugeLabel
         position={30}
