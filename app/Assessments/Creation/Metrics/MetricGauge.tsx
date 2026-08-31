@@ -2,6 +2,21 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
+const GAUGE_LABEL_SIZE =
+  5.75;
+
+const GAUGE_LABEL_LINE_HEIGHT =
+  "7px";
+
+const GAUGE_TOP_LABEL_Y =
+  1;
+
+const GAUGE_BAR_Y =
+  18;
+
+const GAUGE_BOTTOM_LABEL_Y =
+  29;
+
 function clamp(
   value: number,
   min = 0,
@@ -177,7 +192,7 @@ function CurrentMarker({
           background:
             theme.textPrimary,
           opacity:
-            0.72,
+            0.68,
         }}
       />
 
@@ -270,16 +285,18 @@ function GaugeLabel({
           `${clamp(position)}%`,
         top:
           row === "top"
-            ? 0
-            : 25,
+            ? GAUGE_TOP_LABEL_Y
+            : GAUGE_BOTTOM_LABEL_Y,
         transform:
           "translateX(-50%)",
         color:
           theme.textMuted,
         fontSize:
-          6.5,
+          GAUGE_LABEL_SIZE,
         lineHeight:
-          "7px",
+          GAUGE_LABEL_LINE_HEIGHT,
+        fontWeight:
+          400,
         fontVariantNumeric:
           "tabular-nums",
         whiteSpace:
@@ -312,7 +329,7 @@ function GaugeBar({
         right:
           0,
         top:
-          15,
+          GAUGE_BAR_Y,
         height:
           5,
         borderRadius:
@@ -379,8 +396,8 @@ export default function MetricGauge(
             "relative",
           height:
             hasBottomLabels
-              ? 34
-              : 21,
+              ? 40
+              : 27,
           width:
             "100%",
         }}
@@ -469,8 +486,8 @@ export default function MetricGauge(
           "relative",
         height:
           hasBottomLabels
-            ? 34
-            : 21,
+            ? 40
+            : 27,
         width:
           "100%",
       }}
