@@ -50,6 +50,68 @@ export function buildDefaultAssessmentTargetMarksByPaper(
   );
 }
 
+/**
+ * Repair a complete set of historical Course-default targets when every
+ * configured paper exactly matches a Course-declared historical default.
+ *
+ * Custom teacher targets are otherwise preserved. The generic Builder owns no
+ * knowledge of which legacy mark values belong to a particular Course.
+ */
+export function migrateHistoricalDefaultAssessmentTargetMarks({
+  targetMarksByPaper,
+  courseConfig,
+}: {
+  targetMarksByPaper:
+    AssessmentTargetMarksByPaper;
+  courseConfig:
+    CourseAssessmentConfig;
+}): AssessmentTargetMarksByPaper {
+  const papers =
+    getAssessmentPapers(
+      courseConfig
+    );
+
+  const matchesCompleteHistoricalDefaultSet =
+    papers.length > 0 &&
+    papers.every(
+      (paper) => {
+        const paperConfig =
+          getAssessmentPaperConfig(
+            paper,
+            courseConfig
+          );
+
+        const historicalDefaults =
+          paperConfig
+            .historicalDefaultTargetMarks ??
+          [];
+
+        const currentValue =
+          targetMarksByPaper[
+            paper
+          ];
+
+        return (
+          historicalDefaults.length > 0 &&
+          typeof currentValue ===
+            "number" &&
+          Number.isFinite(
+            currentValue
+          ) &&
+          historicalDefaults.includes(
+            currentValue
+          )
+        );
+      }
+    );
+
+  return matchesCompleteHistoricalDefaultSet
+    ? buildDefaultAssessmentTargetMarksByPaper(
+        courseConfig
+      )
+    : targetMarksByPaper;
+}
+
 export function normaliseAssessmentTargetMarksByPaper({
   targetMarksByPaper,
   courseConfig,
