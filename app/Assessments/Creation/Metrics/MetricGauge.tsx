@@ -92,6 +92,9 @@ type RangeGaugeProps = {
   minPct: number;
   targetPct: number;
   maxPct: number;
+  minLabel?: string;
+  targetLabel?: string;
+  maxLabel?: string;
   theme: AppTheme;
 };
 
@@ -99,6 +102,7 @@ type ThresholdGaugeProps = {
   mode: "threshold";
   currentPct: number;
   thresholdPct: number;
+  thresholdLabel?: string;
   theme: AppTheme;
 };
 
@@ -122,13 +126,13 @@ function CurrentMarker({
         left:
           `${clamp(position)}%`,
         top:
-          -4,
+          -3,
         transform:
           "translateX(-50%)",
         width:
           2,
         height:
-          16,
+          12,
         background:
           theme.textPrimary,
         borderRadius:
@@ -158,19 +162,97 @@ function TargetDiamond({
         top:
           "50%",
         width:
-          8,
+          6,
         height:
-          8,
+          6,
         transform:
           "translate(-50%, -50%) rotate(45deg)",
         background:
           theme.bgSurface,
         border:
-          `2px solid ${theme.textPrimary}`,
+          `1.5px solid ${theme.textPrimary}`,
         boxSizing:
           "border-box",
       }}
     />
+  );
+}
+
+function GaugeLabel({
+  position,
+  label,
+  theme,
+}: {
+  position: number;
+  label?: string;
+  theme: AppTheme;
+}) {
+  if (!label) {
+    return null;
+  }
+
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        position:
+          "absolute",
+        left:
+          `${clamp(position)}%`,
+        top:
+          0,
+        transform:
+          "translateX(-50%)",
+        color:
+          theme.textMuted,
+        fontSize:
+          9,
+        lineHeight:
+          "10px",
+        fontVariantNumeric:
+          "tabular-nums",
+        whiteSpace:
+          "nowrap",
+        pointerEvents:
+          "none",
+      }}
+    >
+      {label}
+    </span>
+  );
+}
+
+function GaugeBar({
+  children,
+  background,
+  theme,
+}: {
+  children: React.ReactNode;
+  background: string;
+  theme: AppTheme;
+}) {
+  return (
+    <div
+      style={{
+        position:
+          "absolute",
+        left:
+          0,
+        right:
+          0,
+        bottom:
+          0,
+        height:
+          6,
+        borderRadius:
+          999,
+        background,
+        boxShadow:
+          `inset 0 0 0 1px ${theme.borderStandard}`,
+      }}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -206,41 +288,51 @@ export default function MetricGauge(
           position:
             "relative",
           height:
-            8,
-          borderRadius:
-            999,
-          background:
-            `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} ${blendStart}%, ${theme.success} ${blendEnd}%, ${theme.success} 100%)`,
-          boxShadow:
-            `inset 0 0 0 1px ${theme.borderStandard}`,
+            18,
+          width:
+            "100%",
         }}
       >
-        <div
-          aria-hidden="true"
-          style={{
-            position:
-              "absolute",
-            left:
-              `${threshold}%`,
-            top:
-              -3,
-            width:
-              1,
-            height:
-              14,
-            background:
-              theme.textSecondary,
-          }}
+        <GaugeLabel
+          position={threshold}
+          label={
+            props.thresholdLabel ??
+            `${threshold.toFixed(0)}%`
+          }
+          theme={theme}
         />
 
-        <CurrentMarker
-          position={
-            props.currentPct
+        <GaugeBar
+          background={
+            `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} ${blendStart}%, ${theme.success} ${blendEnd}%, ${theme.success} 100%)`
           }
-          theme={
-            theme
-          }
-        />
+          theme={theme}
+        >
+          <div
+            aria-hidden="true"
+            style={{
+              position:
+                "absolute",
+              left:
+                `${threshold}%`,
+              top:
+                -2,
+              width:
+                1,
+              height:
+                10,
+              background:
+                theme.textSecondary,
+            }}
+          />
+
+          <CurrentMarker
+            position={
+              props.currentPct
+            }
+            theme={theme}
+          />
+        </GaugeBar>
       </div>
     );
   }
@@ -265,72 +357,89 @@ export default function MetricGauge(
         position:
           "relative",
         height:
-          8,
-        borderRadius:
-          999,
-        background:
-          `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} 27%, ${theme.success} 33%, ${theme.success} 67%, ${theme.danger} 73%, ${theme.danger} 100%)`,
-        boxShadow:
-          `inset 0 0 0 1px ${theme.borderStandard}`,
+          18,
+        width:
+          "100%",
       }}
     >
-      <div
-        aria-hidden="true"
-        style={{
-          position:
-            "absolute",
-          left:
-            "30%",
-          top:
-            -2,
-          width:
-            1,
-          height:
-            12,
-          background:
-            theme.textMuted,
-          opacity:
-            0.7,
-        }}
+      <GaugeLabel
+        position={30}
+        label={props.minLabel}
+        theme={theme}
       />
 
-      <div
-        aria-hidden="true"
-        style={{
-          position:
-            "absolute",
-          left:
-            "70%",
-          top:
-            -2,
-          width:
-            1,
-          height:
-            12,
-          background:
-            theme.textMuted,
-          opacity:
-            0.7,
-        }}
-      />
-
-      <TargetDiamond
+      <GaugeLabel
         position={50}
-        theme={
-          theme
-        }
+        label={props.targetLabel}
+        theme={theme}
       />
 
-      {currentPosition !== null ? (
-        <CurrentMarker
-          position={
-            currentPosition
-          }
-          theme={
-            theme
-          }
+      <GaugeLabel
+        position={70}
+        label={props.maxLabel}
+        theme={theme}
+      />
+
+      <GaugeBar
+        background={
+          `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} 27%, ${theme.success} 33%, ${theme.success} 67%, ${theme.danger} 73%, ${theme.danger} 100%)`
+        }
+        theme={theme}
+      >
+        <div
+          aria-hidden="true"
+          style={{
+            position:
+              "absolute",
+            left:
+              "30%",
+            top:
+              -2,
+            width:
+              1,
+            height:
+              10,
+            background:
+              theme.textMuted,
+            opacity:
+              0.7,
+          }}
         />
-      ) : null}
+
+        <div
+          aria-hidden="true"
+          style={{
+            position:
+              "absolute",
+            left:
+              "70%",
+            top:
+              -2,
+            width:
+              1,
+            height:
+              10,
+            background:
+              theme.textMuted,
+            opacity:
+              0.7,
+          }}
+        />
+
+        <TargetDiamond
+          position={50}
+          theme={theme}
+        />
+
+        {currentPosition !== null ? (
+          <CurrentMarker
+            position={
+              currentPosition
+            }
+            theme={theme}
+          />
+        ) : null}
+      </GaugeBar>
     </div>
   );
 }
