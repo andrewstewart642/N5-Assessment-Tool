@@ -277,9 +277,9 @@ function GaugeLabel({
         color:
           theme.textMuted,
         fontSize:
-          7,
+          6.5,
         lineHeight:
-          "8px",
+          "7px",
         fontVariantNumeric:
           "tabular-nums",
         whiteSpace:
