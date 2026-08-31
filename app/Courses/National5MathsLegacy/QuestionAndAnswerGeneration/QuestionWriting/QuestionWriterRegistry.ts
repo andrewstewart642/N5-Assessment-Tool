@@ -36,13 +36,14 @@ import ScientificNotationConceptModule from "@/app/Courses/National5Maths/Questi
 
 import SignificantFiguresConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N03_1_SignificantFigures";
 
-import ReversePercentagesConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_1_PercentagesReverse";
-
-import AppreciationConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_2_PercentagesAppreciation";
+import {
+  AppreciationConceptModule,
+  ReversePercentagesConceptModule,
+} from "../../../National5Maths/03_QuestionGeneration/01-Numerical/NUM-N4-Percentages/LegacyBridge";
 
 import DepreciationConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N04_3_PercentagesDepreciation";
 
-import FractionsConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N05_1_Fractions";
+import FractionsConceptModule from "../../../National5Maths/03_QuestionGeneration/01-Numerical/NUM-N5-Fractions/LegacyBridge";
 
 import TrigEquationsConceptModule from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/Trigonometry/NQ_N5_TRIG_T02_2_Equations";
 
