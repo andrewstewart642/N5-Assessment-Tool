@@ -444,9 +444,11 @@ function TopicMetricRow({
   );
 }
 
-function CourseCoverageTitle({
+function CourseCoverageTitleLine({
+  children,
   theme,
 }: {
+  children: "Course" | "Coverage";
   theme: AppTheme;
 }) {
   return (
@@ -456,15 +458,37 @@ function CourseCoverageTitle({
         color: theme.textSecondary,
         fontSize: METRICS_META_SIZE,
         lineHeight: "8px",
+        minHeight: 8,
         letterSpacing: 0.15,
         textTransform: "uppercase",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function CourseCoverageTitle({
+  theme,
+}: {
+  theme: AppTheme;
+}) {
+  return (
+    <div
+      style={{
         display: "grid",
-        gap: 2,
+        rowGap: 5,
         alignSelf: "center",
       }}
     >
-      <span>Course</span>
-      <span>Coverage</span>
+      <CourseCoverageTitleLine theme={theme}>
+        Course
+      </CourseCoverageTitleLine>
+
+      <CourseCoverageTitleLine theme={theme}>
+        Coverage
+      </CourseCoverageTitleLine>
     </div>
   );
 }
