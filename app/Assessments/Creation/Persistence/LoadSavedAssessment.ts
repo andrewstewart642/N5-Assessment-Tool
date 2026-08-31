@@ -44,6 +44,10 @@ import type {
   AssessmentQuestionDraftByPaper,
 } from "../Questions/DraftTypes";
 
+import {
+  getAssessmentCreationCourseConfig,
+} from "./CourseSelection";
+
 
 type StateSetter<T> =
   Dispatch<
@@ -52,7 +56,7 @@ type StateSetter<T> =
 
 
 type UseAssessmentCreatorSavedAssessmentArgs = {
-  courseConfig:
+  courseConfig?:
     CourseAssessmentConfig;
 
   setCreatedAt:
@@ -157,7 +161,8 @@ type UseAssessmentCreatorSavedAssessmentArgs = {
 
 
 export function useAssessmentCreatorSavedAssessment({
-  courseConfig,
+  courseConfig =
+    getAssessmentCreationCourseConfig(),
 
   setCreatedAt,
 
