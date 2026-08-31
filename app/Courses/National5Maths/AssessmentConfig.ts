@@ -383,10 +383,10 @@ export const NATIONAL5_MATHS_ASSESSMENT_CONFIG:
           "Standard",
 
         leftLabel:
-          "C",
+          "C-Standard",
 
         rightLabel:
-          "A",
+          "A-Standard",
 
         rightTargetPct:
           35,
@@ -423,7 +423,7 @@ export const NATIONAL5_MATHS_ASSESSMENT_CONFIG:
           70,
 
         thresholdLabel:
-          "SQA evidence coverage threshold",
+          "Exam standard coverage threshold",
       },
     },
 
