@@ -68,6 +68,10 @@ export const NATIONAL5_MATHS_ASSESSMENT_CONFIG:
         defaultTargetMarks:
           40,
 
+        historicalDefaultTargetMarks: [
+          35,
+        ],
+
         description:
           "Non-calculator paper.",
 
@@ -106,6 +110,10 @@ export const NATIONAL5_MATHS_ASSESSMENT_CONFIG:
 
         defaultTargetMarks:
           50,
+
+        historicalDefaultTargetMarks: [
+          45,
+        ],
 
         description:
           "Calculator-allowed paper.",
