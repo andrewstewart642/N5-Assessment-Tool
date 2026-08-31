@@ -40,35 +40,100 @@ export function sumAssessmentTargetMarks({
   );
 }
 
-function getTopicOrderFromSkillsData(
+type SkillsTreeTopicPresentation = {
+  topic: AssessmentTopicCode;
+  label?: string;
+};
+
+function getSkillsTreeCategoryLabel(
+  categoryLabel: string
+): string {
+  const trimmed =
+    categoryLabel.trim();
+
+  const withoutSkillsSuffix =
+    trimmed.replace(
+      /\s+skills$/i,
+      ""
+    );
+
+  return (
+    withoutSkillsSuffix.trim() ||
+    trimmed
+  );
+}
+
+/**
+ * Resolve topic navigation order and teacher-facing names from the actual
+ * Skills Tree. Metrics therefore follows whatever Course curriculum tree is
+ * active rather than maintaining its own duplicated topic vocabulary.
+ */
+function getTopicPresentationFromSkillsData(
   skillsData: SkillsData | undefined
-): AssessmentTopicCode[] {
+): SkillsTreeTopicPresentation[] {
   if (!skillsData) {
     return [];
   }
 
   const orderedTopics:
-    AssessmentTopicCode[] = [];
+    SkillsTreeTopicPresentation[] = [];
 
-  Object.values(
+  Object.entries(
     skillsData
   ).forEach(
-    (skills) => {
-      skills.forEach(
-        (skill) => {
-          const domain =
-            skill.domain;
+    ([categoryLabel, skills]) => {
+      const categoryTopics =
+        skills.reduce<AssessmentTopicCode[]>(
+          (
+            topics,
+            skill
+          ) => {
+            const domain =
+              skill.domain;
 
+            if (
+              domain &&
+              !topics.includes(
+                domain
+              )
+            ) {
+              topics.push(
+                domain
+              );
+            }
+
+            return topics;
+          },
+          []
+        );
+
+      categoryTopics.forEach(
+        (topic) => {
           if (
-            domain &&
-            !orderedTopics.includes(
-              domain
+            orderedTopics.some(
+              (item) =>
+                item.topic ===
+                topic
             )
           ) {
-            orderedTopics.push(
-              domain
-            );
+            return;
           }
+
+          orderedTopics.push({
+            topic,
+
+            /**
+             * A one-domain Skills Tree category is an authoritative topic
+             * heading. Mixed-domain categories still supply order, while the
+             * Course topic target label remains the safe fallback.
+             */
+            label:
+              categoryTopics.length === 1
+                ? getSkillsTreeCategoryLabel(
+                    categoryLabel
+                  )
+                : undefined,
+          });
         }
       );
     }
@@ -84,26 +149,29 @@ function orderTopicTargetsForCourse({
   topicTargets: CourseTopicTarget[];
   skillsData: SkillsData | undefined;
 }): CourseTopicTarget[] {
-  const topicOrder =
-    getTopicOrderFromSkillsData(
+  const topicPresentation =
+    getTopicPresentationFromSkillsData(
       skillsData
     );
 
   if (
-    topicOrder.length === 0
+    topicPresentation.length === 0
   ) {
     return topicTargets;
   }
 
-  const orderIndex =
+  const presentationByTopic =
     new Map(
-      topicOrder.map(
+      topicPresentation.map(
         (
-          topic,
+          item,
           index
         ) => [
-          topic,
-          index,
+          item.topic,
+          {
+            ...item,
+            index,
+          },
         ] as const
       )
     );
@@ -114,7 +182,14 @@ function orderTopicTargetsForCourse({
         target,
         originalIndex
       ) => ({
-        target,
+        target: {
+          ...target,
+          label:
+            presentationByTopic.get(
+              target.topic
+            )?.label ??
+            target.label,
+        },
         originalIndex,
       })
     )
@@ -124,14 +199,14 @@ function orderTopicTargetsForCourse({
         second
       ) => {
         const firstIndex =
-          orderIndex.get(
+          presentationByTopic.get(
             first.target.topic
-          );
+          )?.index;
 
         const secondIndex =
-          orderIndex.get(
+          presentationByTopic.get(
             second.target.topic
-          );
+          )?.index;
 
         if (
           firstIndex === undefined &&
@@ -188,9 +263,10 @@ export function buildTopicMetricPolicies(
  * embedded here. Courses opt in by supplying assessmentMetrics plus their
  * existing topicTargets.
  *
- * Topic rows follow the first occurrence of each domain in the course Skills
- * Tree so Metrics mirrors the teacher's navigation order without hard-wiring
- * a subject-specific topic sequence into the generic feature.
+ * Topic rows follow the first occurrence of each domain in the Course Skills
+ * Tree, and single-domain category headings provide the visible Metrics topic
+ * names. A Course can therefore replace its curriculum tree without changing
+ * the generic Metrics feature.
  */
 export function buildAssessmentMetricsPolicy(
   courseConfig: CourseAssessmentConfig
