@@ -27,7 +27,7 @@ const METRICS_TEXT_SIZE =
   8;
 
 const METRICS_VALUE_SIZE =
-  6;
+  6.25;
 
 const METRICS_META_SIZE =
   7;
@@ -35,11 +35,17 @@ const METRICS_META_SIZE =
 const METRICS_MICRO_SIZE =
   6;
 
-const METRICS_LABEL_RAIL =
-  "124px";
+const METRICS_LEFT_RAIL =
+  "150px";
+
+const METRICS_RIGHT_RAIL =
+  "112px";
 
 const METRICS_ROW_GAP =
-  14;
+  10;
+
+const METRICS_ROW_TEMPLATE =
+  `${METRICS_LEFT_RAIL} minmax(210px, 1fr) ${METRICS_RIGHT_RAIL}`;
 
 function formatMarks(
   value: number
@@ -99,6 +105,122 @@ function SectionTitle({
   );
 }
 
+function CurrentStack({
+  marks,
+  percentage,
+  theme,
+  align = "right",
+  includeMarksWord = true,
+}: {
+  marks?: number;
+  percentage: number | null;
+  theme: AppTheme;
+  align?: "left" | "right";
+  includeMarksWord?: boolean;
+}) {
+  return (
+    <span
+      style={{
+        display:
+          "grid",
+        gap:
+          2,
+        color:
+          theme.textSecondary,
+        fontSize:
+          METRICS_VALUE_SIZE,
+        lineHeight:
+          "8px",
+        fontVariantNumeric:
+          "tabular-nums",
+        textAlign:
+          align,
+        whiteSpace:
+          "nowrap",
+      }}
+    >
+      {marks !== undefined ? (
+        <span>
+          {formatMarks(
+            marks
+          )}{includeMarksWord
+            ? " marks"
+            : ""}
+        </span>
+      ) : null}
+
+      <span>
+        {formatPct(
+          percentage
+        )}
+      </span>
+    </span>
+  );
+}
+
+function BalanceSide({
+  label,
+  marks,
+  percentage,
+  theme,
+  align,
+}: {
+  label: string;
+  marks: number;
+  percentage: number | null;
+  theme: AppTheme;
+  align: "left" | "right";
+}) {
+  return (
+    <div
+      style={{
+        display:
+          "grid",
+        gap:
+          3,
+        minWidth:
+          0,
+        color:
+          theme.textSecondary,
+        fontVariantNumeric:
+          "tabular-nums",
+        textAlign:
+          align,
+      }}
+    >
+      <span
+        style={{
+          fontSize:
+            METRICS_TEXT_SIZE,
+          lineHeight:
+            "9px",
+          whiteSpace:
+            "nowrap",
+        }}
+      >
+        {label}
+      </span>
+
+      <span
+        style={{
+          fontSize:
+            METRICS_VALUE_SIZE,
+          lineHeight:
+            "8px",
+          whiteSpace:
+            "nowrap",
+        }}
+      >
+        {formatMarks(
+          marks
+        )} marks · {formatPct(
+          percentage
+        )}
+      </span>
+    </div>
+  );
+}
+
 function BalanceMetricRow({
   snapshot,
   theme,
@@ -113,111 +235,93 @@ function BalanceMetricRow({
       style={{
         display:
           "grid",
-        gridTemplateColumns:
-          `${METRICS_LABEL_RAIL} minmax(0, 1fr)`,
-        columnGap:
-          METRICS_ROW_GAP,
-        alignItems:
-          "center",
-        minWidth:
-          0,
+        gap:
+          6,
         padding:
-          "3px 0 6px",
+          "2px 0 5px",
       }}
     >
+      <SectionTitle
+        theme={theme}
+      >
+        {snapshot.policy.label}
+      </SectionTitle>
+
       <div
         style={{
           display:
             "grid",
-          gap:
-            3,
+          gridTemplateColumns:
+            METRICS_ROW_TEMPLATE,
+          columnGap:
+            METRICS_ROW_GAP,
+          alignItems:
+            "center",
           minWidth:
             0,
-          alignSelf:
-            "center",
-          fontVariantNumeric:
-            "tabular-nums",
         }}
       >
-        <SectionTitle
-          theme={theme}
-        >
-          {snapshot.policy.label}
-        </SectionTitle>
-
-        <span
-          style={{
-            color:
-              theme.textSecondary,
-            fontSize:
-              METRICS_VALUE_SIZE,
-            lineHeight:
-              "8px",
-            whiteSpace:
-              "nowrap",
-          }}
-        >
-          {snapshot.policy.leftLabel}{" "}
-          {formatMarks(
+        <BalanceSide
+          label={
+            snapshot.policy.leftLabel
+          }
+          marks={
             snapshot.leftMarks
-          )} · {formatPct(
+          }
+          percentage={
             snapshot.leftPct
-          )}
-        </span>
+          }
+          theme={theme}
+          align="left"
+        />
 
-        <span
-          style={{
-            color:
-              theme.textSecondary,
-            fontSize:
-              METRICS_VALUE_SIZE,
-            lineHeight:
-              "8px",
-            whiteSpace:
-              "nowrap",
-          }}
-        >
-          {snapshot.policy.rightLabel}{" "}
-          {formatMarks(
-            snapshot.rightMarks
-          )} · {formatPct(
+        <MetricGauge
+          mode="range"
+          positionMode="weighted"
+          currentPct={
             snapshot.rightPct
-          )}
-        </span>
-      </div>
-
-      <MetricGauge
-        mode="range"
-        positionMode="absolute"
-        currentPct={
-          snapshot.rightPct
-        }
-        minPct={
-          snapshot.minRightPct
-        }
-        targetPct={
-          snapshot.targetRightPct
-        }
-        maxPct={
-          snapshot.maxRightPct
-        }
-        minTopLabel={
-          formatTargetPct(
+          }
+          minPct={
             snapshot.minRightPct
-          )
-        }
-        targetTopLabel={
-          formatTargetPct(
+          }
+          targetPct={
             snapshot.targetRightPct
-          )
-        }
-        maxTopLabel={
-          formatTargetPct(
+          }
+          maxPct={
             snapshot.maxRightPct
-          )
-        }
-        theme={theme}
-      />
+          }
+          minTopLabel={
+            formatTargetPct(
+              snapshot.minRightPct
+            )
+          }
+          targetTopLabel={
+            formatTargetPct(
+              snapshot.targetRightPct
+            )
+          }
+          maxTopLabel={
+            formatTargetPct(
+              snapshot.maxRightPct
+            )
+          }
+          theme={theme}
+        />
+
+        <BalanceSide
+          label={
+            snapshot.policy.rightLabel
+          }
+          marks={
+            snapshot.rightMarks
+          }
+          percentage={
+            snapshot.rightPct
+          }
+          theme={theme}
+          align="right"
+        />
+      </div>
     </div>
   );
 }
@@ -237,7 +341,7 @@ function TopicMetricRow({
         display:
           "grid",
         gridTemplateColumns:
-          `${METRICS_LABEL_RAIL} minmax(0, 1fr)`,
+          METRICS_ROW_TEMPLATE,
         columnGap:
           METRICS_ROW_GAP,
         alignItems:
@@ -245,19 +349,21 @@ function TopicMetricRow({
         minWidth:
           0,
         padding:
-          "4px 0 8px",
+          "5px 0 7px",
       }}
     >
       <div
         style={{
           display:
             "grid",
-          gap:
+          gridTemplateColumns:
+            "78px minmax(0, 1fr)",
+          columnGap:
             5,
+          alignItems:
+            "center",
           minWidth:
             0,
-          alignSelf:
-            "center",
           fontVariantNumeric:
             "tabular-nums",
         }}
@@ -277,26 +383,15 @@ function TopicMetricRow({
           {snapshot.policy.label}
         </span>
 
-        <span
-          style={{
-            color:
-              theme.textSecondary,
-            fontSize:
-              METRICS_VALUE_SIZE,
-            lineHeight:
-              "8px",
-            fontWeight:
-              400,
-            whiteSpace:
-              "nowrap",
-          }}
-        >
-          {formatMarks(
+        <CurrentStack
+          marks={
             snapshot.marks
-          )} marks · {formatPct(
+          }
+          percentage={
             snapshot.currentPct
-          )}
-        </span>
+          }
+          theme={theme}
+        />
       </div>
 
       <MetricGauge
@@ -343,6 +438,8 @@ function TopicMetricRow({
         }
         theme={theme}
       />
+
+      <span />
     </div>
   );
 }
@@ -451,7 +548,9 @@ export default function MetricsPanel({
     beginResize,
     resetHeight,
   } =
-    useMetricsPanelSizing();
+    useMetricsPanelSizing({
+      isOpen,
+    });
 
   const invalidQuestionCount =
     new Set(
@@ -506,7 +605,7 @@ export default function MetricsPanel({
           role="separator"
           aria-orientation="horizontal"
           aria-label="Resize Metrics panel"
-          title="Drag to resize Metrics · double-click to reset"
+          title="Drag to resize Metrics · double-click to fit available space"
           onMouseDown={beginResize}
           onDoubleClick={resetHeight}
           style={{
@@ -643,7 +742,7 @@ export default function MetricsPanel({
             display:
               "grid",
             gap:
-              10,
+              9,
             boxSizing:
               "border-box",
           }}
@@ -700,7 +799,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                3,
+                2,
               paddingTop:
                 2,
             }}
@@ -735,14 +834,8 @@ export default function MetricsPanel({
             style={{
               display:
                 "grid",
-              gridTemplateColumns:
-                `${METRICS_LABEL_RAIL} minmax(0, 1fr)`,
-              columnGap:
-                METRICS_ROW_GAP,
-              alignItems:
-                "center",
-              minWidth:
-                0,
+              gap:
+                3,
               padding:
                 "5px 0 2px",
             }}
@@ -751,61 +844,48 @@ export default function MetricsPanel({
               style={{
                 display:
                   "grid",
-                gap:
-                  4,
-                minWidth:
-                  0,
-                alignSelf:
+                gridTemplateColumns:
+                  METRICS_ROW_TEMPLATE,
+                columnGap:
+                  METRICS_ROW_GAP,
+                alignItems:
                   "center",
-                fontVariantNumeric:
-                  "tabular-nums",
-              }}
-            >
-              <SectionTitle
-                theme={theme}
-              >
-                {metrics.coverage.policy.label}
-              </SectionTitle>
-
-              <span
-                style={{
-                  color:
-                    theme.textSecondary,
-                  fontSize:
-                    METRICS_VALUE_SIZE,
-                  lineHeight:
-                    "8px",
-                  whiteSpace:
-                    "nowrap",
-                }}
-              >
-                {metrics.coverage.representedUnits} / {metrics.coverage.totalUnits} skills
-              </span>
-
-              <span
-                style={{
-                  color:
-                    theme.textSecondary,
-                  fontSize:
-                    METRICS_VALUE_SIZE,
-                  lineHeight:
-                    "8px",
-                }}
-              >
-                {metrics.coverage.percentage.toFixed(1)}%
-              </span>
-            </div>
-
-            <div
-              style={{
-                display:
-                  "grid",
-                gap:
-                  3,
                 minWidth:
                   0,
               }}
             >
+              <div
+                style={{
+                  display:
+                    "grid",
+                  gap:
+                    4,
+                  minWidth:
+                    0,
+                }}
+              >
+                <SectionTitle
+                  theme={theme}
+                >
+                  {metrics.coverage.policy.label}
+                </SectionTitle>
+
+                <span
+                  style={{
+                    color:
+                      theme.textSecondary,
+                    fontSize:
+                      METRICS_VALUE_SIZE,
+                    lineHeight:
+                      "8px",
+                    fontVariantNumeric:
+                      "tabular-nums",
+                  }}
+                >
+                  {metrics.coverage.percentage.toFixed(1)}%
+                </span>
+              </div>
+
               <MetricGauge
                 mode="threshold"
                 currentPct={
@@ -820,6 +900,23 @@ export default function MetricsPanel({
                 }
                 theme={theme}
               />
+
+              <span />
+            </div>
+
+            <div
+              style={{
+                display:
+                  "grid",
+                gridTemplateColumns:
+                  METRICS_ROW_TEMPLATE,
+                columnGap:
+                  METRICS_ROW_GAP,
+                minWidth:
+                  0,
+              }}
+            >
+              <span />
 
               <div
                 style={{
@@ -851,6 +948,8 @@ export default function MetricsPanel({
                       `${metrics.coverage.policy.thresholdPct}% threshold`}
                 </span>
               </div>
+
+              <span />
             </div>
           </div>
 
