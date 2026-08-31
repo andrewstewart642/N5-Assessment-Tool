@@ -7,20 +7,21 @@ import {
 } from "react";
 
 const METRICS_PANEL_HEIGHT_STORAGE_KEY =
-  "assessment_builder_metrics_panel_height_v1";
+  "assessment_builder_metrics_panel_height_v2";
 
-const DEFAULT_METRICS_PANEL_HEIGHT =
-  150;
+const FALLBACK_METRICS_PANEL_HEIGHT =
+  180;
 
 const MIN_METRICS_PANEL_HEIGHT =
   104;
 
 /**
- * Keep enough vertical room above Metrics for the Skills Tree controls and
- * navigation to remain genuinely usable while the lower explorer is open.
+ * A teacher may deliberately drag Metrics well up into the Skills Tree. Keep
+ * only enough of the tree above it for the filter area to remain recoverable;
+ * the tree itself continues to scroll within whatever space remains.
  */
 const MIN_SKILLS_PANEL_HEIGHT =
-  330;
+  220;
 
 function clampNumber(
   value: number,
@@ -36,7 +37,11 @@ function clampNumber(
   );
 }
 
-export function useMetricsPanelSizing() {
+export function useMetricsPanelSizing({
+  isOpen,
+}: {
+  isOpen: boolean;
+}) {
   const panelRef =
     useRef<HTMLElement | null>(
       null
@@ -48,12 +53,15 @@ export function useMetricsPanelSizing() {
       startHeight: number;
     } | null>(null);
 
+  const hasManualHeightRef =
+    useRef(false);
+
   const [
     panelHeight,
     setPanelHeight,
   ] =
     useState(
-      DEFAULT_METRICS_PANEL_HEIGHT
+      FALLBACK_METRICS_PANEL_HEIGHT
     );
 
   const [
@@ -70,7 +78,7 @@ export function useMetricsPanelSizing() {
 
       if (!parent) {
         return Math.max(
-          DEFAULT_METRICS_PANEL_HEIGHT,
+          FALLBACK_METRICS_PANEL_HEIGHT,
           MIN_METRICS_PANEL_HEIGHT
         );
       }
@@ -102,6 +110,93 @@ export function useMetricsPanelSizing() {
       ]
     );
 
+  const getNaturalFitHeight =
+    useCallback(() => {
+      const panel =
+        panelRef.current;
+
+      const parent =
+        panel?.parentElement;
+
+      const skillsPanel =
+        panel
+          ?.previousElementSibling as
+          HTMLElement | null;
+
+      const skillsScroll =
+        skillsPanel
+          ?.querySelector<HTMLElement>(
+            ".skills-tree-scroll"
+          );
+
+      if (
+        !parent ||
+        !skillsPanel ||
+        !skillsScroll
+      ) {
+        return clampPanelHeight(
+          FALLBACK_METRICS_PANEL_HEIGHT
+        );
+      }
+
+      const parentHeight =
+        parent
+          .getBoundingClientRect()
+          .height;
+
+      const skillsRect =
+        skillsPanel
+          .getBoundingClientRect();
+
+      const scrollRect =
+        skillsScroll
+          .getBoundingClientRect();
+
+      const fixedSkillsChrome =
+        Math.max(
+          0,
+          skillsRect.height -
+          scrollRect.height
+        );
+
+      const scrollStyles =
+        window.getComputedStyle(
+          skillsScroll
+        );
+
+      const bottomPadding =
+        Number.parseFloat(
+          scrollStyles.paddingBottom
+        ) || 0;
+
+      const naturalTreeContentHeight =
+        Math.max(
+          0,
+          skillsScroll.scrollHeight -
+          bottomPadding
+        );
+
+      const naturalSkillsHeight =
+        fixedSkillsChrome +
+        naturalTreeContentHeight;
+
+      return clampPanelHeight(
+        parentHeight -
+        naturalSkillsHeight
+      );
+    }, [
+      clampPanelHeight,
+    ]);
+
+  const fitToUnusedTreeSpace =
+    useCallback(() => {
+      setPanelHeight(
+        getNaturalFitHeight()
+      );
+    }, [
+      getNaturalFitHeight,
+    ]);
+
   useEffect(() => {
     try {
       const raw =
@@ -119,6 +214,9 @@ export function useMetricsPanelSizing() {
       if (
         Number.isFinite(parsed)
       ) {
+        hasManualHeightRef.current =
+          true;
+
         setPanelHeight(
           clampPanelHeight(
             parsed
@@ -133,7 +231,38 @@ export function useMetricsPanelSizing() {
   ]);
 
   useEffect(() => {
+    if (
+      !isOpen ||
+      hasManualHeightRef.current
+    ) {
+      return;
+    }
+
+    const frame =
+      window.requestAnimationFrame(
+        fitToUnusedTreeSpace
+      );
+
+    return () => {
+      window.cancelAnimationFrame(
+        frame
+      );
+    };
+  }, [
+    isOpen,
+    fitToUnusedTreeSpace,
+  ]);
+
+  useEffect(() => {
     const handleResize = () => {
+      if (
+        isOpen &&
+        !hasManualHeightRef.current
+      ) {
+        fitToUnusedTreeSpace();
+        return;
+      }
+
       setPanelHeight(
         (current) =>
           clampPanelHeight(
@@ -154,7 +283,9 @@ export function useMetricsPanelSizing() {
       );
     };
   }, [
+    isOpen,
     clampPanelHeight,
+    fitToUnusedTreeSpace,
   ]);
 
   useEffect(() => {
@@ -238,6 +369,12 @@ export function useMetricsPanelSizing() {
   ]);
 
   useEffect(() => {
+    if (
+      !hasManualHeightRef.current
+    ) {
+      return;
+    }
+
     try {
       window.localStorage.setItem(
         METRICS_PANEL_HEIGHT_STORAGE_KEY,
@@ -258,6 +395,9 @@ export function useMetricsPanelSizing() {
       ) => {
         event.preventDefault();
 
+        hasManualHeightRef.current =
+          true;
+
         resizeStartRef.current = {
           startY:
             event.clientY,
@@ -274,13 +414,20 @@ export function useMetricsPanelSizing() {
 
   const resetHeight =
     useCallback(() => {
-      setPanelHeight(
-        clampPanelHeight(
-          DEFAULT_METRICS_PANEL_HEIGHT
-        )
-      );
+      hasManualHeightRef.current =
+        false;
+
+      try {
+        window.localStorage.removeItem(
+          METRICS_PANEL_HEIGHT_STORAGE_KEY
+        );
+      } catch {
+        // Workspace preferences are intentionally best-effort.
+      }
+
+      fitToUnusedTreeSpace();
     }, [
-      clampPanelHeight,
+      fitToUnusedTreeSpace,
     ]);
 
   return {
