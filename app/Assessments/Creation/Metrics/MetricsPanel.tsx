@@ -448,7 +448,7 @@ function CourseCoverageTitleLine({
   children,
   theme,
 }: {
-  children: "Course" | "Coverage";
+  children: string;
   theme: AppTheme;
 }) {
   return (
