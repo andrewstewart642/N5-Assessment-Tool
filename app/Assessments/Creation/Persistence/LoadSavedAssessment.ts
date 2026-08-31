@@ -22,13 +22,22 @@ import type {
 } from "@/app/Assessments/AssessmentTypes";
 
 import type {
+  CourseAssessmentConfig,
+} from "@/app/Courses/CourseAssessmentConfig";
+
+import type {
   AssessmentPaperBooleanMap,
   AssessmentPaperStringMap,
 } from "../Papers/PaperSpecificValues";
 
-import type {
-  AssessmentTargetMarksByPaper,
+import {
+  migrateHistoricalDefaultAssessmentTargetMarks,
+  type AssessmentTargetMarksByPaper,
 } from "../Papers/MarkTargetCalculations";
+
+import {
+  getAssessmentPapers,
+} from "../Papers/PaperRules";
 
 import type {
   AssessmentEditQuestionDraftByPaper,
@@ -43,6 +52,9 @@ type StateSetter<T> =
 
 
 type UseAssessmentCreatorSavedAssessmentArgs = {
+  courseConfig:
+    CourseAssessmentConfig;
+
   setCreatedAt:
     StateSetter<number>;
 
@@ -145,6 +157,8 @@ type UseAssessmentCreatorSavedAssessmentArgs = {
 
 
 export function useAssessmentCreatorSavedAssessment({
+  courseConfig,
+
   setCreatedAt,
 
   setAssessmentName,
@@ -266,13 +280,13 @@ export function useAssessmentCreatorSavedAssessment({
         nextAssessmentId
       );
 
-    setLoadedSavedAssessment(
-      savedAssessment
-    );
-
     if (
       !savedAssessment
     ) {
+      setLoadedSavedAssessment(
+        null
+      );
+
       setHasLoadedSavedAssessment(
         true
       );
@@ -280,12 +294,95 @@ export function useAssessmentCreatorSavedAssessment({
       return;
     }
 
-    const builder =
+    const originalBuilder =
       savedAssessment.builder;
+
+    const migratedTargetMarksByPaper =
+      migrateHistoricalDefaultAssessmentTargetMarks({
+        targetMarksByPaper:
+          originalBuilder.targetMarksByPaper ?? {
+            P1:
+              originalBuilder.p1Target,
+
+            P2:
+              originalBuilder.p2Target,
+          },
+        courseConfig,
+      });
+
+    const coursePapers =
+      getAssessmentPapers(
+        courseConfig
+      );
+
+    const firstCoursePaper =
+      coursePapers[0] ??
+      "P1";
+
+    const secondCoursePaper =
+      coursePapers[1] ??
+      firstCoursePaper;
+
+    const hydratedP1Target =
+      migratedTargetMarksByPaper[
+        firstCoursePaper
+      ] ??
+      originalBuilder.p1Target;
+
+    const hydratedP2Target =
+      migratedTargetMarksByPaper[
+        secondCoursePaper
+      ] ??
+      originalBuilder.p2Target;
+
+    const hydratedSavedAssessment:
+      SavedAssessment = {
+      ...savedAssessment,
+
+      setup: {
+        ...savedAssessment.setup,
+
+        marksTargetP1:
+          savedAssessment.setup
+            .buildPriority ===
+          "MARKS"
+            ? hydratedP1Target
+            : savedAssessment.setup
+                .marksTargetP1,
+
+        marksTargetP2:
+          savedAssessment.setup
+            .buildPriority ===
+          "MARKS"
+            ? hydratedP2Target
+            : savedAssessment.setup
+                .marksTargetP2,
+      },
+
+      builder: {
+        ...originalBuilder,
+
+        targetMarksByPaper:
+          migratedTargetMarksByPaper,
+
+        p1Target:
+          hydratedP1Target,
+
+        p2Target:
+          hydratedP2Target,
+      },
+    };
+
+    setLoadedSavedAssessment(
+      hydratedSavedAssessment
+    );
+
+    const builder =
+      hydratedSavedAssessment.builder;
 
 
     setCreatedAt(
-      savedAssessment.createdAt
+      hydratedSavedAssessment.createdAt
     );
 
     setAssessmentName(
@@ -505,12 +602,12 @@ export function useAssessmentCreatorSavedAssessment({
 
 
     setSelectedClassIds(
-      savedAssessment.setup
+      hydratedSavedAssessment.setup
         .selectedClassIds
     );
 
     setUseCompleteCourseCoverage(
-      savedAssessment.setup
+      hydratedSavedAssessment.setup
         .useCompleteCourseCoverage
     );
 
