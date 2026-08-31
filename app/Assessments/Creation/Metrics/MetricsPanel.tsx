@@ -35,17 +35,32 @@ const METRICS_META_SIZE =
 const METRICS_MICRO_SIZE =
   6;
 
-const METRICS_LEFT_RAIL =
-  "150px";
+const METRICS_LABEL_RAIL =
+  "92px";
 
-const METRICS_RIGHT_RAIL =
-  "112px";
+const METRICS_CURRENT_RAIL =
+  "72px";
+
+const METRICS_TRAILING_RESERVE =
+  "172px";
 
 const METRICS_ROW_GAP =
-  10;
+  8;
 
-const METRICS_ROW_TEMPLATE =
-  `${METRICS_LEFT_RAIL} minmax(210px, 1fr) ${METRICS_RIGHT_RAIL}`;
+const METRICS_BALANCE_TEMPLATE =
+  `${METRICS_LABEL_RAIL} ${METRICS_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_CURRENT_RAIL} ${METRICS_LABEL_RAIL}`;
+
+const METRICS_TOPIC_TEMPLATE =
+  `${METRICS_LABEL_RAIL} ${METRICS_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_TRAILING_RESERVE}`;
+
+const GAUGE_ALIGNED_HEIGHT =
+  42;
+
+const GAUGE_TOP_TEXT_Y =
+  0;
+
+const GAUGE_BOTTOM_TEXT_Y =
+  31;
 
 function formatMarks(
   value: number
@@ -105,32 +120,32 @@ function SectionTitle({
   );
 }
 
-function CurrentStack({
+function GaugeAlignedCurrent({
   marks,
   percentage,
   theme,
-  align = "right",
-  includeMarksWord = true,
+  align,
 }: {
   marks?: number;
   percentage: number | null;
   theme: AppTheme;
-  align?: "left" | "right";
-  includeMarksWord?: boolean;
+  align: "left" | "right";
 }) {
   return (
-    <span
+    <div
       style={{
-        display:
-          "grid",
-        gap:
-          2,
+        position:
+          "relative",
+        height:
+          GAUGE_ALIGNED_HEIGHT,
+        minWidth:
+          0,
         color:
           theme.textSecondary,
         fontSize:
           METRICS_VALUE_SIZE,
         lineHeight:
-          "8px",
+          "7px",
         fontVariantNumeric:
           "tabular-nums",
         textAlign:
@@ -140,84 +155,78 @@ function CurrentStack({
       }}
     >
       {marks !== undefined ? (
-        <span>
+        <span
+          style={{
+            position:
+              "absolute",
+            top:
+              GAUGE_TOP_TEXT_Y,
+            left:
+              align === "left"
+                ? 0
+                : "auto",
+            right:
+              align === "right"
+                ? 0
+                : "auto",
+          }}
+        >
           {formatMarks(
             marks
-          )}{includeMarksWord
-            ? " marks"
-            : ""}
+          )} marks
         </span>
       ) : null}
 
-      <span>
+      <span
+        style={{
+          position:
+            "absolute",
+          top:
+            GAUGE_BOTTOM_TEXT_Y,
+          left:
+            align === "left"
+              ? 0
+              : "auto",
+          right:
+            align === "right"
+              ? 0
+              : "auto",
+        }}
+      >
         {formatPct(
           percentage
         )}
       </span>
-    </span>
+    </div>
   );
 }
 
-function BalanceSide({
+function BalanceLabel({
   label,
-  marks,
-  percentage,
   theme,
   align,
 }: {
   label: string;
-  marks: number;
-  percentage: number | null;
   theme: AppTheme;
   align: "left" | "right";
 }) {
   return (
-    <div
+    <span
       style={{
-        display:
-          "grid",
-        gap:
-          3,
-        minWidth:
-          0,
         color:
           theme.textSecondary,
-        fontVariantNumeric:
-          "tabular-nums",
+        fontSize:
+          METRICS_TEXT_SIZE,
+        lineHeight:
+          "10px",
         textAlign:
           align,
+        whiteSpace:
+          "nowrap",
       }}
     >
-      <span
-        style={{
-          fontSize:
-            METRICS_TEXT_SIZE,
-          lineHeight:
-            "9px",
-          whiteSpace:
-            "nowrap",
-        }}
-      >
-        {label}
-      </span>
-
-      <span
-        style={{
-          fontSize:
-            METRICS_VALUE_SIZE,
-          lineHeight:
-            "8px",
-          whiteSpace:
-            "nowrap",
-        }}
-      >
-        {formatMarks(
-          marks
-        )} marks · {formatPct(
-          percentage
-        )}
-      </span>
-    </div>
+      {label}
+    </span>
   );
 }
 
@@ -236,9 +245,9 @@ function BalanceMetricRow({
         display:
           "grid",
         gap:
-          6,
+          7,
         padding:
-          "2px 0 5px",
+          "3px 0 7px",
       }}
     >
       <SectionTitle
@@ -252,7 +261,7 @@ function BalanceMetricRow({
           display:
             "grid",
           gridTemplateColumns:
-            METRICS_ROW_TEMPLATE,
+            METRICS_BALANCE_TEMPLATE,
           columnGap:
             METRICS_ROW_GAP,
           alignItems:
@@ -261,10 +270,15 @@ function BalanceMetricRow({
             0,
         }}
       >
-        <BalanceSide
+        <BalanceLabel
           label={
             snapshot.policy.leftLabel
           }
+          theme={theme}
+          align="left"
+        />
+
+        <GaugeAlignedCurrent
           marks={
             snapshot.leftMarks
           }
@@ -272,7 +286,7 @@ function BalanceMetricRow({
             snapshot.leftPct
           }
           theme={theme}
-          align="left"
+          align="right"
         />
 
         <MetricGauge
@@ -290,17 +304,17 @@ function BalanceMetricRow({
           maxPct={
             snapshot.maxRightPct
           }
-          minTopLabel={
+          minBottomLabel={
             formatTargetPct(
               snapshot.minRightPct
             )
           }
-          targetTopLabel={
+          targetBottomLabel={
             formatTargetPct(
               snapshot.targetRightPct
             )
           }
-          maxTopLabel={
+          maxBottomLabel={
             formatTargetPct(
               snapshot.maxRightPct
             )
@@ -308,15 +322,20 @@ function BalanceMetricRow({
           theme={theme}
         />
 
-        <BalanceSide
-          label={
-            snapshot.policy.rightLabel
-          }
+        <GaugeAlignedCurrent
           marks={
             snapshot.rightMarks
           }
           percentage={
             snapshot.rightPct
+          }
+          theme={theme}
+          align="left"
+        />
+
+        <BalanceLabel
+          label={
+            snapshot.policy.rightLabel
           }
           theme={theme}
           align="right"
@@ -341,7 +360,7 @@ function TopicMetricRow({
         display:
           "grid",
         gridTemplateColumns:
-          METRICS_ROW_TEMPLATE,
+          METRICS_TOPIC_TEMPLATE,
         columnGap:
           METRICS_ROW_GAP,
         alignItems:
@@ -349,50 +368,34 @@ function TopicMetricRow({
         minWidth:
           0,
         padding:
-          "5px 0 7px",
+          "7px 0 9px",
       }}
     >
-      <div
+      <span
         style={{
-          display:
-            "grid",
-          gridTemplateColumns:
-            "78px minmax(0, 1fr)",
-          columnGap:
-            5,
-          alignItems:
-            "center",
-          minWidth:
-            0,
-          fontVariantNumeric:
-            "tabular-nums",
+          color:
+            theme.textSecondary,
+          fontSize:
+            METRICS_TEXT_SIZE,
+          lineHeight:
+            "10px",
+          whiteSpace:
+            "nowrap",
         }}
       >
-        <span
-          style={{
-            color:
-              theme.textSecondary,
-            fontSize:
-              METRICS_TEXT_SIZE,
-            lineHeight:
-              "10px",
-            whiteSpace:
-              "nowrap",
-          }}
-        >
-          {snapshot.policy.label}
-        </span>
+        {snapshot.policy.label}
+      </span>
 
-        <CurrentStack
-          marks={
-            snapshot.marks
-          }
-          percentage={
-            snapshot.currentPct
-          }
-          theme={theme}
-        />
-      </div>
+      <GaugeAlignedCurrent
+        marks={
+          snapshot.marks
+        }
+        percentage={
+          snapshot.currentPct
+        }
+        theme={theme}
+        align="right"
+      />
 
       <MetricGauge
         mode="range"
@@ -835,9 +838,9 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                3,
+                4,
               padding:
-                "5px 0 2px",
+                "6px 0 2px",
             }}
           >
             <div
@@ -845,7 +848,7 @@ export default function MetricsPanel({
                 display:
                   "grid",
                 gridTemplateColumns:
-                  METRICS_ROW_TEMPLATE,
+                  METRICS_TOPIC_TEMPLATE,
                 columnGap:
                   METRICS_ROW_GAP,
                 alignItems:
@@ -854,37 +857,28 @@ export default function MetricsPanel({
                   0,
               }}
             >
-              <div
+              <SectionTitle
+                theme={theme}
+              >
+                {metrics.coverage.policy.label}
+              </SectionTitle>
+
+              <span
                 style={{
-                  display:
-                    "grid",
-                  gap:
-                    4,
-                  minWidth:
-                    0,
+                  color:
+                    theme.textSecondary,
+                  fontSize:
+                    METRICS_VALUE_SIZE,
+                  lineHeight:
+                    "8px",
+                  fontVariantNumeric:
+                    "tabular-nums",
+                  textAlign:
+                    "right",
                 }}
               >
-                <SectionTitle
-                  theme={theme}
-                >
-                  {metrics.coverage.policy.label}
-                </SectionTitle>
-
-                <span
-                  style={{
-                    color:
-                      theme.textSecondary,
-                    fontSize:
-                      METRICS_VALUE_SIZE,
-                    lineHeight:
-                      "8px",
-                    fontVariantNumeric:
-                      "tabular-nums",
-                  }}
-                >
-                  {metrics.coverage.percentage.toFixed(1)}%
-                </span>
-              </div>
+                {metrics.coverage.percentage.toFixed(1)}%
+              </span>
 
               <MetricGauge
                 mode="threshold"
@@ -895,7 +889,8 @@ export default function MetricsPanel({
                   metrics.coverage.policy
                     .thresholdPct
                 }
-                thresholdTopLabel={
+                thresholdTopLabel=""
+                thresholdBottomLabel={
                   `${metrics.coverage.policy.thresholdPct}%`
                 }
                 theme={theme}
@@ -909,13 +904,14 @@ export default function MetricsPanel({
                 display:
                   "grid",
                 gridTemplateColumns:
-                  METRICS_ROW_TEMPLATE,
+                  METRICS_TOPIC_TEMPLATE,
                 columnGap:
                   METRICS_ROW_GAP,
                 minWidth:
                   0,
               }}
             >
+              <span />
               <span />
 
               <div
@@ -925,7 +921,7 @@ export default function MetricsPanel({
                   justifyContent:
                     "space-between",
                   gap:
-                    8,
+                    10,
                   color:
                     metrics.coverage
                       .thresholdMet
