@@ -17,10 +17,34 @@ const GAUGE_TOP_LABEL_Y =
   0;
 
 const GAUGE_BAR_Y =
-  20;
+  19;
 
 const GAUGE_BOTTOM_LABEL_Y =
-  32;
+  31;
+
+const NORMALISED_MIN_POSITION =
+  30;
+
+const NORMALISED_TARGET_POSITION =
+  50;
+
+const NORMALISED_MAX_POSITION =
+  70;
+
+/**
+ * Balance gauges deliberately reserve more visual room for the majority
+ * C-standard / Operational side while keeping the acceptable A-standard /
+ * Reasoning window large enough to read clearly. The underlying values remain
+ * exact percentages; only their presentation is calibrated.
+ */
+const WEIGHTED_MIN_POSITION =
+  38;
+
+const WEIGHTED_TARGET_POSITION =
+  58;
+
+const WEIGHTED_MAX_POSITION =
+  78;
 
 function clamp(
   value: number,
@@ -36,29 +60,35 @@ function clamp(
   );
 }
 
-function normaliseRangePosition({
+function mapRangePosition({
   value,
   min,
   target,
   max,
+  minPosition,
+  targetPosition,
+  maxPosition,
 }: {
   value: number;
   min: number;
   target: number;
   max: number;
+  minPosition: number;
+  targetPosition: number;
+  maxPosition: number;
 }): number {
   const safeValue =
     clamp(value);
 
   if (safeValue <= min) {
     if (min <= 0) {
-      return 30;
+      return minPosition;
     }
 
     return (
       safeValue /
       min
-    ) * 30;
+    ) * minPosition;
   }
 
   if (safeValue <= target) {
@@ -66,14 +96,18 @@ function normaliseRangePosition({
       target - min;
 
     return span <= 0
-      ? 50
-      : 30 +
+      ? targetPosition
+      : minPosition +
           (
             (
               safeValue - min
             ) /
             span
-          ) * 20;
+          ) *
+            (
+              targetPosition -
+              minPosition
+            );
   }
 
   if (safeValue <= max) {
@@ -81,21 +115,25 @@ function normaliseRangePosition({
       max - target;
 
     return span <= 0
-      ? 50
-      : 50 +
+      ? targetPosition
+      : targetPosition +
           (
             (
               safeValue - target
             ) /
             span
-          ) * 20;
+          ) *
+            (
+              maxPosition -
+              targetPosition
+            );
   }
 
   if (max >= 100) {
-    return 70;
+    return maxPosition;
   }
 
-  return 70 +
+  return maxPosition +
     (
       (
         safeValue - max
@@ -103,7 +141,11 @@ function normaliseRangePosition({
       (
         100 - max
       )
-    ) * 30;
+    ) *
+      (
+        100 -
+        maxPosition
+      );
 }
 
 type RangeGaugeProps = {
@@ -118,7 +160,10 @@ type RangeGaugeProps = {
   minBottomLabel?: string;
   targetBottomLabel?: string;
   maxBottomLabel?: string;
-  positionMode?: "normalised" | "absolute";
+  positionMode?:
+    | "normalised"
+    | "absolute"
+    | "weighted";
   theme: AppTheme;
 };
 
@@ -198,7 +243,7 @@ function CurrentMarker({
           background:
             theme.textPrimary,
           opacity:
-            0.68,
+            0.58,
         }}
       />
 
@@ -350,21 +395,7 @@ function GaugeBar({
   );
 }
 
-function buildNormalisedRangeGradient(
-  theme: AppTheme
-): string {
-  return `linear-gradient(to right,
-    ${theme.danger} 0%,
-    ${theme.danger} 3%,
-    ${theme.textMuted} 22%,
-    ${theme.success} 30%,
-    ${theme.success} 70%,
-    ${theme.textMuted} 78%,
-    ${theme.danger} 97%,
-    ${theme.danger} 100%)`;
-}
-
-function buildAbsoluteRangeGradient({
+function buildRangeGradient({
   theme,
   minPosition,
   maxPosition,
@@ -374,13 +405,16 @@ function buildAbsoluteRangeGradient({
   maxPosition: number;
 }): string {
   const dangerLeft =
-    clamp(minPosition - 9);
+    clamp(minPosition - 12);
+
   const neutralLeft =
-    clamp(minPosition - 3.5);
+    clamp(minPosition - 5);
+
   const neutralRight =
-    clamp(maxPosition + 3.5);
+    clamp(maxPosition + 5);
+
   const dangerRight =
-    clamp(maxPosition + 9);
+    clamp(maxPosition + 12);
 
   return `linear-gradient(to right,
     ${theme.danger} 0%,
@@ -443,8 +477,8 @@ export default function MetricGauge(
         style={
           gaugeFrameStyle(
             hasBottomLabels
-              ? 44
-              : 31
+              ? 42
+              : 30
           )
         }
       >
@@ -504,31 +538,37 @@ export default function MetricGauge(
     );
   }
 
-  const absolute =
-    props.positionMode ===
-    "absolute";
+  const positionMode =
+    props.positionMode ??
+    "normalised";
 
   const minPosition =
-    absolute
+    positionMode === "absolute"
       ? clamp(props.minPct)
-      : 30;
+      : positionMode === "weighted"
+        ? WEIGHTED_MIN_POSITION
+        : NORMALISED_MIN_POSITION;
 
   const targetPosition =
-    absolute
+    positionMode === "absolute"
       ? clamp(props.targetPct)
-      : 50;
+      : positionMode === "weighted"
+        ? WEIGHTED_TARGET_POSITION
+        : NORMALISED_TARGET_POSITION;
 
   const maxPosition =
-    absolute
+    positionMode === "absolute"
       ? clamp(props.maxPct)
-      : 70;
+      : positionMode === "weighted"
+        ? WEIGHTED_MAX_POSITION
+        : NORMALISED_MAX_POSITION;
 
   const currentPosition =
     props.currentPct === null
       ? null
-      : absolute
+      : positionMode === "absolute"
         ? clamp(props.currentPct)
-        : normaliseRangePosition({
+        : mapRangePosition({
             value:
               props.currentPct,
             min:
@@ -537,6 +577,9 @@ export default function MetricGauge(
               props.targetPct,
             max:
               props.maxPct,
+            minPosition,
+            targetPosition,
+            maxPosition,
           });
 
   const hasBottomLabels =
@@ -551,8 +594,8 @@ export default function MetricGauge(
       style={
         gaugeFrameStyle(
           hasBottomLabels
-            ? 44
-            : 31
+            ? 42
+            : 30
         )
       }
     >
@@ -600,15 +643,11 @@ export default function MetricGauge(
 
       <GaugeBar
         background={
-          absolute
-            ? buildAbsoluteRangeGradient({
-                theme,
-                minPosition,
-                maxPosition,
-              })
-            : buildNormalisedRangeGradient(
-                theme
-              )
+          buildRangeGradient({
+            theme,
+            minPosition,
+            maxPosition,
+          })
         }
         theme={theme}
       >
