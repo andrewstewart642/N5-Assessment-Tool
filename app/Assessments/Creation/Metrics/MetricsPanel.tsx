@@ -207,42 +207,53 @@ function TopicMetricRow({
       style={{
         display:
           "grid",
-        gap:
-          5,
-        paddingBottom:
-          2,
+        gridTemplateColumns:
+          "76px minmax(0, 1fr)",
+        columnGap:
+          8,
+        alignItems:
+          "center",
+        minWidth:
+          0,
       }}
     >
       <div
         style={{
           display:
-            "flex",
-          justifyContent:
-            "space-between",
-          alignItems:
-            "baseline",
+            "grid",
           gap:
-            8,
-          color:
-            theme.textSecondary,
-          fontSize:
-            METRICS_TEXT_SIZE,
-          lineHeight:
-            "9px",
+            2,
+          minWidth:
+            0,
+          alignSelf:
+            "center",
           fontVariantNumeric:
             "tabular-nums",
         }}
       >
-        <span>
+        <span
+          style={{
+            color:
+              theme.textSecondary,
+            fontSize:
+              METRICS_TEXT_SIZE,
+            lineHeight:
+              "9px",
+            whiteSpace:
+              "nowrap",
+          }}
+        >
           {snapshot.policy.label}
         </span>
 
         <span
           style={{
             color:
-              theme.textSecondary,
+              theme.textPrimary,
             fontSize:
               METRICS_VALUE_SIZE,
+            lineHeight:
+              "7px",
             fontWeight:
               400,
             whiteSpace:
@@ -601,7 +612,7 @@ export default function MetricsPanel({
             display:
               "grid",
             gap:
-              12,
+              10,
             boxSizing:
               "border-box",
           }}
@@ -658,7 +669,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                9,
+                4,
               paddingTop:
                 2,
             }}
@@ -666,7 +677,7 @@ export default function MetricsPanel({
             <div
               style={{
                 paddingBottom:
-                  3,
+                  2,
               }}
             >
               <SectionTitle
