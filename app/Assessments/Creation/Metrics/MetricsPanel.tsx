@@ -47,6 +47,14 @@ function formatPct(
   return `${value.toFixed(1)}%`;
 }
 
+function formatTargetPct(
+  value: number
+): string {
+  return Number.isInteger(value)
+    ? `${value}%`
+    : `${value.toFixed(1)}%`;
+}
+
 function SectionTitle({
   children,
   theme,
@@ -150,14 +158,20 @@ function BalanceMetricRow({
         maxPct={
           snapshot.maxRightPct
         }
-        minLabel={
-          `${snapshot.minRightPct.toFixed(0)}%`
+        minTopLabel={
+          formatTargetPct(
+            snapshot.minRightPct
+          )
         }
-        targetLabel={
-          `${snapshot.targetRightPct.toFixed(0)}%`
+        targetTopLabel={
+          formatTargetPct(
+            snapshot.targetRightPct
+          )
         }
-        maxLabel={
-          `${snapshot.maxRightPct.toFixed(0)}%`
+        maxTopLabel={
+          formatTargetPct(
+            snapshot.maxRightPct
+          )
         }
         theme={theme}
       />
@@ -228,14 +242,33 @@ function TopicMetricRow({
         maxPct={
           snapshot.policy.maxPct
         }
-        minLabel={
-          `${snapshot.minMarksAchievable}m`
+        minTopLabel={
+          `${formatMarks(
+            snapshot.minMarksExact
+          )} marks`
         }
-        targetLabel={
-          `${snapshot.targetMarksAchievable}m`
+        targetTopLabel={
+          `${snapshot.targetMarksAchievable} marks`
         }
-        maxLabel={
-          `${snapshot.maxMarksAchievable}m`
+        maxTopLabel={
+          `${formatMarks(
+            snapshot.maxMarksExact
+          )} marks`
+        }
+        minBottomLabel={
+          formatTargetPct(
+            snapshot.policy.minPct
+          )
+        }
+        targetBottomLabel={
+          formatTargetPct(
+            snapshot.policy.targetPct
+          )
+        }
+        maxBottomLabel={
+          formatTargetPct(
+            snapshot.policy.maxPct
+          )
         }
         theme={theme}
       />
@@ -420,7 +453,7 @@ export default function MetricsPanel({
           className="hover-scroll"
           style={{
             maxHeight:
-              "min(200px, 26vh)",
+              "min(210px, 27vh)",
             overflowY:
               "auto",
             borderTop:
@@ -557,7 +590,7 @@ export default function MetricsPanel({
                 metrics.coverage.policy
                   .thresholdPct
               }
-              thresholdLabel={
+              thresholdTopLabel={
                 `${metrics.coverage.policy.thresholdPct}%`
               }
               theme={theme}
