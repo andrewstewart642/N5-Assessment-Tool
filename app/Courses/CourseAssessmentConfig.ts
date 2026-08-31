@@ -38,6 +38,15 @@ export type CoursePaperConfig = {
 
   defaultTargetMarks: number;
 
+  /**
+   * Historical default values that may appear in unversioned saved
+   * assessments after an older/transitional Course configuration was used.
+   *
+   * Generic persistence can migrate a complete matching legacy paper set to
+   * the current defaults without hard-wiring any Course-specific mark values.
+   */
+  historicalDefaultTargetMarks?: number[];
+
   description?: string;
 
   /**
