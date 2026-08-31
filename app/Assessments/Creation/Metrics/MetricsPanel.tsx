@@ -27,10 +27,13 @@ const METRICS_TEXT_SIZE =
   8;
 
 const METRICS_VALUE_SIZE =
-  7;
+  6;
 
 const METRICS_META_SIZE =
   7;
+
+const METRICS_MICRO_SIZE =
+  6;
 
 function formatMarks(
   value: number
@@ -105,7 +108,9 @@ function BalanceMetricRow({
         display:
           "grid",
         gap:
-          3,
+          6,
+        padding:
+          "2px 0 3px",
       }}
     >
       <SectionTitle
@@ -127,9 +132,11 @@ function BalanceMetricRow({
           fontSize:
             METRICS_VALUE_SIZE,
           lineHeight:
-            "8px",
+            "7px",
           fontVariantNumeric:
             "tabular-nums",
+          whiteSpace:
+            "nowrap",
         }}
       >
         <span>
@@ -201,7 +208,9 @@ function TopicMetricRow({
         display:
           "grid",
         gap:
-          3,
+          5,
+        paddingBottom:
+          2,
       }}
     >
       <div
@@ -231,11 +240,13 @@ function TopicMetricRow({
         <span
           style={{
             color:
-              theme.textPrimary,
+              theme.textSecondary,
             fontSize:
               METRICS_VALUE_SIZE,
             fontWeight:
               400,
+            whiteSpace:
+              "nowrap",
           }}
         >
           {formatMarks(
@@ -586,11 +597,11 @@ export default function MetricsPanel({
             borderTop:
               `1px solid ${theme.borderStandard}`,
             padding:
-              "5px 12px 7px",
+              "7px 12px 10px",
             display:
               "grid",
             gap:
-              8,
+              12,
             boxSizing:
               "border-box",
           }}
@@ -606,11 +617,13 @@ export default function MetricsPanel({
               color:
                 theme.textMuted,
               fontSize:
-                METRICS_META_SIZE,
+                METRICS_MICRO_SIZE,
               lineHeight:
-                "8px",
+                "7px",
               fontVariantNumeric:
                 "tabular-nums",
+              paddingBottom:
+                2,
             }}
           >
             <span>
@@ -645,14 +658,23 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                6,
+                9,
+              paddingTop:
+                2,
             }}
           >
-            <SectionTitle
-              theme={theme}
+            <div
+              style={{
+                paddingBottom:
+                  3,
+              }}
             >
-              Topic
-            </SectionTitle>
+              <SectionTitle
+                theme={theme}
+              >
+                Topic
+              </SectionTitle>
+            </div>
 
             {metrics.topics.map(
               (topic) => (
@@ -672,14 +694,23 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                3,
+                6,
+              paddingTop:
+                4,
             }}
           >
-            <SectionTitle
-              theme={theme}
+            <div
+              style={{
+                paddingBottom:
+                  2,
+              }}
             >
-              {metrics.coverage.policy.label}
-            </SectionTitle>
+              <SectionTitle
+                theme={theme}
+              >
+                {metrics.coverage.policy.label}
+              </SectionTitle>
+            </div>
 
             <div
               style={{
@@ -694,7 +725,7 @@ export default function MetricsPanel({
                 fontSize:
                   METRICS_VALUE_SIZE,
                 lineHeight:
-                  "8px",
+                  "7px",
                 fontVariantNumeric:
                   "tabular-nums",
               }}
@@ -703,14 +734,7 @@ export default function MetricsPanel({
                 {metrics.coverage.representedUnits} / {metrics.coverage.totalUnits} skills
               </span>
 
-              <span
-                style={{
-                  color:
-                    theme.textPrimary,
-                  fontWeight:
-                    400,
-                }}
-              >
+              <span>
                 {metrics.coverage.percentage.toFixed(1)}%
               </span>
             </div>
@@ -744,9 +768,9 @@ export default function MetricsPanel({
                     ? theme.success
                     : theme.textMuted,
                 fontSize:
-                  METRICS_META_SIZE,
+                  METRICS_MICRO_SIZE,
                 lineHeight:
-                  "8px",
+                  "7px",
               }}
             >
               <span>
@@ -770,11 +794,11 @@ export default function MetricsPanel({
                 borderTop:
                   `1px solid ${theme.borderStandard}`,
                 paddingTop:
-                  3,
+                  6,
                 fontSize:
-                  METRICS_META_SIZE,
+                  METRICS_MICRO_SIZE,
                 lineHeight:
-                  "8px",
+                  "7px",
               }}
             >
               Metrics metadata incomplete for {invalidQuestionCount} assigned question{invalidQuestionCount === 1 ? "" : "s"}.
