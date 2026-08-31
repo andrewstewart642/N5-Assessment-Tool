@@ -102,7 +102,7 @@ function BalanceMetricRow({
         display:
           "grid",
         gap:
-          1,
+          2,
       }}
     >
       <SectionTitle
@@ -198,7 +198,7 @@ function TopicMetricRow({
         display:
           "grid",
         gap:
-          0,
+          2,
       }}
     >
       <div
@@ -230,7 +230,7 @@ function TopicMetricRow({
             color:
               theme.textPrimary,
             fontWeight:
-              700,
+              500,
           }}
         >
           {formatMarks(
@@ -437,10 +437,55 @@ export default function MetricsPanel({
           "grid",
         gridTemplateRows:
           isOpen
-            ? "28px 9px minmax(0, 1fr)"
+            ? "28px minmax(0, 1fr)"
             : "28px",
+        position:
+          "relative",
       }}
     >
+      {isOpen ? (
+        <div
+          role="separator"
+          aria-orientation="horizontal"
+          aria-label="Resize Metrics panel"
+          title="Drag to resize Metrics · double-click to reset"
+          onMouseDown={beginResize}
+          onDoubleClick={resetHeight}
+          style={{
+            position:
+              "absolute",
+            top:
+              0,
+            left:
+              0,
+            right:
+              0,
+            height:
+              8,
+            cursor:
+              "row-resize",
+            display:
+              "grid",
+            placeItems:
+              "start center",
+            paddingTop:
+              1,
+            background:
+              isDragging
+                ? theme.controlBgHover
+                : "transparent",
+            boxSizing:
+              "border-box",
+            zIndex:
+              4,
+          }}
+        >
+          <ResizeDots
+            theme={theme}
+          />
+        </div>
+      ) : null}
+
       <button
         type="button"
         onClick={() =>
@@ -476,7 +521,9 @@ export default function MetricsPanel({
           gap:
             7,
           padding:
-            "0 8px 0 7px",
+            isOpen
+              ? "3px 8px 0 7px"
+              : "0 8px 0 7px",
           cursor:
             "pointer",
           fontFamily:
@@ -525,51 +572,20 @@ export default function MetricsPanel({
 
       {isOpen ? (
         <div
-          role="separator"
-          aria-orientation="horizontal"
-          aria-label="Resize Metrics panel"
-          title="Drag to resize Metrics · double-click to reset"
-          onMouseDown={beginResize}
-          onDoubleClick={resetHeight}
-          style={{
-            height:
-              9,
-            cursor:
-              "row-resize",
-            display:
-              "grid",
-            placeItems:
-              "center",
-            borderTop:
-              `1px solid ${theme.borderStandard}`,
-            background:
-              isDragging
-                ? theme.controlBgHover
-                : "transparent",
-            boxSizing:
-              "border-box",
-          }}
-        >
-          <ResizeDots
-            theme={theme}
-          />
-        </div>
-      ) : null}
-
-      {isOpen ? (
-        <div
           className="hover-scroll"
           style={{
             minHeight:
               0,
             overflowY:
               "auto",
+            borderTop:
+              `1px solid ${theme.borderStandard}`,
             padding:
-              "3px 12px 5px",
+              "5px 12px 7px",
             display:
               "grid",
             gap:
-              4,
+              7,
             boxSizing:
               "border-box",
           }}
@@ -624,7 +640,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                2,
+                5,
             }}
           >
             <SectionTitle
@@ -651,7 +667,7 @@ export default function MetricsPanel({
               display:
                 "grid",
               gap:
-                1,
+                2,
             }}
           >
             <SectionTitle
@@ -687,7 +703,7 @@ export default function MetricsPanel({
                   color:
                     theme.textPrimary,
                   fontWeight:
-                    700,
+                    500,
                 }}
               >
                 {metrics.coverage.percentage.toFixed(1)}%
