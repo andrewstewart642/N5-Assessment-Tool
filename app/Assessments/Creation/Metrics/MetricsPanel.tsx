@@ -23,55 +23,43 @@ import type {
   TopicMetricSnapshot,
 } from "./MetricsTypes";
 
-const METRICS_TEXT_SIZE =
-  8;
+const METRICS_TEXT_SIZE = 8;
+const METRICS_VALUE_SIZE = 6.25;
+const METRICS_META_SIZE = 7;
+const METRICS_MICRO_SIZE = 6;
 
-const METRICS_VALUE_SIZE =
-  6.25;
-
-const METRICS_META_SIZE =
-  7;
-
-const METRICS_MICRO_SIZE =
-  6;
-
-const METRICS_LABEL_RAIL =
-  "92px";
-
-const METRICS_CURRENT_RAIL =
-  "72px";
-
-const METRICS_TRAILING_RESERVE =
-  "172px";
-
-const METRICS_ROW_GAP =
-  8;
+const METRICS_LABEL_RAIL = "88px";
+const METRICS_CURRENT_RAIL = "64px";
+const METRICS_TOPIC_TRAILING_RESERVE = "12px";
+const METRICS_ROW_GAP = 7;
 
 const METRICS_BALANCE_TEMPLATE =
   `${METRICS_LABEL_RAIL} ${METRICS_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_CURRENT_RAIL} ${METRICS_LABEL_RAIL}`;
 
 const METRICS_TOPIC_TEMPLATE =
-  `${METRICS_LABEL_RAIL} ${METRICS_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_TRAILING_RESERVE}`;
+  `${METRICS_LABEL_RAIL} ${METRICS_CURRENT_RAIL} minmax(0, 1fr) ${METRICS_TOPIC_TRAILING_RESERVE}`;
 
-const GAUGE_ALIGNED_HEIGHT =
-  42;
+const GAUGE_ALIGNED_HEIGHT = 42;
+const GAUGE_TOP_TEXT_Y = 0;
+const GAUGE_BOTTOM_TEXT_Y = 31;
 
-const GAUGE_TOP_TEXT_Y =
-  0;
-
-const GAUGE_BOTTOM_TEXT_Y =
-  31;
+/*
+ * Balance gauges are deliberately calibrated rather than literal 0–100 axes.
+ * The exact percentages still drive the calculation, but the acceptable
+ * 30–40% A-standard / Reasoning window is given enough visual room to read.
+ * Shifting the window a little right of centre reinforces the intended 65:35
+ * balance without making the panel look overwhelmingly red.
+ */
+const BALANCE_MIN_VISUAL = 41;
+const BALANCE_TARGET_VISUAL = 61;
+const BALANCE_MAX_VISUAL = 81;
 
 function formatMarks(
   value: number
 ): string {
-  if (
-    Number.isInteger(value)
-  ) {
-    return `${value}`;
-  }
-
-  return value.toFixed(1);
+  return Number.isInteger(value)
+    ? `${value}`
+    : value.toFixed(1);
 }
 
 function formatPct(
@@ -92,6 +80,100 @@ function formatTargetPct(
     : `${value.toFixed(1)}%`;
 }
 
+function clamp(
+  value: number,
+  min = 0,
+  max = 100
+): number {
+  return Math.min(
+    max,
+    Math.max(
+      min,
+      value
+    )
+  );
+}
+
+function mapBalancePercentageToVisualPosition({
+  value,
+  min,
+  target,
+  max,
+}: {
+  value: number | null;
+  min: number;
+  target: number;
+  max: number;
+}): number | null {
+  if (value === null) {
+    return null;
+  }
+
+  const safeValue = clamp(value);
+
+  if (safeValue <= min) {
+    return min <= 0
+      ? BALANCE_MIN_VISUAL
+      : (
+          safeValue /
+          min
+        ) * BALANCE_MIN_VISUAL;
+  }
+
+  if (safeValue <= target) {
+    const span = target - min;
+
+    return span <= 0
+      ? BALANCE_TARGET_VISUAL
+      : BALANCE_MIN_VISUAL +
+          (
+            (
+              safeValue - min
+            ) /
+            span
+          ) *
+            (
+              BALANCE_TARGET_VISUAL -
+              BALANCE_MIN_VISUAL
+            );
+  }
+
+  if (safeValue <= max) {
+    const span = max - target;
+
+    return span <= 0
+      ? BALANCE_TARGET_VISUAL
+      : BALANCE_TARGET_VISUAL +
+          (
+            (
+              safeValue - target
+            ) /
+            span
+          ) *
+            (
+              BALANCE_MAX_VISUAL -
+              BALANCE_TARGET_VISUAL
+            );
+  }
+
+  if (max >= 100) {
+    return BALANCE_MAX_VISUAL;
+  }
+
+  return BALANCE_MAX_VISUAL +
+    (
+      (
+        safeValue - max
+      ) /
+      (
+        100 - max
+      )
+    ) *
+      (
+        100 - BALANCE_MAX_VISUAL
+      );
+}
+
 function SectionTitle({
   children,
   theme,
@@ -103,16 +185,11 @@ function SectionTitle({
     <div
       style={{
         ...UI_TEXT.sectionLabel,
-        color:
-          theme.textSecondary,
-        fontSize:
-          METRICS_META_SIZE,
-        lineHeight:
-          "8px",
-        letterSpacing:
-          0.15,
-        textTransform:
-          "uppercase",
+        color: theme.textSecondary,
+        fontSize: METRICS_META_SIZE,
+        lineHeight: "8px",
+        letterSpacing: 0.15,
+        textTransform: "uppercase",
       }}
     >
       {children}
@@ -134,68 +211,47 @@ function GaugeAlignedCurrent({
   return (
     <div
       style={{
-        position:
-          "relative",
-        height:
-          GAUGE_ALIGNED_HEIGHT,
-        minWidth:
-          0,
-        color:
-          theme.textSecondary,
-        fontSize:
-          METRICS_VALUE_SIZE,
-        lineHeight:
-          "7px",
-        fontVariantNumeric:
-          "tabular-nums",
-        textAlign:
-          align,
-        whiteSpace:
-          "nowrap",
+        position: "relative",
+        height: GAUGE_ALIGNED_HEIGHT,
+        minWidth: 0,
+        color: theme.textSecondary,
+        fontSize: METRICS_VALUE_SIZE,
+        lineHeight: "7px",
+        fontVariantNumeric: "tabular-nums",
+        textAlign: align,
+        whiteSpace: "nowrap",
       }}
     >
       {marks !== undefined ? (
         <span
           style={{
-            position:
-              "absolute",
-            top:
-              GAUGE_TOP_TEXT_Y,
-            left:
-              align === "left"
-                ? 0
-                : "auto",
-            right:
-              align === "right"
-                ? 0
-                : "auto",
+            position: "absolute",
+            top: GAUGE_TOP_TEXT_Y,
+            left: align === "left"
+              ? 0
+              : "auto",
+            right: align === "right"
+              ? 0
+              : "auto",
           }}
         >
-          {formatMarks(
-            marks
-          )} marks
+          {formatMarks(marks)} marks
         </span>
       ) : null}
 
       <span
         style={{
-          position:
-            "absolute",
-          top:
-            GAUGE_BOTTOM_TEXT_Y,
-          left:
-            align === "left"
-              ? 0
-              : "auto",
-          right:
-            align === "right"
-              ? 0
-              : "auto",
+          position: "absolute",
+          top: GAUGE_BOTTOM_TEXT_Y,
+          left: align === "left"
+            ? 0
+            : "auto",
+          right: align === "right"
+            ? 0
+            : "auto",
         }}
       >
-        {formatPct(
-          percentage
-        )}
+        {formatPct(percentage)}
       </span>
     </div>
   );
@@ -213,16 +269,11 @@ function BalanceLabel({
   return (
     <span
       style={{
-        color:
-          theme.textSecondary,
-        fontSize:
-          METRICS_TEXT_SIZE,
-        lineHeight:
-          "10px",
-        textAlign:
-          align,
-        whiteSpace:
-          "nowrap",
+        color: theme.textSecondary,
+        fontSize: METRICS_TEXT_SIZE,
+        lineHeight: "10px",
+        textAlign: align,
+        whiteSpace: "nowrap",
       }}
     >
       {label}
@@ -232,111 +283,89 @@ function BalanceLabel({
 
 function BalanceMetricRow({
   snapshot,
+  assessmentMarks,
   theme,
 }: {
-  snapshot:
-    BalanceMetricSnapshot;
-  theme:
-    AppTheme;
+  snapshot: BalanceMetricSnapshot;
+  assessmentMarks: number;
+  theme: AppTheme;
 }) {
+  const currentVisualPosition =
+    mapBalancePercentageToVisualPosition({
+      value: snapshot.rightPct,
+      min: snapshot.minRightPct,
+      target: snapshot.targetRightPct,
+      max: snapshot.maxRightPct,
+    });
+
+  const minimumRightMarks =
+    assessmentMarks *
+    snapshot.minRightPct /
+    100;
+
+  const maximumRightMarks =
+    assessmentMarks *
+    snapshot.maxRightPct /
+    100;
+
   return (
     <div
       style={{
-        display:
-          "grid",
-        gap:
-          7,
-        padding:
-          "3px 0 7px",
+        display: "grid",
+        gap: 7,
+        padding: "3px 0 7px",
       }}
     >
-      <SectionTitle
-        theme={theme}
-      >
+      <SectionTitle theme={theme}>
         {snapshot.policy.label}
       </SectionTitle>
 
       <div
         style={{
-          display:
-            "grid",
-          gridTemplateColumns:
-            METRICS_BALANCE_TEMPLATE,
-          columnGap:
-            METRICS_ROW_GAP,
-          alignItems:
-            "center",
-          minWidth:
-            0,
+          display: "grid",
+          gridTemplateColumns: METRICS_BALANCE_TEMPLATE,
+          columnGap: METRICS_ROW_GAP,
+          alignItems: "center",
+          minWidth: 0,
         }}
       >
         <BalanceLabel
-          label={
-            snapshot.policy.leftLabel
-          }
+          label={snapshot.policy.leftLabel}
           theme={theme}
           align="left"
         />
 
         <GaugeAlignedCurrent
-          marks={
-            snapshot.leftMarks
-          }
-          percentage={
-            snapshot.leftPct
-          }
+          marks={snapshot.leftMarks}
+          percentage={snapshot.leftPct}
           theme={theme}
           align="right"
         />
 
         <MetricGauge
           mode="range"
-          positionMode="weighted"
-          currentPct={
-            snapshot.rightPct
-          }
-          minPct={
-            snapshot.minRightPct
-          }
-          targetPct={
-            snapshot.targetRightPct
-          }
-          maxPct={
-            snapshot.maxRightPct
-          }
-          minBottomLabel={
-            formatTargetPct(
-              snapshot.minRightPct
-            )
-          }
-          targetBottomLabel={
-            formatTargetPct(
-              snapshot.targetRightPct
-            )
-          }
-          maxBottomLabel={
-            formatTargetPct(
-              snapshot.maxRightPct
-            )
-          }
+          positionMode="absolute"
+          currentPct={currentVisualPosition}
+          minPct={BALANCE_MIN_VISUAL}
+          targetPct={BALANCE_TARGET_VISUAL}
+          maxPct={BALANCE_MAX_VISUAL}
+          minTopLabel={`${formatMarks(minimumRightMarks)} marks`}
+          maxTopLabel={`${formatMarks(maximumRightMarks)} marks`}
+          minBottomLabel={formatTargetPct(snapshot.minRightPct)}
+          targetBottomLabel={formatTargetPct(snapshot.targetRightPct)}
+          maxBottomLabel={formatTargetPct(snapshot.maxRightPct)}
           theme={theme}
         />
 
         <GaugeAlignedCurrent
-          marks={
-            snapshot.rightMarks
-          }
-          percentage={
-            snapshot.rightPct
-          }
+          marks={snapshot.rightMarks}
+          percentage={snapshot.rightPct}
           theme={theme}
           align="left"
         />
 
         <BalanceLabel
-          label={
-            snapshot.policy.rightLabel
-          }
+          label={snapshot.policy.rightLabel}
           theme={theme}
           align="right"
         />
@@ -349,100 +378,78 @@ function TopicMetricRow({
   snapshot,
   theme,
 }: {
-  snapshot:
-    TopicMetricSnapshot;
-  theme:
-    AppTheme;
+  snapshot: TopicMetricSnapshot;
+  theme: AppTheme;
 }) {
   return (
     <div
       style={{
-        display:
-          "grid",
-        gridTemplateColumns:
-          METRICS_TOPIC_TEMPLATE,
-        columnGap:
-          METRICS_ROW_GAP,
-        alignItems:
-          "center",
-        minWidth:
-          0,
-        padding:
-          "7px 0 9px",
+        display: "grid",
+        gridTemplateColumns: METRICS_TOPIC_TEMPLATE,
+        columnGap: METRICS_ROW_GAP,
+        alignItems: "center",
+        minWidth: 0,
+        padding: "7px 0 10px",
       }}
     >
       <span
         style={{
-          color:
-            theme.textSecondary,
-          fontSize:
-            METRICS_TEXT_SIZE,
-          lineHeight:
-            "10px",
-          whiteSpace:
-            "nowrap",
+          color: theme.textSecondary,
+          fontSize: METRICS_TEXT_SIZE,
+          lineHeight: "10px",
+          whiteSpace: "nowrap",
         }}
       >
         {snapshot.policy.label}
       </span>
 
       <GaugeAlignedCurrent
-        marks={
-          snapshot.marks
-        }
-        percentage={
-          snapshot.currentPct
-        }
+        marks={snapshot.marks}
+        percentage={snapshot.currentPct}
         theme={theme}
         align="right"
       />
 
       <MetricGauge
         mode="range"
-        currentPct={
-          snapshot.currentPct
-        }
-        minPct={
-          snapshot.policy.minPct
-        }
-        targetPct={
-          snapshot.policy.targetPct
-        }
-        maxPct={
-          snapshot.policy.maxPct
-        }
-        minTopLabel={
-          `${formatMarks(
-            snapshot.minMarksExact
-          )} marks`
-        }
-        targetTopLabel={
-          `${snapshot.targetMarksAchievable} marks`
-        }
-        maxTopLabel={
-          `${formatMarks(
-            snapshot.maxMarksExact
-          )} marks`
-        }
-        minBottomLabel={
-          formatTargetPct(
-            snapshot.policy.minPct
-          )
-        }
-        targetBottomLabel={
-          formatTargetPct(
-            snapshot.policy.targetPct
-          )
-        }
-        maxBottomLabel={
-          formatTargetPct(
-            snapshot.policy.maxPct
-          )
-        }
+        currentPct={snapshot.currentPct}
+        minPct={snapshot.policy.minPct}
+        targetPct={snapshot.policy.targetPct}
+        maxPct={snapshot.policy.maxPct}
+        minTopLabel={`${formatMarks(snapshot.minMarksExact)} marks`}
+        targetTopLabel={`${snapshot.targetMarksAchievable} marks`}
+        maxTopLabel={`${formatMarks(snapshot.maxMarksExact)} marks`}
+        minBottomLabel={formatTargetPct(snapshot.policy.minPct)}
+        targetBottomLabel={formatTargetPct(snapshot.policy.targetPct)}
+        maxBottomLabel={formatTargetPct(snapshot.policy.maxPct)}
         theme={theme}
       />
 
       <span />
+    </div>
+  );
+}
+
+function CourseCoverageTitle({
+  theme,
+}: {
+  theme: AppTheme;
+}) {
+  return (
+    <div
+      style={{
+        ...UI_TEXT.sectionLabel,
+        color: theme.textSecondary,
+        fontSize: METRICS_META_SIZE,
+        lineHeight: "7px",
+        letterSpacing: 0.15,
+        textTransform: "uppercase",
+        display: "grid",
+        gap: 0,
+      }}
+    >
+      <span>Course</span>
+      <span>Coverage</span>
     </div>
   );
 }
@@ -459,18 +466,14 @@ function ExplorerChevron({
       viewBox="0 0 8 8"
       aria-hidden="true"
       style={{
-        display:
-          "block",
-        flex:
-          "0 0 auto",
+        display: "block",
+        flex: "0 0 auto",
       }}
     >
       <path
-        d={
-          isOpen
-            ? "M1 2 L4 5 L7 2"
-            : "M2 1 L5 4 L2 7"
-        }
+        d={isOpen
+          ? "M1 2 L4 5 L7 2"
+          : "M2 1 L5 4 L2 7"}
         fill="none"
         stroke="currentColor"
         strokeWidth="1.2"
@@ -490,14 +493,10 @@ function ResizeDots({
     <span
       aria-hidden="true"
       style={{
-        display:
-          "flex",
-        alignItems:
-          "center",
-        justifyContent:
-          "center",
-        gap:
-          2,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
       }}
     >
       {[0, 1, 2].map(
@@ -505,16 +504,11 @@ function ResizeDots({
           <span
             key={dot}
             style={{
-              width:
-                2,
-              height:
-                2,
-              borderRadius:
-                "50%",
-              background:
-                theme.textMuted,
-              opacity:
-                0.9,
+              width: 2,
+              height: 2,
+              borderRadius: "50%",
+              background: theme.textMuted,
+              opacity: 0.9,
             }}
           />
         )
@@ -527,22 +521,18 @@ export default function MetricsPanel({
   metrics,
   theme,
 }: {
-  metrics:
-    AssessmentMetricsSnapshot;
-  theme:
-    AppTheme;
+  metrics: AssessmentMetricsSnapshot;
+  theme: AppTheme;
 }) {
   const [
     isOpen,
     setIsOpen,
-  ] =
-    useState(false);
+  ] = useState(false);
 
   const [
     headerHovered,
     setHeaderHovered,
-  ] =
-    useState(false);
+  ] = useState(false);
 
   const {
     panelRef,
@@ -550,17 +540,14 @@ export default function MetricsPanel({
     isDragging,
     beginResize,
     resetHeight,
-  } =
-    useMetricsPanelSizing({
-      isOpen,
-    });
+  } = useMetricsPanelSizing({
+    isOpen,
+  });
 
   const invalidQuestionCount =
     new Set(
       metrics.validationIssues
-        .map((issue) =>
-          issue.questionId
-        )
+        .map((issue) => issue.questionId)
         .filter(
           (
             questionId
@@ -573,34 +560,22 @@ export default function MetricsPanel({
     <section
       ref={panelRef}
       style={{
-        border:
-          `1px solid ${theme.borderStandard}`,
-        borderTop:
-          `1px solid ${theme.borderStandard}`,
-        borderRadius:
-          "0 0 6px 6px",
-        background:
-          theme.bgSurface,
-        minHeight:
-          0,
-        height:
-          isOpen
-            ? panelHeight
-            : 30,
-        overflow:
-          "hidden",
-        fontFamily:
-          UI_TYPO.family,
-        boxSizing:
-          "border-box",
-        display:
-          "grid",
-        gridTemplateRows:
-          isOpen
-            ? "28px minmax(0, 1fr)"
-            : "28px",
-        position:
-          "relative",
+        border: `1px solid ${theme.borderStandard}`,
+        borderTop: `1px solid ${theme.borderStandard}`,
+        borderRadius: "0 0 6px 6px",
+        background: theme.bgSurface,
+        minHeight: 0,
+        height: isOpen
+          ? panelHeight
+          : 30,
+        overflow: "hidden",
+        fontFamily: UI_TYPO.family,
+        boxSizing: "border-box",
+        display: "grid",
+        gridTemplateRows: isOpen
+          ? "28px minmax(0, 1fr)"
+          : "28px",
+        position: "relative",
       }}
     >
       {isOpen ? (
@@ -612,37 +587,23 @@ export default function MetricsPanel({
           onMouseDown={beginResize}
           onDoubleClick={resetHeight}
           style={{
-            position:
-              "absolute",
-            top:
-              0,
-            left:
-              0,
-            right:
-              0,
-            height:
-              8,
-            cursor:
-              "row-resize",
-            display:
-              "grid",
-            placeItems:
-              "start center",
-            paddingTop:
-              1,
-            background:
-              isDragging
-                ? theme.controlBgHover
-                : "transparent",
-            boxSizing:
-              "border-box",
-            zIndex:
-              4,
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 8,
+            cursor: "row-resize",
+            display: "grid",
+            placeItems: "start center",
+            paddingTop: 1,
+            background: isDragging
+              ? theme.controlBgHover
+              : "transparent",
+            boxSizing: "border-box",
+            zIndex: 4,
           }}
         >
-          <ResizeDots
-            theme={theme}
-          />
+          <ResizeDots theme={theme} />
         </div>
       ) : null}
 
@@ -650,80 +611,51 @@ export default function MetricsPanel({
         type="button"
         onClick={() =>
           setIsOpen(
-            (current) =>
-              !current
+            (current) => !current
           )
         }
-        onMouseEnter={() =>
-          setHeaderHovered(true)
-        }
-        onMouseLeave={() =>
-          setHeaderHovered(false)
-        }
+        onMouseEnter={() => setHeaderHovered(true)}
+        onMouseLeave={() => setHeaderHovered(false)}
         aria-expanded={isOpen}
         style={{
-          width:
-            "100%",
-          height:
-            28,
-          border:
-            "none",
-          background:
-            headerHovered
-              ? theme.controlBgHover
-              : "transparent",
-          color:
-            theme.textPrimary,
-          display:
-            "flex",
-          alignItems:
-            "center",
-          gap:
-            7,
-          padding:
-            isOpen
-              ? "3px 8px 0 7px"
-              : "0 8px 0 7px",
-          cursor:
-            "pointer",
-          fontFamily:
-            UI_TYPO.family,
-          boxSizing:
-            "border-box",
-          textAlign:
-            "left",
-          transition:
-            "background 0.12s ease",
+          width: "100%",
+          height: 28,
+          border: "none",
+          background: headerHovered
+            ? theme.controlBgHover
+            : "transparent",
+          color: theme.textPrimary,
+          display: "flex",
+          alignItems: "center",
+          gap: 7,
+          padding: isOpen
+            ? "3px 8px 0 7px"
+            : "0 8px 0 7px",
+          cursor: "pointer",
+          fontFamily: UI_TYPO.family,
+          boxSizing: "border-box",
+          textAlign: "left",
+          transition: "background 0.12s ease",
         }}
       >
         <span
           style={{
-            width:
-              12,
-            height:
-              12,
-            display:
-              "grid",
-            placeItems:
-              "center",
-            color:
-              theme.textSecondary,
+            width: 12,
+            height: 12,
+            display: "grid",
+            placeItems: "center",
+            color: theme.textSecondary,
           }}
         >
-          <ExplorerChevron
-            isOpen={isOpen}
-          />
+          <ExplorerChevron isOpen={isOpen} />
         </span>
 
         <span
           style={{
             ...UI_TEXT.controlTextStrong,
-            fontSize:
-              UI_TYPO.sizeMeta,
-            color:
-              theme.textPrimary,
-            fontWeight:
-              UI_TYPO.weightSemibold,
+            fontSize: UI_TYPO.sizeMeta,
+            color: theme.textPrimary,
+            fontWeight: UI_TYPO.weightSemibold,
           }}
         >
           Metrics
@@ -734,88 +666,40 @@ export default function MetricsPanel({
         <div
           className="hover-scroll"
           style={{
-            minHeight:
-              0,
-            overflowY:
-              "auto",
-            borderTop:
-              `1px solid ${theme.borderStandard}`,
-            padding:
-              "7px 12px 10px",
-            display:
-              "grid",
-            gap:
-              9,
-            boxSizing:
-              "border-box",
+            minHeight: 0,
+            overflowY: "auto",
+            borderTop: `1px solid ${theme.borderStandard}`,
+            padding: "8px 12px 10px",
+            display: "grid",
+            gap: 9,
+            boxSizing: "border-box",
           }}
         >
-          <div
-            style={{
-              display:
-                "flex",
-              justifyContent:
-                "space-between",
-              gap:
-                8,
-              color:
-                theme.textMuted,
-              fontSize:
-                METRICS_MICRO_SIZE,
-              lineHeight:
-                "7px",
-              fontVariantNumeric:
-                "tabular-nums",
-              paddingBottom:
-                2,
-            }}
-          >
-            <span>
-              Overall assessment
-            </span>
-
-            <span>
-              {formatMarks(
-                metrics.assignedMarks
-              )} / {formatMarks(
-                metrics.finalTargetMarks
-              )} marks
-            </span>
-          </div>
-
           <BalanceMetricRow
-            snapshot={
-              metrics.standard
-            }
+            snapshot={metrics.standard}
+            assessmentMarks={metrics.finalTargetMarks}
             theme={theme}
           />
 
           <BalanceMetricRow
-            snapshot={
-              metrics.thinking
-            }
+            snapshot={metrics.thinking}
+            assessmentMarks={metrics.finalTargetMarks}
             theme={theme}
           />
 
           <div
             style={{
-              display:
-                "grid",
-              gap:
-                2,
-              paddingTop:
-                2,
+              display: "grid",
+              gap: 2,
+              paddingTop: 2,
             }}
           >
             <div
               style={{
-                paddingBottom:
-                  4,
+                paddingBottom: 4,
               }}
             >
-              <SectionTitle
-                theme={theme}
-              >
+              <SectionTitle theme={theme}>
                 Topic
               </SectionTitle>
             </div>
@@ -823,9 +707,7 @@ export default function MetricsPanel({
             {metrics.topics.map(
               (topic) => (
                 <TopicMetricRow
-                  key={
-                    topic.policy.topic
-                  }
+                  key={topic.policy.topic}
                   snapshot={topic}
                   theme={theme}
                 />
@@ -835,64 +717,52 @@ export default function MetricsPanel({
 
           <div
             style={{
-              display:
-                "grid",
-              gap:
-                4,
-              padding:
-                "6px 0 2px",
+              display: "grid",
+              gap: 3,
+              padding: "6px 0 2px",
             }}
           >
             <div
               style={{
-                display:
-                  "grid",
-                gridTemplateColumns:
-                  METRICS_TOPIC_TEMPLATE,
-                columnGap:
-                  METRICS_ROW_GAP,
-                alignItems:
-                  "center",
-                minWidth:
-                  0,
+                display: "grid",
+                gridTemplateColumns: METRICS_TOPIC_TEMPLATE,
+                columnGap: METRICS_ROW_GAP,
+                alignItems: "center",
+                minWidth: 0,
               }}
             >
-              <SectionTitle
-                theme={theme}
-              >
-                {metrics.coverage.policy.label}
-              </SectionTitle>
+              <CourseCoverageTitle theme={theme} />
 
-              <span
+              <div
                 style={{
-                  color:
-                    theme.textSecondary,
-                  fontSize:
-                    METRICS_VALUE_SIZE,
-                  lineHeight:
-                    "8px",
-                  fontVariantNumeric:
-                    "tabular-nums",
-                  textAlign:
-                    "right",
+                  position: "relative",
+                  height: GAUGE_ALIGNED_HEIGHT,
+                  minWidth: 0,
+                  color: theme.textSecondary,
+                  fontSize: METRICS_VALUE_SIZE,
+                  lineHeight: "7px",
+                  fontVariantNumeric: "tabular-nums",
+                  textAlign: "right",
+                  whiteSpace: "nowrap",
                 }}
               >
-                {metrics.coverage.percentage.toFixed(1)}%
-              </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    right: 0,
+                    top: GAUGE_TOP_TEXT_Y,
+                  }}
+                >
+                  {metrics.coverage.percentage.toFixed(1)}%
+                </span>
+              </div>
 
               <MetricGauge
                 mode="threshold"
-                currentPct={
-                  metrics.coverage.percentage
-                }
-                thresholdPct={
-                  metrics.coverage.policy
-                    .thresholdPct
-                }
+                currentPct={metrics.coverage.percentage}
+                thresholdPct={metrics.coverage.policy.thresholdPct}
                 thresholdTopLabel=""
-                thresholdBottomLabel={
-                  `${metrics.coverage.policy.thresholdPct}%`
-                }
+                thresholdBottomLabel={`${metrics.coverage.policy.thresholdPct}%`}
                 theme={theme}
               />
 
@@ -901,14 +771,10 @@ export default function MetricsPanel({
 
             <div
               style={{
-                display:
-                  "grid",
-                gridTemplateColumns:
-                  METRICS_TOPIC_TEMPLATE,
-                columnGap:
-                  METRICS_ROW_GAP,
-                minWidth:
-                  0,
+                display: "grid",
+                gridTemplateColumns: METRICS_TOPIC_TEMPLATE,
+                columnGap: METRICS_ROW_GAP,
+                minWidth: 0,
               }}
             >
               <span />
@@ -916,21 +782,17 @@ export default function MetricsPanel({
 
               <div
                 style={{
-                  display:
-                    "flex",
-                  justifyContent:
-                    "space-between",
-                  gap:
-                    10,
-                  color:
-                    metrics.coverage
-                      .thresholdMet
-                      ? theme.success
-                      : theme.textMuted,
-                  fontSize:
-                    METRICS_MICRO_SIZE,
-                  lineHeight:
-                    "7px",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 14,
+                  minWidth: 0,
+                  color: metrics.coverage.thresholdMet
+                    ? theme.success
+                    : theme.textMuted,
+                  fontSize: METRICS_MICRO_SIZE,
+                  lineHeight: "7px",
+                  whiteSpace: "nowrap",
                 }}
               >
                 <span>
@@ -938,10 +800,8 @@ export default function MetricsPanel({
                 </span>
 
                 <span>
-                  {metrics.coverage.thresholdMet
-                    ? "✓ threshold met"
-                    : metrics.coverage.policy.thresholdLabel ??
-                      `${metrics.coverage.policy.thresholdPct}% threshold`}
+                  {metrics.coverage.policy.thresholdLabel ??
+                    `${metrics.coverage.policy.thresholdPct}% threshold`}
                 </span>
               </div>
 
@@ -952,16 +812,11 @@ export default function MetricsPanel({
           {invalidQuestionCount > 0 ? (
             <div
               style={{
-                color:
-                  theme.danger,
-                borderTop:
-                  `1px solid ${theme.borderStandard}`,
-                paddingTop:
-                  6,
-                fontSize:
-                  METRICS_MICRO_SIZE,
-                lineHeight:
-                  "7px",
+                color: theme.danger,
+                borderTop: `1px solid ${theme.borderStandard}`,
+                paddingTop: 6,
+                fontSize: METRICS_MICRO_SIZE,
+                lineHeight: "7px",
               }}
             >
               Metrics metadata incomplete for {invalidQuestionCount} assigned question{invalidQuestionCount === 1 ? "" : "s"}.
