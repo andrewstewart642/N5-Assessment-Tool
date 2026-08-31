@@ -92,9 +92,12 @@ type RangeGaugeProps = {
   minPct: number;
   targetPct: number;
   maxPct: number;
-  minLabel?: string;
-  targetLabel?: string;
-  maxLabel?: string;
+  minTopLabel?: string;
+  targetTopLabel?: string;
+  maxTopLabel?: string;
+  minBottomLabel?: string;
+  targetBottomLabel?: string;
+  maxBottomLabel?: string;
   theme: AppTheme;
 };
 
@@ -102,7 +105,8 @@ type ThresholdGaugeProps = {
   mode: "threshold";
   currentPct: number;
   thresholdPct: number;
-  thresholdLabel?: string;
+  thresholdTopLabel?: string;
+  thresholdBottomLabel?: string;
   theme: AppTheme;
 };
 
@@ -181,10 +185,12 @@ function TargetDiamond({
 function GaugeLabel({
   position,
   label,
+  row,
   theme,
 }: {
   position: number;
   label?: string;
+  row: "top" | "bottom";
   theme: AppTheme;
 }) {
   if (!label) {
@@ -200,15 +206,17 @@ function GaugeLabel({
         left:
           `${clamp(position)}%`,
         top:
-          0,
+          row === "top"
+            ? 0
+            : 16,
         transform:
           "translateX(-50%)",
         color:
           theme.textMuted,
         fontSize:
-          9,
+          8,
         lineHeight:
-          "10px",
+          "9px",
         fontVariantNumeric:
           "tabular-nums",
         whiteSpace:
@@ -225,10 +233,12 @@ function GaugeLabel({
 function GaugeBar({
   children,
   background,
+  hasBottomLabels,
   theme,
 }: {
   children: React.ReactNode;
   background: string;
+  hasBottomLabels: boolean;
   theme: AppTheme;
 }) {
   return (
@@ -240,8 +250,14 @@ function GaugeBar({
           0,
         right:
           0,
+        top:
+          hasBottomLabels
+            ? 9
+            : undefined,
         bottom:
-          0,
+          hasBottomLabels
+            ? undefined
+            : 0,
         height:
           6,
         borderRadius:
@@ -282,13 +298,20 @@ export default function MetricGauge(
         threshold + 2.5
       );
 
+    const hasBottomLabels =
+      Boolean(
+        props.thresholdBottomLabel
+      );
+
     return (
       <div
         style={{
           position:
             "relative",
           height:
-            18,
+            hasBottomLabels
+              ? 25
+              : 16,
           width:
             "100%",
         }}
@@ -296,15 +319,28 @@ export default function MetricGauge(
         <GaugeLabel
           position={threshold}
           label={
-            props.thresholdLabel ??
+            props.thresholdTopLabel ??
             `${threshold.toFixed(0)}%`
           }
+          row="top"
+          theme={theme}
+        />
+
+        <GaugeLabel
+          position={threshold}
+          label={
+            props.thresholdBottomLabel
+          }
+          row="bottom"
           theme={theme}
         />
 
         <GaugeBar
           background={
             `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} ${blendStart}%, ${theme.success} ${blendEnd}%, ${theme.success} 100%)`
+          }
+          hasBottomLabels={
+            hasBottomLabels
           }
           theme={theme}
         >
@@ -351,38 +387,74 @@ export default function MetricGauge(
             props.maxPct,
         });
 
+  const hasBottomLabels =
+    Boolean(
+      props.minBottomLabel ||
+      props.targetBottomLabel ||
+      props.maxBottomLabel
+    );
+
   return (
     <div
       style={{
         position:
           "relative",
         height:
-          18,
+          hasBottomLabels
+            ? 25
+            : 16,
         width:
           "100%",
       }}
     >
       <GaugeLabel
         position={30}
-        label={props.minLabel}
+        label={props.minTopLabel}
+        row="top"
         theme={theme}
       />
 
       <GaugeLabel
         position={50}
-        label={props.targetLabel}
+        label={props.targetTopLabel}
+        row="top"
         theme={theme}
       />
 
       <GaugeLabel
         position={70}
-        label={props.maxLabel}
+        label={props.maxTopLabel}
+        row="top"
+        theme={theme}
+      />
+
+      <GaugeLabel
+        position={30}
+        label={props.minBottomLabel}
+        row="bottom"
+        theme={theme}
+      />
+
+      <GaugeLabel
+        position={50}
+        label={props.targetBottomLabel}
+        row="bottom"
+        theme={theme}
+      />
+
+      <GaugeLabel
+        position={70}
+        label={props.maxBottomLabel}
+        row="bottom"
         theme={theme}
       />
 
       <GaugeBar
         background={
           `linear-gradient(to right, ${theme.danger} 0%, ${theme.danger} 27%, ${theme.success} 33%, ${theme.success} 67%, ${theme.danger} 73%, ${theme.danger} 100%)`
+        }
+        hasBottomLabels={
+          hasBottomLabels
         }
         theme={theme}
       >
