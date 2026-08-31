@@ -7,7 +7,7 @@ import {
 } from "react";
 
 const METRICS_PANEL_HEIGHT_STORAGE_KEY =
-  "assessment_builder_metrics_panel_height_v2";
+  "assessment_builder_metrics_panel_height_v3";
 
 const FALLBACK_METRICS_PANEL_HEIGHT =
   180;
@@ -169,16 +169,28 @@ export function useMetricsPanelSizing({
           scrollStyles.paddingBottom
         ) || 0;
 
+      const lastTreeRow =
+        skillsScroll
+          .lastElementChild as
+          HTMLElement | null;
+
       const naturalTreeContentHeight =
-        Math.max(
-          0,
-          skillsScroll.scrollHeight -
-          bottomPadding
-        );
+        lastTreeRow
+          ? Math.max(
+              0,
+              lastTreeRow
+                .getBoundingClientRect()
+                .bottom -
+              scrollRect.top +
+              skillsScroll.scrollTop +
+              bottomPadding
+            )
+          : bottomPadding;
 
       const naturalSkillsHeight =
         fixedSkillsChrome +
-        naturalTreeContentHeight;
+        naturalTreeContentHeight +
+        2;
 
       return clampPanelHeight(
         parentHeight -
