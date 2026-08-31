@@ -1,3 +1,7 @@
+import {
+  useState,
+} from "react";
+
 import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
@@ -253,21 +257,61 @@ function TopicMetricRow({
   );
 }
 
+function ExplorerChevron({
+  isOpen,
+}: {
+  isOpen: boolean;
+}) {
+  return (
+    <svg
+      width="8"
+      height="8"
+      viewBox="0 0 8 8"
+      aria-hidden="true"
+      style={{
+        display:
+          "block",
+        flex:
+          "0 0 auto",
+      }}
+    >
+      <path
+        d={
+          isOpen
+            ? "M1 2 L4 5 L7 2"
+            : "M2 1 L5 4 L2 7"
+        }
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function MetricsPanel({
   metrics,
-  isOpen,
-  onToggle,
   theme,
 }: {
   metrics:
     AssessmentMetricsSnapshot;
-  isOpen:
-    boolean;
-  onToggle:
-    () => void;
   theme:
     AppTheme;
 }) {
+  const [
+    isOpen,
+    setIsOpen,
+  ] =
+    useState(false);
+
+  const [
+    headerHovered,
+    setHeaderHovered,
+  ] =
+    useState(false);
+
   const invalidQuestionCount =
     new Set(
       metrics.validationIssues
@@ -285,19 +329,38 @@ export default function MetricsPanel({
   return (
     <section
       style={{
+        border:
+          `1px solid ${theme.borderStandard}`,
         borderTop:
           `1px solid ${theme.borderStandard}`,
+        borderRadius:
+          "0 0 6px 6px",
         background:
           theme.bgSurface,
         minHeight:
           0,
+        overflow:
+          "hidden",
         fontFamily:
           UI_TYPO.family,
+        boxSizing:
+          "border-box",
       }}
     >
       <button
         type="button"
-        onClick={onToggle}
+        onClick={() =>
+          setIsOpen(
+            (current) =>
+              !current
+          )
+        }
+        onMouseEnter={() =>
+          setHeaderHovered(true)
+        }
+        onMouseLeave={() =>
+          setHeaderHovered(false)
+        }
         aria-expanded={isOpen}
         style={{
           width:
@@ -307,49 +370,62 @@ export default function MetricsPanel({
           border:
             "none",
           background:
-            "transparent",
+            headerHovered
+              ? theme.controlBgHover
+              : "transparent",
           color:
             theme.textPrimary,
           display:
             "flex",
           alignItems:
             "center",
-          justifyContent:
-            "space-between",
+          gap:
+            7,
           padding:
-            "0 10px",
+            "0 8px 0 7px",
           cursor:
             "pointer",
           fontFamily:
             UI_TYPO.family,
           boxSizing:
             "border-box",
+          textAlign:
+            "left",
+          transition:
+            "background 0.12s ease",
         }}
       >
+        <span
+          style={{
+            width:
+              12,
+            height:
+              12,
+            display:
+              "grid",
+            placeItems:
+              "center",
+            color:
+              theme.textSecondary,
+          }}
+        >
+          <ExplorerChevron
+            isOpen={isOpen}
+          />
+        </span>
+
         <span
           style={{
             ...UI_TEXT.controlTextStrong,
             fontSize:
               UI_TYPO.sizeMeta,
-          }}
-        >
-          {isOpen ? "⌄" : "›"} METRICS
-        </span>
-
-        <span
-          style={{
-            ...UI_TEXT.metadata,
             color:
-              theme.textMuted,
-            fontVariantNumeric:
-              "tabular-nums",
+              theme.textPrimary,
+            fontWeight:
+              UI_TYPO.weightSemibold,
           }}
         >
-          {formatMarks(
-            metrics.assignedMarks
-          )} / {formatMarks(
-            metrics.finalTargetMarks
-          )}
+          Metrics
         </span>
       </button>
 
@@ -358,9 +434,11 @@ export default function MetricsPanel({
           className="hover-scroll"
           style={{
             maxHeight:
-              "min(480px, 58vh)",
+              "min(500px, 58vh)",
             overflowY:
               "auto",
+            borderTop:
+              `1px solid ${theme.borderStandard}`,
             padding:
               "10px 12px 14px",
             display:
@@ -371,6 +449,34 @@ export default function MetricsPanel({
               "border-box",
           }}
         >
+          <div
+            style={{
+              display:
+                "flex",
+              justifyContent:
+                "space-between",
+              gap:
+                10,
+              ...UI_TEXT.metadata,
+              color:
+                theme.textMuted,
+              fontVariantNumeric:
+                "tabular-nums",
+            }}
+          >
+            <span>
+              Overall assessment
+            </span>
+
+            <span>
+              {formatMarks(
+                metrics.assignedMarks
+              )} / {formatMarks(
+                metrics.finalTargetMarks
+              )} marks
+            </span>
+          </div>
+
           <BalanceMetricRow
             snapshot={
               metrics.standard
@@ -485,7 +591,8 @@ export default function MetricsPanel({
               <span>
                 {metrics.coverage.thresholdMet
                   ? "✓ threshold met"
-                  : `${metrics.coverage.policy.thresholdPct}% threshold`}
+                  : metrics.coverage.policy.thresholdLabel ??
+                    `${metrics.coverage.policy.thresholdPct}% threshold`}
               </span>
             </div>
           </div>

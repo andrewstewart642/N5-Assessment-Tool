@@ -115,6 +115,37 @@ export type CourseTopicTarget = {
 };
 
 /**
+ * Course-owned balance rule consumed by the generic assessment Metrics layer.
+ *
+ * The right-hand percentage is the quoted target for the second label, while
+ * tolerancePct describes the permitted percentage-point movement either side.
+ */
+export type CourseAssessmentBalanceMetric = {
+  id: string;
+  label: string;
+  leftLabel: string;
+  rightLabel: string;
+  rightTargetPct: number;
+  tolerancePct: number;
+};
+
+export type CourseAssessmentCoverageMetric = {
+  label: string;
+  thresholdPct: number;
+  thresholdLabel?: string;
+};
+
+/**
+ * Course-supplied policy only. The actual Metrics calculations and UI remain
+ * under app/Assessments/Creation/Metrics.
+ */
+export type CourseAssessmentMetricsConfig = {
+  standardBalance: CourseAssessmentBalanceMetric;
+  thinkingBalance: CourseAssessmentBalanceMetric;
+  coverage: CourseAssessmentCoverageMetric;
+};
+
+/**
  * Generic Assessment-facing configuration supplied
  * by a Course.
  *
@@ -150,6 +181,14 @@ export type CourseAssessmentConfig = {
     CourseAssessmentStructureId[];
 
   topicTargets: CourseTopicTarget[];
+
+  /**
+   * Optional course policy for the generic Builder Metrics feature.
+   * Courses which do not define this continue to build normally without the
+   * Metrics panel.
+   */
+  assessmentMetrics?:
+    CourseAssessmentMetricsConfig;
 
   /**
    * Transitional optional curriculum contract.

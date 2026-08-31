@@ -366,6 +366,59 @@ export const NATIONAL5_MATHS_ASSESSMENT_CONFIG:
       },
     ],
 
+    assessmentMetrics: {
+      standardBalance: {
+        id:
+          "standard",
+
+        label:
+          "Standard",
+
+        leftLabel:
+          "C",
+
+        rightLabel:
+          "A",
+
+        rightTargetPct:
+          35,
+
+        tolerancePct:
+          5,
+      },
+
+      thinkingBalance: {
+        id:
+          "thinking",
+
+        label:
+          "Thinking",
+
+        leftLabel:
+          "Operational",
+
+        rightLabel:
+          "Reasoning",
+
+        rightTargetPct:
+          35,
+
+        tolerancePct:
+          5,
+      },
+
+      coverage: {
+        label:
+          "Course coverage",
+
+        thresholdPct:
+          70,
+
+        thresholdLabel:
+          "SQA evidence coverage threshold",
+      },
+    },
+
     skillTree:
       withA8BuilderConcepts(
         skillsData

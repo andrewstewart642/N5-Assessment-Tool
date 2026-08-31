@@ -38,6 +38,13 @@ import {
 } from "./HUDBar/ProgressRows";
 
 import {
+  buildAssessmentMetricsPolicy,
+  getCoverageUnitIdsFromSkillsData,
+  sumAssessmentTargetMarks,
+  useAssessmentMetrics,
+} from "./Metrics";
+
+import {
   ASSESSMENT_WORKSPACE_DIVIDER_WIDTH_PX,
 } from "./PaperWorkspace/Dimensions";
 
@@ -1134,18 +1141,67 @@ function AssessmentCreatorContent() {
 
 
   /*
-   * Paper targets and HUD
+   * Paper targets, Metrics and HUD
    */
 
   const {
-  targetMarksByPaper,
-} =
-  useAssessmentPaperTargets({
-    targetMarksByPaper:
-      assessmentTargetMarksByPaper,
+    targetMarksByPaper,
+  } =
+    useAssessmentPaperTargets({
+      targetMarksByPaper:
+        assessmentTargetMarksByPaper,
 
-    courseConfig,
-  });
+      courseConfig,
+    });
+
+  const metricsPolicy =
+    useMemo(
+      () =>
+        buildAssessmentMetricsPolicy(
+          courseConfig
+        ),
+      [
+        courseConfig,
+      ]
+    );
+
+  const metricsCoverageUnitIds =
+    useMemo(
+      () =>
+        getCoverageUnitIdsFromSkillsData(
+          activeSkillsData
+        ),
+      [
+        activeSkillsData,
+      ]
+    );
+
+  const metricsFinalTargetMarks =
+    useMemo(
+      () =>
+        sumAssessmentTargetMarks({
+          papers:
+            getAssessmentPapers(
+              courseConfig
+            ),
+          targetMarksByPaper,
+        }),
+      [
+        courseConfig,
+        targetMarksByPaper,
+      ]
+    );
+
+  const assessmentMetrics =
+    useAssessmentMetrics({
+      questions,
+      finalTargetMarks:
+        metricsFinalTargetMarks,
+      policy:
+        metricsPolicy,
+      coverageUnitIds:
+        metricsCoverageUnitIds,
+    });
 
   const progressHudPaperRows =
     useAssessmentProgressRows({
@@ -1305,6 +1361,10 @@ function AssessmentCreatorContent() {
           <AssessmentSkillsPanel
             theme={
               theme
+            }
+
+            metrics={
+              assessmentMetrics
             }
 
             skillsTreeProps={{

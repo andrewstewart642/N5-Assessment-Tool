@@ -7,6 +7,7 @@ export {
 } from "./AssessmentMetricsState";
 
 export {
+  buildAssessmentMetricsPolicy,
   buildTopicMetricPolicies,
   percentageToMarks,
   sumAssessmentTargetMarks,

@@ -12,11 +12,15 @@ import {
 
 import type {
   AssessmentMetricsPolicy,
+  AssessmentMetricsSnapshot,
 } from "./MetricsTypes";
 
 /**
  * Live Metrics state is intentionally derived only from committed assessment
  * questions. Draft generation and unsaved edits do not affect the snapshot.
+ *
+ * A course can omit a Metrics policy entirely; in that case the Builder keeps
+ * working and this hook simply returns null.
  */
 export function useAssessmentMetrics({
   questions,
@@ -26,17 +30,19 @@ export function useAssessmentMetrics({
 }: {
   questions: Question[];
   finalTargetMarks: number;
-  policy: AssessmentMetricsPolicy;
+  policy: AssessmentMetricsPolicy | null;
   coverageUnitIds: string[];
-}) {
+}): AssessmentMetricsSnapshot | null {
   return useMemo(
     () =>
-      calculateAssessmentMetrics({
-        questions,
-        finalTargetMarks,
-        policy,
-        coverageUnitIds,
-      }),
+      policy
+        ? calculateAssessmentMetrics({
+            questions,
+            finalTargetMarks,
+            policy,
+            coverageUnitIds,
+          })
+        : null,
     [
       questions,
       finalTargetMarks,

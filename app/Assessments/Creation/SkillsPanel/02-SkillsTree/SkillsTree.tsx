@@ -155,6 +155,13 @@ type SkillsTreeProps = {
       Paper
   ) => void;
 
+  /**
+   * Removes the lower rounding/border when another Explorer-style section is
+   * attached immediately beneath the Skills Tree.
+   */
+  attachedFooter?:
+    boolean;
+
   theme:
     AppTheme;
 };
@@ -193,6 +200,8 @@ export default function SkillsTree({
 
   addQuestionToPaper,
   regenerateQuestionToPaper,
+
+  attachedFooter = false,
 
   theme,
 }: SkillsTreeProps) {
@@ -319,8 +328,15 @@ export default function SkillsTree({
         border:
           `1px solid ${theme.borderStandard}`,
 
+        borderBottom:
+          attachedFooter
+            ? "none"
+            : `1px solid ${theme.borderStandard}`,
+
         borderRadius:
-          6,
+          attachedFooter
+            ? "6px 6px 0 0"
+            : 6,
 
         background:
           theme.bgSurface,

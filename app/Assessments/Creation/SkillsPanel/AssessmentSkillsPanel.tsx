@@ -6,6 +6,14 @@ import type {
   AppTheme,
 } from "@/app/UI/Application/Theme/AppTheme";
 
+import type {
+  AssessmentMetricsSnapshot,
+} from "../Metrics";
+
+import {
+  MetricsPanel,
+} from "../Metrics";
+
 import SkillsTree from "./02-SkillsTree/SkillsTree";
 
 type SkillsTreeProps =
@@ -17,17 +25,25 @@ type AssessmentSkillsPanelProps = {
   theme:
     AppTheme;
 
+  metrics?:
+    AssessmentMetricsSnapshot | null;
+
   skillsTreeProps:
     Omit<
       SkillsTreeProps,
-      "theme"
+      "theme" |
+      "attachedFooter"
     >;
 };
 
 export default function AssessmentSkillsPanel({
   theme,
+  metrics,
   skillsTreeProps,
 }: AssessmentSkillsPanelProps) {
+  const hasMetrics =
+    Boolean(metrics);
+
   return (
     <section
       style={{
@@ -44,7 +60,9 @@ export default function AssessmentSkillsPanel({
           "grid",
 
         gridTemplateRows:
-          "minmax(0, 1fr)",
+          hasMetrics
+            ? "minmax(0, 1fr) auto"
+            : "minmax(0, 1fr)",
 
         overflow:
           "hidden",
@@ -61,10 +79,20 @@ export default function AssessmentSkillsPanel({
     >
       <SkillsTree
         {...skillsTreeProps}
+        attachedFooter={
+          hasMetrics
+        }
         theme={
           theme
         }
       />
+
+      {metrics ? (
+        <MetricsPanel
+          metrics={metrics}
+          theme={theme}
+        />
+      ) : null}
     </section>
   );
 }

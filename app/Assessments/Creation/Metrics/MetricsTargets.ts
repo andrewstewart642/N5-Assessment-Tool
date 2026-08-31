@@ -3,10 +3,12 @@ import type {
 } from "@/app/Assessments/AssessmentTypes";
 
 import type {
+  CourseAssessmentConfig,
   CourseTopicTarget,
 } from "@/app/Courses/CourseAssessmentConfig";
 
 import type {
+  AssessmentMetricsPolicy,
   TopicMetricPolicy,
 } from "./MetricsTypes";
 
@@ -48,6 +50,40 @@ export function buildTopicMetricPolicies(
       maxPct: target.maxPct,
     })
   );
+}
+
+/**
+ * Convert the course-owned policy into the generic Metrics policy.
+ *
+ * No course identity, paper mark total or subject-specific percentage is
+ * embedded here. Courses opt in by supplying assessmentMetrics plus their
+ * existing topicTargets.
+ */
+export function buildAssessmentMetricsPolicy(
+  courseConfig: CourseAssessmentConfig
+): AssessmentMetricsPolicy | null {
+  const config =
+    courseConfig.assessmentMetrics;
+
+  if (!config) {
+    return null;
+  }
+
+  return {
+    standardBalance: {
+      ...config.standardBalance,
+    },
+    thinkingBalance: {
+      ...config.thinkingBalance,
+    },
+    topicTargets:
+      buildTopicMetricPolicies(
+        courseConfig.topicTargets
+      ),
+    coverage: {
+      ...config.coverage,
+    },
+  };
 }
 
 export function percentageToMarks(
