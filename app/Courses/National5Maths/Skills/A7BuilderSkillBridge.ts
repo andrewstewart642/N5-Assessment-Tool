@@ -42,21 +42,12 @@ const a7Concept = (
   },
 });
 
+/**
+ * Keep the Builder selectors explicit for the hardened A7 families. A generic
+ * "mixed" selector can silently disagree with a teacher's requested 3/5-mark
+ * tariff, whereas these two choices map one-to-one onto calibrated generators.
+ */
 const A7_BUILDER_CONCEPTS: Concept[] = [
-  a7Concept(
-    "alg-a7-mixed",
-    "A7",
-    "Mixed linear equations",
-    {
-      marks: 3,
-      thinkingType: "mixed",
-      paperSuitability: "BOTH",
-      availableDifficultyLevels: [1, 2],
-      defaultDifficultyLevel: 1,
-      fullDescription:
-        "Use the calibrated A7 family distribution, constrained by paper, marks and thinking type.",
-    },
-  ),
   a7Concept(
     "alg-a7-fractional",
     "A7.1",
