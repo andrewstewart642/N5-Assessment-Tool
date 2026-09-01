@@ -145,7 +145,7 @@ function ContextQuestion({
         display: "grid",
         gridTemplateColumns: "38px minmax(0, 1fr) 54px",
         columnGap: 8,
-        rowGap: 13,
+        rowGap: 10,
         alignItems: "start",
       }}
     >
@@ -155,7 +155,7 @@ function ContextQuestion({
         A triangle and rectangle are shown in the diagram.
       </div>
 
-      <div style={{ gridColumn: "2 / 4", gridRow: 3, paddingRight: 34, marginTop: 3 }}>
+      <div style={{ gridColumn: "2 / 4", gridRow: 3, paddingRight: 16, marginTop: -2 }}>
         <A7AreaPreview visual={question.visual} state={question.mathState} />
       </div>
 
@@ -184,8 +184,8 @@ export default function A7SqaQuestionPreview({ question, questionNumber = 1 }: P
       className="a7-sqa-preview"
       style={{
         width: "100%",
-        minHeight: question.family === "CONTEXT_AREA_EQUALITY" ? 500 : 180,
-        padding: question.family === "CONTEXT_AREA_EQUALITY" ? "22px 24px 28px" : "22px 24px 30px",
+        minHeight: question.family === "CONTEXT_AREA_EQUALITY" ? 440 : 180,
+        padding: question.family === "CONTEXT_AREA_EQUALITY" ? "18px 22px 22px" : "22px 24px 30px",
         background: "#ffffff",
         color: "#111111",
         borderRadius: 2,
