@@ -55,7 +55,10 @@ export const A7_FRACTIONAL_SURFACE_GENERATION_GUARDRAILS = [
 ] as const;
 
 export const A7_CONTEXT_VISUAL_GENERATION_GUARDRAILS = [
-  "Use a symmetric narrow triangle and a separate upright rectangle, following the overall arrangement of the reviewed 2022 source family.",
+  "Keep the triangle isosceles or equilateral in appearance, with its apex centred over its base; its proportions may vary with the generated dimensions rather than being forced into one narrow silhouette.",
+  "Make the displayed shape proportions broadly agree with the dimensions obtained at the intended value of x. A candidate substituting their answer as a sense-check should not be visually contradicted by the diagram.",
+  "Use a common qualitative scale for the triangle and rectangle where practical so the equal-area relationship remains visually plausible; clamp only for legibility rather than drawing every item to an identical template.",
+  "Allow the rectangle to be square-like, tall and narrow, or short and wide where the resolved dimensions support that aspect ratio.",
   "The algebraic dimension may appear horizontally or vertically on either shape, while the other dimension stays fixed so the equal-area model remains linear.",
   "Permit restrained linear forms such as x+c, c-x and occasional 2x+c or c-2x; a non-unit x coefficient is an upper-texture variant rather than the default.",
   "Place vertical dimension arrows immediately beside the relevant shapes and horizontal dimensions directly beneath them.",
