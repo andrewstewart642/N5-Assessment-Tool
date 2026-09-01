@@ -16,6 +16,9 @@ type A7AreaPreviewProps = {
 const VIEWBOX_WIDTH = 760;
 const VIEWBOX_HEIGHT = 350;
 const SHAPE_BOTTOM = 286;
+const SHAPE_SLOT_MAX_WIDTH = 245;
+const SHAPE_SLOT_MAX_HEIGHT = 235;
+const SHAPE_SCALE_CAP = 34;
 
 const mathParts = (latex: string): PaperPart[] => [
   { kind: "math", latex, displayMode: false },
@@ -73,25 +76,30 @@ function MathLabel({
 export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
   const resolved = resolvedDimensions(state);
 
-  // Use one common scale for both shapes. Because the generated areas are equal
-  // at the intended solution, this makes the drawing a useful qualitative
-  // sense-check without pretending that the diagram is an exact construction.
+  // Keep one common scale so equal mathematical areas remain qualitatively equal
+  // in the drawing, but actively use the available question-paper space. At
+  // least one resolved axis should normally approach its slot limit rather than
+  // leaving a pair of postage-stamp shapes in the middle of a large diagram.
   const largestHorizontal = Math.max(resolved.triangle.base, resolved.rectangle.width);
   const largestVertical = Math.max(resolved.triangle.height, resolved.rectangle.height);
-  const scale = Math.min(23, 170 / largestHorizontal, 220 / largestVertical);
+  const scale = Math.min(
+    SHAPE_SCALE_CAP,
+    SHAPE_SLOT_MAX_WIDTH / largestHorizontal,
+    SHAPE_SLOT_MAX_HEIGHT / largestVertical,
+  );
 
   const triangleWidth = resolved.triangle.base * scale;
   const triangleHeight = resolved.triangle.height * scale;
   const rectangleWidth = resolved.rectangle.width * scale;
   const rectangleHeight = resolved.rectangle.height * scale;
 
-  const triangleCentreX = 195;
+  const triangleCentreX = 185;
   const triangleLeft = triangleCentreX - triangleWidth / 2;
   const triangleRight = triangleCentreX + triangleWidth / 2;
   const triangleTop = SHAPE_BOTTOM - triangleHeight;
   const triangleArrowX = triangleRight + 28;
 
-  const rectangleCentreX = 535;
+  const rectangleCentreX = 545;
   const rectangleLeft = rectangleCentreX - rectangleWidth / 2;
   const rectangleTop = SHAPE_BOTTOM - rectangleHeight;
   const rectangleRight = rectangleCentreX + rectangleWidth / 2;
@@ -102,7 +110,7 @@ export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
       style={{
         position: "relative",
         width: "100%",
-        maxWidth: 650,
+        maxWidth: 760,
         aspectRatio: `${VIEWBOX_WIDTH} / ${VIEWBOX_HEIGHT}`,
         margin: "6px auto 12px",
         color: "#111111",
