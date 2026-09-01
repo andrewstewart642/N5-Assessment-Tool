@@ -31,32 +31,15 @@ export {
   getConceptFromSelection,
 };
 
+const A7_GENERAL_CONCEPT_ID = "alg-a7-linear-general";
+const A7_FRACTIONAL_CONCEPT_ID = "alg-a7-fractional";
+const A7_FORM_AND_SOLVE_CONCEPT_ID = "alg-a7-area-equality";
+
 const isA7Skill = (skill: Skill) =>
   skill.id === "alg-a07-linear-equations";
 
-const a7VariantProfiles = (
-  skill: Skill,
-  selectedConcept: string,
-): QuestionVariantSelectionMeta[] => {
-  const concept = getConceptFromSelection(skill, selectedConcept);
-
-  if (concept?.id === "alg-a7-area-equality") {
-    return [{
-      level: 2,
-      templateId: "A7_LINEAR_EQUATIONS_V1:CONTEXT_AREA_EQUALITY:UPPER_VALID",
-      marks: {
-        totalMarks: 5,
-        cMarks: 0,
-        aMarks: 5,
-        reasoningMarks: 5,
-      },
-      standardProfile: "A",
-      paperSuitability: "P1",
-      calculatorStatus: "CalculatorAllowed",
-    }];
-  }
-
-  return [1, 2].map((level) => ({
+const a7FractionalVariantProfiles = (): QuestionVariantSelectionMeta[] =>
+  [1, 2].map((level) => ({
     level,
     templateId: `A7_LINEAR_EQUATIONS_V1:FRACTIONAL_COEFFICIENT:${level === 1 ? "LOWER_VALID" : "UPPER_VALID"}`,
     marks: {
@@ -69,6 +52,50 @@ const a7VariantProfiles = (
     paperSuitability: "BOTH",
     calculatorStatus: "CalculatorAllowed" as const,
   }));
+
+const a7FormAndSolveVariantProfiles = (): QuestionVariantSelectionMeta[] => [
+  {
+    level: 2,
+    templateId: "A7_LINEAR_EQUATIONS_V1:CONTEXT_AREA_EQUALITY:UPPER_VALID",
+    marks: {
+      totalMarks: 5,
+      cMarks: 0,
+      aMarks: 5,
+      reasoningMarks: 5,
+    },
+    standardProfile: "A",
+    paperSuitability: "P1",
+    calculatorStatus: "CalculatorAllowed",
+  },
+];
+
+const a7VariantProfiles = (
+  skill: Skill,
+  selectedConcept: string,
+): QuestionVariantSelectionMeta[] => {
+  const concept = getConceptFromSelection(skill, selectedConcept);
+
+  if (concept?.id === A7_FRACTIONAL_CONCEPT_ID) {
+    return a7FractionalVariantProfiles();
+  }
+
+  if (concept?.id === A7_FORM_AND_SOLVE_CONCEPT_ID) {
+    return a7FormAndSolveVariantProfiles();
+  }
+
+  if (concept?.id === A7_GENERAL_CONCEPT_ID) {
+    return [
+      ...a7FractionalVariantProfiles(),
+      ...a7FormAndSolveVariantProfiles(),
+    ];
+  }
+
+  // A generic/restored A7 selection should behave like the parent selector,
+  // rather than silently collapsing to only one of its child families.
+  return [
+    ...a7FractionalVariantProfiles(),
+    ...a7FormAndSolveVariantProfiles(),
+  ];
 };
 
 export function getAvailableDifficultiesForConcept(
@@ -79,11 +106,15 @@ export function getAvailableDifficultiesForConcept(
     return getAvailableDifficultiesClean(skill, selectedConcept);
   }
 
-  return a7VariantProfiles(skill, selectedConcept)
-    .map((profile) => profile.level)
-    .filter((level): level is DifficultyLevel =>
-      level >= 1 && level <= 5
-    );
+  return [
+    ...new Set(
+      a7VariantProfiles(skill, selectedConcept)
+        .map((profile) => profile.level)
+        .filter((level): level is DifficultyLevel =>
+          level >= 1 && level <= 5
+        )
+    ),
+  ];
 }
 
 export function isDifficultyEligibleForConcept(
