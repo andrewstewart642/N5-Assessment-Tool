@@ -26,7 +26,7 @@ type Sample = {
   error?: string;
 };
 
-const SAMPLE_COUNTS = [1, 5, 10, 20] as const;
+const SAMPLE_COUNTS = [2, 4, 6, 10, 20] as const;
 
 const FAMILY_OPTIONS: { value: FamilyControl; label: string; papers: A7GeneratorPaper[] }[] = [
   { value: "MIX", label: "Calibrated mix", papers: ["P1", "P2"] },
@@ -40,13 +40,13 @@ function Chip({ children, emphasis = false }: { children: ReactNode; emphasis?: 
       style={{
         display: "inline-flex",
         alignItems: "center",
-        minHeight: 22,
-        padding: "2px 8px",
+        minHeight: 21,
+        padding: "2px 7px",
         border: emphasis ? "1px solid rgba(96,165,250,0.50)" : "1px solid rgba(148,163,184,0.24)",
         borderRadius: 999,
         background: emphasis ? "rgba(59,130,246,0.12)" : "rgba(255,255,255,0.04)",
         color: emphasis ? "#bfdbfe" : "#cbd5e1",
-        fontSize: 10,
+        fontSize: 9.5,
         whiteSpace: "nowrap",
       }}
     >
@@ -67,9 +67,9 @@ function SectionTitle({ children }: { children: ReactNode }) {
   return (
     <div
       style={{
-        marginBottom: 6,
+        marginBottom: 5,
         color: "#94a3b8",
-        fontSize: 10,
+        fontSize: 9.5,
         fontWeight: 800,
         letterSpacing: "0.05em",
         textTransform: "uppercase",
@@ -88,7 +88,7 @@ function sourceReference(question: A7GeneratedQuestion) {
 function MarkingDetail({ scheme }: { scheme: A7GeneratedMarkingScheme }) {
   return (
     <div style={{ display: "grid", gap: 8 }}>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
         <Chip emphasis>{scheme.profileId.replaceAll("_", " ")}</Chip>
         <Chip>{scheme.markProfile.replaceAll("_", " ")}</Chip>
         <Chip>{scheme.workingPolicy.unsupportedCorrectAnswerTreatment.replaceAll("_", " ")}</Chip>
@@ -100,21 +100,21 @@ function MarkingDetail({ scheme }: { scheme: A7GeneratedMarkingScheme }) {
             key={`${mark.markNumber}-${mark.role}`}
             style={{
               display: "grid",
-              gridTemplateColumns: "60px 150px minmax(0, 1fr)",
+              gridTemplateColumns: "52px 118px minmax(0, 1fr)",
               borderTop: index ? "1px solid #e5e7eb" : "none",
               fontFamily: "Arial, Helvetica, sans-serif",
             }}
           >
-            <div style={{ padding: 9, borderRight: "1px solid #e5e7eb", textAlign: "center", fontWeight: 700, fontSize: 10 }}>
+            <div style={{ padding: 7, borderRight: "1px solid #e5e7eb", textAlign: "center", fontWeight: 700, fontSize: 9 }}>
               {mark.partLabel ? `(${mark.partLabel}) ` : ""}m{mark.markNumber}
             </div>
-            <div style={{ padding: 9, borderRight: "1px solid #e5e7eb", fontWeight: 700, fontSize: 9, lineHeight: 1.35 }}>
+            <div style={{ padding: 7, borderRight: "1px solid #e5e7eb", fontWeight: 700, fontSize: 8.5, lineHeight: 1.35 }}>
               {mark.role.replaceAll("_", " ")}
               <div style={{ marginTop: 3, color: "#64748b", fontWeight: 600 }}>
                 {mark.standard} · {mark.thinking === "REASONING" ? "Reasoning" : "Operational"}
               </div>
             </div>
-            <div style={{ padding: 9, fontSize: 10, lineHeight: 1.4 }}>
+            <div style={{ padding: 7, fontSize: 9, lineHeight: 1.4 }}>
               <div style={{ fontWeight: 700 }}>{mark.requirement}</div>
               {mark.evidenceExamples.length ? <div style={{ marginTop: 4 }}><strong>Evidence:</strong> {mark.evidenceExamples.join("; ")}</div> : null}
               {mark.acceptanceNotes.length ? <div style={{ marginTop: 4, color: "#475569" }}><strong>Accept:</strong> {mark.acceptanceNotes.join(" ")}</div> : null}
@@ -127,10 +127,10 @@ function MarkingDetail({ scheme }: { scheme: A7GeneratedMarkingScheme }) {
       <div style={{ display: "grid", gap: 6 }}>
         {scheme.methods.map((method) => (
           <div key={method.methodFamilyId} style={{ border: "1px solid rgba(148,163,184,0.18)", borderRadius: 7, overflow: "hidden" }}>
-            <div style={{ padding: "6px 8px", color: "#cbd5e1", fontSize: 10, fontWeight: 700 }}>
+            <div style={{ padding: "5px 7px", color: "#cbd5e1", fontSize: 9, fontWeight: 700 }}>
               {method.methodFamilyId.replaceAll("_", " ")}
             </div>
-            <div style={{ display: "grid", gap: 4, padding: 9, background: "#ffffff", color: "#111827", fontFamily: "Arial, Helvetica, sans-serif", fontSize: 10 }}>
+            <div style={{ display: "grid", gap: 4, padding: 7, background: "#ffffff", color: "#111827", fontFamily: "Arial, Helvetica, sans-serif", fontSize: 9 }}>
               {method.lines.map((line) => (
                 <div key={line.id} style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", gap: 8 }}>
                   <span>{line.text}</span>
@@ -148,19 +148,18 @@ function MarkingDetail({ scheme }: { scheme: A7GeneratedMarkingScheme }) {
 function DifficultyDetail({ question }: { question: A7GeneratedQuestion }) {
   const metrics = question.quality.difficultyMetrics;
   return (
-    <div style={{ display: "grid", gap: 6, padding: "8px 10px", border: "1px solid rgba(167,139,250,0.22)", borderRadius: 7, background: "rgba(124,58,237,0.055)", color: "#ddd6fe", fontSize: 10 }}>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-        <Chip emphasis>Difficulty {question.difficulty}</Chip>
+    <div style={{ display: "grid", gap: 5, padding: "7px 8px", border: "1px solid rgba(167,139,250,0.22)", borderRadius: 7, background: "rgba(124,58,237,0.055)", color: "#ddd6fe", fontSize: 9 }}>
+      <div style={{ display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+        <Chip emphasis>D{question.difficulty}</Chip>
         <Chip>{question.quality.difficultyBandId.replaceAll("_", " ").toLowerCase()}</Chip>
         <Chip>score {question.quality.difficultyScore}</Chip>
         {metrics.denominatorLcm !== null ? <Chip>LCD {metrics.denominatorLcm}</Chip> : null}
-        <Chip>surface {metrics.surfaceComplexity}</Chip>
         <Chip>max coeff {metrics.largestWorkingCoefficient}</Chip>
-        <Chip>max constant {metrics.largestWorkingConstant}</Chip>
+        <Chip>max const {metrics.largestWorkingConstant}</Chip>
         <Chip>final coeff {metrics.rearrangedCoefficientMagnitude}</Chip>
-        {metrics.solutionDenominator !== null ? <Chip>answer denom {metrics.solutionDenominator}</Chip> : null}
+        {metrics.solutionDenominator !== null ? <Chip>ans denom {metrics.solutionDenominator}</Chip> : null}
       </div>
-      <div style={{ color: "#c4b5fd", lineHeight: 1.45 }}>
+      <div style={{ color: "#c4b5fd", lineHeight: 1.4 }}>
         {question.quality.difficultySignals.join(" ")}
       </div>
     </div>
@@ -170,7 +169,7 @@ function DifficultyDetail({ question }: { question: A7GeneratedQuestion }) {
 function SampleCard({ sample, index, showDetail }: { sample: Sample; index: number; showDetail: boolean }) {
   if (sample.error) {
     return (
-      <article style={{ border: "1px solid rgba(248,113,113,0.42)", borderRadius: 10, padding: 12, background: "rgba(127,29,29,0.12)" }}>
+      <article style={{ minWidth: 0, border: "1px solid rgba(248,113,113,0.42)", borderRadius: 10, padding: 12, background: "rgba(127,29,29,0.12)" }}>
         <strong style={{ color: "#fca5a5" }}>Sample {index + 1} failed · seed {sample.seed}</strong>
         <pre style={{ whiteSpace: "pre-wrap", color: "#fecaca", fontSize: 9 }}>{sample.error}</pre>
       </article>
@@ -183,58 +182,55 @@ function SampleCard({ sample, index, showDetail }: { sample: Sample; index: numb
   const reference = sourceReference(question);
 
   return (
-    <article style={{ overflow: "hidden", border: "1px solid rgba(148,163,184,0.18)", borderRadius: 10, background: "rgba(255,255,255,0.025)" }}>
+    <article style={{ minWidth: 0, overflow: "hidden", border: "1px solid rgba(148,163,184,0.18)", borderRadius: 10, background: "rgba(255,255,255,0.025)" }}>
       <div
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 8,
-          padding: "8px 10px",
+          gap: 7,
+          padding: "7px 9px",
           borderBottom: "1px solid rgba(148,163,184,0.14)",
         }}
       >
-        <strong style={{ color: "#e2e8f0", fontSize: 11 }}>Sample {index + 1} · seed {sample.seed}</strong>
-        <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          <Chip emphasis>D{question.difficulty} · {question.quality.difficultyBandId.replaceAll("_", " ")}</Chip>
-          <Chip>{question.marks} marks</Chip>
-          <Chip>{question.standard}</Chip>
+        <strong style={{ color: "#e2e8f0", fontSize: 10.5, whiteSpace: "nowrap" }}>Sample {index + 1} · seed {sample.seed}</strong>
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <Chip emphasis>D{question.difficulty}</Chip>
+          <Chip>{question.marks}m</Chip>
           <Chip>{question.thinking === "REASONING" ? "Reasoning" : "Operational"}</Chip>
           <Chip>{question.paper}</Chip>
-          <Chip>{question.family.replaceAll("_", " ")}</Chip>
+          <Chip>{question.family === "FRACTIONAL_COEFFICIENT" ? "Fractional" : "Area context"}</Chip>
         </div>
       </div>
 
-      <div style={{ display: "grid", gap: 12, padding: 10 }}>
+      <div style={{ display: "grid", gap: 9, padding: 8 }}>
         <section>
           <SectionTitle>SQA-style question preview</SectionTitle>
           <A7SqaQuestionPreview question={question} questionNumber={index + 1} />
         </section>
 
-        <section>
-          <SectionTitle>Historical reference</SectionTitle>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center", padding: "8px 10px", border: "1px solid rgba(96,165,250,0.22)", borderRadius: 7, background: "rgba(59,130,246,0.055)", color: "#dbeafe", fontSize: 10 }}>
-            <strong>{reference ? `See ${reference}` : "No primary historical reference"}</strong>
-            {question.sourceBasis.historicalReference.matchReasons.map((reason) => (
-              <Chip key={reason}>{reason.replaceAll("_", " ").toLowerCase()}</Chip>
-            ))}
+        <section style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.15fr) minmax(0, 0.85fr)", gap: 8, alignItems: "start" }}>
+          <div style={{ minWidth: 0 }}>
+            <SectionTitle>Historical reference</SectionTitle>
+            <div style={{ padding: "7px 8px", border: "1px solid rgba(96,165,250,0.22)", borderRadius: 7, background: "rgba(59,130,246,0.055)", color: "#dbeafe", fontSize: 9.5, lineHeight: 1.35 }}>
+              <strong>{reference ? `See ${reference}` : "No primary historical reference"}</strong>
+            </div>
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <SectionTitle>Final answer</SectionTitle>
+            <div style={{ display: "grid", gap: 2, padding: "7px 8px", borderRadius: 7, background: "rgba(255,255,255,0.055)", color: "#f8fafc", fontSize: 10 }}>
+              {scheme.finalAnswers.map((answer) => (
+                <div key={`${answer.partLabel}-${answer.normalisedAnswer}`}>
+                  {answer.partLabel ? `(${answer.partLabel}) ` : ""}{answer.normalisedAnswer}
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
         <section>
           <SectionTitle>Difficulty calibration</SectionTitle>
           <DifficultyDetail question={question} />
-        </section>
-
-        <section>
-          <SectionTitle>Final answer</SectionTitle>
-          <div style={{ display: "grid", gap: 3, padding: "8px 10px", borderRadius: 7, background: "rgba(255,255,255,0.055)", color: "#f8fafc", fontSize: "10.5pt" }}>
-            {scheme.finalAnswers.map((answer) => (
-              <div key={`${answer.partLabel}-${answer.normalisedAnswer}`}>
-                {answer.partLabel ? `(${answer.partLabel}) ` : ""}{answer.normalisedAnswer}
-              </div>
-            ))}
-          </div>
         </section>
 
         {showDetail ? (
@@ -244,9 +240,9 @@ function SampleCard({ sample, index, showDetail }: { sample: Sample; index: numb
           </section>
         ) : null}
 
-        <details style={{ borderTop: "1px solid rgba(148,163,184,0.10)", paddingTop: 5 }}>
-          <summary style={{ cursor: "pointer", color: "#64748b", fontSize: 9, fontWeight: 700 }}>Raw generated pair</summary>
-          <pre style={{ marginTop: 6, maxHeight: 420, overflow: "auto", padding: 8, borderRadius: 7, background: "rgba(0,0,0,0.28)", color: "#94a3b8", fontSize: 8, lineHeight: 1.35, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+        <details style={{ borderTop: "1px solid rgba(148,163,184,0.10)", paddingTop: 4 }}>
+          <summary style={{ cursor: "pointer", color: "#64748b", fontSize: 8.5, fontWeight: 700 }}>Raw generated pair</summary>
+          <pre style={{ marginTop: 6, maxHeight: 360, overflow: "auto", padding: 8, borderRadius: 7, background: "rgba(0,0,0,0.28)", color: "#94a3b8", fontSize: 8, lineHeight: 1.35, whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
             {JSON.stringify({ question, markingScheme: scheme }, null, 2)}
           </pre>
         </details>
@@ -341,7 +337,7 @@ export default function A7SqaGeneratorTesterPage() {
   } as const;
 
   return (
-    <main style={{ minHeight: "100vh", padding: 16, background: "#070a10", color: "#f8fafc", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" }}>
+    <main style={{ minHeight: "100vh", padding: 10, background: "#070a10", color: "#f8fafc", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" }}>
       <style>{`
         .a7-sqa-preview .katex-display {
           margin: 0 !important;
@@ -352,15 +348,26 @@ export default function A7SqaGeneratorTesterPage() {
           text-align: center !important;
         }
         .a7-sqa-preview .katex {
-          font-size: 1.08em;
+          font-size: 1.04em;
+        }
+        .a7-comparison-grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+          align-items: start;
+        }
+        @media (max-width: 1180px) {
+          .a7-comparison-grid {
+            grid-template-columns: minmax(0, 1fr);
+          }
         }
       `}</style>
 
-      <div style={{ width: "min(1780px, 100%)", margin: "0 auto" }}>
-        <section style={{ display: "flex", alignItems: "end", gap: 8, flexWrap: "wrap", padding: 10, marginBottom: 8, border: "1px solid rgba(148,163,184,0.18)", borderRadius: 10, background: "rgba(255,255,255,0.03)" }}>
+      <div style={{ width: "min(1980px, 100%)", margin: "0 auto" }}>
+        <section style={{ display: "flex", alignItems: "end", gap: 8, flexWrap: "wrap", padding: 9, marginBottom: 8, border: "1px solid rgba(148,163,184,0.18)", borderRadius: 10, background: "rgba(255,255,255,0.03)" }}>
           <Label>
             A7 family
-            <select value={family} onChange={(event) => { setFamily(event.target.value as FamilyControl); setDirty(true); }} style={{ ...controlStyle, minWidth: 220 }}>
+            <select value={family} onChange={(event) => { setFamily(event.target.value as FamilyControl); setDirty(true); }} style={{ ...controlStyle, minWidth: 200 }}>
               {FAMILY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
           </Label>
@@ -381,7 +388,7 @@ export default function A7SqaGeneratorTesterPage() {
                 setDifficulty(value === "MIX" ? "MIX" : Number(value) as A7GeneratorDifficulty);
                 setDirty(true);
               }}
-              style={{ ...controlStyle, minWidth: 150 }}
+              style={{ ...controlStyle, minWidth: 145 }}
             >
               <option value="MIX">Calibrated mix</option>
               <option value="1">Band 1 · lower</option>
@@ -398,18 +405,18 @@ export default function A7SqaGeneratorTesterPage() {
 
           <Label>
             Next batch seed
-            <input type="number" value={nextSeed} onChange={(event) => { setNextSeed(Number(event.target.value) || 1); setDirty(true); }} style={{ ...controlStyle, width: 110 }} />
+            <input type="number" value={nextSeed} onChange={(event) => { setNextSeed(Number(event.target.value) || 1); setDirty(true); }} style={{ ...controlStyle, width: 105 }} />
           </Label>
 
-          <button type="button" onClick={generateNextBatch} style={{ height: 32, padding: "0 14px", border: "1px solid rgba(96,165,250,0.52)", borderRadius: 7, background: "rgba(59,130,246,0.18)", color: "#dbeafe", cursor: "pointer", fontSize: 11, fontWeight: 800 }}>
+          <button type="button" onClick={generateNextBatch} style={{ height: 32, padding: "0 13px", border: "1px solid rgba(96,165,250,0.52)", borderRadius: 7, background: "rgba(59,130,246,0.18)", color: "#dbeafe", cursor: "pointer", fontSize: 11, fontWeight: 800 }}>
             Generate next batch
           </button>
 
-          <button type="button" onClick={() => setShowDetail((value) => !value)} style={{ height: 32, padding: "0 13px", border: "1px solid rgba(148,163,184,0.28)", borderRadius: 7, background: showDetail ? "rgba(255,255,255,0.055)" : "rgba(16,185,129,0.10)", color: showDetail ? "#cbd5e1" : "#a7f3d0", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
+          <button type="button" onClick={() => setShowDetail((value) => !value)} style={{ height: 32, padding: "0 12px", border: "1px solid rgba(148,163,184,0.28)", borderRadius: 7, background: showDetail ? "rgba(255,255,255,0.055)" : "rgba(16,185,129,0.10)", color: showDetail ? "#cbd5e1" : "#a7f3d0", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
             {showDetail ? "Hide answer detail" : "Show marking + worked answer"}
           </button>
 
-          <div style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 4, flexWrap: "wrap", alignItems: "center" }}>
             {dirty ? <Chip emphasis>Controls changed · generate</Chip> : null}
             {lastStartSeed !== null ? <Chip>batch source {lastStartSeed}</Chip> : null}
             <Chip>{samples.length} generated</Chip>
@@ -421,11 +428,11 @@ export default function A7SqaGeneratorTesterPage() {
           </div>
         </section>
 
-        <section style={{ marginBottom: 10, padding: "8px 10px", border: "1px solid rgba(96,165,250,0.18)", borderRadius: 8, background: "rgba(59,130,246,0.04)", color: "#bfdbfe", fontSize: 10, lineHeight: 1.45 }}>
-          A7 QA now tests two separate things at once: SQA-like surface fidelity and route-based difficulty. Band 1 keeps the written arithmetic compact; Band 2 permits more LCD/bracket/coefficient work, but displayed denominators remain at most 10 and LCD at most 15. Batch generation rejects duplicate displayed questions.
+        <section style={{ marginBottom: 8, padding: "7px 9px", border: "1px solid rgba(96,165,250,0.18)", borderRadius: 8, background: "rgba(59,130,246,0.04)", color: "#bfdbfe", fontSize: 9.5, lineHeight: 1.4 }}>
+          Two-up comparison mode: each row shows two generated questions side-by-side for faster SQA-fidelity and difficulty moderation. Below 1180px the page falls back to one column.
         </section>
 
-        <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 760px), 1fr))", gap: 12 }}>
+        <section className="a7-comparison-grid">
           {samples.map((sample, index) => (
             <SampleCard key={sample.id} sample={sample} index={index} showDetail={showDetail} />
           ))}
