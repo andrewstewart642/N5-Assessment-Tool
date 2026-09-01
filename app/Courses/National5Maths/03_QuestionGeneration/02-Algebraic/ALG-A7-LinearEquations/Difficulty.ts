@@ -18,8 +18,8 @@ export type A7DifficultyAssessment = {
 const absoluteMax = (values: readonly number[]) => Math.max(...values.map((value) => Math.abs(value)));
 
 const bandForScore = (score: number): { difficulty: A7GeneratorDifficulty; bandId: A7GeneratorDifficultyBandId } => {
-  const band = A7_GENERATOR_DIFFICULTY_BANDS.find((candidate) => score >= candidate.scoreMin && score <= candidate.scoreMax)
-    ?? A7_GENERATOR_DIFFICULTY_BANDS[A7_GENERATOR_DIFFICULTY_BANDS.length - 1];
+  const band = A7_GENERATOR_DIFFICULTY_BANDS.find((candidate) => score >= candidate.scoreMin && score <= candidate.scoreMax);
+  if (!band) return { difficulty: 2, bandId: "UPPER_VALID" };
   return { difficulty: band.difficulty, bandId: band.bandId };
 };
 
@@ -45,7 +45,7 @@ export const assessA7FractionalDifficulty = (state: A7FractionalEquationState): 
   }
   if (state.denominatorLcm >= 12) {
     score += 1;
-    signals.push("LCD is in the upper moderated range (12-15). ");
+    signals.push("LCD is in the upper moderated range (12-15).");
   }
   if (surfaceComplexity === 2) {
     score += 2;
