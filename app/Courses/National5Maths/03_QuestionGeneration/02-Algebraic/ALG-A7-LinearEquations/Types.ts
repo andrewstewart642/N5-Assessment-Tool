@@ -12,7 +12,23 @@ export type A7Rational = {
   denominator: number;
 };
 
-export type A7FractionalSurfaceVariant = "SPLIT_TERMS" | "BINOMIAL_LEFT_NUMERATOR";
+/**
+ * Source-calibrated display grammars from the three reviewed standalone A7
+ * equations. These are structural grammars, not historical wording templates.
+ *
+ * SPLIT_TERMS
+ *   ax/d1 - b/d2 = cx              (2016-type surface)
+ *
+ * BINOMIAL_RIGHT_NUMERATOR
+ *   ax/d1 - n = (b - cx)/d2        (2019-type surface)
+ *
+ * BINOMIAL_LEFT_NUMERATOR
+ *   (ax + b)/d1 = cx/d2 + n        (2025-type surface)
+ */
+export type A7FractionalSurfaceVariant =
+  | "SPLIT_TERMS"
+  | "BINOMIAL_RIGHT_NUMERATOR"
+  | "BINOMIAL_LEFT_NUMERATOR";
 
 export type A7FractionalEquationState = {
   family: "FRACTIONAL_COEFFICIENT";
@@ -72,10 +88,14 @@ export type A7AreaVisualSpec = {
   triangle: {
     baseLabel: string;
     heightLabel: string;
+    baseLatex: string;
+    heightLatex: string;
   };
   rectangle: {
     heightLabel: string;
     widthLabel: string;
+    heightLatex: string;
+    widthLatex: string;
   };
   requirements: string[];
 };
