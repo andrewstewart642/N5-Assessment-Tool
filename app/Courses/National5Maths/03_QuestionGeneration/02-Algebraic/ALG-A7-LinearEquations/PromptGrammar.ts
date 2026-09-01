@@ -8,45 +8,49 @@ import type {
 
 const abs = (value: number) => Math.abs(value);
 
+const positiveXText = (coefficient: number) => coefficient === 1 ? "x" : `${coefficient}x`;
+
 const unsignedRationalLatex = (value: A7Rational, variable = false) => {
   const numerator = abs(value.numerator);
   const denominator = value.denominator;
   if (variable) {
-    if (denominator === 1) return numerator === 1 ? "x" : `${numerator}x`;
-    return numerator === 1 ? `\\frac{x}{${denominator}}` : `\\frac{${numerator}x}{${denominator}}`;
+    const numeratorText = numerator === 1 ? "x" : `${numerator}x`;
+    return denominator === 1 ? numeratorText : `\\frac{${numeratorText}}{${denominator}}`;
   }
   return denominator === 1 ? `${numerator}` : `\\frac{${numerator}}{${denominator}}`;
 };
 
-const linearSideLatex = (xTerm: A7Rational, constant: A7Rational) => {
-  const pieces: string[] = [];
-  if (xTerm.numerator !== 0) {
-    const x = unsignedRationalLatex(xTerm, true);
-    pieces.push(xTerm.numerator < 0 ? `-${x}` : x);
-  }
-  if (constant.numerator !== 0) {
-    const value = unsignedRationalLatex(constant, false);
-    if (!pieces.length) pieces.push(constant.numerator < 0 ? `-${value}` : value);
-    else pieces.push(constant.numerator < 0 ? `- ${value}` : `+ ${value}`);
-  }
-  return pieces.length ? pieces.join(" ") : "0";
+const splitTermsLatex = (state: A7FractionalEquationState) => {
+  const leftX = unsignedRationalLatex(state.lhsX, true);
+  const leftConstant = unsignedRationalLatex(state.lhsConstant, false);
+  const rightX = positiveXText(state.rhsX.numerator);
+  return `${leftX} - ${leftConstant} = ${rightX}`;
+};
+
+const binomialRightLatex = (state: A7FractionalEquationState) => {
+  const leftX = unsignedRationalLatex(state.lhsX, true);
+  const wholeConstant = abs(state.lhsConstant.numerator);
+  const denominator = state.rhsX.denominator;
+  const constantNumerator = state.rhsConstant.numerator;
+  const xNumerator = abs(state.rhsX.numerator);
+  const xText = xNumerator === 1 ? "x" : `${xNumerator}x`;
+  return `${leftX} - ${wholeConstant} = \\frac{${constantNumerator} - ${xText}}{${denominator}}`;
 };
 
 const binomialLeftLatex = (state: A7FractionalEquationState) => {
   const denominator = state.lhsX.denominator;
   const xNumerator = state.lhsX.numerator;
   const constantNumerator = state.lhsConstant.numerator;
-  const xText = xNumerator === 1 ? "x" : xNumerator === -1 ? "-x" : `${xNumerator}x`;
-  const constantText = constantNumerator < 0 ? `- ${abs(constantNumerator)}` : `+ ${constantNumerator}`;
-  return `\\frac{${xText} ${constantText}}{${denominator}}`;
+  const xText = xNumerator === 1 ? "x" : `${xNumerator}x`;
+  const rightX = unsignedRationalLatex(state.rhsX, true);
+  const wholeConstant = state.rhsConstant.numerator;
+  return `\\frac{${xText} + ${constantNumerator}}{${denominator}} = ${rightX} + ${wholeConstant}`;
 };
 
 export const fractionalEquationLatex = (state: A7FractionalEquationState) => {
-  const left = state.surfaceVariant === "BINOMIAL_LEFT_NUMERATOR"
-    ? binomialLeftLatex(state)
-    : linearSideLatex(state.lhsX, state.lhsConstant);
-  const right = linearSideLatex(state.rhsX, state.rhsConstant);
-  return `${left} = ${right}`;
+  if (state.surfaceVariant === "SPLIT_TERMS") return splitTermsLatex(state);
+  if (state.surfaceVariant === "BINOMIAL_RIGHT_NUMERATOR") return binomialRightLatex(state);
+  return binomialLeftLatex(state);
 };
 
 export const buildA7FractionalPrompt = (state: A7FractionalEquationState): {
@@ -55,16 +59,29 @@ export const buildA7FractionalPrompt = (state: A7FractionalEquationState): {
   promptSections: A7PromptSection[];
 } => {
   const equation = fractionalEquationLatex(state);
-  const lead = "Solve the equation.";
-  const finish = "Give your answer in its simplest form.";
+  const lead = "Solve the equation";
+
+  if (state.surfaceVariant === "SPLIT_TERMS") {
+    const finish = "Give your answer in its simplest form.";
+    return {
+      prompt: `${lead}. ${equation}. ${finish}`,
+      promptParts: [
+        { kind: "text", value: lead },
+        { kind: "math", latex: equation, displayMode: true },
+        { kind: "text", value: finish },
+      ],
+      promptSections: [{ label: "", text: `${lead}. ${finish}`, marks: 3 }],
+    };
+  }
+
   return {
-    prompt: `${lead} ${equation} ${finish}`,
+    prompt: `${lead} ${equation}.`,
     promptParts: [
-      { kind: "text", value: lead },
-      { kind: "math", latex: equation, displayMode: true },
-      { kind: "text", value: finish },
+      { kind: "text", value: `${lead} ` },
+      { kind: "math", latex: equation, displayMode: false },
+      { kind: "text", value: "." },
     ],
-    promptSections: [{ label: "", text: `${lead} ${finish}`, marks: 3 }],
+    promptSections: [{ label: "", text: lead, marks: 3 }],
   };
 };
 
@@ -81,10 +98,10 @@ export const buildA7ContextPrompt = (state: A7ContextAreaState): {
 } => {
   const triangleHeight = signedLinearLabel(1, state.triangle.heightConstant);
   const rectangleWidth = signedLinearLabel(-1, state.rectangle.widthConstant);
-  const introduction = "A triangle and a rectangle are shown in the diagram.";
+  const introduction = "A triangle and rectangle are shown in the diagram.";
   const diagramSummary = `Triangle: base ${state.triangle.base} cm, height (${triangleHeight}) cm. Rectangle: height ${state.rectangle.height} cm, width (${rectangleWidth}) cm.`;
-  const partA = "Find an expression, in terms of x, for the area of the triangle.";
-  const partB = "The triangle and rectangle have equal areas. Find the value of x algebraically.";
+  const partA = "Find an expression for the area of the triangle.";
+  const partB = "Given that the area of the triangle is equal to the area of the rectangle, find algebraically the value of x.";
 
   return {
     prompt: `${introduction} ${diagramSummary} (a) ${partA} (b) ${partB}`,
