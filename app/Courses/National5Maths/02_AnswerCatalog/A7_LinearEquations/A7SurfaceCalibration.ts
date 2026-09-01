@@ -51,10 +51,11 @@ export const A7_FRACTIONAL_SURFACE_EVIDENCE: readonly A7FractionalSurfaceEvidenc
 export const A7_FRACTIONAL_SURFACE_GENERATION_GUARDRAILS = [
   "Keep the displayed equation to three top-level algebraic objects; do not turn the source family into a four-term rational-expression exercise.",
   "Begin both sides with a positive algebraic object. Internal subtraction is permitted where historically evidenced, but a leading negative term is not part of the reviewed A7 surface grammar.",
-  "Use two distinct displayed non-unit denominators whose lowest common denominator remains 6 or 10.",
-  "Prefer structurally clean denominator pairings related to the reviewed 3-and-6, 2-and-5, and 2-and-3 examples rather than arbitrary fractions on every term.",
+  "Use two distinct displayed non-unit denominators. Historical anchors use 2, 3, 5 and 6; teacher-moderated generation may interpolate to similarly natural pairings using displayed denominators no larger than 10 and LCD no larger than 15.",
+  "Prefer recognisable lowest-common-denominator pairings such as 2-and-3, 3-and-6, 2-and-5, 3-and-4, 4-and-6, 3-and-5 and 4-and-8 rather than arbitrary fractions on every term.",
   "Treat the three reviewed source surfaces as separate prompt grammars: 2016-type split fractions, 2019-type right binomial fraction, and 2025-type left binomial fraction.",
-  "Do not broaden surface complexity merely because the cleared equation remains inside the numerical calibration envelope; visual/algebraic cleanliness is itself part of fidelity.",
+  "Do not broaden surface complexity merely because the cleared equation remains numerically solvable; visual/algebraic cleanliness is itself part of fidelity.",
+  "For every proposed extension ask the explicit moderation question: would this still look and feel at home on an SQA National 5 paper? Reject it when the answer is doubtful.",
 ] as const;
 
 export const A7_CONTEXT_VISUAL_GENERATION_GUARDRAILS = [
