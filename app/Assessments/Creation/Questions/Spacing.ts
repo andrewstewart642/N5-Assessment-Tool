@@ -9,13 +9,6 @@ import type {
 const DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX =
   48;
 
-/*
- * Before A8 had family-aware response-space baselines, clean A8 questions
- * were committed with the National 5 document fallback of 40 px. Treat that
- * one value as stale historical workspace state. Other explicit values are
- * intentional preview/state overrides and must be respected (notably the
- * 24 px Compact-mode spacing).
- */
 const STALE_A8_SPACING_BASE_PX =
   40;
 
@@ -27,6 +20,24 @@ function isA8GeneratedQuestion(
       "A8-"
     )
   );
+}
+
+function getA7GeneratedSpacingBasePx(
+  questionCode: string | undefined
+): number | null {
+  if (!questionCode?.startsWith("A7-")) {
+    return null;
+  }
+
+  /*
+   * These baselines do two jobs in the Builder: preserve plausible pupil
+   * working space and give the optional worked-answer overlay enough room not
+   * to collide with the next question. The five-mark context route naturally
+   * needs more vertical working than the three-mark fractional route.
+   */
+  return questionCode.includes("-CONTEXT-AREA-")
+    ? 150
+    : 104;
 }
 
 function hasExplicitSpacingBasePx(
@@ -65,10 +76,15 @@ export function getAssessmentQuestionSpacingBasePx(
     }
   }
 
-  /*
-   * Repair only the stale A8 40 px value (or a missing value). Compact mode
-   * supplies its own 24 px preview override, which now flows through normally.
-   */
+  const a7Spacing =
+    getA7GeneratedSpacingBasePx(
+      question.questionCode
+    );
+
+  if (a7Spacing !== null) {
+    return a7Spacing;
+  }
+
   if (
     isA8 &&
     question.questionCode
@@ -88,15 +104,23 @@ export function getAssessmentQuestionSpacingBasePx(
 export function applyAssessmentQuestionSpacingBase(
   question: Question
 ): Question {
+  const a7Spacing =
+    getA7GeneratedSpacingBasePx(
+      question.questionCode
+    );
+
   return {
     ...question,
 
     spacingBasePx:
-      question.questionCode
-        ? getNational5MathsQuestionSpacingBasePx(
-            question.questionCode
-          )
-        : DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX,
+      a7Spacing ??
+      (
+        question.questionCode
+          ? getNational5MathsQuestionSpacingBasePx(
+              question.questionCode
+            )
+          : DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX
+      ),
   };
 }
 
