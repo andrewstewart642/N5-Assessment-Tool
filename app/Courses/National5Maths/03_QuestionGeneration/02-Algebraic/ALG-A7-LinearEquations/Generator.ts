@@ -7,10 +7,15 @@ import {
   selectA7Family,
 } from "./Calibration";
 import {
-  A7_GENERATOR_ABSTRACT_ENVELOPE,
+  A7_GENERATOR_CONTEXT_VISUAL_GUARDRAILS,
+  A7_GENERATOR_DIFFICULTY_RULES,
   A7_GENERATOR_FAMILY_EVIDENCE,
+  A7_GENERATOR_FRACTIONAL_DENOMINATOR_PAIRS,
+  A7_GENERATOR_FRACTIONAL_GENERATION_ENVELOPE,
+  A7_GENERATOR_FRACTIONAL_SURFACE_GUARDRAILS,
   A7_GENERATOR_INVARIANTS,
 } from "./Evidence";
+import { assessA7ContextDifficulty, assessA7FractionalDifficulty } from "./Difficulty";
 import { buildA7ContextPrompt, buildA7FractionalPrompt } from "./PromptGrammar";
 import type {
   A7AreaVisualSpec,
@@ -21,6 +26,7 @@ import type {
   A7FractionalSurfaceVariant,
   A7GenerateOptions,
   A7GeneratedQuestion,
+  A7GeneratorDifficulty,
   A7GeneratorPaper,
   A7Rational,
 } from "./Types";
@@ -74,37 +80,42 @@ const reduceRational = (numerator: number, denominator: number): A7Rational => {
 const clearedValue = (value: A7Rational, denominatorLcm: number) =>
   value.numerator * (denominatorLcm / value.denominator);
 
-/**
- * Distinct displayed denominator pairings whose LCD remains inside the
- * reviewed 6-10 envelope. The three exact historical pairings (3,6), (2,5)
- * and (2,3) are included, with only closely-related divisor pairings added.
- */
-const DISPLAY_DENOMINATOR_PAIRS = [
-  { left: 3, right: 6, lcm: 6 },
-  { left: 2, right: 3, lcm: 6 },
-  { left: 2, right: 6, lcm: 6 },
-  { left: 3, right: 2, lcm: 6 },
-  { left: 2, right: 5, lcm: 10 },
-  { left: 5, right: 2, lcm: 10 },
-  { left: 2, right: 10, lcm: 10 },
-  { left: 5, right: 10, lcm: 10 },
-] as const;
-
-const SURFACE_VARIANTS: readonly A7FractionalSurfaceVariant[] = [
-  "SPLIT_TERMS",
-  "BINOMIAL_RIGHT_NUMERATOR",
-  "BINOMIAL_LEFT_NUMERATOR",
-];
-
 const preservesDisplayedDenominator = (numerator: number, denominator: number) =>
   reduceRational(numerator, denominator).denominator === denominator;
 
-const fractionalState = (seed: number): A7FractionalEquationState => {
-  const rng = new SeededRandom(mixSeed(seed, 0xA70017));
-  const surfaceVariant = rng.pick(SURFACE_VARIANTS);
+const surfaceVariantForDifficulty = (
+  rng: SeededRandom,
+  difficulty: A7GeneratorDifficulty,
+): A7FractionalSurfaceVariant => {
+  const lower: readonly A7FractionalSurfaceVariant[] = [
+    "SPLIT_TERMS",
+    "SPLIT_TERMS",
+    "BINOMIAL_RIGHT_NUMERATOR",
+    "BINOMIAL_LEFT_NUMERATOR",
+  ];
+  const upper: readonly A7FractionalSurfaceVariant[] = [
+    "BINOMIAL_RIGHT_NUMERATOR",
+    "BINOMIAL_LEFT_NUMERATOR",
+    "BINOMIAL_RIGHT_NUMERATOR",
+    "BINOMIAL_LEFT_NUMERATOR",
+    "SPLIT_TERMS",
+  ];
+  return rng.pick(difficulty === 1 ? lower : upper);
+};
 
-  for (let attempt = 0; attempt < 16000; attempt += 1) {
-    const pair = rng.pick(DISPLAY_DENOMINATOR_PAIRS);
+const fractionalState = (
+  seed: number,
+  targetDifficulty: A7GeneratorDifficulty,
+): A7FractionalEquationState => {
+  const rng = new SeededRandom(mixSeed(seed, 0xA70017));
+  const envelope = A7_GENERATOR_FRACTIONAL_GENERATION_ENVELOPE;
+  const eligiblePairs = A7_GENERATOR_FRACTIONAL_DENOMINATOR_PAIRS.filter((pair) =>
+    (pair.difficultyBands as readonly number[]).includes(targetDifficulty),
+  );
+
+  for (let attempt = 0; attempt < 24000; attempt += 1) {
+    const surfaceVariant = surfaceVariantForDifficulty(rng, targetDifficulty);
+    const pair = rng.pick(eligiblePairs);
     const leftDenominator = pair.left;
     const rightDenominator = pair.right;
 
@@ -115,9 +126,9 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
 
     if (surfaceVariant === "SPLIT_TERMS") {
       // 2016-type surface: ax/d1 - b/d2 = cx
-      const xNumerator = rng.int(1, 5);
-      const constantNumerator = rng.int(1, 5);
-      const wholeXCoefficient = rng.int(1, 2);
+      const xNumerator = rng.int(1, targetDifficulty === 1 ? 5 : 7);
+      const constantNumerator = rng.int(1, targetDifficulty === 1 ? 6 : 9);
+      const wholeXCoefficient = rng.int(1, targetDifficulty === 1 ? 2 : 3);
       if (!preservesDisplayedDenominator(xNumerator, leftDenominator) ||
           !preservesDisplayedDenominator(constantNumerator, rightDenominator)) continue;
 
@@ -127,10 +138,10 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
       rhsConstant = reduceRational(0, 1);
     } else if (surfaceVariant === "BINOMIAL_RIGHT_NUMERATOR") {
       // 2019-type surface: ax/d1 - n = (b - cx)/d2
-      const lhsXNumerator = rng.int(1, 4);
-      const wholeConstant = rng.int(1, 3);
-      const rhsConstantNumerator = rng.int(1, 6);
-      const rhsXNumerator = rng.int(1, 4);
+      const lhsXNumerator = rng.int(1, targetDifficulty === 1 ? 4 : 6);
+      const wholeConstant = rng.int(1, targetDifficulty === 1 ? 2 : 4);
+      const rhsConstantNumerator = rng.int(1, targetDifficulty === 1 ? 6 : 9);
+      const rhsXNumerator = rng.int(1, targetDifficulty === 1 ? 4 : 6);
       if (!preservesDisplayedDenominator(lhsXNumerator, leftDenominator) ||
           !preservesDisplayedDenominator(rhsConstantNumerator, rightDenominator) ||
           !preservesDisplayedDenominator(rhsXNumerator, rightDenominator)) continue;
@@ -141,10 +152,10 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
       rhsConstant = reduceRational(rhsConstantNumerator, rightDenominator);
     } else {
       // 2025-type surface: (ax + b)/d1 = cx/d2 + n
-      const lhsXNumerator = rng.int(1, 5);
-      const lhsConstantNumerator = rng.int(1, 6);
-      const rhsXNumerator = rng.int(1, 4);
-      const wholeConstant = rng.int(1, 3);
+      const lhsXNumerator = rng.int(1, targetDifficulty === 1 ? 5 : 7);
+      const lhsConstantNumerator = rng.int(1, targetDifficulty === 1 ? 6 : 9);
+      const rhsXNumerator = rng.int(1, targetDifficulty === 1 ? 4 : 6);
+      const wholeConstant = rng.int(1, targetDifficulty === 1 ? 2 : 4);
       if (!preservesDisplayedDenominator(lhsXNumerator, leftDenominator) ||
           !preservesDisplayedDenominator(lhsConstantNumerator, leftDenominator) ||
           !preservesDisplayedDenominator(rhsXNumerator, rightDenominator)) continue;
@@ -161,7 +172,7 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
       rhsX.denominator,
       rhsConstant.denominator,
     ]);
-    if (denominatorLcm !== pair.lcm) continue;
+    if (denominatorLcm !== pair.lcm || denominatorLcm > envelope.denominatorLcmMax) continue;
 
     const clearedEquation = {
       lhsX: clearedValue(lhsX, denominatorLcm),
@@ -170,23 +181,21 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
       rhsConstant: clearedValue(rhsConstant, denominatorLcm),
     };
 
-    if (Math.abs(clearedEquation.lhsX) > A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteClearedCoefficient.observedMax ||
-        Math.abs(clearedEquation.rhsX) > A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteClearedCoefficient.observedMax ||
-        Math.abs(clearedEquation.lhsConstant) > A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteClearedConstant.observedMax ||
-        Math.abs(clearedEquation.rhsConstant) > A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteClearedConstant.observedMax) continue;
+    if (Math.abs(clearedEquation.lhsX) > envelope.absoluteClearedCoefficientMax ||
+        Math.abs(clearedEquation.rhsX) > envelope.absoluteClearedCoefficientMax ||
+        Math.abs(clearedEquation.lhsConstant) > envelope.absoluteClearedConstantMax ||
+        Math.abs(clearedEquation.rhsConstant) > envelope.absoluteClearedConstantMax) continue;
 
     const rearrangedEquation = {
       xCoefficient: clearedEquation.lhsX - clearedEquation.rhsX,
       constant: clearedEquation.rhsConstant - clearedEquation.lhsConstant,
     };
     const coefficientMagnitude = Math.abs(rearrangedEquation.xCoefficient);
-    if (coefficientMagnitude < A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteRearrangedCoefficient.observedMin ||
-        coefficientMagnitude > A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteRearrangedCoefficient.observedMax) continue;
-    if (rearrangedEquation.constant === 0) continue;
+    if (coefficientMagnitude < envelope.absoluteRearrangedCoefficient.min ||
+        coefficientMagnitude > envelope.absoluteRearrangedCoefficient.max ||
+        rearrangedEquation.constant === 0) continue;
 
-    // Preserve the source-like sign architecture. The 2016 surface naturally
-    // gives the reviewed negative-solution case; the 2019/2025 surfaces retain
-    // positive leading terms and positive solutions.
+    // Preserve the clean sign architecture from the reviewed source surfaces.
     if (surfaceVariant === "SPLIT_TERMS") {
       if (rearrangedEquation.xCoefficient >= 0 || rearrangedEquation.constant <= 0) continue;
     } else if (rearrangedEquation.xCoefficient <= 0 || rearrangedEquation.constant <= 0) {
@@ -194,9 +203,12 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
     }
 
     const solution = reduceRational(rearrangedEquation.constant, rearrangedEquation.xCoefficient);
-    if (solution.denominator === 1 || solution.denominator < 7 || solution.denominator > 8) continue;
-    if (Math.abs(solution.numerator) < A7_GENERATOR_ABSTRACT_ENVELOPE.solutionNumeratorMagnitude.observedMin ||
-        Math.abs(solution.numerator) > A7_GENERATOR_ABSTRACT_ENVELOPE.solutionNumeratorMagnitude.observedMax) continue;
+    const numeratorMagnitude = Math.abs(solution.numerator);
+    if (solution.denominator === 1 ||
+        solution.denominator < envelope.solutionDenominator.min ||
+        solution.denominator > envelope.solutionDenominator.max ||
+        numeratorMagnitude < envelope.solutionNumeratorMagnitude.min ||
+        numeratorMagnitude > envelope.solutionNumeratorMagnitude.max) continue;
 
     const state: A7FractionalEquationState = {
       family: "FRACTIONAL_COEFFICIENT",
@@ -212,10 +224,11 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
     };
 
     if (historicalA7FractionalOverlap(state)) continue;
+    if (assessA7FractionalDifficulty(state).difficulty !== targetDifficulty) continue;
     return state;
   }
 
-  throw new Error("Unable to construct an evidence-calibrated A7 fractional equation for this seed.");
+  throw new Error(`Unable to construct an SQA-like A7 fractional equation at difficulty ${targetDifficulty} for this seed.`);
 };
 
 const contextState = (seed: number): A7ContextAreaState => {
@@ -298,8 +311,13 @@ const sourceBasisForContext = () => {
   };
 };
 
-const fractionalQuestion = (seed: number, paper: A7GeneratorPaper): A7FractionalGeneratedQuestion => {
-  const state = fractionalState(seed);
+const fractionalQuestion = (
+  seed: number,
+  paper: A7GeneratorPaper,
+  difficulty: A7GeneratorDifficulty,
+): A7FractionalGeneratedQuestion => {
+  const state = fractionalState(seed, difficulty);
+  const difficultyAssessment = assessA7FractionalDifficulty(state);
   const prompt = buildA7FractionalPrompt(state);
   const frequency = a7FamilyFrequency("FRACTIONAL_COEFFICIENT", paper);
   const sourceBasis = sourceBasisForFractional(state);
@@ -307,11 +325,12 @@ const fractionalQuestion = (seed: number, paper: A7GeneratorPaper): A7Fractional
 
   return {
     generatorId: "A7_LINEAR_EQUATIONS_V1",
-    instanceId: `A7-${paper}-FRACTIONAL-${seed >>> 0}`,
+    instanceId: `A7-${paper}-D${difficulty}-FRACTIONAL-${seed >>> 0}`,
     seed,
     family: "FRACTIONAL_COEFFICIENT",
     familyReadiness: "CORE",
     paper,
+    difficulty,
     marks: 3,
     standard: "A",
     thinking: "OPERATIONAL",
@@ -319,8 +338,15 @@ const fractionalQuestion = (seed: number, paper: A7GeneratorPaper): A7Fractional
     mathState: state,
     visual: null,
     sourceBasis,
-    generationConstraints: [...A7_GENERATOR_INVARIANTS],
+    generationConstraints: [
+      ...A7_GENERATOR_INVARIANTS,
+      ...A7_GENERATOR_FRACTIONAL_SURFACE_GUARDRAILS,
+      ...A7_GENERATOR_DIFFICULTY_RULES,
+    ],
     quality: {
+      difficultyBandId: difficultyAssessment.bandId,
+      difficultyScore: difficultyAssessment.score,
+      difficultyMetrics: difficultyAssessment.metrics,
       historicalOverlapChecked: true,
       familyObservedCount: frequency.count,
       familyObservedTotal: frequency.total,
@@ -335,11 +361,7 @@ const fractionalQuestion = (seed: number, paper: A7GeneratorPaper): A7Fractional
         "positive leading term on each side",
         `rearranged coefficient ${Math.abs(state.rearrangedEquation.xCoefficient)}`,
       ],
-      difficultySignals: [
-        "Fractional algebra materially affects the first mark.",
-        "A separate rearrangement stage remains necessary after denominators are cleared.",
-        `The exact solution is a ${state.solution.numerator < 0 ? "negative" : "positive"} non-integer rational value.`,
-      ],
+      difficultySignals: difficultyAssessment.signals,
     },
   };
 };
@@ -372,6 +394,7 @@ const contextVisual = (state: A7ContextAreaState): A7AreaVisualSpec => ({
 
 const contextQuestion = (seed: number): A7ContextGeneratedQuestion => {
   const state = contextState(seed);
+  const difficultyAssessment = assessA7ContextDifficulty(state);
   const prompt = buildA7ContextPrompt(state);
   const frequency = a7FamilyFrequency("CONTEXT_AREA_EQUALITY", "P1");
   const sourceBasis = sourceBasisForContext();
@@ -379,11 +402,12 @@ const contextQuestion = (seed: number): A7ContextGeneratedQuestion => {
 
   return {
     generatorId: "A7_LINEAR_EQUATIONS_V1",
-    instanceId: `A7-P1-CONTEXT-AREA-${seed >>> 0}`,
+    instanceId: `A7-P1-D2-CONTEXT-AREA-${seed >>> 0}`,
     seed,
     family: "CONTEXT_AREA_EQUALITY",
     familyReadiness: "EXPERIMENTAL",
     paper: "P1",
+    difficulty: 2,
     marks: 5,
     standard: "A",
     thinking: "REASONING",
@@ -391,8 +415,15 @@ const contextQuestion = (seed: number): A7ContextGeneratedQuestion => {
     mathState: state,
     visual: contextVisual(state),
     sourceBasis,
-    generationConstraints: [...A7_GENERATOR_INVARIANTS],
+    generationConstraints: [
+      ...A7_GENERATOR_INVARIANTS,
+      ...A7_GENERATOR_CONTEXT_VISUAL_GUARDRAILS,
+      ...A7_GENERATOR_DIFFICULTY_RULES,
+    ],
     quality: {
+      difficultyBandId: difficultyAssessment.bandId,
+      difficultyScore: difficultyAssessment.score,
+      difficultyMetrics: difficultyAssessment.metrics,
       historicalOverlapChecked: true,
       familyObservedCount: frequency.count,
       familyObservedTotal: frequency.total,
@@ -405,29 +436,35 @@ const contextQuestion = (seed: number): A7ContextGeneratedQuestion => {
         `two-digit final x coefficient ${state.rearrangedEquation.xCoefficient}`,
         "positive integer physical solution",
       ],
-      difficultySignals: [
-        "The diagram must be translated into two area expressions.",
-        "The equality of the areas must be represented as a linear equation.",
-        "The triangle one-half factor remains mark-bearing during the start-to-solve step.",
-        "The final division is not eased to a single-digit coefficient.",
-      ],
+      difficultySignals: difficultyAssessment.signals,
     },
   };
 };
 
+const defaultFractionalDifficulty = (seed: number): A7GeneratorDifficulty =>
+  mixSeed(seed, 0xA7D1FF) % 100 < 55 ? 1 : 2;
+
 export const generateA7Question = (options: A7GenerateOptions): A7GeneratedQuestion => {
   const includeExperimentalFamilies = options.includeExperimentalFamilies ?? true;
   const paper = chooseA7Paper(options.seed, options.family, options.paper);
-  const family = selectA7Family(
+  let family = selectA7Family(
     options.seed,
     paper,
     options.family,
     includeExperimentalFamilies,
   );
 
+  if (options.difficulty === 1 && family === "CONTEXT_AREA_EQUALITY") {
+    if (options.family === "CONTEXT_AREA_EQUALITY") {
+      throw new Error("The current contextual A7 family is calibrated only to difficulty band 2.");
+    }
+    family = "FRACTIONAL_COEFFICIENT";
+  }
+
   const question = family === "CONTEXT_AREA_EQUALITY"
     ? contextQuestion(options.seed)
-    : fractionalQuestion(options.seed, paper);
+    : fractionalQuestion(options.seed, paper, options.difficulty ?? defaultFractionalDifficulty(options.seed));
+
   const validation = validateA7GeneratedQuestion(question);
   if (!validation.valid) {
     const errors = validation.issues.filter((issue) => issue.severity === "ERROR");
@@ -436,13 +473,36 @@ export const generateA7Question = (options: A7GenerateOptions): A7GeneratedQuest
   return question;
 };
 
+const questionSurfaceSignature = (question: A7GeneratedQuestion) =>
+  question.family === "FRACTIONAL_COEFFICIENT"
+    ? `F:${question.prompt}`
+    : `C:${question.mathState.triangle.base}:${question.mathState.triangle.heightConstant}:${question.mathState.rectangle.height}:${question.mathState.rectangle.widthConstant}`;
+
 export const generateA7QuestionBatch = (
   count: number,
   options: Omit<A7GenerateOptions, "seed"> & { seed: number },
 ): A7GeneratedQuestion[] => {
   if (!Number.isInteger(count) || count < 1) throw new Error("A7 batch count must be a positive integer.");
-  return Array.from({ length: count }, (_, index) => generateA7Question({
-    ...options,
-    seed: mixSeed(options.seed, index + 1),
-  }));
+
+  const results: A7GeneratedQuestion[] = [];
+  const seen = new Set<string>();
+
+  for (let index = 0; index < count; index += 1) {
+    let accepted: A7GeneratedQuestion | null = null;
+    for (let retry = 0; retry < 80; retry += 1) {
+      const candidateSeed = mixSeed(options.seed, (index + 1) * 131 + retry * 7919);
+      const candidate = generateA7Question({ ...options, seed: candidateSeed });
+      const signature = questionSurfaceSignature(candidate);
+      if (seen.has(signature)) continue;
+      seen.add(signature);
+      accepted = candidate;
+      break;
+    }
+    if (!accepted) {
+      throw new Error(`Unable to create ${count} distinct A7 questions inside the calibrated generation space.`);
+    }
+    results.push(accepted);
+  }
+
+  return results;
 };
