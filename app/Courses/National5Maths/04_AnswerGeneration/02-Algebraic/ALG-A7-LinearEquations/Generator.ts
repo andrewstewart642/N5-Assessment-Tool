@@ -2,6 +2,7 @@ import type {
   A7ContextGeneratedQuestion,
   A7FractionalGeneratedQuestion,
   A7GeneratedQuestion,
+  A7LinearDimension,
   A7Rational,
 } from "../../../03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
 import { resolveA7GeneratedAnswerProfile } from "./Calibration";
@@ -37,6 +38,14 @@ const linearSideText = (xCoefficient: number, constant: number) => {
   return result || "0";
 };
 
+const linearDimensionText = (dimension: A7LinearDimension) => {
+  const magnitude = Math.abs(dimension.xCoefficient);
+  const xTerm = magnitude === 1 ? "x" : `${magnitude}x`;
+  return dimension.xCoefficient > 0
+    ? `${xTerm} + ${dimension.constant}`
+    : `${dimension.constant} - ${xTerm}`;
+};
+
 const fractionalClearedEquationText = (question: A7FractionalGeneratedQuestion) => {
   const state = question.mathState.clearedEquation;
   return `${linearSideText(state.lhsX, state.lhsConstant)} = ${linearSideText(state.rhsX, state.rhsConstant)}`;
@@ -49,12 +58,12 @@ const fractionalRearrangedText = (question: A7FractionalGeneratedQuestion) => {
 
 const triangleAreaExpression = (question: A7ContextGeneratedQuestion) => {
   const state = question.mathState;
-  return `${state.triangle.base}/2(x + ${state.triangle.heightConstant})`;
+  return `${state.triangle.fixedDimension}/2(${linearDimensionText(state.triangle.linearDimension)})`;
 };
 
 const rectangleAreaExpression = (question: A7ContextGeneratedQuestion) => {
   const state = question.mathState;
-  return `${state.rectangle.height}(${state.rectangle.widthConstant} - x)`;
+  return `${state.rectangle.fixedDimension}(${linearDimensionText(state.rectangle.linearDimension)})`;
 };
 
 const contextEqualAreaEquation = (question: A7ContextGeneratedQuestion) =>
@@ -62,7 +71,7 @@ const contextEqualAreaEquation = (question: A7ContextGeneratedQuestion) =>
 
 const contextClearedEquation = (question: A7ContextGeneratedQuestion) => {
   const state = question.mathState;
-  return `${state.triangle.base}(x + ${state.triangle.heightConstant}) = ${2 * state.rectangle.height}(${state.rectangle.widthConstant} - x)`;
+  return `${state.triangle.fixedDimension}(${linearDimensionText(state.triangle.linearDimension)}) = ${2 * state.rectangle.fixedDimension}(${linearDimensionText(state.rectangle.linearDimension)})`;
 };
 
 const contextExpandedEquation = (question: A7ContextGeneratedQuestion) => {
@@ -206,7 +215,7 @@ const contextMarkPoints = (
     role: "START_SOLVE",
     requirement: "Begin a valid algebraic solution while preserving and correctly transforming the triangle one-half factor.",
     evidenceExamples: [contextClearedEquation(question), contextExpandedEquation(question)],
-    acceptanceNotes: ["Any equivalent valid transformation of the one-half factor is acceptable."],
+    acceptanceNotes: ["Any equivalent valid transformation of the one-half factor and subsequent bracket expansion is acceptable."],
     dependsOnMarkNumbers: [2],
     followThroughFromMarkNumbers: [1, 2],
     comparableDifficultyRequired: true,
@@ -358,6 +367,7 @@ export const generateA7Answer = (question: A7GeneratedQuestion): A7GeneratedMark
       `Profile anchors: ${profile.sourceAnchorIds.join(", ")}.`,
       "Every generated mark is wholly owned by alg-a07-linear-equations and carries the question's teacher-moderated Standard/Thinking profile.",
       "Equivalent algebraic routes are acceptable even though one canonical worked route is rendered.",
+      "Context dimension placement/orientation may vary, but one fixed and one linear dimension per shape keep the area model linear.",
       "Historical source wording and source layout are calibration evidence only and are not used as answer templates.",
     ],
   };
