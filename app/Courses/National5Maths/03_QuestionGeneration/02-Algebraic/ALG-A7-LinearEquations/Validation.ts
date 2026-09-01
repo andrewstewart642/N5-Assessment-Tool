@@ -6,8 +6,10 @@ import {
   A7_GENERATOR_FRACTIONAL_GENERATION_ENVELOPE,
 } from "./Evidence";
 import type {
+  A7ContextAreaState,
   A7FractionalEquationState,
   A7GeneratedQuestion,
+  A7LinearDimension,
   A7Rational,
   A7ValidationIssue,
   A7ValidationResult,
@@ -50,14 +52,10 @@ const validateFractionalSurfaceGrammar = (
       state.rhsConstant.numerator === 0 &&
       state.lhsX.denominator !== state.lhsConstant.denominator;
     if (!valid) {
-      error(
-        issues,
-        "A7_SURFACE_2016_GRAMMAR",
-        "SPLIT_TERMS must display exactly the clean 2016-type grammar ax/d1 - b/d2 = cx with distinct fractional denominators and no leading negative term.",
-      );
+      error(issues, "A7_SURFACE_SPLIT_GRAMMAR", "SPLIT_TERMS must remain a clean ax/d1 - b/d2 = cx equation with distinct fractional denominators and no leading negative term.");
     }
     if (state.solution.numerator >= 0) {
-      error(issues, "A7_SURFACE_2016_SIGN", "The 2016-type surface is reserved for the observed negative-solution sign architecture.");
+      error(issues, "A7_SURFACE_SPLIT_SIGN", "The split-term surface is reserved for the reviewed negative-solution sign architecture.");
     }
     return;
   }
@@ -71,36 +69,65 @@ const validateFractionalSurfaceGrammar = (
       state.rhsConstant.denominator === state.rhsX.denominator &&
       state.lhsX.denominator !== state.rhsX.denominator;
     if (!valid) {
-      error(
-        issues,
-        "A7_SURFACE_2019_GRAMMAR",
-        "BINOMIAL_RIGHT_NUMERATOR must display the clean 2019-type grammar ax/d1 - n = (b - cx)/d2 with distinct displayed denominators and positive leading terms.",
-      );
+      error(issues, "A7_SURFACE_RIGHT_BINOMIAL", "BINOMIAL_RIGHT_NUMERATOR must retain the clean ax/d1 - n = (b-cx)/d2 grammar.");
     }
     if (state.solution.numerator <= 0) {
-      error(issues, "A7_SURFACE_2019_SIGN", "The 2019-type surface is calibrated to a positive exact solution.");
+      error(issues, "A7_SURFACE_RIGHT_SIGN", "The right-binomial surface is calibrated to a positive exact solution.");
+    }
+    return;
+  }
+
+  if (state.surfaceVariant === "BINOMIAL_LEFT_NUMERATOR") {
+    const valid =
+      state.lhsX.numerator > 0 && state.lhsX.denominator > 1 &&
+      state.lhsConstant.numerator > 0 &&
+      state.lhsConstant.denominator === state.lhsX.denominator &&
+      state.rhsX.numerator > 0 && state.rhsX.denominator > 1 &&
+      state.rhsConstant.numerator > 0 && state.rhsConstant.denominator === 1 &&
+      state.lhsX.denominator !== state.rhsX.denominator;
+    if (!valid) {
+      error(issues, "A7_SURFACE_LEFT_BINOMIAL", "BINOMIAL_LEFT_NUMERATOR must retain the clean (ax+b)/d1 = cx/d2 + n grammar.");
+    }
+    if (state.solution.numerator <= 0) {
+      error(issues, "A7_SURFACE_LEFT_SIGN", "The left-binomial surface is calibrated to a positive exact solution.");
     }
     return;
   }
 
   const valid =
     state.lhsX.numerator > 0 && state.lhsX.denominator > 1 &&
-    state.lhsConstant.numerator > 0 &&
-    state.lhsConstant.denominator === state.lhsX.denominator &&
+    state.lhsConstant.numerator > 0 && state.lhsConstant.denominator === state.lhsX.denominator &&
     state.rhsX.numerator > 0 && state.rhsX.denominator > 1 &&
-    state.rhsConstant.numerator > 0 && state.rhsConstant.denominator === 1 &&
+    state.rhsConstant.numerator > 0 && state.rhsConstant.denominator === state.rhsX.denominator &&
     state.lhsX.denominator !== state.rhsX.denominator;
   if (!valid) {
-    error(
-      issues,
-      "A7_SURFACE_2025_GRAMMAR",
-      "BINOMIAL_LEFT_NUMERATOR must display the clean 2025-type grammar (ax+b)/d1 = cx/d2 + n with distinct displayed denominators and positive leading terms.",
-    );
+    error(issues, "A7_SURFACE_DOUBLE_BINOMIAL", "BINOMIAL_BOTH_SIDES must remain a compact (ax+b)/d1 = (cx+d)/d2 equation with distinct denominators and positive leading terms.");
   }
   if (state.solution.numerator <= 0) {
-    error(issues, "A7_SURFACE_2025_SIGN", "The 2025-type surface is calibrated to a positive exact solution.");
+    error(issues, "A7_SURFACE_DOUBLE_SIGN", "The double-binomial extension is calibrated to a positive exact solution.");
   }
 };
+
+const dimensionAt = (dimension: A7LinearDimension, x: number) =>
+  dimension.xCoefficient * x + dimension.constant;
+
+const dimensionLatex = (dimension: A7LinearDimension) => {
+  const magnitude = Math.abs(dimension.xCoefficient);
+  const xTerm = magnitude === 1 ? "x" : `${magnitude}x`;
+  const body = dimension.xCoefficient > 0
+    ? `${xTerm}+${dimension.constant}`
+    : `${dimension.constant}-${xTerm}`;
+  return `\\left(${body}\\right)\\,\\text{cm}`;
+};
+
+const fixedLatex = (value: number) => `${value}\\,\\text{cm}`;
+
+const expectedVisualLatex = (state: A7ContextAreaState) => ({
+  triangleBase: state.triangle.algebraicDimension === "BASE" ? dimensionLatex(state.triangle.linearDimension) : fixedLatex(state.triangle.fixedDimension),
+  triangleHeight: state.triangle.algebraicDimension === "HEIGHT" ? dimensionLatex(state.triangle.linearDimension) : fixedLatex(state.triangle.fixedDimension),
+  rectangleWidth: state.rectangle.algebraicDimension === "BASE" ? dimensionLatex(state.rectangle.linearDimension) : fixedLatex(state.rectangle.fixedDimension),
+  rectangleHeight: state.rectangle.algebraicDimension === "HEIGHT" ? dimensionLatex(state.rectangle.linearDimension) : fixedLatex(state.rectangle.fixedDimension),
+});
 
 export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7ValidationResult => {
   const issues: A7ValidationIssue[] = [];
@@ -139,7 +166,7 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
       pair.left === displayedLeft && pair.right === displayedRight,
     );
     if (!allowedPair) {
-      error(issues, "A7_DENOMINATOR_PAIR", `Displayed denominator pair ${displayedLeft}/${displayedRight} is outside the moderated SQA-like pairing set.`);
+      error(issues, "A7_DENOMINATOR_PAIR", `Displayed denominator pair ${displayedLeft}/${displayedRight} is outside the moderated pairing set.`);
     }
     if (displayedLeft > envelope.displayedDenominatorMax || displayedRight > envelope.displayedDenominatorMax) {
       error(issues, "A7_DISPLAYED_DENOMINATOR", "Displayed denominators exceed the moderated maximum of 10.");
@@ -148,7 +175,7 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
       error(issues, "A7_DENOMINATOR_LCM", "Denominator LCM exceeds the moderated maximum of 15.");
     }
     if (state.clearedEquation.lhsX === 0 || state.clearedEquation.rhsX === 0) {
-      error(issues, "A7_X_BOTH_SIDES", "The fractional family requires x to occur on both sides before rearrangement.");
+      error(issues, "A7_X_BOTH_SIDES", "The fractional family requires x on both sides before rearrangement.");
     }
     if (Math.abs(state.clearedEquation.lhsX) > envelope.absoluteClearedCoefficientMax ||
         Math.abs(state.clearedEquation.rhsX) > envelope.absoluteClearedCoefficientMax ||
@@ -169,7 +196,7 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
       error(issues, "A7_SOLUTION_DRIFT", "Stored fractional solution does not solve the stored rearranged equation.");
     }
     if (state.solution.denominator === 1) {
-      error(issues, "A7_INTEGER_SOLUTION", "The core three-mark A7 family requires a non-integer exact solution.");
+      error(issues, "A7_INTEGER_SOLUTION", "The three-mark A7 family requires a non-integer exact solution.");
     }
     if (state.solution.denominator < envelope.solutionDenominator.min ||
         state.solution.denominator > envelope.solutionDenominator.max) {
@@ -188,7 +215,7 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
     if (assessment.difficulty !== question.difficulty ||
         assessment.bandId !== question.quality.difficultyBandId ||
         assessment.score !== question.quality.difficultyScore) {
-      error(issues, "A7_DIFFICULTY_DRIFT", "Stored A7 difficulty metadata does not match the route-based difficulty assessment.");
+      error(issues, "A7_DIFFICULTY_DRIFT", "Stored A7 difficulty metadata does not match the route-based assessment.");
     }
   } else {
     const state = question.mathState;
@@ -198,37 +225,43 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
       error(issues, "A7_CONTEXT_PAPER", "The reviewed contextual A7 family is currently supported only on Paper 1.");
     }
     if (question.difficulty !== 2) {
-      error(issues, "A7_CONTEXT_DIFFICULTY", "The current five-mark contextual A7 family is calibrated only to difficulty band 2.");
+      error(issues, "A7_CONTEXT_DIFFICULTY", "The five-mark contextual A7 family is calibrated to difficulty band 2.");
     }
     if (question.thinking !== "REASONING") {
-      error(issues, "A7_THINKING_CONTEXT", "The reviewed equal-area A7 family is Reasoning.");
+      error(issues, "A7_THINKING_CONTEXT", "The equal-area A7 family is Reasoning.");
     }
     if (!Number.isInteger(state.solution) || state.solution <= 0) {
       error(issues, "A7_CONTEXT_SOLUTION", "Equal-area generation requires a positive integer solution.");
     }
-    if (state.triangle.base % 2 === 0) {
-      error(issues, "A7_HALF_FACTOR_EASED", "Triangle base must be odd so the one-half area factor remains structurally mark-bearing.");
+    if (state.triangle.fixedDimension % 2 === 0) {
+      error(issues, "A7_HALF_FACTOR_EASED", "The triangle fixed dimension must be odd so the one-half area factor remains structurally mark-bearing.");
     }
-    const triangleHeight = state.solution + state.triangle.heightConstant;
-    const rectangleWidth = state.rectangle.widthConstant - state.solution;
-    if (triangleHeight <= 0 || rectangleWidth <= 0 || state.triangle.base <= 0 || state.rectangle.height <= 0) {
+    for (const dimension of [state.triangle.linearDimension, state.rectangle.linearDimension]) {
+      if (![1, 2].includes(Math.abs(dimension.xCoefficient)) || dimension.constant < 1 || dimension.constant > 20) {
+        error(issues, "A7_CONTEXT_LINEAR_DIMENSION", "Context linear dimensions must use moderated coefficients ±1/±2 and constants 1-20.");
+      }
+    }
+
+    const triangleLinearValue = dimensionAt(state.triangle.linearDimension, state.solution);
+    const rectangleLinearValue = dimensionAt(state.rectangle.linearDimension, state.solution);
+    if (triangleLinearValue <= 0 || rectangleLinearValue <= 0 || state.triangle.fixedDimension <= 0 || state.rectangle.fixedDimension <= 0) {
       error(issues, "A7_CONTEXT_DIMENSIONS", "All generated physical dimensions must be positive at the intended solution.");
     }
-    const triangleArea = state.triangle.base * triangleHeight / 2;
-    const rectangleArea = state.rectangle.height * rectangleWidth;
+    const triangleArea = state.triangle.fixedDimension * triangleLinearValue / 2;
+    const rectangleArea = state.rectangle.fixedDimension * rectangleLinearValue;
     if (triangleArea !== rectangleArea) {
       error(issues, "A7_AREA_MISMATCH", "Generated triangle and rectangle do not have equal areas at the intended solution.");
     }
-    if (Math.abs(state.rearrangedEquation.xCoefficient) < 10) {
-      error(issues, "A7_CONTEXT_EASED_FINAL_DIVISION", "The final rearranged coefficient must be two-digit to preserve the historical final-mark demand.");
+    if (Math.abs(state.rearrangedEquation.xCoefficient) < 10 || Math.abs(state.rearrangedEquation.xCoefficient) > 30) {
+      error(issues, "A7_CONTEXT_FINAL_DIVISION", "The final contextual x coefficient must remain in the moderated two-digit 10-30 range.");
     }
-    if (question.visual.triangle.baseLabel !== `${state.triangle.base} cm` ||
-        question.visual.rectangle.heightLabel !== `${state.rectangle.height} cm`) {
-      error(issues, "A7_VISUAL_STATE_DRIFT", "Area visual labels do not agree with the generated mathematical state.");
-    }
-    if (question.visual.triangle.heightLatex !== `\\left(x+${state.triangle.heightConstant}\\right)\\,\\text{cm}` ||
-        question.visual.rectangle.widthLatex !== `\\left(${state.rectangle.widthConstant}-x\\right)\\,\\text{cm}`) {
-      error(issues, "A7_VISUAL_MATH_DRIFT", "Area visual mathematical labels do not agree with the generated mathematical state.");
+
+    const expectedVisual = expectedVisualLatex(state);
+    if (question.visual.triangle.baseLatex !== expectedVisual.triangleBase ||
+        question.visual.triangle.heightLatex !== expectedVisual.triangleHeight ||
+        question.visual.rectangle.widthLatex !== expectedVisual.rectangleWidth ||
+        question.visual.rectangle.heightLatex !== expectedVisual.rectangleHeight) {
+      error(issues, "A7_VISUAL_STATE_DRIFT", "Area visual labels do not agree with the generated dimension placement/state.");
     }
     if (assessment.difficulty !== question.difficulty ||
         assessment.bandId !== question.quality.difficultyBandId ||
