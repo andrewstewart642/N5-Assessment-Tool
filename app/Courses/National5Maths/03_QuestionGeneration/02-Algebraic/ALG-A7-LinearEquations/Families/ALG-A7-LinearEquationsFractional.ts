@@ -5,6 +5,7 @@ export const ALG_A7_LINEAR_EQUATIONS_FRACTIONAL = {
   family: "FRACTIONAL_COEFFICIENT",
   readiness: "CORE",
   papers: ["P1", "P2"],
+  difficulties: [1, 2],
   marks: 3,
   standard: "A",
   thinking: "OPERATIONAL",
