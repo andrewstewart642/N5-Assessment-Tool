@@ -156,7 +156,7 @@ function ContextQuestion({
       </div>
 
       <div style={{ gridColumn: "2 / 4", gridRow: 3, paddingRight: 34, marginTop: 3 }}>
-        <A7AreaPreview visual={question.visual} />
+        <A7AreaPreview visual={question.visual} state={question.mathState} />
       </div>
 
       <div style={{ gridColumn: 1, gridRow: 4, textAlign: "right" }}>(a)</div>
