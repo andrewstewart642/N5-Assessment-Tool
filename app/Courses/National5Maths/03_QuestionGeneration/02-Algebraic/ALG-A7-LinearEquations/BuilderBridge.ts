@@ -11,6 +11,9 @@ import type {
 } from "@/app/Assessments/Questions/Generation/AnswerGenerationTypes";
 
 import {
+  formatHistoricalQuestionReferenceLabel,
+} from "../../../CatalogCoreTypes";
+import {
   generateA7AssessmentPair,
 } from "../../../04_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations/Pairing";
 import type {
@@ -29,9 +32,7 @@ import type {
 } from "./Types";
 
 const A7_SKILL_ID = "alg-a07-linear-equations";
-
-const randomSeed = () =>
-  Math.floor(Math.random() * 0x7fffffff) + 1;
+const randomSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 
 const rationalLatex = (value: A7Rational) =>
   value.denominator === 1
@@ -54,7 +55,7 @@ const linearSideLatex = (xCoefficient: number, constant: number) => {
     : `${xTerm}+${constant}`;
 };
 
-const resolvedDimension = (
+const dimensionAt = (
   xCoefficient: number,
   constant: number,
   x: number,
@@ -64,12 +65,12 @@ const areaDiagramPart = (
   question: A7ContextGeneratedQuestion,
 ): AreaEqualityDiagramPart => {
   const state = question.mathState;
-  const triangleLinear = resolvedDimension(
+  const triangleLinear = dimensionAt(
     state.triangle.linearDimension.xCoefficient,
     state.triangle.linearDimension.constant,
     state.solution,
   );
-  const rectangleLinear = resolvedDimension(
+  const rectangleLinear = dimensionAt(
     state.rectangle.linearDimension.xCoefficient,
     state.rectangle.linearDimension.constant,
     state.solution,
@@ -142,18 +143,12 @@ const fractionalWorkedAnswers = (
         },
         {
           id: `${question.instanceId}-builder-rearrange`,
-          parts: [{
-            kind: "math",
-            latex: `${rearranged.xCoefficient}x=${rearranged.constant}`,
-          }],
+          parts: [{ kind: "math", latex: `${rearranged.xCoefficient}x=${rearranged.constant}` }],
           markNumbers: [2],
         },
         {
           id: `${question.instanceId}-builder-solve`,
-          parts: [{
-            kind: "math",
-            latex: `x=${rationalLatex(question.mathState.solution)}`,
-          }],
+          parts: [{ kind: "math", latex: `x=${rationalLatex(question.mathState.solution)}` }],
           markNumbers: [3],
         },
       ],
@@ -173,7 +168,6 @@ const contextExpressions = (question: A7ContextGeneratedQuestion) => {
 
   return {
     triangleArea,
-    rectangleArea,
     equalArea: `${triangleArea}=${rectangleArea}`,
     cleared,
     expanded,
@@ -233,10 +227,7 @@ const contextWorkedAnswers = (
 
 const answerParts = (question: A7GeneratedQuestion): PaperPart[] => {
   if (question.family === "FRACTIONAL_COEFFICIENT") {
-    return [{
-      kind: "math",
-      latex: `x=${rationalLatex(question.mathState.solution)}`,
-    }];
+    return [{ kind: "math", latex: `x=${rationalLatex(question.mathState.solution)}` }];
   }
 
   const expressions = contextExpressions(question);
@@ -298,7 +289,10 @@ export function buildA7BuilderGenerated(
   const marking = pair.markingScheme;
   const reasoningMarks = question.thinking === "REASONING" ? question.marks : 0;
   const reference = question.sourceBasis.historicalReference;
-  const referenceLabel = `See N5 Maths ${reference.year} ${reference.paper} Q${reference.questionNumber}`;
+  const referenceId = reference.primaryQuestionCatalogId;
+  const formattedReference = referenceId
+    ? formatHistoricalQuestionReferenceLabel(referenceId)
+    : null;
 
   return {
     prompt: question.prompt,
@@ -310,6 +304,11 @@ export function buildA7BuilderGenerated(
     workedAnswers: question.family === "FRACTIONAL_COEFFICIENT"
       ? fractionalWorkedAnswers(question, marking)
       : contextWorkedAnswers(question, marking),
+    historicalReference: {
+      label: formattedReference ? `See ${formattedReference}` : "Historical reference",
+      questionCatalogId: referenceId,
+      matchReasons: [...reference.matchReasons],
+    },
     marks: question.marks,
     questionCode: question.instanceId,
     markBreakdown: {
@@ -350,11 +349,6 @@ export function buildA7BuilderGenerated(
       standardProfile: "A",
       paperSuitability: question.family === "CONTEXT_AREA_EQUALITY" ? "P1" : "BOTH",
       calculatorStatus: "CalculatorAllowed",
-    },
-    historicalReference: {
-      label: referenceLabel,
-      questionCatalogId: reference.questionCatalogId,
-      matchReasons: [...reference.matchReasons],
     },
   };
 }
