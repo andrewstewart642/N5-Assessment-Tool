@@ -140,10 +140,10 @@ export const validateA7GeneratedAnswer = (
       issues.push(issue("CONTEXT_FINAL_DIVISION_EASED", "Generated equal-area final x coefficient must remain two-digit."));
     }
     const dimensionsAtSolution = [
-      state.triangle.base,
-      state.solution + state.triangle.heightConstant,
-      state.rectangle.height,
-      state.rectangle.widthConstant - state.solution,
+      state.triangle.fixedDimension,
+      state.triangle.linearDimension.xCoefficient * state.solution + state.triangle.linearDimension.constant,
+      state.rectangle.fixedDimension,
+      state.rectangle.linearDimension.xCoefficient * state.solution + state.rectangle.linearDimension.constant,
     ];
     if (dimensionsAtSolution.some((value) => value <= 0)) {
       issues.push(issue("CONTEXT_INVALID_DIMENSION", "Generated equal-area answer state contains a non-positive physical dimension."));
