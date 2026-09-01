@@ -4,6 +4,7 @@ import {
   A7_GENERATOR_FAMILY_EVIDENCE,
 } from "./Evidence";
 import type {
+  A7FractionalEquationState,
   A7GeneratedQuestion,
   A7Rational,
   A7ValidationIssue,
@@ -29,6 +30,70 @@ const error = (issues: A7ValidationIssue[], code: string, message: string) =>
   issues.push({ severity: "ERROR", code, message });
 const warning = (issues: A7ValidationIssue[], code: string, message: string) =>
   issues.push({ severity: "WARNING", code, message });
+
+const validateFractionalSurfaceGrammar = (
+  state: A7FractionalEquationState,
+  issues: A7ValidationIssue[],
+) => {
+  if (state.surfaceVariant === "SPLIT_TERMS") {
+    const valid =
+      state.lhsX.numerator > 0 && state.lhsX.denominator > 1 &&
+      state.lhsConstant.numerator < 0 && state.lhsConstant.denominator > 1 &&
+      state.rhsX.numerator > 0 && state.rhsX.denominator === 1 &&
+      state.rhsConstant.numerator === 0 &&
+      state.lhsX.denominator !== state.lhsConstant.denominator;
+    if (!valid) {
+      error(
+        issues,
+        "A7_SURFACE_2016_GRAMMAR",
+        "SPLIT_TERMS must display exactly the clean 2016-type grammar ax/d1 - b/d2 = cx with distinct fractional denominators and no leading negative term.",
+      );
+    }
+    if (state.solution.numerator >= 0) {
+      error(issues, "A7_SURFACE_2016_SIGN", "The 2016-type surface is reserved for the observed negative-solution sign architecture.");
+    }
+    return;
+  }
+
+  if (state.surfaceVariant === "BINOMIAL_RIGHT_NUMERATOR") {
+    const valid =
+      state.lhsX.numerator > 0 && state.lhsX.denominator > 1 &&
+      state.lhsConstant.numerator < 0 && state.lhsConstant.denominator === 1 &&
+      state.rhsX.numerator < 0 && state.rhsX.denominator > 1 &&
+      state.rhsConstant.numerator > 0 &&
+      state.rhsConstant.denominator === state.rhsX.denominator &&
+      state.lhsX.denominator !== state.rhsX.denominator;
+    if (!valid) {
+      error(
+        issues,
+        "A7_SURFACE_2019_GRAMMAR",
+        "BINOMIAL_RIGHT_NUMERATOR must display the clean 2019-type grammar ax/d1 - n = (b - cx)/d2 with distinct displayed denominators and positive leading terms.",
+      );
+    }
+    if (state.solution.numerator <= 0) {
+      error(issues, "A7_SURFACE_2019_SIGN", "The 2019-type surface is calibrated to a positive exact solution.");
+    }
+    return;
+  }
+
+  const valid =
+    state.lhsX.numerator > 0 && state.lhsX.denominator > 1 &&
+    state.lhsConstant.numerator > 0 &&
+    state.lhsConstant.denominator === state.lhsX.denominator &&
+    state.rhsX.numerator > 0 && state.rhsX.denominator > 1 &&
+    state.rhsConstant.numerator > 0 && state.rhsConstant.denominator === 1 &&
+    state.lhsX.denominator !== state.rhsX.denominator;
+  if (!valid) {
+    error(
+      issues,
+      "A7_SURFACE_2025_GRAMMAR",
+      "BINOMIAL_LEFT_NUMERATOR must display the clean 2025-type grammar (ax+b)/d1 = cx/d2 + n with distinct displayed denominators and positive leading terms.",
+    );
+  }
+  if (state.solution.numerator <= 0) {
+    error(issues, "A7_SURFACE_2025_SIGN", "The 2025-type surface is calibrated to a positive exact solution.");
+  }
+};
 
 export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7ValidationResult => {
   const issues: A7ValidationIssue[] = [];
@@ -82,10 +147,8 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
     if (historicalA7FractionalOverlap(state)) {
       error(issues, "A7_HISTORICAL_OVERLAP", "Generated displayed equation reproduces a historical cleared equation up to scalar equivalence or side swap.");
     }
-    if (state.surfaceVariant === "BINOMIAL_LEFT_NUMERATOR" &&
-        (state.lhsX.denominator !== state.lhsConstant.denominator || state.lhsX.denominator === 1)) {
-      error(issues, "A7_BINOMIAL_SURFACE", "Binomial numerator variant requires two left-hand terms sharing a genuine denominator.");
-    }
+
+    validateFractionalSurfaceGrammar(state, issues);
   } else {
     const state = question.mathState;
     if (question.paper !== "P1") {
@@ -116,6 +179,10 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
     if (question.visual.triangle.baseLabel !== `${state.triangle.base} cm` ||
         question.visual.rectangle.heightLabel !== `${state.rectangle.height} cm`) {
       error(issues, "A7_VISUAL_STATE_DRIFT", "Area visual labels do not agree with the generated mathematical state.");
+    }
+    if (question.visual.triangle.heightLatex !== `\\left(x+${state.triangle.heightConstant}\\right)\\,\\text{cm}` ||
+        question.visual.rectangle.widthLatex !== `\\left(${state.rectangle.widthConstant}-x\\right)\\,\\text{cm}`) {
+      error(issues, "A7_VISUAL_MATH_DRIFT", "Area visual mathematical labels do not agree with the generated mathematical state.");
     }
   }
 
