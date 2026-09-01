@@ -6,7 +6,7 @@ import type {
 } from "@/app/Assessments/AssessmentTypes";
 
 type A7ConceptOptions = {
-  marks: number;
+  marks?: number;
   thinkingType: NonNullable<Concept["metadata"]>["thinkingType"];
   paperSuitability: SkillPaperSuitability;
   availableDifficultyLevels: DifficultyLevel[];
@@ -43,12 +43,30 @@ const a7Concept = (
 });
 
 /**
- * A7.1 is the Builder-facing general-linear-equations branch. The selectable
- * leaves map one-to-one onto the two currently calibrated A7 generator
- * families while keeping their stable internal ids for saved-question
- * restoration.
+ * Mirror the parent/child selector pattern used by fractions:
+ *
+ * A7.1   General linear equations       -> all calibrated A7.1 families
+ * A7.1.1 Fractional linear equation     -> fractional family only
+ * A7.1.2 Form and solve linear equation -> contextual forming family only
+ *
+ * The parent deliberately has no single mark tariff. Variant-level selection
+ * metadata decides which child family is eligible under the active Builder
+ * marks/thinking/paper constraints.
  */
 const A7_BUILDER_CONCEPTS: Concept[] = [
+  a7Concept(
+    "alg-a7-linear-general",
+    "A7.1",
+    "General linear equations",
+    {
+      thinkingType: "mixed",
+      paperSuitability: "BOTH",
+      availableDifficultyLevels: [1, 2],
+      defaultDifficultyLevel: 1,
+      fullDescription:
+        "Generate across the calibrated A7.1 linear-equation families, including fractional linear equations and form-and-solve contexts.",
+    },
+  ),
   a7Concept(
     "alg-a7-fractional",
     "A7.1.1",
@@ -90,8 +108,6 @@ export function withA7BuilderConcepts(
       skill.id === "alg-a07-linear-equations"
         ? {
             ...skill,
-            code: "A7.1",
-            text: "General linear equations",
             paperSuitability: "BOTH",
             concepts: A7_BUILDER_CONCEPTS,
           }
