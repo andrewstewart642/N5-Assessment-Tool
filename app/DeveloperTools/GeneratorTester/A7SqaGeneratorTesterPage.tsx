@@ -5,16 +5,18 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { formatHistoricalQuestionReferenceLabel } from "../../Courses/National5Maths/CatalogCoreTypes";
 import type {
   A7GeneratedQuestion,
+  A7GeneratorDifficulty,
   A7GeneratorFamily,
   A7GeneratorPaper,
 } from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
 import {
-  generateA7AssessmentPair,
+  generateA7AssessmentBatch,
   type A7GeneratedMarkingScheme,
 } from "../../Courses/National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations";
 import A7SqaQuestionPreview from "./A7SqaQuestionPreview";
 
 type FamilyControl = "MIX" | A7GeneratorFamily;
+type DifficultyControl = "MIX" | A7GeneratorDifficulty;
 
 type Sample = {
   id: string;
@@ -143,6 +145,28 @@ function MarkingDetail({ scheme }: { scheme: A7GeneratedMarkingScheme }) {
   );
 }
 
+function DifficultyDetail({ question }: { question: A7GeneratedQuestion }) {
+  const metrics = question.quality.difficultyMetrics;
+  return (
+    <div style={{ display: "grid", gap: 6, padding: "8px 10px", border: "1px solid rgba(167,139,250,0.22)", borderRadius: 7, background: "rgba(124,58,237,0.055)", color: "#ddd6fe", fontSize: 10 }}>
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+        <Chip emphasis>Difficulty {question.difficulty}</Chip>
+        <Chip>{question.quality.difficultyBandId.replaceAll("_", " ").toLowerCase()}</Chip>
+        <Chip>score {question.quality.difficultyScore}</Chip>
+        {metrics.denominatorLcm !== null ? <Chip>LCD {metrics.denominatorLcm}</Chip> : null}
+        <Chip>surface {metrics.surfaceComplexity}</Chip>
+        <Chip>max coeff {metrics.largestWorkingCoefficient}</Chip>
+        <Chip>max constant {metrics.largestWorkingConstant}</Chip>
+        <Chip>final coeff {metrics.rearrangedCoefficientMagnitude}</Chip>
+        {metrics.solutionDenominator !== null ? <Chip>answer denom {metrics.solutionDenominator}</Chip> : null}
+      </div>
+      <div style={{ color: "#c4b5fd", lineHeight: 1.45 }}>
+        {question.quality.difficultySignals.join(" ")}
+      </div>
+    </div>
+  );
+}
+
 function SampleCard({ sample, index, showDetail }: { sample: Sample; index: number; showDetail: boolean }) {
   if (sample.error) {
     return (
@@ -172,6 +196,7 @@ function SampleCard({ sample, index, showDetail }: { sample: Sample; index: numb
       >
         <strong style={{ color: "#e2e8f0", fontSize: 11 }}>Sample {index + 1} · seed {sample.seed}</strong>
         <div style={{ display: "flex", gap: 5, flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <Chip emphasis>D{question.difficulty} · {question.quality.difficultyBandId.replaceAll("_", " ")}</Chip>
           <Chip>{question.marks} marks</Chip>
           <Chip>{question.standard}</Chip>
           <Chip>{question.thinking === "REASONING" ? "Reasoning" : "Operational"}</Chip>
@@ -194,6 +219,11 @@ function SampleCard({ sample, index, showDetail }: { sample: Sample; index: numb
               <Chip key={reason}>{reason.replaceAll("_", " ").toLowerCase()}</Chip>
             ))}
           </div>
+        </section>
+
+        <section>
+          <SectionTitle>Difficulty calibration</SectionTitle>
+          <DifficultyDetail question={question} />
         </section>
 
         <section>
@@ -228,8 +258,9 @@ function SampleCard({ sample, index, showDetail }: { sample: Sample; index: numb
 export default function A7SqaGeneratorTesterPage() {
   const [family, setFamily] = useState<FamilyControl>("MIX");
   const [paper, setPaper] = useState<A7GeneratorPaper>("P1");
+  const [difficulty, setDifficulty] = useState<DifficultyControl>("MIX");
   const [sampleCount, setSampleCount] = useState<number>(10);
-  const [nextSeed, setNextSeed] = useState<number>(28001);
+  const [nextSeed, setNextSeed] = useState<number>(29001);
   const [lastStartSeed, setLastStartSeed] = useState<number | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [samples, setSamples] = useState<Sample[]>([]);
@@ -246,32 +277,34 @@ export default function A7SqaGeneratorTesterPage() {
       setPaper(supportedPapers[0] ?? "P1");
       setDirty(true);
     }
-  }, [paper, supportedPapers]);
+    if (family === "CONTEXT_AREA_EQUALITY" && difficulty === 1) {
+      setDifficulty(2);
+      setDirty(true);
+    }
+  }, [difficulty, family, paper, supportedPapers]);
 
   function generateSamples(startSeed: number, count = sampleCount): Sample[] {
-    return Array.from({ length: count }, (_, index) => {
-      const seed = startSeed + index;
-      try {
-        const pair = generateA7AssessmentPair({
-          seed,
-          paper,
-          ...(family === "MIX" ? {} : { family }),
-          includeExperimentalFamilies: true,
-        });
-        return {
-          id: `${pair.question.instanceId}-${index}`,
-          seed,
-          question: pair.question,
-          markingScheme: pair.markingScheme,
-        };
-      } catch (error) {
-        return {
-          id: `A7-error-${seed}-${index}`,
-          seed,
-          error: error instanceof Error ? error.stack ?? error.message : String(error),
-        };
-      }
-    });
+    try {
+      const pairs = generateA7AssessmentBatch(count, {
+        seed: startSeed,
+        paper,
+        ...(family === "MIX" ? {} : { family }),
+        ...(difficulty === "MIX" ? {} : { difficulty }),
+        includeExperimentalFamilies: true,
+      });
+      return pairs.map((pair, index) => ({
+        id: `${pair.question.instanceId}-${index}`,
+        seed: pair.question.seed,
+        question: pair.question,
+        markingScheme: pair.markingScheme,
+      }));
+    } catch (error) {
+      return [{
+        id: `A7-error-${startSeed}`,
+        seed: startSeed,
+        error: error instanceof Error ? error.stack ?? error.message : String(error),
+      }];
+    }
   }
 
   function generateNextBatch() {
@@ -283,7 +316,7 @@ export default function A7SqaGeneratorTesterPage() {
   }
 
   useEffect(() => {
-    const startSeed = 28001;
+    const startSeed = 29001;
     setSamples(generateSamples(startSeed, 10));
     setLastStartSeed(startSeed);
     setNextSeed(startSeed + 10);
@@ -294,6 +327,8 @@ export default function A7SqaGeneratorTesterPage() {
   const failed = samples.filter((sample) => Boolean(sample.error)).length;
   const fractional = samples.filter((sample) => sample.question?.family === "FRACTIONAL_COEFFICIENT").length;
   const contextual = samples.filter((sample) => sample.question?.family === "CONTEXT_AREA_EQUALITY").length;
+  const difficulty1 = samples.filter((sample) => sample.question?.difficulty === 1).length;
+  const difficulty2 = samples.filter((sample) => sample.question?.difficulty === 2).length;
 
   const controlStyle = {
     height: 32,
@@ -338,6 +373,23 @@ export default function A7SqaGeneratorTesterPage() {
           </Label>
 
           <Label>
+            Difficulty
+            <select
+              value={difficulty}
+              onChange={(event) => {
+                const value = event.target.value;
+                setDifficulty(value === "MIX" ? "MIX" : Number(value) as A7GeneratorDifficulty);
+                setDirty(true);
+              }}
+              style={{ ...controlStyle, minWidth: 150 }}
+            >
+              <option value="MIX">Calibrated mix</option>
+              <option value="1">Band 1 · lower</option>
+              <option value="2">Band 2 · upper</option>
+            </select>
+          </Label>
+
+          <Label>
             Samples
             <select value={sampleCount} onChange={(event) => { setSampleCount(Number(event.target.value)); setDirty(true); }} style={controlStyle}>
               {SAMPLE_COUNTS.map((count) => <option key={count} value={count}>{count}</option>)}
@@ -359,16 +411,18 @@ export default function A7SqaGeneratorTesterPage() {
 
           <div style={{ marginLeft: "auto", display: "flex", gap: 5, flexWrap: "wrap", alignItems: "center" }}>
             {dirty ? <Chip emphasis>Controls changed · generate</Chip> : null}
-            {lastStartSeed !== null ? <Chip>batch {lastStartSeed}-{lastStartSeed + Math.max(samples.length - 1, 0)}</Chip> : null}
+            {lastStartSeed !== null ? <Chip>batch source {lastStartSeed}</Chip> : null}
             <Chip>{samples.length} generated</Chip>
             <Chip>{failed} errors</Chip>
             <Chip>{fractional} fractional</Chip>
             <Chip>{contextual} context</Chip>
+            <Chip>{difficulty1} D1</Chip>
+            <Chip>{difficulty2} D2</Chip>
           </div>
         </section>
 
         <section style={{ marginBottom: 10, padding: "8px 10px", border: "1px solid rgba(96,165,250,0.18)", borderRadius: 8, background: "rgba(59,130,246,0.04)", color: "#bfdbfe", fontSize: 10, lineHeight: 1.45 }}>
-          Visual QA now follows the source-paper structure: a dedicated question-number lane, a separate MARKS lane, source-like equation placement, and a 2022-style dimensioned area diagram. The preview deliberately avoids the generic PaperContent grid that caused the equations to render inside the marks column.
+          A7 QA now tests two separate things at once: SQA-like surface fidelity and route-based difficulty. Band 1 keeps the written arithmetic compact; Band 2 permits more LCD/bracket/coefficient work, but displayed denominators remain at most 10 and LCD at most 15. Batch generation rejects duplicate displayed questions.
         </section>
 
         <section style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 760px), 1fr))", gap: 12 }}>
