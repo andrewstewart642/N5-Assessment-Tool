@@ -55,7 +55,7 @@ export const buildA7FractionalPrompt = (state: A7FractionalEquationState): {
   promptSections: A7PromptSection[];
 } => {
   const equation = fractionalEquationLatex(state);
-  const lead = "Solve algebraically the equation.";
+  const lead = "Solve the equation.";
   const finish = "Give your answer in its simplest form.";
   return {
     prompt: `${lead} ${equation} ${finish}`,
@@ -81,10 +81,10 @@ export const buildA7ContextPrompt = (state: A7ContextAreaState): {
 } => {
   const triangleHeight = signedLinearLabel(1, state.triangle.heightConstant);
   const rectangleWidth = signedLinearLabel(-1, state.rectangle.widthConstant);
-  const introduction = "A triangle and a rectangle have equal areas. All lengths are in centimetres.";
+  const introduction = "A triangle and a rectangle are shown in the diagram.";
   const diagramSummary = `Triangle: base ${state.triangle.base} cm, height (${triangleHeight}) cm. Rectangle: height ${state.rectangle.height} cm, width (${rectangleWidth}) cm.`;
-  const partA = "Write down an expression, in terms of x, for the area of the triangle.";
-  const partB = "Use the fact that the two areas are equal to find the value of x algebraically.";
+  const partA = "Find an expression, in terms of x, for the area of the triangle.";
+  const partB = "The triangle and rectangle have equal areas. Find the value of x algebraically.";
 
   return {
     prompt: `${introduction} ${diagramSummary} (a) ${partA} (b) ${partB}`,
