@@ -45,9 +45,9 @@ const a7Concept = (
 /**
  * Mirror the parent/child selector pattern used by fractions:
  *
- * A7.1   General linear equations       -> all calibrated A7.1 families
- * A7.1.1 Fractional linear equation     -> fractional family only
- * A7.1.2 Form and solve linear equation -> contextual forming family only
+ * A7.1   Work with linear equations       -> all calibrated A7.1 families
+ * A7.1.1 Fractional linear equations      -> fractional family only
+ * A7.1.2 Form and solve linear equations  -> contextual forming family only
  *
  * The parent deliberately has no single mark tariff. Variant-level selection
  * metadata decides which child family is eligible under the active Builder
@@ -57,7 +57,7 @@ const A7_BUILDER_CONCEPTS: Concept[] = [
   a7Concept(
     "alg-a7-linear-general",
     "A7.1",
-    "General linear equations",
+    "Work with linear equations",
     {
       thinkingType: "mixed",
       paperSuitability: "BOTH",
@@ -70,7 +70,7 @@ const A7_BUILDER_CONCEPTS: Concept[] = [
   a7Concept(
     "alg-a7-fractional",
     "A7.1.1",
-    "Fractional linear equation",
+    "Fractional linear equations",
     {
       marks: 3,
       thinkingType: "operational",
@@ -84,7 +84,7 @@ const A7_BUILDER_CONCEPTS: Concept[] = [
   a7Concept(
     "alg-a7-area-equality",
     "A7.1.2",
-    "Form and solve linear equation",
+    "Form and solve linear equations",
     {
       marks: 5,
       thinkingType: "reasoning",
