@@ -5,6 +5,7 @@ export const ALG_A7_LINEAR_EQUATIONS_CONTEXT = {
   family: "CONTEXT_AREA_EQUALITY",
   readiness: "EXPERIMENTAL",
   papers: ["P1"],
+  difficulties: [2],
   marks: 5,
   standard: "A",
   thinking: "REASONING",
