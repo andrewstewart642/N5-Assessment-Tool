@@ -7,6 +7,14 @@ export type A7GeneratorReadiness = "CORE" | "EXPERIMENTAL";
 export type A7GeneratorStandard = "A";
 export type A7GeneratorThinking = "OPERATIONAL" | "REASONING";
 
+/**
+ * A7 uses two skill-specific difficulty bands. These are not Standard bands:
+ * both remain A-standard. The distinction reflects the amount of structural
+ * and numerical work needed to complete the same assessment construct.
+ */
+export type A7GeneratorDifficulty = 1 | 2;
+export type A7GeneratorDifficultyBandId = "LOWER_VALID" | "UPPER_VALID";
+
 export type A7Rational = {
   numerator: number;
   denominator: number;
@@ -113,7 +121,20 @@ export type A7SourceBasis = {
   historicalReference: HistoricalQuestionReferenceProfile;
 };
 
+export type A7DifficultyMetrics = {
+  denominatorLcm: number | null;
+  surfaceComplexity: 1 | 2 | 3;
+  largestWorkingCoefficient: number;
+  largestWorkingConstant: number;
+  rearrangedCoefficientMagnitude: number;
+  solutionNumeratorMagnitude: number;
+  solutionDenominator: number | null;
+};
+
 export type A7GenerationQualityProfile = {
+  difficultyBandId: A7GeneratorDifficultyBandId;
+  difficultyScore: number;
+  difficultyMetrics: A7DifficultyMetrics;
   historicalOverlapChecked: true;
   familyObservedCount: number;
   familyObservedTotal: number;
@@ -131,6 +152,7 @@ type A7GeneratedQuestionBase = {
   family: A7GeneratorFamily;
   familyReadiness: A7GeneratorReadiness;
   paper: A7GeneratorPaper;
+  difficulty: A7GeneratorDifficulty;
   marks: 3 | 5;
   standard: A7GeneratorStandard;
   thinking: A7GeneratorThinking;
@@ -155,6 +177,7 @@ export type A7ContextGeneratedQuestion = A7GeneratedQuestionBase & {
   family: "CONTEXT_AREA_EQUALITY";
   familyReadiness: "EXPERIMENTAL";
   paper: "P1";
+  difficulty: 2;
   marks: 5;
   thinking: "REASONING";
   mathState: A7ContextAreaState;
@@ -165,6 +188,7 @@ export type A7GeneratedQuestion = A7FractionalGeneratedQuestion | A7ContextGener
 
 export type A7GenerateOptions = {
   seed: number;
+  difficulty?: A7GeneratorDifficulty;
   family?: A7GeneratorFamily;
   paper?: A7GeneratorPaper;
   /** Set false to restrict automatic selection to the repeated core family. */
