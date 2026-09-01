@@ -26,6 +26,8 @@ const TRIANGLE_MAX_HEIGHT = 190;
 const RECTANGLE_MAX_WIDTH = 185;
 const RECTANGLE_MAX_HEIGHT = 165;
 const SCALE_CAP = 32;
+const ARROW_CLEARANCE = 26;
+const LABEL_CLEARANCE = 18;
 
 const mathParts = (latex: string): PaperPart[] => [
   { kind: "math", latex, displayMode: false },
@@ -57,16 +59,20 @@ const fitScale = (
   maxHeight: number,
 ) => Math.min(SCALE_CAP, maxWidth / width, maxHeight / height);
 
+type MathLabelAnchor = "CENTRE" | "LEFT";
+
 function MathLabel({
   latex,
   x,
   y,
-  centred = true,
+  anchor = "CENTRE",
+  protectClearance = false,
 }: {
   latex: string;
   x: number;
   y: number;
-  centred?: boolean;
+  anchor?: MathLabelAnchor;
+  protectClearance?: boolean;
 }) {
   return (
     <div
@@ -74,12 +80,19 @@ function MathLabel({
         position: "absolute",
         left: `${(x / VIEWBOX_WIDTH) * 100}%`,
         top: `${(y / VIEWBOX_HEIGHT) * 100}%`,
-        transform: centred ? "translate(-50%, -50%)" : "translateY(-50%)",
+        transform: anchor === "CENTRE" ? "translate(-50%, -50%)" : "translateY(-50%)",
         whiteSpace: "nowrap",
         fontSize: "17px",
         lineHeight: 1,
         color: "currentColor",
         pointerEvents: "none",
+        // Vertical labels sit in their own clear lane to the right of the
+        // dimension arrow. The white backing is intentionally invisible on
+        // paper, but guarantees that long KaTeX brackets never visually touch
+        // an arrowhead or line because of glyph overhang.
+        background: protectClearance ? "#ffffff" : undefined,
+        padding: protectClearance ? "2px 4px" : undefined,
+        zIndex: protectClearance ? 2 : 1,
       }}
     >
       <PaperContent parts={mathParts(latex)} />
@@ -112,15 +125,15 @@ export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
   const triangleLeft = triangleCentreX - triangleWidth / 2;
   const triangleRight = triangleCentreX + triangleWidth / 2;
   const triangleTop = SHAPE_BOTTOM - triangleHeight;
-  const triangleArrowX = triangleRight + 26;
-  const triangleHeightLabelX = triangleArrowX + 48;
+  const triangleArrowX = triangleRight + ARROW_CLEARANCE;
+  const triangleHeightLabelX = triangleArrowX + LABEL_CLEARANCE;
 
   const rectangleCentreX = 525;
   const rectangleLeft = rectangleCentreX - rectangleWidth / 2;
   const rectangleTop = SHAPE_BOTTOM - rectangleHeight;
   const rectangleRight = rectangleCentreX + rectangleWidth / 2;
-  const rectangleArrowX = rectangleRight + 26;
-  const rectangleHeightLabelX = Math.min(VIEWBOX_WIDTH - 54, rectangleArrowX + 55);
+  const rectangleArrowX = rectangleRight + ARROW_CLEARANCE;
+  const rectangleHeightLabelX = rectangleArrowX + LABEL_CLEARANCE;
 
   return (
     <div
@@ -175,12 +188,16 @@ export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
         latex={visual.triangle.heightLatex}
         x={triangleHeightLabelX}
         y={(triangleTop + SHAPE_BOTTOM) / 2}
+        anchor="LEFT"
+        protectClearance
       />
       <MathLabel latex={visual.rectangle.widthLatex} x={rectangleCentreX} y={SHAPE_BOTTOM + 24} />
       <MathLabel
         latex={visual.rectangle.heightLatex}
         x={rectangleHeightLabelX}
         y={(rectangleTop + SHAPE_BOTTOM) / 2}
+        anchor="LEFT"
+        protectClearance
       />
     </div>
   );
