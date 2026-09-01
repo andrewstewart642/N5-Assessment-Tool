@@ -43,7 +43,6 @@ export const chooseA7Paper = (
     return supported[positiveModulo(seed, supported.length)] as A7GeneratorPaper;
   }
 
-  // Three of the four reviewed A7 occurrences are on Paper 1.
   return positiveModulo(seed, 4) === 0 ? "P2" : "P1";
 };
 
@@ -65,7 +64,6 @@ export const selectA7Family = (
 
   if (paper === "P2" || !includeExperimentalFamilies) return "FRACTIONAL_COEFFICIENT";
 
-  // P1 corpus: 2 fractional examples, 1 equal-area contextual example.
   const slot = positiveModulo(seed * 17 + 5, 3);
   return slot === 2 ? "CONTEXT_AREA_EQUALITY" : "FRACTIONAL_COEFFICIENT";
 };
@@ -108,7 +106,9 @@ export const historicalReferenceForA7Fractional = (
     ? "N5_MATH_2025_P2_Q13"
     : state.surfaceVariant === "BINOMIAL_RIGHT_NUMERATOR"
       ? "N5_MATH_2019_P1_Q14"
-      : "N5_MATH_2016_P1_Q8";
+      : state.surfaceVariant === "BINOMIAL_BOTH_SIDES"
+        ? "N5_MATH_2025_P2_Q13"
+        : "N5_MATH_2016_P1_Q8";
 
   const all = A7_GENERATOR_ABSTRACT_FINGERPRINTS.map((entry) => entry.sourceQuestionId);
   return {
