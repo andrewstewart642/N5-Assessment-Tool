@@ -35,7 +35,7 @@ const a7Concept = (
     calculator: "optional",
     interactionType: "core",
     stepCount: "multi",
-    topicTags: ["linear equations", "fractional coefficients"],
+    topicTags: ["linear equations"],
     canBePrimary: true,
     availableDifficultyLevels: options.availableDifficultyLevels,
     defaultDifficultyLevel: options.defaultDifficultyLevel,
@@ -43,15 +43,16 @@ const a7Concept = (
 });
 
 /**
- * Keep the Builder selectors explicit for the hardened A7 families. A generic
- * "mixed" selector can silently disagree with a teacher's requested 3/5-mark
- * tariff, whereas these two choices map one-to-one onto calibrated generators.
+ * A7.1 is the Builder-facing general-linear-equations branch. The selectable
+ * leaves map one-to-one onto the two currently calibrated A7 generator
+ * families while keeping their stable internal ids for saved-question
+ * restoration.
  */
 const A7_BUILDER_CONCEPTS: Concept[] = [
   a7Concept(
     "alg-a7-fractional",
-    "A7.1",
-    "Fractional-coefficient linear equation",
+    "A7.1.1",
+    "Fractional linear equation",
     {
       marks: 3,
       thinkingType: "operational",
@@ -64,8 +65,8 @@ const A7_BUILDER_CONCEPTS: Concept[] = [
   ),
   a7Concept(
     "alg-a7-area-equality",
-    "A7.2",
-    "Form and solve an equal-area linear equation",
+    "A7.1.2",
+    "Form and solve linear equation",
     {
       marks: 5,
       thinkingType: "reasoning",
@@ -73,7 +74,7 @@ const A7_BUILDER_CONCEPTS: Concept[] = [
       availableDifficultyLevels: [2],
       defaultDifficultyLevel: 2,
       fullDescription:
-        "Use a dimensioned triangle/rectangle diagram to form and solve a five-mark equal-area linear equation.",
+        "Form and solve a linear equation from a contextual relationship. The currently calibrated generator family uses equal areas from a dimensioned triangle and rectangle.",
     },
   ),
 ];
@@ -89,7 +90,8 @@ export function withA7BuilderConcepts(
       skill.id === "alg-a07-linear-equations"
         ? {
             ...skill,
-            text: "Work with linear equations",
+            code: "A7.1",
+            text: "General linear equations",
             paperSuitability: "BOTH",
             concepts: A7_BUILDER_CONCEPTS,
           }
