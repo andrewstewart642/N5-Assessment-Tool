@@ -13,11 +13,7 @@ export type A7FractionalSurfaceEvidence = {
   rhsStartsWithNegativeTerm: false;
 };
 
-/**
- * Surface-level findings added after teacher visual moderation of the first A7
- * generator batch. These facts were re-checked against the supplied source
- * papers rather than inferred from generated output.
- */
+/** Historical source facts. Generation may interpolate modestly beyond them. */
 export const A7_FRACTIONAL_SURFACE_EVIDENCE: readonly A7FractionalSurfaceEvidence[] = [
   {
     sourceQuestionId: "N5_MATH_2016_P1_Q8",
@@ -49,18 +45,20 @@ export const A7_FRACTIONAL_SURFACE_EVIDENCE: readonly A7FractionalSurfaceEvidenc
 ] as const;
 
 export const A7_FRACTIONAL_SURFACE_GENERATION_GUARDRAILS = [
-  "Keep the displayed equation to three top-level algebraic objects; do not turn the source family into a four-term rational-expression exercise.",
-  "Begin both sides with a positive algebraic object. Internal subtraction is permitted where historically evidenced, but a leading negative term is not part of the reviewed A7 surface grammar.",
-  "Use two distinct displayed non-unit denominators. Historical anchors use 2, 3, 5 and 6; teacher-moderated generation may interpolate to similarly natural pairings using displayed denominators no larger than 10 and LCD no larger than 15.",
-  "Prefer recognisable lowest-common-denominator pairings such as 2-and-3, 3-and-6, 2-and-5, 3-and-4, 4-and-6, 3-and-5 and 4-and-8 rather than arbitrary fractions on every term.",
-  "Treat the three reviewed source surfaces as separate prompt grammars: 2016-type split fractions, 2019-type right binomial fraction, and 2025-type left binomial fraction.",
+  "Use the three reviewed source surfaces as the default prompt grammars; moderate interpolation is allowed only where the result still looks and feels like an SQA National 5 question.",
+  "Begin both sides with a positive algebraic object. Internal subtraction is permitted where historically evidenced, but avoid ugly leading-negative architecture.",
+  "Use two distinct displayed non-unit denominators. Historical anchors use 2, 3, 5 and 6; moderated generation may use similarly natural pairings with displayed denominators no larger than 10 and LCD no larger than 15.",
+  "Prefer recognisable lowest-common-denominator pairings rather than arbitrary fractions on every term.",
+  "A moderated upper-band extension may place a compact binomial fraction on each side, but it must remain a linear-equation task rather than drift into rational-expression manipulation.",
   "Do not broaden surface complexity merely because the cleared equation remains numerically solvable; visual/algebraic cleanliness is itself part of fidelity.",
-  "For every proposed extension ask the explicit moderation question: would this still look and feel at home on an SQA National 5 paper? Reject it when the answer is doubtful.",
+  "For every proposed extension ask: would this still look and feel at home on an SQA National 5 paper? Reject it when the answer is doubtful.",
 ] as const;
 
 export const A7_CONTEXT_VISUAL_GENERATION_GUARDRAILS = [
-  "Use a symmetric narrow triangle and a separate upright rectangle, following the relative visual arrangement of the reviewed 2022 source family.",
-  "Place vertical dimension arrows immediately beside the relevant shapes, with algebraic labels centred beside those arrows.",
+  "Use a symmetric narrow triangle and a separate upright rectangle, following the overall arrangement of the reviewed 2022 source family.",
+  "The algebraic dimension may appear horizontally or vertically on either shape, while the other dimension stays fixed so the equal-area model remains linear.",
+  "Permit restrained linear forms such as x+c, c-x and occasional 2x+c or c-2x; a non-unit x coefficient is an upper-texture variant rather than the default.",
+  "Place vertical dimension arrows immediately beside the relevant shapes and horizontal dimensions directly beneath them.",
   "Render algebraic dimension labels using mathematical typesetting; plain UI text is not an acceptable final visual representation.",
-  "Place fixed horizontal dimensions directly beneath the relevant shapes.",
+  "Keep the visual recognisably SQA-like even when the parameter layout is moderately broader than the single historical source example.",
 ] as const;
