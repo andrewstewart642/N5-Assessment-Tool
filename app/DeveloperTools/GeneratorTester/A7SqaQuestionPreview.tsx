@@ -57,19 +57,16 @@ function FractionalQuestion({
   questionNumber: number;
 }) {
   const equation = fractionalEquationLatex(question.mathState);
-  // The reviewed corpus uses both an inline equation (2019/2025) and a
-  // centred equation on the next line (2016). Keep both source-like layouts
-  // in the tester so presentation is checked as well as mathematics.
-  const inlineEquation = question.mathState.surfaceVariant === "BINOMIAL_LEFT_NUMERATOR" || question.seed % 2 === 0;
+  const sourceLikeCentredLayout = question.mathState.surfaceVariant === "SPLIT_TERMS";
 
-  if (inlineEquation) {
+  if (!sourceLikeCentredLayout) {
     return (
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "38px minmax(0, 1fr) 54px",
           columnGap: 8,
-          rowGap: 14,
+          rowGap: 12,
           alignItems: "baseline",
         }}
       >
@@ -90,12 +87,10 @@ function FractionalQuestion({
           <span style={{ whiteSpace: "nowrap" }}>
             <PaperContent parts={mathParts(equation)} />
           </span>
+          <span>.</span>
         </div>
         <div style={{ gridColumn: 3, gridRow: 2, justifySelf: "center" }}>
           <MarkColumn marks={question.marks} />
-        </div>
-        <div style={{ gridColumn: 2, gridRow: 3, paddingTop: 6 }}>
-          Give your answer in its simplest form.
         </div>
       </div>
     );
@@ -118,8 +113,8 @@ function FractionalQuestion({
         style={{
           gridColumn: 2,
           gridRow: 3,
-          width: "min(360px, 80%)",
-          margin: "8px auto 10px",
+          width: "min(300px, 72%)",
+          margin: "10px auto 12px",
           textAlign: "center",
           fontSize: "12pt",
           overflow: "visible",
@@ -150,31 +145,31 @@ function ContextQuestion({
         display: "grid",
         gridTemplateColumns: "38px minmax(0, 1fr) 54px",
         columnGap: 8,
-        rowGap: 12,
+        rowGap: 13,
         alignItems: "start",
       }}
     >
       <SqaHeaderMarks />
       <div style={{ gridColumn: 1, gridRow: 2, fontWeight: 700 }}>{questionNumber}.</div>
       <div style={{ gridColumn: 2, gridRow: 2 }}>
-        A triangle and a rectangle are shown in the diagram.
+        A triangle and rectangle are shown in the diagram.
       </div>
 
-      <div style={{ gridColumn: "2 / 4", gridRow: 3, paddingRight: 16 }}>
+      <div style={{ gridColumn: "2 / 4", gridRow: 3, paddingRight: 34, marginTop: 3 }}>
         <A7AreaPreview visual={question.visual} />
       </div>
 
       <div style={{ gridColumn: 1, gridRow: 4, textAlign: "right" }}>(a)</div>
       <div style={{ gridColumn: 2, gridRow: 4 }}>
-        Find an expression, in terms of <em>x</em>, for the area of the triangle.
+        Find an expression for the area of the triangle.
       </div>
       <div style={{ gridColumn: 3, gridRow: 4, justifySelf: "center" }}>
         <MarkColumn marks={1} />
       </div>
 
       <div style={{ gridColumn: 1, gridRow: 5, textAlign: "right" }}>(b)</div>
-      <div style={{ gridColumn: 2, gridRow: 5 }}>
-        The triangle and rectangle have equal areas. Find the value of <em>x</em> algebraically.
+      <div style={{ gridColumn: 2, gridRow: 5, maxWidth: 760 }}>
+        Given that the area of the triangle is equal to the area of the rectangle, find algebraically the value of <em>x</em>.
       </div>
       <div style={{ gridColumn: 3, gridRow: 5, justifySelf: "center" }}>
         <MarkColumn marks={4} />
@@ -189,8 +184,8 @@ export default function A7SqaQuestionPreview({ question, questionNumber = 1 }: P
       className="a7-sqa-preview"
       style={{
         width: "100%",
-        minHeight: question.family === "CONTEXT_AREA_EQUALITY" ? 430 : 200,
-        padding: question.family === "CONTEXT_AREA_EQUALITY" ? "22px 24px 26px" : "22px 24px 30px",
+        minHeight: question.family === "CONTEXT_AREA_EQUALITY" ? 500 : 180,
+        padding: question.family === "CONTEXT_AREA_EQUALITY" ? "22px 24px 28px" : "22px 24px 30px",
         background: "#ffffff",
         color: "#111111",
         borderRadius: 2,
