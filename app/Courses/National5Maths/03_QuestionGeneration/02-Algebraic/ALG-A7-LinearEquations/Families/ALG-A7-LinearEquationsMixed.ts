@@ -4,5 +4,6 @@ export const ALG_A7_LINEAR_EQUATIONS_MIXED = {
   label: "Linear equations",
   families: ["FRACTIONAL_COEFFICIENT", "CONTEXT_AREA_EQUALITY"],
   papers: ["P1", "P2"],
+  difficulties: [1, 2],
   generatorId: "A7_LINEAR_EQUATIONS_V1",
 } as const;
