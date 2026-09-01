@@ -14,6 +14,10 @@ import type {
 } from "@/app/Assessments/AssessmentTypes";
 
 import type {
+  PaperPart,
+} from "@/app/Assessments/Questions/Content/PaperParts";
+
+import type {
   QuestionSelectionFilters,
 } from "@/app/Assessments/Questions/Selection/QuestionSelectionTypes";
 
@@ -28,10 +32,154 @@ import type {
 } from "../01-SkillsFilters/SkillsFilters";
 
 import {
-  conceptInlineParts,
   conceptSelectionText,
   getConceptRestriction,
 } from "./ConceptSelectionRules";
+
+const A7_LINEAR_EQUATIONS_SKILL_ID =
+  "alg-a07-linear-equations";
+
+function conceptLabelParts(
+  concept: Concept
+): PaperPart[] {
+  const short =
+    concept.shortLabel?.trim();
+
+  const rawLabel =
+    concept.label.trim();
+
+  const fallbackLabel =
+    rawLabel.startsWith(
+      concept.code
+    )
+      ? rawLabel
+          .slice(
+            concept.code.length
+          )
+          .trim()
+      : rawLabel;
+
+  const labelText =
+    short ||
+    fallbackLabel ||
+    rawLabel;
+
+  const parts: PaperPart[] = [
+    {
+      kind: "text",
+      value: labelText,
+    },
+  ];
+
+  if (concept.badge?.trim()) {
+    parts.push({
+      kind: "text",
+      value: " · ",
+    });
+
+    parts.push({
+      kind: "math",
+      latex:
+        concept.badge.trim(),
+    });
+  }
+
+  return parts;
+}
+
+function ConceptIdentity({
+  concept,
+}: {
+  concept: Concept;
+}) {
+  return (
+    <span
+      style={{
+        width: "100%",
+
+        minWidth: 0,
+
+        display: "grid",
+
+        gridTemplateColumns:
+          "6.5ch minmax(0, 1fr)",
+
+        columnGap: 10,
+
+        alignItems:
+          "baseline",
+      }}
+    >
+      <span
+        style={{
+          whiteSpace:
+            "nowrap",
+        }}
+      >
+        {concept.code}
+      </span>
+
+      <span
+        style={{
+          minWidth: 0,
+
+          overflow:
+            "hidden",
+
+          whiteSpace:
+            "nowrap",
+
+          textOverflow:
+            "ellipsis",
+        }}
+      >
+        <PaperContent
+          parts={
+            conceptLabelParts(
+              concept
+            )
+          }
+        />
+      </span>
+    </span>
+  );
+}
+
+function conceptsForDisplay(
+  skill: Skill,
+  rankedConcepts: Concept[]
+): Concept[] {
+  if (
+    skill.id !==
+    A7_LINEAR_EQUATIONS_SKILL_ID
+  ) {
+    return rankedConcepts;
+  }
+
+  const sourceOrder =
+    new Map(
+      skill.concepts.map(
+        (concept, index) => [
+          concept.id,
+          index,
+        ]
+      )
+    );
+
+  return [
+    ...rankedConcepts,
+  ].sort(
+    (first, second) =>
+      (sourceOrder.get(
+        first.id
+      ) ??
+        Number.MAX_SAFE_INTEGER) -
+      (sourceOrder.get(
+        second.id
+      ) ??
+        Number.MAX_SAFE_INTEGER)
+  );
+}
 
 type ConceptSelectorProps = {
   skill: Skill;
@@ -95,6 +243,12 @@ export default function ConceptSelector({
       null
     );
 
+  const displayConcepts =
+    conceptsForDisplay(
+      skill,
+      rankedConcepts
+    );
+
   useEffect(() => {
     if (!dropdownOpen) {
       return;
@@ -146,178 +300,179 @@ export default function ConceptSelector({
       }}
     >
       <button
-  type="button"
-  onClick={() =>
-    rankedConcepts.length >
-      0 &&
-    setDropdownOpen(
-      (previous) =>
-        !previous
-    )
-  }
-  disabled={
-    rankedConcepts.length ===
-    0
-  }
-  style={{
-    width: "100%",
-    height: 30,
-
-    borderRadius: 5,
-
-    border:
-      `1px solid ${theme.borderStandard}`,
-
-    background:
-      theme.controlBg,
-
-    color:
-      theme.textPrimary,
-
-    boxSizing:
-      "border-box",
-
-    padding:
-      "0 28px 0 8px",
-
-    display:
-      "flex",
-
-    alignItems:
-      "center",
-
-    minWidth: 0,
-
-    overflow:
-      "hidden",
-
-    cursor:
-      rankedConcepts.length ===
-      0
-        ? "default"
-        : "pointer",
-
-    opacity:
-      rankedConcepts.length ===
-      0
-        ? 0.62
-        : 1,
-
-    position:
-      "relative",
-
-    transition:
-      "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease",
-
-    boxShadow:
-      dropdownOpen
-        ? theme.shadow
-        : "none",
-  }}
-  title={
-    selected
-      ? conceptSelectionText(
-          selected
-        )
-      : "Select skill concept"
-  }
->
-  <span
-    style={{
-      minWidth: 0,
-
-      overflow:
-        "hidden",
-
-      whiteSpace:
-        "nowrap",
-
-      textOverflow:
-        "ellipsis",
-
-      fontSize:
-        UI_TYPO.sizeSm,
-
-      lineHeight: 1,
-
-      fontWeight:
-        UI_TYPO.weightRegular,
-    }}
-  >
-    {selected ? (
-      <PaperContent
-        parts={
-          conceptInlineParts(
-            selected
+        type="button"
+        onClick={() =>
+          rankedConcepts.length >
+            0 &&
+          setDropdownOpen(
+            (previous) =>
+              !previous
           )
         }
-      />
-    ) : (
-      <span
-        style={{
-          color:
-            theme.textMuted,
-        }}
-      >
-        Select skill concept
-      </span>
-    )}
-  </span>
-
-  <span
-    aria-hidden="true"
-    style={{
-      position:
-        "absolute",
-
-      right: 9,
-
-      top: "50%",
-
-      transform:
-        "translateY(-50%)",
-
-      width: 14,
-      height: 14,
-
-      display:
-        "grid",
-
-      placeItems:
-        "center",
-
-      color:
-        theme.textMuted,
-
-      pointerEvents:
-        "none",
-    }}
-  >
-    <svg
-      width="7"
-      height="7"
-      viewBox="0 0 8 8"
-      aria-hidden="true"
-      style={{
-        display:
-          "block",
-      }}
-    >
-      <path
-        d={
-          dropdownOpen
-            ? "M1 5 L4 2 L7 5"
-            : "M1 2 L4 5 L7 2"
+        disabled={
+          rankedConcepts.length ===
+          0
         }
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  </span>
-</button>
+        style={{
+          width: "100%",
+          height: 30,
+
+          borderRadius: 5,
+
+          border:
+            `1px solid ${theme.borderStandard}`,
+
+          background:
+            theme.controlBg,
+
+          color:
+            theme.textPrimary,
+
+          boxSizing:
+            "border-box",
+
+          padding:
+            "0 28px 0 8px",
+
+          display:
+            "flex",
+
+          alignItems:
+            "center",
+
+          minWidth: 0,
+
+          overflow:
+            "hidden",
+
+          cursor:
+            rankedConcepts.length ===
+            0
+              ? "default"
+              : "pointer",
+
+          opacity:
+            rankedConcepts.length ===
+            0
+              ? 0.62
+              : 1,
+
+          position:
+            "relative",
+
+          transition:
+            "background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease",
+
+          boxShadow:
+            dropdownOpen
+              ? theme.shadow
+              : "none",
+        }}
+        title={
+          selected
+            ? conceptSelectionText(
+                selected
+              )
+            : "Select skill concept"
+        }
+      >
+        <span
+          style={{
+            flex:
+              "1 1 auto",
+
+            minWidth: 0,
+
+            overflow:
+              "hidden",
+
+            whiteSpace:
+              "nowrap",
+
+            textOverflow:
+              "ellipsis",
+
+            fontSize:
+              UI_TYPO.sizeSm,
+
+            lineHeight: 1,
+
+            fontWeight:
+              UI_TYPO.weightRegular,
+          }}
+        >
+          {selected ? (
+            <ConceptIdentity
+              concept={
+                selected
+              }
+            />
+          ) : (
+            <span
+              style={{
+                color:
+                  theme.textMuted,
+              }}
+            >
+              Select skill concept
+            </span>
+          )}
+        </span>
+
+        <span
+          aria-hidden="true"
+          style={{
+            position:
+              "absolute",
+
+            right: 9,
+
+            top: "50%",
+
+            transform:
+              "translateY(-50%)",
+
+            width: 14,
+            height: 14,
+
+            display:
+              "grid",
+
+            placeItems:
+              "center",
+
+            color:
+              theme.textMuted,
+
+            pointerEvents:
+              "none",
+          }}
+        >
+          <svg
+            width="7"
+            height="7"
+            viewBox="0 0 8 8"
+            aria-hidden="true"
+            style={{
+              display:
+                "block",
+            }}
+          >
+            <path
+              d={
+                dropdownOpen
+                  ? "M1 5 L4 2 L7 5"
+                  : "M1 2 L4 5 L7 2"
+              }
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </span>
+      </button>
 
       {dropdownOpen ? (
         <div
@@ -372,7 +527,7 @@ export default function ConceptSelector({
                 "none",
 
               borderBottom:
-                rankedConcepts.length
+                displayConcepts.length
                   ? `1px solid ${theme.borderStandard}`
                   : "none",
 
@@ -415,13 +570,20 @@ export default function ConceptSelector({
             Select skill concept
           </button>
 
-          {rankedConcepts.map(
+          {displayConcepts.map(
             (
               concept,
-              conceptIndex
+              displayIndex
             ) => {
+              const rankedIndex =
+                rankedConcepts.findIndex(
+                  (candidate) =>
+                    candidate.id ===
+                    concept.id
+                );
+
               const active =
-                conceptIndex ===
+                rankedIndex ===
                 currentIndex;
 
               const restriction =
@@ -449,9 +611,15 @@ export default function ConceptSelector({
                   }
                   type="button"
                   onClick={() => {
+                    if (
+                      rankedIndex < 0
+                    ) {
+                      return;
+                    }
+
                     setConceptIndex(
                       skill.id,
-                      conceptIndex
+                      rankedIndex
                     );
 
                     setDropdownOpen(
@@ -474,8 +642,8 @@ export default function ConceptSelector({
                       "none",
 
                     borderBottom:
-                      conceptIndex ===
-                      rankedConcepts.length -
+                      displayIndex ===
+                      displayConcepts.length -
                         1
                         ? "none"
                         : `1px solid ${theme.borderStandard}`,
@@ -547,11 +715,9 @@ export default function ConceptSelector({
                       lineHeight: 1,
                     }}
                   >
-                    <PaperContent
-                      parts={
-                        conceptInlineParts(
-                          concept
-                        )
+                    <ConceptIdentity
+                      concept={
+                        concept
                       }
                     />
                   </span>
