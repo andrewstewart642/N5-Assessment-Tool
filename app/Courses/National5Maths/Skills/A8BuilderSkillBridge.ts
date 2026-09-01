@@ -5,6 +5,10 @@ import type {
   SkillsData,
 } from "@/app/Assessments/AssessmentTypes";
 
+import {
+  withA7BuilderConcepts,
+} from "./A7BuilderSkillBridge";
+
 type A8ConceptOptions = {
   marks: number;
   thinkingType: NonNullable<Concept["metadata"]>["thinkingType"];
@@ -129,11 +133,21 @@ const A8_BUILDER_CONCEPTS: Concept[] = [
 export function withA8BuilderConcepts(
   skillsData: SkillsData
 ): SkillsData {
+  /*
+   * A7 and A8 are currently the two hardened algebra skills. Compose the
+   * bridges here so the existing AssessmentConfig call picks up both without
+   * adding a second course-config migration point.
+   */
+  const withA7 =
+    withA7BuilderConcepts(
+      skillsData
+    );
+
   const algebraicSkills =
-    skillsData["Algebraic Skills"] ?? [];
+    withA7["Algebraic Skills"] ?? [];
 
   return {
-    ...skillsData,
+    ...withA7,
     "Algebraic Skills": algebraicSkills.map(
       (skill) =>
         skill.id ===
