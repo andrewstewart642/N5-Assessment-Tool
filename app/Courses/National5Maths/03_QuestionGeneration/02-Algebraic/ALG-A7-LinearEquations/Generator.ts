@@ -18,6 +18,7 @@ import type {
   A7ContextGeneratedQuestion,
   A7FractionalEquationState,
   A7FractionalGeneratedQuestion,
+  A7FractionalSurfaceVariant,
   A7GenerateOptions,
   A7GeneratedQuestion,
   A7GeneratorPaper,
@@ -46,10 +47,6 @@ class SeededRandom {
   pick<T>(values: readonly T[]): T {
     return values[this.int(0, values.length - 1)];
   }
-
-  chance(probability: number) {
-    return this.next() < probability;
-  }
 }
 
 const mixSeed = (seed: number, salt: number) => {
@@ -77,41 +74,85 @@ const reduceRational = (numerator: number, denominator: number): A7Rational => {
 const clearedValue = (value: A7Rational, denominatorLcm: number) =>
   value.numerator * (denominatorLcm / value.denominator);
 
-const nonZeroInt = (rng: SeededRandom, min: number, max: number) => {
-  let value = 0;
-  while (value === 0) value = rng.int(min, max);
-  return value;
-};
+/**
+ * Distinct displayed denominator pairings whose LCD remains inside the
+ * reviewed 6-10 envelope. The three exact historical pairings (3,6), (2,5)
+ * and (2,3) are included, with only closely-related divisor pairings added.
+ */
+const DISPLAY_DENOMINATOR_PAIRS = [
+  { left: 3, right: 6, lcm: 6 },
+  { left: 2, right: 3, lcm: 6 },
+  { left: 2, right: 6, lcm: 6 },
+  { left: 3, right: 2, lcm: 6 },
+  { left: 2, right: 5, lcm: 10 },
+  { left: 5, right: 2, lcm: 10 },
+  { left: 2, right: 10, lcm: 10 },
+  { left: 5, right: 10, lcm: 10 },
+] as const;
 
-const divisorsFor = (targetLcm: 6 | 10) => targetLcm === 6
-  ? [1, 2, 3, 6] as const
-  : [1, 2, 5, 10] as const;
+const SURFACE_VARIANTS: readonly A7FractionalSurfaceVariant[] = [
+  "SPLIT_TERMS",
+  "BINOMIAL_RIGHT_NUMERATOR",
+  "BINOMIAL_LEFT_NUMERATOR",
+];
+
+const preservesDisplayedDenominator = (numerator: number, denominator: number) =>
+  reduceRational(numerator, denominator).denominator === denominator;
 
 const fractionalState = (seed: number): A7FractionalEquationState => {
   const rng = new SeededRandom(mixSeed(seed, 0xA70017));
-  const wantBinomial = rng.chance(0.34);
+  const surfaceVariant = rng.pick(SURFACE_VARIANTS);
 
-  for (let attempt = 0; attempt < 12000; attempt += 1) {
-    const targetLcm = rng.chance(0.62) ? 6 : 10;
-    const divisors = divisorsFor(targetLcm);
+  for (let attempt = 0; attempt < 16000; attempt += 1) {
+    const pair = rng.pick(DISPLAY_DENOMINATOR_PAIRS);
+    const leftDenominator = pair.left;
+    const rightDenominator = pair.right;
 
     let lhsX: A7Rational;
     let lhsConstant: A7Rational;
     let rhsX: A7Rational;
     let rhsConstant: A7Rational;
 
-    if (wantBinomial) {
-      const commonDenominator = rng.pick(targetLcm === 6 ? [2, 3, 6] as const : [2, 5, 10] as const);
-      lhsX = reduceRational(nonZeroInt(rng, -5, 5), commonDenominator);
-      lhsConstant = reduceRational(nonZeroInt(rng, -6, 6), commonDenominator);
-      rhsX = reduceRational(nonZeroInt(rng, -5, 5), rng.pick(divisors));
-      rhsConstant = reduceRational(rng.int(-6, 6), rng.pick(divisors));
-      if (lhsX.denominator !== lhsConstant.denominator || lhsX.denominator === 1) continue;
+    if (surfaceVariant === "SPLIT_TERMS") {
+      // 2016-type surface: ax/d1 - b/d2 = cx
+      const xNumerator = rng.int(1, 5);
+      const constantNumerator = rng.int(1, 5);
+      const wholeXCoefficient = rng.int(1, 2);
+      if (!preservesDisplayedDenominator(xNumerator, leftDenominator) ||
+          !preservesDisplayedDenominator(constantNumerator, rightDenominator)) continue;
+
+      lhsX = reduceRational(xNumerator, leftDenominator);
+      lhsConstant = reduceRational(-constantNumerator, rightDenominator);
+      rhsX = reduceRational(wholeXCoefficient, 1);
+      rhsConstant = reduceRational(0, 1);
+    } else if (surfaceVariant === "BINOMIAL_RIGHT_NUMERATOR") {
+      // 2019-type surface: ax/d1 - n = (b - cx)/d2
+      const lhsXNumerator = rng.int(1, 4);
+      const wholeConstant = rng.int(1, 3);
+      const rhsConstantNumerator = rng.int(1, 6);
+      const rhsXNumerator = rng.int(1, 4);
+      if (!preservesDisplayedDenominator(lhsXNumerator, leftDenominator) ||
+          !preservesDisplayedDenominator(rhsConstantNumerator, rightDenominator) ||
+          !preservesDisplayedDenominator(rhsXNumerator, rightDenominator)) continue;
+
+      lhsX = reduceRational(lhsXNumerator, leftDenominator);
+      lhsConstant = reduceRational(-wholeConstant, 1);
+      rhsX = reduceRational(-rhsXNumerator, rightDenominator);
+      rhsConstant = reduceRational(rhsConstantNumerator, rightDenominator);
     } else {
-      lhsX = reduceRational(nonZeroInt(rng, -5, 5), rng.pick(divisors));
-      lhsConstant = reduceRational(rng.int(-6, 6), rng.pick(divisors));
-      rhsX = reduceRational(nonZeroInt(rng, -5, 5), rng.pick(divisors));
-      rhsConstant = reduceRational(rng.int(-6, 6), rng.pick(divisors));
+      // 2025-type surface: (ax + b)/d1 = cx/d2 + n
+      const lhsXNumerator = rng.int(1, 5);
+      const lhsConstantNumerator = rng.int(1, 6);
+      const rhsXNumerator = rng.int(1, 4);
+      const wholeConstant = rng.int(1, 3);
+      if (!preservesDisplayedDenominator(lhsXNumerator, leftDenominator) ||
+          !preservesDisplayedDenominator(lhsConstantNumerator, leftDenominator) ||
+          !preservesDisplayedDenominator(rhsXNumerator, rightDenominator)) continue;
+
+      lhsX = reduceRational(lhsXNumerator, leftDenominator);
+      lhsConstant = reduceRational(lhsConstantNumerator, leftDenominator);
+      rhsX = reduceRational(rhsXNumerator, rightDenominator);
+      rhsConstant = reduceRational(wholeConstant, 1);
     }
 
     const denominatorLcm = lcmAll([
@@ -120,11 +161,7 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
       rhsX.denominator,
       rhsConstant.denominator,
     ]);
-    if (denominatorLcm !== targetLcm) continue;
-
-    const fractionalTermCount = [lhsX, lhsConstant, rhsX, rhsConstant]
-      .filter((value) => value.numerator !== 0 && value.denominator > 1).length;
-    if (fractionalTermCount < 2) continue;
+    if (denominatorLcm !== pair.lcm) continue;
 
     const clearedEquation = {
       lhsX: clearedValue(lhsX, denominatorLcm),
@@ -147,6 +184,15 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
         coefficientMagnitude > A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteRearrangedCoefficient.observedMax) continue;
     if (rearrangedEquation.constant === 0) continue;
 
+    // Preserve the source-like sign architecture. The 2016 surface naturally
+    // gives the reviewed negative-solution case; the 2019/2025 surfaces retain
+    // positive leading terms and positive solutions.
+    if (surfaceVariant === "SPLIT_TERMS") {
+      if (rearrangedEquation.xCoefficient >= 0 || rearrangedEquation.constant <= 0) continue;
+    } else if (rearrangedEquation.xCoefficient <= 0 || rearrangedEquation.constant <= 0) {
+      continue;
+    }
+
     const solution = reduceRational(rearrangedEquation.constant, rearrangedEquation.xCoefficient);
     if (solution.denominator === 1 || solution.denominator < 7 || solution.denominator > 8) continue;
     if (Math.abs(solution.numerator) < A7_GENERATOR_ABSTRACT_ENVELOPE.solutionNumeratorMagnitude.observedMin ||
@@ -154,7 +200,7 @@ const fractionalState = (seed: number): A7FractionalEquationState => {
 
     const state: A7FractionalEquationState = {
       family: "FRACTIONAL_COEFFICIENT",
-      surfaceVariant: wantBinomial ? "BINOMIAL_LEFT_NUMERATOR" : "SPLIT_TERMS",
+      surfaceVariant,
       lhsX,
       lhsConstant,
       rhsX,
@@ -283,8 +329,10 @@ const fractionalQuestion = (seed: number, paper: A7GeneratorPaper): A7Fractional
       paperArithmeticProfile: paper === "P1" ? "P1_WRITTEN" : "P2_CALCULATOR_AVAILABLE",
       structuralLevers: [
         `denominator LCM ${state.denominatorLcm}`,
-        state.surfaceVariant === "BINOMIAL_LEFT_NUMERATOR" ? "binomial numerator" : "split fractional terms",
-        "x on both sides",
+        `surface grammar ${state.surfaceVariant}`,
+        "three top-level displayed algebraic objects",
+        "distinct displayed denominators",
+        "positive leading term on each side",
         `rearranged coefficient ${Math.abs(state.rearrangedEquation.xCoefficient)}`,
       ],
       difficultySignals: [
@@ -303,14 +351,20 @@ const contextVisual = (state: A7ContextAreaState): A7AreaVisualSpec => ({
   triangle: {
     baseLabel: `${state.triangle.base} cm`,
     heightLabel: `(x + ${state.triangle.heightConstant}) cm`,
+    baseLatex: `${state.triangle.base}\\,\\text{cm}`,
+    heightLatex: `\\left(x+${state.triangle.heightConstant}\\right)\\,\\text{cm}`,
   },
   rectangle: {
     heightLabel: `${state.rectangle.height} cm`,
     widthLabel: `(${state.rectangle.widthConstant} - x) cm`,
+    heightLatex: `${state.rectangle.height}\\,\\text{cm}`,
+    widthLatex: `\\left(${state.rectangle.widthConstant}-x\\right)\\,\\text{cm}`,
   },
   requirements: [
-    "Show one triangle and one rectangle as separate schematic shapes.",
-    "Display all four generated dimension labels clearly.",
+    "Show a symmetric narrow triangle and a separate upright rectangle in the same relative arrangement as the reviewed source family.",
+    "Place the triangle-height dimension arrow immediately to the right of the triangle and the rectangle-height arrow immediately to the right of the rectangle.",
+    "Render algebraic dimension labels as mathematics rather than plain text.",
+    "Display both fixed base/width labels directly beneath their shapes.",
     "Do not imply that candidates may measure the drawing.",
     "Visual geometry must be procedurally original and must agree with the generated mathematical state.",
   ],
