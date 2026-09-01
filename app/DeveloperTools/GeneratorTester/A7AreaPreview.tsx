@@ -14,11 +14,18 @@ type A7AreaPreviewProps = {
 };
 
 const VIEWBOX_WIDTH = 760;
-const VIEWBOX_HEIGHT = 350;
-const SHAPE_BOTTOM = 286;
-const SHAPE_SLOT_MAX_WIDTH = 245;
-const SHAPE_SLOT_MAX_HEIGHT = 235;
-const SHAPE_SCALE_CAP = 34;
+const VIEWBOX_HEIGHT = 300;
+const SHAPE_BOTTOM = 235;
+
+// Each shape gets its own SQA-like drawing slot. We preserve the resolved aspect
+// ratio of each shape, but do not force both shapes to use the same pixel scale:
+// official exam diagrams are qualitative, and an extreme aspect ratio should not
+// make the other shape collapse into a postage stamp.
+const TRIANGLE_MAX_WIDTH = 220;
+const TRIANGLE_MAX_HEIGHT = 190;
+const RECTANGLE_MAX_WIDTH = 185;
+const RECTANGLE_MAX_HEIGHT = 165;
+const SCALE_CAP = 32;
 
 const mathParts = (latex: string): PaperPart[] => [
   { kind: "math", latex, displayMode: false },
@@ -42,6 +49,13 @@ const resolvedDimensions = (state: A7ContextAreaState) => {
     },
   };
 };
+
+const fitScale = (
+  width: number,
+  height: number,
+  maxWidth: number,
+  maxHeight: number,
+) => Math.min(SCALE_CAP, maxWidth / width, maxHeight / height);
 
 function MathLabel({
   latex,
@@ -76,43 +90,46 @@ function MathLabel({
 export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
   const resolved = resolvedDimensions(state);
 
-  // Keep one common scale so equal mathematical areas remain qualitatively equal
-  // in the drawing, but actively use the available question-paper space. At
-  // least one resolved axis should normally approach its slot limit rather than
-  // leaving a pair of postage-stamp shapes in the middle of a large diagram.
-  const largestHorizontal = Math.max(resolved.triangle.base, resolved.rectangle.width);
-  const largestVertical = Math.max(resolved.triangle.height, resolved.rectangle.height);
-  const scale = Math.min(
-    SHAPE_SCALE_CAP,
-    SHAPE_SLOT_MAX_WIDTH / largestHorizontal,
-    SHAPE_SLOT_MAX_HEIGHT / largestVertical,
+  const triangleScale = fitScale(
+    resolved.triangle.base,
+    resolved.triangle.height,
+    TRIANGLE_MAX_WIDTH,
+    TRIANGLE_MAX_HEIGHT,
+  );
+  const rectangleScale = fitScale(
+    resolved.rectangle.width,
+    resolved.rectangle.height,
+    RECTANGLE_MAX_WIDTH,
+    RECTANGLE_MAX_HEIGHT,
   );
 
-  const triangleWidth = resolved.triangle.base * scale;
-  const triangleHeight = resolved.triangle.height * scale;
-  const rectangleWidth = resolved.rectangle.width * scale;
-  const rectangleHeight = resolved.rectangle.height * scale;
+  const triangleWidth = resolved.triangle.base * triangleScale;
+  const triangleHeight = resolved.triangle.height * triangleScale;
+  const rectangleWidth = resolved.rectangle.width * rectangleScale;
+  const rectangleHeight = resolved.rectangle.height * rectangleScale;
 
-  const triangleCentreX = 185;
+  const triangleCentreX = 180;
   const triangleLeft = triangleCentreX - triangleWidth / 2;
   const triangleRight = triangleCentreX + triangleWidth / 2;
   const triangleTop = SHAPE_BOTTOM - triangleHeight;
-  const triangleArrowX = triangleRight + 28;
+  const triangleArrowX = triangleRight + 26;
+  const triangleHeightLabelX = triangleArrowX + 48;
 
-  const rectangleCentreX = 545;
+  const rectangleCentreX = 525;
   const rectangleLeft = rectangleCentreX - rectangleWidth / 2;
   const rectangleTop = SHAPE_BOTTOM - rectangleHeight;
   const rectangleRight = rectangleCentreX + rectangleWidth / 2;
-  const rectangleArrowX = rectangleRight + 28;
+  const rectangleArrowX = rectangleRight + 26;
+  const rectangleHeightLabelX = Math.min(VIEWBOX_WIDTH - 54, rectangleArrowX + 55);
 
   return (
     <div
       style={{
         position: "relative",
         width: "100%",
-        maxWidth: 760,
+        maxWidth: 720,
         aspectRatio: `${VIEWBOX_WIDTH} / ${VIEWBOX_HEIGHT}`,
-        margin: "6px auto 12px",
+        margin: "0 auto 4px",
         color: "#111111",
       }}
     >
@@ -156,16 +173,14 @@ export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
       <MathLabel latex={visual.triangle.baseLatex} x={triangleCentreX} y={SHAPE_BOTTOM + 24} />
       <MathLabel
         latex={visual.triangle.heightLatex}
-        x={triangleArrowX + 16}
+        x={triangleHeightLabelX}
         y={(triangleTop + SHAPE_BOTTOM) / 2}
-        centred={false}
       />
       <MathLabel latex={visual.rectangle.widthLatex} x={rectangleCentreX} y={SHAPE_BOTTOM + 24} />
       <MathLabel
         latex={visual.rectangle.heightLatex}
-        x={rectangleArrowX + 16}
+        x={rectangleHeightLabelX}
         y={(rectangleTop + SHAPE_BOTTOM) / 2}
-        centred={false}
       />
     </div>
   );
