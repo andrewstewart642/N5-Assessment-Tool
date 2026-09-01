@@ -21,22 +21,16 @@ export type A7Rational = {
 };
 
 /**
- * Source-calibrated display grammars from the three reviewed standalone A7
- * equations. These are structural grammars, not historical wording templates.
- *
- * SPLIT_TERMS
- *   ax/d1 - b/d2 = cx              (2016-type surface)
- *
- * BINOMIAL_RIGHT_NUMERATOR
- *   ax/d1 - n = (b - cx)/d2        (2019-type surface)
- *
- * BINOMIAL_LEFT_NUMERATOR
- *   (ax + b)/d1 = cx/d2 + n        (2025-type surface)
+ * Source-calibrated surfaces plus one moderated extension. The extension is
+ * intentionally narrow: two binomial fractions are permitted only where the
+ * resulting written route still looks like National 5 rather than a rational-
+ * expressions exercise.
  */
 export type A7FractionalSurfaceVariant =
   | "SPLIT_TERMS"
   | "BINOMIAL_RIGHT_NUMERATOR"
-  | "BINOMIAL_LEFT_NUMERATOR";
+  | "BINOMIAL_LEFT_NUMERATOR"
+  | "BINOMIAL_BOTH_SIDES";
 
 export type A7FractionalEquationState = {
   family: "FRACTIONAL_COEFFICIENT";
@@ -59,17 +53,29 @@ export type A7FractionalEquationState = {
   solution: A7Rational;
 };
 
+export type A7LinearDimension = {
+  xCoefficient: -2 | -1 | 1 | 2;
+  constant: number;
+};
+
+export type A7DimensionAxis = "BASE" | "HEIGHT";
+
+/**
+ * Each shape keeps exactly one fixed dimension and one linear dimension so the
+ * equal-area model remains linear. The expression can appear on either axis;
+ * the coefficient/sign can vary inside a moderated National 5 envelope.
+ */
 export type A7ContextAreaState = {
   family: "CONTEXT_AREA_EQUALITY";
   triangle: {
-    base: number;
-    heightXCoefficient: 1;
-    heightConstant: number;
+    algebraicDimension: A7DimensionAxis;
+    fixedDimension: number;
+    linearDimension: A7LinearDimension;
   };
   rectangle: {
-    height: number;
-    widthXCoefficient: -1;
-    widthConstant: number;
+    algebraicDimension: A7DimensionAxis;
+    fixedDimension: number;
+    linearDimension: A7LinearDimension;
   };
   equalAreaEquation: {
     triangleMultiplierNumerator: number;
@@ -124,6 +130,9 @@ export type A7SourceBasis = {
 export type A7DifficultyMetrics = {
   denominatorLcm: number | null;
   surfaceComplexity: 1 | 2 | 3;
+  bracketExpansionCount: number;
+  largestBracketMultiplier: number;
+  nonUnitLinearCoefficientCount: number;
   largestWorkingCoefficient: number;
   largestWorkingConstant: number;
   rearrangedCoefficientMagnitude: number;
