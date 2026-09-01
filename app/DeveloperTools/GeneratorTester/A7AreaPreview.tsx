@@ -10,7 +10,7 @@ import type {
 
 type A7AreaPreviewProps = {
   visual: A7AreaVisualSpec;
-  state: A7ContextAreaState;
+  state?: A7ContextAreaState;
 };
 
 const VIEWBOX_WIDTH = 760;
@@ -28,6 +28,17 @@ const RECTANGLE_MAX_HEIGHT = 165;
 const SCALE_CAP = 32;
 const ARROW_CLEARANCE = 26;
 const LABEL_CLEARANCE = 18;
+
+const LEGACY_PREVIEW_DIMENSIONS = {
+  triangle: {
+    base: 8,
+    height: 6,
+  },
+  rectangle: {
+    width: 7,
+    height: 4,
+  },
+};
 
 const mathParts = (latex: string): PaperPart[] => [
   { kind: "math", latex, displayMode: false },
@@ -101,7 +112,13 @@ function MathLabel({
 }
 
 export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
-  const resolved = resolvedDimensions(state);
+  // The legacy A7 tester predates math-state-aware previews and passes only the
+  // visual labels. Keep that surface compiling without weakening the main SQA
+  // preview: whenever state is supplied, the diagram still uses the generated
+  // dimensions exactly.
+  const resolved = state
+    ? resolvedDimensions(state)
+    : LEGACY_PREVIEW_DIMENSIONS;
 
   const triangleScale = fitScale(
     resolved.triangle.base,
