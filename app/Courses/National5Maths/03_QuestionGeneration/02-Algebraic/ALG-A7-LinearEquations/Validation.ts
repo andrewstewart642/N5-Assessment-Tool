@@ -1,7 +1,9 @@
 import { historicalA7FractionalOverlap } from "./Calibration";
+import { assessA7ContextDifficulty, assessA7FractionalDifficulty } from "./Difficulty";
 import {
-  A7_GENERATOR_ABSTRACT_ENVELOPE,
   A7_GENERATOR_FAMILY_EVIDENCE,
+  A7_GENERATOR_FRACTIONAL_DENOMINATOR_PAIRS,
+  A7_GENERATOR_FRACTIONAL_GENERATION_ENVELOPE,
 } from "./Evidence";
 import type {
   A7FractionalEquationState,
@@ -30,6 +32,11 @@ const error = (issues: A7ValidationIssue[], code: string, message: string) =>
   issues.push({ severity: "ERROR", code, message });
 const warning = (issues: A7ValidationIssue[], code: string, message: string) =>
   issues.push({ severity: "WARNING", code, message });
+
+const displayedDenominatorPair = (state: A7FractionalEquationState): [number, number] =>
+  state.surfaceVariant === "SPLIT_TERMS"
+    ? [state.lhsX.denominator, state.lhsConstant.denominator]
+    : [state.lhsX.denominator, state.rhsX.denominator];
 
 const validateFractionalSurfaceGrammar = (
   state: A7FractionalEquationState,
@@ -106,7 +113,10 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
     error(issues, "A7_MARK_TARIFF", `Expected ${evidence.marks} marks for ${question.family}.`);
   }
   if (question.standard !== "A") {
-    error(issues, "A7_STANDARD", "A7 V1 generation is calibrated only to the reviewed A-standard corpus.");
+    error(issues, "A7_STANDARD", "A7 generation is calibrated only to the reviewed A-standard corpus.");
+  }
+  if (question.difficulty !== 1 && question.difficulty !== 2) {
+    error(issues, "A7_DIFFICULTY_VALUE", "A7 difficulty must be band 1 or band 2.");
   }
   if (!question.sourceBasis.historicalReference.primaryQuestionCatalogId) {
     error(issues, "A7_REFERENCE_MISSING", "Every generated A7 instance must expose a primary historical reference.");
@@ -117,20 +127,40 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
 
   if (question.family === "FRACTIONAL_COEFFICIENT") {
     const state = question.mathState;
+    const envelope = A7_GENERATOR_FRACTIONAL_GENERATION_ENVELOPE;
+    const assessment = assessA7FractionalDifficulty(state);
+
     if (question.thinking !== "OPERATIONAL") {
       error(issues, "A7_THINKING_FRACTIONAL", "The reviewed fractional A7 family is Operational.");
     }
-    if (state.denominatorLcm < A7_GENERATOR_ABSTRACT_ENVELOPE.denominatorLcm.observedMin ||
-        state.denominatorLcm > A7_GENERATOR_ABSTRACT_ENVELOPE.denominatorLcm.observedMax) {
-      error(issues, "A7_DENOMINATOR_LCM", "Denominator LCM is outside the reviewed 6-10 calibration envelope.");
+
+    const [displayedLeft, displayedRight] = displayedDenominatorPair(state);
+    const allowedPair = A7_GENERATOR_FRACTIONAL_DENOMINATOR_PAIRS.some((pair) =>
+      pair.left === displayedLeft && pair.right === displayedRight,
+    );
+    if (!allowedPair) {
+      error(issues, "A7_DENOMINATOR_PAIR", `Displayed denominator pair ${displayedLeft}/${displayedRight} is outside the moderated SQA-like pairing set.`);
+    }
+    if (displayedLeft > envelope.displayedDenominatorMax || displayedRight > envelope.displayedDenominatorMax) {
+      error(issues, "A7_DISPLAYED_DENOMINATOR", "Displayed denominators exceed the moderated maximum of 10.");
+    }
+    if (state.denominatorLcm > envelope.denominatorLcmMax) {
+      error(issues, "A7_DENOMINATOR_LCM", "Denominator LCM exceeds the moderated maximum of 15.");
     }
     if (state.clearedEquation.lhsX === 0 || state.clearedEquation.rhsX === 0) {
-      error(issues, "A7_X_BOTH_SIDES", "The V1 fractional family requires x to occur on both sides before rearrangement.");
+      error(issues, "A7_X_BOTH_SIDES", "The fractional family requires x to occur on both sides before rearrangement.");
     }
-    if (Math.abs(state.rearrangedEquation.xCoefficient) < A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteRearrangedCoefficient.observedMin ||
-        Math.abs(state.rearrangedEquation.xCoefficient) > A7_GENERATOR_ABSTRACT_ENVELOPE.absoluteRearrangedCoefficient.observedMax) {
-      error(issues, "A7_REARRANGED_COEFFICIENT", "Rearranged x coefficient is outside the reviewed 7-8 envelope.");
+    if (Math.abs(state.clearedEquation.lhsX) > envelope.absoluteClearedCoefficientMax ||
+        Math.abs(state.clearedEquation.rhsX) > envelope.absoluteClearedCoefficientMax ||
+        Math.abs(state.clearedEquation.lhsConstant) > envelope.absoluteClearedConstantMax ||
+        Math.abs(state.clearedEquation.rhsConstant) > envelope.absoluteClearedConstantMax) {
+      error(issues, "A7_WORKING_MAGNITUDE", "Cleared working exceeds the moderated written-arithmetic envelope.");
     }
+    if (Math.abs(state.rearrangedEquation.xCoefficient) < envelope.absoluteRearrangedCoefficient.min ||
+        Math.abs(state.rearrangedEquation.xCoefficient) > envelope.absoluteRearrangedCoefficient.max) {
+      error(issues, "A7_REARRANGED_COEFFICIENT", "Rearranged x coefficient is outside the moderated 5-12 envelope.");
+    }
+
     const expected = reduced({
       numerator: state.rearrangedEquation.constant,
       denominator: state.rearrangedEquation.xCoefficient,
@@ -141,24 +171,40 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
     if (state.solution.denominator === 1) {
       error(issues, "A7_INTEGER_SOLUTION", "The core three-mark A7 family requires a non-integer exact solution.");
     }
-    if (state.solution.denominator < 7 || state.solution.denominator > 8) {
-      error(issues, "A7_SOLUTION_DENOMINATOR", "Reduced solution denominator is outside the reviewed 7-8 envelope.");
+    if (state.solution.denominator < envelope.solutionDenominator.min ||
+        state.solution.denominator > envelope.solutionDenominator.max) {
+      error(issues, "A7_SOLUTION_DENOMINATOR", "Reduced solution denominator is outside the moderated 2-12 envelope.");
+    }
+    if (Math.abs(state.solution.numerator) < envelope.solutionNumeratorMagnitude.min ||
+        Math.abs(state.solution.numerator) > envelope.solutionNumeratorMagnitude.max) {
+      error(issues, "A7_SOLUTION_NUMERATOR", "Reduced solution numerator is outside the moderated magnitude envelope.");
     }
     if (historicalA7FractionalOverlap(state)) {
       error(issues, "A7_HISTORICAL_OVERLAP", "Generated displayed equation reproduces a historical cleared equation up to scalar equivalence or side swap.");
     }
 
     validateFractionalSurfaceGrammar(state, issues);
+
+    if (assessment.difficulty !== question.difficulty ||
+        assessment.bandId !== question.quality.difficultyBandId ||
+        assessment.score !== question.quality.difficultyScore) {
+      error(issues, "A7_DIFFICULTY_DRIFT", "Stored A7 difficulty metadata does not match the route-based difficulty assessment.");
+    }
   } else {
     const state = question.mathState;
+    const assessment = assessA7ContextDifficulty(state);
+
     if (question.paper !== "P1") {
       error(issues, "A7_CONTEXT_PAPER", "The reviewed contextual A7 family is currently supported only on Paper 1.");
+    }
+    if (question.difficulty !== 2) {
+      error(issues, "A7_CONTEXT_DIFFICULTY", "The current five-mark contextual A7 family is calibrated only to difficulty band 2.");
     }
     if (question.thinking !== "REASONING") {
       error(issues, "A7_THINKING_CONTEXT", "The reviewed equal-area A7 family is Reasoning.");
     }
     if (!Number.isInteger(state.solution) || state.solution <= 0) {
-      error(issues, "A7_CONTEXT_SOLUTION", "Equal-area V1 generation requires a positive integer solution.");
+      error(issues, "A7_CONTEXT_SOLUTION", "Equal-area generation requires a positive integer solution.");
     }
     if (state.triangle.base % 2 === 0) {
       error(issues, "A7_HALF_FACTOR_EASED", "Triangle base must be odd so the one-half area factor remains structurally mark-bearing.");
@@ -183,6 +229,11 @@ export const validateA7GeneratedQuestion = (question: A7GeneratedQuestion): A7Va
     if (question.visual.triangle.heightLatex !== `\\left(x+${state.triangle.heightConstant}\\right)\\,\\text{cm}` ||
         question.visual.rectangle.widthLatex !== `\\left(${state.rectangle.widthConstant}-x\\right)\\,\\text{cm}`) {
       error(issues, "A7_VISUAL_MATH_DRIFT", "Area visual mathematical labels do not agree with the generated mathematical state.");
+    }
+    if (assessment.difficulty !== question.difficulty ||
+        assessment.bandId !== question.quality.difficultyBandId ||
+        assessment.score !== question.quality.difficultyScore) {
+      error(issues, "A7_CONTEXT_DIFFICULTY_DRIFT", "Stored contextual difficulty metadata does not match the route-based assessment.");
     }
   }
 
