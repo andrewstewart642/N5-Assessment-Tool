@@ -32,6 +32,7 @@ import type {
 } from "./Types";
 
 const A7_SKILL_ID = "alg-a07-linear-equations";
+const A7_GENERAL_CONCEPT_ID = "alg-a7-linear-general";
 const randomSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 
 const rationalLatex = (value: A7Rational) =>
@@ -251,6 +252,29 @@ const familyFromContext = (
   if (id === "alg-a7-fractional" || selected.includes("fraction")) {
     return "FRACTIONAL_COEFFICIENT";
   }
+
+  if (id === A7_GENERAL_CONCEPT_ID) {
+    // A7.1 is an aggregate selector, not a third family. Resolve it through
+    // the active Builder constraints so the generated tariff always matches
+    // the family that made the parent selectable.
+    if (context.selectionFilters?.targetMarks === 3) {
+      return "FRACTIONAL_COEFFICIENT";
+    }
+    if (context.selectionFilters?.targetMarks === 5) {
+      return "CONTEXT_AREA_EQUALITY";
+    }
+    if (context.selectionFilters?.selectedThinkingType === "REASONING") {
+      return "CONTEXT_AREA_EQUALITY";
+    }
+    if (context.selectionFilters?.selectedThinkingType === "OPERATIONAL") {
+      return "FRACTIONAL_COEFFICIENT";
+    }
+    if (context.paper === "P2") {
+      return "FRACTIONAL_COEFFICIENT";
+    }
+    return undefined;
+  }
+
   if (context.selectionFilters?.selectedThinkingType === "REASONING") {
     return "CONTEXT_AREA_EQUALITY";
   }
@@ -259,6 +283,9 @@ const familyFromContext = (
   }
   if (context.selectionFilters?.targetMarks === 5) {
     return "CONTEXT_AREA_EQUALITY";
+  }
+  if (context.selectionFilters?.targetMarks === 3) {
+    return "FRACTIONAL_COEFFICIENT";
   }
   if (context.paper === "P2") {
     return "FRACTIONAL_COEFFICIENT";
