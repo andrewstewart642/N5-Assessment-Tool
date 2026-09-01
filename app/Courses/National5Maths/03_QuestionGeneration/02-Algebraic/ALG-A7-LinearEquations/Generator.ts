@@ -16,11 +16,17 @@ import {
   A7_GENERATOR_INVARIANTS,
 } from "./Evidence";
 import { assessA7ContextDifficulty, assessA7FractionalDifficulty } from "./Difficulty";
-import { buildA7ContextPrompt, buildA7FractionalPrompt } from "./PromptGrammar";
+import {
+  buildA7ContextPrompt,
+  buildA7FractionalPrompt,
+  linearDimensionLatex,
+  linearDimensionText,
+} from "./PromptGrammar";
 import type {
   A7AreaVisualSpec,
   A7ContextAreaState,
   A7ContextGeneratedQuestion,
+  A7DimensionAxis,
   A7FractionalEquationState,
   A7FractionalGeneratedQuestion,
   A7FractionalSurfaceVariant,
@@ -28,6 +34,7 @@ import type {
   A7GeneratedQuestion,
   A7GeneratorDifficulty,
   A7GeneratorPaper,
+  A7LinearDimension,
   A7Rational,
 } from "./Types";
 import { validateA7GeneratedQuestion } from "./Validation";
@@ -90,6 +97,7 @@ const surfaceVariantForDifficulty = (
   const lower: readonly A7FractionalSurfaceVariant[] = [
     "SPLIT_TERMS",
     "SPLIT_TERMS",
+    "SPLIT_TERMS",
     "BINOMIAL_RIGHT_NUMERATOR",
     "BINOMIAL_LEFT_NUMERATOR",
   ];
@@ -99,6 +107,7 @@ const surfaceVariantForDifficulty = (
     "BINOMIAL_RIGHT_NUMERATOR",
     "BINOMIAL_LEFT_NUMERATOR",
     "SPLIT_TERMS",
+    "BINOMIAL_BOTH_SIDES",
   ];
   return rng.pick(difficulty === 1 ? lower : upper);
 };
@@ -113,7 +122,7 @@ const fractionalState = (
     (pair.difficultyBands as readonly number[]).includes(targetDifficulty),
   );
 
-  for (let attempt = 0; attempt < 24000; attempt += 1) {
+  for (let attempt = 0; attempt < 30000; attempt += 1) {
     const surfaceVariant = surfaceVariantForDifficulty(rng, targetDifficulty);
     const pair = rng.pick(eligiblePairs);
     const leftDenominator = pair.left;
@@ -125,7 +134,6 @@ const fractionalState = (
     let rhsConstant: A7Rational;
 
     if (surfaceVariant === "SPLIT_TERMS") {
-      // 2016-type surface: ax/d1 - b/d2 = cx
       const xNumerator = rng.int(1, targetDifficulty === 1 ? 5 : 7);
       const constantNumerator = rng.int(1, targetDifficulty === 1 ? 6 : 9);
       const wholeXCoefficient = rng.int(1, targetDifficulty === 1 ? 2 : 3);
@@ -137,7 +145,6 @@ const fractionalState = (
       rhsX = reduceRational(wholeXCoefficient, 1);
       rhsConstant = reduceRational(0, 1);
     } else if (surfaceVariant === "BINOMIAL_RIGHT_NUMERATOR") {
-      // 2019-type surface: ax/d1 - n = (b - cx)/d2
       const lhsXNumerator = rng.int(1, targetDifficulty === 1 ? 4 : 6);
       const wholeConstant = rng.int(1, targetDifficulty === 1 ? 2 : 4);
       const rhsConstantNumerator = rng.int(1, targetDifficulty === 1 ? 6 : 9);
@@ -150,8 +157,7 @@ const fractionalState = (
       lhsConstant = reduceRational(-wholeConstant, 1);
       rhsX = reduceRational(-rhsXNumerator, rightDenominator);
       rhsConstant = reduceRational(rhsConstantNumerator, rightDenominator);
-    } else {
-      // 2025-type surface: (ax + b)/d1 = cx/d2 + n
+    } else if (surfaceVariant === "BINOMIAL_LEFT_NUMERATOR") {
       const lhsXNumerator = rng.int(1, targetDifficulty === 1 ? 5 : 7);
       const lhsConstantNumerator = rng.int(1, targetDifficulty === 1 ? 6 : 9);
       const rhsXNumerator = rng.int(1, targetDifficulty === 1 ? 4 : 6);
@@ -164,6 +170,22 @@ const fractionalState = (
       lhsConstant = reduceRational(lhsConstantNumerator, leftDenominator);
       rhsX = reduceRational(rhsXNumerator, rightDenominator);
       rhsConstant = reduceRational(wholeConstant, 1);
+    } else {
+      // Moderated extension: (ax+b)/d1 = (cx+d)/d2. It creates up to two
+      // genuine bracket-expansion steps but remains a compact linear equation.
+      const lhsXNumerator = rng.int(1, 6);
+      const lhsConstantNumerator = rng.int(1, 8);
+      const rhsXNumerator = rng.int(1, 6);
+      const rhsConstantNumerator = rng.int(1, 8);
+      if (!preservesDisplayedDenominator(lhsXNumerator, leftDenominator) ||
+          !preservesDisplayedDenominator(lhsConstantNumerator, leftDenominator) ||
+          !preservesDisplayedDenominator(rhsXNumerator, rightDenominator) ||
+          !preservesDisplayedDenominator(rhsConstantNumerator, rightDenominator)) continue;
+
+      lhsX = reduceRational(lhsXNumerator, leftDenominator);
+      lhsConstant = reduceRational(lhsConstantNumerator, leftDenominator);
+      rhsX = reduceRational(rhsXNumerator, rightDenominator);
+      rhsConstant = reduceRational(rhsConstantNumerator, rightDenominator);
     }
 
     const denominatorLcm = lcmAll([
@@ -186,19 +208,24 @@ const fractionalState = (
         Math.abs(clearedEquation.lhsConstant) > envelope.absoluteClearedConstantMax ||
         Math.abs(clearedEquation.rhsConstant) > envelope.absoluteClearedConstantMax) continue;
 
+    const rawXCoefficient = clearedEquation.lhsX - clearedEquation.rhsX;
+    const rawConstant = clearedEquation.rhsConstant - clearedEquation.lhsConstant;
+    if (rawXCoefficient === 0 || rawConstant === 0) continue;
+    const sign = rawXCoefficient < 0 ? -1 : 1;
     const rearrangedEquation = {
-      xCoefficient: clearedEquation.lhsX - clearedEquation.rhsX,
-      constant: clearedEquation.rhsConstant - clearedEquation.lhsConstant,
+      xCoefficient: rawXCoefficient * sign,
+      constant: rawConstant * sign,
     };
-    const coefficientMagnitude = Math.abs(rearrangedEquation.xCoefficient);
+    const coefficientMagnitude = rearrangedEquation.xCoefficient;
     if (coefficientMagnitude < envelope.absoluteRearrangedCoefficient.min ||
         coefficientMagnitude > envelope.absoluteRearrangedCoefficient.max ||
         rearrangedEquation.constant === 0) continue;
 
-    // Preserve the clean sign architecture from the reviewed source surfaces.
+    // Retain the source-like negative-solution character of the split-term
+    // grammar while keeping the other surfaces clean and positive.
     if (surfaceVariant === "SPLIT_TERMS") {
-      if (rearrangedEquation.xCoefficient >= 0 || rearrangedEquation.constant <= 0) continue;
-    } else if (rearrangedEquation.xCoefficient <= 0 || rearrangedEquation.constant <= 0) {
+      if (rearrangedEquation.constant >= 0) continue;
+    } else if (rearrangedEquation.constant <= 0) {
       continue;
     }
 
@@ -231,54 +258,103 @@ const fractionalState = (
   throw new Error(`Unable to construct an SQA-like A7 fractional equation at difficulty ${targetDifficulty} for this seed.`);
 };
 
+const dimensionAt = (dimension: A7LinearDimension, x: number) =>
+  dimension.xCoefficient * x + dimension.constant;
+
+const expressionAxis = (rng: SeededRandom): A7DimensionAxis =>
+  rng.next() < 0.5 ? "BASE" : "HEIGHT";
+
 const contextState = (seed: number): A7ContextAreaState => {
   const rng = new SeededRandom(mixSeed(seed, 0xA70022));
-  const triangleBases = [3, 5, 7] as const;
+  const triangleFixedDimensions = [3, 5, 7] as const;
 
-  for (let attempt = 0; attempt < 8000; attempt += 1) {
-    const triangleBase = rng.pick(triangleBases);
-    const rectangleHeight = rng.int(4, 8);
+  for (let attempt = 0; attempt < 18000; attempt += 1) {
+    const triangleFixedDimension = rng.pick(triangleFixedDimensions);
+    const rectangleFixedDimension = rng.int(4, 8);
     const solution = rng.int(2, 8);
-    const heightConstant = rng.int(6, 15);
-    const triangleHeightAtSolution = solution + heightConstant;
-    const doubledAreaNumerator = triangleBase * triangleHeightAtSolution;
-    if (doubledAreaNumerator % 2 !== 0) continue;
-    const triangleArea = doubledAreaNumerator / 2;
-    if (triangleArea % rectangleHeight !== 0) continue;
+    const triangleAlgebraicDimension = expressionAxis(rng);
+    const rectangleAlgebraicDimension = expressionAxis(rng);
 
-    const rectangleWidthAtSolution = triangleArea / rectangleHeight;
-    const widthConstant = solution + rectangleWidthAtSolution;
-    if (rectangleWidthAtSolution <= 0 || widthConstant > 20) continue;
+    const useNonUnitCoefficient = rng.next() < 0.28;
+    const nonUnitOnTriangle = useNonUnitCoefficient && rng.next() < 0.5;
+    const triangleCoefficient = (nonUnitOnTriangle
+      ? rng.pick([2, -2] as const)
+      : rng.pick([1, 1, 1, -1] as const)) as -2 | -1 | 1 | 2;
+    const rectangleCoefficient = (useNonUnitCoefficient && !nonUnitOnTriangle
+      ? rng.pick([2, -2] as const)
+      : rng.pick([1, 1, -1, -1] as const)) as -2 | -1 | 1 | 2;
 
-    const xCoefficient = triangleBase + 2 * rectangleHeight;
-    if (xCoefficient < 10 || xCoefficient > 25) continue;
-    const constant = xCoefficient * solution;
+    const triangleDimensionAtSolution = rng.int(6, 20);
+    const doubledTriangleArea = triangleFixedDimension * triangleDimensionAtSolution;
+    if (doubledTriangleArea % 2 !== 0) continue;
+    const triangleArea = doubledTriangleArea / 2;
+    if (triangleArea % rectangleFixedDimension !== 0) continue;
 
-    // Do not reproduce the sole historical parameter set.
-    if (triangleBase === 3 && heightConstant === 12 && rectangleHeight === 6 && widthConstant === 8) continue;
+    const rectangleDimensionAtSolution = triangleArea / rectangleFixedDimension;
+    if (rectangleDimensionAtSolution < 2 || rectangleDimensionAtSolution > 20) continue;
+
+    const triangleConstant = triangleDimensionAtSolution - triangleCoefficient * solution;
+    const rectangleConstant = rectangleDimensionAtSolution - rectangleCoefficient * solution;
+    if (triangleConstant < 1 || triangleConstant > 20 || rectangleConstant < 1 || rectangleConstant > 20) continue;
+
+    const triangleLinearDimension: A7LinearDimension = {
+      xCoefficient: triangleCoefficient,
+      constant: triangleConstant,
+    };
+    const rectangleLinearDimension: A7LinearDimension = {
+      xCoefficient: rectangleCoefficient,
+      constant: rectangleConstant,
+    };
+
+    if (dimensionAt(triangleLinearDimension, solution) <= 0 ||
+        dimensionAt(rectangleLinearDimension, solution) <= 0) continue;
+
+    const leftXCoefficient = triangleFixedDimension * triangleCoefficient;
+    const leftConstant = triangleFixedDimension * triangleConstant;
+    const rightXCoefficient = 2 * rectangleFixedDimension * rectangleCoefficient;
+    const rightConstant = 2 * rectangleFixedDimension * rectangleConstant;
+    const rawXCoefficient = leftXCoefficient - rightXCoefficient;
+    const rawConstant = rightConstant - leftConstant;
+    if (rawXCoefficient === 0 || rawConstant === 0) continue;
+    const sign = rawXCoefficient < 0 ? -1 : 1;
+    const xCoefficient = rawXCoefficient * sign;
+    const constant = rawConstant * sign;
+    if (xCoefficient < 10 || xCoefficient > 30 || constant !== xCoefficient * solution) continue;
+
+    // Exclude the exact historical state while retaining its family grammar.
+    const historicalMatch =
+      triangleAlgebraicDimension === "HEIGHT" &&
+      triangleFixedDimension === 3 &&
+      triangleCoefficient === 1 &&
+      triangleConstant === 12 &&
+      rectangleAlgebraicDimension === "BASE" &&
+      rectangleFixedDimension === 6 &&
+      rectangleCoefficient === -1 &&
+      rectangleConstant === 8;
+    if (historicalMatch) continue;
 
     return {
       family: "CONTEXT_AREA_EQUALITY",
       triangle: {
-        base: triangleBase,
-        heightXCoefficient: 1,
-        heightConstant,
+        algebraicDimension: triangleAlgebraicDimension,
+        fixedDimension: triangleFixedDimension,
+        linearDimension: triangleLinearDimension,
       },
       rectangle: {
-        height: rectangleHeight,
-        widthXCoefficient: -1,
-        widthConstant,
+        algebraicDimension: rectangleAlgebraicDimension,
+        fixedDimension: rectangleFixedDimension,
+        linearDimension: rectangleLinearDimension,
       },
       equalAreaEquation: {
-        triangleMultiplierNumerator: triangleBase,
+        triangleMultiplierNumerator: triangleFixedDimension,
         triangleMultiplierDenominator: 2,
-        rectangleMultiplier: rectangleHeight,
+        rectangleMultiplier: rectangleFixedDimension,
       },
       clearedEquation: {
-        leftXCoefficient: triangleBase,
-        leftConstant: triangleBase * heightConstant,
-        rightXCoefficient: -2 * rectangleHeight,
-        rightConstant: 2 * rectangleHeight * widthConstant,
+        leftXCoefficient,
+        leftConstant,
+        rightXCoefficient,
+        rightConstant,
       },
       rearrangedEquation: {
         xCoefficient,
@@ -288,7 +364,7 @@ const contextState = (seed: number): A7ContextAreaState => {
     };
   }
 
-  throw new Error("Unable to construct an evidence-calibrated A7 equal-area question for this seed.");
+  throw new Error("Unable to construct an SQA-like A7 equal-area question for this seed.");
 };
 
 const sourceBasisForFractional = (state: A7FractionalEquationState) => {
@@ -356,8 +432,7 @@ const fractionalQuestion = (
       structuralLevers: [
         `denominator LCM ${state.denominatorLcm}`,
         `surface grammar ${state.surfaceVariant}`,
-        "three top-level displayed algebraic objects",
-        "distinct displayed denominators",
+        `genuine bracket expansions ${difficultyAssessment.metrics.bracketExpansionCount}`,
         "positive leading term on each side",
         `rearranged coefficient ${Math.abs(state.rearrangedEquation.xCoefficient)}`,
       ],
@@ -366,31 +441,42 @@ const fractionalQuestion = (
   };
 };
 
-const contextVisual = (state: A7ContextAreaState): A7AreaVisualSpec => ({
-  kind: "A7_EQUAL_AREA_DIAGRAM",
-  rendererFamilyId: "A7_AREA_EQUALITY_DIAGRAM",
-  unit: "cm",
-  triangle: {
-    baseLabel: `${state.triangle.base} cm`,
-    heightLabel: `(x + ${state.triangle.heightConstant}) cm`,
-    baseLatex: `${state.triangle.base}\\,\\text{cm}`,
-    heightLatex: `\\left(x+${state.triangle.heightConstant}\\right)\\,\\text{cm}`,
-  },
-  rectangle: {
-    heightLabel: `${state.rectangle.height} cm`,
-    widthLabel: `(${state.rectangle.widthConstant} - x) cm`,
-    heightLatex: `${state.rectangle.height}\\,\\text{cm}`,
-    widthLatex: `\\left(${state.rectangle.widthConstant}-x\\right)\\,\\text{cm}`,
-  },
-  requirements: [
-    "Show a symmetric narrow triangle and a separate upright rectangle in the same relative arrangement as the reviewed source family.",
-    "Place the triangle-height dimension arrow immediately to the right of the triangle and the rectangle-height arrow immediately to the right of the rectangle.",
-    "Render algebraic dimension labels as mathematics rather than plain text.",
-    "Display both fixed base/width labels directly beneath their shapes.",
-    "Do not imply that candidates may measure the drawing.",
-    "Visual geometry must be procedurally original and must agree with the generated mathematical state.",
-  ],
-});
+const fixedDimensionLatex = (value: number) => `${value}\\,\\text{cm}`;
+const algebraicDimensionLatex = (dimension: A7LinearDimension) =>
+  `\\left(${linearDimensionLatex(dimension)}\\right)\\,\\text{cm}`;
+const algebraicDimensionLabel = (dimension: A7LinearDimension) =>
+  `(${linearDimensionText(dimension)}) cm`;
+
+const contextVisual = (state: A7ContextAreaState): A7AreaVisualSpec => {
+  const triangleBaseAlgebraic = state.triangle.algebraicDimension === "BASE";
+  const rectangleWidthAlgebraic = state.rectangle.algebraicDimension === "BASE";
+
+  return {
+    kind: "A7_EQUAL_AREA_DIAGRAM",
+    rendererFamilyId: "A7_AREA_EQUALITY_DIAGRAM",
+    unit: "cm",
+    triangle: {
+      baseLabel: triangleBaseAlgebraic ? algebraicDimensionLabel(state.triangle.linearDimension) : `${state.triangle.fixedDimension} cm`,
+      heightLabel: triangleBaseAlgebraic ? `${state.triangle.fixedDimension} cm` : algebraicDimensionLabel(state.triangle.linearDimension),
+      baseLatex: triangleBaseAlgebraic ? algebraicDimensionLatex(state.triangle.linearDimension) : fixedDimensionLatex(state.triangle.fixedDimension),
+      heightLatex: triangleBaseAlgebraic ? fixedDimensionLatex(state.triangle.fixedDimension) : algebraicDimensionLatex(state.triangle.linearDimension),
+    },
+    rectangle: {
+      heightLabel: rectangleWidthAlgebraic ? `${state.rectangle.fixedDimension} cm` : algebraicDimensionLabel(state.rectangle.linearDimension),
+      widthLabel: rectangleWidthAlgebraic ? algebraicDimensionLabel(state.rectangle.linearDimension) : `${state.rectangle.fixedDimension} cm`,
+      heightLatex: rectangleWidthAlgebraic ? fixedDimensionLatex(state.rectangle.fixedDimension) : algebraicDimensionLatex(state.rectangle.linearDimension),
+      widthLatex: rectangleWidthAlgebraic ? algebraicDimensionLatex(state.rectangle.linearDimension) : fixedDimensionLatex(state.rectangle.fixedDimension),
+    },
+    requirements: [
+      "Use a symmetric narrow triangle and a separate upright rectangle in the reviewed source-like arrangement.",
+      "Either the horizontal or vertical dimension may carry the linear expression; the visual label must follow the generated state.",
+      "Render every algebraic dimension label as mathematics rather than plain text.",
+      "Keep the remaining dimension on each shape fixed so the equal-area model stays linear.",
+      "Do not imply that candidates may measure the drawing.",
+      "Visual geometry must be procedurally original and agree with the generated mathematical state.",
+    ],
+  };
+};
 
 const contextQuestion = (seed: number): A7ContextGeneratedQuestion => {
   const state = contextState(seed);
@@ -432,6 +518,9 @@ const contextQuestion = (seed: number): A7ContextGeneratedQuestion => {
       paperArithmeticProfile: "P1_WRITTEN",
       structuralLevers: [
         "triangle one-half factor retained",
+        `triangle expression on ${state.triangle.algebraicDimension.toLowerCase()}`,
+        `rectangle expression on ${state.rectangle.algebraicDimension.toLowerCase()}`,
+        `dimension coefficients ${state.triangle.linearDimension.xCoefficient} and ${state.rectangle.linearDimension.xCoefficient}`,
         "equal-area representation transition",
         `two-digit final x coefficient ${state.rearrangedEquation.xCoefficient}`,
         "positive integer physical solution",
@@ -456,7 +545,7 @@ export const generateA7Question = (options: A7GenerateOptions): A7GeneratedQuest
 
   if (options.difficulty === 1 && family === "CONTEXT_AREA_EQUALITY") {
     if (options.family === "CONTEXT_AREA_EQUALITY") {
-      throw new Error("The current contextual A7 family is calibrated only to difficulty band 2.");
+      throw new Error("The contextual A7 family is calibrated only to difficulty band 2.");
     }
     family = "FRACTIONAL_COEFFICIENT";
   }
@@ -476,7 +565,31 @@ export const generateA7Question = (options: A7GenerateOptions): A7GeneratedQuest
 const questionSurfaceSignature = (question: A7GeneratedQuestion) =>
   question.family === "FRACTIONAL_COEFFICIENT"
     ? `F:${question.prompt}`
-    : `C:${question.mathState.triangle.base}:${question.mathState.triangle.heightConstant}:${question.mathState.rectangle.height}:${question.mathState.rectangle.widthConstant}`;
+    : `C:${question.mathState.triangle.algebraicDimension}:${question.mathState.triangle.fixedDimension}:${question.mathState.triangle.linearDimension.xCoefficient}:${question.mathState.triangle.linearDimension.constant}:${question.mathState.rectangle.algebraicDimension}:${question.mathState.rectangle.fixedDimension}:${question.mathState.rectangle.linearDimension.xCoefficient}:${question.mathState.rectangle.linearDimension.constant}`;
+
+const questionStructuralSignature = (question: A7GeneratedQuestion) => {
+  if (question.family === "FRACTIONAL_COEFFICIENT") {
+    const state = question.mathState;
+    return [
+      "F",
+      question.difficulty,
+      state.surfaceVariant,
+      state.lhsX.denominator,
+      state.rhsX.denominator,
+      Math.abs(state.lhsX.numerator),
+      Math.abs(state.rhsX.numerator),
+    ].join(":");
+  }
+  return [
+    "C",
+    stateAxis(question.mathState.triangle.algebraicDimension),
+    question.mathState.triangle.linearDimension.xCoefficient,
+    stateAxis(question.mathState.rectangle.algebraicDimension),
+    question.mathState.rectangle.linearDimension.xCoefficient,
+  ].join(":");
+};
+
+const stateAxis = (axis: A7DimensionAxis) => axis === "BASE" ? "B" : "H";
 
 export const generateA7QuestionBatch = (
   count: number,
@@ -485,21 +598,24 @@ export const generateA7QuestionBatch = (
   if (!Number.isInteger(count) || count < 1) throw new Error("A7 batch count must be a positive integer.");
 
   const results: A7GeneratedQuestion[] = [];
-  const seen = new Set<string>();
+  const seenExact = new Set<string>();
+  const seenStructural = new Set<string>();
 
   for (let index = 0; index < count; index += 1) {
     let accepted: A7GeneratedQuestion | null = null;
-    for (let retry = 0; retry < 80; retry += 1) {
+    for (let retry = 0; retry < 220; retry += 1) {
       const candidateSeed = mixSeed(options.seed, (index + 1) * 131 + retry * 7919);
       const candidate = generateA7Question({ ...options, seed: candidateSeed });
-      const signature = questionSurfaceSignature(candidate);
-      if (seen.has(signature)) continue;
-      seen.add(signature);
+      const exactSignature = questionSurfaceSignature(candidate);
+      const structuralSignature = questionStructuralSignature(candidate);
+      if (seenExact.has(exactSignature) || seenStructural.has(structuralSignature)) continue;
+      seenExact.add(exactSignature);
+      seenStructural.add(structuralSignature);
       accepted = candidate;
       break;
     }
     if (!accepted) {
-      throw new Error(`Unable to create ${count} distinct A7 questions inside the calibrated generation space.`);
+      throw new Error(`Unable to create ${count} structurally distinct A7 questions inside the calibrated generation space.`);
     }
     results.push(accepted);
   }
