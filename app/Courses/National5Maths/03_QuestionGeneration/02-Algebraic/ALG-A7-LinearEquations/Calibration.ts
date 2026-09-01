@@ -104,13 +104,11 @@ export const historicalA7FractionalOverlap = (state: A7FractionalEquationState) 
 export const historicalReferenceForA7Fractional = (
   state: A7FractionalEquationState,
 ): HistoricalQuestionReferenceProfile => {
-  let primaryQuestionCatalogId = "N5_MATH_2019_P1_Q14";
-
-  if (state.surfaceVariant === "BINOMIAL_LEFT_NUMERATOR") {
-    primaryQuestionCatalogId = "N5_MATH_2025_P2_Q13";
-  } else if (state.solution.numerator < 0 && state.denominatorLcm === 6) {
-    primaryQuestionCatalogId = "N5_MATH_2016_P1_Q8";
-  }
+  const primaryQuestionCatalogId = state.surfaceVariant === "BINOMIAL_LEFT_NUMERATOR"
+    ? "N5_MATH_2025_P2_Q13"
+    : state.surfaceVariant === "BINOMIAL_RIGHT_NUMERATOR"
+      ? "N5_MATH_2019_P1_Q14"
+      : "N5_MATH_2016_P1_Q8";
 
   const all = A7_GENERATOR_ABSTRACT_FINGERPRINTS.map((entry) => entry.sourceQuestionId);
   return {
