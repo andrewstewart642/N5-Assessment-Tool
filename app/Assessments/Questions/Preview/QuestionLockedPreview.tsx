@@ -1,4 +1,3 @@
-
 import type {
   Question,
 } from "@/app/Assessments/AssessmentTypes";
@@ -242,6 +241,48 @@ export default function QuestionLockedPreview({
               )}
             </span>
           </div>
+
+          {question.historicalReference ? (
+            <div
+              style={{
+                width:
+                  "fit-content",
+
+                maxWidth:
+                  "100%",
+
+                border:
+                  "1px solid rgba(37,99,235,0.18)",
+
+                borderRadius:
+                  999,
+
+                background:
+                  "rgba(239,246,255,0.72)",
+
+                color:
+                  "rgba(30,64,175,0.78)",
+
+                padding:
+                  "3px 7px",
+
+                fontFamily:
+                  UI_TYPO.family,
+
+                fontSize:
+                  10,
+
+                fontWeight:
+                  UI_TYPO.weightSemibold,
+
+                lineHeight:
+                  1.2,
+              }}
+              title="Closest historical source reference"
+            >
+              {question.historicalReference.label}
+            </div>
+          ) : null}
 
           <div
             style={{
