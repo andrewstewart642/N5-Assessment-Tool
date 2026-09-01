@@ -78,6 +78,12 @@ export type QuestionSkillLink = {
     QuestionSkillRole;
 };
 
+export type HistoricalQuestionReference = {
+  label: string;
+  questionCatalogId: string | null;
+  matchReasons: string[];
+};
+
 export type ConceptMetadata = {
   standardTier:
     "C" | "A" | "C+A";
@@ -254,18 +260,18 @@ export type Question = {
   answerParts?:
     PaperPart[];
 
-  /**
-   * Generated pupil-style worked solutions.
-   */
+  /** Generated pupil-style worked solutions. */
   workedAnswers?:
     WorkedAnswerSet;
 
+  /** Builder-only historical source anchor used to increase teacher trust. */
+  historicalReference?:
+    HistoricalQuestionReference;
+
   /**
    * Teacher-selected primary method.
-   *
-   * Stored separately from the mathematical
-   * question itself so regeneration can retain it
-   * where that method remains valid.
+   * Stored separately from the mathematical question itself so regeneration can
+   * retain it where that method remains valid.
    */
   preferredAnswerMethodFamilyId?:
     string;
@@ -308,20 +314,11 @@ export type Question = {
   measuredHeightBasePx?:
     number;
 
-  /**
-   * Exact generated-variant metadata, when provided by the concept module.
-   */
+  /** Exact generated-variant metadata, when provided by the concept module. */
   selectionMeta?:
     QuestionVariantSelectionMeta;
 
-  /**
-   * Topic mark ownership for whole-assessment monitoring.
-   * The sum should normally equal the question total marks.
-   *
-   * Example:
-   * - Composite volume rounded to 2 sf:
-   *   GEO: 4, NUM: 1
-   */
+  /** Topic mark ownership for whole-assessment monitoring. */
   topicMarkBreakdown?:
     QuestionTopicMarkBreakdown;
 };
