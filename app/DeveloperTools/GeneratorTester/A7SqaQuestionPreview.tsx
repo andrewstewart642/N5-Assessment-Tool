@@ -2,8 +2,8 @@
 
 import type { PaperPart } from "@/app/Assessments/Questions/Content/PaperParts";
 import PaperContent from "@/app/UI/Documents/Components/PaperContent";
-import type { A7GeneratedQuestion } from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
-import { fractionalEquationLatex } from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/PromptGrammar";
+import type { A7GeneratedQuestion } from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
+import { fractionalEquationLatex } from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/PromptGrammar";
 import A7AreaPreview from "./A7AreaPreview";
 
 type Props = {
