@@ -1,7 +1,7 @@
 import {
   A7_CROSS_CORPUS_GENERATION_INVARIANTS,
   A7_GENERATOR_SCOPE,
-} from "../../../02_AnswerCatalog/A7_LinearEquations/A7CrossCorpusAnalysis";
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7CrossCorpusAnalysis";
 import {
   A7_ABSTRACT_CALIBRATION_ENVELOPE,
   A7_ABSTRACT_EQUATION_FINGERPRINTS,
@@ -9,18 +9,18 @@ import {
   A7_CONTEXT_AREA_FINGERPRINTS,
   A7_CONTEXT_CALIBRATION_ENVELOPE,
   A7_EMPIRICAL_FAMILY_FREQUENCY,
-} from "../../../02_AnswerCatalog/A7_LinearEquations/A7CrossCorpusCalibration";
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7CrossCorpusCalibration";
 import {
   A7_DIFFICULTY_BANDS,
   A7_DIFFICULTY_SCORING_RULES,
   A7_FRACTIONAL_DENOMINATOR_PAIRS,
   A7_FRACTIONAL_GENERATION_ENVELOPE,
-} from "../../../02_AnswerCatalog/A7_LinearEquations/A7DifficultyCalibration";
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7DifficultyCalibration";
 import {
   A7_CONTEXT_VISUAL_GENERATION_GUARDRAILS,
   A7_FRACTIONAL_SURFACE_EVIDENCE,
   A7_FRACTIONAL_SURFACE_GENERATION_GUARDRAILS,
-} from "../../../02_AnswerCatalog/A7_LinearEquations/A7SurfaceCalibration";
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7SurfaceCalibration";
 import type { A7GeneratorFamily } from "./Types";
 
 export const A7_GENERATOR_INVARIANTS = A7_CROSS_CORPUS_GENERATION_INVARIANTS;

@@ -2,7 +2,7 @@ import {
   A8_CORPUS_ENTRIES,
   A8_CROSS_CORPUS_GENERATION_INVARIANTS,
   A8_FAMILY_COMPARISONS,
-} from "../../../02_AnswerCatalog/A8_SimultaneousEquations/A8CrossCorpusAnalysis";
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A8-SimultaneousEquations/A8CrossCorpusAnalysis";
 import {
   A8_CALIBRATION_DECISIONS,
   A8_DEFAULT_DIFFICULTY_LEVEL,
@@ -13,7 +13,7 @@ import {
   A8_HISTORICAL_SYSTEM_SIGNATURES,
   A8_PAPER_NUMERICAL_CALIBRATION,
   A8_SUPPORTED_DIFFICULTY_LEVELS,
-} from "../../../02_AnswerCatalog/A8_SimultaneousEquations/A8CrossCorpusCalibration";
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A8-SimultaneousEquations/A8CrossCorpusCalibration";
 import type { A8GeneratorFamily, A8GeneratorPaper } from "./Types";
 
 export const A8_GENERATOR_SOURCE_IDS = A8_CORPUS_ENTRIES.map((entry) => entry.id.replace(/_MS$/, ""));
