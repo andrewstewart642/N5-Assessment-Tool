@@ -1,11 +1,11 @@
 import {
   generateA7Question,
   generateA7QuestionBatch,
-} from "../../../03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Generator";
+} from "../../../04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Generator";
 import type {
   A7GenerateOptions,
   A7GeneratedQuestion,
-} from "../../../03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
+} from "../../../04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
 import { generateA7Answer, generateA7AnswerBatch } from "./Generator";
 import type { A7GeneratedMarkingScheme } from "./Types";
 

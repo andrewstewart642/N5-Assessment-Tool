@@ -2,7 +2,7 @@ import type {
   A8GeneratedQuestion,
   A8GeneratorFamily,
   A8LinearEquation,
-} from "../../../03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
+} from "../../../04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
 
 export type A8GeneratedMarkType =
   | "REPRESENTATION"
