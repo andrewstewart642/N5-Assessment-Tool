@@ -20,10 +20,10 @@ import {
   getConceptFromSelection,
   getEligibleDifficultiesForConcept as getEligibleDifficultiesClean,
   isDifficultyEligibleForConcept as isDifficultyEligibleClean,
-} from "../../03_QuestionGeneration/Registry";
+} from "../../04_QuestionGeneration/Registry";
 import {
   buildA7BuilderGenerated,
-} from "../../03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/BuilderBridge";
+} from "../../04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/BuilderBridge";
 
 export {
   buildSkillLinks,

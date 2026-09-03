@@ -15,10 +15,10 @@ import {
 } from "../../../CatalogCoreTypes";
 import {
   generateA7AssessmentPair,
-} from "../../../04_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations/Pairing";
+} from "../../../05_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations/Pairing";
 import type {
   A7GeneratedMarkingScheme,
-} from "../../../04_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
+} from "../../../05_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
 import {
   linearDimensionLatex,
 } from "./PromptGrammar";
