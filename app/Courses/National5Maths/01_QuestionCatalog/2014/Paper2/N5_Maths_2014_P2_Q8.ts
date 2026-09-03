@@ -1,1 +1,100 @@
-import type{QuestionCatalogEntry}from "../../QuestionCatalogTypes";import{catalogValue,notApplicable,qpEvidence,questionReviewInProgress,sourceIsolation,visualOriginality,visualValidation}from "../../QuestionCatalogHelpers";const evidence=qpEvidence("8",27,"QUESTION","P2",11);export const N5_MATHS_2014_P2_Q8={identity:{id:"N5_MATH_2014_P2_Q8",schemaVersion:"N5_CATALOG_V2",courseId:"N5_MATH",paperContextId:"N5_MATH_2014_P2_CONTEXT",year:2014,paper:"P2",questionNumber:"8",answerCatalogId:"N5_MATH_2014_P2_Q8_MS"},sourceLayout:{sourcePages:[27],printedPageLabels:["Page 11"],continuesAcrossPages:false,answerSpace:{"category":"MEDIUM","estimatedWritingLines":5,"responseSurfaceVisualIds":[],"separateFinalAnswerAreaPresent":false,"measurementMethod":"PDF_RENDER","sourceMeasurements":[{"id":"Q8_SPACE_MAIN","regionType":"WRITTEN_WORKING","questionPartIds":["Q8_MAIN"],"pdfPageNumber":27,"printedPageLabel":"Page 11","measurementMethod":"PDF_RENDER","renderDpi":300,"pageWidthPx":2481,"pageHeightPx":3508,"topPx":440,"bottomPx":1212,"leftPx":null,"rightPx":null,"heightPx":772,"widthPx":null,"topPt":105.48,"bottomPt":290.84,"leftPt":null,"rightPt":null,"heightPt":185.36,"widthPt":null,"heightMm":65.39,"widthMm":null,"boundaryConvention":"Bottom of the Q8 algebraic expression to the top of Q9.","notes":null}],"notes":"Working space separates Q8 from Q9 on the same page."},sourceEvidence:[evidence]},structure:{structureType:"SINGLE",totalMarks:3,parts:[{"id":"Q8_MAIN","label":"","marks":3,"primarySkillId":"num-n2-indices","secondarySkillIds":[],"conceptIds":["num-n2-1"],"topic":"NUM","commandTypes":["SIMPLIFY"],"responseTypes":["EXPRESSION"],"dependsOnPartIds":[],"sharedInformationIds":[],"visualElementIds":[],"standardProfile":"C","thinkingProfile":"OPERATIONAL","calculatorBurden":"MENTAL_FRIENDLY"}],dependencyType:"INDEPENDENT",sharedStimulus:false,sharedVisuals:false,sharedGivenData:false,requiredResultProvided:false},curriculum:{"primaryTopic":"NUM","primarySkillId":"num-n2-indices","secondarySkillIds":[],"primaryConceptId":"num-n2-1","conceptIds":["num-n2-1"],"paperSuitability":"P2","standardProfile":"C","thinkingProfile":"OPERATIONAL","crossSkillQuestion":false,"skillMarkDistribution":{"num-n2-indices":3},"conceptMarkDistribution":{"num-n2-1":3}},task:{"commandTypes":["SIMPLIFY"],"responseTypes":["EXPRESSION"],"responseCount":1,"explicitMethodCue":false,"methodRestricted":false,"workingRequestedInPrompt":false,"justificationRequested":false,"contextualConclusionRequested":false,"visualResponseRequired":false},mathematics:{"primaryGoal":"Simplify a monomial fraction by reducing numerical coefficients and applying index laws across multiplication and division.","subgoals":[{"id":"Q8_S1","summary":"Simplify the numerical coefficient 10/2.","dependsOnSubgoalIds":[]},{"id":"Q8_S2","summary":"Combine powers of n in the numerator. ","dependsOnSubgoalIds":[]},{"id":"Q8_S3","summary":"Subtract denominator exponent to obtain the final power.","dependsOnSubgoalIds":["Q8_S2"]}],"operationTypes":["MULTIPLY","DIVIDE","SIMPLIFY"],"requiredFormulaIds":[],"requiredTheoremIds":[],"stageCount":3,"intermediateQuantityTypes":["combined numerator power"],"methodSelectionRequired":false,"solutionCountExpected":1,"validitySelectionRequired":false,"representationTransitions":[]},information:[{"id":"Q8_INFO_EXPR","informationType":"expression","normalisedContent":"monomial fraction is (n^5 × 10n)/(2n^2)","value":"(n^5*10n)/(2n^2)","unit":null,"source":"TEXT","explicitness":"EXPLICIT","role":"GIVEN_VALUE","visualElementId":null,"usedByPartIds":["Q8_MAIN"]}],reasoning:{"reasoningTypes":["DIRECT_PROCEDURE","STRUCTURE_RECOGNITION"],"difficulty":{"overallDifficulty":"LOW","methodSelectionLoad":"VERY_LOW","arithmeticLoad":"LOW","algebraicLoad":"LOW","representationLoad":"VERY_LOW","languageLoad":"LOW","contextInterpretationLoad":"VERY_LOW","reasoningDepth":"LOW","dependencyCount":0,"difficultyDrivers":["applying multiplication and division index laws in one expression","simplifying coefficient and power independently"]}},numbers:{"numberTypes":["INTEGER","POWER","ALGEBRAIC"],"nonCalculatorFriendly":true,"exactAndApproximateMixed":false,"magnitudeNotes":null,"simplificationVisibility":"EXPLICIT_INSTRUCTION","expectedFinalValueForm":"ALGEBRAIC_EXPRESSION","intermediateValueSize":"SMALL","finalValueSize":"SMALL","dominantInputFormat":"ALGEBRAIC","dominantOutputFormat":"ALGEBRAIC"},calculator:{"status":"CALCULATOR_ALLOWED","burden":"MENTAL_FRIENDLY","requiredFunctions":[],"modeSensitive":false,"modeRequirements":[],"notes":"This is symbolic index manipulation despite appearing on the calculator paper."},parameterDesign:{"deliberatelyConstructedValues":true,"exactResultDesigned":true,"roundingDesigned":false,"factorisableDesigned":false,"perfectSquareDesigned":false,"pythagoreanTripleUsed":false,"niceRatioUsed":false,"validSolutionCountDesigned":null,"parameterConstraints":["base variable is common across powers","final exponent remains a positive integer","numerical coefficient simplifies exactly"],"safeVariationAxes":["coefficient pair","numerator exponents","denominator exponent"],"invariantRelationships":["same-base powers multiply then divide"],"degeneracyConditionsToAvoid":["exponents cancelling to zero unless intended","coefficient not reducible when coefficient simplification is part of demand"]},constraints:{"mathematicalDomainConstraints":[],"contextValidityConstraints":[],"calculatorModeConstraints":["Although Paper 2 permits a calculator, the structural index-law reasoning is calculator-independent."],"methodConstraints":[],"presentationConstraints":[]},answerSpecification:{"answerForm":"SYMBOLIC","simplestFormRequired":false,"rationalDenominatorRequired":false,"positivePowersRequired":false,"scientificNotationRequired":false,"precisionType":"NONE","precisionValue":null,"units":{"dimension":null,"unitSymbol":null,"conversionRequired":false,"unitsExplicitlyRequested":false},"multipleAnswersRequired":1,"domainRestriction":null,"contextualWordsRequired":false,"coordinateOrderRelevant":false,"bracketsRelevant":false,"visualAnswerRequired":false},context:{"contextualised":false,"contextDomain":null,"contextRole":"NONE","namedPeoplePresent":false,"currencyPresent":false,"realWorldUnitsPresent":false,"realismConstrainsAnswer":false,"contextObjects":[],"contextCanBeSafelyReplaced":true},language:{"informationDensity":"LOW","scaffoldingLevel":"MEDIUM","bulletStructureUsed":false,"naturalLanguageInterpretationRequired":false,"promptSummary":"Simplify a single algebraic fraction containing a product of powers of the same base and numerical coefficients.","styleNotes":null,"promptStructure":{"sentenceCount":1,"promptWordCount":7,"introductionStyle":"BARE_SYMBOLIC_EXPRESSION","relationshipStatementStyle":null,"commandStyle":"SINGLE_SIMPLIFY_COMMAND","temporalStructure":"NONE","informationOrder":["SIMPLIFY_COMMAND","ALGEBRAIC_POWER_EXPRESSION"],"normalisedPromptStructure":["Present a compact symbolic product/quotient of powers with a Simplify command."],"usesPronounReference":false,"lexicalFeatureTags":["abstract algebra","indices","minimal prose"],"generatorVariationNotes":"Vary coefficients and powers while preserving meaningful use of index laws and a non-trivial simplified symbolic result."}},visuals:notApplicable("No supplied visual material is used in this Question."),mathematicalModel:notApplicable(),specialisedProfiles:{arithmetic:catalogValue({"arithmeticComplexity":"LOW","commonDenominatorRequired":false,"cancellationAvailable":true,"simplificationRequired":true,"simplificationVisibility":"EXPLICIT_INSTRUCTION","cancellationStyle":"FINAL_SIMPLIFICATION_ONLY"},[evidence],"CATALOGUE_CLASSIFICATION","HIGH",null),percentage:notApplicable(),powersSurdsScientific:catalogValue({"powersPresent":true,"surdsPresent":false,"scientificNotationPresent":false,"rationalisationRequired":false,"exactSimplificationRequired":true},[evidence],"CATALOGUE_CLASSIFICATION","HIGH",null),algebra:catalogValue({"expansionRequired":false,"factorisationRequired":false,"completingSquareRequired":false,"rationalExpressionPresent":true,"changeOfSubjectRequired":false},[evidence],"CATALOGUE_CLASSIFICATION","HIGH",null),equationsInequalities:notApplicable(),functionsGraphs:notApplicable(),statistics:notApplicable(),geometryMeasureCircleSimilarity:notApplicable(),trigonometry:notApplicable(),bearings:notApplicable(),coordinateGeometry:notApplicable(),vectors:notApplicable()},family:{"familyId":"NUM_INDICES_MONOMIAL_FRACTION_MULTIPLY_DIVIDE","subFamilyId":null,"familyConfidence":"HIGH","structuralSignature":["same-base index multiplication","same-base division","coefficient simplification"],"surfaceStyleIds":["INLINE_INDEX_FRACTION"],"relatedFamilyIds":[]},surface:{"abstractOrContextual":"ABSTRACT","proseAmount":"LOW","visualAmount":"NONE","layoutComplexity":"LOW","informationOrderCanVarySafely":true,"visualPlacementCanVarySafely":true},generation:{"readiness":"PARTIAL","linkedGeneratorFamilyIds":["NUM_INDICES_MONOMIAL_FRACTION_MULTIPLY_DIVIDE"],"invariantMathematics":["same-base index laws","exact monomial result"],"variableParameters":["coefficients","numerator exponents","denominator exponent"],"parameterConstraints":["final exponent and coefficient remain simple"],"safeContextVariations":[],"safeRepresentationVariations":[],"unsafeVariations":[],"difficultyControls":["number of index-law steps","coefficient cancellation"],"requiredVisualCapabilities":[],"requiredValidationChecks":["mark total and part structure remain valid","generated values satisfy all parameter constraints","required answer form remains attainable","generated instance is mathematically non-degenerate"],"provenance":"GENERATION_ANALYSIS"},sourceIsolation:sourceIsolation(),review:questionReviewInProgress(false,"P2"),}satisfies QuestionCatalogEntry;
+import { createN2IndexQuestionCatalogEntry } from "../../N2IndicesCatalogFactory";
+
+export const N5_MATHS_2014_P2_Q8 = createN2IndexQuestionCatalogEntry(
+{
+  "year": 2014,
+  "paper": "P2",
+  "questionNumber": "8",
+  "pdfPage": 27,
+  "printedPageLabel": "Page 11",
+  "marks": 3,
+  "family": "MULTI_LAW_SIMPLIFICATION",
+  "subFamilyId": "PRODUCT_QUOTIENT_WITH_COEFFICIENT",
+  "primaryConceptId": "num-n2-1",
+  "conceptIds": [
+    "num-n2-1"
+  ],
+  "projectStandardProfile": "C",
+  "commandTypes": [
+    "SIMPLIFY"
+  ],
+  "responseType": "EXPRESSION",
+  "answerForm": "SYMBOLIC",
+  "expectedFinalValueForm": "ALGEBRAIC_EXPRESSION",
+  "normalisedExpression": "(n^5 * 10n) / (2n^2)",
+  "expressionDescription": "A monomial fraction combines a numerical coefficient with same-base powers in a numerator product and a denominator power.",
+  "targetFormDescription": null,
+  "operationTypes": [
+    "MULTIPLY",
+    "DIVIDE",
+    "SIMPLIFY"
+  ],
+  "theoremIds": [
+    "INDEX_MULTIPLY_SAME_BASE",
+    "INDEX_DIVIDE_SAME_BASE"
+  ],
+  "subgoals": [
+    "Reduce the numerical coefficient independently of the powers.",
+    "Combine the numerator powers of the common base.",
+    "Divide by the denominator power to obtain one simplified monomial."
+  ],
+  "representationTransitions": [],
+  "stageCount": 3,
+  "numberTypes": [
+    "INTEGER",
+    "POWER",
+    "ALGEBRAIC"
+  ],
+  "fractionalIndicesPresent": false,
+  "negativeIndicesPresent": false,
+  "rootNotationPresent": false,
+  "bracketedExpressionPresent": false,
+  "algebraicFractionPresent": true,
+  "additiveTermsPresent": false,
+  "coefficientSimplificationRequired": true,
+  "positivePowerOutputExplicit": false,
+  "simplestFormExplicit": true,
+  "reasoningTypes": [
+    "DIRECT_PROCEDURE",
+    "MULTI_STAGE",
+    "STRUCTURE_RECOGNITION"
+  ],
+  "overallDifficulty": "LOW",
+  "algebraicLoad": "LOW",
+  "representationLoad": "VERY_LOW",
+  "difficultyDrivers": [
+    "combining multiplication and division laws in one expression",
+    "simplifying coefficient and exponent structure separately"
+  ],
+  "structuralSignature": [
+    "single algebraic fraction",
+    "numerator product of same-base powers",
+    "denominator same-base power",
+    "independent coefficient reduction",
+    "at least two index-law operations"
+  ],
+  "surfaceStyleId": "INDEX_FRACTION_PRODUCT_QUOTIENT",
+  "promptSentenceCount": 1,
+  "promptWordCount": 7,
+  "introductionStyle": "BARE_SYMBOLIC_EXPRESSION",
+  "commandStyle": "SINGLE_SIMPLIFY_COMMAND",
+  "informationOrder": [
+    "SIMPLIFY_COMMAND",
+    "INDEXED_FRACTION"
+  ],
+  "normalisedPromptStructure": [
+    "Issue a direct simplification command for one compact indexed algebraic fraction."
+  ],
+  "lexicalFeatureTags": [
+    "abstract mathematics",
+    "indices",
+    "minimal prose",
+    "fraction layout"
+  ],
+  "answerSpaceCategory": "MEDIUM",
+  "estimatedWritingLines": 5,
+  "responseTopPt": 105.48,
+  "responseBottomPt": 290.84,
+  "responseBoundaryConvention": "Bottom of the displayed Q8 fraction to the top of Q9."
+}
+);
