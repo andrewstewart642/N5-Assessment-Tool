@@ -23,9 +23,19 @@ The boundary rejects generator-only or synthesis-only fields such as:
 
 - Question `generation`, `parameterDesign` and `sourceIsolation`.
 - Visual renderer-generation/originality/validation policy.
-- Answer `consistency`, `generation` and `integrity`.
+- Answer cross-corpus consistency analysis, answer-generation policy and catalogue-integrity policy.
 
 This is deliberate. If generator research needs a fact, that fact must first exist as legitimate historical evidence in `01` or `02`, then be synthesised in `03`.
+
+## Historical storage rule
+
+Newly migrated catalogue entries should use the historical storage adapters rather than populating the old generator-facing sections merely to satisfy the transitional master types.
+
+- `asHistoricalQuestionCatalogEntry` stores the historical Question view while preserving the legacy return type for older consumers.
+- `asHistoricalAnswerCatalogEntry` stores historical marking evidence plus the per-entry factual fingerprint, while omitting cross-corpus analysis, integrity policy and answer-generation policy.
+- These adapters are migration seams only. They do not recreate omitted fields at runtime.
+
+A7 and A8 now follow this rule. Their historical Question factories no longer store `parameterDesign`, generator variation notes, top-level generation policy, source-isolation policy or visual generation/originality/validation policy. Their Answer factories no longer store cross-corpus analysis, answer-generation policy or integrity policy.
 
 ## Cross-skill rule
 
@@ -33,7 +43,7 @@ A historical question is stored once in `01_QuestionCatalog` and once in `02_Ans
 
 ## Migration rule
 
-The old master catalogue contracts remain temporarily available inside `01_QuestionCatalog` and `02_AnswerCatalog` while the existing corpus is migrated. New SkillCatalog code must use the historical-only boundary. Generator-facing and cross-corpus fields will be removed from migrated A7/A8 source factories before the same pattern is rolled across the remaining historical bank.
+The old master catalogue contracts remain temporarily available inside `01_QuestionCatalog` and `02_AnswerCatalog` while the untouched corpus is migrated. New catalogue work should use the historical-only storage pattern established by A7/A8, and new SkillCatalog code must use the historical-only boundary.
 
 During staged migration, old synthesis-module locations or old numbered generation paths may remain as temporary compatibility mounts/re-export shims. New code must import the canonical SkillCatalog and generation paths. Remove a shim only after repository-wide consumers have been migrated and TypeScript/runtime checks pass.
 
