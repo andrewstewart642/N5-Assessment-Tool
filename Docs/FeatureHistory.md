@@ -222,7 +222,14 @@ Key outcomes:
 
 Historical-only views prevent downstream generator policy and synthesis fields from leaking back into stored source records.
 
-A7/A8 historical factories were also purified so their stored runtime payloads no longer carried generator-specific policy merely to satisfy older transitional types. fileciteturn1318file0L3-L11
+A7/A8 historical factories were also purified so their stored runtime payloads no longer carried generator-specific policy merely to satisfy older transitional types.
+
+Reference checkpoint:
+
+```text
+3c0c1c7d8f94b9bf85eedb420ebca0ec4402a6c9
+Stage 3C document purified A7 A8 catalogues
+```
 
 ---
 
@@ -232,7 +239,7 @@ A7/A8 historical factories were also purified so their stored runtime payloads n
 
 Builder capability for migrated National 5 Mathematics skills moved toward generic registration/composition instead of chained skill-specific bridges.
 
-A7 question/answer generation was exposed through canonical generation modules, while A8's existing concept implementation was redirected to canonical question/answer generation paths without unnecessarily rewriting its mathematical behaviour. fileciteturn1319file0L3-L11
+A7 question/answer generation was exposed through canonical generation modules, while A8's existing concept implementation was redirected to canonical question/answer generation paths without unnecessarily rewriting its mathematical behaviour.
 
 The architectural direction became:
 
@@ -245,6 +252,13 @@ canonical generation registry
 ```
 
 Adding another migrated skill should therefore be a registration problem rather than another bespoke bridge chain.
+
+Reference checkpoint:
+
+```text
+6e2095c7cea18466bc445aa9edd8892e2764916c
+Stage 4 point A8 Legacy module at canonical generation paths
+```
 
 ---
 
@@ -263,9 +277,22 @@ The National 5 Mathematics evidence/generation workspace reached its canonical s
 04 / 05 ──────────────────────────► 06_VisualAssets when required
 ```
 
-The finalisation removed the obsolete numbered generation trees and old visual-compatibility path, separated historical visual evidence from generated visual capability, and introduced/strengthened the National 5 Mathematics architecture guard. fileciteturn1321file0L3-L7 fileciteturn1322file0L3-L11
+The finalisation removed obsolete numbered generation trees and the old visual-compatibility path, separated historical visual evidence from generated visual capability, and introduced/strengthened the National 5 Mathematics architecture guard.
 
-The local Course architecture document now defines the dependency rules, catalogue workflow and skill-by-skill generator workflow. fileciteturn1323file0L3-L7
+Useful reference checkpoints:
+
+```text
+e52e2dadae1b3af60bac6f1ffb3c83b623e9e755
+Stage 5B remove deprecated generation trees
+
+39651ea747b468ca95365931476da040f07baec6
+Stage 5C fix historical visual import boundary
+
+7e7b1b9b7b884dbae9231f6bffb81393b357d3cd
+Stage 5D document canonical National5Maths architecture
+```
+
+The local Course architecture document now defines the dependency rules, catalogue workflow and skill-by-skill generator workflow.
 
 At the final Stage 5 checkpoint the architecture guard and TypeScript checks passed locally. Remaining compatibility generation is treated as bounded migration debt rather than part of the six-layer content model.
 
