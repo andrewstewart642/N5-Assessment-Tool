@@ -4,10 +4,9 @@ import type {
   SkillPaperSuitability,
   SkillsData,
 } from "@/app/Assessments/AssessmentTypes";
-
-import {
-  withA7BuilderConcepts,
-} from "./A7BuilderSkillBridge";
+import type {
+  BuilderSkillRegistration,
+} from "./BuilderSkillRegistration";
 
 type A8ConceptOptions = {
   marks: number;
@@ -52,7 +51,7 @@ const a8Concept = (
   },
 });
 
-const A8_BUILDER_CONCEPTS: Concept[] = [
+export const A8_BUILDER_CONCEPTS: Concept[] = [
   a8Concept(
     "alg-a8-mixed",
     "A8",
@@ -130,38 +129,28 @@ const A8_BUILDER_CONCEPTS: Concept[] = [
   ),
 ];
 
+export const A8_BUILDER_SKILL_REGISTRATION: BuilderSkillRegistration = {
+  skillId: "alg-a08-simultaneous-equations",
+  apply: (skill) => ({
+    ...skill,
+    text: "Work with simultaneous equations",
+    paperSuitability: "BOTH",
+    concepts: A8_BUILDER_CONCEPTS,
+  }),
+};
+
+/** @deprecated Use BuilderSkillRegistry as the single composition point. */
 export function withA8BuilderConcepts(
   skillsData: SkillsData
 ): SkillsData {
-  /*
-   * A7 and A8 are currently the two hardened algebra skills. Compose the
-   * bridges here so the existing AssessmentConfig call picks up both without
-   * adding a second course-config migration point.
-   */
-  const withA7 =
-    withA7BuilderConcepts(
-      skillsData
-    );
-
-  const algebraicSkills =
-    withA7["Algebraic Skills"] ?? [];
-
-  return {
-    ...withA7,
-    "Algebraic Skills": algebraicSkills.map(
-      (skill) =>
-        skill.id ===
-        "alg-a08-simultaneous-equations"
-          ? {
-              ...skill,
-              text:
-                "Work with simultaneous equations",
-              paperSuitability:
-                "BOTH",
-              concepts:
-                A8_BUILDER_CONCEPTS,
-            }
+  return Object.fromEntries(
+    Object.entries(skillsData).map(([group, skills]) => [
+      group,
+      skills.map((skill) =>
+        skill.id === A8_BUILDER_SKILL_REGISTRATION.skillId
+          ? A8_BUILDER_SKILL_REGISTRATION.apply(skill)
           : skill
-    ),
-  };
+      ),
+    ]),
+  );
 }
