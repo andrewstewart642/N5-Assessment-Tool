@@ -14,8 +14,12 @@ import {
   A8_PAPER_NUMERICAL_CALIBRATION,
   A8_SUPPORTED_DIFFICULTY_LEVELS,
 } from "../../../03_SkillCatalog/02-Algebraic/ALG-A8-SimultaneousEquations/A8CrossCorpusCalibration";
+import {
+  A8_HISTORICAL_EVIDENCE_VALIDATED,
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A8-SimultaneousEquations/A8HistoricalEvidenceValidation";
 import type { A8GeneratorFamily, A8GeneratorPaper } from "./Types";
 
+export const A8_GENERATOR_EVIDENCE_VALIDATED = A8_HISTORICAL_EVIDENCE_VALIDATED;
 export const A8_GENERATOR_SOURCE_IDS = A8_CORPUS_ENTRIES.map((entry) => entry.id.replace(/_MS$/, ""));
 export const A8_ANSWER_SOURCE_IDS = A8_CORPUS_ENTRIES.map((entry) => entry.id);
 

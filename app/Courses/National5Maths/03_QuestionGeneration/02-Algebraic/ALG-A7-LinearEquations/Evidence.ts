@@ -17,12 +17,16 @@ import {
   A7_FRACTIONAL_GENERATION_ENVELOPE,
 } from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7DifficultyCalibration";
 import {
+  A7_HISTORICAL_EVIDENCE_VALIDATED,
+} from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7HistoricalEvidenceValidation";
+import {
   A7_CONTEXT_VISUAL_GENERATION_GUARDRAILS,
   A7_FRACTIONAL_SURFACE_EVIDENCE,
   A7_FRACTIONAL_SURFACE_GENERATION_GUARDRAILS,
 } from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7SurfaceCalibration";
 import type { A7GeneratorFamily } from "./Types";
 
+export const A7_GENERATOR_EVIDENCE_VALIDATED = A7_HISTORICAL_EVIDENCE_VALIDATED;
 export const A7_GENERATOR_INVARIANTS = A7_CROSS_CORPUS_GENERATION_INVARIANTS;
 export const A7_GENERATOR_DECISIONS = A7_CALIBRATION_DECISIONS;
 export const A7_GENERATOR_ABSTRACT_ENVELOPE = A7_ABSTRACT_CALIBRATION_ENVELOPE;
