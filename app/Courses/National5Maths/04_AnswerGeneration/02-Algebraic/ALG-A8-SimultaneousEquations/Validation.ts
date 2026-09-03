@@ -1,4 +1,4 @@
-import type { A8GeneratedQuestion } from "../../../03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
+import type { A8GeneratedQuestion } from "../../../04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
 import { resolveA8GeneratedAnswerProfile } from "./Calibration";
 import type {
   A8AnswerValidationResult,

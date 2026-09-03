@@ -4,7 +4,7 @@ import type {
   A7GeneratedQuestion,
   A7LinearDimension,
   A7Rational,
-} from "../../../03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
+} from "../../../04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
 import { resolveA7GeneratedAnswerProfile } from "./Calibration";
 import type {
   A7GeneratedAnswerMethod,

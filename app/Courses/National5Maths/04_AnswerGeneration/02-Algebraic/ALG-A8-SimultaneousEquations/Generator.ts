@@ -3,7 +3,7 @@ import type {
   A8GeneratedContext,
   A8GeneratedQuestion,
   A8LinearEquation,
-} from "../../../03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
+} from "../../../04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
 import { resolveA8GeneratedAnswerProfile } from "./Calibration";
 import type {
   A8GeneratedAnswerLine,

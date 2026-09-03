@@ -1,7 +1,7 @@
 import {
   A8_CORPUS_ENTRIES,
 } from "../../../03_SkillCatalog/02-Algebraic/ALG-A8-SimultaneousEquations/A8CrossCorpusAnalysis";
-import type { A8GeneratedQuestion } from "../../../03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
+import type { A8GeneratedQuestion } from "../../../04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations/Types";
 import type {
   A8GeneratedAnswerProfile,
   A8GeneratedAnswerProfileId,

@@ -3,7 +3,7 @@ import type {
   A7GeneratorFamily,
   A7GeneratorThinking,
   A7Rational,
-} from "../../../03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
+} from "../../../04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
 
 export type A7GeneratedMarkType = "REPRESENTATION" | "PROCESS" | "ACCURACY";
 

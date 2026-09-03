@@ -1,7 +1,7 @@
 import {
   A7_CORPUS_ENTRIES,
 } from "../../../03_SkillCatalog/02-Algebraic/ALG-A7-LinearEquations/A7CrossCorpusAnalysis";
-import type { A7GeneratedQuestion } from "../../../03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
+import type { A7GeneratedQuestion } from "../../../04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations/Types";
 import type {
   A7GeneratedAnswerProfile,
   A7GeneratedAnswerProfileId,
