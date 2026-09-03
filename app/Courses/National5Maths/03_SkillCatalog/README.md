@@ -11,17 +11,21 @@
 
 ## Dependency rule
 
-`01_QuestionCatalog` and `02_AnswerCatalog` must never import from `03_SkillCatalog` or any generation layer. SkillCatalog may depend on the historical catalogs and shared core types. Generation may depend on SkillCatalog.
+`01_QuestionCatalog` and `02_AnswerCatalog` must never import from `03_SkillCatalog` or any generation layer. SkillCatalog may depend on historical-only catalogue views and shared core types. Generation may depend on SkillCatalog.
 
-## Historical-view rule
+## Historical boundary rule
 
-SkillCatalog does not consume the transitional catalogue entries directly as synthesis inputs.
+`03_SkillCatalog` must not accept the transitional full `QuestionCatalogEntry` or `AnswerCatalogEntry` contracts.
 
-- `QuestionCatalogHistoricalView` exposes historical question evidence while hiding top-level generator policy and generator-writing notes.
-- `AnswerCatalogHistoricalView` exposes historical marking evidence while hiding cross-corpus consistency judgements and answer-generation policy.
-- `SkillCatalogTypes.createSkillHistoricalEvidenceSet` pairs the real one-question Question Catalog record with the real one-question Answer Catalog record and validates their IDs, mark tariff and Skill relevance before synthesis.
+Raw year/question files are projected at the `01/02 -> 03` boundary through `toHistoricalQuestionCatalogView` and `toHistoricalAnswerCatalogView`. From that point onward SkillCatalog can see historical question/marking evidence only.
 
-A SkillCatalog summary may add reviewed interpretation, family labels and generation decisions, but it must not duplicate historical identity/tariff facts without validation against the imported source pair.
+The boundary rejects generator-only or synthesis-only fields such as:
+
+- Question `generation`, `parameterDesign` and `sourceIsolation`.
+- Visual renderer-generation/originality/validation policy.
+- Answer `consistency`, `generation` and `integrity`.
+
+This is deliberate. If generator research needs a fact, that fact must first exist as legitimate historical evidence in `01` or `02`, then be synthesised in `03`.
 
 ## Cross-skill rule
 
@@ -29,10 +33,12 @@ A historical question is stored once in `01_QuestionCatalog` and once in `02_Ans
 
 ## Migration rule
 
+The old master catalogue contracts remain temporarily available inside `01_QuestionCatalog` and `02_AnswerCatalog` while the existing corpus is migrated. New SkillCatalog code must use the historical-only boundary. Generator-facing and cross-corpus fields will be removed from migrated A7/A8 source factories before the same pattern is rolled across the remaining historical bank.
+
 During staged migration, old synthesis-module locations or old numbered generation paths may remain as temporary compatibility mounts/re-export shims. New code must import the canonical SkillCatalog and generation paths. Remove a shim only after repository-wide consumers have been migrated and TypeScript/runtime checks pass.
 
 ## Current migration scope
 
-A7 and A8 are the first complete examples of the new evidence seam. Their `HistoricalEvidence.ts` files import the actual question-by-question and marking-scheme-by-marking-scheme records, then the generation Evidence layer requires the corresponding historical-evidence validation before exposing generator calibration.
+A7 and A8 are the proof slices. Their `HistoricalEvidence.ts` files import the real one-question/one-marking-scheme bank, project those records into historical-only views, validate Question ↔ Answer linkage and tariff consistency, and then compare the curated cross-corpus summaries against that evidence.
 
 Source-backed general marking policies remain in `02_AnswerCatalog` because they are historical marking evidence, not synthesis.
