@@ -22,14 +22,14 @@ import type {
   A8GeneratorFamily,
   A8GeneratorPaper,
   A8GraphVisualSpec,
-} from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+} from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 import type {
   A8GeneratedAnswerProfileId,
   A8GeneratedMarkPoint,
   A8GeneratedMarkProfile,
   A8GeneratedPresentationPolicy,
   A8GeneratedWorkingPolicy,
-} from "../../Courses/National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+} from "../../Courses/National5Maths/05_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 import A8GraphPreview from "./A8GraphPreview";
 import { GENERATOR_TEST_TARGET } from "./GeneratorTestTarget";
 
