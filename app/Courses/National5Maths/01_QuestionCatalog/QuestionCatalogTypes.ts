@@ -34,7 +34,7 @@ import type {                                                                   
   GeneratorFamilyId,                                                                              /* Reuses generator-family identifiers. */
   PaperContextId,                                                                                 /* Reuses paper-context identifiers. */
 } from "../CatalogCoreTypes";                                                                     /* Closes shared catalogue imports. */
-import type { VisualElementId, VisualEvidenceProfile } from "../05_VisualAssets/VisualCatalogTypes"; /* Reuses the dedicated visual catalogue subsystem. */
+import type { VisualElementId, VisualEvidenceProfile } from "../CatalogVisualEvidenceTypes";     /* Reuses the shared historical visual-evidence contract. */
 
 // ============================================================================
 // SECTION 1 — QUESTION IDS
@@ -45,7 +45,7 @@ export type QuestionPartId = string;                                            
 export type QuestionFamilyId = string;                                                           /* Gives each normalised Question family a stable ID. */
 export type QuestionInformationId = string;                                                      /* Gives each supplied-information item a stable ID. */
 export type QuestionSubgoalId = string;                                                          /* Gives each mathematical subgoal a stable ID. */
-export type QuestionResponseSpaceMeasurementId = string;                                         /* Gives each measured response region a stable ID. */
+export type QuestionResponseSpaceMeasurementId = string;                                         /* Gives each measured response region a stable local ID. */
 
 // ============================================================================
 // SECTION 2 — CATALOGUE IDENTITY
