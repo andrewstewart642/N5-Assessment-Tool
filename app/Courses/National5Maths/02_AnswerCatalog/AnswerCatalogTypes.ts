@@ -40,7 +40,7 @@ import type {
   QuestionUnitProfile,
 } from "../01_QuestionCatalog/QuestionCatalogTypes";
 
-import type { VisualCandidateInteraction, VisualElementId } from "../05_VisualAssets/VisualCatalogTypes";
+import type { VisualCandidateInteraction, VisualElementId } from "../CatalogVisualEvidenceTypes";
 
 // ============================================================================
 // SECTION 1 — STABLE IDS
