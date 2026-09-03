@@ -29,6 +29,14 @@ const DEPRECATED_IMPORT_ALLOWLIST = new Set([
   "app/DeveloperTools/GeneratorTester/GeneratorTesterPage.tsx",
 ]);
 
+// The old numbered trees themselves are temporary compatibility mounts. Their
+// internal imports are migration debt, not permission for any external file to
+// depend on them. Stage 5B removes these roots once external consumers are gone.
+const DEPRECATED_TREE_PREFIXES = [
+  "app/Courses/National5Maths/03_QuestionGeneration/",
+  "app/Courses/National5Maths/04_AnswerGeneration/",
+];
+
 const violations = [];
 const warnings = [];
 
@@ -119,7 +127,9 @@ for (const file of walk(appRoot)) {
     const usesOldAnswerGeneration = containsSegment(specifier, "04_AnswerGeneration");
     if (!usesOldQuestionGeneration && !usesOldAnswerGeneration) continue;
 
-    if (DEPRECATED_IMPORT_ALLOWLIST.has(fileRel)) {
+    if (DEPRECATED_TREE_PREFIXES.some((prefix) => fileRel.startsWith(prefix))) {
+      warnings.push(`${fileRel}: internal dependency inside a temporary deprecated generation tree (${specifier}).`);
+    } else if (DEPRECATED_IMPORT_ALLOWLIST.has(fileRel)) {
       warnings.push(`${fileRel}: temporary deprecated generation import (${specifier}).`);
     } else {
       addViolation(file, `Deprecated numbered generation path is forbidden (${specifier}). Use 04_QuestionGeneration / 05_AnswerGeneration.`);
@@ -137,6 +147,8 @@ for (const file of walk(appRoot)) {
     if (!containsSegment(specifier, "05_VisualAssets")) continue;
     if (fileRel.startsWith("app/Courses/National5Maths/01_QuestionCatalog/")) {
       warnings.push(`${fileRel}: historical visual-type import still uses 05_VisualAssets.`);
+    } else if (fileRel.startsWith("app/Courses/National5Maths/05_VisualAssets/")) {
+      warnings.push(`${fileRel}: internal dependency inside the temporary 05_VisualAssets compatibility tree.`);
     } else {
       addViolation(file, `Deprecated 05_VisualAssets import is forbidden (${specifier}). Use 06_VisualAssets.`);
     }
