@@ -31,11 +31,11 @@ import {
   type A8GeneratorDifficulty,
   type A8GeneratorFamily,
   type A8GeneratorPaper,
-} from "../../../../../National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+} from "../../../../../National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 
 import {
   generateA8Answer,
-} from "../../../../../National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+} from "../../../../../National5Maths/05_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 
 type A8BuilderCode =
   | "A8"
