@@ -17,8 +17,8 @@ import {
   type A8GeneratorDifficulty,
   type A8GeneratorFamily,
   type A8GeneratorPaper,
-} from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
-import { generateA8Answer } from "../../Courses/National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+} from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+import { generateA8Answer } from "../../Courses/National5Maths/05_AnswerGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 
 export type GeneratorTestConcept = {
   code: string;
@@ -118,8 +118,6 @@ const A8_TEST_MODULE: ConceptGeneratorModule = {
       includeExperimentalFamilies: true,
     });
 
-    // This also validates the answer against the exact generated question
-    // state. A successful card therefore passed both generator validators.
     const markingScheme = generateA8Answer(question);
     const finalAnswer = answerText(markingScheme.finalAnswers);
 
