@@ -1,6 +1,6 @@
 "use client";
 
-import type { A8GraphVisualSpec, A8LinearEquation } from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
+import type { A8GraphVisualSpec, A8LinearEquation } from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A8-SimultaneousEquations";
 
 type Point = { x: number; y: number };
 
@@ -91,9 +91,6 @@ const equationDerivedBounds = (
   const targetAspect = plotWidth / plotHeight;
   const currentAspect = xRange / yRange;
 
-  // Keep one unit horizontally the same visual size as one unit vertically.
-  // If one dimension needs expanding, favour positive x and negative y so the
-  // axes sit naturally inside the diagram rather than at the bottom-left edge.
   if (currentAspect < targetAspect) {
     const extra = yRange * targetAspect - xRange;
     xMin -= extra * 0.2;
