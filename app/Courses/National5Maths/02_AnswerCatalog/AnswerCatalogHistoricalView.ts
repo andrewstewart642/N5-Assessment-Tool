@@ -37,6 +37,24 @@ export type HistoricalAnswerCatalogView = Pick<
   review: HistoricalAnswerReviewProfile;
 };
 
+/**
+ * Storage shape used by newly purified Answer Catalog entries while older
+ * catalogue files still compile against AnswerCatalogEntry.
+ *
+ * The historical fingerprint remains nested under `consistency` for temporary
+ * compatibility, but cross-corpus analysis, integrity policy and answer-
+ * generation policy are not stored on the entry.
+ */
+export type HistoricalAnswerCatalogEntry = Omit<
+  AnswerCatalogEntry,
+  "consistency" | "integrity" | "generation" | "review"
+> & {
+  consistency: {
+    factualFingerprint: ConsistencyFeatureObservation[];
+  };
+  review: HistoricalAnswerReviewProfile;
+};
+
 const historicalReview = (
   review: AnswerCatalogEntry["review"],
 ): HistoricalAnswerReviewProfile => {
@@ -71,3 +89,12 @@ export const toHistoricalAnswerCatalogView = (
   factualFingerprint: entry.consistency.factualFingerprint,
   review: historicalReview(entry.review),
 });
+
+/**
+ * Transitional storage adapter for purified historical marking entries.
+ * It preserves the legacy AnswerCatalogEntry return type for existing consumers
+ * without recreating cross-corpus, integrity or generation fields at runtime.
+ */
+export const asHistoricalAnswerCatalogEntry = (
+  entry: HistoricalAnswerCatalogEntry,
+): AnswerCatalogEntry => entry as unknown as AnswerCatalogEntry;
