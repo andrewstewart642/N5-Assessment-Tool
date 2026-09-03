@@ -6,7 +6,7 @@ import type {
   A7AreaVisualSpec,
   A7ContextAreaState,
   A7LinearDimension,
-} from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
+} from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
 
 type A7AreaPreviewProps = {
   visual: A7AreaVisualSpec;
@@ -97,10 +97,6 @@ function MathLabel({
         lineHeight: 1,
         color: "currentColor",
         pointerEvents: "none",
-        // Vertical labels sit in their own clear lane to the right of the
-        // dimension arrow. The white backing is intentionally invisible on
-        // paper, but guarantees that long KaTeX brackets never visually touch
-        // an arrowhead or line because of glyph overhang.
         background: protectClearance ? "#ffffff" : undefined,
         padding: protectClearance ? "2px 4px" : undefined,
         zIndex: protectClearance ? 2 : 1,
@@ -112,10 +108,6 @@ function MathLabel({
 }
 
 export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
-  // The legacy A7 tester predates math-state-aware previews and passes only the
-  // visual labels. Keep that surface compiling without weakening the main SQA
-  // preview: whenever state is supplied, the diagram still uses the generated
-  // dimensions exactly.
   const resolved = state
     ? resolvedDimensions(state)
     : LEGACY_PREVIEW_DIMENSIONS;
@@ -177,7 +169,6 @@ export default function A7AreaPreview({ visual, state }: A7AreaPreviewProps) {
         </defs>
 
         <g fill="none" stroke="currentColor" strokeWidth="1.65">
-          {/* Always isosceles: the apex stays directly above the midpoint. */}
           <path d={`M${triangleLeft} ${SHAPE_BOTTOM} L${triangleRight} ${SHAPE_BOTTOM} L${triangleCentreX} ${triangleTop} Z`} />
           <rect x={rectangleLeft} y={rectangleTop} width={rectangleWidth} height={rectangleHeight} />
 
