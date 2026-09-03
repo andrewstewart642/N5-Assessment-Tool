@@ -1,6 +1,17 @@
 import type { QuestionCatalogEntry } from "../01_QuestionCatalog/QuestionCatalogTypes";
-import type { A8CorpusSurfaceFamily, A8HistoricalMarkProfile } from "./A8_SimultaneousEquations/A8CrossCorpusAnalysis";
+import type { A8QuestionMode } from "../01_QuestionCatalog/A8SimultaneousEquationsCatalogTypes";
 
+// Historical A8 source classifications belong to the catalogue layers. 03_SkillCatalog
+// may synthesise these classifications across the corpus, but 02_AnswerCatalog must
+// never import its types backwards from that downstream layer.
+export type A8CorpusSurfaceFamily = A8QuestionMode;
+
+export type A8HistoricalMarkProfile =
+  | "SCALE_STRATEGY_CORRECT"
+  | "SCALE_VALUE_VALUE"
+  | "FORM_FORM_SCALE_STRATEGY_CORRECT_COMMUNICATE"
+  | "FORM_FORM_SCALE_VALUE_VALUE_COMMUNICATE"
+  | "FORM_FORM_SCALE_VALUE_VALUE_DERIVED";
 
 export type A8RejectedMethod = "GUESS_AND_CHECK" | "REPEATED_SUBSTITUTION" | null;
 
