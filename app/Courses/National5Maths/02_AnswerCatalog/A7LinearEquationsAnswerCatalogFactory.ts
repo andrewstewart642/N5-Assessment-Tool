@@ -1,20 +1,17 @@
 import type { CatalogEvidenceRef, CatalogMarkThinking, CatalogProvenance } from "../CatalogCoreTypes";
-import type { QuestionCatalogEntry, QuestionResponseType } from "../01_QuestionCatalog/QuestionCatalogTypes";
+import type { QuestionCatalogEntry } from "../01_QuestionCatalog/QuestionCatalogTypes";
 import type { AnswerCatalogEntry, CommonResponsePattern, ExpectedAnswerVariant, MarkNode, MethodPathway, SourceMarkingDirective } from "./AnswerCatalogTypes";
+import { asHistoricalAnswerCatalogEntry } from "./AnswerCatalogHistoricalView";
 import {
-  answerIntegrity,
   answerOnly,
   answerReviewInProgress,
   catalogValue,
-  comparisonKey,
   consistencyFeature,
   emptyMethodEquivalence,
   emptyVisualMarking,
-  generationNotReviewed,
   markNode,
   msEvidence,
   notReviewed,
-  notReviewedConsistency,
   presentationPolicy,
   sourcePresentation,
   unitProfile,
@@ -160,12 +157,17 @@ const baseReview = (config: A7AnswerConfig) => {
     config.question.identity.paper,
     config.question.identity.year,
   );
+  const {
+    generationAnalysisComplete: _generationAnalysisComplete,
+    ...historicalReview
+  } = review;
   return {
-    ...review,
-    unresolvedIssues: ["A7 cross-corpus generation analysis remains deliberately separate from the locked historical classification sweep."],
+    ...historicalReview,
+    unresolvedIssues: [],
     validationNotes: [
       ...review.validationNotes,
       "A7 mark ownership, A/C and Operational/Reasoning classifications were teacher-moderated before catalogue implementation.",
+      "Cross-corpus and answer-generation policy are intentionally owned outside the historical Answer Catalog.",
     ],
   };
 };
@@ -185,17 +187,7 @@ const baseEntry = (
   const issues = validateClassifiedMarkNodes(markNodes);
   if (issues.length) throw new Error(`Invalid A7 V3 mark classification: ${issues.join(" | ")}`);
 
-  const responseTypes = expectedResponse.responseTypes;
-  const comparison = comparisonKey(
-    `A7_${config.mode}_COMPARISON`,
-    config.question.family.familyId,
-    [SKILL_ID],
-    config.question.structure.totalMarks,
-    responseTypes,
-    ["mark tariff", "A/C", "Operational/Reasoning", "answer-only treatment", "exact-value conditions", "method pathways"],
-  );
-
-  return {
+  return asHistoricalAnswerCatalogEntry({
     identity: {
       id: config.question.identity.answerCatalogId,
       schemaVersion: "N5_CATALOG_V3",
@@ -237,18 +229,15 @@ const baseEntry = (
       directives.length,
       commonResponses.length,
     ),
-    consistency: notReviewedConsistency(
-      comparison,
-      [
+    consistency: {
+      factualFingerprint: [
         consistencyFeature("mark_count", config.question.structure.totalMarks, "Historical mark tariff for this A7 question.", evidence),
         consistencyFeature("standard", "A", "Teacher-moderated/externally evidenced mark-level standard classification is wholly A.", standardEvidence(config).evidence),
         consistencyFeature("thinking", config.thinking, "Teacher-moderated mark-level thinking classification for the whole question.", thinkingEvidence(config).evidence),
       ],
-    ),
-    integrity: answerIntegrity(),
-    generation: generationNotReviewed(),
+    },
     review: baseReview(config),
-  };
+  });
 };
 
 const fractionalEntry = (config: A7AnswerConfig): AnswerCatalogEntry => {
