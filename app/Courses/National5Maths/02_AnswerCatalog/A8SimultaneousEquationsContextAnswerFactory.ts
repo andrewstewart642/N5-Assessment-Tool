@@ -1,9 +1,9 @@
 import type { QuestionResponseType } from "../01_QuestionCatalog/QuestionCatalogTypes";
 import type { AnswerCatalogEntry, CommonResponsePattern, ExpectedAnswerVariant, MarkNode, MethodPathway, SourceMarkingDirective } from "./AnswerCatalogTypes";
-import { answerIntegrity, answerOnly, catalogValue, consistencyFeature, emptyMethodEquivalence, emptyVisualMarking, generationNotReviewed, markNode, notReviewed, presentationPolicy, sourcePresentation, unitProfile, workingPolicy } from "./AnswerCatalogHelpers";
+import { asHistoricalAnswerCatalogEntry } from "./AnswerCatalogHistoricalView";
+import { answerOnly, catalogValue, consistencyFeature, emptyMethodEquivalence, emptyVisualMarking, markNode, notReviewed, presentationPolicy, sourcePresentation, unitProfile, workingPolicy } from "./AnswerCatalogHelpers";
 import type { A8AnswerConfig } from "./A8SimultaneousEquationsAnswerTypes";
-import { CONCEPT_ID, SKILL_ID, crossCorpusFor, detailedEvidence, policyIdsFor, reviewAfterA8Comparison, sourceDirective } from "./A8SimultaneousEquationsAnswerCommon";
-
+import { CONCEPT_ID, SKILL_ID, detailedEvidence, historicalA8Review, policyIdsFor, sourceDirective } from "./A8SimultaneousEquationsAnswerCommon";
 
 export const contextualEntry = (config: A8AnswerConfig): AnswerCatalogEntry => {
   if (!config.context) throw new Error("Contextual A8 Answer Catalogue entries require context config.");
@@ -111,8 +111,8 @@ export const contextualEntry = (config: A8AnswerConfig): AnswerCatalogEntry => {
 
   const policy = policyIdsFor(question.identity.year);
   const responseTypes: QuestionResponseType[] = isDerived ? ["EQUATION", "NUMBER"] : ["EQUATION", "MIXED"];
-  const review = reviewAfterA8Comparison(config);
-  return {
+  const review = historicalA8Review(config);
+  return asHistoricalAnswerCatalogEntry({
     identity: { id: question.identity.answerCatalogId, schemaVersion: "N5_CATALOG_V2", sourceQuestionId: question.identity.id, courseId: question.identity.courseId, paperContextId: question.identity.paperContextId, year: question.identity.year, paper: question.identity.paper, questionNumber: question.identity.questionNumber, questionFamilyId: question.family.familyId },
     sourceContext: { sourceDocumentId: `N5_MATH_${question.identity.year}_MS`, totalMarks: 6, sourcePages: config.msPages, printedPageLabels: config.printedPageLabels, sourceEvidence: evidence, generalMarkingPolicyId: policy.policyId },
     expectedResponse: { responseTypes, canonicalAnswers, acceptedEquivalentForms: [], precisionType: "NONE", precisionValue: null, acceptedRange: null, units: unitProfile(context.unitDimension, context.unitSymbol), requiredContextStatement: context.communicationRequired, answerCountRequired: isDerived ? 3 : 4, invalidRelatedValues: context.invalidCommunicationForms ?? [], extraAnswerTreatment: "QUESTION_SPECIFIC" },
@@ -162,11 +162,7 @@ export const contextualEntry = (config: A8AnswerConfig): AnswerCatalogEntry => {
         consistencyFeature("explicitly_rejected_method", config.rejectedMethod, config.rejectedMethod ? `The source explicitly rejects ${config.rejectedMethod} for the solving section.` : "No A8-specific method exclusion is stated in the detailed row.", evidence),
         consistencyFeature("communication_mark", context.communicationRequired, context.communicationRequired ? "The final mark is explicitly a contextual communication/presentation mark." : "The final mark is a mathematical derived calculation rather than a communication mark.", evidence),
       ],
-      crossCorpusAnalysis: crossCorpusFor(config, responseTypes),
     },
-    integrity: answerIntegrity(),
-    generation: generationNotReviewed(),
-
     review,
-  };
+  });
 };
