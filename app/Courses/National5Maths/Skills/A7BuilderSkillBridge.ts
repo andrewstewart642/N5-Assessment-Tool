@@ -4,6 +4,9 @@ import type {
   SkillPaperSuitability,
   SkillsData,
 } from "@/app/Assessments/AssessmentTypes";
+import type {
+  BuilderSkillRegistration,
+} from "./BuilderSkillRegistration";
 
 type A7ConceptOptions = {
   marks?: number;
@@ -53,7 +56,7 @@ const a7Concept = (
  * metadata decides which child family is eligible under the active Builder
  * marks/thinking/paper constraints.
  */
-const A7_BUILDER_CONCEPTS: Concept[] = [
+export const A7_BUILDER_CONCEPTS: Concept[] = [
   a7Concept(
     "alg-a7-linear-general",
     "A7.1",
@@ -97,21 +100,27 @@ const A7_BUILDER_CONCEPTS: Concept[] = [
   ),
 ];
 
+export const A7_BUILDER_SKILL_REGISTRATION: BuilderSkillRegistration = {
+  skillId: "alg-a07-linear-equations",
+  apply: (skill) => ({
+    ...skill,
+    paperSuitability: "BOTH",
+    concepts: A7_BUILDER_CONCEPTS,
+  }),
+};
+
+/** @deprecated Use BuilderSkillRegistry as the single composition point. */
 export function withA7BuilderConcepts(
   skillsData: SkillsData,
 ): SkillsData {
-  const algebraicSkills = skillsData["Algebraic Skills"] ?? [];
-
-  return {
-    ...skillsData,
-    "Algebraic Skills": algebraicSkills.map((skill) =>
-      skill.id === "alg-a07-linear-equations"
-        ? {
-            ...skill,
-            paperSuitability: "BOTH",
-            concepts: A7_BUILDER_CONCEPTS,
-          }
-        : skill
-    ),
-  };
+  return Object.fromEntries(
+    Object.entries(skillsData).map(([group, skills]) => [
+      group,
+      skills.map((skill) =>
+        skill.id === A7_BUILDER_SKILL_REGISTRATION.skillId
+          ? A7_BUILDER_SKILL_REGISTRATION.apply(skill)
+          : skill
+      ),
+    ]),
+  );
 }
