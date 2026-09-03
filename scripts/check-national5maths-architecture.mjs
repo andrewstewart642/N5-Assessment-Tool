@@ -15,28 +15,6 @@ const CANONICAL_LAYERS = [
 ];
 
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
-
-// Stage-5 migration debt only. These files are deliberately kept explicit so
-// any new dependency on an old numbered path fails immediately. Remove entries
-// as Stage 5B migrates each DeveloperTools consumer to the canonical paths.
-const DEPRECATED_IMPORT_ALLOWLIST = new Set([
-  "app/DeveloperTools/GeneratorTester/A7AreaPreview.tsx",
-  "app/DeveloperTools/GeneratorTester/A7GeneratorTesterPage.tsx",
-  "app/DeveloperTools/GeneratorTester/A7SqaGeneratorTesterPage.tsx",
-  "app/DeveloperTools/GeneratorTester/A7SqaQuestionPreview.tsx",
-  "app/DeveloperTools/GeneratorTester/A8GraphPreview.tsx",
-  "app/DeveloperTools/GeneratorTester/GeneratorTestTarget.ts",
-  "app/DeveloperTools/GeneratorTester/GeneratorTesterPage.tsx",
-]);
-
-// The old numbered trees themselves are temporary compatibility mounts. Their
-// internal imports are migration debt, not permission for any external file to
-// depend on them. Stage 5B removes these roots once external consumers are gone.
-const DEPRECATED_TREE_PREFIXES = [
-  "app/Courses/National5Maths/03_QuestionGeneration/",
-  "app/Courses/National5Maths/04_AnswerGeneration/",
-];
-
 const violations = [];
 const warnings = [];
 
@@ -74,6 +52,8 @@ for (const layer of CANONICAL_LAYERS) {
 }
 
 const obsoletePaths = [
+  "03_QuestionGeneration",
+  "04_AnswerGeneration",
   "National5MathsConfig.ts",
   "PaperContexts",
   "QuestionAndAnswerGeneration",
@@ -116,29 +96,25 @@ for (const file of walk(n5Root)) {
   }
 }
 
-// Deprecated numbered paths are checked across app/, not just the clean N5
-// workspace, because DeveloperTools and Legacy adapters are common places for
-// stale imports to survive.
+// Deprecated numbered generation addresses are forbidden everywhere in app/.
+// Stage 5B removes the old trees completely, so no compatibility allowlist is
+// retained: any future reference to either name is a hard architecture failure.
 for (const file of walk(appRoot)) {
-  const fileRel = rel(file);
   const source = fs.readFileSync(file, "utf8");
   for (const specifier of importSpecifiers(source)) {
     const usesOldQuestionGeneration = containsSegment(specifier, "03_QuestionGeneration");
     const usesOldAnswerGeneration = containsSegment(specifier, "04_AnswerGeneration");
     if (!usesOldQuestionGeneration && !usesOldAnswerGeneration) continue;
 
-    if (DEPRECATED_TREE_PREFIXES.some((prefix) => fileRel.startsWith(prefix))) {
-      warnings.push(`${fileRel}: internal dependency inside a temporary deprecated generation tree (${specifier}).`);
-    } else if (DEPRECATED_IMPORT_ALLOWLIST.has(fileRel)) {
-      warnings.push(`${fileRel}: temporary deprecated generation import (${specifier}).`);
-    } else {
-      addViolation(file, `Deprecated numbered generation path is forbidden (${specifier}). Use 04_QuestionGeneration / 05_AnswerGeneration.`);
-    }
+    addViolation(
+      file,
+      `Deprecated numbered generation path is forbidden (${specifier}). Use 04_QuestionGeneration / 05_AnswerGeneration.`,
+    );
   }
 }
 
 // Historical visual-evidence contracts may still reference 05_VisualAssets
-// while that evidence model is separated from generation/rendering in Stage 5B.
+// while that evidence model is separated from generation/rendering in Stage 5C.
 // The exception is deliberately narrow: Question Catalog source evidence and
 // the universal Answer Catalog visual-marking contract only. New code uses 06.
 for (const file of walk(appRoot)) {
