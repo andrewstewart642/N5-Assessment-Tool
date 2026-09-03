@@ -51,6 +51,10 @@ for (const layer of CANONICAL_LAYERS) {
   }
 }
 
+if (!fs.existsSync(path.join(n5Root, "CatalogVisualEvidenceTypes.ts"))) {
+  violations.push("Missing shared historical visual-evidence contract: CatalogVisualEvidenceTypes.ts");
+}
+
 const obsoletePaths = [
   "03_QuestionGeneration",
   "04_AnswerGeneration",
@@ -64,6 +68,27 @@ for (const obsoletePath of obsoletePaths) {
   }
 }
 
+// 05_VisualAssets is no longer an implementation layer. Until the 2014 pilot
+// imports are rewritten, it may contain exactly one forwarding source file and
+// nothing else. This prevents a compatibility address becoming a second owner.
+const deprecatedVisualRoot = path.join(n5Root, "05_VisualAssets");
+if (fs.existsSync(deprecatedVisualRoot)) {
+  const files = walk(deprecatedVisualRoot).map((file) => path.relative(deprecatedVisualRoot, file).split(path.sep).join("/"));
+  const unexpected = files.filter((file) => file !== "VisualCatalogTypes.ts");
+  if (unexpected.length > 0) {
+    violations.push(`05_VisualAssets may contain only the temporary VisualCatalogTypes.ts forwarder; found ${unexpected.join(", ")}.`);
+  }
+  const bridge = path.join(deprecatedVisualRoot, "VisualCatalogTypes.ts");
+  if (!fs.existsSync(bridge)) {
+    violations.push("05_VisualAssets exists without its temporary VisualCatalogTypes.ts forwarder.");
+  } else {
+    const bridgeSource = fs.readFileSync(bridge, "utf8");
+    if (!bridgeSource.includes("../CatalogVisualEvidenceTypes")) {
+      violations.push("05_VisualAssets/VisualCatalogTypes.ts must forward only to the shared CatalogVisualEvidenceTypes contract.");
+    }
+  }
+}
+
 for (const file of walk(n5Root)) {
   const relativeToN5 = path.relative(n5Root, file).split(path.sep).join("/");
   const layer = relativeToN5.split("/")[0];
@@ -72,7 +97,7 @@ for (const file of walk(n5Root)) {
 
   for (const specifier of imports) {
     if (layer === "01_QuestionCatalog" || layer === "02_AnswerCatalog") {
-      for (const forbidden of ["03_SkillCatalog", "04_QuestionGeneration", "05_AnswerGeneration"]) {
+      for (const forbidden of ["03_SkillCatalog", "04_QuestionGeneration", "05_AnswerGeneration", "06_VisualAssets"]) {
         if (containsSegment(specifier, forbidden)) {
           addViolation(file, `${layer} must not import downstream ${forbidden} (${specifier}).`);
         }
@@ -80,25 +105,23 @@ for (const file of walk(n5Root)) {
     }
 
     if (layer === "03_SkillCatalog") {
-      for (const forbidden of ["04_QuestionGeneration", "05_AnswerGeneration"]) {
+      for (const forbidden of ["04_QuestionGeneration", "05_AnswerGeneration", "06_VisualAssets"]) {
         if (containsSegment(specifier, forbidden)) {
-          addViolation(file, `03_SkillCatalog must not import generation layer ${forbidden} (${specifier}).`);
+          addViolation(file, `03_SkillCatalog must not import generation/rendering layer ${forbidden} (${specifier}).`);
         }
       }
     }
 
-    if (layer === "04_QuestionGeneration" || layer === "05_AnswerGeneration") {
+    if (layer === "04_QuestionGeneration" || layer === "05_AnswerGeneration" || layer === "06_VisualAssets") {
       const normalised = specifier.split("\\").join("/");
       if (/01_QuestionCatalog\/(?:20\d{2})\//.test(normalised) || /02_AnswerCatalog\/(?:20\d{2})\//.test(normalised)) {
-        addViolation(file, `${layer} must consume SkillCatalog/historical abstractions rather than a raw year file (${specifier}).`);
+        addViolation(file, `${layer} must consume SkillCatalog/shared abstractions rather than a raw historical year file (${specifier}).`);
       }
     }
   }
 }
 
 // Deprecated numbered generation addresses are forbidden everywhere in app/.
-// Stage 5B removes the old trees completely, so no compatibility allowlist is
-// retained: any future reference to either name is a hard architecture failure.
 for (const file of walk(appRoot)) {
   const source = fs.readFileSync(file, "utf8");
   for (const specifier of importSpecifiers(source)) {
@@ -113,10 +136,9 @@ for (const file of walk(appRoot)) {
   }
 }
 
-// Historical visual-evidence contracts may still reference 05_VisualAssets
-// while that evidence model is separated from generation/rendering in Stage 5C.
-// The exception is deliberately narrow: Question Catalog source evidence and
-// the universal Answer Catalog visual-marking contract only. New code uses 06.
+// The 2014 pilot and the two universal catalogue contracts still name the old
+// 05_VisualAssets address. That address is now only a one-file forwarder to the
+// shared historical visual contract. No new consumer is permitted.
 for (const file of walk(appRoot)) {
   const fileRel = rel(file);
   const source = fs.readFileSync(file, "utf8");
@@ -128,16 +150,13 @@ for (const file of walk(appRoot)) {
     );
     const isHistoricalAnswerVisualContract =
       fileRel === "app/Courses/National5Maths/02_AnswerCatalog/AnswerCatalogTypes.ts";
-    const isDeprecatedVisualTree = fileRel.startsWith(
-      "app/Courses/National5Maths/05_VisualAssets/",
-    );
+    const isCompatibilityForwarder =
+      fileRel === "app/Courses/National5Maths/05_VisualAssets/VisualCatalogTypes.ts";
 
     if (isHistoricalQuestionCatalog || isHistoricalAnswerVisualContract) {
-      warnings.push(`${fileRel}: historical visual-type import still uses 05_VisualAssets.`);
-    } else if (isDeprecatedVisualTree) {
-      warnings.push(`${fileRel}: internal dependency inside the temporary 05_VisualAssets compatibility tree.`);
-    } else {
-      addViolation(file, `Deprecated 05_VisualAssets import is forbidden (${specifier}). Use 06_VisualAssets.`);
+      warnings.push(`${fileRel}: legacy 05_VisualAssets import forwards to CatalogVisualEvidenceTypes; migrate this import when the historical file is next touched.`);
+    } else if (!isCompatibilityForwarder) {
+      addViolation(file, `Deprecated 05_VisualAssets import is forbidden (${specifier}). Historical evidence uses CatalogVisualEvidenceTypes; generated visuals use 06_VisualAssets.`);
     }
   }
 }
