@@ -15,7 +15,7 @@ export const N5_MATHS_2024_P1_Q13 = createN2IndexQuestionCatalogEntry(
     "num-n2-1",
     "num-n2-4"
   ],
-  "projectStandardProfile": "C",
+  "projectStandardProfile": "A",
   "commandTypes": [
     "EXPAND",
     "SIMPLIFY"
