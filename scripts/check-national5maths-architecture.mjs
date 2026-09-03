@@ -137,17 +137,28 @@ for (const file of walk(appRoot)) {
   }
 }
 
-// Historical question files may still reference 05_VisualAssets while the
-// visual-evidence contract is migrated. Everywhere else the old visual number
-// is forbidden now; new code must use 06_VisualAssets.
+// Historical visual-evidence contracts may still reference 05_VisualAssets
+// while that evidence model is separated from generation/rendering in Stage 5B.
+// The exception is deliberately narrow: Question Catalog source evidence and
+// the universal Answer Catalog visual-marking contract only. New code uses 06.
 for (const file of walk(appRoot)) {
   const fileRel = rel(file);
   const source = fs.readFileSync(file, "utf8");
   for (const specifier of importSpecifiers(source)) {
     if (!containsSegment(specifier, "05_VisualAssets")) continue;
-    if (fileRel.startsWith("app/Courses/National5Maths/01_QuestionCatalog/")) {
+
+    const isHistoricalQuestionCatalog = fileRel.startsWith(
+      "app/Courses/National5Maths/01_QuestionCatalog/",
+    );
+    const isHistoricalAnswerVisualContract =
+      fileRel === "app/Courses/National5Maths/02_AnswerCatalog/AnswerCatalogTypes.ts";
+    const isDeprecatedVisualTree = fileRel.startsWith(
+      "app/Courses/National5Maths/05_VisualAssets/",
+    );
+
+    if (isHistoricalQuestionCatalog || isHistoricalAnswerVisualContract) {
       warnings.push(`${fileRel}: historical visual-type import still uses 05_VisualAssets.`);
-    } else if (fileRel.startsWith("app/Courses/National5Maths/05_VisualAssets/")) {
+    } else if (isDeprecatedVisualTree) {
       warnings.push(`${fileRel}: internal dependency inside the temporary 05_VisualAssets compatibility tree.`);
     } else {
       addViolation(file, `Deprecated 05_VisualAssets import is forbidden (${specifier}). Use 06_VisualAssets.`);
