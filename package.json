@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "check:n5-architecture": "node scripts/check-national5maths-architecture.mjs"
   },
   "dependencies": {
     "@sparticuz/chromium": "^149.0.0",
