@@ -1,5 +1,6 @@
 import type { QuestionCatalogEntry, QuestionPart } from "./QuestionCatalogTypes";
-import { catalogValue, notApplicable, questionReviewInProgress, sourceIsolation } from "./QuestionCatalogHelpers";
+import { asHistoricalQuestionCatalogEntry } from "./QuestionCatalogHistoricalView";
+import { catalogValue, notApplicable, questionReviewInProgress } from "./QuestionCatalogHelpers";
 import type { A8QuestionConfig } from "./A8SimultaneousEquationsCatalogTypes";
 import { sourceEvidence, nativeMeasurement, equationText } from "./A8SimultaneousEquationsCatalogSource";
 import { buildGraphVisual } from "./A8SimultaneousEquationsGraphVisual";
@@ -47,16 +48,7 @@ export const createA8QuestionCatalogEntry = (config: A8QuestionConfig): Question
         { id: `${q}_INFO_EQ2`, informationType: "linear equation", normalisedContent: "second equation of a two-variable linear system", value: equationText(config.equations[1], config.variableSymbols), unit: null, source: "TEXT" as const, explicitness: "EXPLICIT" as const, role: "GIVEN_VALUE" as const, visualElementId: graphical ? `VIS_${q}_GRAPH` : null, usedByPartIds: [`${q}_MAIN`] },
       ];
 
-  const determinant = config.equations[0].a * config.equations[1].b - config.equations[1].a * config.equations[0].b;
-  const generatorFamily = config.mode === "ABSTRACT_SOLVE"
-    ? "A8_SIMULTANEOUS_EQUATIONS_ABSTRACT"
-    : config.mode === "GRAPH_INTERSECTION_SOLVE"
-      ? "A8_SIMULTANEOUS_EQUATIONS_GRAPH_INTERSECTION"
-      : config.mode === "CONTEXT_DERIVED_TOTAL"
-        ? "A8_SIMULTANEOUS_EQUATIONS_CONTEXT_DERIVED_TOTAL"
-        : "A8_SIMULTANEOUS_EQUATIONS_CONTEXT_FORM_AND_SOLVE";
-
-  return {
+  return asHistoricalQuestionCatalogEntry({
     identity: {
       id: `N5_MATH_${config.year}_${config.paper}_Q${config.questionNumber}`,
       schemaVersion: "N5_CATALOG_V2",
@@ -78,7 +70,7 @@ export const createA8QuestionCatalogEntry = (config: A8QuestionConfig): Question
         separateFinalAnswerAreaPresent: false,
         measurementMethod: "PDF_NATIVE",
         sourceMeasurements: config.responseRegions.map((region) => nativeMeasurement(config, region)),
-        notes: "Response-space boundaries were measured from native PDF text/graphic positions; the measurements are source evidence only and are not reusable generator layout coordinates.",
+        notes: "Response-space boundaries were measured from native PDF text/graphic positions; the measurements are historical source evidence only.",
       },
       sourceEvidence: [evidence],
     },
@@ -147,7 +139,7 @@ export const createA8QuestionCatalogEntry = (config: A8QuestionConfig): Question
           ? ["REPRESENTATION_TRANSLATION", "DIRECT_PROCEDURE", "STRUCTURE_RECOGNITION"]
           : ["DIRECT_PROCEDURE", "MULTI_STAGE", "STRUCTURE_RECOGNITION"],
       difficulty: {
-        overallDifficulty: contextual ? "MEDIUM" : "MEDIUM",
+        overallDifficulty: "MEDIUM",
         methodSelectionLoad: "LOW",
         arithmeticLoad: config.numberTypes.includes("DECIMAL") ? "MEDIUM" : "LOW",
         algebraicLoad: "MEDIUM",
@@ -183,34 +175,15 @@ export const createA8QuestionCatalogEntry = (config: A8QuestionConfig): Question
       modeRequirements: [],
       notes: config.paper === "P1" ? "The historical question appears on the non-calculator paper." : "A calculator is permitted, but the core algebraic structure does not require specialist calculator functionality.",
     },
-    parameterDesign: {
-      deliberatelyConstructedValues: true,
-      exactResultDesigned: true,
-      roundingDesigned: false,
-      factorisableDesigned: false,
-      perfectSquareDesigned: false,
-      pythagoreanTripleUsed: false,
-      niceRatioUsed: true,
-      validSolutionCountDesigned: 1,
-      parameterConstraints: [
-        "The determinant of the coefficient matrix must be non-zero.",
-        "At least one genuine coefficient-scaling step should be required before elimination.",
-        "Solutions and any contextual totals must remain exact and appropriate to the source paper's arithmetic burden.",
-        ...(contextual ? ["Context quantities must remain realistic and use consistent units."] : []),
-      ],
-      safeVariationAxes: contextual ? ["coefficient pairs", "unknown values", "derived totals", "context objects", "unit presentation"] : ["coefficient pairs", "constants", "variable symbols", "sign pattern"],
-      invariantRelationships: ["two independent linear equations", `non-zero determinant (${determinant} in the historical instance)`, "one unique ordered pair of variable values"],
-      degeneracyConditionsToAvoid: ["proportional equations", "zero determinant", "trivial identical equations", "unintended no-solution or infinitely-many-solution systems", ...(contextual ? ["negative or contextually impossible quantities unless the context explicitly permits them"] : [])],
-    },
     constraints: {
-      mathematicalDomainConstraints: ["The pair of equations has exactly one solution."],
-      contextValidityConstraints: contextual ? ["Generated unknown values and totals must be plausible for the selected context."] : [],
+      mathematicalDomainConstraints: ["The two historical equations are independent and have exactly one solution."],
+      contextValidityConstraints: contextual ? ["The source context represents meaningful non-negative quantities with consistent units."] : [],
       calculatorModeConstraints: [],
       methodConstraints: config.algebraicallyExplicit ? ["The source explicitly requires an algebraic solution."] : [],
       presentationConstraints: graphical ? ["The final response is the coordinate pair of the common intersection."] : [],
     },
     answerSpecification: {
-      answerForm: contextual ? "MIXED" : graphical ? "EXACT" : "EXACT",
+      answerForm: contextual ? "MIXED" : "EXACT",
       simplestFormRequired: false,
       rationalDenominatorRequired: false,
       positivePowersRequired: false,
@@ -276,7 +249,6 @@ export const createA8QuestionCatalogEntry = (config: A8QuestionConfig): Question
         normalisedPromptStructure: contextual ? ["Introduce a first two-quantity relationship and request an equation.", "Introduce an independent second relationship and request an equation.", config.mode === "CONTEXT_DERIVED_TOTAL" ? "Request a further quantity that depends on the solved values." : "Request both underlying quantities."] : graphical ? ["Supply two linear equations and a supporting intersection graph.", "Require the intersection coordinates to be obtained algebraically."] : ["Present two linear equations.", "Require an algebraic solution."],
         usesPronounReference: contextual,
         lexicalFeatureTags: contextual ? ["simultaneous equations", "context modelling", "multipart scaffold"] : graphical ? ["simultaneous equations", "straight lines", "intersection", "algebraic method"] : ["simultaneous equations", "abstract algebra", "algebraic method"],
-        generatorVariationNotes: contextual ? "Vary context, coefficients and exact target values while deriving every stated total from the intended solution and preserving an independent two-equation system." : "Vary coefficients, signs and exact solution values while preserving a unique system that genuinely requires coefficient scaling.",
       },
       styleNotes: null,
     },
@@ -322,21 +294,6 @@ export const createA8QuestionCatalogEntry = (config: A8QuestionConfig): Question
       informationOrderCanVarySafely: !contextual,
       visualPlacementCanVarySafely: !graphical,
     },
-    generation: {
-      readiness: "READY_FOR_PROTOTYPE",
-      linkedGeneratorFamilyIds: [generatorFamily],
-      invariantMathematics: ["two independent linear equations in two unknowns", "non-zero determinant", "unique exact solution", "at least one coefficient-scaling step before elimination"],
-      variableParameters: contextual ? ["coefficients", "unknown values", "derived totals", "context vocabulary", "unit system"] : ["coefficients", "constants", "variable symbols", "solution signs"],
-      parameterConstraints: ["determinant non-zero", "avoid proportional equations", "avoid trivially identical coefficients when scaling is the assessed first mark", "keep arithmetic aligned with intended paper burden"],
-      safeContextVariations: contextual ? ["cost bundles", "mass bundles", "material-use bundles", "other two-quantity additive contexts"] : [],
-      safeRepresentationVariations: graphical ? ["original procedural straight-line graph consistent with the generated equations"] : [],
-      unsafeVariations: ["dependent equations", "inconsistent equation/context totals", "a generated context with impossible negative quantities", "copying historical prompt wording or source graph geometry"],
-      difficultyControls: ["whether one or both equations require scaling", "least-common-multiple size", "sign pattern", "integer versus simple decimal solution", "whether a contextual post-solution calculation is required"],
-      requiredVisualCapabilities: graphical ? ["procedural straight-line graph renderer"] : [],
-      requiredValidationChecks: ["mark total and part structure remain valid", "determinant non-zero", "equations evaluate exactly at intended solution", "generated totals derive from intended unknown values", "no historical wording/layout reuse", ...(graphical ? ["graph lines and intersection agree with generated algebra"] : [])],
-      provenance: "GENERATION_ANALYSIS",
-    },
-    sourceIsolation: sourceIsolation(),
     review: questionReviewInProgress(graphical, config.paper, config.year, true),
-  };
+  });
 };
