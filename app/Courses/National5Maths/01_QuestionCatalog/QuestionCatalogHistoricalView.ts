@@ -2,7 +2,7 @@ import type { CatalogReviewProfile, CatalogValue } from "../CatalogCoreTypes";
 import type {
   VisualCatalogElement,
   VisualEvidenceProfile,
-} from "../06_VisualAssets/VisualCatalogTypes";
+} from "../CatalogVisualEvidenceTypes";
 import type {
   QuestionCatalogEntry,
   QuestionLanguageProfile,
