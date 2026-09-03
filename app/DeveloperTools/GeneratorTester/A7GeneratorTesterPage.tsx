@@ -11,11 +11,11 @@ import {
   type A7GeneratedQuestion,
   type A7GeneratorFamily,
   type A7GeneratorPaper,
-} from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
+} from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
 import {
   generateA7AssessmentPair,
   type A7GeneratedMarkingScheme,
-} from "../../Courses/National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations";
+} from "../../Courses/National5Maths/05_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations";
 import A7AreaPreview from "./A7AreaPreview";
 
 type FamilyControl = "MIX" | A7GeneratorFamily;
