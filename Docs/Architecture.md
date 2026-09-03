@@ -1,163 +1,59 @@
-# N5 Assessment Tool Architecture
+# N5 Assessment Tool — Current Architecture
 
 ## 1. Purpose
 
-This document defines the current architecture of the N5 Assessment Tool.
+This document describes the architecture of the repository **as it exists now**.
 
-It explains:
+It explains ownership, dependency direction, runtime composition and the principal module boundaries used when tracing or changing behaviour.
 
-- the major application domains;
-- ownership boundaries;
-- dependency direction;
-- routing architecture;
-- Course abstraction;
-- Assessment architecture;
-- Classes architecture;
-- My Assessments architecture;
-- question-generation architecture;
-- generated-document and PDF architecture;
-- application UI architecture;
-- persistence rules;
-- client-boundary rules;
-- naming/discoverability rules;
-- and the standards future structural work must preserve.
+It is not a migration diary and does not preserve obsolete folder structures for historical interest. Historical change is available through Git history and designated history documents.
 
-For the physical location of individual files and folders, see:
+Use:
 
 ```text
+AGENTS.md
+→ mandatory operating, preservation and source-isolation rules
+
 Docs/RepositoryMap.md
+→ physical repository/file map
+
+app/Courses/National5Maths/ARCHITECTURE.md
+→ detailed National 5 Mathematics evidence/generation architecture
 ```
-
-For architectural decisions that should not be casually revisited, see:
-
-```text
-Docs/LockedDecisions.md
-```
-
-For the history of Architecture V2 and earlier migrations, see:
-
-```text
-Docs/RefactorLedger.md
-```
-
-For meaningful product/technical changes after the broad Architecture V2 migration, see:
-
-```text
-Docs/FeatureHistory.md
-```
-
-For future ideas and deferred work, see:
-
-```text
-Docs/FutureFeatures.md
-```
-
-This document describes current architecture, not migration history.
 
 ---
 
-## 2. Current Architectural Phase
+## 2. Architectural Objective
 
-Architecture V2 is substantially complete.
+The repository should be understandable by responsibility.
 
-The repository should now be treated as having an established architecture rather than being in a continuing whole-repository migration.
-
-The normal development pattern is now:
+A developer should be able to answer:
 
 ```text
-established architecture
-        ↓
-feature development
-        ↓
-feature refinement
-        ↓
-small targeted structural improvement where needed
+Where does this behaviour belong?
+What depends on it?
+What does it depend on?
+What public contract does it expose?
+What else could be affected if it changes?
 ```
 
-Architecture V2 remains relevant as historical context because it explains why ownership boundaries exist, but current files should describe the repository in present tense.
+The architecture optimises for clear ownership and explicit wiring rather than the shortest possible imports.
 
-Do not treat old “still to migrate” notes as active requirements unless the current repository still demonstrates the problem.
+The governing naming principle is:
 
----
-
-## 3. Architectural Goal
-
-The repository should be understandable without knowing how it was originally built.
-
-A developer or coding agent should be able to inspect the root source tree and determine:
-
-```text
-app/Assessments/
-→ generic assessment workflow, persistence and compilation
-
-app/Classes/
-→ school-class data and class workflows
-
-app/Courses/
-→ educational and Course-specific knowledge
-
-app/DeveloperTools/
-→ runtime developer utilities
-
-app/Home/
-→ Home-page product experience
-
-app/MyAssessments/
-→ user-facing saved-assessment library
-
-app/UI/Application/
-→ interactive application presentation
-
-app/UI/Documents/
-→ generated-document presentation
-```
-
-The architecture should express responsibility directly rather than requiring historical knowledge.
-
-The same standard now applies at file level: folder context should make concise responsibility-based filenames understandable without relying on implementation details such as whether the file exports a React hook.
+> **Folder = context. Filename = responsibility.**
 
 ---
 
-## 4. Acceptance Criterion Zero: Preserve Behaviour
+## 3. Runtime Source Root
 
-Architecture work must not remove functioning product behaviour merely to produce a cleaner folder structure.
-
-The first acceptance criterion for structural work remains:
-
-> Existing working product behaviour remains working unless a behavioural change is explicitly intended.
-
-Architecture work may:
-
-- move files;
-- rename files;
-- split or combine implementation where ownership becomes clearer;
-- simplify APIs;
-- remove proven dead code;
-- eliminate compatibility aliases once consumers are migrated;
-- improve dependency direction.
-
-Architecture work must not casually:
-
-- delete functioning features;
-- invalidate saved user data;
-- break public URLs;
-- alter generated assessment output;
-- remove active compatibility behaviour;
-- silently change workflow semantics.
-
-Clean architecture is not more important than preserving the product.
-
----
-
-## 5. Runtime Source Model
-
-All runtime application source lives beneath:
+Runtime application source lives beneath:
 
 ```text
 app/
 ```
 
-The top-level runtime source structure is now:
+The top-level runtime owners are:
 
 ```text
 app/
@@ -172,260 +68,94 @@ app/
 └── page.tsx
 ```
 
-There is no separate runtime `src/` tree.
+There is no parallel runtime `src/` tree.
 
-Global application CSS is owned by:
-
-```text
-app/UI/Application/Styles/ApplicationGlobals.css
-```
-
-The root `app/` folder serves two roles:
-
-1. the Next.js App Router source root;
-2. the container for product architecture.
-
-Those roles are separated through naming and ownership rules.
+Each top-level folder owns a product or platform responsibility rather than mirroring a browser URL.
 
 ---
 
-## 6. Product Architecture vs Routing Architecture
+## 4. Product Architecture and Routing Are Separate
 
-Product architecture must not mirror URL structure.
+Public URLs describe navigation.
 
-For example:
+Source folders describe ownership.
+
+The application deliberately keeps route composition thin:
 
 ```text
-/create-assessment/builder
+next.config.ts
+        ↓
+internal route information
+        ↓
+app/page.tsx
+        ↓
+product-owned page component
 ```
 
-is a public URL, while its implementation belongs to:
+`app/page.tsx` imports the major product page entry points and selects one according to the internal route value. It must remain a routing adapter rather than becoming a feature implementation owner.
+
+`app/layout.tsx` owns global application composition and imports the global stylesheet, application settings provider, header and activity rail.
+
+Framework-significant names such as `page.tsx`, `layout.tsx` and `route.ts` should only be used at genuine framework boundaries.
+
+Public routes and persisted routing identifiers should be treated as compatibility contracts unless a deliberate product change says otherwise.
+
+---
+
+## 5. Top-Level Ownership
 
 ```text
-app/Assessments/Creation/AssessmentCreatorPage.tsx
+Assessments
+→ generic assessment workflow, question contracts, persistence and compilation
+
+Classes
+→ class records, class workflow and class coverage
+
+Courses
+→ Course identity, educational knowledge, Course configuration and Course-specific generation
+
+DeveloperTools
+→ runtime developer-only interfaces
+
+Home
+→ Home-page product experience
+
+MyAssessments
+→ saved-assessment library presentation and management workflow
+
+UI/Application
+→ interactive application presentation
+
+UI/Documents
+→ printable/generated-document presentation
 ```
 
-Likewise:
+A consumer may depend on an owner. Consumption does not transfer ownership.
+
+---
+
+## 6. High-Level Dependency Direction
+
+The principal dependency direction is:
 
 ```text
-/my-assessments
-```
-
-maps to a first-class My Assessments-owned implementation beneath:
-
-```text
-app/MyAssessments/
+Course knowledge
+      ↓
+CourseAssessmentConfig / CourseRegistry
+      ↓
+generic Assessment + Classes consumers
 ```
 
 and:
 
 ```text
-/my-classes
-```
-
-maps to a Classes-owned implementation.
-
-The Home route maps to product implementation beneath:
-
-```text
-app/Home/
-```
-
-URLs describe navigation.
-
-Product folders describe ownership.
-
-These are separate concerns.
-
----
-
-## 7. Routing Architecture
-
-The application deliberately keeps the Next.js routing surface small.
-
-Public application URLs are mapped through internal rewrites in:
-
-```text
-next.config.ts
-```
-
-Those rewrites preserve the public browser URL while dispatching into:
-
-```text
-app/page.tsx
-```
-
-`app/page.tsx` is the thin application routing adapter.
-
-Its responsibility is to:
-
-- read internal route information supplied by the rewrite layer;
-- resolve route parameters where required;
-- select the appropriate product-owned page;
-- call `notFound()` when no valid route exists.
-
-It must not accumulate feature implementation.
-
-Global App Router composition remains in:
-
-```text
-app/layout.tsx
-```
-
-A real route-handler boundary may still exist where server behaviour requires one. The PDF generator is an intentional example:
-
-```text
-app/Assessments/Compilation/PDF/generate/route.ts
-```
-
----
-
-## 8. Current Public Route Contract
-
-The route contract includes:
-
-```text
-/
-→ Home
-
-/create-assessment
-→ Assessment Setup
-
-/create-assessment/builder
-→ Assessment Creator
-
-/compile-assessment
-→ Assessment Compilation
-
-/my-assessments
-→ My Assessments
-
-/my-classes
-→ My Classes
-
-/my-classes/:classId
-→ Class Details
-
-/dev/generator-tester
-→ Generator Tester
-```
-
-Structural work should preserve these URLs unless changing a public route is an explicit product decision.
-
-Historical internal rewrite parameter names may remain for compatibility and must not be interpreted as current product branding.
-
----
-
-## 9. Next.js Special Filename Rule
-
-Because product code lives inside Next.js's `app/` tree, framework-significant filenames must be used deliberately.
-
-Examples include:
-
-```text
-page.tsx
-layout.tsx
-route.ts
-loading.tsx
-error.tsx
-not-found.tsx
-template.tsx
-default.tsx
-```
-
-Ordinary product implementations should use descriptive names such as:
-
-```text
-AssessmentCreatorPage.tsx
-AssessmentCompilationPage.tsx
-MyAssessmentsPage.tsx
-MyClassesPage.tsx
-ClassDetailsPage.tsx
-```
-
-A product folder must not gain a `page.tsx` merely because the component visually represents a page.
-
----
-
-## 10. Primary Ownership Domains
-
-The primary runtime ownership domains are:
-
-```text
-Assessments
-Classes
-Courses
-DeveloperTools
-Home
-MyAssessments
-UI
-```
-
-Ownership is based on responsibility.
-
-It is not based on:
-
-- which feature first created a file;
-- which feature currently imports it most often;
-- where a historical version lived;
-- which folder gives the shortest import path.
-
-The owner is the domain whose responsibility the concept represents.
-
-`Home` is a product-area owner for the Home experience, while application-wide reusable visual infrastructure remains under `UI/Application`.
-
----
-
-## 11. Dependency Principle
-
-A consumer may depend on an owner.
-
-An owner should not move merely because another feature consumes it.
-
-Examples:
-
-```text
-Classes
-   ↓
-CourseRegistry
-   ↓
-CourseAssessmentConfig
-```
-
-Classes consumes Course knowledge. That does not make Course configuration part of Classes.
-
-Likewise:
-
-```text
-MyAssessments
+Saved assessment state
       ↓
-SavedAssessments
-```
-
-means the library consumes saved-assessment data. It does not make persistence part of My Assessments.
-
-And:
-
-```text
-MyAssessments
+Assessment Compilation
       ↓
-Assessment Compilation PDF assets
-```
-
-means the library consumes generated PDFs. It does not own PDF generation.
-
----
-
-## 12. Avoid Circular Ownership
-
-Dependencies should form understandable directions.
-
-Preferred conceptual flows include:
-
-```text
-Course knowledge
+generated document / PDF asset
       ↓
-generic Assessment / Classes consumers
+My Assessments preview and other consumers
 ```
 
 and:
@@ -435,942 +165,366 @@ generic document primitives
       ↓
 qualification-family templates
       ↓
-Course-specific documents
+Course-specific document composition
       ↓
-Assessment compilation / consumers
+Assessment Compilation
 ```
 
-and:
-
-```text
-Saved assessment data
-      ↓
-My Assessments library presentation
-```
-
-Application features should not create circular ownership merely to avoid explicit wiring.
-
----
-
-## 13. No Generic Dumping Grounds
-
-Avoid broad folders such as:
-
-```text
-Helpers/
-Utils/
-Shared/
-Common/
-Misc/
-shared-types/
-math-helpers/
-```
-
-unless a durable responsibility genuinely requires one.
-
-A function should normally live beside the domain that owns the concept it implements.
-
-Specific ownership is more valuable than globally short import paths.
-
-The same principle applies to filenames: prefer a concrete responsibility name over a vague `Utils`, `Helpers`, `Common` or `Shared` suffix when the responsibility can be named directly.
+Avoid circular ownership introduced merely to make wiring convenient.
 
 ---
 
 # Assessments
 
-## 14. Assessments Domain
+## 7. Assessments Domain
 
-Generic assessment workflow belongs beneath:
+`app/Assessments/` owns generic assessment behaviour.
 
-```text
-app/Assessments/
-```
-
-The major domain areas now include:
+Current major areas are:
 
 ```text
+AssessmentTypes.ts
 Compilation/
 Creation/
 Questions/
 SavedAssessments/
-AssessmentTypes.ts
 ```
 
-Assessments owns the lifecycle and contracts for creating, saving, generating, previewing and compiling assessments.
+The domain should be Course-aware but not Course-specific.
 
-The user-facing saved-assessment library was deliberately promoted out of this domain into `app/MyAssessments/` because it has become a substantial product area in its own right.
-
-Assessments should remain Course-aware but not Course-specific.
+If a rule describes how one mathematical Course works, it belongs in Courses rather than being embedded in generic Assessment workflow.
 
 ---
 
-## 15. Assessment Types
+## 8. Assessment Creation
 
-Generic assessment concepts belong in:
+`app/Assessments/Creation/` owns the interactive process of configuring and building an assessment.
 
-```text
-app/Assessments/AssessmentTypes.ts
-```
-
-Examples include genuinely Assessment-owned concepts such as papers, assessment questions, question standards, thinking-type filters and generic assessment contracts.
-
-Course identity itself is not Assessment-owned.
-
-`CourseId` belongs to the Courses domain.
-
-Do not create convenience re-exports that obscure ownership.
-
----
-
-## 16. Assessment Creation
-
-Assessment Creation lives beneath:
-
-```text
-app/Assessments/Creation/
-```
-
-It represents the interactive workflow for configuring and building an assessment.
-
-Main page entry points include:
-
-```text
-AssessmentSetupPage.tsx
-AssessmentCreatorPage.tsx
-```
-
-Assessment Creation is divided by visible and behavioural responsibility.
-
-Established areas include responsibilities such as:
-
-```text
-Analysis/
-AssessmentSettings/
-Feedback/
-HUDBar/
-Papers/
-PaperWorkspace/
-Persistence/
-Questions/
-Setup/
-SkillsPanel/
-TopBar/
-```
-
-The current file naming inside these owners is intentionally responsibility-first. Folder context supplies the domain/region; child filenames describe the job performed within that owner.
-
----
-
-## 17. Assessment Setup
-
-Assessment Setup owns configuration gathered before the main Creator workspace.
-
-Responsibilities include concepts such as:
-
-- Course selection;
-- assessment type;
-- paper structure;
-- build priority;
-- mark targets;
-- time targets;
-- assessment name;
-- assessment date;
-- class selection;
-- coverage selection;
-- cover-page options;
-- formula-sheet options.
-
-Setup should work through Course configuration rather than hard-coding National 5 Maths.
-
-Current responsibility names include concepts such as class-coverage state/storage, class loading, Course/paper options, form state, saved choices, target calculations and target state.
-
----
-
-## 18. Assessment Creator
-
-`AssessmentCreatorPage.tsx` is the composition root for the main creation workspace.
-
-It may coordinate:
-
-- feature state;
-- persistence hooks;
-- question state;
-- paper state;
-- preview state;
-- analysis;
-- workspace composition;
-- settings state.
-
-It should not become the permanent owner of every implementation detail.
-
-When a coherent responsibility can be expressed in a dedicated hook, component or module, that implementation should live in its relevant Creation subfolder.
-
-The goal is not the smallest possible page file. The goal is understandable orchestration.
-
----
-
-## 19. TopBar
-
-Assessment Creation's upper-row UI belongs beneath:
-
-```text
-app/Assessments/Creation/TopBar/
-```
-
-The name `TopBar` is reserved for this Assessment Creation region.
-
-It is distinct from the global application `HeaderBar`.
-
-TopBar concerns include assessment metadata, date controls and active/view paper controls.
-
-The current tree uses responsibility names such as `DateField`, `NameField`, `PaperSelector`, `DateCalendarBehaviour`, `NameFieldBehaviour` and `Dimensions` rather than repeating `AssessmentTopBar` in every filename.
-
----
-
-## 20. HUDBar
-
-Assessment Creation's lower status/control area belongs beneath:
-
-```text
-app/Assessments/Creation/HUDBar/
-```
-
-It owns Creator-specific lower status/control presentation such as Marks & Timings, Notes and the Compile action.
-
-Compile readiness/state may evolve independently without moving the control out of the Creation HUD responsibility.
-
-Current files use concise responsibilities such as `CompileButton`, `ProgressPanel`, `ProgressMetrics` and `ProgressRows` within the `HUDBar/` context.
-
----
-
-## 21. SkillsPanel
-
-Skill selection belongs beneath:
-
-```text
-app/Assessments/Creation/SkillsPanel/
-```
-
-SkillsPanel owns interactive skill-selection presentation.
-
-It may:
-
-- display the active Course skill tree;
-- filter skills;
-- display category sections;
-- display concepts;
-- manage difficulty interaction;
-- display class-coverage information.
-
-It must not own the underlying educational definition of National 5 Maths skills. That belongs to Courses.
-
-The folders:
-
-```text
-01-SkillsFilters/
-02-SkillsTree/
-```
-
-are intentionally ordered to mirror the visual/product flow of the page. This is meaningful ordering, not decorative numbering.
-
----
-
-## 22. Paper State and Sitting State
-
-Assessment Creation paper workflow belongs beneath:
-
-```text
-app/Assessments/Creation/Papers/
-```
-
-This includes generic concerns such as:
-
-- active paper;
-- viewed paper;
-- paper targets;
-- intended duration;
-- selection;
-- paper-specific values;
-- sitting date/time state.
-
-Current files distinguish responsibilities such as active/viewed paper selection, intended duration, mark-target calculations/editing/summary, automatic end times, sitting schedule and generic time calculations.
-
-Paper sitting currently supports per-paper date/start/end behaviour with deliberate compatibility and linking rules.
-
-Some internal models still expose P1/P2 compatibility fields because persisted assessment data uses them.
-
-Those compatibility seams are not justification for moving paper ownership or deleting working compatibility.
-
----
-
-## 23. PaperWorkspace
-
-The central Creator workspace belongs beneath:
-
-```text
-app/Assessments/Creation/PaperWorkspace/
-```
-
-It owns the interactive workspace itself.
-
-Responsibilities include:
-
-- Creator workspace layout;
-- panes;
-- preview viewport;
-- zoom/view behaviour;
-- document locking behaviour;
-- split layout;
-- preview composition;
-- preview-owned overlays/status controls.
-
-Preview implementation specific to the workspace belongs beneath:
-
-```text
-PaperWorkspace/Preview/
-```
-
-The shared preview-edge tray implementation belongs beneath:
-
-```text
-PaperWorkspace/Preview/Tray/
-```
-
-The workspace may consume generated-document primitives. It does not own those primitives.
-
----
-
-## 24. Preview Tray
-
-The Assessment Creator PDF/workspace preview includes a shared pull-out tray on the preview edge.
-
-The tray is an Assessment Creation/preview concern and currently provides two conceptual modes:
-
-```text
-Settings
-View
-```
-
-Settings owns paper-content and paper-sitting controls for the assessment being built.
-
-View owns preview/display controls such as Compact, Exam, Answers, HUD visibility and layout/zoom reset actions.
-
-The physical implementation is grouped under `PaperWorkspace/Preview/Tray/`, where files such as `SettingsTab`, `ViewTab`, `ScheduleEditor`, `ClockPicker`, `ViewModeSelector` and `WorkspaceControls` describe their responsibilities without repeating `PreviewTray` in every filename.
-
-This tray must not be confused with global application settings.
-
----
-
-## 25. Assessment Question Workflow
-
-Assessment Creation-specific question workflow belongs beneath:
-
-```text
-app/Assessments/Creation/Questions/
-```
-
-It owns concerns such as question drafts, generated question state, edit state, question controls, Creator-specific question preview and question workflow.
-
-Current responsibility names include `Actions`, `DraftActions`, `DraftDefaults`, `DraftGeneration`, `DraftTypes`, `SelectionSettings`, `Spacing` and `WorkingState`.
-
-Generic question contracts belong higher in:
-
-```text
-app/Assessments/Questions/
-```
-
-Course-specific writers belong under the Course.
-
----
-
-## 26. Assessment Analysis
-
-Assessment quality analysis belongs beneath:
-
-```text
-app/Assessments/Creation/Analysis/
-```
-
-Analysis may measure concerns such as topic distribution, standard distribution, calculator balance, operational/reasoning balance and assessment quality indicators.
-
-Analysis should consume generic Assessment data and Course configuration.
-
-It should not contain hidden National 5 Maths curriculum definitions.
-
----
-
-## 27. Assessment-Specific Settings
-
-Assessment-specific settings belong with Assessment Creation.
-
-They are distinct from global application settings beneath:
-
-```text
-app/UI/Application/
-```
-
-Assessment Preview Tray settings currently provide the active UI for many assessment-specific presentation/sitting controls.
-
-Using similar interaction patterns does not make global settings and assessment settings the same domain.
-
----
-
-## 28. Assessment Persistence
-
-Creation persistence belongs beneath:
-
-```text
-app/Assessments/Creation/Persistence/
-```
-
-Current responsibilities are explicitly visible through filenames such as:
-
-```text
-AutoSaveAssessment.ts
-BrowserStorage.ts
-CourseSelection.ts
-LoadSavedAssessment.ts
-RestoreInitialState.ts
-SaveBrowserState.ts
-SaveStatus.ts
-```
-
-Persistence is an architectural boundary because browser-saved data survives code refactors.
-
-Persisted data must therefore be treated as an external compatibility contract.
-
----
-
-## 29. Persisted Data Rule
-
-Do not rename storage keys, saved fields or persisted contracts merely to make source terminology prettier.
-
-Historical terminology may remain in persisted data even after source ownership has changed.
-
-A source refactor and a persisted-data migration are separate changes.
-
-A persisted-data migration requires deliberate handling of existing users, old localStorage data, defaults, normalisation, optional compatibility fields and migration order.
-
-Legacy wording in persistent storage is acceptable when it protects user data.
-
----
-
-## 30. Saved Assessments
-
-Persistent saved-assessment models belong beneath:
-
-```text
-app/Assessments/SavedAssessments/
-```
-
-The saved-assessment domain owns:
-
-- saved-assessment data contracts;
-- saved-assessment storage;
-- current/active saved-assessment identity;
-- backwards-compatible normalisation where required.
-
-The UI for browsing saved assessments belongs separately beneath:
-
-```text
-app/MyAssessments/
-```
-
-This distinction is intentional:
-
-```text
-SavedAssessments
-→ data and persistence
-
-MyAssessments
-→ user-facing library experience
-```
-
----
-
-## 31. Shared Assessment Questions
-
-Generic question architecture belongs beneath:
-
-```text
-app/Assessments/Questions/
-```
-
-Its responsibilities include generic content, generation, preview and selection contracts.
-
-These modules define contracts generic assessment workflows can use.
-
-They should not encode National 5 Maths-specific generation decisions.
-
----
-
-## 32. Question Content
-
-Generic structured question/answer content belongs beneath:
-
-```text
-app/Assessments/Questions/Content/
-```
-
-This layer provides generic content structures that can be rendered by document/UI consumers.
-
----
-
-## 33. Question Generation Contracts
-
-Generic question/answer generation contracts belong beneath:
-
-```text
-app/Assessments/Questions/Generation/
-```
-
-This layer answers questions such as:
-
-- what input does a generator receive?
-- what output does a generator return?
-- what generic metadata does an answer generator provide?
-
-It does not answer how a National 5 Maths concept should be written. That belongs in the Course implementation.
-
----
-
-## 34. Question Selection Contracts
-
-Generic question-selection models belong beneath:
-
-```text
-app/Assessments/Questions/Selection/
-```
-
-Course configuration may supply tags or metadata consumed by selection.
-
-Compatibility fields may remain while genuine consumers still require them.
-
----
-
-## 35. Shared Question Preview
-
-Shared Assessment question preview belongs beneath:
-
-```text
-app/Assessments/Questions/Preview/
-```
-
-These are Assessment-owned previews, not themselves generic generated-document primitives.
-
-Because they participate in the interactive application preview experience, they may use Application UI typography where appropriate.
-
-The stronger layering rule remains:
-
-```text
-app/UI/Documents/
-```
-
-must not depend on:
-
-```text
-app/UI/Application/
-```
-
----
-
-# Compilation and PDF
-
-## 36. Assessment Compilation
-
-Compilation belongs beneath:
-
-```text
-app/Assessments/Compilation/
-```
-
-Compilation is conceptually separate from Creation.
+It includes responsibilities such as setup, skill selection, paper state, question state, analysis, persistence, workspace preview, assessment-specific settings and status controls.
 
 Creation asks:
 
-> What should this assessment contain?
+> What should this assessment contain, and how should the user build it?
 
-Compilation asks:
-
-> How should the chosen assessment become a final paginated/generated document?
-
-Current major areas include:
-
-```text
-Model/
-Pagination/
-Rendering/
-PDF/
-AssessmentCompilationPage.tsx
-CompilationPageSizes.ts
-CompilationPagination.ts
-```
-
-Compilation owns canonical document modelling, page sizes, pagination, compiled document composition, final rendering and generated PDF workflow.
+Creation may consume generic question contracts and Course configuration. It must not become the owner of Course curriculum knowledge or final document generation.
 
 ---
 
-## 37. Canonical Compilation Model
+## 9. Assessment Questions
 
-The final assessment is represented through an Assessment-owned canonical compilation model beneath:
+`app/Assessments/Questions/` owns generic question contracts and shared question behaviour.
+
+The important separation is:
 
 ```text
-app/Assessments/Compilation/Model/
+Assessments/Questions
+→ generic contracts and generic interaction
+
+Courses/<Course>
+→ educational knowledge and Course-specific manufacture
 ```
 
-`buildAssessmentCompilationDocument.ts` converts saved assessment state into a document representation that compilation renderers can consume.
-
-This boundary is important because browser compilation and server PDF generation should consume the same document meaning rather than independently reconstructing an assessment.
-
-Do not create parallel “preview PDF” and “download PDF” assessment models.
+Course-specific question generation should adapt into Assessment-owned contracts rather than redefining the generic Assessment model.
 
 ---
 
-## 38. Compilation Pagination
+## 10. Saved Assessments
 
-Pagination belongs beneath:
+`app/Assessments/SavedAssessments/` owns persistent assessment data and compatibility handling.
 
-```text
-app/Assessments/Compilation/Pagination/
-```
+Persisted browser data is an external compatibility contract.
 
-Pagination determines how compiled assessment content is grouped into pages while respecting document/page-space rules.
+A source refactor must not casually rename storage keys, persisted fields or stored compatibility identifiers.
 
-Generic pagination should not become a second location for Course-specific educational knowledge.
+The user-facing library does not own this persistence layer.
 
 ---
 
-## 39. Compilation Rendering
+## 11. Assessment Compilation
 
-Compiled assessment rendering belongs beneath:
+`app/Assessments/Compilation/` owns transformation of saved assessment state into final document meaning.
+
+Creation and Compilation are deliberately separate:
 
 ```text
-app/Assessments/Compilation/Rendering/
+Creation
+→ chooses and edits assessment content
+
+Compilation
+→ converts saved content into a canonical paginated document
 ```
 
-The renderer consumes the canonical compilation model and Course/document components to produce the compiled assessment representation.
-
-Creation preview, compilation preview and PDF generation should converge on shared document meaning wherever practical rather than drifting into visually different independent implementations.
+The canonical compilation document should be the shared meaning used by browser compilation and server PDF generation. Do not create independent preview and download document models that can drift apart.
 
 ---
 
-## 40. PDF Generation Architecture
+## 12. Canonical Compilation Flow
 
-PDF generation lives beneath:
-
-```text
-app/Assessments/Compilation/PDF/
-```
-
-The current server pipeline is conceptually:
+The current conceptual flow is:
 
 ```text
 SavedAssessment
       ↓
 buildAssessmentCompilationDocument
       ↓
-AssessmentPdfDocument / shared document rendering
+AssessmentCompilationDocument
       ↓
-standalone HTML + embedded KaTeX assets
+pagination + Course document composition
       ↓
-headless Chromium via Puppeteer
+rendered document
       ↓
-PDF bytes
-      ↓
-PDF generation route response
+PDF generation / preview consumers
 ```
 
-The server route is:
-
-```text
-app/Assessments/Compilation/PDF/generate/route.ts
-```
-
-Server-only browser launch concerns belong with PDF compilation, not with My Assessments.
+`buildAssessmentCompilationDocument.ts` imports saved-assessment identity/state, the Course Registry, Course paper/structure helpers and pagination. It exports `buildAssessmentCompilationDocument`, making it a major troubleshooting boundary when final document content is incorrect.
 
 ---
 
-## 41. PDF Assets and Client Cache
+# Courses
 
-Client-side generated PDF asset/cache behaviour belongs beneath:
+## 13. Courses Domain
+
+`app/Courses/` owns educational and Course-specific knowledge.
+
+Important generic Course infrastructure includes:
 
 ```text
-app/Assessments/Compilation/PDF/Client/
+CourseTypes.ts
+CourseCatalog.ts
+CourseAvailability.ts
+CourseAssessmentConfig.ts
+CourseRegistry.ts
+Documents/
+Papers/
+QuestionExamples/
+Selection/
 ```
 
-The cache represents generated assessment PDF assets, not presentation-specific tile/list UI.
+Concrete Courses live beneath their own folders.
 
-Consumers such as My Assessments should reuse the same generated asset where possible.
-
-The asset identity should account for assessment identity and revision/update state so a changed assessment cannot silently reuse a stale PDF.
+The architecture is intentionally multi-Course. National 5 Mathematics is the present primary development focus, but generic Assessment and Classes code must remain capable of consuming another registered Course without being rewritten around one curriculum.
 
 ---
 
-## 42. PDF Rendering in My Assessments
+## 14. Course Assessment Configuration
 
-My Assessments uses PDF.js to render generated PDF assets into interactive canvas previews.
+`app/Courses/CourseAssessmentConfig.ts` defines the Assessment-facing Course contract.
 
-The library owns the viewer/presentation interaction; it does not own PDF generation.
+It imports generic Assessment types and Course identity, and exports:
 
-Tile previews and large modal previews should reuse the same generated PDF asset rather than launching duplicate PDF generation work.
+```text
+Course configuration types
+paper configuration types
+assessment mode/structure types
+metric policy types
+paper/structure lookup helpers
+paper suitability helpers
+```
 
-List-view preview generation should remain demand-driven rather than generating every library PDF simply because the list is visible.
+Its role is to answer:
+
+> What does generic Assessment workflow need to know about this Course?
+
+It should not become the complete Course domain model. Historical evidence, generators, visuals and Course document implementation remain separately owned.
+
+Authored repository files must remain free of official awarding-body names and acronyms. Any residual branded metadata currently present in Course configuration or developer-only naming is compliance debt to remove in a dedicated source-isolation sweep.
 
 ---
 
-## 43. Compilation and Courses
+## 15. Course Registry
 
-Compilation obtains Course-specific document behaviour through Course-owned document configuration.
+`app/Courses/CourseRegistry.ts` is the central runtime registration point for Course assessment configurations.
 
-It should not become a second location for National 5 Maths document knowledge.
-
-Preferred direction:
+It imports:
 
 ```text
-Assessment Compilation
-        ↓
-Course Documents
-        ↓
-qualification-family templates
-        ↓
-generic document primitives
+CourseId
+CourseAssessmentConfig
+registered concrete Course AssessmentConfig modules
 ```
+
+and exports:
+
+```text
+DEFAULT_COURSE_ID
+COURSE_REGISTRY
+findCourseAssessmentConfigById
+hasCourseAssessmentConfig
+getCourseAssessmentConfigById
+getDefaultCourseAssessmentConfig
+getRegisteredCourseAssessmentConfigs
+```
+
+When a generic feature cannot resolve Course behaviour, this is one of the first wiring points to inspect.
 
 ---
 
-# My Assessments
+# National 5 Mathematics
 
-## 44. My Assessments Domain
+## 16. National 5 Mathematics Content Architecture
 
-The user-facing assessment library is now a first-class product domain beneath:
-
-```text
-app/MyAssessments/
-```
-
-This was promoted from the older Assessment-owned library location because the feature now has substantial independent UI/workflow responsibility.
-
-Current high-level structure includes:
+The canonical Course content workspace is:
 
 ```text
-Actions/
-Display/
-Library/
-ListView/
-Preview/
-TileView/
-Toolbar/
-MyAssessmentsPage.tsx
+app/Courses/National5Maths/
+├── 01_QuestionCatalog/
+├── 02_AnswerCatalog/
+├── 03_SkillCatalog/
+├── 04_QuestionGeneration/
+├── 05_AnswerGeneration/
+├── 06_VisualAssets/
+├── Skills/
+├── AssessmentConfig.ts
+├── CatalogCoreTypes.ts
+├── CatalogVisualEvidenceTypes.ts
+└── ARCHITECTURE.md
 ```
 
-My Assessments owns library presentation and interaction, while consuming saved-assessment persistence and PDF-generation contracts from their real owners.
+Detailed rules live in the local `ARCHITECTURE.md`.
+
+The six ordered layers are meaningful workflow architecture, not decorative numbering.
 
 ---
 
-## 45. Library Responsibilities
-
-My Assessments currently supports two equal library modes:
+## 17. Six-Layer Evidence-to-Generation Flow
 
 ```text
-Tile view
-List view
+01_QuestionCatalog ──┐
+                     ├──► 03_SkillCatalog ───► 04_QuestionGeneration
+02_AnswerCatalog ────┘            │
+                                  └──────────► 05_AnswerGeneration
+
+04 / 05 ──────────────────────────► 06_VisualAssets when required
 ```
 
-Tile view prioritises visual browsing and embedded PDF previews.
+Shared catalogue contracts sit upstream of generation.
 
-List view prioritises rapid scanning, progress comparison and assessment management while retaining explicit Preview functionality.
-
-The selected view mode is a user preference and may be persisted locally.
+Historical evidence is stored once. Skill-level conclusions are synthesised once. Runtime generators consume reviewed synthesis rather than re-analysing individual year files.
 
 ---
 
-## 46. My Assessments Toolbar
+## 18. Historical Catalogue Boundary
 
-Library controls belong beneath:
+`01_QuestionCatalog` owns historical question truth.
 
-```text
-app/MyAssessments/Toolbar/
-```
+`02_AnswerCatalog` owns historical marking truth.
 
-Current controls include search, status filtering, sort selection, result count and tile/list switching.
+These layers may describe mathematical structure, response-space measurements, visual semantics, mark pathways, classification and source locators, but they must obey the source-isolation rules in `AGENTS.md`.
 
-Filtering/sorting rules belong in library-specific modules rather than being buried in presentation components.
+Historical evidence must not be rewritten to agree with project-authored Skills metadata.
 
----
-
-## 47. My Assessments Display Metadata
-
-Formatting and derived display metadata belong beneath:
-
-```text
-app/MyAssessments/Display/
-```
-
-Current modules are:
-
-```text
-LabelsAndDates.ts
-Progress.ts
-```
-
-This includes date/time formatting, Course/type/coverage labels and progress display derivation.
-
-Display derivation must not become a parallel saved-assessment data model.
+Question and matching marking evidence are separate records but one evidence pair.
 
 ---
 
-## 48. Tile View
+## 19. Skill Catalog Boundary
 
-Tile-specific presentation belongs beneath:
+`03_SkillCatalog` is the reviewed cross-corpus synthesis layer.
 
-```text
-app/MyAssessments/TileView/
-```
+It consumes historical-only views of the Question and Answer Catalogues and answers:
 
-Tiles provide:
+> What does the complete historical evidence teach us about this skill?
 
-- full-height scrollable generated-PDF preview;
-- assessment title and Course/type/coverage metadata;
-- overall and paper-specific progress;
-- status;
-- assessment/edited/created dates;
-- pin, duplicate, delete and open actions.
+It owns observed patterns, family analysis, calibration, difficulty mechanisms, marking patterns and controlled generation envelopes.
 
-The tile height is deliberately bounded so the PDF scrolls inside the preview pane rather than expanding the whole library card.
+It must not become a second copy of the historical database.
 
 ---
 
-## 49. List View
+## 20. Generation Boundaries
 
-List-specific presentation belongs beneath:
+`04_QuestionGeneration` manufactures new question instances.
 
-```text
-app/MyAssessments/ListView/
-```
+`05_AnswerGeneration` manufactures marking and worked solutions paired to the exact generated mathematical state.
 
-The list retains the core information/functionality of tile view while optimising density.
+`06_VisualAssets` owns generated visual blueprints, rendering capability and generated-output visual validation.
 
-Preview is intentionally a first-class column/action rather than an obscure secondary icon.
-
-The list should avoid horizontal overflow at the primary desktop target width and should preserve readable column hierarchy.
+Historical visual semantics remain catalogue evidence and do not move downstream merely because a generator later consumes the mathematical meaning.
 
 ---
 
-## 50. Library PDF Preview
+## 21. National 5 Mathematics Runtime Composition
 
-My Assessments large PDF-preview presentation belongs beneath:
+`app/Courses/National5Maths/AssessmentConfig.ts` is the Course-facing composition root.
+
+It imports:
 
 ```text
-app/MyAssessments/Preview/
+Skills/National5MathsSkills
+Skills/BuilderSkillRegistry
+CourseAssessmentConfig type
 ```
 
-The modal viewer uses the same generated PDF asset as the tile/list preview path where possible.
+and exports the concrete Course Assessment configuration.
 
-The preview should support scrolling and clear dismissal through close control, backdrop and Escape.
-
-This is a library presentation concern; PDF generation remains Assessment Compilation-owned.
+The Skills registry applies generator capability to the canonical Skills data before the Course config exposes the tree to generic Assessment consumers.
 
 ---
 
-## 51. Library Actions
+## 22. Builder Skill Registration
 
-User-facing library actions belong beneath:
+`Skills/BuilderSkillRegistry.ts` is the single composition point for migrated skill capability.
+
+It imports individual skill registrations and the generic Skills contract.
+
+It exports:
 
 ```text
-app/MyAssessments/Actions/
+applyBuilderSkillRegistrations
+NATIONAL5_MATHS_BUILDER_SKILL_REGISTRATION_IDS
 ```
 
-This includes interaction such as delete confirmation UI where the action is specific to the library experience.
+Registrations must not chain through one another. Adding a new migrated skill should mean adding its own registration rather than editing a previously migrated skill.
 
-The actual persistent mutation still uses SavedAssessments-owned storage contracts.
+---
+
+## 23. Question Generation Registry
+
+`04_QuestionGeneration/Registry.ts` is the canonical Builder-facing question dispatch boundary.
+
+It imports generic Assessment generation/selection contracts plus registered concept modules.
+
+It exports the principal dispatch/selection functions:
+
+```text
+conceptSelectionText
+getConceptFromSelection
+getAvailableDifficultiesForConcept
+isDifficultyEligibleForConcept
+getEligibleDifficultiesForConcept
+buildGenerated
+buildSkillLinks
+```
+
+When a concept appears in the Skills Tree but does not generate correctly, this registry and the relevant concept module are primary troubleshooting points.
+
+Some not-yet-migrated concept modules still enter through `National5MathsLegacy`. That compatibility tree is not the preferred owner for new work and should not be expanded merely for convenience.
+
+---
+
+## 24. Current Compatibility Seam
+
+`tsconfig.json` currently contains a targeted alias that resolves the historical National 5 Mathematics alias to `National5MathsLegacy`.
+
+The normal root alias remains separate.
+
+This means new clean-workspace National 5 Mathematics code should not assume that the historical Course alias points at the six-layer workspace.
+
+Use deliberate imports and inspect alias resolution when troubleshooting unexpected module selection.
+
+The compatibility tree exists to keep untouched runtime generators working while individual skills are migrated into the canonical architecture. New generator development should target the six-layer workspace.
 
 ---
 
 # Classes
 
-## 52. Classes Domain
+## 25. Classes Domain
 
-Class-owned functionality belongs beneath:
+`app/Classes/` owns class records, class persistence, class pages and coverage behaviour.
 
-```text
-app/Classes/
-```
+Classes may reference a Course identity but does not own curriculum definitions.
 
-Classes owns:
-
-- class records;
-- class names and metadata;
-- Course association;
-- completed skill coverage;
-- class persistence;
-- My Classes;
-- Class Details;
-- My Classes-specific UI;
-- class coverage presentation.
-
-Current high-level structure is:
-
-```text
-app/Classes/
-├── Coverage/
-├── MyClasses/
-├── Records/
-├── ClassData.ts
-├── ClassDetailsPage.tsx
-└── MyClassesPage.tsx
-```
-
----
-
-## 53. Class Types
-
-Class-specific contracts belong in the Classes domain, currently centred on:
-
-```text
-app/Classes/ClassData.ts
-```
-
-A Class may reference `CourseId`, but does not own Course identity.
-
-Course identity remains defined by Courses.
-
----
-
-## 54. Class Records
-
-Class records, browser persistence and collection state belong beneath:
-
-```text
-app/Classes/Records/
-```
-
-Current responsibilities are visible through:
-
-```text
-BrowserStorage.ts
-Collection.ts
-Normalisation.ts
-```
-
-This replaces the older generic `State/` naming in current architecture. Historical references to `Classes/State/` may remain in migration history where they accurately describe an earlier state.
-
-Class storage compatibility should be preserved when existing browser data depends on it.
-
----
-
-## 55. Class Coverage
-
-Class coverage belongs beneath:
-
-```text
-app/Classes/Coverage/
-```
-
-Current responsibilities include assessment class selection, selected coverage items/details, question examples, skill/progress derivation and the coverage skills tree.
-
-Class coverage must resolve educational skills through Course configuration.
-
-Preferred flow:
+Educational structure should flow through:
 
 ```text
 SchoolClass.courseId
@@ -1382,1703 +536,279 @@ CourseAssessmentConfig
 skillTree
 ```
 
-Classes should not directly import concrete National 5 Maths skills merely because National 5 Maths is currently the most complete Course.
+Generic Classes code should not import a concrete Course's skills merely because that Course is currently the most complete.
 
 ---
 
-# Courses
+## 26. Privacy Boundary
 
-## 56. Courses Domain
+Pupil identity should not need to be stored by the application server merely to support class/assessment workflow.
 
-Course-specific educational knowledge belongs beneath:
+Where pupil identity becomes necessary, prefer non-identifying IDs and teacher-owned/local mapping where practical.
+
+Future OCR, assisted-marking or analytics work must not casually weaken this privacy boundary.
+
+Specific future features belong in backlog documentation until implementation requires real architecture.
+
+---
+
+# Home and My Assessments
+
+## 27. Home
+
+`app/Home/` owns the Home-page product experience.
+
+Reusable global presentation remains `UI/Application`-owned even when Home consumes it.
+
+---
+
+## 28. My Assessments
+
+`app/MyAssessments/` owns the user-facing saved-assessment library.
+
+It may browse, filter, sort, preview and manage assessments, but it does not own:
 
 ```text
-app/Courses/
+SavedAssessment persistence
+PDF generation
+Course educational knowledge
 ```
 
-Courses owns concepts such as:
-
-- Course identity;
-- Course registration;
-- assessment configuration;
-- skills;
-- qualification-specific rules;
-- Course documents;
-- historical exam evidence;
-- question writers;
-- answer writers.
-
-The Courses domain is the principal boundary preventing generic Assessment and Classes workflows from becoming National-5-Maths-specific.
-
----
-
-## 57. Course Identity
-
-Course identity belongs in the Courses domain.
-
-`CourseId` must have one canonical owner.
-
-Do not recreate aliases such as `AssessmentCourseId` or re-export Course identity from unrelated domains merely to shorten imports.
-
----
-
-## 58. Course Catalog
-
-Selectable Course catalogue information belongs in:
-
-```text
-app/Courses/CourseCatalog.ts
-```
-
-This represents user-facing Course availability/metadata.
-
-It is distinct from runtime assessment configuration.
-
----
-
-## 59. Course Registry
-
-Course assessment configurations are registered through the Course Registry.
-
-Canonical terminology should remain consistent with the current registry API.
-
-Historical shorter aliases should not be reintroduced without a real compatibility need.
-
----
-
-## 60. Course Assessment Config
-
-The generic contract between Courses and Assessment workflows lives in:
-
-```text
-app/Courses/CourseAssessmentConfig.ts
-```
-
-Its purpose is to answer:
-
-> What does a generic Assessment workflow need to know about this Course?
-
-This contract allows generic application code to consume Course knowledge without knowing the concrete Course implementation.
-
----
-
-## 61. Course Selection
-
-Course-selection persistence belongs beneath:
-
-```text
-app/Courses/Selection/
-```
-
-Ownership belongs to Courses because the persisted value represents Course identity/selection.
-
-Historical storage keys may remain where required for backwards compatibility.
-
----
-
-## 62. Course Paper Rules
-
-Generic access to Course paper behaviour belongs beneath:
-
-```text
-app/Courses/Papers/
-```
-
-This boundary prevents Assessment Creation from hard-coding Course-specific paper assumptions where a Course contract can supply them.
-
----
-
-## 63. National 5 Mathematics
-
-National 5 Mathematics implementation belongs beneath:
-
-```text
-app/Courses/National5Maths/
-```
-
-Major responsibilities include:
-
-```text
-AssessmentConfig.ts
-Skills/
-Documents/
-ExamQuestionAndAnswerCatalog/
-QuestionAndAnswerGeneration/
-```
-
-National 5 Maths-specific knowledge should normally remain inside this domain.
-
----
-
-## 64. National 5 Maths Skills
-
-The canonical National 5 Mathematics skill tree belongs beneath:
-
-```text
-app/Courses/National5Maths/Skills/
-```
-
-Generic consumers receive that structure through Course configuration.
-
-They should not know the concrete skills file path unless they are Course-owned implementation.
-
----
-
-## 65. Historical Exam Evidence
-
-Historical National 5 Mathematics exam questions and marking schemes belong beneath:
-
-```text
-app/Courses/National5Maths/ExamQuestionAndAnswerCatalog/
-```
-
-The catalogue represents evidence from historical examination material.
-
-It is not the same thing as generated-question implementation.
-
----
-
-## 66. Question and Answer Generation
-
-Course-specific generation implementation belongs beneath:
-
-```text
-app/Courses/National5Maths/QuestionAndAnswerGeneration/
-```
-
-The high-level distinction is:
-
-```text
-QuestionWriting/
-AnswerWriting/
-AnswerMethods/
-```
-
-This terminology should be preferred over historical ambiguous generation names when referring to current architecture.
-
----
-
-## 67. Question Writing
-
-Question-writing logic belongs beneath the Course's QuestionWriting area.
-
-It owns concept selection, writer registration, concept modules and concept-specific question writers.
-
-Concept modules may adapt Course evidence into generation behaviour.
-
-They remain part of the Course because they encode educational knowledge.
-
----
-
-## 68. Answer Writing
-
-Answer-writing implementation is distinct from question writing even when both are invoked by one assessment-generation flow.
-
-This separation allows an answer implementation to evolve without embedding all answer logic inside question writers.
-
----
-
-## 69. Answer Methods
-
-Course-specific answer-method knowledge remains Course-owned.
-
-Generic Assessment code may consume answer-generation contracts, but the educational method itself remains beneath the Course.
-
----
-
-## 70. Question Bank Architecture Is Retired
-
-The historical:
-
-```text
-app/question-bank/
-```
-
-architecture is not part of the current system and must not be recreated.
-
-Live concept adapters were migrated to Course-owned question-writing architecture.
-
-Future question-generation work should extend the Course architecture rather than creating a parallel Question Bank.
-
----
-
-## 71. Adding a New Course
-
-A new Course belongs beneath:
-
-```text
-app/Courses/<Course>/
-```
-
-Only create folders required by real implementation.
-
-Do not pre-create empty structures for future Courses, future document systems or future generation systems.
-
-When implementation exists, expose it through generic Course contracts where appropriate.
-
-The architecture should grow from real responsibilities rather than speculative placeholders.
-
----
-
-# UI
-
-## 72. UI Domain
-
-Presentation infrastructure belongs beneath:
-
-```text
-app/UI/
-```
-
-The most important visual boundary is:
-
-```text
-UI/
-├── Application/
-└── Documents/
-```
-
-These represent different presentation systems.
-
----
-
-## 73. Application UI
-
-Interactive product UI infrastructure belongs beneath:
-
-```text
-app/UI/Application/
-```
-
-Current areas include:
-
-```text
-Colours/
-Components/
-HeaderBar/
-Motion/
-Settings/
-SettingsDrawer/
-Shell/
-Styles/
-Theme/
-Typography/
-```
-
-Home-page product implementation is owned by `app/Home/`, not an `Application/Home/` subfolder. Home may consume reusable Application UI where appropriate.
-
-Application UI is allowed to depend on browser interaction where required.
-
-A remaining compatibility folder does not automatically become the preferred owner for new work.
-
----
-
-## 74. Global Application Shell
-
-The global shell is composed in:
-
-```text
-app/layout.tsx
-```
-
-using Application-owned pieces including:
-
-```text
-HeaderBar
-ApplicationActivityRail
-ApplicationShellTokens
-SettingsProvider
-```
-
-The current shell establishes a global header row and a body row containing the activity rail plus page content.
-
-The Activity Rail is global application chrome and is not specific to Assessment Creation.
-
-Global panel overlays should not structurally resize feature content unless that interaction is explicitly intended.
-
----
-
-## 75. Global Settings
-
-Global appearance/settings functionality belongs beneath:
-
-```text
-app/UI/Application/Settings/
-```
-
-and associated Application UI ownership.
-
-Global settings are surfaced through the Application Shell/Activity Rail.
-
-They must remain separate from Assessment-specific Settings/View controls in the Creator preview tray.
-
-Older SettingsDrawer-owned compatibility pieces may remain where still consumed, but new global settings architecture should follow current Application Settings/Shell ownership.
-
----
-
-## 76. Application Theme
-
-Global application theming belongs beneath:
-
-```text
-app/UI/Application/Theme/
-```
-
-Theme infrastructure may provide colour mode, appearance preference, accent colour and semantic visual tokens.
-
-Current application appearance supports dark, soft-grey, light, system and custom modes through the global settings system.
-
-Compatibility aliases may remain while they have genuine active consumers.
-
----
-
-## 77. Application Typography
-
-Interactive application typography belongs beneath:
-
-```text
-app/UI/Application/Typography/
-```
-
-Application typography tokens are appropriate for controls, metadata, application headings, Creator UI, Classes UI and interactive previews where the styling belongs to the application.
-
-They should not automatically become the typography source for generated documents.
-
----
-
-## 78. Current Workbench UI Direction
-
-The established application UI direction is compact and desktop/workbench-oriented.
-
-Characteristics include:
-
-- restrained dark/neutral surfaces;
-- thin borders;
-- modest 4–6px radii for most controls and panels;
-- compact control heights;
-- restrained blue accent;
-- subtle surface hierarchy rather than large card chrome;
-- deliberate alignment and information density;
-- consistent behaviour across appearance modes.
-
-This is product UI guidance, not generated-document styling guidance.
-
----
-
-## 79. Generated Document UI
-
-Generated-document presentation belongs beneath:
-
-```text
-app/UI/Documents/
-```
-
-This layer represents printable/document-like output.
-
-It should remain conceptually independent of interactive application chrome.
-
-Document output must not rely on global navigation, activity rails, settings drawers, hover behaviour or application-only layout assumptions.
-
----
-
-## 80. Application UI Must Not Own Documents
-
-A generated assessment may be previewed inside the application.
-
-That does not make document layout part of Application UI.
-
-The preview container may be Assessment/MyAssessments-owned.
-
-The document being rendered inside it remains Document/Course/Compilation-owned.
-
-This distinction prevents the printable document system becoming coupled to editor/library chrome.
-
----
-
-## 81. Document Layering
-
-Generated documents follow this layering model:
-
-```text
-generic document primitives
-        ↓
-qualification-family templates
-        ↓
-Course-specific documents
-        ↓
-Assessment compilation/consumers
-```
-
-Each layer should add only the knowledge it owns.
-
----
-
-## 82. Generic Document Primitives
-
-Generic document primitives live beneath:
-
-```text
-app/UI/Documents/Components/
-```
-
-They should remain qualification-agnostic where practical.
-
----
-
-## 83. Document Layout Utilities
-
-Generic document measurement/layout logic belongs beneath:
-
-```text
-app/UI/Documents/Layout/
-```
-
-This should provide generic conversion/layout behaviour rather than National 5 Maths semantics.
-
----
-
-## 84. Qualification-Family Templates
-
-National Qualifications presentation patterns belong beneath:
-
-```text
-app/UI/Documents/Templates/NationalQualifications/
-```
-
-This layer may encode formatting common to the qualification family.
-
-It should not encode National 5 Maths curriculum knowledge.
-
----
-
-## 85. Course Documents
-
-National 5 Maths document composition belongs beneath:
-
-```text
-app/Courses/National5Maths/Documents/
-```
-
-Course Documents may compose:
-
-```text
-generic Document primitives
-+
-National Qualifications templates
-+
-National 5 Maths-specific content
-```
-
-This includes cover pages, formula sheets, question-page composition and question-spacing rules.
-
----
-
-## 86. Document Dependency Boundary
-
-The generated-document system must not depend on interactive Application UI.
-
-Specifically:
-
-```text
-app/UI/Documents/
-```
-
-should not import from:
-
-```text
-app/UI/Application/
-```
-
-If generated documents require typography, spacing or colours, document-appropriate ownership should be established rather than silently depending on application theme.
-
----
-
-# Runtime Boundaries and Development Rules
-
-## 87. Client Boundaries
-
-`"use client"` marks a boundary between Server and Client Component graphs.
-
-It should therefore be placed deliberately.
-
-A nested file does not need its own `"use client"` merely because it contains hooks, browser APIs or event handlers if it is imported only beneath an existing client boundary.
-
-Do not add `"use client"` defensively.
-
----
-
-## 88. Why Client-Boundary Discipline Matters
-
-Unnecessary client directives:
-
-- enlarge client boundaries;
-- obscure Server/Client ownership;
-- make behaviour harder to reason about;
-- may create Next.js serialisation warnings for function props;
-- reduce the architectural value of Next.js boundaries.
-
-Prefer a small number of deliberate client entry points.
-
----
-
-## 89. Providers
-
-Global providers should exist only when they represent genuinely global state or environment.
-
-Current global examples include application settings/theme infrastructure.
-
-Do not introduce a new global provider simply to avoid passing a small explicit dependency.
-
-Prefer local ownership where state is local.
-
----
-
-## 90. State Management
-
-The architecture does not introduce a new external state-management library.
-
-Existing React state, hooks, contexts and persistence remain appropriate where they fit.
-
-A state-library migration would be a separate architectural decision requiring a demonstrated problem.
-
-Do not add Redux, Zustand or another global state system merely as routine cleanup.
-
----
-
-## 91. Explicit Dependencies Over Hidden Coupling
-
-Prefer explicit component/hook dependencies over hidden browser-event communication.
-
-Custom browser events may remain while actively required for compatibility or existing wiring.
-
-They should not be deleted until a replacement path exists.
-
-When replacing hidden event coupling:
-
-```text
-introduce explicit path
-→ switch all consumers
-→ verify behaviour
-→ remove event bridge
-```
-
-Do not simply delete an event because the architecture looks cleaner without it.
-
----
-
-## 92. Developer Tools
-
-Runtime developer-only functionality belongs beneath:
-
-```text
-app/DeveloperTools/
-```
-
-It is part of the application source tree because these tools execute inside the application runtime.
-
-Developer Tools should not contain production educational ownership merely because a developer tool consumes it.
-
----
-
-## 93. Repository Tooling
-
-There is currently no permanent repository-level `Tools/` tree.
-
-Historical migration tooling used during Architecture V2 was removed after its work was completed and verified.
-
-Repository tooling, if introduced later, must have a specific responsibility and must remain conceptually separate from runtime `app/DeveloperTools/`.
-
-Runtime application code must never depend on historical migration tooling.
-
----
-
-## 94. Architecture V2 History
-
-Architecture V2 migration history is preserved through:
-
-```text
-Docs/RefactorLedger.md
-Git history
-```
-
-Historical migration artefacts and paths are evidence of how the repository arrived at the current state.
-
-They are not precedent for new runtime architecture.
-
-The current architecture files take precedence over historical migration wording when describing ownership today.
-
----
-
-## 95. Naming Architecture
-
-Names should describe current product concepts and concrete responsibilities.
-
-Preferred terms include:
-
-```text
-Assessment Creation
-Assessment Compilation
-My Assessments
-HeaderBar
-ActivityRail
-TopBar
-HUDBar
-SkillsPanel
-PaperWorkspace
-Preview Tray
-Drawer
-Popover
-QuestionWriting
-AnswerWriting
-ExamQuestion
-ExamMarkingScheme
-CourseAssessmentConfig
-```
-
-The governing file/folder naming rule is:
-
-> **Folder = context. Filename = responsibility.**
-
-Implications:
-
-- a filename does not begin with `use` merely because it exports a React hook;
-- exported hook function names still follow React's `useSomething` convention;
-- child filenames should not mechanically repeat the complete parent-folder name;
-- context may remain in a filename when removing it would make the name ambiguous or misleading;
-- vague implementation names such as `Utils`, `Helpers`, `Common`, `Shared` and `Misc` should be replaced by the concrete responsibility where possible;
-- generic folders such as `Components/` or `State/` should not be introduced when a durable responsibility can be named instead;
-- public routes, persistence keys and stored compatibility fields are not renamed merely to match source filenames.
-
-The discoverability test is:
-
-> If somebody unfamiliar with the implementation sees only the folder path and filename, can they make a sensible guess about what the file is responsible for?
-
-Avoid reviving superseded implementation terminology simply because old files, storage keys or internal route parameters still contain it.
-
-Do not introduce historical product/brand terminology into new user-facing or source naming.
-
----
-
-## 96. Builder Terminology
-
-The public URL:
-
-```text
-/create-assessment/builder
-```
-
-and some persisted/internal compatibility keys may continue to contain `builder`.
-
-That does not mean source architecture should return to:
-
-```text
-Builder/
-BuilderComponents/
-BuilderLogic/
-```
-
-The current source concept is Assessment Creation.
-
-Persisted/public compatibility wording and source architecture terminology are allowed to differ.
-
----
-
-## 97. Type Ownership
-
-Types should live with the concept that owns them.
-
-Examples:
-
-```text
-Course identity/types
-→ Courses
-
-Class data
-→ Classes
-
-generic assessment types
-→ Assessments
-
-question content contracts
-→ Assessments/Questions/Content
-
-generation contracts
-→ Assessments/Questions/Generation
-```
-
-Do not create a global `shared-types` bucket merely because several domains consume a type.
-
-Multi-domain consumption does not remove ownership.
-
----
-
-## 98. Compatibility Aliases
-
-Compatibility aliases are acceptable only when they serve an active compatibility purpose.
-
-Before deleting one:
-
-```text
-find definition
-→ find imports
-→ find indirect consumers
-→ check persisted data
-→ check dynamic access
-→ migrate consumers
-→ verify
-→ delete alias
-```
-
-An alias with no consumers can be removed.
-
-An alias with active persistence/backwards-compatibility responsibilities cannot be removed merely because its name looks old.
-
----
-
-## 99. Dead Code Standard
-
-Code is not dead merely because no obvious static import appears in one search.
-
-Before deletion, check:
-
-- direct imports;
-- re-exports;
-- registry references;
-- dynamic imports;
-- string-based lookup;
-- persistence contracts;
-- runtime events;
-- Course registration;
-- route dispatch;
-- generated-data consumers.
-
-Delete only after the ownership/consumer investigation supports it.
-
----
-
-## 100. Feature Development Pattern
-
-The default development pattern after Architecture V2 is:
-
-```text
-UNDERSTAND CURRENT BEHAVIOUR
-        ↓
-IDENTIFY OWNER
-        ↓
-DEFINE SMALL PASS
-        ↓
-IMPLEMENT
-        ↓
-TYPE-CHECK
-        ↓
-BROWSER TEST
-        ↓
-BUILD WHEN APPROPRIATE
-        ↓
-DOCUMENT MEANINGFUL CHANGE
-```
-
-Incremental UI passes are preferred when visual behaviour is being refined.
-
-Do not destabilise unrelated systems during a focused feature pass.
-
----
-
-## 101. Refactor Migration Pattern
-
-When a genuine structural migration is still required, retain the proven pattern:
-
-```text
-AUDIT
-  ↓
-OWNER
-  ↓
-WRITE NEW
-  ↓
-TYPE-CHECK
-  ↓
-SWITCH CONSUMER
-  ↓
-VERIFY
-  ↓
-BROAD GREP
-  ↓
-DELETE OLD
-  ↓
-VERIFY AGAIN
-  ↓
-DOCUMENT
-  ↓
-COMMIT
-```
-
-The principle remains:
-
-> Do not destroy the old path until the new path is proven.
-
-A purely mechanical naming pass may instead use a clear rename map plus import-path repair, provided behaviour/symbol names are not accidentally changed and the full graph is verified afterwards.
-
----
-
-## 102. Verification Standard
-
-Structural source changes should normally be followed by:
-
-```bash
-npx tsc --noEmit
-npm run lint
-npm run build
-git --no-pager diff --check
-```
-
-During focused UI iteration, TypeScript plus lint/browser verification may be sufficient between passes, but infrastructure/release-level completion should reach a clean production build.
-
-When route/framework changes leave stale `.next` output, regenerate or clear it as appropriate before rewriting correct source.
-
----
-
-## 103. Browser Verification
-
-Compilation and type-checking are necessary but not sufficient for visible application changes.
-
-Browser smoke testing should cover the affected workflow and, where appropriate:
-
-```text
-Home
-Assessment Setup
-Assessment Creator
-question generation
-paper switching
-Preview Tray
-assessment preview
-application settings
-saved assessment behaviour
-Compilation
-PDF generation/download
-My Assessments tile view
-My Assessments list view
-My Assessments PDF preview
-My Classes
-Class Details
-```
-
-When a browser/server boundary fails, DevTools Network/Console and the development server stack trace should be used to isolate the failing stage.
-
-Generated document pages/PDFs should be visually checked where rendering infrastructure changed.
-
----
-
-## 104. Course Independence Test
-
-A useful architecture test is:
-
-> Could another Course be added without copying and rewriting the entire Assessment workflow?
-
-If the answer is no because generic Assessment code contains National 5 Maths-specific knowledge, ownership is probably wrong.
-
-Course-specific knowledge should move toward the Course boundary.
-
----
-
-## 105. Classes Independence Test
-
-A useful Classes architecture test is:
-
-> Can a Class point to a different registered Course without Classes importing that Course's concrete skills implementation?
-
-If not, Classes is too tightly coupled to one Course.
-
-Use Course Registry/configuration boundaries.
-
----
-
-## 106. Document Independence Test
-
-A useful document architecture test is:
-
-> Could the generated assessment document be rendered without relying on the interactive application theme/navigation system?
-
-If not, the Documents layer is probably too tightly coupled to Application UI.
-
-Generated documents should own or receive their own presentation requirements.
-
----
-
-## 107. Creation Independence Test
-
-A useful Assessment Creation test is:
-
-> Can the Creator obtain educational rules through Course configuration rather than importing one Course's concrete implementation everywhere?
-
-If not, Course knowledge is leaking into generic workflow.
-
----
-
-## 108. My Assessments Independence Test
-
-A useful My Assessments test is:
-
-> Can the library display/manage saved assessments without becoming the owner of persistence or PDF generation?
-
-If not, library presentation is leaking into lower-level data/compilation ownership.
-
-The preferred direction is:
+Preferred direction:
 
 ```text
 MyAssessments
-   ↓
-SavedAssessments / Compilation PDF contracts
+      ↓
+SavedAssessments + Compilation/PDF contracts
 ```
 
 not the reverse.
 
 ---
 
-## 109. Feature Folder Standard
+# UI and Documents
 
-Create a new subfolder when it represents a coherent, durable responsibility.
+## 29. Application UI
 
-Do not create folders solely to:
+`app/UI/Application/` owns interactive application presentation such as global shell, header, activity rail, settings, theme, typography and reusable controls.
 
-- reduce the number of files visible in Explorer;
-- mirror another feature;
-- reserve space for future work;
-- encode arbitrary/decorative numbering;
-- make every file have a unique directory.
+The established visual direction is compact, desktop/workbench-oriented and information-dense, with restrained surfaces, modest radii, thin borders and consistent appearance behaviour.
 
-Meaningful ordered folders are allowed where order itself communicates real product, visual or curriculum structure.
-
-Many small coherent files are acceptable.
-
-Micro-fragmentation without ownership value is not.
+New application UI should default toward the existing visual language unless an intentional redesign is requested.
 
 ---
 
-## 110. Visible-Area Structure
+## 30. Generated Documents
 
-For complex UI features, grouping by visible product area is preferred when that area represents a real responsibility.
+`app/UI/Documents/` owns reusable printable/document presentation.
 
-Examples include:
+Generated documents must remain independent of application navigation, drawers, hover behaviour and application-only styling assumptions.
+
+The document dependency direction is:
 
 ```text
-TopBar/
-HUDBar/
-SkillsPanel/
-PaperWorkspace/
-TileView/
-ListView/
-Toolbar/
-Shell/
-```
-
-This makes repository navigation align with the UI vocabulary used during development.
-
----
-
-## 111. Meaningful vs Decorative Numbering
-
-Folder numbering should not be introduced merely to force arbitrary Explorer ordering.
-
-Numbering is valid when the order itself carries product/curriculum meaning.
-
-The current intentional example is:
-
-```text
-app/Assessments/Creation/SkillsPanel/
-├── 01-SkillsFilters/
-└── 02-SkillsTree/
-```
-
-The ordering mirrors the webpage logic: filters appear before the Skills Tree. Preserve this unless the product structure itself changes.
-
-Future architecture should continue to prefer descriptive ownership over decorative ordering.
-
----
-
-## 112. No Placeholder Architecture
-
-Do not create empty architecture for future features.
-
-Examples:
-
-```text
-no empty Higher Maths Course tree
-no empty Advanced Higher tree
-no speculative OCR domain
-no future AI-marking source folders
-no empty document-template hierarchies
-```
-
-Future concepts should be recorded in:
-
-```text
-Docs/FutureFeatures.md
-```
-
-Create runtime architecture when real implementation needs an owner.
-
----
-
-## 113. Future OCR / Assisted Marking Work
-
-OCR and assisted-marking concepts remain valid future product ideas.
-
-Their conceptual existence is not sufficient reason to create placeholder runtime folders.
-
-When implementation begins:
-
-1. determine actual responsibilities;
-2. establish ownership based on real behaviour;
-3. introduce the smallest coherent architecture required;
-4. preserve the privacy boundary described below.
-
----
-
-## 114. Privacy Boundary
-
-The class/assessment architecture should preserve the privacy model that pupil names do not need to be stored by the application server.
-
-Where pupil identity is required, architecture should favour non-identifying IDs and local teacher-owned mapping where appropriate.
-
-Future data architecture must not casually weaken that boundary.
-
----
-
-## 115. Current Source vs Historical Evidence
-
-The repository contains current runtime source and historical migration evidence.
-
-Current source defines architecture.
-
-Historical files explain how the current source was reached.
-
-Never infer a preferred modern pattern merely because a legacy migration entry used it.
-
----
-
-## 116. Documentation Roles
-
-Documentation has distinct responsibilities:
-
-```text
-Docs/Architecture.md
-→ current architecture and dependency principles
-
-Docs/RepositoryMap.md
-→ current physical locations and owners
-
-Docs/LockedDecisions.md
-→ durable decisions that should not be casually reopened
-
-Docs/RefactorLedger.md
-→ historical Architecture V2 migration work
-
-Docs/FeatureHistory.md
-→ post-refactor feature and technical evolution
-
-Docs/FutureFeatures.md
-→ future ideas, planned work and deferred concepts
-
-Docs/ChatGPTWorkflow.md
-→ safe AI-assisted development procedure
-
-AGENTS.md
-→ first-read repository instructions for coding agents
-```
-
-Do not turn one document into all of the others.
-
-Documentation reconciliation is additive/information-preserving by default: preserve historical truth, update current truth, add new decisions, and explicitly supersede contradictory obsolete instructions.
-
----
-
-## 117. Architecture V2 Completion State
-
-Architecture V2 achieved its broad objective when:
-
-- runtime source gained clear owners;
-- duplicated legacy architecture was removed;
-- route structure stopped duplicating product structure;
-- generic Assessment workflow was separated from Course knowledge;
-- Classes resolved Course skills through Course abstraction;
-- question writing and answer writing became Course-owned;
-- historical exam evidence was separated from generation implementation;
-- generated Documents were separated from Application UI;
-- shared types gained explicit owners;
-- redundant compatibility aliases were removed where safe;
-- active persisted-data compatibility was preserved;
-- client boundaries became deliberate;
-- runtime Developer Tools and repository tooling were distinguished;
-- obsolete parallel source roots were removed;
-- documentation described the current repository;
-- and the existing website continued to function.
-
-Those outcomes are now the baseline, not a future checklist.
-
----
-
-## 118. Current Definition of Good Architecture
-
-The goal is not architectural novelty.
-
-The goal is a repository whose structure communicates the product clearly enough that feature development can continue without recreating the confusion Architecture V2 removed.
-
-A strong current change should therefore:
-
-- fit an obvious owner;
-- preserve dependency direction;
-- reuse existing lower-level contracts instead of duplicating them;
-- keep persistence compatibility deliberate;
-- avoid unnecessary client boundaries;
-- avoid speculative folder structure;
-- keep UI and generated-document presentation distinct;
-- use folder/file names that reveal responsibility without implementation archaeology;
-- and update the appropriate living documentation when the product meaningfully changes.
-
----
-
-## 119. Responsibility-First File Discoverability
-
-The repository-wide naming pass completed on 28 August 2026 established file discoverability as part of architecture rather than cosmetic style.
-
-Examples of the resulting pattern include:
-
-```text
-Persistence/AutoSaveAssessment.ts
-Persistence/RestoreInitialState.ts
-Questions/DraftGeneration.ts
-Papers/AutomaticEndTimes.ts
-TopBar/PaperSelector.tsx
-PaperWorkspace/Preview/ZoomAndPageTracking.ts
-MyAssessments/Library/Filtering.ts
-Classes/Records/Normalisation.ts
-```
-
-The names deliberately avoid exposing implementation details such as “this is a hook” when the responsibility is more useful to a reader.
-
-React hook functions themselves continue to use `use...` names where required by React.
-
-This naming layer is governed by the same ownership principle as the larger architecture: the path should explain what a responsibility is and where it belongs.
-
-A bad filename can also reveal a deeper design problem. If no clear responsibility name fits because a file performs several unrelated jobs, consider whether the file should be decomposed rather than hiding the problem behind a generic name.
-
----
-
-# PASS 4 — NATIONAL 5 MATHEMATICS CATALOGUE / GENERATION ARCHITECTURE — 28 AUGUST 2026
-
-## 120. Current National 5 Maths Transition Overrides Sections 63–69 and 85
-
-Sections 63–69 and 85 above are retained as the pre-catalogue Course architecture that was current before the dedicated National 5 Maths evidence/generation transition. Their historical information remains useful, but their physical current-path descriptions are superseded by this section.
-
-The transition intentionally uses two Course areas with different jobs:
-
-```text
-app/Courses/National5Maths/
-→ clean destination architecture for catalogue, generation, visuals, paper context and future Course integration
-
-app/Courses/National5MathsLegacy/
-→ preserved former working Course implementation used by existing runtime imports during transition
-```
-
-The clean current workspace is:
-
-```text
-app/Courses/National5Maths/
-├── 01_QuestionCatalog/
-├── 02_AnswerCatalog/
-├── 03_QuestionGeneration/
-├── 04_AnswerGeneration/
-├── 05_VisualAssets/
-├── PaperContexts/
-├── Skills/
-├── CatalogCoreTypes.ts
-└── National5MathsConfig.ts
-```
-
-The preserved compatibility implementation is:
-
-```text
-app/Courses/National5MathsLegacy/
-├── AssessmentConfig.ts
-├── Documents/
-├── ExamQuestionAndAnswerCatalog/
-├── QuestionAndAnswerGeneration/
-└── Skills/
-```
-
-This is a write-new migration strategy: the functioning legacy Course remains available until the clean owners are sufficiently complete and runtime consumers can be switched safely.
-
----
-
-## 121. Meaningful Workflow Numbering in National 5 Maths
-
-The folders:
-
-```text
-01_QuestionCatalog
-02_AnswerCatalog
-03_QuestionGeneration
-04_AnswerGeneration
-05_VisualAssets
-```
-
-use meaningful ordering, not decorative numbering.
-
-They describe the knowledge flow by which source evidence becomes original generated assessment content.
-
-This follows the same architectural exception already used for meaningful SkillsPanel ordering: numbering is valid where sequence itself communicates product/domain structure.
-
----
-
-## 122. Catalogue Layer vs Generation Layer
-
-The new National 5 Maths architecture separates evidence description from output generation.
-
-Conceptually:
-
-```text
-Historical Question Paper
+UI/Documents generic primitives
         ↓
-Question Catalogue
-
-Historical Marking Scheme
+qualification-family templates
         ↓
-Answer Catalogue
-
-paired structural knowledge
+Course-specific document composition
         ↓
-Question Generation
+Assessment Compilation
+```
+
+A document displayed inside the application does not become Application UI merely because the viewer is interactive.
+
+---
+
+## 31. PDF Architecture
+
+Server PDF generation belongs under Assessment Compilation.
+
+The final PDF should consume the same canonical assessment document meaning used by compilation rather than independently reconstructing the assessment.
+
+My Assessments may cache or display generated PDF assets but does not own PDF generation.
+
+---
+
+# Runtime and State Boundaries
+
+## 32. Client Boundaries
+
+`"use client"` should be introduced only at genuine client entry boundaries.
+
+Nested modules imported below an existing client boundary do not require redundant directives merely because they use hooks or browser APIs.
+
+Avoid defensive client-boundary expansion.
+
+---
+
+## 33. State Management
+
+Use existing React state, hooks and contexts where they fit the owner.
+
+Do not introduce a new global state-management library merely as routine cleanup. A new state system requires a demonstrated architectural problem and a deliberate decision.
+
+Global providers should represent genuinely global state/environment rather than convenience.
+
+---
+
+## 34. Explicit Dependencies
+
+Prefer explicit imports, props, hooks and registry wiring over hidden global/event coupling.
+
+Existing browser-event compatibility may remain while genuinely required, but replacement should follow:
+
+```text
+introduce explicit path
         ↓
-Answer Generation
+switch consumers
         ↓
-Visual renderer / asset selection
+verify
         ↓
-Assessment-native Question / Answer content
+remove compatibility path
 ```
-
-The catalogue must not become a hidden runtime Question Bank or a direct duplicate of `app/Assessments/Questions/` contracts.
-
-Its job is to describe historical evidence, normalised structure, classification and safe generation knowledge.
-
-The generation layer translates that Course-specific knowledge into generic Assessment Question/Answer contracts consumed by Creation, Preview, Compilation and PDF systems.
 
 ---
 
-## 123. Question Catalogue Architecture
+# Troubleshooting and Dependency Navigation
 
-The Question Catalogue is a universal Course-owned evidence model designed to represent the complete historical National 5 Maths corpus without a family-specific shortcut.
+## 35. Why Import/Export Mapping Matters
 
-Core owners include:
-
-```text
-app/Courses/National5Maths/CatalogCoreTypes.ts
-app/Courses/National5Maths/01_QuestionCatalog/QuestionCatalogTypes.ts
-app/Courses/National5Maths/01_QuestionCatalog/QuestionCatalogHelpers.ts
-```
-
-The contract captures domains including:
+When debugging or rewiring behaviour, the fastest useful question is often not “which folder sounds relevant?” but:
 
 ```text
-identity / provenance
-paper context
-source page and response-space evidence
-Question/part structure
-curriculum links
-commands and response form
-mathematical goal/subgoals
-information and reasoning
-number profile
-parameter behaviour
-constraints
-answer specification
-units
-context/language
-representations and visuals
-family/surface/difficulty/layout
-generation analysis
-specialised mathematical profiles
-review/completeness state
+Who imports this module?
+What does this module import?
+What symbols does it expose?
+Which registry/composition root connects it to runtime?
 ```
 
-Universal profiles use typed `NOT_APPLICABLE` / `UNKNOWN` / `NOT_REVIEWED` states rather than omitting inconvenient domains or conflating missing knowledge with irrelevance.
+For that reason, architecture documentation should identify **boundary modules and composition points**, while the physical repository map should identify concrete files.
+
+An exhaustive import/export graph for every source file should be generated mechanically from source rather than hand-maintained in prose. A hand-written full graph will become stale and therefore dangerous.
+
+The long-term documentation/tooling target is a generated dependency index containing, for each TypeScript/TSX module:
+
+```text
+file path
+imports
+imported symbols where practical
+exports
+known direct consumers
+architectural owner
+boundary/registry role where applicable
+```
+
+That index should be regenerable after structural work.
 
 ---
 
-## 124. Common Catalogue Evidence Model
+## 36. Key Wiring Index
 
-`CatalogCoreTypes.ts` owns the common catalogue evidence language.
+The following modules are current high-value troubleshooting entry points:
 
-Important states are:
+| Module | Depends on / imports | Provides / exports | Typical reason to inspect |
+| --- | --- | --- | --- |
+| `app/layout.tsx` | Application globals, settings provider, header, activity rail, shell tokens | root layout + metadata | global shell/theme/layout issue |
+| `app/page.tsx` | product page entry points + route handling | application page router | wrong page/route dispatch |
+| `app/Courses/CourseAssessmentConfig.ts` | Course identity + generic Assessment types | Course contract types + paper/structure helpers | generic Course behaviour mismatch |
+| `app/Courses/CourseRegistry.ts` | concrete Course configs | registry lookup APIs | Course not registered/resolved |
+| `app/Courses/National5Maths/AssessmentConfig.ts` | canonical Skills + Builder skill registry + Course contract | concrete National 5 Maths config | skill tree/paper/metric wiring |
+| `app/Courses/National5Maths/Skills/BuilderSkillRegistry.ts` | migrated skill registrations | skill-capability composition | migrated skill missing from Builder |
+| `app/Courses/National5Maths/04_QuestionGeneration/Registry.ts` | concept modules + generic generation/selection contracts | question dispatch + eligibility APIs | concept/difficulty/generation dispatch |
+| `app/Assessments/Compilation/Model/buildAssessmentCompilationDocument.ts` | SavedAssessment + Course Registry/config + pagination | canonical compilation builder | final document content/paper mismatch |
 
-```text
-VALUE
-NOT_APPLICABLE
-UNKNOWN
-NOT_REVIEWED
-```
-
-Important provenance is:
-
-```text
-SOURCE_FACT
-CATALOGUE_CLASSIFICATION
-GENERATION_ANALYSIS
-```
-
-Evidence references identify source documents/pages/papers/question locators and evidence type.
-
-The separation matters because a future generator should be able to consume normalised structural analysis without confusing it with literal source content or treating a project inference as a direct source fact.
+This is intentionally a boundary index, not an attempt to duplicate every leaf import in prose.
 
 ---
 
-## 125. Source Evidence Outranks Project Classification
+## 37. Repository Map Responsibility
 
-Historical Question Papers and matching Marking Schemes are authoritative evidence of what actually appeared and how it was marked.
+`Docs/RepositoryMap.md` should remain the human-readable physical map of current source.
 
-Project-authored taxonomies, Skills metadata and generation assumptions are fallible.
-
-Therefore a conflict follows this direction:
+When it is rewritten, it should complement this Architecture document by showing:
 
 ```text
-historical source fact
+owner
+important entry files
+major registries/composition roots
+important cross-domain contracts
+troubleshooting path
+```
+
+It should not preserve obsolete paths simply because they existed historically.
+
+---
+
+# Preservation and Change Rules
+
+## 38. Persistence and Compatibility
+
+Persistence, public routes and active compatibility are external contracts.
+
+Do not remove or rename them merely to make source terminology prettier.
+
+Before removing compatibility, inspect imports, re-exports, registries, dynamic access, browser events, persistence, route dispatch and generated-data consumers.
+
+Once a compatibility implementation has no legitimate consumer, remove it rather than allowing two authorities to drift.
+
+---
+
+## 39. Source Isolation
+
+The non-negotiable source/copyright isolation rules live in `AGENTS.md` and apply to every architecture layer.
+
+Architecture must preserve the separation between:
+
+```text
+historical evidence
         ↓
-accurate catalogue entry
+normalised facts / reviewed synthesis
         ↓
-flag mismatch with project-authored classification
-        ↓
-reconcile the project classification later
+independently authored generation
 ```
 
-Do not alter historical evidence to preserve a Skills Tree assumption.
+Historical wording and artwork are not runtime template assets.
 
-The 2014 pilot has already exposed current Skills Tree paper-suitability mismatches. Skills reconciliation is intentionally deferred until the catalogue has enough corpus evidence to support systematic correction.
+Neutral year/paper/question locators and mathematical/structural evidence remain valid traceability data.
 
 ---
 
-## 126. Question + Marking Scheme Pairing
+## 40. Verification
 
-Question and Answer catalogues are physically separate owners for navigation and responsibility, but the source Question Paper and matching Marking Scheme form a paired evidence unit.
+Verification should be proportional to risk.
 
-A numbered Question should eventually have:
+Use TypeScript, architecture checks, lint/build, runtime tests and browser/document inspection where the changed area could plausibly be affected.
 
-```text
-Question Catalogue entry
-        ↕
-matching Answer/MS Catalogue entry
+For National 5 Mathematics structural/content-boundary work, the architecture guard is:
+
+```bash
+npm run check:n5-architecture
 ```
 
-with links between source prompt structure, parts, marks, mathematical subgoals, marking nodes, evidence, alternatives, follow-through and marking policy.
+A TypeScript graph check is:
 
-Question-only review is therefore a legitimate intermediate state, not a fully validated evidence pair.
+```bash
+npx tsc --noEmit
+```
+
+These checks are not required as ritual after every harmless prose edit, but should be run often enough that structural breakage cannot accumulate unnoticed.
 
 ---
 
-## 127. Response-Space Geometry Is Domain Evidence
+## 41. Definition of Good Architecture
 
-The physical space supplied to candidates is part of assessment design and belongs in the Question Catalogue.
-
-The current contract supports broad response-space classification **and** exact source measurements such as:
+A strong change should leave the answer to these questions clearer:
 
 ```text
-PDF page / printed page
-measurement method
-render DPI
-page pixel dimensions
-response-region boundaries
-pixel dimensions
-PDF-point dimensions
-millimetre dimensions
-part-to-region mapping
-boundary convention
+Who owns this responsibility?
+What does it consume?
+What consumes it?
+What contract does it expose?
+Does it preserve Course independence?
+Does it preserve persistence and public behaviour?
+Does it preserve source isolation?
+Can the next developer find the wiring quickly?
 ```
 
-Multiple response regions may be attached to one multipart Question.
-
-This data can later inform realistic generated paper spacing and layout distributions.
-
-Historical response-space coordinates are source evidence only. They are not reusable source-layout templates for generated Questions.
-
----
-
-## 128. Visual Evidence Architecture
-
-Visuals are first-class Course evidence rather than text-adjacent decoration.
-
-The dedicated visual contract belongs beneath:
-
-```text
-app/Courses/National5Maths/05_VisualAssets/
-```
-
-Visual analysis separates mathematical/contextual semantics from historical artwork.
-
-A visual may describe:
-
-```text
-type / purpose / dependency
-semantic entities
-semantic relationships
-explicit and visually implied facts
-scale meaning
-orientation constraints
-labels
-candidate interaction
-response-surface behaviour
-specialised geometry/graph/scatter/vector/bearing/3D/etc. profile
-layout/readability requirements
-generation invariants
-safe/unsafe variation
-renderer capabilities
-licensing/context-asset requirements
-validation checks
-```
-
-The architecture distinguishes mathematical schematics from context imagery.
-
----
-
-## 129. Deterministic Mathematical Visual Generation
-
-Essential mathematical diagrams should normally be generated deterministically through procedural SVG or equivalent code-driven rendering.
-
-The architecture must not require runtime AI image generation for core mathematical diagrams.
-
-Appropriate renderer families include concepts such as:
-
-```text
-2D geometry
-circle geometry
-function graphs
-scattergraphs
-vector grids
-bearing/navigation diagrams
-2D/3D coordinates
-solid/composite-solid diagrams
-mechanisms
-context objects with dimensions
-response surfaces
-```
-
-Context images may come from a curated/licensed asset bank where a non-mathematical scene is useful.
-
-A generated visual should preserve semantic relationships while being newly laid out/rendered rather than reproducing historical artwork.
-
----
-
-## 130. Source Isolation and Copyright Boundary
-
-Historical exam content is evidence, not template source.
-
-The architecture explicitly prohibits generation from consuming:
-
-```text
-historical prompt wording
-historical marking wording
-historical pixel artwork
-historical vector artwork/geometry
-exact historical source coordinates/layout geometry
-```
-
-It permits generation to consume:
-
-```text
-normalised mathematical facts
-structural relationships
-catalogue classifications
-semantic visual models
-safe parameter constraints
-safe variation axes
-source-independent generation analysis
-```
-
-This is a structural copyright/originality boundary, not merely a style preference.
-
----
-
-## 131. Answer Catalogue Architecture Direction
-
-`02_AnswerCatalog` is intended to capture historical marking evidence rather than a single worked answer.
-
-The Answer Catalogue must be able to represent, where source evidence requires it:
-
-```text
-expected answer sets
-method pathways
-mark nodes
-mark types and dependencies
-implied evidence
-follow-through
-answer-only rules
-working/location requirements
-alternative-method equivalence
-method eligibility/exclusion
-rounding and exactness
-units and notation
-context-bearing marks
-diagram/visual evidence
-common-result rules
-cross-part/question rules
-general marking policy
-special cases
-review state
-```
-
-A marking scheme is therefore modelled as a branching evidence/pathway graph where appropriate rather than being forced into one linear worked solution.
-
----
-
-## 132. Question/Answer Bridge
-
-The paired catalogues should be able to express relationships such as:
-
-```text
-Question part → available marks
-mark node → mathematical subgoal
-method pathway → equivalent alternatives
-candidate error → affected downstream marks
-prompt instruction → marking consequence
-supplied information → expected evidence
-visual feature → mark-bearing evidence
-answer specification → final-answer mark conditions
-cross-part result → follow-through behaviour
-```
-
-This bridge is part of the Course evidence model and is distinct from final presentation of worked answers in Assessment UI/Documents.
-
----
-
-## 133. Historical Corpus Model
-
-The intended complete historical Question corpus is:
-
-```text
-2014–2019
-2021–2025
-```
-
-There is no 2020 examination paper in the intended corpus because examinations were cancelled during COVID.
-
-Known numbered-Question counts are:
-
-```text
-2014 → 26
-2015 → 28
-2016 → 28
-2017 → 30
-2018 → 37
-2019 → 34
-2021 → 36
-2022 → 29
-2023 → 29
-2024 → 30
-2025 → 30
-TOTAL → 337
-```
-
-Years 2021–2023 also require paper-context metadata to preserve their Assessment Resource / Modified-paper regimes rather than treating every year as identical.
-
----
-
-## 134. Catalogue File Organisation
-
-Question files are organised by year and paper:
-
-```text
-01_QuestionCatalog/<year>/Paper1/
-01_QuestionCatalog/<year>/Paper2/
-```
-
-and use:
-
-```text
-N5_Maths_YYYY_Px_Qn.ts
-```
-
-Matching Answer/MS entries will live under:
-
-```text
-02_AnswerCatalog/<year>/Paper1/
-02_AnswerCatalog/<year>/Paper2/
-```
-
-and use:
-
-```text
-N5_Maths_YYYY_Px_Qn_MS.ts
-```
-
-One file represents one numbered historical Question/evidence pair side. Do not collapse the whole year into one giant catalogue module merely to reduce file count.
-
----
-
-## 135. Temporary Runtime Compatibility Bridge
-
-During the clean Course transition, `tsconfig.json` intentionally maps:
-
-```text
-@/app/Courses/National5Maths
-@/app/Courses/National5Maths/*
-```
-
-to:
-
-```text
-app/Courses/National5MathsLegacy
-```
-
-while the normal root alias remains:
-
-```text
-@/* → ./*
-```
-
-This means imports using the historical National5Maths alias currently resolve to **legacy**, not the clean destination folder.
-
-New clean National 5 Maths catalogue/generation code should therefore use safe relative imports or a deliberately introduced destination alias rather than accidentally importing legacy through the compatibility path.
-
-The bridge is temporary and must be removed only after runtime consumers have migrated and the clean Course implementation is verified.
-
-Explorer hiding of `National5MathsLegacy` is visual only and has no runtime/Git meaning.
-
----
-
-## 136. 2014 Full-Fidelity Pilot
-
-The complete 2014 Question Paper pilot now covers:
-
-```text
-Paper 1 → 13 numbered Questions / 40 marks
-Paper 2 → 13 numbered Questions / 50 marks
-```
-
-All 26 entries have been re-audited against the strengthened master Question Catalogue contract.
-
-The pilot includes exact source response-space measurements, part-level demand, calculator burden, number/language profiles and semantic visual evidence.
-
-The 2014 Answer/Marking Scheme catalogue is not yet complete, so counterpart cross-checking remains a deliberate outstanding review state.
-
-This pilot exists to stress-test the universal contracts before mass-populating the remaining corpus.
-
----
-
-## 137. Catalogue-First Hardening Rule
-
-When a historical source exposes a characteristic the master contract cannot represent cleanly:
-
-```text
-source discovery
-        ↓
-assess whether the meaning is genuinely new
-        ↓
-strengthen the master contract if required
-        ↓
-retrofit the pilot
-        ↓
-only then continue mass population
-```
-
-Do not silently drop evidence because the current schema lacks a field.
-
-Do not duplicate an existing characteristic merely because the new field name differs from an old legacy name; compare meaning before adding parallel concepts.
-
-The legacy pilot is valuable evidence of characteristics that previously proved useful, but the new architecture should absorb those characteristics semantically rather than reproducing old structure for its own sake.
+If the repository becomes harder to trace after a structural change, the architecture has not improved.
