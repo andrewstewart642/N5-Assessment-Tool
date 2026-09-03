@@ -14,17 +14,8 @@ const CANONICAL_LAYERS = [
   "06_VisualAssets",
 ];
 
-const LEGACY_VISUAL_IMPORT_ALLOWLIST = new Set([
-  "app/Courses/National5Maths/01_QuestionCatalog/QuestionCatalogTypes.ts",
-  "app/Courses/National5Maths/02_AnswerCatalog/AnswerCatalogTypes.ts",
-  ...Array.from({ length: 13 }, (_, index) =>
-    `app/Courses/National5Maths/01_QuestionCatalog/2014/Paper1/N5_Maths_2014_P1_Q${index + 1}.ts`,
-  ),
-]);
-
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
 const violations = [];
-const warnings = [];
 
 const rel = (filePath) => path.relative(repoRoot, filePath).split(path.sep).join("/");
 
@@ -66,6 +57,7 @@ if (!fs.existsSync(path.join(n5Root, "CatalogVisualEvidenceTypes.ts"))) {
 const obsoletePaths = [
   "03_QuestionGeneration",
   "04_AnswerGeneration",
+  "05_VisualAssets",
   "National5MathsConfig.ts",
   "PaperContexts",
   "QuestionAndAnswerGeneration",
@@ -73,27 +65,6 @@ const obsoletePaths = [
 for (const obsoletePath of obsoletePaths) {
   if (fs.existsSync(path.join(n5Root, obsoletePath))) {
     violations.push(`Obsolete National5Maths compatibility path still exists: ${obsoletePath}`);
-  }
-}
-
-// 05_VisualAssets is no longer an implementation layer. Until the 2014 pilot
-// imports are rewritten, it may contain exactly one forwarding source file and
-// nothing else. This prevents a compatibility address becoming a second owner.
-const deprecatedVisualRoot = path.join(n5Root, "05_VisualAssets");
-if (fs.existsSync(deprecatedVisualRoot)) {
-  const files = walk(deprecatedVisualRoot).map((file) => path.relative(deprecatedVisualRoot, file).split(path.sep).join("/"));
-  const unexpected = files.filter((file) => file !== "VisualCatalogTypes.ts");
-  if (unexpected.length > 0) {
-    violations.push(`05_VisualAssets may contain only the temporary VisualCatalogTypes.ts forwarder; found ${unexpected.join(", ")}.`);
-  }
-  const bridge = path.join(deprecatedVisualRoot, "VisualCatalogTypes.ts");
-  if (!fs.existsSync(bridge)) {
-    violations.push("05_VisualAssets exists without its temporary VisualCatalogTypes.ts forwarder.");
-  } else {
-    const bridgeSource = fs.readFileSync(bridge, "utf8");
-    if (!bridgeSource.includes("../CatalogVisualEvidenceTypes")) {
-      violations.push("05_VisualAssets/VisualCatalogTypes.ts must forward only to the shared CatalogVisualEvidenceTypes contract.");
-    }
   }
 }
 
@@ -129,44 +100,25 @@ for (const file of walk(n5Root)) {
   }
 }
 
-// Deprecated numbered generation addresses are forbidden everywhere in app/.
+// Deprecated numbered addresses are forbidden everywhere in app/. These paths
+// no longer exist, so any new reference is an architecture regression.
 for (const file of walk(appRoot)) {
   const source = fs.readFileSync(file, "utf8");
   for (const specifier of importSpecifiers(source)) {
-    const usesOldQuestionGeneration = containsSegment(specifier, "03_QuestionGeneration");
-    const usesOldAnswerGeneration = containsSegment(specifier, "04_AnswerGeneration");
-    if (!usesOldQuestionGeneration && !usesOldAnswerGeneration) continue;
+    if (containsSegment(specifier, "03_QuestionGeneration") || containsSegment(specifier, "04_AnswerGeneration")) {
+      addViolation(
+        file,
+        `Deprecated numbered generation path is forbidden (${specifier}). Use 04_QuestionGeneration / 05_AnswerGeneration.`,
+      );
+    }
 
-    addViolation(
-      file,
-      `Deprecated numbered generation path is forbidden (${specifier}). Use 04_QuestionGeneration / 05_AnswerGeneration.`,
-    );
-  }
-}
-
-// The exact 2014 pilot files listed above still name the old 05_VisualAssets
-// address. That address is now only a one-file forwarder to the shared contract.
-// Any new 05 consumer is a hard failure rather than a migration warning.
-for (const file of walk(appRoot)) {
-  const fileRel = rel(file);
-  const source = fs.readFileSync(file, "utf8");
-  for (const specifier of importSpecifiers(source)) {
-    if (!containsSegment(specifier, "05_VisualAssets")) continue;
-
-    const isCompatibilityForwarder =
-      fileRel === "app/Courses/National5Maths/05_VisualAssets/VisualCatalogTypes.ts";
-
-    if (LEGACY_VISUAL_IMPORT_ALLOWLIST.has(fileRel)) {
-      warnings.push(`${fileRel}: legacy 05_VisualAssets import forwards to CatalogVisualEvidenceTypes; migrate this import when the historical file is next touched.`);
-    } else if (!isCompatibilityForwarder) {
-      addViolation(file, `Deprecated 05_VisualAssets import is forbidden (${specifier}). Historical evidence uses CatalogVisualEvidenceTypes; generated visuals use 06_VisualAssets.`);
+    if (containsSegment(specifier, "05_VisualAssets")) {
+      addViolation(
+        file,
+        `Deprecated 05_VisualAssets path is forbidden (${specifier}). Historical evidence uses CatalogVisualEvidenceTypes; generated visuals use 06_VisualAssets.`,
+      );
     }
   }
-}
-
-if (warnings.length > 0) {
-  console.warn("National5Maths architecture migration warnings:");
-  for (const warning of warnings) console.warn(`  - ${warning}`);
 }
 
 if (violations.length > 0) {
@@ -175,4 +127,4 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log(`National5Maths architecture check passed (${CANONICAL_LAYERS.length} canonical layers).`);
+console.log(`National5Maths architecture check passed (${CANONICAL_LAYERS.length} canonical layers, no deprecated compatibility paths).`);
