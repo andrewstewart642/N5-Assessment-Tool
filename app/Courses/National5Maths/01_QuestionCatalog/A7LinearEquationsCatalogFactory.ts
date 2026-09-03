@@ -1,6 +1,7 @@
 import type { CatalogEvidenceRef, CatalogMarkThinking } from "../CatalogCoreTypes";
 import type { QuestionCatalogEntry, QuestionNumberType, QuestionPart } from "./QuestionCatalogTypes";
-import { catalogValue, notApplicable, qpEvidence, questionReviewInProgress, sourceIsolation, visualOriginality, visualValidation } from "./QuestionCatalogHelpers";
+import { asHistoricalQuestionCatalogEntry } from "./QuestionCatalogHistoricalView";
+import { catalogValue, notApplicable, qpEvidence, questionReviewInProgress } from "./QuestionCatalogHelpers";
 
 const SKILL_ID = "alg-a07-linear-equations";
 const CONCEPT_ID = "alg-a7-1";
@@ -121,23 +122,6 @@ const visualForContext = (config: A7QuestionConfig, evidence: CatalogEvidenceRef
         contextImage: notApplicable(),
         responseSurface: notApplicable(),
       },
-      generation: {
-        readiness: "PARTIAL" as const,
-        strategy: "PROCEDURAL_SVG" as const,
-        rendererFamilyId: "A7_AREA_EQUALITY_DIAGRAM",
-        allowedMediaAssetIds: [],
-        requiredAssetTags: [],
-        semanticInvariants: ["one triangle and one rectangle", "four labelled dimensions", "dimensions reproduce the generated area expressions exactly"],
-        safeVariationAxes: ["relative placement of the two shapes", "label placement", "shape proportions"],
-        unsafeVariations: ["omitting a required dimension", "using source geometry as a template", "drawing dimensions inconsistent with the generated expressions"],
-        permittedOrientationChanges: ["mirror or rotate the schematic provided labels remain unambiguous"],
-        permittedStyleChanges: ["line weight", "spacing", "font size within print-readability constraints"],
-        requiredRendererCapabilities: ["labelled triangle", "labelled rectangle", "algebraic dimension labels"],
-        requiredValidationChecks: ["all four dimensions visible", "labels agree with generated mathematics", "no label collisions"],
-        provenance: "GENERATION_ANALYSIS" as const,
-      },
-      originality: visualOriginality(),
-      validation: visualValidation(false, false),
       sourceEvidence: [visualEvidence],
       confidence: "HIGH" as const,
     }],
@@ -147,7 +131,6 @@ const visualForContext = (config: A7QuestionConfig, evidence: CatalogEvidenceRef
     containsContextImage: false,
     containsProcedurallyReproducibleDiagram: true,
     containsResponseSurface: false,
-    generationRequiresMultipleVisuals: false,
   }, [visualEvidence], "CATALOGUE_CLASSIFICATION", "HIGH", null);
 };
 
@@ -170,7 +153,7 @@ export const createA7QuestionCatalogEntry = (config: A7QuestionConfig): Question
       ]
     : [{ id: `${q}_INFO_EQUATION`, informationType: "linear equation with fractional coefficients", normalisedContent: "A one-variable linear equation containing fractional terms is supplied directly.", value: null, unit: null, source: "TEXT" as const, explicitness: "EXPLICIT" as const, role: "GIVEN_VALUE" as const, visualElementId: null, usedByPartIds: [`${q}_MAIN`] }];
 
-  return {
+  return asHistoricalQuestionCatalogEntry({
     identity: {
       id: `N5_MATH_${config.year}_${config.paper}_Q${config.questionNumber}`,
       schemaVersion: "N5_CATALOG_V3",
@@ -262,7 +245,7 @@ export const createA7QuestionCatalogEntry = (config: A7QuestionConfig): Question
         overallDifficulty: contextual ? "HIGH" : "MEDIUM",
         methodSelectionLoad: contextual ? "MEDIUM" : "LOW",
         arithmeticLoad: "LOW",
-        algebraicLoad: contextual ? "MEDIUM" : "MEDIUM",
+        algebraicLoad: "MEDIUM",
         representationLoad: contextual ? "MEDIUM" : "VERY_LOW",
         languageLoad: contextual ? "LOW" : "VERY_LOW",
         contextInterpretationLoad: contextual ? "MEDIUM" : "VERY_LOW",
@@ -293,28 +276,12 @@ export const createA7QuestionCatalogEntry = (config: A7QuestionConfig): Question
       modeRequirements: [],
       notes: "The assessed demand is algebraic manipulation rather than calculator functionality.",
     },
-    parameterDesign: {
-      deliberatelyConstructedValues: true,
-      exactResultDesigned: true,
-      roundingDesigned: false,
-      factorisableDesigned: false,
-      perfectSquareDesigned: false,
-      pythagoreanTripleUsed: false,
-      niceRatioUsed: true,
-      validSolutionCountDesigned: 1,
-      parameterConstraints: contextual
-        ? ["Area expressions must produce a genuine one-variable linear equation.", "The intended solution must keep all generated dimensions positive.", "The triangle area must retain its one-half factor so the historical mark structure is preserved."]
-        : ["At least one fractional denominator must materially affect the first solving step.", "The final solution should remain exact and non-integer for the observed three-mark family."],
-      safeVariationAxes: contextual ? ["integer dimensions", "linear dimension offsets", "relative diagram placement"] : ["fractional coefficients", "integer constants", "sign pattern"],
-      invariantRelationships: contextual ? ["triangle area equals rectangle area", "single exact linear solution"] : ["single one-variable linear equation", "fractional-coefficient first step", "exact non-integer solution"],
-      degeneracyConditionsToAvoid: contextual ? ["negative generated dimensions", "identity or contradiction", "equation simplifying to a one-step trivial solve"] : ["integer final solution", "denominators that cancel before any assessed algebraic step", "identity or contradiction"],
-    },
     constraints: {
-      mathematicalDomainConstraints: contextual ? ["generated dimensions must remain positive at the intended solution"] : [],
-      contextValidityConstraints: contextual ? ["all displayed lengths must be physically meaningful"] : [],
+      mathematicalDomainConstraints: contextual ? ["The physical dimensions represented in the area model must be positive."] : [],
+      contextValidityConstraints: contextual ? ["All displayed lengths represent physically meaningful dimensions."] : [],
       calculatorModeConstraints: [],
-      methodConstraints: contextual ? ["part (b) explicitly requires an algebraic solution"] : [],
-      presentationConstraints: contextual ? [] : ["final exact value should be stated in simplest form when required by the source"],
+      methodConstraints: contextual ? ["Part (b) explicitly requires an algebraic solution."] : [],
+      presentationConstraints: contextual ? [] : ["The final exact value is stated in simplest form when the source requires it."],
     },
     answerSpecification: {
       answerForm: "EXACT",
@@ -326,7 +293,7 @@ export const createA7QuestionCatalogEntry = (config: A7QuestionConfig): Question
       precisionValue: null,
       units: { dimension: null, unitSymbol: null, conversionRequired: false, unitsExplicitlyRequested: false },
       multipleAnswersRequired: contextual ? 2 : 1,
-      domainRestriction: contextual ? "generated dimensions remain positive" : null,
+      domainRestriction: contextual ? "physical dimensions remain positive" : null,
       contextualWordsRequired: false,
       coordinateOrderRelevant: false,
       bracketsRelevant: false,
@@ -352,7 +319,6 @@ export const createA7QuestionCatalogEntry = (config: A7QuestionConfig): Question
         normalisedPromptStructure: contextual ? ["Supply dimensions visually.", "Request one area expression.", "State equality of areas.", "Require algebraic solution for x."] : ["Present a one-variable fractional equation.", "Require an exact solution."],
         usesPronounReference: false,
         lexicalFeatureTags: contextual ? ["area", "linear equation", "algebraically", "diagram"] : ["linear equation", "fractions", "exact solution"],
-        generatorVariationNotes: contextual ? "Preserve the equal-area modelling structure without copying the historical diagram or wording." : "Vary fractional coefficients and signs while preserving a genuine three-stage exact solve.",
       },
       styleNotes: null,
     },
@@ -388,21 +354,6 @@ export const createA7QuestionCatalogEntry = (config: A7QuestionConfig): Question
       informationOrderCanVarySafely: !contextual,
       visualPlacementCanVarySafely: contextual,
     },
-    generation: {
-      readiness: "NOT_READY",
-      linkedGeneratorFamilyIds: [],
-      invariantMathematics: contextual ? ["equal-area relationship becomes one linear equation", "single exact valid solution"] : ["fractional one-variable linear equation", "single exact non-integer solution"],
-      variableParameters: contextual ? ["shape dimensions", "linear offsets", "solution"] : ["numerators", "denominators", "constants", "signs"],
-      parameterConstraints: [],
-      safeContextVariations: contextual ? ["other simple geometric-measure contexts only after cross-corpus analysis supports them"] : [],
-      safeRepresentationVariations: contextual ? ["original procedural diagram preserving the same semantic data roles"] : [],
-      unsafeVariations: ["copy historical prompt wording", "reuse source layout/geometry", "change the mark tariff before A7 cross-corpus calibration"],
-      difficultyControls: [],
-      requiredVisualCapabilities: contextual ? ["simple labelled 2D shape renderer"] : [],
-      requiredValidationChecks: ["exact solution exists", "mark total remains source-calibrated", "generated instance remains within the reviewed A7 family"],
-      provenance: "GENERATION_ANALYSIS",
-    },
-    sourceIsolation: sourceIsolation(),
     review: questionReviewInProgress(true, config.paper, config.year, true),
-  };
+  });
 };
