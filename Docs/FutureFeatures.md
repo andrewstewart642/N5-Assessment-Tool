@@ -1,540 +1,558 @@
 # N5 Assessment Tool — Future Features
 
-**Document type:** Future idea / planned-work / deferred-work register  
-**Status:** Active living document  
-**Started:** 27 August 2026
-
----
-
 ## 1. Purpose
 
-This file is the central place to record useful future ideas before they are implemented.
+This file is the active forward-looking backlog for useful work that is not yet complete.
 
-Use it when the thought is:
+It records ideas, planned follow-up and deliberately deferred work so they do not depend on chat memory.
 
-> This would be useful later — do not let me forget it.
-
-Recording an item here does **not**:
-
-- approve implementation;
-- establish architecture;
-- create a deadline;
-- justify placeholder source folders;
-- make the idea a locked decision.
-
-Architecture should still be created only when real implementation begins.
-
-Implemented work should move into:
+An entry here does **not** automatically:
 
 ```text
-Docs/FeatureHistory.md
+approve implementation
+create a deadline
+establish architecture
+justify placeholder source folders
+change a locked decision
 ```
 
-when it forms a meaningful product/technical checkpoint.
+Current binding rules live in `AGENTS.md` and `Docs/LockedDecisions.md`.
+
+Implemented work should leave this active backlog and, where historically useful, be recorded in `Docs/FeatureHistory.md`.
 
 ---
 
-## 2. Suggested Statuses
-
-Use lightweight statuses:
+## 2. Status Vocabulary
 
 ```text
-IDEA
-→ worth remembering; not yet designed
+PLANNED
+→ accepted direction; implementation remains outstanding
 
 INVESTIGATE
-→ useful idea but important product/technical questions remain
-
-PLANNED
-→ agreed direction; implementation intentionally deferred
+→ useful direction, but important design/technical questions remain
 
 DEFERRED
-→ deliberately postponed until another dependency/priority is ready
+→ intentionally postponed until another dependency or priority is ready
+
+IDEA
+→ worth preserving, not yet designed
 
 PARKED
-→ keep the idea, but do not actively prioritise it
+→ retain for later; not an active priority
 ```
 
-When implemented, remove it from the active future list or mark it implemented and reference `FeatureHistory.md`.
+Keep entries concise enough that the backlog remains useful.
 
 ---
 
-## 3. How to Add an Idea
+# Near-Term Technical and Compliance Work
 
-A useful entry can be very small:
+## FF-001 — Repository-wide source-isolation compliance sweep
+
+**Status:** PLANNED  
+**Area:** Repository / legal-source isolation
+
+Audit repository-authored source, comments, documentation, metadata and developer tooling for prohibited awarding-body identifiers and any stored historical examination wording that should not remain in authored repository content.
+
+The target state is that a repository-wide text search cannot recover prohibited organisation identifiers or verbatim historical questions from authored files.
+
+Neutral historical locators such as year / paper / question number remain permitted.
+
+This should be a deliberate whole-repository pass rather than opportunistic piecemeal edits because persistence, compatibility and developer-only names may require careful treatment.
+
+---
+
+## FF-002 — Automated source-isolation guard
+
+**Status:** PLANNED  
+**Area:** Repository tooling
+
+After the manual compliance sweep establishes the intended clean baseline, add a lightweight automated check that fails when prohibited source-identifying terms are reintroduced into authored repository content.
+
+The check should be simple, inspectable and maintainable.
+
+Where practical, extend the idea beyond branding to detect known forbidden literal source fragments without storing substantial protected source text inside the repository solely to perform the check.
+
+---
+
+## FF-003 — Generated import/export dependency map
+
+**Status:** PLANNED  
+**Area:** Repository tooling / documentation
+
+Generate a machine-derived dependency index for TypeScript/TSX source so troubleshooting and rewiring can begin from actual module relationships rather than manual archaeology.
+
+Target output:
 
 ```text
-### Feature name
-Status: IDEA
-Area: My Assessments
-
-One or two sentences explaining the idea and why it matters.
+Docs/DependencyMap.md
 ```
 
-Do not fully design every idea at capture time.
+For each source module, capture where practical:
+
+```text
+file path
+architectural owner
+imports
+imported symbols
+exports
+direct consumers
+registry/composition role
+```
+
+The index must be regenerable from source. Do not maintain a complete per-file dependency graph manually in prose.
 
 ---
 
-# My Assessments
+## FF-004 — Canonicalise the remaining A8 Builder adapter
 
-## FA-001 — Archive assessments by academic year
+**Status:** PLANNED  
+**Area:** National 5 Mathematics / generation integration
+
+The A8 simultaneous-equations generation capability still reaches Builder through a physical compatibility implementation even though its catalogue/generation dependencies have moved toward the canonical architecture.
+
+Create a clean canonical Builder-facing module/adapter under the six-layer workspace, switch the generation registry to it and verify A8 generation/worked-answer behaviour before removing that specific compatibility seam.
+
+Do not rewrite already-working mathematical generation merely to change its physical owner.
+
+---
+
+## FF-005 — Retire remaining National 5 Mathematics compatibility generation incrementally
+
+**Status:** DEFERRED / ONGOING MIGRATION  
+**Area:** National 5 Mathematics / Course integration
+
+A compatibility Course tree and targeted TypeScript alias remain because several untouched concept generators still depend on the older implementation.
+
+Retire those seams skill-by-skill as real catalogue/generator work reaches them:
+
+```text
+establish canonical replacement
+→ switch registry/consumer
+→ verify
+→ search compatibility usage
+→ remove proven-obsolete seam
+```
+
+Do not launch a blind rewrite of every remaining generator solely to eliminate the compatibility tree.
+
+Remove the alias/tree only when legitimate consumers are gone.
+
+---
+
+## FF-006 — Remove obsolete Application Settings compatibility files
+
+**Status:** DEFERRED MAINTENANCE  
+**Area:** Application UI
+
+Audit the remaining historical Settings compatibility area and remove/rehome files only when their consumers are proven migrated or absent.
+
+New global settings work should continue to use the current Application Settings/Shell ownership rather than expanding old compatibility structure.
+
+---
+
+## FF-007 — Continue targeted Course-independence audits
+
+**Status:** PARKED MAINTENANCE  
+**Area:** Assessments / Classes / Courses
+
+When feature work exposes a concrete Course-specific dependency inside generic Assessment or Classes code, determine whether the variation belongs behind an existing Course contract or warrants a small contract extension.
+
+Do not start a repository-wide abstraction exercise without a real consumer problem.
+
+---
+
+# National 5 Mathematics Catalogue and Generation Programme
+
+## FF-008 — Continue paired historical Question and Answer cataloguing
+
+**Status:** PLANNED  
+**Area:** `01_QuestionCatalog` / `02_AnswerCatalog`
+
+Continue chronological source capture across the intended historical corpus using one Question Catalogue record and one matching Answer Catalogue record per numbered question.
+
+Question and marking evidence should be cross-checked as a pair while remaining physically separate owners.
+
+Catalogue work must preserve mathematical, marking, response-space, visual and classification evidence without storing historical wording/artwork as reusable content.
+
+Avoid embedding transient completion counts in this backlog; current catalogue state should be established from source.
+
+---
+
+## FF-009 — Prove the full catalogue-to-generator pipeline on another skill
+
+**Status:** PLANNED / HIGH VALUE  
+**Area:** `03_SkillCatalog` → `04_QuestionGeneration` → `05_AnswerGeneration`
+
+Before investing exclusively in mass chronological population, take another representative skill through the complete vertical slice:
+
+```text
+identify all historical evidence for the skill
+→ catalogue/cross-check required Question + Answer records
+→ create reviewed Skill Catalogue synthesis
+→ implement Question generator
+→ implement paired Answer generator
+→ wire into Builder
+→ test variation/originality/output quality
+```
+
+Choose a skill materially different from the already-hardened algebraic examples so the architecture is tested against a new question family.
+
+The aim is to prove that the catalogue contract produces high-quality Builder output before hundreds of additional records are populated.
+
+---
+
+## FF-010 — Expand Skill Catalogue synthesis skill-by-skill
+
+**Status:** PLANNED  
+**Area:** `03_SkillCatalog`
+
+Build reviewed cross-corpus synthesis for each skill once enough historical Question/Answer evidence exists.
+
+Skill Catalogue entries should distinguish:
+
+```text
+what was actually observed
+cross-corpus patterns
+marking patterns
+difficulty mechanisms
+safe invariants
+controlled generation extensions
+```
+
+Do not duplicate historical records into skill folders.
+
+---
+
+## FF-011 — Expand original Question generation skill-by-skill
+
+**Status:** PLANNED  
+**Area:** `04_QuestionGeneration`
+
+Develop executable generators from reviewed Skill Catalogue synthesis rather than directly from individual historical questions.
+
+Each generator should provide meaningful variation in mathematics and surface form while preserving the skill's authentic assessment characteristics.
+
+Avoid “same question, different numbers” construction wherever the skill permits richer variation.
+
+---
+
+## FF-012 — Expand paired Answer/marking generation
+
+**Status:** PLANNED  
+**Area:** `05_AnswerGeneration`
+
+For each generated question family, manufacture marking and worked-answer output from the exact generated mathematical state.
+
+Support legitimate alternative methods, mark-node dependencies, follow-through and presentation requirements where the skill evidence justifies them.
+
+The same generated state should feed both the question and its answer; answer generation must not independently guess/reconstruct values.
+
+---
+
+## FF-013 — Generated-question originality and collision testing
+
+**Status:** PLANNED  
+**Area:** National 5 Mathematics / generator validation
+
+Add generator validation aimed specifically at preventing historical-question reconstruction.
+
+Testing should include large sample runs and structural/literal similarity checks sufficient to expose generators whose parameter spaces are too narrow or whose surface construction is effectively a historical template.
+
+The goal is not to reject ordinary unavoidable mathematical similarity in basic skills. It is to detect suspiciously close recreation of a known historical instance and improve the generator's variation envelope.
+
+Design this without embedding full protected source questions into runtime generator code.
+
+---
+
+## FF-014 — Expand deterministic mathematical visual capability
+
+**Status:** PLANNED / ITERATIVE  
+**Area:** `06_VisualAssets`
+
+Build renderer families as generator work requires them, prioritising deterministic code-driven mathematical visuals.
+
+Likely families include:
+
+```text
+2D geometry
+circle geometry
+function graphs
+scattergraphs
+vectors / grids
+bearings/navigation
+coordinate diagrams
+solids/composite solids
+response surfaces
+```
+
+Generated visuals should consume mathematical/semantic specifications and create independent layouts rather than reproduce historical source artwork.
+
+Context photography/illustration may use approved original/licensed assets with licence metadata where required.
+
+---
+
+## FF-015 — Reconcile Skills Tree metadata from mature corpus evidence
+
+**Status:** DEFERRED UNTIL EVIDENCE IS SUFFICIENT  
+**Area:** National 5 Mathematics / Skills
+
+The project-authored Skills Tree may contain paper-suitability, classification or other assumptions that historical evidence contradicts.
+
+Continue recording the historical evidence faithfully and flag mismatches during catalogue work.
+
+When enough corpus evidence exists, perform a systematic reconciliation pass rather than making isolated reactive edits whenever one mismatch appears.
+
+---
+
+## FF-016 — Tighten catalogue completeness validation
+
+**Status:** PLANNED / AFTER CONTRACT MATURITY  
+**Area:** catalogue contracts / architecture guard
+
+As the Question and Answer catalogue contracts survive a wider range of real historical evidence, strengthen validation so reviewed records cannot silently omit fields that have become genuinely mandatory.
+
+Potential validation targets include:
+
+```text
+source/counterpart linkage
+part/mark integrity
+classification completeness
+response-space evidence
+visual evidence state
+review state
+mark-node ownership
+```
+
+Do not harden assumptions prematurely from one question family.
+
+---
+
+## FF-017 — Evidence-derived Skills Tree / generator progress reporting
+
+**Status:** IDEA  
+**Area:** Developer Tools / catalogue programme
+
+Consider a generated progress view showing, by skill and/or historical paper:
+
+```text
+Question Catalogue coverage
+Answer Catalogue coverage
+Skill Catalogue synthesis status
+Question Generator status
+Answer Generator status
+visual capability dependencies
+validation state
+```
+
+If implemented, derive this from canonical source records rather than maintaining a second manual progress database.
+
+---
+
+# Assessment Library and Creator
+
+## FF-018 — Archive assessments by academic year
 
 **Status:** PLANNED / DEFERRED  
 **Area:** My Assessments
 
-Allow teachers to archive older assessments by year so the active library does not become cluttered after several academic years.
+Allow teachers to archive older assessments so the active library remains manageable across multiple academic years while archived work remains accessible and restorable.
 
-Motivation:
-
-> Teacher tools accumulate hundreds of documents over time. Old work should remain accessible without overwhelming the current-year library.
-
-Likely user-facing concepts may include:
-
-```text
-Archive
-Academic year grouping
-Active vs archived library
-Restore from archive
-```
-
-Exact data model and interaction should be designed when implementation begins.
-
-The current Search / Status / Sort / Tile–List toolbar should be treated as the existing library foundation rather than replaced unnecessarily.
+Build on the current library rather than creating a second assessment store.
 
 ---
 
-## FA-002 — Formal assessment finalisation workflow
+## FF-019 — Formal assessment finalisation workflow
 
 **Status:** INVESTIGATE  
-**Area:** My Assessments / Assessment lifecycle
+**Area:** Assessment lifecycle / My Assessments
 
-The saved-assessment model currently supports Draft/Complete state.
+Design what it means for an assessment to move from Draft to a genuinely final/complete state.
 
-Investigate whether the product should expose a clearer explicit workflow for finalising an assessment rather than treating the status as passive metadata.
-
-Questions to answer later:
-
-- What action makes an assessment Complete?
-- Can a completed assessment be reopened as Draft?
-- Does finalisation freeze anything or merely change status?
-- Should PDF generation/printing affect status?
-
-Do not invent behaviour until this is deliberately designed.
-
----
-
-# Assessment Creator
-
-## FA-003 — Compile readiness signalling
-
-**Status:** PLANNED / DEFERRED  
-**Area:** Assessment Creator / HUDBar
-
-The current Compile button is visually complete but does not yet communicate readiness beyond its normal state.
-
-Agreed direction for a future enhancement:
+Questions include:
 
 ```text
-assessment becomes ready
-        ↓
-one restrained brighter pulse / glow
-        ↓
-richer but static ready state
+what action finalises it?
+can it be reopened?
+does finalisation freeze content?
+does printing/PDF generation affect state?
 ```
 
-Avoid continuous attention-grabbing animation.
-
-Readiness rules themselves must be defined before implementation.
+Do not infer lifecycle semantics from the current status field alone.
 
 ---
 
-## FA-004 — Compile-time duration reconciliation
+## FF-020 — Compile readiness signalling
 
-**Status:** IDEA / INVESTIGATE  
-**Area:** Assessment Creator / Compilation / Paper Sitting
+**Status:** DEFERRED  
+**Area:** Assessment Creator / HUD
 
-Paper Sitting currently calculates intended end time from configured assessment intent, and a teacher may manually override End.
+Once readiness rules are defined, give the Compile action a restrained indication that the assessment is ready.
 
-A future Compile-stage check could compare the final assessment marks/duration with the intended sitting duration and surface a discrepancy when useful.
-
-Teacher-entered manual overrides should remain respected; this should be a reconciliation/notice workflow, not silent rewriting.
+Preferred interaction direction remains one subtle transition/pulse into a richer static ready state rather than continuous animation.
 
 ---
 
-# Application Shell / Account
+## FF-021 — Compile-time duration reconciliation
 
-## FA-005 — Account / login controls in HeaderBar right region
+**Status:** INVESTIGATE  
+**Area:** Assessment Creator / Compilation / paper sitting
+
+Compare final marks/duration with the teacher's intended sitting duration at compile time and surface a useful discrepancy when appropriate.
+
+Respect deliberate teacher overrides; this should warn/reconcile rather than silently rewrite timings.
+
+---
+
+## FF-022 — Teacher assessment calendar
+
+**Status:** IDEA  
+**Area:** Application shell / My Assessments / planning
+
+Explore a teacher-facing calendar accessible from the side action area showing upcoming/planned assessment dates and, once lifecycle semantics exist, useful readiness/completion state.
+
+Reuse canonical assessment records and dates rather than creating a parallel planning database.
+
+---
+
+## FF-023 — Account/login controls
 
 **Status:** PARKED  
-**Area:** Application Shell
+**Area:** Application shell
 
-The HeaderBar's right-hand region is intentionally empty and reserved for future application/account controls.
+The HeaderBar right region may later host account/login identity and controls once authentication/account architecture is actually designed.
 
-Potential future use includes login/account identity once authentication/account architecture is designed.
-
-Do **not** design or pre-build account UI merely because the space is reserved.
+Do not pre-build account architecture solely because presentation space is available.
 
 ---
 
-# Courses and Qualification Expansion
+# Future Courses
 
-## FA-006 — Higher Mathematics Course
+## FF-024 — Higher Mathematics
 
 **Status:** IDEA  
 **Area:** Courses
 
-Add Higher Mathematics as a sibling Course implementation when product priorities justify it.
+Add a Higher Mathematics sibling Course when product priorities justify it.
 
-Architecture expectation:
+Reuse generic Assessment/Class architecture rather than cloning the National 5 Mathematics workflow.
 
-```text
-app/Courses/HigherMaths/
-```
-
-only once real implementation begins.
-
-The existing generic Assessment Creation workflow should be reused rather than cloned.
-
-Do not pre-create an empty Higher Course tree.
+Create Course-specific folders only when real implementation begins.
 
 ---
 
-## FA-007 — Advanced Higher Mathematics Course
+## FF-025 — Advanced Higher Mathematics
 
 **Status:** IDEA  
 **Area:** Courses
 
-Potential future sibling Course after the generic Course architecture has been exercised by another real qualification.
+Potential future sibling Course after the generic Course boundaries have been exercised by additional real implementations.
 
-Do not create placeholder source architecture before implementation begins.
+Do not create placeholder source architecture in advance.
 
 ---
 
-## FA-008 — National 5 Applications of Mathematics expansion
+## FF-026 — Expand National 5 Applications of Mathematics
 
 **Status:** IDEA / INVESTIGATE  
 **Area:** Courses
 
-A National 5 Applications of Mathematics Course owner already exists.
+Expand the existing Course owner with genuine configuration, skills, documents and question/answer generation when required.
 
-Future work may expand its real assessment configuration, skills, documents and question/answer generation as required.
-
-Only add substructure when genuine Course functionality exists; do not mechanically mirror National 5 Maths for symmetry.
+Do not mirror the National 5 Mathematics folder tree mechanically merely for symmetry.
 
 ---
 
 # Scanning, Marking and Pupil Workflow
 
-## FA-009 — QR-coded assessment scripts
+## FF-027 — QR-coded assessment scripts
 
 **Status:** IDEA / INVESTIGATE  
-**Area:** Future marking workflow
+**Area:** future marking workflow
 
-Explore adding QR-coded identifiers to generated assessment pages so scanned pupil scripts can be associated with the correct assessment/page/pupil identifier without requiring pupil names in server-visible document metadata.
+Explore generated non-identifying page/script identifiers that allow scanned responses to be associated with the correct assessment, page and pupil ID without embedding pupil names into server-visible document metadata.
 
-Any implementation must preserve the privacy model around pupil identity.
+Any implementation must preserve the locked pupil-identity privacy boundary.
 
 ---
 
-## FA-010 — Batch scanned-script ingestion
+## FF-028 — Batch scanned-script ingestion
 
 **Status:** IDEA / INVESTIGATE  
-**Area:** Future marking workflow
+**Area:** future marking workflow
 
-Explore a teacher workflow for scanning a batch of completed scripts into PDF and automatically separating/identifying scripts/pages using generated identifiers such as QR codes.
+Explore a teacher workflow for importing a batch scan/PDF and separating or identifying individual scripts/pages using generated identifiers.
 
-This should be designed as a real workflow before any source architecture is created.
+Design the real workflow before creating source architecture.
 
 ---
 
-## FA-011 — OCR-assisted marking foundation
+## FF-029 — OCR-assisted response recognition
 
 **Status:** IDEA / INVESTIGATE  
-**Area:** Future marking workflow
+**Area:** future marking workflow
 
-Longer-term concept: use OCR/recognition to assist marking of scanned pupil responses.
+Investigate recognition of handwritten/printed pupil responses as an assistive stage for marking.
 
-The intended direction is assistance rather than pretending fully automatic marking is reliable from day one.
+Early design should assume teacher review/correction and measured reliability rather than fully automatic recognition.
 
-Early concepts discussed include:
-
-- local/controlled OCR where practical;
-- teacher review/correction;
-- collecting teacher-marked examples as useful training/evaluation data;
-- incrementally improving recognition/marking support from real marked work.
-
-Do not create speculative OCR/AI source folders until implementation responsibilities are understood.
+Privacy, processing location, retention and error handling require explicit design before implementation.
 
 ---
 
-## FA-012 — Teacher-marked training/evaluation dataset
+## FF-030 — Teacher-confirmed marking evaluation dataset
 
 **Status:** IDEA / INVESTIGATE  
-**Area:** Future marking workflow
+**Area:** future marking workflow
 
-If OCR/AI-assisted marking progresses, investigate using teacher-confirmed marks/annotations from an early pilot as the highest-quality source of training/evaluation examples.
+If assisted recognition/marking progresses, investigate whether appropriately governed teacher-confirmed examples can support evaluation and improvement.
 
-A possible early pilot scale previously discussed was approximately 10–15 teachers, but this is not a committed rollout number.
+Consent, anonymisation, retention, access and data-protection requirements must be designed before collecting such data.
 
-Data governance, consent, retention, anonymisation and GDPR requirements must be designed before collecting data.
+No pilot scale is committed by this entry.
 
 ---
 
-## FA-013 — AI-assisted marking
+## FF-031 — AI-assisted marking
 
 **Status:** LONG-TERM IDEA  
-**Area:** Future marking workflow
+**Area:** future marking workflow
 
-Explore AI support for suggesting marks/feedback from scanned responses after sufficient OCR, evaluation and teacher-reviewed evidence exists.
+Explore AI support for suggesting marks/feedback only after sufficient recognition quality, evaluation evidence and teacher-review workflow exist.
 
-Principles:
+Teachers must remain able to review and override suggestions, and reliability must be measured rather than assumed.
 
-- teacher remains able to review/override;
-- reliability must be measured rather than assumed;
-- launch should not depend on “magical robot marking” being perfect;
-- privacy/data governance must be part of architecture from the beginning.
-
-This is a long-term product direction, not a near-term implementation instruction.
+This is a long-term direction, not a near-term implementation instruction.
 
 ---
 
-# Privacy and Pupil Identity
+## FF-032 — Local pupil-ID/name mapping UX
 
-## FA-014 — Local pupil-ID → name mapping workflow
-
-**Status:** PLANNED PRINCIPLE / FUTURE UX  
+**Status:** IDEA / FUTURE UX  
 **Area:** Classes / future pupil workflow
 
-Maintain the privacy approach where the application can operate on anonymous/non-identifying pupil IDs while the pupil-ID → pupil-name mapping remains local to the teacher's device where practical.
+Make the locked privacy model easy to use: the application should be able to operate on non-identifying pupil IDs while teacher-facing local mapping supplies names where practical.
 
-Future pupil/scanning/marking UX should make this model easy for teachers rather than weakening it for convenience.
-
-Any proposal to transmit/store pupil names more broadly requires explicit privacy review.
+Future scanning/marking flows should preserve this model rather than weakening it for convenience.
 
 ---
 
-# Technical / Maintenance Follow-Up
+# Backlog Maintenance
 
-## FA-015 — Remove remaining obsolete SettingsDrawer compatibility files
+## 3. Keep This File Forward-Looking
 
-**Status:** DEFERRED MAINTENANCE  
-**Area:** Application UI
-
-Global Settings now uses Application Settings + Activity Rail/Shell ownership.
-
-A small historical `app/UI/Application/SettingsDrawer/` compatibility area remains in the repository.
-
-Audit its remaining consumers and remove/rehome files only when proven safe.
-
-Do not treat the folder's existence as permission to build new global Settings functionality there.
-
----
-
-## FA-016 — Continue targeted Course-independence audits
-
-**Status:** PARKED MAINTENANCE  
-**Area:** Assessments / Courses
-
-Architecture V2 established Course-independent generic workflows, but future feature work should continue to watch for concrete National 5 Maths imports leaking into generic Assessment/Classes code.
-
-When a real seam is encountered:
+When an item is completed:
 
 ```text
-confirm it is genuinely Course-specific
+remove it from the active backlog
         ↓
-add/extend a Course contract if justified
-        ↓
-switch the consumer
-        ↓
-verify
+record the meaningful implemented outcome in FeatureHistory when useful
 ```
 
-Do not launch another repository-wide “Course independence refactor” without a concrete problem.
+Do not leave implemented items here indefinitely as a second historical ledger.
 
----
+When current architecture changes, update stale paths in active backlog items.
 
-# Application Shell / Planning
+When an idea becomes a binding rule, move the rule to `LockedDecisions.md` rather than trying to make this file authoritative.
 
-## FA-017 — Teacher assessment calendar in the side action area
-
-**Status:** IDEA  
-**Area:** Application Shell / My Assessments / assessment planning
-
-Explore a teacher-facing calendar accessible from the application's side action/Activity Rail area so upcoming and planned assessment dates can be viewed at a glance.
-
-The calendar could potentially show whether an assessment is:
-
-```text
-planned/upcoming
-completed
-ready for print
-```
-
-or equivalent meaningful readiness/status information once the assessment lifecycle/finalisation model is defined.
-
-This idea should build on existing assessment dates and library status rather than creating a second assessment record system.
-
-The exact owner, status semantics and interaction should be designed when implementation begins. This entry preserves the earlier loose idea without establishing source architecture prematurely.
-
----
-
-# Product / UI Ideas to Capture Later
-
-This section intentionally remains lightweight.
-
-When a new idea appears during normal development, add it here rather than relying on chat history or memory.
-
-Good candidates include:
-
-- a workflow improvement the team deliberately postpones;
-- an idea discovered while polishing another feature;
-- an enhancement which depends on a future system;
-- technical debt worth remembering but not worth expanding the current pass to fix.
-
-Do not add speculative ideas merely to make the roadmap look larger.
-
----
-
-# Implemented / Moved to Feature History
-
-When an item is implemented, either remove it from the active sections or record a short pointer here, for example:
-
-```text
-FA-XXX — Implemented 2026-09-01
-→ See Docs/FeatureHistory.md
-```
-
-The active future list should remain useful rather than becoming another historical ledger.
-
----
-
-# National 5 Mathematics Catalogue / Generation Programme — Added 28 August 2026
-
-The following entries capture work that is deliberately **not yet complete** after the 2014 Question Catalogue pilot. The architecture itself is established; these entries describe the next population, reconciliation and retirement stages.
-
-## FA-018 — Populate the Answer Catalogue from historical marking schemes
-
-**Status:** PLANNED  
-**Area:** National 5 Maths / `02_AnswerCatalog`
-
-Catalogue the matching historical answers/marking schemes as first-class evidence paired to each Question Catalogue entry.
-
-The Answer Catalogue should model the marking scheme as a structured evidence system rather than a single linear worked solution. It should support method pathways, mark nodes, dependencies, implied evidence, follow-through, answer-only rules, alternative methods, exactness/rounding, units, notation, diagram evidence, common-result rules and cross-question/general marking policy where the source supports them.
-
-Question and Answer files remain physically separate for navigability while the Question Paper and matching Marking Scheme are analysed as a paired evidence unit.
-
-The 2014 Question entries currently remain `IN_PROGRESS` until their matching Answer/MS catalogue pass is completed and cross-checked.
-
----
-
-## FA-019 — Extend full-fidelity Question cataloguing across the historical corpus
-
-**Status:** PLANNED  
-**Area:** National 5 Maths / `01_QuestionCatalog`
-
-After the 2014 pilot contracts and workflow have survived the Answer Catalogue stress test, extend the same evidence standard through the remaining historical corpus:
-
-```text
-2015
-2016
-2017
-2018
-2019
-2021
-2022
-2023
-2024
-2025
-```
-
-There is no 2020 National 5 examination paper in the intended corpus because of the COVID cancellation.
-
-The known corpus contains 337 numbered Questions across 2014–2019 and 2021–2025. Population should remain year/paper based and should not trade completeness for speed.
-
----
-
-## FA-020 — Reconcile the National 5 Maths Skills Tree after corpus cataloguing
-
-**Status:** PLANNED / DEFERRED UNTIL CATALOGUE PHASE COMPLETES  
-**Area:** National 5 Maths / Skills
-
-Historical examination evidence is treated as authoritative evidence of what actually appeared. The project-authored Skills Tree is useful infrastructure but can contain incorrect paper-suitability or classification assumptions.
-
-The 2014 Paper 1 pilot already exposed examples where historical Questions conflict with current Skills Tree paper-suitability metadata.
-
-Do **not** distort catalogue evidence to make it agree with the current Skills Tree. Record the historical fact and flag the mismatch. Reconcile the Skills Tree systematically after enough corpus evidence has been catalogued to make the correction evidence-led rather than reactive.
-
----
-
-## FA-021 — Populate `03_QuestionGeneration` from catalogue knowledge
-
-**Status:** PLANNED / DEFERRED UNTIL CATALOGUE EVIDENCE IS SUFFICIENT  
-**Area:** National 5 Maths / Question Generation
-
-Build original Question generators from the normalised structural knowledge learned from the historical Question + Answer catalogues.
-
-Generation must consume semantic/catalogued knowledge rather than historical wording or artwork. It should produce Builder/Assessment-native Question objects only after the catalogue layer has described the relevant family, constraints, difficulty, response space, representations and safe parameter variation.
-
-The earlier successful trig-equation prototype remains evidence that catalogue-informed generation is viable, but the new workflow should be populated against the full-fidelity contracts rather than restoring the narrow legacy generation layout.
-
----
-
-## FA-022 — Populate `04_AnswerGeneration` and downloadable marking-scheme output
-
-**Status:** PLANNED / DEFERRED UNTIL ANSWER CATALOGUE EVIDENCE IS SUFFICIENT  
-**Area:** National 5 Maths / Answer Generation
-
-Generate original worked answers and illustrative marking-scheme structures from catalogued marking knowledge, linked to generated Questions.
-
-The generation layer should preserve legitimate alternative methods, mark dependencies, follow-through and presentation requirements without copying historical marking-scheme wording.
-
-This should ultimately support both in-application answers and downloadable marking-scheme-style documents through the existing document/Compilation architecture.
-
----
-
-## FA-023 — Build out deterministic visual renderer families and context-asset bank
-
-**Status:** PLANNED / INVESTIGATE DURING GENERATION WORK  
-**Area:** National 5 Maths / `05_VisualAssets`
-
-Implement the renderer families required by the visual evidence catalogue, prioritising deterministic procedural SVG for mathematical schematics such as geometry, circles, graphs, scattergraphs, vectors, bearings, coordinate diagrams, solids and response surfaces.
-
-Context photographs/illustrations should come from an approved/licensed asset bank with licence metadata where a contextual image is useful. Historical source artwork and exact source geometry must not be used as generation templates.
-
-Runtime AI image generation is not required for essential mathematical diagrams.
-
----
-
-## FA-024 — Retire `National5MathsLegacy` and the temporary TypeScript alias bridge
-
-**Status:** DEFERRED MAINTENANCE / MIGRATION END STATE  
-**Area:** National 5 Maths / Course integration
-
-The current runtime continues to resolve historical National 5 Maths imports through a temporary TypeScript path bridge into:
-
-```text
-app/Courses/National5MathsLegacy/
-```
-
-while the clean workflow architecture is built in:
-
-```text
-app/Courses/National5Maths/
-```
-
-Remove the bridge and legacy tree only after the clean Skills, Course config, Documents, catalogue/generation and runtime consumers have been migrated or replaced and the application is verified end-to-end.
-
-Do not delete the legacy tree merely because Explorer hides it or because the clean catalogue workspace now exists.
-
----
-
-## FA-025 — Tighten catalogue completeness validation after the pilot transition
-
-**Status:** PLANNED  
-**Area:** National 5 Maths / catalogue contracts
-
-Several evidence fields added during the 2014 pilot are intentionally transitional/optional so the contract could be strengthened without breaking pre-rewrite entries.
-
-Once the pilot Question + Answer passes establish the final evidence standard, tighten validation so reviewed catalogue entries cannot silently omit required response-space measurement, part-demand, calculator, language or other mandatory evidence fields.
-
-Do this after the contract has survived real historical variety rather than prematurely hardening assumptions from one Question family.
+Do not add speculative items merely to make the roadmap appear larger.
