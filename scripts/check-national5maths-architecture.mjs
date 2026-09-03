@@ -14,6 +14,14 @@ const CANONICAL_LAYERS = [
   "06_VisualAssets",
 ];
 
+const LEGACY_VISUAL_IMPORT_ALLOWLIST = new Set([
+  "app/Courses/National5Maths/01_QuestionCatalog/QuestionCatalogTypes.ts",
+  "app/Courses/National5Maths/02_AnswerCatalog/AnswerCatalogTypes.ts",
+  ...Array.from({ length: 13 }, (_, index) =>
+    `app/Courses/National5Maths/01_QuestionCatalog/2014/Paper1/N5_Maths_2014_P1_Q${index + 1}.ts`,
+  ),
+]);
+
 const SOURCE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
 const violations = [];
 const warnings = [];
@@ -136,24 +144,19 @@ for (const file of walk(appRoot)) {
   }
 }
 
-// The 2014 pilot and the two universal catalogue contracts still name the old
-// 05_VisualAssets address. That address is now only a one-file forwarder to the
-// shared historical visual contract. No new consumer is permitted.
+// The exact 2014 pilot files listed above still name the old 05_VisualAssets
+// address. That address is now only a one-file forwarder to the shared contract.
+// Any new 05 consumer is a hard failure rather than a migration warning.
 for (const file of walk(appRoot)) {
   const fileRel = rel(file);
   const source = fs.readFileSync(file, "utf8");
   for (const specifier of importSpecifiers(source)) {
     if (!containsSegment(specifier, "05_VisualAssets")) continue;
 
-    const isHistoricalQuestionCatalog = fileRel.startsWith(
-      "app/Courses/National5Maths/01_QuestionCatalog/",
-    );
-    const isHistoricalAnswerVisualContract =
-      fileRel === "app/Courses/National5Maths/02_AnswerCatalog/AnswerCatalogTypes.ts";
     const isCompatibilityForwarder =
       fileRel === "app/Courses/National5Maths/05_VisualAssets/VisualCatalogTypes.ts";
 
-    if (isHistoricalQuestionCatalog || isHistoricalAnswerVisualContract) {
+    if (LEGACY_VISUAL_IMPORT_ALLOWLIST.has(fileRel)) {
       warnings.push(`${fileRel}: legacy 05_VisualAssets import forwards to CatalogVisualEvidenceTypes; migrate this import when the historical file is next touched.`);
     } else if (!isCompatibilityForwarder) {
       addViolation(file, `Deprecated 05_VisualAssets import is forbidden (${specifier}). Historical evidence uses CatalogVisualEvidenceTypes; generated visuals use 06_VisualAssets.`);
