@@ -1,9 +1,9 @@
 import type { QuestionResponseType } from "../01_QuestionCatalog/QuestionCatalogTypes";
 import type { AnswerCatalogEntry, CommonResponsePattern, ExpectedAnswerVariant, MarkNode, MethodPathway, SourceMarkingDirective } from "./AnswerCatalogTypes";
-import { answerIntegrity, answerOnly, catalogValue, consistencyFeature, emptyMethodEquivalence, emptyVisualMarking, generationNotReviewed, markNode, notReviewed, presentationPolicy, sourcePresentation, unitProfile, workingPolicy } from "./AnswerCatalogHelpers";
+import { asHistoricalAnswerCatalogEntry } from "./AnswerCatalogHistoricalView";
+import { answerOnly, catalogValue, consistencyFeature, emptyMethodEquivalence, emptyVisualMarking, markNode, notReviewed, presentationPolicy, sourcePresentation, unitProfile, workingPolicy } from "./AnswerCatalogHelpers";
 import type { A8AnswerConfig } from "./A8SimultaneousEquationsAnswerTypes";
-import { CONCEPT_ID, SKILL_ID, crossCorpusFor, detailedEvidence, policyIdsFor, reviewAfterA8Comparison, sourceDirective, sourceEntrySummary } from "./A8SimultaneousEquationsAnswerCommon";
-
+import { CONCEPT_ID, SKILL_ID, detailedEvidence, historicalA8Review, policyIdsFor, sourceDirective } from "./A8SimultaneousEquationsAnswerCommon";
 
 export const bareEntry = (config: A8AnswerConfig): AnswerCatalogEntry => {
   const question = config.question;
@@ -101,9 +101,8 @@ export const bareEntry = (config: A8AnswerConfig): AnswerCatalogEntry => {
   };
 
   const policy = policyIdsFor(question.identity.year);
-  const summary = sourceEntrySummary(config);
-  const review = reviewAfterA8Comparison(config);
-  return {
+  const review = historicalA8Review(config);
+  return asHistoricalAnswerCatalogEntry({
     identity: { id: question.identity.answerCatalogId, schemaVersion: "N5_CATALOG_V2", sourceQuestionId: question.identity.id, courseId: question.identity.courseId, paperContextId: question.identity.paperContextId, year: question.identity.year, paper: question.identity.paper, questionNumber: question.identity.questionNumber, questionFamilyId: question.family.familyId },
     sourceContext: { sourceDocumentId: `N5_MATH_${question.identity.year}_MS`, totalMarks: 3, sourcePages: config.msPages, printedPageLabels: config.printedPageLabels, sourceEvidence: evidence, generalMarkingPolicyId: policy.policyId },
     expectedResponse: { responseTypes, canonicalAnswers, acceptedEquivalentForms: [], precisionType: "NONE", precisionValue: null, acceptedRange: null, units: unitProfile(null, null), requiredContextStatement: false, answerCountRequired: config.surfaceFamily === "GRAPH_INTERSECTION_SOLVE" ? 1 : 2, invalidRelatedValues: [], extraAnswerTreatment: "QUESTION_SPECIFIC" },
@@ -144,14 +143,10 @@ export const bareEntry = (config: A8AnswerConfig): AnswerCatalogEntry => {
     consistency: {
       factualFingerprint: [
         consistencyFeature("a8_mark_profile", config.markProfile, `This source uses the ${config.markProfile} decomposition.`, evidence),
-        consistencyFeature("answer_only_treatment", config.detailedAnswerOnly, summary?.correctAnswerWithoutWorking === "NO_CREDIT" ? "The detailed source explicitly gives no credit for unsupported correct answers." : "The detailed source does not state a question-specific answer-only total.", evidence),
+        consistencyFeature("answer_only_treatment", config.detailedAnswerOnly, config.detailedAnswerOnly === "NO_CREDIT" ? "The detailed source explicitly gives no credit for unsupported correct answers." : "The detailed source does not state a question-specific answer-only total.", evidence),
         consistencyFeature("explicitly_rejected_method", config.rejectedMethod, config.rejectedMethod ? `The detailed source explicitly rejects ${config.rejectedMethod}.` : "No A8-specific method exclusion is stated in the detailed row.", evidence),
       ],
-      crossCorpusAnalysis: crossCorpusFor(config, responseTypes),
     },
-    integrity: answerIntegrity(),
-    generation: generationNotReviewed(),
     review,
-  };
-
+  });
 };
