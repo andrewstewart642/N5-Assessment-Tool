@@ -1,13 +1,13 @@
 import type { CatalogEvidenceRef } from "../CatalogCoreTypes";
-import type { VisualEvidenceProfile } from "../05_VisualAssets/VisualCatalogTypes";
-import { catalogValue, notApplicable, visualOriginality, visualValidation } from "./QuestionCatalogHelpers";
+import type { HistoricalVisualEvidenceProfile } from "./QuestionCatalogHistoricalView";
+import { catalogValue, notApplicable } from "./QuestionCatalogHelpers";
 import type { A8QuestionConfig } from "./A8SimultaneousEquationsCatalogTypes";
 import { equationText } from "./A8SimultaneousEquationsCatalogSource";
 
 export const buildGraphVisual = (
   config: A8QuestionConfig,
   visualEvidence: CatalogEvidenceRef,
-): VisualEvidenceProfile => {
+): HistoricalVisualEvidenceProfile => {
   const [xSymbol, ySymbol] = config.variableSymbols;
   const [xValue, yValue] = config.solution;
   return {
@@ -108,23 +108,6 @@ export const buildGraphVisual = (
         contextImage: notApplicable(),
         responseSurface: notApplicable(),
       },
-      generation: {
-        readiness: "READY_FOR_PROTOTYPE",
-        strategy: "PROCEDURAL_GRAPH",
-        rendererFamilyId: "A8_SIMULTANEOUS_LINEAR_GRAPH",
-        allowedMediaAssetIds: [],
-        requiredAssetTags: [],
-        semanticInvariants: ["two distinct straight lines", "one unique intersection", "line equations agree with generated algebra", "intersection agrees with generated solution"],
-        safeVariationAxes: ["axis extent", "line styling", "label placement", "generated coefficients and intersection"],
-        unsafeVariations: ["parallel or coincident lines", "graph inconsistent with equation coefficients", "visual point inconsistent with algebraic solution"],
-        permittedOrientationChanges: [],
-        permittedStyleChanges: ["line weight", "label spacing", "axis extent"],
-        requiredRendererCapabilities: ["straight-line plotting", "coordinate axes", "semantic intersection label"],
-        requiredValidationChecks: ["determinant non-zero", "graph/equation consistency", "intersection/solution consistency", "label collision", "print readability"],
-        provenance: "GENERATION_ANALYSIS",
-      },
-      originality: visualOriginality(),
-      validation: visualValidation(true, true),
       sourceEvidence: [visualEvidence],
       confidence: "HIGH",
     }],
@@ -134,6 +117,5 @@ export const buildGraphVisual = (
     containsContextImage: false,
     containsProcedurallyReproducibleDiagram: true,
     containsResponseSurface: false,
-    generationRequiresMultipleVisuals: false,
   };
 };
