@@ -1,19 +1,11 @@
-import type { QuestionCatalogEntry } from "../01_QuestionCatalog/QuestionCatalogTypes";
-import {
-  toHistoricalQuestionCatalogView,
-  type HistoricalQuestionCatalogView,
-} from "../01_QuestionCatalog/QuestionCatalogHistoricalView";
-import type { AnswerCatalogEntry } from "../02_AnswerCatalog/AnswerCatalogTypes";
-import {
-  toHistoricalAnswerCatalogView,
-  type HistoricalAnswerCatalogView,
-} from "../02_AnswerCatalog/AnswerCatalogHistoricalView";
+import type { HistoricalQuestionCatalogView } from "../01_QuestionCatalog/QuestionCatalogHistoricalView";
+import type { HistoricalAnswerCatalogView } from "../02_AnswerCatalog/AnswerCatalogHistoricalView";
 
-export type SkillHistoricalSourcePair = {
-  question: QuestionCatalogEntry;
-  answer: AnswerCatalogEntry;
-};
-
+/**
+ * SkillCatalog is deliberately forbidden from accepting the transitional full
+ * QuestionCatalogEntry / AnswerCatalogEntry contracts. Projection into these
+ * historical-only views happens at the 01/02 -> 03 boundary.
+ */
 export type SkillHistoricalEvidencePair = {
   question: HistoricalQuestionCatalogView;
   answer: HistoricalAnswerCatalogView;
@@ -22,6 +14,52 @@ export type SkillHistoricalEvidencePair = {
 export type SkillHistoricalEvidenceSet = {
   skillId: string;
   entries: readonly SkillHistoricalEvidencePair[];
+};
+
+const QUESTION_FORBIDDEN_KEYS = [
+  "generation",
+  "parameterDesign",
+  "sourceIsolation",
+] as const;
+
+const ANSWER_FORBIDDEN_KEYS = [
+  "consistency",
+  "generation",
+  "integrity",
+] as const;
+
+const assertNoOwnKey = (
+  value: object,
+  key: string,
+  label: string,
+): void => {
+  if (Object.prototype.hasOwnProperty.call(value, key)) {
+    throw new Error(`${label}: forbidden downstream field '${key}' crossed the historical catalogue boundary.`);
+  }
+};
+
+const assertHistoricalQuestionBoundary = (
+  question: HistoricalQuestionCatalogView,
+): void => {
+  for (const key of QUESTION_FORBIDDEN_KEYS) {
+    assertNoOwnKey(question, key, question.identity.id);
+  }
+
+  if (question.visuals.state === "VALUE") {
+    for (const element of question.visuals.value.elements) {
+      assertNoOwnKey(element, "generation", `${question.identity.id}/${element.id}`);
+      assertNoOwnKey(element, "originality", `${question.identity.id}/${element.id}`);
+      assertNoOwnKey(element, "validation", `${question.identity.id}/${element.id}`);
+    }
+  }
+};
+
+const assertHistoricalAnswerBoundary = (
+  answer: HistoricalAnswerCatalogView,
+): void => {
+  for (const key of ANSWER_FORBIDDEN_KEYS) {
+    assertNoOwnKey(answer, key, answer.identity.id);
+  }
 };
 
 const questionMentionsSkill = (
@@ -44,49 +82,46 @@ const answerMentionsSkill = (
 /**
  * Creates the canonical evidence set used by one SkillCatalog slice.
  *
- * The raw imports remain the authoritative question-by-question historical
- * records. SkillCatalog receives restricted historical views and validates the
- * Question ↔ Answer relationship before any cross-corpus synthesis runs.
+ * Callers must pass already-projected historical records. This is intentional:
+ * 03_SkillCatalog never receives generator analysis, renderer policy or
+ * cross-corpus judgements from the transitional source-catalog contracts.
  */
 export const createSkillHistoricalEvidenceSet = (
   skillId: string,
-  sourcePairs: readonly SkillHistoricalSourcePair[],
+  sourcePairs: readonly SkillHistoricalEvidencePair[],
 ): SkillHistoricalEvidenceSet => {
   const entries = sourcePairs.map(({ question, answer }) => {
-    const historicalQuestion = toHistoricalQuestionCatalogView(question);
-    const historicalAnswer = toHistoricalAnswerCatalogView(answer);
+    assertHistoricalQuestionBoundary(question);
+    assertHistoricalAnswerBoundary(answer);
 
-    if (historicalAnswer.identity.sourceQuestionId !== historicalQuestion.identity.id) {
+    if (answer.identity.sourceQuestionId !== question.identity.id) {
       throw new Error(
-        `${skillId}: ${historicalAnswer.identity.id} points to ${historicalAnswer.identity.sourceQuestionId}, not ${historicalQuestion.identity.id}.`,
+        `${skillId}: ${answer.identity.id} points to ${answer.identity.sourceQuestionId}, not ${question.identity.id}.`,
       );
     }
 
-    if (historicalQuestion.identity.answerCatalogId !== historicalAnswer.identity.id) {
+    if (question.identity.answerCatalogId !== answer.identity.id) {
       throw new Error(
-        `${skillId}: ${historicalQuestion.identity.id} points to ${historicalQuestion.identity.answerCatalogId}, not ${historicalAnswer.identity.id}.`,
+        `${skillId}: ${question.identity.id} points to ${question.identity.answerCatalogId}, not ${answer.identity.id}.`,
       );
     }
 
-    if (historicalQuestion.structure.totalMarks !== historicalAnswer.sourceContext.totalMarks) {
+    if (question.structure.totalMarks !== answer.sourceContext.totalMarks) {
       throw new Error(
-        `${skillId}: mark tariff mismatch for ${historicalQuestion.identity.id}.`,
+        `${skillId}: mark tariff mismatch for ${question.identity.id}.`,
       );
     }
 
     if (
-      !questionMentionsSkill(historicalQuestion, skillId) &&
-      !answerMentionsSkill(historicalAnswer, skillId)
+      !questionMentionsSkill(question, skillId) &&
+      !answerMentionsSkill(answer, skillId)
     ) {
       throw new Error(
-        `${skillId}: ${historicalQuestion.identity.id} does not reference the Skill at question or mark level.`,
+        `${skillId}: ${question.identity.id} does not reference the Skill at question or mark level.`,
       );
     }
 
-    return {
-      question: historicalQuestion,
-      answer: historicalAnswer,
-    };
+    return { question, answer };
   });
 
   const questionIds = new Set<string>();
