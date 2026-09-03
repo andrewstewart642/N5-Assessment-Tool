@@ -8,11 +8,11 @@ import type {
   A7GeneratorDifficulty,
   A7GeneratorFamily,
   A7GeneratorPaper,
-} from "../../Courses/National5Maths/03_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
+} from "../../Courses/National5Maths/04_QuestionGeneration/02-Algebraic/ALG-A7-LinearEquations";
 import {
   generateA7AssessmentBatch,
   type A7GeneratedMarkingScheme,
-} from "../../Courses/National5Maths/04_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations";
+} from "../../Courses/National5Maths/05_AnswerGeneration/02-Algebraic/ALG-A7-LinearEquations";
 import A7SqaQuestionPreview from "./A7SqaQuestionPreview";
 
 type FamilyControl = "MIX" | A7GeneratorFamily;
