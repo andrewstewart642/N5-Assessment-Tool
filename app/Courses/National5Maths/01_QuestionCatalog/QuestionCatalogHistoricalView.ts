@@ -172,4 +172,10 @@ export const toHistoricalQuestionCatalogView = (
  */
 export const asHistoricalQuestionCatalogEntry = (
   entry: HistoricalQuestionCatalogView,
-): QuestionCatalogEntry => entry as unknown as QuestionCatalogEntry;
+): QuestionCatalogEntry => {
+  const review = historicalReview(entry.review as QuestionCatalogEntry["review"]);
+  return {
+    ...entry,
+    review,
+  } as unknown as QuestionCatalogEntry;
+};
