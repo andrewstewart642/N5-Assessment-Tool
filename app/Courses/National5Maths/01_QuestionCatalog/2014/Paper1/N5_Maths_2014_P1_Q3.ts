@@ -1,5 +1,5 @@
 import type { QuestionCatalogEntry } from "../../QuestionCatalogTypes";
-import type { VisualEvidenceProfile } from "../../../05_VisualAssets/VisualCatalogTypes";
+import type { VisualEvidenceProfile } from "../../../CatalogVisualEvidenceTypes";
 import { catalogValue, notApplicable, qpEvidence, questionReviewInProgress, sourceIsolation, visualOriginality, visualValidation } from "../../QuestionCatalogHelpers";
 
 const evidence = qpEvidence("3", 4);
