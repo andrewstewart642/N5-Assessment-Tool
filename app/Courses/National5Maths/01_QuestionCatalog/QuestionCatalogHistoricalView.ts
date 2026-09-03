@@ -161,3 +161,15 @@ export const toHistoricalQuestionCatalogView = (
   surface: entry.surface,
   review: historicalReview(entry.review),
 });
+
+/**
+ * Transitional storage adapter for newly purified historical entries.
+ *
+ * A7/A8 now store only HistoricalQuestionCatalogView data at runtime. The cast
+ * preserves compatibility with older call sites that still name
+ * QuestionCatalogEntry while the untouched corpus is migrated incrementally.
+ * No omitted generator field is recreated by this adapter.
+ */
+export const asHistoricalQuestionCatalogEntry = (
+  entry: HistoricalQuestionCatalogView,
+): QuestionCatalogEntry => entry as unknown as QuestionCatalogEntry;
