@@ -1,0 +1,20 @@
+export const NUM_N2_MULTI_LAW_SIMPLIFICATION = {
+  skillId: "num-n2-indices",
+  label: "Simplify using more than one index-law step",
+  family: "MULTI_LAW_SIMPLIFICATION",
+  mechanisms: [
+    "PRODUCT_QUOTIENT_WITH_COEFFICIENT",
+    "POWER_OF_POWER_WITH_NEGATIVE_INDEX",
+    "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX",
+    "PRODUCT_OVER_ROOT",
+    "NEGATIVE_INDEX_QUOTIENT",
+    "POSITIVE_POWER_PRODUCT_QUOTIENT",
+  ],
+  readiness: "CORE",
+  papers: ["P1", "P2"],
+  difficulties: [1, 2],
+  marks: [2, 3],
+  standardProfiles: ["C", "C+A", "A"],
+  thinking: "OPERATIONAL",
+  generatorId: "N2_INDICES_V1",
+} as const;
