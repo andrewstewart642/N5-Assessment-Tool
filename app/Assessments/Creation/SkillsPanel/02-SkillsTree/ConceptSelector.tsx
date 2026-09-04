@@ -36,8 +36,11 @@ import {
   getConceptRestriction,
 } from "./ConceptSelectionRules";
 
-const A7_LINEAR_EQUATIONS_SKILL_ID =
-  "alg-a07-linear-equations";
+const SOURCE_ORDERED_CONCEPT_SKILL_IDS =
+  new Set([
+    "num-n2-indices",
+    "alg-a07-linear-equations",
+  ]);
 
 function conceptLabelParts(
   concept: Concept
@@ -150,8 +153,9 @@ function conceptsForDisplay(
   rankedConcepts: Concept[]
 ): Concept[] {
   if (
-    skill.id !==
-    A7_LINEAR_EQUATIONS_SKILL_ID
+    !SOURCE_ORDERED_CONCEPT_SKILL_IDS.has(
+      skill.id
+    )
   ) {
     return rankedConcepts;
   }
