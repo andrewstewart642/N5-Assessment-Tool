@@ -34,6 +34,11 @@ import FractionalIndicesConceptModule from "../../National5MathsLegacy/QuestionA
 import ScientificNotationConceptModule from "../../National5MathsLegacy/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N02_5_ScientificNotation";
 import SignificantFiguresConceptModule from "../../National5MathsLegacy/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/NQ_N5_NUM_N03_1_SignificantFigures";
 import {
+  N2EvaluateFractionalConceptModule,
+  N2ExpandConceptModule,
+  N2SimplifyConceptModule,
+} from "./01-Numerical/NUM-N2-Indices/BuilderModules";
+import {
   AppreciationConceptModule,
   ReversePercentagesConceptModule,
 } from "./01-Numerical/NUM-N4-Percentages/LegacyBridge";
@@ -56,6 +61,12 @@ import TrigEquationsConceptModule from "../../National5MathsLegacy/QuestionAndAn
 const conceptModules: ConceptGeneratorModule[] = [
   SurdsConceptModule,
   RationaliseConceptModule,
+  // Canonical N2 modules deliberately precede the retained legacy N2 modules.
+  // The legacy entries remain only as compatibility fallbacks for pre-migration
+  // concept codes such as N2.4; Builder-facing N2.1-N2.3 dispatches here.
+  N2SimplifyConceptModule,
+  N2ExpandConceptModule,
+  N2EvaluateFractionalConceptModule,
   MultiplyDivideIndicesConceptModule,
   PowerOfAProductConceptModule,
   PowerToAPowerConceptModule,
