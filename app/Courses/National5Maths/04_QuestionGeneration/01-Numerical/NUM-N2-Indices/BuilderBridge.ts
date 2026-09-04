@@ -50,6 +50,21 @@ const randomSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 const text = (value: string): PaperPart => ({ kind: "text", value });
 const math = (latex: string): PaperPart => ({ kind: "math", latex, displayMode: false });
 
+type N2BuilderScope = "N2" | N2GeneratorSkillId;
+
+const ALL_N2_MECHANISMS: readonly N2GeneratorMechanism[] = [
+  ...N2_MECHANISMS_BY_SKILL["N2.1"],
+  ...N2_MECHANISMS_BY_SKILL["N2.2"],
+  ...N2_MECHANISMS_BY_SKILL["N2.3"],
+];
+
+const mechanismsForScope = (
+  scope: N2BuilderScope,
+): readonly N2GeneratorMechanism[] =>
+  scope === "N2"
+    ? ALL_N2_MECHANISMS
+    : N2_MECHANISMS_BY_SKILL[scope];
+
 const markCounts = (standards: readonly ("C" | "A")[]) => ({
   totalMarks: standards.length,
   cMarks: standards.filter((standard) => standard === "C").length,
@@ -196,8 +211,9 @@ const workedAnswers = (
   })),
 });
 
-const skillIdFromContext = (context: GeneratorContext): N2GeneratorSkillId => {
+const scopeFromContext = (context: GeneratorContext): N2BuilderScope => {
   const code = context.concept?.code ?? context.selectedConceptText;
+  if (code === "N2") return "N2";
   if (code === "N2.2") return "N2.2";
   if (code === "N2.3") return "N2.3";
   return "N2.1";
@@ -205,12 +221,12 @@ const skillIdFromContext = (context: GeneratorContext): N2GeneratorSkillId => {
 
 const chooseMechanism = (
   context: GeneratorContext,
-  skillId: N2GeneratorSkillId,
+  scope: N2BuilderScope,
   difficulty: N2GeneratorDifficulty,
   paper: N2GeneratorPaper,
   seed: number,
 ): N2GeneratorMechanism => {
-  const candidates = N2_MECHANISMS_BY_SKILL[skillId]
+  const candidates = mechanismsForScope(scope)
     .map((mechanism) => getN2MechanismProfile(mechanism))
     .filter((profile) => profile.supportedPapers.includes(paper))
     .filter((profile) => !context.selectionFilters || isVariantEligibleForFilters(
@@ -220,7 +236,7 @@ const chooseMechanism = (
 
   if (candidates.length === 0) {
     throw new Error(
-      `No N2 ${skillId} mechanism matches the active Builder filters on ${paper}.`,
+      `No N2 ${scope} mechanism matches the active Builder filters on ${paper}.`,
     );
   }
 
@@ -240,8 +256,8 @@ export function buildN2BuilderGenerated(
   const difficulty: N2GeneratorDifficulty = context.difficulty <= 1 ? 1 : 2;
   const paper: N2GeneratorPaper = context.paper === "P2" ? "P2" : "P1";
   const seed = randomSeed();
-  const selectedSkillId = skillIdFromContext(context);
-  const mechanism = chooseMechanism(context, selectedSkillId, difficulty, paper, seed);
+  const selectedScope = scopeFromContext(context);
+  const mechanism = chooseMechanism(context, selectedScope, difficulty, paper, seed);
   const question = generateN2Question({
     seed,
     difficulty,
@@ -281,8 +297,8 @@ export function buildN2BuilderGenerated(
       paperSuitability: paperSuitabilityForProfile(profile),
     },
     sourceSkillCode: "N2",
-    sourceConceptCode: question.skillId,
-    sourceConceptLabel: question.skillLabel,
+    sourceConceptCode: context.concept?.code ?? question.skillId,
+    sourceConceptLabel: context.concept?.label ?? question.skillLabel,
     templateId: `${question.generatorId}:${question.mechanism}`,
     topicMarkBreakdown: {
       NUM: question.marks,
