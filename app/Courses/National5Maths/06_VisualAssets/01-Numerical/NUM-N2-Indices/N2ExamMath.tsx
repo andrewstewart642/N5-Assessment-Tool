@@ -34,10 +34,9 @@ function KatexAtom({ latex }: { latex: string }) {
 /**
  * Browser-native fractional exponent face.
  *
- * This component controls only the internal fraction geometry. Its parent
- * supplies the superscript lift in the base expression's font-size context,
- * so the fraction can stay comfortably separated without falling back onto
- * the main baseline.
+ * The numerator, rule and denominator are deliberately separate DOM boxes so
+ * their geometry stays readable at small print sizes. Superscript placement is
+ * handled by FractionalSuperscript rather than by this component.
  */
 function FractionalExponent({ value }: { value: N2RationalExponent }) {
   const negative = value.numerator < 0;
@@ -50,7 +49,6 @@ function FractionalExponent({ value }: { value: N2RationalExponent }) {
         display: "inline-flex",
         alignItems: "center",
         fontFamily: '"Times New Roman", Times, serif',
-        fontSize: "0.62em",
         fontWeight: 400,
         lineHeight: 0.78,
         whiteSpace: "nowrap",
@@ -96,29 +94,32 @@ function FractionalExponent({ value }: { value: N2RationalExponent }) {
 }
 
 /**
- * True superscript carrier for the custom fraction.
+ * Semantic superscript carrier.
  *
- * The lift lives on a wrapper that still has the base expression's font size.
- * That is important: using `top` or `vertical-align` on the already-shrunken
- * fraction only moved it by a few pixels. Here -0.72em is measured against the
- * normal algebra size, so the whole fraction is unambiguously above the base
- * while its own numerator/rule/denominator spacing stays unchanged.
+ * Earlier passes tried to simulate superscript placement with relative offsets.
+ * That left the fraction visually too close to the main baseline. Using a real
+ * <sup> gives the browser the same baseline relationship as ordinary text
+ * superscripts, while the custom FractionalExponent keeps the readable fraction
+ * geometry. The small extra lift is deliberately measured after the native
+ * superscript placement, not instead of it.
  */
 function FractionalSuperscript({ value }: { value: N2RationalExponent }) {
   return (
-    <span
+    <sup
       style={{
         display: "inline-block",
         position: "relative",
-        top: "-0.72em",
-        marginLeft: "0.035em",
-        marginRight: "0.025em",
+        top: "-0.10em",
+        marginLeft: "0.025em",
+        marginRight: "0.02em",
+        fontSize: "0.62em",
         lineHeight: 0,
+        verticalAlign: "super",
         whiteSpace: "nowrap",
       }}
     >
       <FractionalExponent value={value} />
-    </span>
+    </sup>
   );
 }
 
