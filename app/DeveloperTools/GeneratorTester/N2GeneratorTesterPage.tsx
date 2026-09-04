@@ -21,6 +21,10 @@ import type {
 } from "../../Courses/National5Maths/04_QuestionGeneration/01-Numerical/NUM-N2-Indices/Types";
 import { generateN2Answer } from "../../Courses/National5Maths/05_AnswerGeneration/01-Numerical/NUM-N2-Indices/Generator";
 import type { N2GeneratedMarkingScheme } from "../../Courses/National5Maths/05_AnswerGeneration/01-Numerical/NUM-N2-Indices/Types";
+import {
+  N2ExamAnswer,
+  N2ExamQuestionPrompt,
+} from "../../Courses/National5Maths/06_VisualAssets/01-Numerical/NUM-N2-Indices/N2ExamMath";
 
 type SelectedSkill = "ALL" | N2GeneratorSkillId;
 type SelectedMechanism = "MIX" | N2GeneratorMechanism;
@@ -210,7 +214,7 @@ function SampleCard({ sample, index, showAnswerDetail }: { sample: GeneratedN2Sa
               lineHeight: 1.7,
             }}
           >
-            <PaperContent parts={question.promptParts} />
+            <N2ExamQuestionPrompt question={question} />
           </div>
         </section>
 
@@ -237,7 +241,7 @@ function SampleCard({ sample, index, showAnswerDetail }: { sample: GeneratedN2Sa
           >
             {answer.finalAnswers.map((finalAnswer, answerIndex) => (
               <div key={`${finalAnswer.partLabel}-${answerIndex}`}>
-                <PaperContent parts={asMathParts(finalAnswer.latex)} />
+                <N2ExamAnswer state={question.mathState} />
                 <div style={{ marginTop: 4, color: "#94a3b8", fontSize: 8.5 }}>{finalAnswer.normalisedAnswer}</div>
               </div>
             ))}
