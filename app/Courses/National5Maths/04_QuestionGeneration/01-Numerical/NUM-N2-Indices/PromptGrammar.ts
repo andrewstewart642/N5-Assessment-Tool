@@ -36,10 +36,16 @@ export const addN2Exponents = (first: N2Exponent, second: N2Exponent): N2Rationa
   );
 };
 
+/**
+ * Fractional indices need a stronger visual hierarchy than ordinary inline
+ * fractions. Script style keeps the exponent clearly subordinate to the base,
+ * while the explicit rule thickness prevents the numerator/denominator from
+ * visually swallowing the fraction bar at small sizes.
+ */
 export const rationalExponentLatex = (value: N2RationalExponent): string => {
   if (value.denominator === 1) return `${value.numerator}`;
   const sign = value.numerator < 0 ? "-" : "";
-  return `${sign}\\tfrac{${Math.abs(value.numerator)}}{${value.denominator}}`;
+  return `${sign}\\genfrac{}{}{0.055em}{2}{${Math.abs(value.numerator)}}{${value.denominator}}`;
 };
 
 const rationalExponentPlain = (value: N2RationalExponent): string =>
@@ -79,7 +85,7 @@ const radicalLatex = (variable: string, exponent: number, rootIndex: 2 | 3) => {
 export const n2ExpressionLatex = (state: N2GeneratedMathState): string => {
   switch (state.mechanism) {
     case "FRACTIONAL_NUMERIC_EVALUATION":
-      return `${state.base}^{\\tfrac{${state.exponentNumerator}}{${state.rootIndex}}}`;
+      return `${state.base}^{${rationalExponentLatex({ numerator: state.exponentNumerator, denominator: state.rootIndex })}}`;
     case "PRODUCT_QUOTIENT_WITH_COEFFICIENT": {
       const first = powerLatex(state.variable, state.firstExponent);
       const second = `${state.coefficientNumerator}${powerLatex(state.variable, state.secondExponent)}`;
@@ -217,18 +223,20 @@ export const buildN2Prompt = (state: N2GeneratedMathState): {
 
   if (state.mechanism === "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX") {
     const lead = "Express";
-    const finish = `as a single power of ${state.variable}.`;
+    const targetExponentSymbol = state.variable === "n" ? "k" : "n";
+    const targetLatex = `${state.variable}^{${targetExponentSymbol}}`;
+    const targetPlain = `${state.variable}^${targetExponentSymbol}`;
     return {
-      prompt: `${lead} ${expressionPlain} ${finish}`,
-      promptParts: [text(`${lead} `), math(expressionLatex), text(` ${finish}`)],
-      promptSections: [{ label: "", text: `${lead} the expression ${finish}`, marks }],
+      prompt: `${lead} ${expressionPlain} in the form ${targetPlain}.`,
+      promptParts: [text(`${lead} `), math(expressionLatex), text(" in the form "), math(targetLatex), text(".")],
+      promptSections: [{ label: "", text: `${lead} the expression in the prescribed power form`, marks }],
     };
   }
 
   if (state.mechanism === "SQUARED_FRACTIONAL_MONOMIAL") {
     const lead = "Remove the brackets and simplify";
     return {
-      prompt: `${lead}: ${expressionPlain}.`,
+      prompt: `${lead} ${expressionPlain}.`,
       promptParts: [text(`${lead} `), math(expressionLatex), text(".")],
       promptSections: [{ label: "", text: lead, marks }],
     };
@@ -237,7 +245,7 @@ export const buildN2Prompt = (state: N2GeneratedMathState): {
   if (state.mechanism === "DISTRIBUTIVE_INDEX_EXPANSION") {
     const lead = "Expand and simplify fully";
     return {
-      prompt: `${lead}: ${expressionPlain}.`,
+      prompt: `${lead} ${expressionPlain}.`,
       promptParts: [text(`${lead} `), math(expressionLatex), text(".")],
       promptSections: [{ label: "", text: lead, marks }],
     };
@@ -246,19 +254,21 @@ export const buildN2Prompt = (state: N2GeneratedMathState): {
   const lead = "Simplify";
   const positivePower = state.mechanism === "POWER_OF_POWER_WITH_NEGATIVE_INDEX"
     || state.mechanism === "NEGATIVE_INDEX_QUOTIENT";
-  const finish = positivePower ? " Give your answer using a positive power." : "";
+  const finish = positivePower ? "Give your answer with a positive power." : "";
   return {
-    prompt: `${lead} ${expressionPlain}.${finish}`,
+    prompt: positivePower
+      ? `${lead} ${expressionPlain}.\n${finish}`
+      : `${lead} ${expressionPlain}.`,
     promptParts: positivePower
       ? [
           text(`${lead} `),
           math(expressionLatex),
-          text(". Give your answer using a "),
+          text(".\nGive your answer with a "),
           math("\\textbf{positive}"),
           text(" power."),
         ]
       : [text(`${lead} `), math(expressionLatex), text(".")],
-    promptSections: [{ label: "", text: `${lead}.${finish}`.trim(), marks }],
+    promptSections: [{ label: "", text: positivePower ? `${lead}. ${finish}` : lead, marks }],
   };
 };
 
