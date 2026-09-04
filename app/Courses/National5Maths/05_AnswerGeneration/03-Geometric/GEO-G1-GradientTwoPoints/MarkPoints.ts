@@ -130,6 +130,7 @@ export const buildG1NumericMarkPoints = (
   ];
 
   if (question.family === "CONTEXTUAL_LINEAR_MODEL") {
+    const contextState = question.mathState;
     marks.push(classifiedMark(question, profile, {
       markNumber: 4,
       partLabel: "b",
@@ -137,10 +138,10 @@ export const buildG1NumericMarkPoints = (
       role: "MODEL_APPLICATION",
       requirement: "Substitute the supplied new input into the deterministic model and evaluate the requested contextual value.",
       evidenceExamples: [
-        `${state.yVariable} = (${g1AnswerRationalPlain(state.gradient)})(${state.followUp.input}) + ${g1AnswerRationalPlain(state.intercept)} = ${g1AnswerRationalPlain(state.followUp.exactOutput)}`,
+        `${contextState.yVariable} = (${g1AnswerRationalPlain(contextState.gradient)})(${contextState.followUp.input}) + ${g1AnswerRationalPlain(contextState.intercept)} = ${g1AnswerRationalPlain(contextState.followUp.exactOutput)}`,
       ],
       acceptanceNotes: [
-        `The contextual unit ${state.followUp.outputUnit} may be stated but is not required for this generated one-mark calculation.`,
+        `The contextual unit ${contextState.followUp.outputUnit} may be stated but is not required for this generated one-mark calculation.`,
         "Consistent follow-through from a carried part-(a) model is permitted only when the application still requires a non-trivial multiplication/division and an addition/subtraction.",
       ],
       dependsOnMarkNumbers: [3],
