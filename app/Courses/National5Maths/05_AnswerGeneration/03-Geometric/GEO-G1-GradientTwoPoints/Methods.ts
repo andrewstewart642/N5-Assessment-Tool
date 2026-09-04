@@ -102,19 +102,20 @@ export const buildG1NumericMethods = (
     return [slopeIntercept, pointSlope];
   }
 
+  const contextState = question.mathState;
   const application: G1GeneratedAnswerMethod = {
     methodFamilyId: "MODEL_APPLICATION",
     sourceEvidenceIds,
     lines: [
       {
         id: `${question.instanceId}-APPLICATION`,
-        text: g1ModelApplicationPlain(state, state.followUp.input, state.followUp.exactOutput),
-        latex: g1ModelApplicationLatex(state, state.followUp.input, state.followUp.exactOutput),
+        text: g1ModelApplicationPlain(contextState, contextState.followUp.input, contextState.followUp.exactOutput),
+        latex: g1ModelApplicationLatex(contextState, contextState.followUp.input, contextState.followUp.exactOutput),
         markNumbers: [4],
       },
       {
         id: `${question.instanceId}-APPLICATION-CONTEXT`,
-        text: `${g1AnswerRationalPlain(state.followUp.exactOutput)} ${state.followUp.outputUnit}`,
+        text: `${g1AnswerRationalPlain(contextState.followUp.exactOutput)} ${contextState.followUp.outputUnit}`,
         latex: null,
         markNumbers: [4],
       },
@@ -123,6 +124,12 @@ export const buildG1NumericMethods = (
 
   return [slopeIntercept, pointSlope, application];
 };
+
+const symbolicParameterTerm = (coefficient: number, parameter: string) =>
+  coefficient === 1 ? parameter : `${coefficient}${parameter}`;
+
+const symbolicFactorNumeratorLatex = (state: G1SymbolicGeneratedQuestion["mathState"]) =>
+  `m=\\frac{${state.numeratorFactorisationLatex}}{${symbolicParameterTerm(state.parameterisedPoint.xCoefficient, state.parameter)}-${state.numericPoint.x}}`;
 
 export const buildG1SymbolicMethod = (
   question: G1SymbolicGeneratedQuestion,
@@ -142,7 +149,7 @@ export const buildG1SymbolicMethod = (
       {
         id: `${question.instanceId}-SYMBOLIC-FACTOR`,
         text: "Factor the difference-of-squares numerator.",
-        latex: `m=\\frac{${state.numeratorFactorisationLatex}}{${state.denominatorFactorisationLatex}}`,
+        latex: symbolicFactorNumeratorLatex(state),
         markNumbers: [2],
       },
       {
