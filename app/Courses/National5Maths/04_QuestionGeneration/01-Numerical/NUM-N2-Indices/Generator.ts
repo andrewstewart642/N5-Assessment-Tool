@@ -108,9 +108,9 @@ const productQuotientCoefficientState = (
   difficulty: N2GeneratorDifficulty,
 ): N2ProductQuotientCoefficientState => {
   const rng = new SeededRandom(mixSeed(seed, 0x020402 + difficulty));
-  const coefficientPairs = difficulty === 1
-    ? ([[6, 2], [12, 3], [15, 5]] as const)
-    : ([[12, 3], [18, 6], [20, 4]] as const);
+  const coefficientPairs: readonly (readonly [number, number])[] = difficulty === 1
+    ? [[6, 2], [12, 3], [15, 5]]
+    : [[12, 3], [18, 6], [20, 4]];
   for (let attempt = 0; attempt < 300; attempt += 1) {
     const [coefficientNumerator, coefficientDenominator] = rng.pick(coefficientPairs);
     const firstExponent = difficulty === 1 ? rng.int(2, 4) : rng.int(3, 5);
@@ -212,9 +212,9 @@ const squaredFractionalMonomialState = (
   difficulty: N2GeneratorDifficulty,
 ): N2SquaredFractionalMonomialState => {
   const rng = new SeededRandom(mixSeed(seed, 0x020405 + difficulty));
-  const coefficients = difficulty === 1
-    ? ([[1, 2], [3, 4]] as const)
-    : ([[2, 5], [3, 5], [3, 4]] as const);
+  const coefficients: readonly (readonly [number, number])[] = difficulty === 1
+    ? [[1, 2], [3, 4]]
+    : [[2, 5], [3, 5], [3, 4]];
   const [coefficientNumerator, coefficientDenominator] = rng.pick(coefficients);
   const variableExponent = difficulty === 1 ? rng.pick([2, 3] as const) : rng.pick([3, 4, 5] as const);
   return {
