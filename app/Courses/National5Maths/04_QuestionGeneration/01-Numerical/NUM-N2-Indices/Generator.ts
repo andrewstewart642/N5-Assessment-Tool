@@ -37,6 +37,7 @@ import type {
   N2ProductOverRootState,
   N2ProductQuotientCoefficientState,
   N2ReciprocalRootState,
+  N2RationalExponent,
   N2SquaredFractionalMonomialState,
 } from "./Types";
 import { validateN2GeneratedQuestion } from "./Validation";
@@ -71,36 +72,68 @@ const mixSeed = (seed: number, salt: number) => {
   return (value ^ (value >>> 16)) >>> 0;
 };
 
+const positiveModulo = (value: number, modulus: number) => ((value % modulus) + modulus) % modulus;
 const VARIABLES = ["a", "b", "c", "m", "n", "p", "x", "y"] as const;
+
+const fractionalState = (
+  rootValue: number,
+  rootIndex: 2 | 3,
+  exponentNumerator: number,
+): N2FractionalEvaluationState => ({
+  family: "FRACTIONAL_INDEX_EVALUATION",
+  mechanism: "FRACTIONAL_NUMERIC_EVALUATION",
+  rootValue,
+  rootIndex,
+  exponentNumerator,
+  base: rootValue ** rootIndex,
+  exactResult: rootValue ** exponentNumerator,
+});
 
 const fractionalEvaluationState = (
   seed: number,
   difficulty: N2GeneratorDifficulty,
 ): N2FractionalEvaluationState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020401 + difficulty));
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    const rootIndex = rng.pick([2, 3] as const);
-    const rootValue = difficulty === 1
-      ? (rootIndex === 2 ? rng.pick([2, 3, 4, 5] as const) : rng.pick([2, 3, 4, 5] as const))
-      : (rootIndex === 2 ? rng.pick([3, 4, 5, 6] as const) : rng.pick([3, 4, 5] as const));
-    const exponentNumerator = difficulty === 1
-      ? (rootIndex === 2 ? 3 : rng.pick([2, 4] as const))
-      : (rootIndex === 2 ? rng.pick([3, 5] as const) : rng.pick([4, 5] as const));
-    const state: N2FractionalEvaluationState = {
-      family: "FRACTIONAL_INDEX_EVALUATION",
-      mechanism: "FRACTIONAL_NUMERIC_EVALUATION",
-      rootValue,
-      rootIndex,
-      exponentNumerator,
-      base: rootValue ** rootIndex,
-      exactResult: rootValue ** exponentNumerator,
-    };
-    if (difficulty === 1 && state.exactResult > 125) continue;
-    if (difficulty === 2 && (state.exactResult < 126 || state.exactResult > 625)) continue;
-    if (historicalN2FractionalOverlap(state)) continue;
-    return state;
+  const candidates: N2FractionalEvaluationState[] = [];
+  const rootValues = difficulty === 1 ? ([2, 3, 4, 5] as const) : ([2, 3, 4, 5, 6, 7] as const);
+
+  for (const rootIndex of [2, 3] as const) {
+    const numerators = difficulty === 1
+      ? (rootIndex === 2 ? ([3] as const) : ([2, 4] as const))
+      : (rootIndex === 2 ? ([3, 5] as const) : ([2, 4, 5] as const));
+
+    for (const rootValue of rootValues) {
+      for (const exponentNumerator of numerators) {
+        const state = fractionalState(rootValue, rootIndex, exponentNumerator);
+        if (state.base > (difficulty === 1 ? 125 : 343)) continue;
+        if (state.exactResult > (difficulty === 1 ? 125 : 625)) continue;
+        if (historicalN2FractionalOverlap(state)) continue;
+
+        if (difficulty === 2) {
+          const representationHarder = (rootIndex === 2 && exponentNumerator === 5)
+            || (rootIndex === 3 && exponentNumerator >= 4);
+          const recognitionHarder = rootIndex === 3 && exponentNumerator === 2 && state.base >= 216;
+          const exactValueHarder = state.exactResult >= 126;
+          if (!representationHarder && !recognitionHarder && !exactValueHarder) continue;
+        }
+
+        candidates.push(state);
+      }
+    }
   }
-  throw new Error("Unable to construct a non-historical exact N2 fractional-index evaluation for this seed and difficulty.");
+
+  if (!candidates.length) {
+    throw new Error("Unable to construct a non-historical exact N2 fractional-index evaluation for this difficulty.");
+  }
+
+  if (difficulty === 1) {
+    return candidates[positiveModulo(seed, candidates.length)];
+  }
+
+  const routine = candidates.filter((candidate) => candidate.exactResult <= 343);
+  const stretch = candidates.filter((candidate) => candidate.exactResult > 343);
+  const useStretch = stretch.length > 0 && positiveModulo(seed, 10) === 0;
+  const pool = useStretch ? stretch : routine.length ? routine : candidates;
+  return pool[positiveModulo(seed, pool.length)];
 };
 
 const productQuotientCoefficientState = (
@@ -171,7 +204,10 @@ const powerOfPowerNegativeState = (
     const poweredExponent = innerExponent * outerExponent;
     const combinedExponent = poweredExponent + secondExponent;
     const finalDenominatorExponent = Math.abs(combinedExponent);
-    if (combinedExponent >= -2 || finalDenominatorExponent > 12) continue;
+    if (combinedExponent >= -2 || finalDenominatorExponent > 13) continue;
+    const historicalTuple = (innerExponent === 2 && outerExponent === 3 && secondExponent === -10)
+      || (innerExponent === -2 && outerExponent === 4 && secondExponent === -5);
+    if (historicalTuple) continue;
     return {
       family: "MULTI_LAW_SIMPLIFICATION",
       mechanism: "POWER_OF_POWER_WITH_NEGATIVE_INDEX",
@@ -193,10 +229,10 @@ const reciprocalRootState = (
   difficulty: N2GeneratorDifficulty,
 ): N2ReciprocalRootState => {
   const rng = new SeededRandom(mixSeed(seed, 0x020404 + difficulty));
-  const rootIndex = difficulty === 1 ? 2 : rng.pick([2, 3] as const);
-  const radicandExponent = difficulty === 1
-    ? rng.pick([1, 3] as const)
-    : (rootIndex === 2 ? rng.pick([3, 5] as const) : rng.pick([2, 4, 5] as const));
+  const candidates: readonly (readonly [2 | 3, number])[] = difficulty === 1
+    ? [[3, 2], [2, 3]]
+    : [[2, 5], [3, 4], [3, 5]];
+  const [rootIndex, radicandExponent] = candidates[positiveModulo(seed, candidates.length)];
   return {
     family: "MULTI_LAW_SIMPLIFICATION",
     mechanism: "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX",
@@ -285,41 +321,155 @@ const negativeIndexQuotientState = (
 };
 
 const fraction = (numerator: number, denominator: 2 | 3): N2Exponent => ({ numerator, denominator });
+const exponentValue = (value: N2Exponent) => typeof value === "number" ? value : value.numerator / value.denominator;
+const rationalIsZero = (value: N2RationalExponent) => value.numerator === 0;
+
+type N2DistributiveTemplate = readonly [N2Exponent, N2Exponent, N2Exponent];
+type N2DistributiveTemplatePool = {
+  nonZero: N2DistributiveTemplate[];
+  zero: N2DistributiveTemplate[];
+  seen: Set<string>;
+};
+
+const createDistributivePool = (): N2DistributiveTemplatePool => ({ nonZero: [], zero: [], seen: new Set<string>() });
+
+const exponentKey = (value: N2Exponent) => typeof value === "number"
+  ? `${value}`
+  : `${value.numerator}/${value.denominator}`;
+
+const addDistributiveTemplate = (
+  pool: N2DistributiveTemplatePool,
+  outsideExponent: N2Exponent,
+  firstTermExponent: N2Exponent,
+  secondTermExponent: N2Exponent,
+) => {
+  const firstResultExponent = addN2Exponents(outsideExponent, firstTermExponent);
+  const secondResultExponent = addN2Exponents(outsideExponent, secondTermExponent);
+  const firstValue = firstResultExponent.numerator / firstResultExponent.denominator;
+  const secondValue = secondResultExponent.numerator / secondResultExponent.denominator;
+  if (firstValue < 0 || secondValue < 0 || firstValue > 4 || secondValue > 4) return;
+  if (
+    firstResultExponent.numerator === secondResultExponent.numerator
+    && firstResultExponent.denominator === secondResultExponent.denominator
+  ) return;
+
+  const key = [outsideExponent, firstTermExponent, secondTermExponent].map(exponentKey).join("|");
+  if (pool.seen.has(key)) return;
+  pool.seen.add(key);
+
+  const template: N2DistributiveTemplate = [outsideExponent, firstTermExponent, secondTermExponent];
+  if (rationalIsZero(firstResultExponent) || rationalIsZero(secondResultExponent)) pool.zero.push(template);
+  else pool.nonZero.push(template);
+};
+
+const chooseDistributiveTemplate = (
+  pool: N2DistributiveTemplatePool,
+  seed: number,
+  zeroFrequency: number,
+): N2DistributiveTemplate => {
+  const useZero = pool.zero.length > 0 && positiveModulo(seed, zeroFrequency) === 0;
+  const candidates = useZero ? pool.zero : pool.nonZero.length ? pool.nonZero : pool.zero;
+  if (!candidates.length) throw new Error("N2 distributive template pool is empty.");
+  return candidates[positiveModulo(seed, candidates.length)];
+};
+
+const lowerDistributiveTemplate = (seed: number): N2DistributiveTemplate => {
+  const pool = createDistributivePool();
+  const fractionalTerms = [fraction(1, 2), fraction(1, 3), fraction(2, 3)] as const;
+  for (const fractionalTerm of fractionalTerms) {
+    for (const negativeInteger of [-1, -2] as const) {
+      addDistributiveTemplate(pool, 2, fractionalTerm, negativeInteger);
+      addDistributiveTemplate(pool, 2, negativeInteger, fractionalTerm);
+    }
+  }
+  return chooseDistributiveTemplate(pool, seed, 4);
+};
+
+const upperDistributiveTemplate = (seed: number): N2DistributiveTemplate => {
+  const negativeFractionSingle = createDistributivePool();
+  const twoFractionInside = createDistributivePool();
+  const fractionalOutside = createDistributivePool();
+  const sourceNearImproper = createDistributivePool();
+
+  const negativeFractions = [fraction(-1, 2), fraction(-3, 2), fraction(-1, 3), fraction(-2, 3), fraction(-4, 3)] as const;
+  const positiveFractions = [fraction(1, 2), fraction(3, 2), fraction(1, 3), fraction(2, 3), fraction(4, 3)] as const;
+
+  // Most upper-band items use one clear extra representation lever: a negative
+  // fractional index paired with an ordinary signed integer term.
+  for (const outside of [2, 3] as const) {
+    for (const negativeFraction of negativeFractions) {
+      for (const integerTerm of [-1, -2] as const) {
+        addDistributiveTemplate(negativeFractionSingle, outside, negativeFraction, integerTerm);
+        addDistributiveTemplate(negativeFractionSingle, outside, integerTerm, negativeFraction);
+      }
+    }
+  }
+
+  // A smaller share coordinates two fractional bracket terms while the outside
+  // power stays integral, keeping the addition itself easy to read.
+  for (const outside of [2, 3] as const) {
+    for (const negativeFraction of negativeFractions) {
+      for (const positiveFraction of positiveFractions) {
+        addDistributiveTemplate(twoFractionInside, outside, negativeFraction, positiveFraction);
+        addDistributiveTemplate(twoFractionInside, outside, positiveFraction, negativeFraction);
+      }
+    }
+  }
+
+  // The hardest structural variant distributes one fractional outside power
+  // across two same-denominator fractional terms so no awkward fraction
+  // arithmetic is introduced merely for show.
+  const sameDenominatorGroups = [
+    { denominator: 2 as const, outsideNumerators: [1, 3] as const, positiveNumerators: [1, 3, 5] as const, negativeNumerators: [-1, -3] as const },
+    { denominator: 3 as const, outsideNumerators: [2, 4] as const, positiveNumerators: [1, 2, 4] as const, negativeNumerators: [-1, -2, -4] as const },
+  ] as const;
+  for (const group of sameDenominatorGroups) {
+    for (const outsideNumerator of group.outsideNumerators) {
+      const outside = fraction(outsideNumerator, group.denominator);
+      for (const positiveNumerator of group.positiveNumerators) {
+        const positive = fraction(positiveNumerator, group.denominator);
+        for (const negativeNumerator of group.negativeNumerators) {
+          const negative = fraction(negativeNumerator, group.denominator);
+          addDistributiveTemplate(fractionalOutside, outside, positive, negative);
+          addDistributiveTemplate(fractionalOutside, outside, negative, positive);
+        }
+      }
+    }
+  }
+
+  // A source-near upper extension keeps the familiar integer outside power but
+  // lets the positive fractional term finish as a modest improper fraction.
+  for (const positive of [fraction(1, 2), fraction(1, 3), fraction(2, 3)] as const) {
+    for (const negativeInteger of [-1, -2] as const) {
+      addDistributiveTemplate(sourceNearImproper, 3, positive, negativeInteger);
+      addDistributiveTemplate(sourceNearImproper, 3, negativeInteger, positive);
+    }
+  }
+
+  const classSlot = positiveModulo(seed, 10);
+  const selectedPool = classSlot < 4
+    ? negativeFractionSingle
+    : classSlot < 6
+      ? twoFractionInside
+      : classSlot < 8
+        ? fractionalOutside
+        : sourceNearImproper;
+  return chooseDistributiveTemplate(selectedPool, seed, 8);
+};
 
 const distributiveIndexExpansionState = (
   seed: number,
   difficulty: N2GeneratorDifficulty,
 ): N2DistributiveIndexExpansionState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020408 + difficulty));
-  const lowerTemplates: readonly [N2Exponent, N2Exponent, N2Exponent][] = [
-    [2, fraction(1, 2), -2],
-    [2, -1, fraction(1, 2)],
-    [3, fraction(1, 3), -2],
-    [2, fraction(-1, 2), -1],
-    [3, -2, fraction(2, 3)],
-  ];
-  const upperTemplates: readonly [N2Exponent, N2Exponent, N2Exponent][] = [
-    [fraction(1, 2), fraction(3, 2), fraction(-1, 2)],
-    [fraction(3, 2), fraction(1, 2), fraction(-1, 2)],
-    [fraction(2, 3), fraction(4, 3), fraction(-2, 3)],
-    [3, fraction(-1, 2), fraction(-4, 3)],
-    [fraction(-1, 2), fraction(3, 2), fraction(5, 2)],
-  ];
-  const [outsideExponent, firstTermExponent, secondTermExponent] = rng.pick(
-    difficulty === 1 ? lowerTemplates : upperTemplates,
-  );
+  const [outsideExponent, firstTermExponent, secondTermExponent] = difficulty === 1
+    ? lowerDistributiveTemplate(seed)
+    : upperDistributiveTemplate(seed);
   const firstResultExponent = addN2Exponents(outsideExponent, firstTermExponent);
   const secondResultExponent = addN2Exponents(outsideExponent, secondTermExponent);
-  if (
-    firstResultExponent.numerator === secondResultExponent.numerator
-    && firstResultExponent.denominator === secondResultExponent.denominator
-  ) {
-    throw new Error("Distributive N2 template produced duplicate like terms.");
-  }
   return {
     family: "BRACKETED_INDEX_LAWS",
     mechanism: "DISTRIBUTIVE_INDEX_EXPANSION",
-    variable: rng.pick(VARIABLES),
+    variable: VARIABLES[positiveModulo(seed * 5 + 3, VARIABLES.length)],
     outsideExponent,
     firstTermExponent,
     secondTermExponent,
@@ -342,6 +492,7 @@ const positivePowerProductQuotientState = (
     const numeratorExponent = firstExponent + poweredExponent;
     const finalExponent = numeratorExponent - denominatorExponent;
     if (numeratorExponent > 10 || finalExponent < 2 || finalExponent > 9) continue;
+    if (firstExponent === 7 && innerExponent === 3 && outerExponent === 2 && denominatorExponent === 4) continue;
     return {
       family: "MULTI_LAW_SIMPLIFICATION",
       mechanism: "POSITIVE_POWER_PRODUCT_QUOTIENT",
