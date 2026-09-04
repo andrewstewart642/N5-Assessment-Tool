@@ -32,11 +32,12 @@ function KatexAtom({ latex }: { latex: string }) {
 }
 
 /**
- * Browser-native fractional exponent renderer.
+ * Browser-native fractional exponent face.
  *
- * This deliberately does NOT ask KaTeX to lay out the fractional exponent.
- * The numerator, rule, denominator and vertical lift are separate DOM boxes,
- * so the printed-exam hierarchy is stable regardless of KaTeX script metrics.
+ * This component controls only the internal fraction geometry. Its parent
+ * supplies the superscript lift in the base expression's font-size context,
+ * so the fraction can stay comfortably separated without falling back onto
+ * the main baseline.
  */
 function FractionalExponent({ value }: { value: N2RationalExponent }) {
   const negative = value.numerator < 0;
@@ -48,11 +49,8 @@ function FractionalExponent({ value }: { value: N2RationalExponent }) {
       style={{
         display: "inline-flex",
         alignItems: "center",
-        verticalAlign: "0.88em",
-        marginLeft: "0.035em",
-        marginRight: "0.025em",
         fontFamily: '"Times New Roman", Times, serif',
-        fontSize: "0.64em",
+        fontSize: "0.62em",
         fontWeight: 400,
         lineHeight: 0.78,
         whiteSpace: "nowrap",
@@ -97,6 +95,33 @@ function FractionalExponent({ value }: { value: N2RationalExponent }) {
   );
 }
 
+/**
+ * True superscript carrier for the custom fraction.
+ *
+ * The lift lives on a wrapper that still has the base expression's font size.
+ * That is important: using `top` or `vertical-align` on the already-shrunken
+ * fraction only moved it by a few pixels. Here -0.72em is measured against the
+ * normal algebra size, so the whole fraction is unambiguously above the base
+ * while its own numerator/rule/denominator spacing stays unchanged.
+ */
+function FractionalSuperscript({ value }: { value: N2RationalExponent }) {
+  return (
+    <span
+      style={{
+        display: "inline-block",
+        position: "relative",
+        top: "-0.72em",
+        marginLeft: "0.035em",
+        marginRight: "0.025em",
+        lineHeight: 0,
+        whiteSpace: "nowrap",
+      }}
+    >
+      <FractionalExponent value={value} />
+    </span>
+  );
+}
+
 function Power({ base, exponent }: { base: string; exponent: N2Exponent }) {
   if (typeof exponent === "number" || exponent.denominator === 1) {
     const value = typeof exponent === "number" ? exponent : exponent.numerator;
@@ -113,7 +138,7 @@ function Power({ base, exponent }: { base: string; exponent: N2Exponent }) {
       }}
     >
       <KatexAtom latex={base} />
-      <FractionalExponent value={exponent} />
+      <FractionalSuperscript value={exponent} />
     </span>
   );
 }
