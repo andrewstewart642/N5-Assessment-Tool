@@ -17,6 +17,7 @@ import MyClassesPage from "@/app/Classes/MyClassesPage";
 import A7GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/A7GeneratorTesterPage";
 import A7SqaGeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/A7SqaGeneratorTesterPage";
 import GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/GeneratorTesterPage";
+import N2GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/N2GeneratorTesterPage";
 
 import HomePage from "@/app/Home/HomePage";
 
@@ -183,6 +184,16 @@ export default async function ApplicationPage({
   ) {
     return (
       <GeneratorTesterPage />
+    );
+  }
+
+
+  if (
+    route ===
+    "generator-tester-n2"
+  ) {
+    return (
+      <N2GeneratorTesterPage />
     );
   }
 
