@@ -2,14 +2,14 @@
 
 `N2_INDICES_V1` is the authoritative question-generation engine for the reviewed N2 indices skill slice.
 
-The engine consumes only `03_SkillCatalog` synthesis. It selects a reviewed family first, then a calibrated mechanism, then samples compact parameters. It does not invent arbitrary combinations of index laws and it does not copy historical prompt wording.
+The engine consumes only `03_SkillCatalog` synthesis. Public skill labels are intentionally compact (`N2.1` Simplify indices, `N2.2` Expand and simplify, `N2.3` Evaluate fractional indices); the more detailed families and mechanisms remain internal generation variants rather than separate pupil-facing skills.
 
-V1 supports:
+The engine selects a reviewed family/mechanism, then samples compact parameters inside a requested difficulty band. Difficulty is instance-level: the historical mechanism difficulty is the default anchor, not a permanent lock. The same mechanism can therefore produce lower- and upper-band instances when the mathematical envelope supports both.
 
-- core two-mark numerical fractional-index evaluation;
-- the two separately calibrated bracket mechanisms;
-- six reviewed multi-law mechanisms, including the repeated negative-index power-of-a-power structure.
+V1 supports all nine reviewed internal mechanisms, including numerical fractional-index evaluation, the two bracketed mechanisms and the six multi-law mechanisms. The refined pass adds controlled structural variation to distributive expansion, negative-index power-of-a-power and reciprocal-root conversion while retaining the reviewed mathematical grammar.
 
-Every generated N2 item is Operational. C/A standard and tariff come from the selected mechanism rather than from difficulty or law count.
+Every generated N2 item is Operational. C/A standard and tariff continue to come from the selected mechanism rather than from difficulty or law count.
 
-This folder deliberately contains only question generation. Builder-facing paired output remains on the existing legacy N2 path until `05_AnswerGeneration` is implemented for this engine; the subsequent bridge will switch the clean Registry to the paired N2 generator without duplicating answer logic here.
+Question typography is generated semantically for KaTeX: top-level fractions use a clear display-style fraction, fractional exponents use a legible text-style fraction inside the power, and positive-power output instructions emphasise the word **positive**.
+
+This folder deliberately owns question generation only. Paired marking/worked answers are owned by `05_AnswerGeneration/01-Numerical/NUM-N2-Indices/`, and DeveloperTools consumes both canonical layers without duplicating generation logic.

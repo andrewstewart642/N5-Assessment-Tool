@@ -26,7 +26,7 @@ export const N2_GENERATED_ANSWER_PROFILES: Record<N2GeneratedAnswerProfileId, N2
     equivalentRoutesAccepted: true,
     positivePowerOutputRequired: false,
     exactIntegerRequired: true,
-    rationale: "Preserve the stable two-stage numerical fractional-index structure: interpret the fractional exponent, then complete an exact integer evaluation. The generated answer-only policy follows the explicit 2015 full-credit source rule; the 2021 source silence is not treated as contrary evidence.",
+    rationale: "Preserve the stable two-stage numerical fractional-index structure: interpret the fractional exponent, then complete an exact integer evaluation. Difficulty may vary through controlled exact-value burden without changing the two-mark architecture.",
   },
   PRODUCT_QUOTIENT_COEFFICIENT: {
     id: "PRODUCT_QUOTIENT_COEFFICIENT",
@@ -52,7 +52,7 @@ export const N2_GENERATED_ANSWER_PROFILES: Record<N2GeneratedAnswerProfileId, N2
     equivalentRoutesAccepted: true,
     positivePowerOutputRequired: true,
     exactIntegerRequired: false,
-    rationale: "Use the repeated 2016/2022 three-stage route: apply power-of-a-power, combine signed exponents, then convert the negative result to a reciprocal positive-power form. Reciprocal-first routes remain acceptable when mathematically equivalent.",
+    rationale: "Preserve the three-stage route: apply power-of-a-power, combine signed exponents, then convert the negative result to reciprocal positive-power form. Factor order and sign layout may vary when the same three mathematical stages remain intact.",
   },
   RECIPROCAL_ROOT_SINGLE_POWER: {
     id: "RECIPROCAL_ROOT_SINGLE_POWER",
@@ -65,7 +65,7 @@ export const N2_GENERATED_ANSWER_PROFILES: Record<N2GeneratedAnswerProfileId, N2
     equivalentRoutesAccepted: true,
     positivePowerOutputRequired: false,
     exactIntegerRequired: false,
-    rationale: "The two marks are representation-led: root notation becomes a fractional index, then the reciprocal becomes a negative fractional index while retaining one power of the same base.",
+    rationale: "The two marks are representation-led: a powered root becomes a fractional index, then the reciprocal becomes a negative fractional index while retaining one power of the same base. The powered radicand may vary to produce non-unit fractional numerators.",
   },
   SQUARED_FRACTIONAL_MONOMIAL: {
     id: "SQUARED_FRACTIONAL_MONOMIAL",
@@ -117,7 +117,7 @@ export const N2_GENERATED_ANSWER_PROFILES: Record<N2GeneratedAnswerProfileId, N2
     equivalentRoutesAccepted: true,
     positivePowerOutputRequired: false,
     exactIntegerRequired: false,
-    rationale: "Preserve the two-mark distributive structure: one correct indexed product establishes progress, then both terms are completed and the zero power is simplified to one.",
+    rationale: "Preserve the two-mark distributive structure: one correct indexed product establishes progress, then both distributed terms are completed and simplified. A zero-power constant may occur, but it is no longer forced in every generated layout.",
   },
   POSITIVE_POWER_PRODUCT_QUOTIENT: {
     id: "POSITIVE_POWER_PRODUCT_QUOTIENT",
