@@ -6,6 +6,7 @@ import AssessmentSetupPage from "@/app/Assessments/Creation/AssessmentSetupPage"
 import ClassDetailsPage from "@/app/Classes/ClassDetailsPage";
 import MyClassesPage from "@/app/Classes/MyClassesPage";
 import A7GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/A7GeneratorTesterPage";
+import G1GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/G1GeneratorTesterPage";
 import GeneratorTesterHubPage from "@/app/DeveloperTools/GeneratorTester/GeneratorTesterHubPage";
 import GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/GeneratorTesterPage";
 import N2GeneratorTesterPage from "@/app/DeveloperTools/GeneratorTester/N2GeneratorTesterPage";
@@ -45,6 +46,7 @@ export default async function ApplicationPage({ searchParams }: ApplicationPageP
   if (route === "generator-tester-a7-debug") return <A7GeneratorTesterPage />;
   if (route === "generator-tester-a8") return <GeneratorTesterPage />;
   if (route === "generator-tester-n2") return <N2GeneratorTesterPage />;
+  if (route === "generator-tester-g1") return <G1GeneratorTesterPage />;
 
   notFound();
 }
