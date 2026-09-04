@@ -21,6 +21,7 @@ export type N2DifficultyAssessment = {
 const isRational = (value: N2Exponent): value is Exclude<N2Exponent, number> => typeof value !== "number";
 const isFractional = (value: N2Exponent) => isRational(value) && value.denominator !== 1;
 const isNegative = (value: N2Exponent) => typeof value === "number" ? value < 0 : value.numerator < 0;
+const isNegativeFractional = (value: N2Exponent) => isRational(value) && value.denominator !== 1 && value.numerator < 0;
 
 const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
   switch (state.mechanism) {
@@ -156,7 +157,15 @@ const signalsFor = (
   const signals: string[] = [];
   if (state.mechanism === "FRACTIONAL_NUMERIC_EVALUATION") {
     signals.push("exact two-stage fractional-index interpretation and evaluation");
-    if (difficulty === 2) signals.push("larger exact-value evaluation within a controlled perfect-power range");
+    if (difficulty === 2) {
+      const representationHarder = (state.rootIndex === 2 && state.exponentNumerator === 5)
+        || (state.rootIndex === 3 && state.exponentNumerator >= 4);
+      const recognitionHarder = state.rootIndex === 3 && state.exponentNumerator === 2 && state.base >= 216;
+      if (representationHarder) signals.push("less familiar fractional numerator increases interpretation demand without changing the two-stage route");
+      if (recognitionHarder) signals.push("larger perfect-cube base increases exact root-recognition demand without inflating the final value");
+      if (state.exactResult >= 126) signals.push("moderately larger exact value remains within a controlled perfect-power range");
+      if (state.exactResult > 343) signals.push("occasional stretch exact value at the top of the upper band");
+    }
   }
   if (metrics.stageCount === 3) signals.push("three independently mark-bearing stages");
   if (metrics.negativeExponentCount > 0) signals.push("signed exponent manipulation");
@@ -171,13 +180,19 @@ const signalsFor = (
   if (state.mechanism === "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX" && state.radicandExponent > 1) {
     signals.push("powered radicand produces a non-unit fractional numerator");
   }
-  if (state.mechanism === "DISTRIBUTIVE_INDEX_EXPANSION" && isFractional(state.outsideExponent)) {
-    signals.push("fractional outside power must be distributed across both terms");
+  if (state.mechanism === "DISTRIBUTIVE_INDEX_EXPANSION") {
+    const promptExponents = [state.outsideExponent, state.firstTermExponent, state.secondTermExponent];
+    if (isFractional(state.outsideExponent)) {
+      signals.push("fractional outside power must be distributed across both terms");
+    }
+    if (promptExponents.some(isNegativeFractional)) {
+      signals.push("negative fractional index increases signed-fractional coordination");
+    }
   }
   if (state.mechanism === "POSITIVE_POWER_PRODUCT_QUOTIENT") {
     signals.push("three distinct positive-index laws must be coordinated");
   }
-  if (difficulty === 2 && !signals.some((signal) => signal.startsWith("larger exact-value"))) {
+  if (difficulty === 2 && state.mechanism !== "FRACTIONAL_NUMERIC_EVALUATION") {
     signals.push("upper-band parameters or representation increase the within-skill demand");
   }
   return signals;
