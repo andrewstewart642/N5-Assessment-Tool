@@ -11,6 +11,7 @@ import {
 } from "./BuilderBridge";
 import {
   N2_MECHANISMS_BY_SKILL,
+  N2_SKILL_PARENT_LABEL,
   N2_SKILLS,
 } from "./SkillLabels";
 import type {
@@ -18,8 +19,25 @@ import type {
   N2GeneratorSkillId,
 } from "./Types";
 
-const conceptLabel = (code: N2GeneratorSkillId) =>
-  N2_SKILLS.find((entry) => entry.id === code)?.label ?? code;
+type N2BuilderCode = "N2" | N2GeneratorSkillId;
+
+const ALL_N2_MECHANISMS: readonly N2GeneratorMechanism[] = [
+  ...N2_MECHANISMS_BY_SKILL["N2.1"],
+  ...N2_MECHANISMS_BY_SKILL["N2.2"],
+  ...N2_MECHANISMS_BY_SKILL["N2.3"],
+];
+
+const mechanismsForCode = (
+  code: N2BuilderCode,
+): readonly N2GeneratorMechanism[] =>
+  code === "N2"
+    ? ALL_N2_MECHANISMS
+    : N2_MECHANISMS_BY_SKILL[code];
+
+const conceptLabel = (code: N2BuilderCode) =>
+  code === "N2"
+    ? N2_SKILL_PARENT_LABEL.replace(/^N2\s+/, "")
+    : N2_SKILLS.find((entry) => entry.id === code)?.label ?? code;
 
 const paperSuitability = (mechanisms: readonly N2GeneratorMechanism[]) => {
   const papers = new Set(
@@ -40,9 +58,9 @@ const standardCoverage = (mechanisms: readonly N2GeneratorMechanism[]) => {
 };
 
 const makeN2Module = (
-  code: N2GeneratorSkillId,
+  code: N2BuilderCode,
 ): ConceptGeneratorModule => {
-  const mechanisms = N2_MECHANISMS_BY_SKILL[code];
+  const mechanisms = mechanismsForCode(code);
   const suitability = paperSuitability(mechanisms);
 
   return {
@@ -78,6 +96,7 @@ const makeN2Module = (
   };
 };
 
+export const N2GeneralConceptModule = makeN2Module("N2");
 export const N2SimplifyConceptModule = makeN2Module("N2.1");
 export const N2ExpandConceptModule = makeN2Module("N2.2");
 export const N2EvaluateFractionalConceptModule = makeN2Module("N2.3");
