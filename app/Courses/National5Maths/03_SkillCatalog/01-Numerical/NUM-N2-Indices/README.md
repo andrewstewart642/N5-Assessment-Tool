@@ -2,7 +2,16 @@
 
 This folder contains the reviewed cross-corpus synthesis for `num-n2-indices`.
 
-The historical bank currently contains eleven paired Question/Answer Catalogue records spanning three top-level families: fractional-index evaluation, bracketed index laws and multi-law simplification. SkillCatalog keeps those source records immutable and synthesises only the recurring family structure, mark-standard behaviour, difficulty levers, surface patterns and generation guardrails needed by downstream question/answer generators.
+The public skill taxonomy is intentionally compact:
+
+- `N2` — Simplify expressions using the laws of indices
+- `N2.1` — Simplify indices
+- `N2.2` — Expand and simplify
+- `N2.3` — Evaluate fractional indices
+
+The more detailed historical families and generator mechanisms remain internal calibration/variant concepts. They are not separate pupil-facing or Builder-facing skill labels.
+
+The historical bank currently contains eleven paired Question/Answer Catalogue records spanning three internal top-level families: fractional-index evaluation, bracketed index laws and multi-law simplification. SkillCatalog keeps those source records immutable and synthesises only the recurring family structure, mark-standard behaviour, difficulty levers, surface patterns and generation guardrails needed by downstream question/answer generators.
 
 Key conclusions fixed by the first N2 pass:
 
@@ -12,6 +21,7 @@ Key conclusions fixed by the first N2 pass:
 - numerical fractional-index evaluation is a stable two-mark A-standard family in the current bank;
 - bracketed index-law evidence supports two distinct two-mark mechanisms rather than one unrestricted bracket generator;
 - the repeated power-of-a-power with negative-index structure is the strongest repeated symbolic subfamily anchor;
-- historical answer-only policy varies and must not be universalised by generation.
+- historical answer-only policy varies and must not be universalised by generation;
+- difficulty is instance-level within a skill/mechanism: the historical anchor supplies a default centre of gravity, not a fixed difficulty ceiling.
 
 `HistoricalEvidence.ts` is the only source-bank ingress. The remaining files operate on reviewed synthesis and must not import raw year records directly.

@@ -17,15 +17,19 @@ import {
   N2_GENERATOR_MULTI_LAW_SURFACE_GUARDRAILS,
 } from "./Evidence";
 import {
-  addRationalExponents,
+  addN2Exponents,
   buildN2Prompt,
+  reduceN2RationalExponent,
 } from "./PromptGrammar";
+import { n2SkillForMechanism } from "./SkillLabels";
 import type {
   N2DistributiveIndexExpansionState,
+  N2Exponent,
   N2FractionalEvaluationState,
   N2GenerateOptions,
   N2GeneratedMathState,
   N2GeneratedQuestion,
+  N2GeneratorDifficulty,
   N2GeneratorMechanism,
   N2NegativeIndexQuotientState,
   N2PositivePowerProductQuotientState,
@@ -69,14 +73,19 @@ const mixSeed = (seed: number, salt: number) => {
 
 const VARIABLES = ["a", "b", "c", "m", "n", "p", "x", "y"] as const;
 
-const fractionalEvaluationState = (seed: number): N2FractionalEvaluationState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020401));
-  for (let attempt = 0; attempt < 200; attempt += 1) {
+const fractionalEvaluationState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2FractionalEvaluationState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020401 + difficulty));
+  for (let attempt = 0; attempt < 500; attempt += 1) {
     const rootIndex = rng.pick([2, 3] as const);
-    const rootValue = rootIndex === 2 ? rng.pick([2, 3, 4, 5, 6] as const) : rng.pick([2, 3, 4, 5] as const);
-    const exponentNumerator = rootIndex === 2
-      ? rng.pick([3, 5] as const)
-      : rng.pick([2, 4, 5] as const);
+    const rootValue = difficulty === 1
+      ? (rootIndex === 2 ? rng.pick([2, 3, 4, 5] as const) : rng.pick([2, 3, 4, 5] as const))
+      : (rootIndex === 2 ? rng.pick([3, 4, 5, 6] as const) : rng.pick([3, 4, 5] as const));
+    const exponentNumerator = difficulty === 1
+      ? (rootIndex === 2 ? 3 : rng.pick([2, 4] as const))
+      : (rootIndex === 2 ? rng.pick([3, 5] as const) : rng.pick([4, 5] as const));
     const state: N2FractionalEvaluationState = {
       family: "FRACTIONAL_INDEX_EVALUATION",
       mechanism: "FRACTIONAL_NUMERIC_EVALUATION",
@@ -86,30 +95,30 @@ const fractionalEvaluationState = (seed: number): N2FractionalEvaluationState =>
       base: rootValue ** rootIndex,
       exactResult: rootValue ** exponentNumerator,
     };
-    if (state.exactResult > 1000) continue;
+    if (difficulty === 1 && state.exactResult > 125) continue;
+    if (difficulty === 2 && (state.exactResult < 126 || state.exactResult > 625)) continue;
     if (historicalN2FractionalOverlap(state)) continue;
     return state;
   }
-  throw new Error("Unable to construct a non-historical exact N2 fractional-index evaluation for this seed.");
+  throw new Error("Unable to construct a non-historical exact N2 fractional-index evaluation for this seed and difficulty.");
 };
 
-const productQuotientCoefficientState = (seed: number): N2ProductQuotientCoefficientState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020402));
-  const coefficientPairs = [
-    [6, 2],
-    [12, 3],
-    [15, 5],
-    [18, 6],
-    [20, 4],
-  ] as const;
-  for (let attempt = 0; attempt < 200; attempt += 1) {
+const productQuotientCoefficientState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2ProductQuotientCoefficientState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020402 + difficulty));
+  const coefficientPairs = difficulty === 1
+    ? ([[6, 2], [12, 3], [15, 5]] as const)
+    : ([[12, 3], [18, 6], [20, 4]] as const);
+  for (let attempt = 0; attempt < 300; attempt += 1) {
     const [coefficientNumerator, coefficientDenominator] = rng.pick(coefficientPairs);
-    const firstExponent = rng.int(2, 5);
-    const secondExponent = rng.int(1, 4);
-    const denominatorExponent = rng.int(1, 4);
+    const firstExponent = difficulty === 1 ? rng.int(2, 4) : rng.int(3, 5);
+    const secondExponent = difficulty === 1 ? rng.int(1, 3) : rng.int(2, 4);
+    const denominatorExponent = difficulty === 1 ? rng.int(1, 3) : rng.int(2, 5);
     const numeratorExponent = firstExponent + secondExponent;
     const finalExponent = numeratorExponent - denominatorExponent;
-    if (numeratorExponent > 10 || finalExponent < 2) continue;
+    if (numeratorExponent > 10 || finalExponent < 2 || finalExponent > 9) continue;
     return {
       family: "MULTI_LAW_SIMPLIFICATION",
       mechanism: "PRODUCT_QUOTIENT_WITH_COEFFICIENT",
@@ -122,17 +131,43 @@ const productQuotientCoefficientState = (seed: number): N2ProductQuotientCoeffic
       numeratorExponent,
       coefficientResult: coefficientNumerator / coefficientDenominator,
       finalExponent,
+      reverseNumeratorFactors: difficulty === 2 && rng.next() < 0.5,
     };
   }
-  throw new Error("Unable to construct an N2 coefficient/product/quotient state for this seed.");
+  throw new Error("Unable to construct an N2 coefficient/product/quotient state for this seed and difficulty.");
 };
 
-const powerOfPowerNegativeState = (seed: number): N2PowerOfPowerNegativeIndexState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020403));
-  for (let attempt = 0; attempt < 400; attempt += 1) {
-    const innerExponent = rng.pick([-3, -1, 3, 4] as const);
-    const outerExponent = rng.int(2, 4);
-    const secondExponent = -rng.int(2, 10);
+const powerOfPowerNegativeState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2PowerOfPowerNegativeIndexState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020403 + difficulty));
+  for (let attempt = 0; attempt < 600; attempt += 1) {
+    let innerExponent: number;
+    let outerExponent: number;
+    let secondExponent: number;
+
+    if (difficulty === 1) {
+      innerExponent = rng.pick([-3, -2, -1] as const);
+      outerExponent = rng.pick([2, 3] as const);
+      secondExponent = rng.next() < 0.8 ? -rng.int(2, 6) : rng.int(1, 3);
+    } else {
+      const layout = rng.int(0, 2);
+      if (layout === 0) {
+        innerExponent = rng.pick([-2, -1] as const);
+        outerExponent = -rng.pick([2, 3] as const);
+        secondExponent = -rng.int(5, 10);
+      } else if (layout === 1) {
+        innerExponent = rng.pick([2, 3] as const);
+        outerExponent = -rng.pick([2, 3] as const);
+        secondExponent = rng.int(1, 4);
+      } else {
+        innerExponent = rng.pick([-3, -2] as const);
+        outerExponent = rng.pick([3, 4] as const);
+        secondExponent = rng.next() < 0.5 ? rng.int(1, 4) : -rng.int(2, 6);
+      }
+    }
+
     const poweredExponent = innerExponent * outerExponent;
     const combinedExponent = poweredExponent + secondExponent;
     const finalDenominatorExponent = Math.abs(combinedExponent);
@@ -147,32 +182,41 @@ const powerOfPowerNegativeState = (seed: number): N2PowerOfPowerNegativeIndexSta
       poweredExponent,
       combinedExponent,
       finalDenominatorExponent,
+      powerFactorFirst: difficulty === 1 ? rng.next() < 0.8 : rng.next() < 0.5,
     };
   }
-  throw new Error("Unable to construct an N2 negative-index power-of-a-power state for this seed.");
+  throw new Error("Unable to construct an N2 negative-index power-of-a-power state for this seed and difficulty.");
 };
 
-const reciprocalRootState = (seed: number): N2ReciprocalRootState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020404));
+const reciprocalRootState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2ReciprocalRootState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020404 + difficulty));
+  const rootIndex = difficulty === 1 ? 2 : rng.pick([2, 3] as const);
+  const radicandExponent = difficulty === 1
+    ? rng.pick([1, 3] as const)
+    : (rootIndex === 2 ? rng.pick([3, 5] as const) : rng.pick([2, 4, 5] as const));
   return {
     family: "MULTI_LAW_SIMPLIFICATION",
     mechanism: "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX",
     variable: rng.pick(VARIABLES),
-    rootIndex: 2,
-    finalExponent: { numerator: -1, denominator: 2 },
+    rootIndex,
+    radicandExponent,
+    finalExponent: reduceN2RationalExponent(-radicandExponent, rootIndex),
   };
 };
 
-const squaredFractionalMonomialState = (seed: number): N2SquaredFractionalMonomialState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020405));
-  const coefficients = [
-    [1, 2],
-    [3, 4],
-    [2, 5],
-    [3, 5],
-  ] as const;
+const squaredFractionalMonomialState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2SquaredFractionalMonomialState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020405 + difficulty));
+  const coefficients = difficulty === 1
+    ? ([[1, 2], [3, 4]] as const)
+    : ([[2, 5], [3, 5], [3, 4]] as const);
   const [coefficientNumerator, coefficientDenominator] = rng.pick(coefficients);
-  const variableExponent = rng.pick([2, 3, 5] as const);
+  const variableExponent = difficulty === 1 ? rng.pick([2, 3] as const) : rng.pick([3, 4, 5] as const);
   return {
     family: "BRACKETED_INDEX_LAWS",
     mechanism: "SQUARED_FRACTIONAL_MONOMIAL",
@@ -187,11 +231,14 @@ const squaredFractionalMonomialState = (seed: number): N2SquaredFractionalMonomi
   };
 };
 
-const productOverRootState = (seed: number): N2ProductOverRootState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020406));
-  const coefficient = rng.pick([2, 4, 5, 6] as const);
-  const firstExponent = rng.int(2, 5);
-  const secondExponent = rng.int(1, 2);
+const productOverRootState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2ProductOverRootState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020406 + difficulty));
+  const coefficient = difficulty === 1 ? rng.pick([2, 4] as const) : rng.pick([4, 5, 6] as const);
+  const firstExponent = difficulty === 1 ? rng.int(2, 3) : rng.int(3, 5);
+  const secondExponent = difficulty === 1 ? 1 : rng.int(1, 2);
   const rootIndex = 2 as const;
   const numeratorExponent = firstExponent + secondExponent;
   return {
@@ -203,28 +250,30 @@ const productOverRootState = (seed: number): N2ProductOverRootState => {
     secondExponent,
     rootIndex,
     numeratorExponent,
-    finalExponent: {
-      numerator: numeratorExponent * rootIndex - 1,
-      denominator: rootIndex,
-    },
+    finalExponent: reduceN2RationalExponent(numeratorExponent * rootIndex - 1, rootIndex),
   };
 };
 
-const negativeIndexQuotientState = (seed: number): N2NegativeIndexQuotientState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020407));
-  for (let attempt = 0; attempt < 200; attempt += 1) {
-    const numeratorExponent = rng.pick([-1, -3, -4] as const);
-    const firstDenominator = rng.int(1, 4);
-    const secondDenominator = rng.int(2, 5);
+const negativeIndexQuotientState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2NegativeIndexQuotientState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020407 + difficulty));
+  for (let attempt = 0; attempt < 300; attempt += 1) {
+    const numeratorExponent = difficulty === 1
+      ? rng.pick([-1, -2] as const)
+      : rng.pick([-3, -4] as const);
+    const firstDenominator = difficulty === 1 ? rng.int(1, 3) : rng.int(2, 4);
+    const secondDenominator = difficulty === 1 ? rng.int(1, 3) : rng.int(3, 5);
     const denominatorExponent = firstDenominator + secondDenominator;
     const combinedExponent = numeratorExponent - denominatorExponent;
     const finalDenominatorExponent = Math.abs(combinedExponent);
-    if (finalDenominatorExponent > 10) continue;
+    if (finalDenominatorExponent > (difficulty === 1 ? 8 : 10)) continue;
     return {
       family: "MULTI_LAW_SIMPLIFICATION",
       mechanism: "NEGATIVE_INDEX_QUOTIENT",
       variable: rng.pick(VARIABLES),
-      coefficient: rng.pick([2, 3, 4, 6, 7] as const),
+      coefficient: rng.pick(difficulty === 1 ? ([2, 3, 4] as const) : ([3, 4, 6, 7] as const)),
       numeratorExponent,
       denominatorExponents: [firstDenominator, secondDenominator],
       denominatorExponent,
@@ -232,38 +281,63 @@ const negativeIndexQuotientState = (seed: number): N2NegativeIndexQuotientState 
       finalDenominatorExponent,
     };
   }
-  throw new Error("Unable to construct an N2 negative-index quotient state for this seed.");
+  throw new Error("Unable to construct an N2 negative-index quotient state for this seed and difficulty.");
 };
 
-const distributiveIndexExpansionState = (seed: number): N2DistributiveIndexExpansionState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020408));
-  const outsideExponent = rng.pick([2, 3] as const);
-  const firstTermExponent = rng.pick([
-    { numerator: 1, denominator: 2 },
-    { numerator: 3, denominator: 2 },
-    { numerator: 1, denominator: 3 },
-    { numerator: 2, denominator: 3 },
-    { numerator: 4, denominator: 3 },
-  ] as const);
+const fraction = (numerator: number, denominator: 2 | 3): N2Exponent => ({ numerator, denominator });
+
+const distributiveIndexExpansionState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2DistributiveIndexExpansionState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020408 + difficulty));
+  const lowerTemplates: readonly [N2Exponent, N2Exponent, N2Exponent][] = [
+    [2, fraction(1, 2), -2],
+    [2, -1, fraction(1, 2)],
+    [3, fraction(1, 3), -2],
+    [2, fraction(-1, 2), -1],
+    [3, -2, fraction(2, 3)],
+  ];
+  const upperTemplates: readonly [N2Exponent, N2Exponent, N2Exponent][] = [
+    [fraction(1, 2), fraction(3, 2), fraction(-1, 2)],
+    [fraction(3, 2), fraction(1, 2), fraction(-1, 2)],
+    [fraction(2, 3), fraction(4, 3), fraction(-2, 3)],
+    [3, fraction(-1, 2), fraction(-4, 3)],
+    [fraction(-1, 2), fraction(3, 2), fraction(5, 2)],
+  ];
+  const [outsideExponent, firstTermExponent, secondTermExponent] = rng.pick(
+    difficulty === 1 ? lowerTemplates : upperTemplates,
+  );
+  const firstResultExponent = addN2Exponents(outsideExponent, firstTermExponent);
+  const secondResultExponent = addN2Exponents(outsideExponent, secondTermExponent);
+  if (
+    firstResultExponent.numerator === secondResultExponent.numerator
+    && firstResultExponent.denominator === secondResultExponent.denominator
+  ) {
+    throw new Error("Distributive N2 template produced duplicate like terms.");
+  }
   return {
     family: "BRACKETED_INDEX_LAWS",
     mechanism: "DISTRIBUTIVE_INDEX_EXPANSION",
     variable: rng.pick(VARIABLES),
     outsideExponent,
     firstTermExponent,
-    secondTermExponent: -outsideExponent,
-    firstResultExponent: addRationalExponents(outsideExponent, firstTermExponent),
-    secondResultExponent: 0,
+    secondTermExponent,
+    firstResultExponent,
+    secondResultExponent,
   };
 };
 
-const positivePowerProductQuotientState = (seed: number): N2PositivePowerProductQuotientState => {
-  const rng = new SeededRandom(mixSeed(seed, 0x020409));
-  for (let attempt = 0; attempt < 300; attempt += 1) {
-    const firstExponent = rng.int(3, 6);
-    const innerExponent = rng.int(2, 4);
-    const outerExponent = rng.int(2, 3);
-    const denominatorExponent = rng.int(1, 6);
+const positivePowerProductQuotientState = (
+  seed: number,
+  difficulty: N2GeneratorDifficulty,
+): N2PositivePowerProductQuotientState => {
+  const rng = new SeededRandom(mixSeed(seed, 0x020409 + difficulty));
+  for (let attempt = 0; attempt < 400; attempt += 1) {
+    const firstExponent = difficulty === 1 ? rng.int(2, 4) : rng.int(3, 6);
+    const innerExponent = difficulty === 1 ? rng.int(2, 3) : rng.int(2, 4);
+    const outerExponent = difficulty === 1 ? 2 : rng.int(2, 3);
+    const denominatorExponent = difficulty === 1 ? rng.int(1, 4) : rng.int(2, 6);
     const poweredExponent = innerExponent * outerExponent;
     const numeratorExponent = firstExponent + poweredExponent;
     const finalExponent = numeratorExponent - denominatorExponent;
@@ -281,29 +355,33 @@ const positivePowerProductQuotientState = (seed: number): N2PositivePowerProduct
       finalExponent,
     };
   }
-  throw new Error("Unable to construct an N2 all-positive three-law state for this seed.");
+  throw new Error("Unable to construct an N2 all-positive three-law state for this seed and difficulty.");
 };
 
-const stateForMechanism = (seed: number, mechanism: N2GeneratorMechanism): N2GeneratedMathState => {
+const stateForMechanism = (
+  seed: number,
+  mechanism: N2GeneratorMechanism,
+  difficulty: N2GeneratorDifficulty,
+): N2GeneratedMathState => {
   switch (mechanism) {
     case "FRACTIONAL_NUMERIC_EVALUATION":
-      return fractionalEvaluationState(seed);
+      return fractionalEvaluationState(seed, difficulty);
     case "PRODUCT_QUOTIENT_WITH_COEFFICIENT":
-      return productQuotientCoefficientState(seed);
+      return productQuotientCoefficientState(seed, difficulty);
     case "POWER_OF_POWER_WITH_NEGATIVE_INDEX":
-      return powerOfPowerNegativeState(seed);
+      return powerOfPowerNegativeState(seed, difficulty);
     case "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX":
-      return reciprocalRootState(seed);
+      return reciprocalRootState(seed, difficulty);
     case "SQUARED_FRACTIONAL_MONOMIAL":
-      return squaredFractionalMonomialState(seed);
+      return squaredFractionalMonomialState(seed, difficulty);
     case "PRODUCT_OVER_ROOT":
-      return productOverRootState(seed);
+      return productOverRootState(seed, difficulty);
     case "NEGATIVE_INDEX_QUOTIENT":
-      return negativeIndexQuotientState(seed);
+      return negativeIndexQuotientState(seed, difficulty);
     case "DISTRIBUTIVE_INDEX_EXPANSION":
-      return distributiveIndexExpansionState(seed);
+      return distributiveIndexExpansionState(seed, difficulty);
     case "POSITIVE_POWER_PRODUCT_QUOTIENT":
-      return positivePowerProductQuotientState(seed);
+      return positivePowerProductQuotientState(seed, difficulty);
   }
 };
 
@@ -320,17 +398,21 @@ export const generateN2Question = (options: N2GenerateOptions): N2GeneratedQuest
   const family = selectN2Family(seed, paper, options.family, options.mechanism, options.difficulty);
   const mechanism = selectN2Mechanism(seed, paper, family, options.mechanism, options.difficulty);
   const mechanismProfile = getN2MechanismProfile(mechanism);
+  const targetDifficulty = options.difficulty ?? mechanismProfile.difficulty;
   const familyEvidence = N2_GENERATOR_FAMILY_EVIDENCE[family];
-  const mathState = stateForMechanism(seed, mechanism);
-  const difficulty = assessN2Difficulty(mathState);
+  const mathState = stateForMechanism(seed, mechanism, targetDifficulty);
+  const difficulty = assessN2Difficulty(mathState, targetDifficulty);
   const prompt = buildN2Prompt(mathState);
   const frequency = n2FamilyFrequency(family, paper);
   const historicalReference = historicalReferenceForN2(mathState);
+  const skill = n2SkillForMechanism(mechanism);
 
   const question: N2GeneratedQuestion = {
     generatorId: "N2_INDICES_V1",
-    instanceId: `N2_INDICES_V1_${paper}_${mechanism}_${seed}`,
+    instanceId: `N2_INDICES_V1_${paper}_${mechanism}_L${targetDifficulty}_${seed}`,
     seed,
+    skillId: skill.id,
+    skillLabel: skill.label,
     family,
     mechanism,
     familyReadiness: familyEvidence.readiness,

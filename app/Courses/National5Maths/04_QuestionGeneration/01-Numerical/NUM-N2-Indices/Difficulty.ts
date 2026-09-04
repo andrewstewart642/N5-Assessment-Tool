@@ -4,6 +4,7 @@ import {
 } from "./Evidence";
 import type {
   N2DifficultyMetrics,
+  N2Exponent,
   N2GeneratedMathState,
   N2GeneratorDifficulty,
   N2GeneratorDifficultyBandId,
@@ -17,7 +18,9 @@ export type N2DifficultyAssessment = {
   difficultySignals: string[];
 };
 
-const rationalIsFractional = (value: { denominator: number }) => value.denominator !== 1;
+const isRational = (value: N2Exponent): value is Exclude<N2Exponent, number> => typeof value !== "number";
+const isFractional = (value: N2Exponent) => isRational(value) && value.denominator !== 1;
+const isNegative = (value: N2Exponent) => typeof value === "number" ? value < 0 : value.numerator < 0;
 
 const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
   switch (state.mechanism) {
@@ -48,7 +51,7 @@ const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
     case "POWER_OF_POWER_WITH_NEGATIVE_INDEX":
       return {
         stageCount: 3,
-        negativeExponentCount: Number(state.innerExponent < 0) + Number(state.secondExponent < 0),
+        negativeExponentCount: Number(state.innerExponent < 0) + Number(state.outerExponent < 0) + Number(state.secondExponent < 0),
         fractionalExponentCount: 0,
         rootNotationPresent: false,
         bracketedExpressionPresent: true,
@@ -76,7 +79,7 @@ const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
         fractionalExponentCount: 0,
         rootNotationPresent: false,
         bracketedExpressionPresent: true,
-        algebraicFractionPresent: false,
+        algebraicFractionPresent: true,
         additiveTermsPresent: false,
         coefficientArithmeticPresent: true,
         positivePowerOutputRequired: false,
@@ -85,7 +88,7 @@ const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
       return {
         stageCount: 3,
         negativeExponentCount: 0,
-        fractionalExponentCount: Number(rationalIsFractional(state.finalExponent)),
+        fractionalExponentCount: Number(state.finalExponent.denominator !== 1),
         rootNotationPresent: true,
         bracketedExpressionPresent: false,
         algebraicFractionPresent: true,
@@ -105,11 +108,12 @@ const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
         coefficientArithmeticPresent: false,
         positivePowerOutputRequired: true,
       };
-    case "DISTRIBUTIVE_INDEX_EXPANSION":
+    case "DISTRIBUTIVE_INDEX_EXPANSION": {
+      const promptExponents = [state.outsideExponent, state.firstTermExponent, state.secondTermExponent];
       return {
         stageCount: 2,
-        negativeExponentCount: 1,
-        fractionalExponentCount: 2,
+        negativeExponentCount: promptExponents.filter(isNegative).length,
+        fractionalExponentCount: promptExponents.filter(isFractional).length,
         rootNotationPresent: false,
         bracketedExpressionPresent: true,
         algebraicFractionPresent: false,
@@ -117,6 +121,7 @@ const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
         coefficientArithmeticPresent: false,
         positivePowerOutputRequired: false,
       };
+    }
     case "POSITIVE_POWER_PRODUCT_QUOTIENT":
       return {
         stageCount: 3,
@@ -132,7 +137,7 @@ const metricsFor = (state: N2GeneratedMathState): N2DifficultyMetrics => {
   }
 };
 
-const difficultyForMechanism = (state: N2GeneratedMathState): N2GeneratorDifficulty => {
+const historicalDefaultDifficulty = (state: N2GeneratedMathState): N2GeneratorDifficulty => {
   switch (state.mechanism) {
     case "FRACTIONAL_NUMERIC_EVALUATION":
     case "PRODUCT_QUOTIENT_WITH_COEFFICIENT":
@@ -143,10 +148,15 @@ const difficultyForMechanism = (state: N2GeneratedMathState): N2GeneratorDifficu
   }
 };
 
-const signalsFor = (state: N2GeneratedMathState, metrics: N2DifficultyMetrics): string[] => {
+const signalsFor = (
+  state: N2GeneratedMathState,
+  metrics: N2DifficultyMetrics,
+  difficulty: N2GeneratorDifficulty,
+): string[] => {
   const signals: string[] = [];
   if (state.mechanism === "FRACTIONAL_NUMERIC_EVALUATION") {
     signals.push("exact two-stage fractional-index interpretation and evaluation");
+    if (difficulty === 2) signals.push("larger exact-value evaluation within a controlled perfect-power range");
   }
   if (metrics.stageCount === 3) signals.push("three independently mark-bearing stages");
   if (metrics.negativeExponentCount > 0) signals.push("signed exponent manipulation");
@@ -155,25 +165,39 @@ const signalsFor = (state: N2GeneratedMathState, metrics: N2DifficultyMetrics): 
   if (metrics.additiveTermsPresent) signals.push("parallel exponent calculations across a two-term bracket");
   if (metrics.coefficientArithmeticPresent) signals.push("coefficient arithmetic is independently visible");
   if (metrics.positivePowerOutputRequired) signals.push("positive-power conversion is a required final stage");
+  if (state.mechanism === "POWER_OF_POWER_WITH_NEGATIVE_INDEX" && state.outerExponent < 0) {
+    signals.push("negative outer power increases signed-exponent coordination");
+  }
+  if (state.mechanism === "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX" && state.radicandExponent > 1) {
+    signals.push("powered radicand produces a non-unit fractional numerator");
+  }
+  if (state.mechanism === "DISTRIBUTIVE_INDEX_EXPANSION" && isFractional(state.outsideExponent)) {
+    signals.push("fractional outside power must be distributed across both terms");
+  }
   if (state.mechanism === "POSITIVE_POWER_PRODUCT_QUOTIENT") {
     signals.push("three distinct positive-index laws must be coordinated");
+  }
+  if (difficulty === 2 && !signals.some((signal) => signal.startsWith("larger exact-value"))) {
+    signals.push("upper-band parameters or representation increase the within-skill demand");
   }
   return signals;
 };
 
-export const assessN2Difficulty = (state: N2GeneratedMathState): N2DifficultyAssessment => {
-  const difficulty = difficultyForMechanism(state);
-  const band = N2_GENERATOR_DIFFICULTY_BANDS.find((entry) => entry.difficulty === difficulty);
-  if (!band) throw new Error(`Missing N2 difficulty band ${difficulty}.`);
+export const assessN2Difficulty = (
+  state: N2GeneratedMathState,
+  requestedDifficulty: N2GeneratorDifficulty = historicalDefaultDifficulty(state),
+): N2DifficultyAssessment => {
+  const band = N2_GENERATOR_DIFFICULTY_BANDS.find((entry) => entry.difficulty === requestedDifficulty);
+  if (!band) throw new Error(`Missing N2 difficulty band ${requestedDifficulty}.`);
   const metrics = metricsFor(state);
   return {
-    difficulty,
+    difficulty: requestedDifficulty,
     bandId: band.bandId,
     metrics,
     structuralLevers: [
       ...N2_GENERATOR_DIFFICULTY_LEVERS.structure,
       ...N2_GENERATOR_DIFFICULTY_LEVERS.representation,
     ],
-    difficultySignals: signalsFor(state, metrics),
+    difficultySignals: signalsFor(state, metrics, requestedDifficulty),
   };
 };

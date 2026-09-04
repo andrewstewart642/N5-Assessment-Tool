@@ -55,7 +55,7 @@ export const buildMarkPointsGroupC = (
           requirement: "Multiply the outside power into at least one bracket term and combine the corresponding exponents correctly.",
           evidenceExamples: [
             `${powerPlain(state.variable, state.outsideExponent)} × ${powerPlain(state.variable, state.firstTermExponent)} = ${powerPlain(state.variable, state.firstResultExponent)}`,
-            `${powerPlain(state.variable, state.outsideExponent)} × ${powerPlain(state.variable, state.secondTermExponent)} = ${powerPlain(state.variable, 0)}`,
+            `${powerPlain(state.variable, state.outsideExponent)} × ${powerPlain(state.variable, state.secondTermExponent)} = ${powerPlain(state.variable, state.secondResultExponent)}`,
           ],
           acceptanceNotes: ["Either bracket term can supply the first mark."],
           dependsOnMarkNumbers: [],
@@ -66,9 +66,9 @@ export const buildMarkPointsGroupC = (
         classifiedMark(question, profile, 2, {
           type: "ACCURACY",
           role: "DISTRIBUTIVE_COMPLETION",
-          requirement: "Complete both distributed products and simplify the zero-power term to one.",
+          requirement: "Complete both distributed products and simplify the two-term result fully.",
           evidenceExamples: [n2CanonicalAnswerPlain(state)],
-          acceptanceNotes: ["Both terms must be complete for the second mark."],
+          acceptanceNotes: ["Both terms must be complete for the second mark; any zero-power term should be simplified to one."],
           dependsOnMarkNumbers: [1],
           followThroughFromMarkNumbers: [1],
           comparableDifficultyRequired: true,

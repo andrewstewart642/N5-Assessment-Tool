@@ -26,6 +26,7 @@ export type N2MechanismProfile = {
   readiness: N2GeneratorMechanismReadiness;
   evidenceCount: number;
   supportedPapers: readonly N2GeneratorPaper[];
+  /** Historical/default anchor only. Generated instances may deliberately vary above or below it. */
   difficulty: N2GeneratorDifficulty;
   marks: 2 | 3;
   standardProfile: N2GeneratorStandardProfile;
@@ -112,14 +113,9 @@ export const getN2MechanismProfile = (
 const eligibleMechanismProfiles = (
   paper: N2GeneratorPaper,
   family?: N2GeneratorFamily,
-  difficulty?: N2GeneratorDifficulty,
 ) => MECHANISM_ORDER
   .map((mechanism) => N2_MECHANISM_PROFILES[mechanism])
-  .filter((profile) =>
-    profile.supportedPapers.includes(paper)
-    && (!family || profile.family === family)
-    && (!difficulty || profile.difficulty === difficulty),
-  );
+  .filter((profile) => profile.supportedPapers.includes(paper) && (!family || profile.family === family));
 
 const weightedPick = <T>(
   seed: number,
@@ -144,15 +140,12 @@ export const chooseN2Paper = (
   requestedFamily?: N2GeneratorFamily,
   requestedMechanism?: N2GeneratorMechanism,
   requestedPaper?: N2GeneratorPaper,
-  difficulty?: N2GeneratorDifficulty,
+  _difficulty?: N2GeneratorDifficulty,
 ): N2GeneratorPaper => {
   if (requestedMechanism) {
     const profile = N2_MECHANISM_PROFILES[requestedMechanism];
     if (requestedFamily && requestedFamily !== profile.family) {
       throw new Error(`${requestedMechanism} belongs to ${profile.family}, not ${requestedFamily}.`);
-    }
-    if (difficulty && profile.difficulty !== difficulty) {
-      throw new Error(`${requestedMechanism} is calibrated at N2 difficulty ${profile.difficulty}, not ${difficulty}.`);
     }
     if (requestedPaper) {
       if (!profile.supportedPapers.includes(requestedPaper)) {
@@ -165,41 +158,36 @@ export const chooseN2Paper = (
 
   if (requestedFamily) {
     const family = N2_GENERATOR_FAMILY_EVIDENCE[requestedFamily];
-    const eligiblePapers = difficulty
-      ? (["P1", "P2"] as const).filter((paper) =>
-          eligibleMechanismProfiles(paper, requestedFamily, difficulty).length > 0,
-        )
-      : [...family.supportedPapers];
+    const eligiblePapers = (["P1", "P2"] as const).filter((paper) =>
+      eligibleMechanismProfiles(paper, requestedFamily).length > 0,
+    );
     if (requestedPaper) {
       if (!eligiblePapers.includes(requestedPaper)) {
-        throw new Error(`${requestedFamily} has no N2 V1 mechanism on ${requestedPaper}${difficulty ? ` at difficulty ${difficulty}` : ""}.`);
+        throw new Error(`${requestedFamily} has no N2 V1 mechanism on ${requestedPaper}.`);
       }
       return requestedPaper;
     }
     if (eligiblePapers.length === 0) {
-      throw new Error(`${requestedFamily} has no N2 V1 paper support${difficulty ? ` at difficulty ${difficulty}` : ""}.`);
+      throw new Error(`${requestedFamily} has no N2 V1 paper support.`);
     }
-    return eligiblePapers[positiveModulo(seed, eligiblePapers.length)];
+    const historicallySupported = eligiblePapers.filter((paper) => family.supportedPapers.includes(paper));
+    const pool = historicallySupported.length ? historicallySupported : eligiblePapers;
+    return pool[positiveModulo(seed, pool.length)];
   }
 
   if (requestedPaper) {
-    if (difficulty && eligibleMechanismProfiles(requestedPaper, undefined, difficulty).length === 0) {
-      throw new Error(`No N2 V1 mechanism is available on ${requestedPaper} at difficulty ${difficulty}.`);
+    if (eligibleMechanismProfiles(requestedPaper).length === 0) {
+      throw new Error(`No N2 V1 mechanism is available on ${requestedPaper}.`);
     }
     return requestedPaper;
   }
 
   const papers = ["P1", "P2"] as const;
   const paperCounts = {
-    P1: difficulty
-      ? eligibleMechanismProfiles("P1", undefined, difficulty).reduce((sum, profile) => sum + profile.evidenceCount, 0)
-      : N2_GENERATOR_CORPUS.filter((entry) => entry.paper === "P1").length,
-    P2: difficulty
-      ? eligibleMechanismProfiles("P2", undefined, difficulty).reduce((sum, profile) => sum + profile.evidenceCount, 0)
-      : N2_GENERATOR_CORPUS.filter((entry) => entry.paper === "P2").length,
+    P1: N2_GENERATOR_CORPUS.filter((entry) => entry.paper === "P1").length,
+    P2: N2_GENERATOR_CORPUS.filter((entry) => entry.paper === "P2").length,
   };
-  const eligiblePapers = papers.filter((paper) => paperCounts[paper] > 0);
-  return weightedPick(seed, eligiblePapers, (paper) => paperCounts[paper]);
+  return weightedPick(seed, papers, (paper) => paperCounts[paper]);
 };
 
 export const selectN2Family = (
@@ -207,7 +195,7 @@ export const selectN2Family = (
   paper: N2GeneratorPaper,
   requestedFamily?: N2GeneratorFamily,
   requestedMechanism?: N2GeneratorMechanism,
-  difficulty?: N2GeneratorDifficulty,
+  _difficulty?: N2GeneratorDifficulty,
 ): N2GeneratorFamily => {
   if (requestedMechanism) {
     const profile = N2_MECHANISM_PROFILES[requestedMechanism];
@@ -217,25 +205,20 @@ export const selectN2Family = (
     if (!profile.supportedPapers.includes(paper)) {
       throw new Error(`${requestedMechanism} is not supported on ${paper}.`);
     }
-    if (difficulty && profile.difficulty !== difficulty) {
-      throw new Error(`${requestedMechanism} is calibrated at N2 difficulty ${profile.difficulty}, not ${difficulty}.`);
-    }
     return profile.family;
   }
 
   if (requestedFamily) {
-    const candidates = eligibleMechanismProfiles(paper, requestedFamily, difficulty);
+    const candidates = eligibleMechanismProfiles(paper, requestedFamily);
     if (candidates.length === 0) {
-      throw new Error(`${requestedFamily} has no N2 V1 mechanism for ${paper}${difficulty ? ` at difficulty ${difficulty}` : ""}.`);
+      throw new Error(`${requestedFamily} has no N2 V1 mechanism for ${paper}.`);
     }
     return requestedFamily;
   }
 
-  const candidates = eligibleMechanismProfiles(paper, undefined, difficulty);
+  const candidates = eligibleMechanismProfiles(paper);
   const families = unique(candidates.map((profile) => profile.family));
-  if (families.length === 0) {
-    throw new Error(`No N2 V1 family is available for ${paper}${difficulty ? ` at difficulty ${difficulty}` : ""}.`);
-  }
+  if (families.length === 0) throw new Error(`No N2 V1 family is available for ${paper}.`);
 
   const cells = paper === "P1" ? N2_GENERATOR_FREQUENCY.P1 : N2_GENERATOR_FREQUENCY.P2;
   return weightedPick(seed, families, (family) =>
@@ -248,7 +231,7 @@ export const selectN2Mechanism = (
   paper: N2GeneratorPaper,
   family: N2GeneratorFamily,
   requestedMechanism?: N2GeneratorMechanism,
-  difficulty?: N2GeneratorDifficulty,
+  _difficulty?: N2GeneratorDifficulty,
 ): N2GeneratorMechanism => {
   if (requestedMechanism) {
     const profile = N2_MECHANISM_PROFILES[requestedMechanism];
@@ -258,15 +241,12 @@ export const selectN2Mechanism = (
     if (!profile.supportedPapers.includes(paper)) {
       throw new Error(`${requestedMechanism} is not supported on ${paper}.`);
     }
-    if (difficulty && profile.difficulty !== difficulty) {
-      throw new Error(`${requestedMechanism} is calibrated at N2 difficulty ${profile.difficulty}, not ${difficulty}.`);
-    }
     return requestedMechanism;
   }
 
-  const candidates = eligibleMechanismProfiles(paper, family, difficulty);
+  const candidates = eligibleMechanismProfiles(paper, family);
   if (candidates.length === 0) {
-    throw new Error(`${family} has no eligible N2 V1 mechanism for ${paper}${difficulty ? ` at difficulty ${difficulty}` : ""}.`);
+    throw new Error(`${family} has no eligible N2 V1 mechanism for ${paper}.`);
   }
 
   return weightedPick(seed * 31 + 7, candidates, (profile) => profile.evidenceCount).mechanism;
@@ -312,9 +292,7 @@ export const historicalReferenceForN2 = (
 
   return {
     primaryQuestionCatalogId,
-    supportingQuestionCatalogIds: profile.questionCatalogIds.filter(
-      (id) => id !== primaryQuestionCatalogId,
-    ),
+    supportingQuestionCatalogIds: profile.questionCatalogIds.filter((id) => id !== primaryQuestionCatalogId),
     matchReasons: [
       "SAME_FAMILY",
       "SAME_SKILL",

@@ -1,4 +1,7 @@
-import { n2CanonicalAnswerPlain } from "../../../04_QuestionGeneration/01-Numerical/NUM-N2-Indices/PromptGrammar";
+import {
+  n2CanonicalAnswerPlain,
+  reduceN2RationalExponent,
+} from "../../../04_QuestionGeneration/01-Numerical/NUM-N2-Indices/PromptGrammar";
 import type { N2GeneratedQuestion } from "../../../04_QuestionGeneration/01-Numerical/NUM-N2-Indices/Types";
 import type { N2GeneratedAnswerProfile, N2GeneratedMarkPoint } from "./Types";
 import { powerPlain } from "./Formatting";
@@ -11,13 +14,16 @@ export const buildMarkPointsGroupB = (
   const state = question.mathState;
 
   switch (state.mechanism) {
-    case "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX":
+    case "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX": {
+      const positiveFractional = reduceN2RationalExponent(state.radicandExponent, state.rootIndex);
       return [
         classifiedMark(question, profile, 1, {
           type: "REPRESENTATION",
           role: "ROOT_TO_FRACTIONAL_INDEX",
-          requirement: "Rewrite the root as a fractional power of the same base.",
-          evidenceExamples: [`${state.rootIndex}th-root(${state.variable}) = ${powerPlain(state.variable, { numerator: 1, denominator: state.rootIndex })}`],
+          requirement: "Rewrite the powered root as a fractional power of the same base.",
+          evidenceExamples: [
+            `${state.rootIndex}th-root(${powerPlain(state.variable, state.radicandExponent)}) = ${powerPlain(state.variable, positiveFractional)}`,
+          ],
           acceptanceNotes: ["The equivalent fractional exponent may be written directly inside the denominator."],
           dependsOnMarkNumbers: [],
           followThroughFromMarkNumbers: [],
@@ -28,7 +34,7 @@ export const buildMarkPointsGroupB = (
           type: "REPRESENTATION",
           role: "RECIPROCAL_TO_NEGATIVE_INDEX",
           requirement: "Use the reciprocal law to express the whole quantity as one negative fractional power.",
-          evidenceExamples: [`1/${powerPlain(state.variable, { numerator: 1, denominator: state.rootIndex })} = ${powerPlain(state.variable, state.finalExponent)}`],
+          evidenceExamples: [`1/${powerPlain(state.variable, positiveFractional)} = ${powerPlain(state.variable, state.finalExponent)}`],
           acceptanceNotes: ["Stating the correct required exponent directly is acceptable."],
           dependsOnMarkNumbers: [1],
           followThroughFromMarkNumbers: [1],
@@ -36,6 +42,7 @@ export const buildMarkPointsGroupB = (
           blockingConditions: [],
         }),
       ];
+    }
     case "SQUARED_FRACTIONAL_MONOMIAL":
       return [
         classifiedMark(question, profile, 1, {

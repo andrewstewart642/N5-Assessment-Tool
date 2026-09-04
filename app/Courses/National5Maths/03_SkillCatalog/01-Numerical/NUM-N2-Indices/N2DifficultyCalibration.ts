@@ -8,19 +8,21 @@ export type N2DifficultyBandCalibration = {
 };
 
 /**
- * Difficulty is deliberately separate from C/A standard. The reviewed corpus
- * contains low-demand A-standard examples and a medium-demand wholly C example.
+ * Difficulty is deliberately separate from C/A standard and from mechanism.
+ * Historical anchors locate the default centre of gravity; generated instances
+ * may deliberately move within the same skill/mechanism by changing genuine
+ * arithmetic, representation or coordination burden.
  */
 export const N2_DIFFICULTY_BANDS: readonly N2DifficultyBandCalibration[] = [
   {
     difficulty: 1,
     bandId: "LOWER_VALID",
-    description: "Lower valid N2 demand: the route is direct and compact, with either two straightforward transformations or a three-stage positive-index/coefficient route whose representation burden remains low.",
+    description: "Lower-band N2 demand: a direct, compact route with controlled values and straightforward representation, matching the normal source-calibrated centre of gravity for the selected skill.",
   },
   {
     difficulty: 2,
     bandId: "UPPER_VALID",
-    description: "Upper valid N2 demand: signed or fractional exponents, root translation, prescribed output form, distributive structure or a denser three-stage law combination materially increases the written/representation burden.",
+    description: "Upper-band N2 demand: the same underlying skill is made materially harder through controlled exact-value size, signed/fractional representation, root translation, prescribed output, distributive structure or denser law coordination — not through arbitrary large numbers alone.",
   },
 ] as const;
 
@@ -116,6 +118,7 @@ export const N2_DIFFICULTY_LEVERS = {
   arithmetic: [
     "fractional coefficient arithmetic",
     "small exact numerical powers",
+    "controlled larger exact values within fractional-index evaluation",
     "signed exponent arithmetic",
   ],
   presentation: [
@@ -127,8 +130,10 @@ export const N2_DIFFICULTY_LEVERS = {
 
 export const N2_DIFFICULTY_SCORING_RULES = [
   "Difficulty is determined by the route the pupil must perform, not by C/A standard and not by the visual ugliness of the exponents.",
-  "A fractional exponent can remain lower-band when it appears in a clean two-mark exact numerical evaluation.",
-  "A wholly positive-index question can be upper-band when three distinct laws must be coordinated, as shown by the 2025 anchor.",
+  "Difficulty belongs to the generated instance rather than being permanently attached to a mechanism; a mechanism may produce lower- and upper-band instances when its mathematical envelope supports both.",
+  "Historical examples anchor the normal/default difficulty for a mechanism but do not impose a generation ceiling.",
+  "A fractional exponent can remain lower-band when it appears in a clean two-mark exact numerical evaluation; a larger but still controlled exact result can raise within-skill demand.",
+  "A wholly positive-index question can be upper-band when three distinct laws must be coordinated.",
   "Signed exponents raise demand only when they create a genuine combine/convert step; merely changing a sign does not justify a difficulty increase.",
   "Root notation is an upper-band signal when the candidate must translate representation before another law can be applied.",
   "Distributive expansion with unlike indexed terms is an upper-band signal because the candidate must maintain two parallel exponent calculations.",

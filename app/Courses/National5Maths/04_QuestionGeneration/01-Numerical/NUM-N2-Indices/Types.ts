@@ -17,6 +17,7 @@ export type N2GeneratorMechanism =
   | "DISTRIBUTIVE_INDEX_EXPANSION"
   | "POSITIVE_POWER_PRODUCT_QUOTIENT";
 
+export type N2GeneratorSkillId = "N2.1" | "N2.2" | "N2.3";
 export type N2GeneratorPaper = "P1" | "P2";
 export type N2GeneratorFamilyReadiness = "CORE" | "SUPPORTED";
 export type N2GeneratorMechanismReadiness = "CORE" | "SUPPORTED";
@@ -30,6 +31,8 @@ export type N2RationalExponent = {
   numerator: number;
   denominator: 1 | 2 | 3;
 };
+
+export type N2Exponent = number | N2RationalExponent;
 
 export type N2FractionalEvaluationState = {
   family: "FRACTIONAL_INDEX_EVALUATION";
@@ -53,6 +56,7 @@ export type N2ProductQuotientCoefficientState = {
   numeratorExponent: number;
   coefficientResult: number;
   finalExponent: number;
+  reverseNumeratorFactors: boolean;
 };
 
 export type N2PowerOfPowerNegativeIndexState = {
@@ -65,6 +69,7 @@ export type N2PowerOfPowerNegativeIndexState = {
   poweredExponent: number;
   combinedExponent: number;
   finalDenominatorExponent: number;
+  powerFactorFirst: boolean;
 };
 
 export type N2ReciprocalRootState = {
@@ -72,6 +77,7 @@ export type N2ReciprocalRootState = {
   mechanism: "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX";
   variable: string;
   rootIndex: 2 | 3;
+  radicandExponent: number;
   finalExponent: N2RationalExponent;
 };
 
@@ -116,11 +122,11 @@ export type N2DistributiveIndexExpansionState = {
   family: "BRACKETED_INDEX_LAWS";
   mechanism: "DISTRIBUTIVE_INDEX_EXPANSION";
   variable: string;
-  outsideExponent: number;
-  firstTermExponent: N2RationalExponent;
-  secondTermExponent: number;
+  outsideExponent: N2Exponent;
+  firstTermExponent: N2Exponent;
+  secondTermExponent: N2Exponent;
   firstResultExponent: N2RationalExponent;
-  secondResultExponent: 0;
+  secondResultExponent: N2RationalExponent;
 };
 
 export type N2PositivePowerProductQuotientState = {
@@ -192,6 +198,8 @@ export type N2GeneratedQuestion = {
   generatorId: "N2_INDICES_V1";
   instanceId: string;
   seed: number;
+  skillId: N2GeneratorSkillId;
+  skillLabel: string;
   family: N2GeneratorFamily;
   mechanism: N2GeneratorMechanism;
   familyReadiness: N2GeneratorFamilyReadiness;

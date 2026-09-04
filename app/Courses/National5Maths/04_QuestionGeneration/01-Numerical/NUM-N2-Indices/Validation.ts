@@ -7,6 +7,8 @@ import {
   N2_GENERATOR_FRACTIONAL_ENVELOPE,
   N2_GENERATOR_SYMBOLIC_ENVELOPE,
 } from "./Evidence";
+import { addN2Exponents, reduceN2RationalExponent } from "./PromptGrammar";
+import { n2SkillForMechanism } from "./SkillLabels";
 import type {
   N2GeneratedQuestion,
   N2RationalExponent,
@@ -19,18 +21,9 @@ const error = (issues: N2ValidationIssue[], code: string, message: string) =>
 const warning = (issues: N2ValidationIssue[], code: string, message: string) =>
   issues.push({ severity: "WARNING", code, message });
 
-const gcd = (a: number, b: number): number => b === 0 ? Math.abs(a) : gcd(b, a % b);
-const reduce = (numerator: number, denominator: number): N2RationalExponent => {
-  const divisor = gcd(Math.abs(numerator), Math.abs(denominator)) || 1;
-  const sign = denominator < 0 ? -1 : 1;
-  return {
-    numerator: (numerator / divisor) * sign,
-    denominator: Math.abs(denominator / divisor) as 1 | 2 | 3,
-  };
-};
 const sameRational = (first: N2RationalExponent, second: N2RationalExponent) => {
-  const a = reduce(first.numerator, first.denominator);
-  const b = reduce(second.numerator, second.denominator);
+  const a = reduceN2RationalExponent(first.numerator, first.denominator);
+  const b = reduceN2RationalExponent(second.numerator, second.denominator);
   return a.numerator === b.numerator && a.denominator === b.denominator;
 };
 
@@ -42,8 +35,12 @@ const withinObservedExponentMagnitude = (values: readonly number[]) => {
 export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2ValidationResult => {
   const issues: N2ValidationIssue[] = [];
   const profile = getN2MechanismProfile(question.mechanism);
-  const assessment = assessN2Difficulty(question.mathState);
+  const assessment = assessN2Difficulty(question.mathState, question.difficulty);
+  const skill = n2SkillForMechanism(question.mechanism);
 
+  if (question.skillId !== skill.id || question.skillLabel !== skill.label) {
+    error(issues, "N2_SKILL_LABEL_DRIFT", "Generated public N2 skill label does not match the internal mechanism mapping.");
+  }
   if (question.family !== profile.family || question.mathState.family !== profile.family) {
     error(issues, "N2_FAMILY_DRIFT", "Generated family does not match the calibrated mechanism family.");
   }
@@ -62,11 +59,11 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
   if (question.thinking !== "OPERATIONAL") {
     error(issues, "N2_THINKING", "N2 V1 generation is Operational only.");
   }
-  if (question.difficulty !== profile.difficulty || assessment.difficulty !== question.difficulty) {
-    error(issues, "N2_DIFFICULTY_DRIFT", "Generated difficulty does not match the calibrated route.");
+  if (assessment.difficulty !== question.difficulty) {
+    error(issues, "N2_DIFFICULTY_DRIFT", "Generated difficulty does not match the requested instance band.");
   }
   if (question.quality.difficultyBandId !== assessment.bandId) {
-    error(issues, "N2_DIFFICULTY_BAND_DRIFT", "Stored difficulty band does not match the route assessment.");
+    error(issues, "N2_DIFFICULTY_BAND_DRIFT", "Stored difficulty band does not match the instance assessment.");
   }
   if (!question.promptParts.length || !question.promptSections.length) {
     error(issues, "N2_PROMPT_EMPTY", "Generated N2 question has no renderable prompt content.");
@@ -84,8 +81,14 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       if (state.base !== state.rootValue ** state.rootIndex || state.exactResult !== state.rootValue ** state.exponentNumerator) {
         error(issues, "N2_FRACTIONAL_EXACTNESS", "Stored fractional-index state is not an exact perfect-power evaluation.");
       }
-      if (!Number.isInteger(state.exactResult) || state.exactResult <= 1 || state.exactResult > 1000) {
-        error(issues, "N2_FRACTIONAL_RESULT", "Fractional-index evaluation must finish at a manageable exact integer.");
+      if (!Number.isInteger(state.exactResult) || state.exactResult <= 1 || state.exactResult > 625) {
+        error(issues, "N2_FRACTIONAL_RESULT", "Fractional-index evaluation must finish at a controlled exact integer.");
+      }
+      if (question.difficulty === 1 && state.exactResult > 125) {
+        error(issues, "N2_FRACTIONAL_LOWER_BAND", "Lower-band fractional evaluation should keep the exact result at 125 or below.");
+      }
+      if (question.difficulty === 2 && state.exactResult < 126) {
+        error(issues, "N2_FRACTIONAL_UPPER_BAND", "Upper-band fractional evaluation should materially increase the exact-value burden.");
       }
       if (historicalN2FractionalOverlap(state)) {
         error(issues, "N2_HISTORICAL_OVERLAP", "Generated fractional evaluation reproduces a catalogued historical base/exponent pair.");
@@ -117,18 +120,21 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       if (state.finalDenominatorExponent !== Math.abs(state.combinedExponent)) {
         error(issues, "N2_POSITIVE_POWER_CONVERSION", "Positive-power denominator does not match the negative final exponent.");
       }
-      if (state.outerExponent < 2 || state.outerExponent > 4 || state.finalDenominatorExponent > 12) {
+      if (Math.abs(state.outerExponent) < 2 || Math.abs(state.outerExponent) > 4 || state.finalDenominatorExponent > 12) {
         error(issues, "N2_NEGATIVE_POWER_ENVELOPE", "Negative-index power-of-a-power state is outside the moderated envelope.");
       }
       break;
     }
     case "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX": {
-      const expected = reduce(-1, state.rootIndex);
+      const expected = reduceN2RationalExponent(-state.radicandExponent, state.rootIndex);
       if (!sameRational(state.finalExponent, expected)) {
-        error(issues, "N2_RECIPROCAL_ROOT_RESULT", "Reciprocal-root exponent does not equal -1/rootIndex.");
+        error(issues, "N2_RECIPROCAL_ROOT_RESULT", "Reciprocal-root exponent does not match the powered radicand and root index.");
+      }
+      if (state.radicandExponent < 1 || state.radicandExponent > 5) {
+        error(issues, "N2_RECIPROCAL_ROOT_ENVELOPE", "Powered radicand is outside the moderated N2 range.");
       }
       if (state.rootIndex !== 2) {
-        warning(issues, "N2_RECIPROCAL_ROOT_ORIGINALITY", "V1 currently prefers square-root reciprocal variants so it does not collapse to trivial symbol substitution of the historical cube-root anchor.");
+        warning(issues, "N2_RECIPROCAL_ROOT_EXTENSION", "Cube-root reciprocal variants are a moderated extension from the strongest square-root presentation pattern.");
       }
       break;
     }
@@ -140,7 +146,7 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
         error(issues, "N2_SQUARED_MONOMIAL_COEFFICIENT", "Squared fractional coefficient state is inconsistent.");
       }
       if (state.coefficientNumerator >= state.coefficientDenominator) {
-        error(issues, "N2_SQUARED_MONOMIAL_FRACTION", "Powered-monomial coefficient should remain a simple proper fraction in V1.");
+        error(issues, "N2_SQUARED_MONOMIAL_FRACTION", "Powered-monomial coefficient should remain a simple proper fraction.");
       }
       break;
     }
@@ -148,12 +154,12 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       if (state.numeratorExponent !== state.firstExponent + state.secondExponent) {
         error(issues, "N2_ROOT_PRODUCT", "Numerator exponent does not match the product law.");
       }
-      const expected = reduce(state.numeratorExponent * state.rootIndex - 1, state.rootIndex);
+      const expected = reduceN2RationalExponent(state.numeratorExponent * state.rootIndex - 1, state.rootIndex);
       if (!sameRational(state.finalExponent, expected)) {
         error(issues, "N2_ROOT_QUOTIENT", "Final fractional exponent does not match division by the root power.");
       }
       if (state.rootIndex !== 2) {
-        warning(issues, "N2_PRODUCT_ROOT_EXTENSION", "Product-over-root V1 is calibrated primarily to the square-root source mechanism.");
+        warning(issues, "N2_PRODUCT_ROOT_EXTENSION", "Product-over-root generation is calibrated primarily to the square-root source mechanism.");
       }
       break;
     }
@@ -170,18 +176,19 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       break;
     }
     case "DISTRIBUTIVE_INDEX_EXPANSION": {
-      const expectedFirst = reduce(
-        state.outsideExponent * state.firstTermExponent.denominator + state.firstTermExponent.numerator,
-        state.firstTermExponent.denominator,
-      );
+      const expectedFirst = addN2Exponents(state.outsideExponent, state.firstTermExponent);
+      const expectedSecond = addN2Exponents(state.outsideExponent, state.secondTermExponent);
       if (!sameRational(state.firstResultExponent, expectedFirst)) {
         error(issues, "N2_DISTRIBUTIVE_FIRST_TERM", "First distributed term does not match same-base exponent addition.");
       }
-      if (state.secondTermExponent !== -state.outsideExponent || state.secondResultExponent !== 0) {
-        error(issues, "N2_DISTRIBUTIVE_ZERO_POWER", "Second distributed term must form a genuine zero-power constant in V1.");
+      if (!sameRational(state.secondResultExponent, expectedSecond)) {
+        error(issues, "N2_DISTRIBUTIVE_SECOND_TERM", "Second distributed term does not match same-base exponent addition.");
       }
-      if (state.outsideExponent === 1) {
-        error(issues, "N2_DISTRIBUTIVE_HISTORICAL_OVERLAP", "V1 avoids the historical outside exponent of one to prevent trivial symbol substitution.");
+      if (sameRational(state.firstResultExponent, state.secondResultExponent)) {
+        error(issues, "N2_DISTRIBUTIVE_LIKE_TERMS", "Generated distributive route should not collapse to two identical like terms.");
+      }
+      if (typeof state.outsideExponent === "number" && state.outsideExponent === 1) {
+        error(issues, "N2_DISTRIBUTIVE_HISTORICAL_OVERLAP", "Generation avoids the historical outside exponent of one to prevent trivial symbol substitution.");
       }
       break;
     }
