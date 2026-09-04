@@ -37,15 +37,16 @@ export const addN2Exponents = (first: N2Exponent, second: N2Exponent): N2Rationa
 };
 
 /**
- * Fractional indices need a stronger visual hierarchy than ordinary inline
- * fractions. Script style keeps the exponent clearly subordinate to the base,
- * while the explicit rule thickness prevents the numerator/denominator from
- * visually swallowing the fraction bar at small sizes.
+ * Let TeX/KaTeX own the hierarchy of a fractional exponent. A normal \frac
+ * inside a superscript automatically drops to the correct script/script-script
+ * sizes and vertical offsets, which is much closer to printed examination
+ * typesetting than forcing a custom genfrac style or moving KaTeX internals
+ * with CSS.
  */
 export const rationalExponentLatex = (value: N2RationalExponent): string => {
   if (value.denominator === 1) return `${value.numerator}`;
   const sign = value.numerator < 0 ? "-" : "";
-  return `${sign}\\genfrac{}{}{0.055em}{2}{${Math.abs(value.numerator)}}{${value.denominator}}`;
+  return `${sign}\\frac{${Math.abs(value.numerator)}}{${value.denominator}}`;
 };
 
 const rationalExponentPlain = (value: N2RationalExponent): string =>
