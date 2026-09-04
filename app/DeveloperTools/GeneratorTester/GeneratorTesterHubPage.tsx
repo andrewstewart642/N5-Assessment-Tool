@@ -4,13 +4,15 @@ import { useState } from "react";
 
 import A7GeneratorTesterPage from "./A7GeneratorTesterPage";
 import A7SqaGeneratorTesterPage from "./A7SqaGeneratorTesterPage";
+import G1GeneratorTesterPage from "./G1GeneratorTesterPage";
 import GeneratorTesterPage from "./GeneratorTesterPage";
 import N2GeneratorTesterPage from "./N2GeneratorTesterPage";
 
-type TesterTarget = "N2" | "A7" | "A8" | "A7_DEBUG";
+type TesterTarget = "N2" | "G1" | "A7" | "A8" | "A7_DEBUG";
 
 const TARGETS: readonly { value: TesterTarget; label: string; description: string }[] = [
   { value: "N2", label: "N2 · Indices", description: "Canonical N2 question + answer generator quality gate" },
+  { value: "G1", label: "G1 · Straight-line gradient", description: "G1 question, answer and generated graph stress tester" },
   { value: "A7", label: "A7 · Linear equations", description: "Source-calibrated A7 generator tester" },
   { value: "A8", label: "A8 · Straight-line systems", description: "A8 generator and graph tester" },
   { value: "A7_DEBUG", label: "A7 · Debug view", description: "Lower-level A7 diagnostic surface" },
@@ -68,6 +70,7 @@ export default function GeneratorTesterHubPage() {
       </header>
 
       {target === "N2" ? <N2GeneratorTesterPage /> : null}
+      {target === "G1" ? <G1GeneratorTesterPage /> : null}
       {target === "A7" ? <A7SqaGeneratorTesterPage /> : null}
       {target === "A8" ? <GeneratorTesterPage /> : null}
       {target === "A7_DEBUG" ? <A7GeneratorTesterPage /> : null}
