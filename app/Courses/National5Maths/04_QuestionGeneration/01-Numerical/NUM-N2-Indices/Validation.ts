@@ -10,6 +10,7 @@ import {
 import { addN2Exponents, reduceN2RationalExponent } from "./PromptGrammar";
 import { n2SkillForMechanism } from "./SkillLabels";
 import type {
+  N2Exponent,
   N2GeneratedQuestion,
   N2RationalExponent,
   N2ValidationIssue,
@@ -30,6 +31,36 @@ const sameRational = (first: N2RationalExponent, second: N2RationalExponent) => 
 const withinObservedExponentMagnitude = (values: readonly number[]) => {
   const max = N2_GENERATOR_SYMBOLIC_ENVELOPE.observedIntegerExponentMagnitude.max;
   return values.every((value) => Math.abs(value) <= max);
+};
+
+const isFractionalExponent = (value: N2Exponent) => typeof value !== "number" && value.denominator !== 1;
+const isNegativeExponent = (value: N2Exponent) => typeof value === "number" ? value < 0 : value.numerator < 0;
+const isNegativeFractionalExponent = (value: N2Exponent) => typeof value !== "number" && value.denominator !== 1 && value.numerator < 0;
+const exponentValue = (value: N2RationalExponent) => value.numerator / value.denominator;
+
+const validateHouseGrammar = (question: N2GeneratedQuestion, issues: N2ValidationIssue[]) => {
+  const requiredLead = question.mechanism === "FRACTIONAL_NUMERIC_EVALUATION"
+    ? "Evaluate "
+    : question.mechanism === "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX"
+      ? "Express "
+      : question.mechanism === "SQUARED_FRACTIONAL_MONOMIAL"
+        ? "Remove the brackets and simplify "
+        : question.mechanism === "DISTRIBUTIVE_INDEX_EXPANSION"
+          ? "Expand and simplify fully "
+          : "Simplify ";
+
+  if (!question.prompt.startsWith(requiredLead)) {
+    error(issues, "N2_PROMPT_HOUSE_GRAMMAR", `Generated prompt does not use the calibrated ${requiredLead.trim()} command style.`);
+  }
+
+  const positivePower = question.mechanism === "POWER_OF_POWER_WITH_NEGATIVE_INDEX"
+    || question.mechanism === "NEGATIVE_INDEX_QUOTIENT";
+  if (positivePower && !question.prompt.includes("Give your answer with a positive power.")) {
+    error(issues, "N2_POSITIVE_POWER_WORDING", "Positive-power questions must use the calibrated short output-form instruction.");
+  }
+  if (question.mechanism === "RECIPROCAL_ROOT_TO_NEGATIVE_FRACTIONAL_INDEX" && !question.prompt.includes(" in the form ")) {
+    error(issues, "N2_RECIPROCAL_TARGET_WORDING", "Reciprocal-root questions must prescribe a compact same-base power form.");
+  }
 };
 
 export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2ValidationResult => {
@@ -72,6 +103,8 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
     error(issues, "N2_REFERENCE_MISSING", "Every generated N2 instance must expose a primary historical reference.");
   }
 
+  validateHouseGrammar(question, issues);
+
   const state = question.mathState;
   switch (state.mechanism) {
     case "FRACTIONAL_NUMERIC_EVALUATION": {
@@ -81,14 +114,23 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       if (state.base !== state.rootValue ** state.rootIndex || state.exactResult !== state.rootValue ** state.exponentNumerator) {
         error(issues, "N2_FRACTIONAL_EXACTNESS", "Stored fractional-index state is not an exact perfect-power evaluation.");
       }
-      if (!Number.isInteger(state.exactResult) || state.exactResult <= 1 || state.exactResult > 625) {
-        error(issues, "N2_FRACTIONAL_RESULT", "Fractional-index evaluation must finish at a controlled exact integer.");
+      if (!Number.isInteger(state.exactResult) || state.exactResult <= 1 || state.exactResult > 625 || state.base > 343) {
+        error(issues, "N2_FRACTIONAL_RESULT", "Fractional-index evaluation must stay within the controlled exact-integer and base envelope.");
       }
       if (question.difficulty === 1 && state.exactResult > 125) {
         error(issues, "N2_FRACTIONAL_LOWER_BAND", "Lower-band fractional evaluation should keep the exact result at 125 or below.");
       }
-      if (question.difficulty === 2 && state.exactResult < 126) {
-        error(issues, "N2_FRACTIONAL_UPPER_BAND", "Upper-band fractional evaluation should materially increase the exact-value burden.");
+      if (question.difficulty === 2) {
+        const representationHarder = (state.rootIndex === 2 && state.exponentNumerator === 5)
+          || (state.rootIndex === 3 && state.exponentNumerator >= 4);
+        const recognitionHarder = state.rootIndex === 3 && state.exponentNumerator === 2 && state.base >= 216;
+        const exactValueHarder = state.exactResult >= 126;
+        if (!representationHarder && !recognitionHarder && !exactValueHarder) {
+          error(issues, "N2_FRACTIONAL_UPPER_BAND", "Upper-band fractional evaluation must add genuine representation or exact-value demand.");
+        }
+        if (state.exactResult > 343) {
+          warning(issues, "N2_FRACTIONAL_STRETCH_VALUE", "This is an occasional upper-band stretch value and should not dominate normal generation.");
+        }
       }
       if (historicalN2FractionalOverlap(state)) {
         error(issues, "N2_HISTORICAL_OVERLAP", "Generated fractional evaluation reproduces a catalogued historical base/exponent pair.");
@@ -120,8 +162,13 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       if (state.finalDenominatorExponent !== Math.abs(state.combinedExponent)) {
         error(issues, "N2_POSITIVE_POWER_CONVERSION", "Positive-power denominator does not match the negative final exponent.");
       }
-      if (Math.abs(state.outerExponent) < 2 || Math.abs(state.outerExponent) > 4 || state.finalDenominatorExponent > 12) {
+      if (Math.abs(state.outerExponent) < 2 || Math.abs(state.outerExponent) > 4 || state.finalDenominatorExponent > 13) {
         error(issues, "N2_NEGATIVE_POWER_ENVELOPE", "Negative-index power-of-a-power state is outside the moderated envelope.");
+      }
+      const historicalTuple = (state.innerExponent === 2 && state.outerExponent === 3 && state.secondExponent === -10)
+        || (state.innerExponent === -2 && state.outerExponent === 4 && state.secondExponent === -5);
+      if (historicalTuple) {
+        error(issues, "N2_NEGATIVE_POWER_HISTORICAL_OVERLAP", "Generated signed power-of-a-power state reproduces a catalogued historical parameter tuple.");
       }
       break;
     }
@@ -133,8 +180,11 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       if (state.radicandExponent < 1 || state.radicandExponent > 5) {
         error(issues, "N2_RECIPROCAL_ROOT_ENVELOPE", "Powered radicand is outside the moderated N2 range.");
       }
-      if (state.rootIndex !== 2) {
-        warning(issues, "N2_RECIPROCAL_ROOT_EXTENSION", "Cube-root reciprocal variants are a moderated extension from the strongest square-root presentation pattern.");
+      if (state.rootIndex === 3 && state.radicandExponent === 1) {
+        error(issues, "N2_RECIPROCAL_ROOT_HISTORICAL_NEARNESS", "Generation avoids the unpowered cube-root anchor so the item is not a trivial symbol substitution.");
+      }
+      if (state.rootIndex === 2) {
+        warning(issues, "N2_RECIPROCAL_ROOT_EXTENSION", "Square-root reciprocal variants are a moderated extension from the reviewed cube-root presentation pattern.");
       }
       break;
     }
@@ -189,6 +239,32 @@ export const validateN2GeneratedQuestion = (question: N2GeneratedQuestion): N2Va
       }
       if (typeof state.outsideExponent === "number" && state.outsideExponent === 1) {
         error(issues, "N2_DISTRIBUTIVE_HISTORICAL_OVERLAP", "Generation avoids the historical outside exponent of one to prevent trivial symbol substitution.");
+      }
+
+      const promptExponents = [state.outsideExponent, state.firstTermExponent, state.secondTermExponent];
+      const fractionalCount = promptExponents.filter(isFractionalExponent).length;
+      const negativeFractionalCount = promptExponents.filter(isNegativeFractionalExponent).length;
+      const negativeCount = promptExponents.filter(isNegativeExponent).length;
+      const maxResult = Math.max(exponentValue(state.firstResultExponent), exponentValue(state.secondResultExponent));
+      const minResult = Math.min(exponentValue(state.firstResultExponent), exponentValue(state.secondResultExponent));
+
+      if (minResult < 0 || maxResult > 4) {
+        error(issues, "N2_DISTRIBUTIVE_OUTPUT_ENVELOPE", "Distributed outputs must stay compact and non-negative after full simplification.");
+      }
+
+      if (question.difficulty === 1) {
+        if (typeof state.outsideExponent !== "number" || state.outsideExponent < 2 || state.outsideExponent > 3) {
+          error(issues, "N2_DISTRIBUTIVE_LOWER_OUTSIDE", "Lower-band expansion requires a compact positive integer outside power.");
+        }
+        if (fractionalCount !== 1 || negativeFractionalCount !== 0 || negativeCount !== 1 || maxResult > 3) {
+          error(issues, "N2_DISTRIBUTIVE_LOWER_BAND", "Lower-band expansion should use one positive fractional index, one negative integer index and straightforward resulting powers.");
+        }
+      } else {
+        const fractionalOutside = isFractionalExponent(state.outsideExponent);
+        const upperLeverPresent = fractionalOutside || negativeFractionalCount > 0 || fractionalCount >= 2 || maxResult > 3;
+        if (!upperLeverPresent) {
+          error(issues, "N2_DISTRIBUTIVE_UPPER_BAND", "Upper-band expansion must add a genuine fractional/signed representation or coordination lever.");
+        }
       }
       break;
     }
