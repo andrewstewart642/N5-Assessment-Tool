@@ -36,6 +36,7 @@ import SignificantFiguresConceptModule from "../../National5MathsLegacy/Question
 import {
   N2EvaluateFractionalConceptModule,
   N2ExpandConceptModule,
+  N2GeneralConceptModule,
   N2SimplifyConceptModule,
 } from "./01-Numerical/NUM-N2-Indices/BuilderModules";
 import {
@@ -62,8 +63,9 @@ const conceptModules: ConceptGeneratorModule[] = [
   SurdsConceptModule,
   RationaliseConceptModule,
   // Canonical N2 modules deliberately precede the retained legacy N2 modules.
-  // The legacy entries remain only as compatibility fallbacks for pre-migration
-  // concept codes such as N2.4; Builder-facing N2.1-N2.3 dispatches here.
+  // The aggregate N2 selector and N2.1-N2.3 all dispatch through the clean
+  // paired generators; legacy entries remain only for pre-migration codes.
+  N2GeneralConceptModule,
   N2SimplifyConceptModule,
   N2ExpandConceptModule,
   N2EvaluateFractionalConceptModule,
