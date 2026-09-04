@@ -52,34 +52,12 @@ body::-webkit-scrollbar-corner {
 }
 
 /*
- * N2 examination-math preview tuning.
- *
- * KaTeX's default inline superscript sizing is deliberately adjusted only
- * inside the N2 developer-test surfaces. Fractional indices are slightly
- * smaller and higher than the main expression, matching the visual hierarchy
- * of the reference examination print while keeping the base at normal size.
- * The fraction rule is strengthened so the numerator/denominator remain
- * clearly separated at the reduced superscript size.
+ * N2 maths deliberately leaves KaTeX's internal superscript/fraction metrics
+ * untouched. Fractional indices are authored as ordinary TeX \frac values
+ * inside powers, so KaTeX can apply the same script and script-script sizing
+ * rules used by printed TeX rather than fighting those metrics with CSS.
  */
-.n2-math-surface .katex {
-  line-height: 1.15;
-}
-
-.n2-math-surface .katex .msupsub {
-  position: relative;
-  top: -0.08em;
-  font-size: 0.88em;
-}
-
-.n2-math-surface .katex .msupsub .mfrac {
-  font-size: 0.94em;
-}
-
-.n2-math-surface .katex .msupsub .frac-line {
-  border-bottom-width: 0.065em !important;
-}
-
-.n2-math-surface .katex .msupsub .mfrac .frac-line {
-  position: relative;
-  top: -0.015em;
+.n2-math-surface .katex,
+.n2-math-surface .katex-html {
+  overflow: visible;
 }
