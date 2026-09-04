@@ -21,8 +21,6 @@ function KatexAtom({ latex }: { latex: string }) {
   const html = katex.renderToString(latex, {
     throwOnError: false,
     displayMode: false,
-    strict: false,
-    trust: true,
   });
 
   return (
@@ -37,15 +35,15 @@ function KatexAtom({ latex }: { latex: string }) {
  * Exam-style rational exponent body.
  *
  * The entire power remains one KaTeX expression so KaTeX owns the true
- * superscript baseline. genfrac style 1 preserves the clear stacked fraction
- * that matched the examination reference, while htmlStyle trims only the
- * fractional exponent face to 90% of that accepted size. This deliberately
- * leaves the superscript position, base size and fraction geometry unchanged.
+ * superscript baseline. Only the fraction style is overridden: genfrac style 1
+ * forces a text-style fraction inside the superscript, preventing the numerator
+ * and denominator from collapsing to scriptscript size. The explicit rule keeps
+ * the fraction bar clear at the small print size used by the assessment UI.
  */
 function rationalExponentBodyLatex(value: N2RationalExponent): string {
   if (value.denominator === 1) return `${value.numerator}`;
   const sign = value.numerator < 0 ? "-" : "";
-  return `${sign}\\htmlStyle{font-size:90%;}{\\genfrac{}{}{0.055em}{1}{${Math.abs(value.numerator)}}{${value.denominator}}}`;
+  return `${sign}\\genfrac{}{}{0.055em}{1}{${Math.abs(value.numerator)}}{${value.denominator}}`;
 }
 
 function powerLatex(base: string, exponent: N2Exponent): string {
