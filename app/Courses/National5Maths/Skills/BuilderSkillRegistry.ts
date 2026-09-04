@@ -2,6 +2,9 @@ import type {
   SkillsData,
 } from "@/app/Assessments/AssessmentTypes";
 import {
+  N2_BUILDER_SKILL_REGISTRATION,
+} from "./N2BuilderSkillBridge";
+import {
   A7_BUILDER_SKILL_REGISTRATION,
 } from "./A7BuilderSkillBridge";
 import {
@@ -12,6 +15,7 @@ import type {
 } from "./BuilderSkillRegistration";
 
 const BUILDER_SKILL_REGISTRATIONS: readonly BuilderSkillRegistration[] = [
+  N2_BUILDER_SKILL_REGISTRATION,
   A7_BUILDER_SKILL_REGISTRATION,
   A8_BUILDER_SKILL_REGISTRATION,
 ];
