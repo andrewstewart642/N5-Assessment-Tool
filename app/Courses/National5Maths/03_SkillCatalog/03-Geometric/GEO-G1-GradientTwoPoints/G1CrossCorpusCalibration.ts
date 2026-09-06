@@ -65,41 +65,81 @@ export const G1_EMPIRICAL_FAMILY_FREQUENCY = {
   overall: [frequency("LINE_EQUATION_FROM_TWO_POINTS", 4, 12), frequency("CONTEXTUAL_LINEAR_MODEL", 2, 12), frequency("BEST_FIT_LINEAR_MODEL", 5, 12), frequency("SYMBOLIC_GRADIENT_FROM_TWO_POINTS", 1, 12)],
   P1: [frequency("LINE_EQUATION_FROM_TWO_POINTS", 4, 11), frequency("CONTEXTUAL_LINEAR_MODEL", 2, 11), frequency("BEST_FIT_LINEAR_MODEL", 5, 11), frequency("SYMBOLIC_GRADIENT_FROM_TWO_POINTS", 0, 11)],
   P2: [frequency("LINE_EQUATION_FROM_TWO_POINTS", 0, 1), frequency("CONTEXTUAL_LINEAR_MODEL", 0, 1), frequency("BEST_FIT_LINEAR_MODEL", 0, 1), frequency("SYMBOLIC_GRADIENT_FROM_TWO_POINTS", 1, 1)],
-  generationPolicy: ["Observed frequency is a weak prior rather than a prediction of future assessment content.", "The direct/diagram three-mark line family is the safest standalone default.", "Best-fit frequency must not be mistaken for permission to absorb the embedded S2 mark into G1.", "The symbolic family remains narrow despite being fully valid because only one reviewed source currently supports it."],
+  generationPolicy: [
+    "Observed occurrence is the default prior for generic G1 selection: 4 line-equation, 2 deterministic-context, 5 best-fit and 1 symbolic appearance in the 12-question reviewed corpus.",
+    "The prior controls family frequency, not a claim about future assessment probability.",
+    "The 5/12 best-fit share refers only to the three G1 model-construction marks; the adjacent statistical mark remains separately owned and deferred.",
+    "The symbolic family remains intentionally rare because one reviewed source supports it.",
+  ],
 } as const;
 
 export const G1_LINE_EQUATION_GENERATION_ENVELOPE = {
   supportedSurfaces: ["DIRECT_COORDINATES_LINE_EQUATION", "COORDINATE_DIAGRAM_LINE_EQUATION"] as const,
   marks: 3 as const,
-  intendedGradientTypes: ["NON_ZERO_INTEGER"] as const,
-  generatorGuardrails: ["Use two distinct x-coordinates and avoid vertical lines.", "Prefer small signed integer coordinates so Paper 1 arithmetic remains exact and readable.", "Avoid zero gradient and normally avoid gradients of +1 or -1 in V1 so the gradient stage remains visibly mark-bearing.", "Use a non-zero intercept so the second and third marks cannot collapse into a line-through-origin shortcut.", "Coordinate-diagram points must lie exactly on the generated line and be positioned on readable grid intersections.", "Permit negative coordinates and negative gradients because both are repeatedly evidenced.", "Do not reproduce a historical point pair or an affine-rescaled near-copy of a catalogued source instance."],
+  intendedGradientTypes: ["NON_ZERO_INTEGER", "SIMPLE_EXACT_FRACTION"] as const,
+  generatorGuardrails: [
+    "Use two distinct x-coordinates and avoid vertical or horizontal lines.",
+    "Keep the source-centred lower band dominated by small exact integer coordinates, with negative line directions occurring frequently because three of four reviewed line-family examples are negative.",
+    "Permit a smaller higher-difficulty extension using reduced fractional gradients with denominators 2, 3, 4 or 5; choose coordinates so the subtraction and substitution remain exact and deliberate.",
+    "Use a non-zero intercept so the second and third marks cannot collapse into a line-through-origin shortcut.",
+    "Direct and coordinate-diagram surfaces should remain approximately balanced because each occurs twice in the reviewed line family.",
+    "Coordinate diagrams are sparse schematics: no grid, no readable intercept scale, compact axes with arrowheads, O at the origin and exact coordinate labels beside the two points.",
+    "Do not reproduce a historical point pair, line equation or affine-rescaled near-copy of a catalogued source instance.",
+  ],
 } as const;
 
 export const G1_CONTEXTUAL_MODEL_GENERATION_ENVELOPE = {
   supportedSurface: "CONTEXT_LINE_GRAPH_LABELLED_POINTS" as const,
   marks: 4 as const,
   followUpOwner: "G1" as const,
-  generatorGuardrails: ["The relationship must be deterministic, not a line of best fit.", "State the two model-defining point values explicitly so the graph is supportive rather than the sole coordinate source.", "Use an exact manageable gradient; a simple non-integer rational gradient is strongly evidenced and helps distinguish this family from the core direct-coordinate surface.", "Keep the context mathematically relevant to the line model and use units consistently.", "The fourth mark must be a direct calculation from the constructed deterministic model rather than a statistical estimate.", "If currency or measurement precision is imposed, answer generation must derive that requirement from the generated state rather than from a copied historical presentation rule."],
+  generatorGuardrails: [
+    "The relationship must be deterministic and physically plausible rather than a line of best fit.",
+    "Use authentic linear contexts such as fixed-charge tariffs, wage-plus-commission or steady increase/decrease models; avoid arbitrary stories with no natural linear interpretation.",
+    "State the measured variables and units explicitly, then state point A and point B as separate information lines.",
+    "Require the final model in the generated contextual variables; a generic y = mx + c response is not full-credit presentation.",
+    "Keep the supportive diagram compact and schematic, with no grid or readable intercept scale when point values are supplied in text.",
+    "Use exact manageable gradients; simple non-integer rational gradients are preferred, while large 100s/1000s values are allowed when they disguise a clean exact ratio.",
+    "Permit sensible decreasing models so negative line directions are represented without forcing implausible contexts.",
+    "The fourth mark must be a direct calculation from the deterministic model and remains G1-owned.",
+  ],
 } as const;
 
 export const G1_BEST_FIT_GENERATION_ENVELOPE = {
   supportedSurfaces: ["BEST_FIT_LABELLED_POINTS_CONTEXT", "BEST_FIT_GRID_READ_POINTS"] as const,
   g1Marks: 3 as const,
   embeddedS2Marks: 1 as const,
-  generatorGuardrails: ["Supply a best-fit line; do not ask the candidate to draw the line in this G1 family.", "Labelled-point variants may duplicate the two line points in prose and therefore use the scattergraph supportively.", "Grid-read variants must expose at least two exact, unambiguous points on the supplied line at readable grid intersections.", "For grid-read variants, axis scale, tick spacing and line placement must be mathematically exact because the visual carries essential data.", "The G1 part stops after construction of the fitted line equation. The one-mark follow-up is S2-owned and remains deferred until S2 answer/generation policy is implemented.", "Context, variables and units may vary, but the generated best-fit line must not reuse historical coordinates, scales or artwork."],
+  generatorGuardrails: [
+    "Supply a line of best fit; do not ask the pupil to draw it in this G1 family.",
+    "Use realistic paired-variable contexts and make the wording state the contextual variable letters and units.",
+    "Preserve the observed surface split as a prior: three explicit/labelled-point examples for every two graph-read examples.",
+    "Preserve the observed fitted-line direction as a prior: approximately two negative examples for every three positive examples.",
+    "Labelled-point variants may be visually sparse because the two line points are stated explicitly.",
+    "Grid-read variants must contain exactly two intended scatter points on the supplied line, both at clear grid intersections; every other scatter point must be off the line.",
+    "Use only enough gridlines to recover the intended coordinates; dense spreadsheet-style grids are invalid visual noise.",
+    "The G1 part stops after construction of the fitted-line equation. The one-mark follow-up remains S2-owned and deferred until that generation layer is deliberately implemented.",
+  ],
 } as const;
 
 export const G1_SYMBOLIC_GENERATION_ENVELOPE = {
   supportedPaper: "P2" as const,
   marks: 3 as const,
-  generatorGuardrails: ["Begin with two coordinate points, with at least one genuinely parameterised coordinate.", "The gradient quotient must create a factorable algebraic numerator and a denominator sharing exactly one non-trivial factor.", "The intended simplification must require gradient substitution, factorisation and cancellation as three distinct mark-bearing stages.", "Keep the final gradient exact and linear in the parameter.", "Exclude parameter values that make the two x-coordinates equal.", "Do not generate a pure factorisation prompt; the coordinate-geometric origin is an invariant of G1 ownership.", "Avoid reproducing the historical difference-of-squares constants or a scalar-equivalent copy of the source quotient."],
+  generatorGuardrails: [
+    "Begin with two coordinate points, with at least one genuinely parameterised coordinate.",
+    "Ask for an expression for the gradient of the joining line, then place the simplest-form instruction on a separate line.",
+    "The gradient quotient must create a factorable numerator and a denominator sharing exactly one non-trivial factor.",
+    "Keep the final gradient exact and linear in the parameter.",
+    "Exclude parameter values that make the two x-coordinates equal.",
+    "Do not generate a free-standing factorisation prompt; coordinate geometry is the ownership invariant.",
+    "Keep the family rare in generic selection because it accounts for one of twelve reviewed G1 appearances.",
+  ],
 } as const;
 
 export const G1_CALIBRATION_DECISIONS = [
-  "G1 V1 should support the core three-mark line-equation family first, then deterministic contextual models, with the symbolic family kept experimental.",
+  "Generic G1 selection should use reviewed occurrence counts as its starting prior rather than developer-interest weights.",
+  "The common three-mark line family retains a source-centred lower band and gains a smaller higher band through simple exact fractional gradients rather than ugly arithmetic.",
+  "Visual economy is part of the question architecture: coordinate and deterministic-context diagrams are sparse schematics, while only essential graph-read best-fit tasks receive a scaled grid.",
   "Best-fit model construction is valid G1 evidence, but full composite generation must preserve the recorded 3 G1 + 1 S2 ownership split.",
-  "Difficulty is separate from C/A Standard. A C-standard graph-reading instance may be upper-band, while a structurally clean C-standard direct-coordinate instance may be lower-band.",
-  "Large contextual numbers are not a difficulty lever by themselves; exact ratio structure and visual-reading burden matter more.",
-  "The presence of later algebra does not transfer ownership away from G1 when the task begins from coordinate geometry or a geometrically defined line.",
-  "Generated answer schemes should not randomly reproduce year-specific answer-without-working regimes. A deliberate generated policy must be chosen in AnswerGeneration and provenance kept separate from historical evidence.",
+  "Negative line directions should appear at corpus-informed frequencies and only in contexts where the direction makes sense.",
+  "Difficulty is separate from C/A Standard. Representation, exact fractional structure and graph-reading burden control the within-skill difficulty band.",
+  "Generated answer schemes must preserve contextual-variable requirements and should not randomise source-year-specific marking regimes.",
 ] as const;
