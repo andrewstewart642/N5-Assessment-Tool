@@ -96,6 +96,13 @@ export type GeneratedQuestionData = {
   sourceConceptLabel?: string;
   templateId?: string;
 
+  /**
+   * Optional cross-skill ownership exposed by a composite generator.
+   * Draft generation deliberately spreads generated data after its empty
+   * default so a canonical generator can declare a real supporting skill.
+   */
+  supportingSkillIds?: string[];
+
   /** Optional exact topic mark ownership for this generated question. */
   topicMarkBreakdown?: QuestionTopicMarkBreakdown;
 
