@@ -104,6 +104,46 @@ function SectionLabel({ children }: { children: ReactNode }) {
   return <div style={{ marginBottom: 7, color: "#94a3b8", fontSize: 11, fontWeight: 850, letterSpacing: "0.045em", textTransform: "uppercase" }}>{children}</div>;
 }
 
+function PromptLines({ lines }: { lines: readonly string[] }) {
+  return (
+    <div style={{ display: "grid", gap: 5 }}>
+      {lines.filter(Boolean).map((line, index) => {
+        const isQuestionPart = /^\([ab]\)/.test(line);
+        return (
+          <div key={`${index}-${line}`} style={{ marginTop: isQuestionPart ? 10 : 0 }}>
+            {line}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function QuestionPreview({ question, showVisualOverlay }: { question: G1GeneratedQuestion; showVisualOverlay: boolean }) {
+  if (!question.visual) {
+    return <PaperContent parts={question.promptParts} />;
+  }
+
+  const lines = question.prompt.split("\n");
+  const splitIndex = question.family === "LINE_EQUATION_FROM_TWO_POINTS"
+    ? 1
+    : question.family === "CONTEXTUAL_LINEAR_MODEL"
+      ? 2
+      : 3;
+  const beforeVisual = lines.slice(0, splitIndex);
+  const afterVisual = lines.slice(splitIndex);
+
+  return (
+    <>
+      <PromptLines lines={beforeVisual} />
+      <G1GraphPreview visual={question.visual} showDeveloperOverlay={showVisualOverlay} />
+      <div style={{ marginTop: 10 }}>
+        <PromptLines lines={afterVisual} />
+      </div>
+    </>
+  );
+}
+
 function AnswerDetail({ answer }: { answer: G1GeneratedMarkingScheme }) {
   return (
     <section style={{ display: "grid", gap: 12 }}>
@@ -188,9 +228,8 @@ function SampleCard({ sample, index, showAnswerDetail, showVisualOverlay }: { sa
       <div style={{ display: "grid", gap: 13, padding: 11 }}>
         <section>
           <SectionLabel>Question</SectionLabel>
-          <div className="g1-question-preview g1-math-surface" style={{ padding: "16px 18px", borderRadius: 7, background: "#ffffff", color: "#111111", fontFamily: '"Trebuchet MS", Trebuchet, Arial, sans-serif', fontSize: "11pt", fontWeight: 400, lineHeight: 1.65, whiteSpace: "pre-line" }}>
-            <PaperContent parts={question.promptParts} />
-            {question.visual ? <G1GraphPreview visual={question.visual} showDeveloperOverlay={showVisualOverlay} /> : null}
+          <div className="g1-question-preview g1-math-surface" style={{ padding: "16px 18px", borderRadius: 7, background: "#ffffff", color: "#111111", fontFamily: '"Trebuchet MS", Trebuchet, Arial, sans-serif', fontSize: "11pt", fontWeight: 400, lineHeight: 1.6, whiteSpace: "pre-line" }}>
+            <QuestionPreview question={question} showVisualOverlay={showVisualOverlay} />
           </div>
         </section>
 
@@ -264,9 +303,7 @@ export default function G1GeneratorTesterPage() {
 
   function familyForSeed(seed: number): G1GeneratorFamily {
     if (selectedFamily !== "MIX") return selectedFamily;
-    const weighted = candidateFamilies.flatMap((family) =>
-      Array.from({ length: g1FamilyFrequency(family, effectivePaper).count }, () => family),
-    );
+    const weighted = candidateFamilies.flatMap((family) => Array.from({ length: g1FamilyFrequency(family, effectivePaper).count }, () => family));
     if (!weighted.length) throw new Error("No historically calibrated G1 family is enabled for the selected paper/difficulty controls.");
     return weighted[positiveModulo(seed, weighted.length)];
   }
@@ -321,14 +358,8 @@ export default function G1GeneratorTesterPage() {
 
   const failedCount = samples.filter((sample) => Boolean(sample.error)).length;
   const successfulSamples = samples.filter((sample): sample is GeneratedG1Sample & { question: G1GeneratedQuestion; answer: G1GeneratedMarkingScheme } => Boolean(sample.question && sample.answer));
-  const familyCounts = successfulSamples.reduce<Record<string, number>>((counts, sample) => {
-    counts[sample.question.family] = (counts[sample.question.family] ?? 0) + 1;
-    return counts;
-  }, {});
-  const surfaceCounts = successfulSamples.reduce<Record<string, number>>((counts, sample) => {
-    counts[sample.question.surfaceStyleId] = (counts[sample.question.surfaceStyleId] ?? 0) + 1;
-    return counts;
-  }, {});
+  const familyCounts = successfulSamples.reduce<Record<string, number>>((counts, sample) => { counts[sample.question.family] = (counts[sample.question.family] ?? 0) + 1; return counts; }, {});
+  const surfaceCounts = successfulSamples.reduce<Record<string, number>>((counts, sample) => { counts[sample.question.surfaceStyleId] = (counts[sample.question.surfaceStyleId] ?? 0) + 1; return counts; }, {});
   const warningCount = samples.reduce((total, sample) => total
     + (sample.questionIssues ?? []).filter((issue) => issue.severity === "WARNING").length
     + (sample.answerIssues ?? []).filter((issue) => issue.severity === "WARNING").length, 0);
@@ -337,16 +368,11 @@ export default function G1GeneratorTesterPage() {
 
   return (
     <main style={{ minHeight: "100vh", padding: 14, background: "#070a10", color: "#f8fafc", fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" }}>
-      <style>{`
-        .g1-math-surface .katex { font-size: 1.1em; }
-        .g1-question-preview .katex { line-height: 1.45; }
-        .g1-final-answer .katex { font-size: 1.18em; }
-      `}</style>
-
+      <style>{`.g1-math-surface .katex { font-size: 1.1em; } .g1-question-preview .katex { line-height: 1.45; } .g1-final-answer .katex { font-size: 1.18em; }`}</style>
       <div style={{ width: "min(1760px, 100%)", margin: "0 auto" }}>
         <div style={{ marginBottom: 11 }}>
           <div style={{ color: "#e2e8f0", fontSize: 16, fontWeight: 850 }}>G1 · Gradient and equation of a straight line</div>
-          <div style={{ marginTop: 3, color: "#64748b", fontSize: 10.5 }}>Canonical G1 question + answer stress tester. Mixed-family selection now uses reviewed historical occurrence counts rather than hand-tuned developer weights.</div>
+          <div style={{ marginTop: 3, color: "#64748b", fontSize: 10.5 }}>Canonical G1 question + answer stress tester. Mixed-family selection uses reviewed historical occurrence counts; visual questions are laid out in the same information → diagram → question flow encoded by the generated prompt.</div>
         </div>
 
         <section style={{ display: "flex", alignItems: "end", gap: 9, flexWrap: "wrap", padding: 11, marginBottom: 9, border: "1px solid rgba(148,163,184,0.18)", borderRadius: 10, background: "rgba(255,255,255,0.03)" }}>
@@ -364,9 +390,7 @@ export default function G1GeneratorTesterPage() {
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 9 }}>
           {lastBatchStartSeed != null ? <Chip>batch {lastBatchStartSeed}–{lastBatchStartSeed + samples.length - 1}</Chip> : null}
           {controlsDirty ? <Chip warning>Controls changed — generate</Chip> : null}
-          <Chip>{failedCount} errors</Chip>
-          <Chip emphasis>{successfulSamples.length}/{samples.length} validated</Chip>
-          <Chip>{warningCount} validator warnings</Chip>
+          <Chip>{failedCount} errors</Chip><Chip emphasis>{successfulSamples.length}/{samples.length} validated</Chip><Chip>{warningCount} validator warnings</Chip>
         </div>
 
         <div style={{ marginBottom: 10, padding: "8px 11px", border: "1px solid rgba(148,163,184,0.15)", borderRadius: 8, color: "#94a3b8", fontSize: 10.5, lineHeight: 1.55 }}>
