@@ -34,6 +34,29 @@ const validateStandaloneLinePolicy = (question: G1GeneratedQuestion, issues: G1V
   }
 };
 
+const validateInterceptIntegrity = (question: G1GeneratedQuestion, issues: G1ValidationIssue[]) => {
+  if (question.family === "SYMBOLIC_GRADIENT_FROM_TWO_POINTS") return;
+
+  if (question.mathState.intercept.numerator === 0) {
+    pushError(
+      issues,
+      "G1_ZERO_INTERCEPT_SHORTCUT",
+      "Generated G1 line models must use a non-zero y-intercept so the equation cannot be simplified by an origin shortcut.",
+    );
+  }
+
+  if (!question.visual) return;
+  const visualIntercept = question.visual.line.intercept;
+  const stateIntercept = question.mathState.intercept;
+  if (visualIntercept.numerator * stateIntercept.denominator !== stateIntercept.numerator * visualIntercept.denominator) {
+    pushError(
+      issues,
+      "G1_VISUAL_INTERCEPT_MISMATCH",
+      "The visual specification must carry the same y-intercept as the generated mathematical state; schematic rendering may distort scale but not intercept identity or sign.",
+    );
+  }
+};
+
 const validateContextArithmeticPolicy = (question: G1GeneratedQuestion, issues: G1ValidationIssue[]) => {
   if (question.family !== "CONTEXTUAL_LINEAR_MODEL") return;
   const [a, b] = question.mathState.points;
@@ -94,6 +117,7 @@ export const validateG1GeneratedQuestion = (question: G1GeneratedQuestion): G1Va
   const base = validateG1GeneratedQuestionV2(question);
   const issues = [...base.issues];
   validateStandaloneLinePolicy(question, issues);
+  validateInterceptIntegrity(question, issues);
   validateContextArithmeticPolicy(question, issues);
   validateBestFitVisualPolicy(question, issues);
   return {
@@ -105,4 +129,5 @@ export const validateG1GeneratedQuestion = (question: G1GeneratedQuestion): G1Va
 export const G1_V3_VALIDATION_LIMITS = {
   maxBestFitMajorIntervalsPerAxis: MAX_BEST_FIT_MAJOR_INTERVALS,
   minGridReadHorizontalCoverage: 0.3,
+  generatedLineInterceptMustBeNonZero: true,
 } as const;
