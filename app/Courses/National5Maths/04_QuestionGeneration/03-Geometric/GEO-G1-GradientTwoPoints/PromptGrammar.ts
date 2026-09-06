@@ -156,7 +156,7 @@ const contextualPointSentence = (
 };
 
 const contextMeasurementSentence = (state: G1ContextualLineState) =>
-  `The graph shows ${state.context.yDescription}, ${state.context.yVariable} (${state.context.yUnit}), against ${state.context.xDescription}, ${state.context.xVariable} (${state.context.xUnit}).`;
+  `The graph shows ${state.context.yDescription}, ${state.context.yVariable} ${state.context.yUnit}, against ${state.context.xDescription}, ${state.context.xVariable} ${state.context.xUnit}.`;
 
 export const buildG1ContextPrompt = (
   state: G1ContextualLineState,
@@ -206,7 +206,7 @@ const bestFitPointSentence = (
 };
 
 const bestFitMeasurementSentence = (state: G1BestFitLineState) =>
-  `The scatter graph shows ${state.context.yDescription}, ${state.context.yVariable} (${state.context.yUnit}), against ${state.context.xDescription}, ${state.context.xVariable} (${state.context.xUnit}).`;
+  `The scatter graph shows ${state.context.yDescription}, ${state.context.yVariable} ${state.context.yUnit}, against ${state.context.xDescription}, ${state.context.xVariable} ${state.context.xUnit}.`;
 
 export const buildG1BestFitPrompt = (
   state: G1BestFitLineState,
