@@ -44,11 +44,12 @@ import type {
 } from "./Types";
 
 const G1_SKILL_ID = "geo-g01-gradient-two-points";
+const S2_SKILL_ID = "stat-s02-linear-model";
 const randomSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 const text = (value: string): PaperPart => ({ kind: "text", value });
 const math = (latex: string): PaperPart => ({ kind: "math", latex, displayMode: false });
 
-type G1BuilderVariant = {
+export type G1BuilderVariant = {
   family: G1GeneratorFamily;
   surfaceStyleId: G1GeneratorSurfaceStyle;
   paper: G1GeneratorPaper;
@@ -441,6 +442,10 @@ export function buildG1BuilderGenerated(
     sourceConceptLabel:
       context.concept?.label ?? "Gradient and equation of a straight line",
     templateId,
+    supportingSkillIds:
+      question.family === "BEST_FIT_LINEAR_MODEL"
+        ? [S2_SKILL_ID]
+        : [],
     topicMarkBreakdown: topicMarksFor(question, wrapperMarks),
     selectionMeta,
   };
