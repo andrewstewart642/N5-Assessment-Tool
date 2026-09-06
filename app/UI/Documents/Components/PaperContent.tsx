@@ -9,6 +9,7 @@ import type {
 } from "@/app/Assessments/Questions/Content/PaperParts";
 
 import AreaEqualityDiagram from "./AreaEqualityDiagram";
+import StraightLineModelGraph from "./StraightLineModelGraph";
 import StraightLineSystemGraph from "./StraightLineSystemGraph";
 
 type PaperContentProps = {
@@ -80,6 +81,18 @@ export default function PaperContent({
           ) {
             return (
               <StraightLineSystemGraph
+                key={index}
+                graph={part}
+              />
+            );
+          }
+
+          if (
+            part.kind ===
+            "straightLineModelGraph"
+          ) {
+            return (
+              <StraightLineModelGraph
                 key={index}
                 graph={part}
               />
