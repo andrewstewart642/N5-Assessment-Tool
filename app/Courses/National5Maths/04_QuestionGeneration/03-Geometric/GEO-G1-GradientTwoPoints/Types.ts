@@ -230,7 +230,7 @@ export type G1LineEquationGeneratedQuestion = G1GeneratedQuestionBase & {
   family: "LINE_EQUATION_FROM_TWO_POINTS";
   familyReadiness: "CORE";
   paper: "P1";
-  difficulty: 1;
+  difficulty: G1GeneratorDifficulty;
   marks: 3;
   standard: "C";
   surfaceStyleId: "DIRECT_COORDINATES_LINE_EQUATION" | "COORDINATE_DIAGRAM_LINE_EQUATION";
