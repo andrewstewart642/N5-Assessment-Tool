@@ -10,6 +10,9 @@ import {
 import {
   A8_BUILDER_SKILL_REGISTRATION,
 } from "./A8BuilderSkillBridge";
+import {
+  G1_BUILDER_SKILL_REGISTRATION,
+} from "./G1BuilderSkillBridge";
 import type {
   BuilderSkillRegistration,
 } from "./BuilderSkillRegistration";
@@ -18,6 +21,7 @@ const BUILDER_SKILL_REGISTRATIONS: readonly BuilderSkillRegistration[] = [
   N2_BUILDER_SKILL_REGISTRATION,
   A7_BUILDER_SKILL_REGISTRATION,
   A8_BUILDER_SKILL_REGISTRATION,
+  G1_BUILDER_SKILL_REGISTRATION,
 ];
 
 const registrationMap = () => {
