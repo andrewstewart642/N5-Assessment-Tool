@@ -30,21 +30,24 @@ export const G1_COORDINATE_DIAGRAM_GENERATION_GUARDRAILS = [
   "Choose label offsets so point text never crosses the line, point marker, axes or other point text.",
   "Neither generated point may lie on the x-axis or y-axis; an axis point removes too much of the intended substitution demand.",
   "Treat the picture as a sketch of the generated relationship rather than a one-to-one scale drawing; preserve direction and quadrant information but avoid an almost-horizontal line that could mislead a less confident pupil.",
+  "A schematic may distort scale, but it must never contradict the generated equation: the drawn line must cross the y-axis above the x-axis for a positive intercept and below it for a negative intercept.",
+  "A non-zero generated intercept must remain visibly clear of the origin; the sketch must not look as though the line passes through O unless the mathematical intercept is exactly zero.",
   "Keep the viewing window tight around the two points while still containing the origin; the axes must not extend substantially farther than the geometry needs.",
   "The diagram must communicate the generated point coordinates but must not make the y-intercept directly readable from a scale.",
-  "The diagram is essential mathematical data; renderer validation must preserve the stored point labels and line direction even though the surface is intentionally schematic.",
+  "The diagram is essential mathematical data; renderer validation must preserve the stored point labels, line direction and intercept side even though the surface is intentionally schematic.",
 ] as const;
 
 export const G1_CONTEXT_GRAPH_GENERATION_GUARDRAILS = [
   "Use a small schematic straight-line graph with sparse axes, arrowheads and contextual variable labels rather than a full Cartesian grid.",
   "Do not draw gridlines or a numeric scale when the two model-defining point values are supplied in the wording.",
   "Do not visually advertise the y-intercept: the pupil should obtain it by calculation from the two supplied points.",
+  "The schematic must still preserve intercept integrity: positive and negative intercepts must appear on the correct side of the x-axis, and a non-zero intercept must not appear to pass through or almost through the origin.",
   "State the measured variables and units in the surrounding wording and require the final equation to be written in those contextual variables.",
   "State point A and point B as separate pieces of information rather than compressing them into an essay-like paragraph.",
   "Maintain a broad bank of genuinely different plausible contexts so repeated practice does not feel like a tariff question with renamed nouns.",
   "Include a substantial minority of physically meaningful decreasing relationships rather than defaulting overwhelmingly to positive correlation.",
   "Sensible terminating decimals may be used, but the coordinate subtraction in the non-calculator gradient route must simplify cleanly; gratuitous decimal precision is invalid difficulty.",
-  "Axis variables, units, line direction and contextual wording must all agree with the generated mathematical state.",
+  "Axis variables, units, line direction, intercept side and contextual wording must all agree with the generated mathematical state.",
   "Keep the diagram visually secondary to the question text and compact enough not to dominate the page.",
 ] as const;
 
@@ -53,6 +56,7 @@ export const G1_BEST_FIT_GRAPH_GENERATION_GUARDRAILS = [
   "Scatter points must plausibly surround the supplied line and must be independently generated rather than copied from historical data.",
   "Labelled-point variants should use a restrained scattergraph without unnecessary grid clutter because the two model-defining point values are supplied in text.",
   "On labelled-point variants, use a schematic display window that spreads the data cloud across the available plotting area instead of preserving large unused space back to a numerical origin that the pupil never has to read.",
+  "Any display transform used for a best-fit preview must preserve the direction of the fitted line and must not cosmetically move a non-zero intercept onto or misleadingly close to the origin.",
   "Grid-read variants must use a genuine scale beginning at zero with a modest number of useful gridlines rather than a dense spreadsheet-style grid.",
   "No grid-read axis should exceed eighteen major intervals; if a context cannot support a readable zero-origin scale it must be regenerated or reserved for the labelled-point surface.",
   "A generated grid-read graph must contain exactly two intended scatter points on the fitted line; both must lie on clean grid intersections and every other scatter point must lie visibly off the line.",
