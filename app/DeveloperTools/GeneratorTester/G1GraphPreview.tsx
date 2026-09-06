@@ -1,3 +1,3 @@
 "use client";
 
-export { default } from "./G1GraphPreviewV2";
+export { default } from "./G1GraphPreviewV3";
