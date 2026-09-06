@@ -87,22 +87,21 @@ export type G1PromptBuild = {
   promptSections: G1PromptSection[];
 };
 
+const simplestFormLine = "Give the equation in its simplest form.";
+
 export const buildG1DirectLinePrompt = (
   state: G1LineModelState,
   seed: number,
 ): G1PromptBuild => {
   const [a, b] = state.points;
-  const variant = Math.abs(seed) % 3;
+  const variant = Math.abs(seed) % 2;
   const lead = variant === 0
     ? "A straight line passes through the points "
-    : variant === 1
-      ? "The points "
-      : "A line contains the two points ";
-  const middle = variant === 1 ? " lie on the same straight line. " : ". ";
-  const command = variant === 2
-    ? "Determine the equation of the line, giving your answer in simplest form."
-    : "Find the equation of the line in its simplest form.";
-  const prompt = `${lead}${coordinatePlain(a)} and ${coordinatePlain(b)}${middle}${command}`;
+    : "The points ";
+  const join = variant === 0 ? "." : " lie on the same straight line.";
+  const command = "Find the equation of the line.";
+  const prompt = `${lead}${coordinatePlain(a)} and ${coordinatePlain(b)}${join}\n${command}\n${simplestFormLine}`;
+
   return {
     prompt,
     promptParts: [
@@ -110,43 +109,72 @@ export const buildG1DirectLinePrompt = (
       { kind: "math", latex: coordinateLatex(a) },
       { kind: "text", value: " and " },
       { kind: "math", latex: coordinateLatex(b) },
-      { kind: "text", value: `${middle}${command}` },
+      { kind: "text", value: `${join}\n${command}\n${simplestFormLine}` },
     ],
-    promptSections: [{ label: "", text: prompt, marks: 3 }],
+    promptSections: [{ label: "", text: `${command}\n${simplestFormLine}`, marks: 3 }],
   };
 };
 
-export const buildG1DiagramLinePrompt = (seed: number): G1PromptBuild => {
-  const command = Math.abs(seed) % 2 === 0
-    ? "Use the coordinate diagram to find the equation of line AB. Give the equation in simplest form."
-    : "The diagram shows the straight line through A and B. Determine its equation in simplest form.";
+export const buildG1DiagramLinePrompt = (): G1PromptBuild => {
+  const lead = "The diagram shows a straight line through A and B.";
+  const command = "Find the equation of the line.";
+  const prompt = `${lead}\n${command}\n${simplestFormLine}`;
   return {
-    prompt: command,
-    promptParts: [{ kind: "text", value: command }],
-    promptSections: [{ label: "", text: command, marks: 3 }],
+    prompt,
+    promptParts: [{ kind: "text", value: prompt }],
+    promptSections: [{ label: "", text: `${command}\n${simplestFormLine}`, marks: 3 }],
   };
 };
+
+const valueWithUnit = (value: number, unit: string) => {
+  if (unit === "pounds") return `£${value}`;
+  if (unit === "percent") return `${value}%`;
+  return `${value} ${unit}`;
+};
+
+const contextualPointSentence = (
+  state: G1ContextualLineState,
+  label: "A" | "B",
+  point: G1NumericPoint,
+): string => {
+  const x = valueWithUnit(point.x, state.context.xUnit);
+  const y = valueWithUnit(point.y, state.context.yUnit);
+  switch (state.context.domainId) {
+    case "TAXI_FARE":
+      return `At point ${label}, a journey of ${x} costs ${y}.`;
+    case "WEEKLY_WAGE":
+      return `At point ${label}, sales are ${x} and the weekly wage is ${y}.`;
+    case "WATER_DRAIN":
+      return `At point ${label}, after ${x}, ${y} of water remains.`;
+    case "BATTERY_DRAIN":
+      return `At point ${label}, after ${x}, the battery charge remaining is ${y}.`;
+    case "COURIER_CHARGE":
+      return `At point ${label}, a delivery of ${x} costs ${y}.`;
+    default:
+      return `Point ${label} represents ${state.context.xDescription} ${x} and ${state.context.yDescription} ${y}.`;
+  }
+};
+
+const contextMeasurementSentence = (state: G1ContextualLineState) =>
+  `The graph shows ${state.context.yDescription}, ${state.context.yVariable} (${state.context.yUnit}), against ${state.context.xDescription}, ${state.context.xVariable} (${state.context.xUnit}).`;
 
 export const buildG1ContextPrompt = (
   state: G1ContextualLineState,
-  seed: number,
 ): G1PromptBuild => {
   const [a, b] = state.points;
-  const pointSentence = Math.abs(seed) % 2 === 0
-    ? `Two points on the graph correspond to ${coordinatePlain(a)} and ${coordinatePlain(b)}.`
-    : `The straight line contains the points ${coordinatePlain(a)} and ${coordinatePlain(b)}.`;
-  const partA = `Find an equation connecting ${state.context.yVariable} and ${state.context.xVariable}. Give the equation in simplest form.`;
+  const information = [
+    state.context.introduction,
+    contextMeasurementSentence(state),
+    contextualPointSentence(state, "A", a),
+    contextualPointSentence(state, "B", b),
+  ];
+  const partA = `Find the equation of the line in terms of ${state.context.yVariable} and ${state.context.xVariable}.\n${simplestFormLine}`;
   const partB = `Use your equation to calculate ${state.followUp.outputDescription} when ${state.context.xVariable} = ${state.followUp.input}.`;
-  const prompt = `${state.context.introduction} ${pointSentence} (a) ${partA} (b) ${partB}`;
+  const prompt = `${information.join("\n")}\n(a) ${partA}\n(b) ${partB}`;
+
   return {
     prompt,
-    promptParts: [
-      { kind: "text", value: `${state.context.introduction} Two points on the graph are ` },
-      { kind: "math", latex: coordinateLatex(a) },
-      { kind: "text", value: " and " },
-      { kind: "math", latex: coordinateLatex(b) },
-      { kind: "text", value: `. (a) ${partA} (b) ${partB}` },
-    ],
+    promptParts: [{ kind: "text", value: prompt }],
     promptSections: [
       { label: "a", text: partA, marks: 3 },
       { label: "b", text: partB, marks: 1 },
@@ -154,32 +182,55 @@ export const buildG1ContextPrompt = (
   };
 };
 
+const bestFitPointSentence = (
+  state: G1BestFitLineState,
+  label: "A" | "B",
+  point: G1NumericPoint,
+): string => {
+  const x = valueWithUnit(point.x, state.context.xUnit);
+  const y = valueWithUnit(point.y, state.context.yUnit);
+  switch (state.context.domainId) {
+    case "ENGINE_FUEL":
+      return `Point ${label} represents an engine size of ${x} and fuel consumption of ${y}.`;
+    case "RALLY_DISTANCE":
+      return `Point ${label} represents ${x} elapsed and ${y} remaining.`;
+    case "CALF_GROWTH":
+      return `Point ${label} represents an age of ${x} and a mass of ${y}.`;
+    case "SUNLIGHT_GROWTH":
+      return `Point ${label} represents ${x} of sunlight and growth of ${y}.`;
+    case "MACHINE_EFFICIENCY":
+      return `Point ${label} represents a machine age of ${x} and an efficiency score of ${y}.`;
+    default:
+      return `Point ${label} represents ${state.context.xDescription} ${x} and ${state.context.yDescription} ${y}.`;
+  }
+};
+
+const bestFitMeasurementSentence = (state: G1BestFitLineState) =>
+  `The scatter graph shows ${state.context.yDescription}, ${state.context.yVariable} (${state.context.yUnit}), against ${state.context.xDescription}, ${state.context.xVariable} (${state.context.xUnit}).`;
+
 export const buildG1BestFitPrompt = (
   state: G1BestFitLineState,
   surfaceStyleId: "BEST_FIT_LABELLED_POINTS_CONTEXT" | "BEST_FIT_GRID_READ_POINTS",
 ): G1PromptBuild => {
   const [a, b] = state.points;
-  const base = `${state.context.introduction} A line of best fit has been drawn on the scatter graph.`;
-  const command = `Find the equation of the line of best fit connecting ${state.context.yVariable} and ${state.context.xVariable}. Give the equation in simplest form.`;
-  const pointText = surfaceStyleId === "BEST_FIT_LABELLED_POINTS_CONTEXT"
-    ? ` Two points on the drawn line are ${coordinatePlain(a)} and ${coordinatePlain(b)}.`
-    : " Use two suitable points from the drawn line.";
-  const prompt = `${base}${pointText} ${command}`;
-  const promptParts: PaperPart[] = [{ kind: "text", value: base }];
+  const information = [
+    state.context.introduction,
+    bestFitMeasurementSentence(state),
+    "A line of best fit has been drawn.",
+  ];
+
   if (surfaceStyleId === "BEST_FIT_LABELLED_POINTS_CONTEXT") {
-    promptParts.push(
-      { kind: "text", value: " Two points on the drawn line are " },
-      { kind: "math", latex: coordinateLatex(a) },
-      { kind: "text", value: " and " },
-      { kind: "math", latex: coordinateLatex(b) },
-      { kind: "text", value: `. ${command}` },
-    );
+    information.push(bestFitPointSentence(state, "A", a));
+    information.push(bestFitPointSentence(state, "B", b));
   } else {
-    promptParts.push({ kind: "text", value: ` Use two suitable points from the drawn line. ${command}` });
+    information.push("Use two suitable points which lie on the drawn line.");
   }
+
+  const command = `Find the equation of the line of best fit in terms of ${state.context.yVariable} and ${state.context.xVariable}.\n${simplestFormLine}`;
+  const prompt = `${information.join("\n")}\n(a) ${command}`;
   return {
     prompt,
-    promptParts,
+    promptParts: [{ kind: "text", value: prompt }],
     promptSections: [{ label: "a", text: command, marks: 3 }],
   };
 };
@@ -192,17 +243,16 @@ const algebraicCoordinateLatex = (coefficient: number, parameter: string, power:
 export const buildG1SymbolicPrompt = (state: G1SymbolicGradientState): G1PromptBuild => {
   const numeric = `\\left(${state.numericPoint.x},${state.numericPoint.y}\\right)`;
   const parameterised = `\\left(${algebraicCoordinateLatex(state.parameterisedPoint.xCoefficient, state.parameter, 1)},${algebraicCoordinateLatex(state.parameterisedPoint.yCoefficient, state.parameter, 2)}\\right)`;
-  const text = "Two points lie on a straight line. Find the gradient of the line as an expression in the parameter, giving your answer in simplest form.";
-  const prompt = `${text} A = (${state.numericPoint.x}, ${state.numericPoint.y}); B contains the generated parameterised coordinates.`;
+  const plain = `Find an expression for the gradient of the line joining point A to point B.\nGive your answer in its simplest form.`;
   return {
-    prompt,
+    prompt: plain,
     promptParts: [
-      { kind: "text", value: "The straight line passes through " },
-      { kind: "math", latex: `A=${numeric}` },
-      { kind: "text", value: " and " },
-      { kind: "math", latex: `B=${parameterised}` },
-      { kind: "text", value: ". Find its gradient as an expression in the parameter. Give your answer in simplest form." },
+      { kind: "text", value: "Point A has coordinates " },
+      { kind: "math", latex: numeric },
+      { kind: "text", value: " and point B has coordinates " },
+      { kind: "math", latex: parameterised },
+      { kind: "text", value: ".\nFind an expression for the gradient of the line joining A to B.\nGive your answer in its simplest form." },
     ],
-    promptSections: [{ label: "", text, marks: 3 }],
+    promptSections: [{ label: "", text: plain, marks: 3 }],
   };
 };
