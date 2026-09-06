@@ -195,6 +195,7 @@ const structuralSignature = (question: G1GeneratedQuestion): string => {
     const state = question.mathState;
     return `S:${state.denominatorScale}:${state.parameterCoefficient}:${state.constant}:${state.parameter}`;
   }
+  const state = question.mathState;
   const contextId = question.family === "CONTEXTUAL_LINEAR_MODEL" || question.family === "BEST_FIT_LINEAR_MODEL"
     ? question.mathState.context.domainId
     : "NONE";
@@ -243,11 +244,12 @@ export const generateG1QuestionBatch = (
 export const G1_GENERATOR_V3_GUARDRAILS = [
   "Standalone line-equation generation uses a smoothed approximately 50:50 positive/negative direction target rather than overfitting a four-question sign sample.",
   "Neither generated standalone point may lie on an axis; an axis point removes part of the intended substitution demand.",
+  "Generated non-symbolic straight-line models use a non-zero intercept, and every visual surface must preserve the intercept side of the x-axis rather than cosmetically making the line pass through or near the origin.",
   "Deterministic contextual generation deliberately includes a substantial minority of physically meaningful decreasing relationships.",
   "Context decimals must remain written-arithmetic friendly: sensible terminating values are allowed only when the gradient subtraction remains clean.",
   "Requested best-fit difficulty is a construction constraint: unsuitable states are regenerated rather than surfaced as a post-generation mismatch error.",
   "Grid-read best-fit graphs reject excessive major-grid density and horizontally compressed data clouds.",
-  "Labelled-point and other supportive diagrams may use schematic visual spacing; visual ugliness is never a difficulty lever.",
+  "Labelled-point and other supportive diagrams may use schematic visual spacing; visual ugliness is never a difficulty lever, but schematic freedom never permits mathematically misleading intercept placement.",
 ] as const;
 
 export { G1_GENERATOR_DESIGN_NOTES } from "./GeneratorV2";
