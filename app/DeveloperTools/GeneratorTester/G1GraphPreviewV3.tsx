@@ -15,6 +15,7 @@ type ScreenPoint = { x: number; y: number };
 const EPSILON = 1e-8;
 const mathFont = 'KaTeX_Math, KaTeX_Main, "Times New Roman", serif';
 const formatTick = (value: number) => Number.isInteger(value) ? `${value}` : `${Number(value.toFixed(2))}`;
+const rationalValue = (value: G1Rational) => value.numerator / value.denominator;
 
 const gcd = (a: number, b: number): number => b === 0 ? Math.abs(a) : gcd(b, a % b);
 const rationalFromNumber = (value: number): G1Rational => {
@@ -64,6 +65,13 @@ const extendScreenLine = (
   return best;
 };
 
+const lineYAtX = (a: ScreenPoint, b: ScreenPoint, x: number) => {
+  const dx = b.x - a.x;
+  if (Math.abs(dx) < EPSILON) return (a.y + b.y) / 2;
+  const t = (x - a.x) / dx;
+  return a.y + t * (b.y - a.y);
+};
+
 const labelPlacement = (
   point: ScreenPoint,
   lineA: ScreenPoint,
@@ -101,6 +109,7 @@ const labelPlacement = (
 const canonicalSchematicGeometry = (
   points: readonly [G1NumericPoint, G1NumericPoint],
   gradient: G1Rational,
+  intercept: G1Rational,
   left: number,
   top: number,
   plotWidth: number,
@@ -112,9 +121,18 @@ const canonicalSchematicGeometry = (
   const bothXNegative = xValues.every((value) => value < 0);
   const bothYPositive = yValues.every((value) => value > 0);
   const bothYNegative = yValues.every((value) => value < 0);
+  const interceptNumber = rationalValue(intercept);
+  const positiveIntercept = interceptNumber > EPSILON;
+  const negativeIntercept = interceptNumber < -EPSILON;
 
   const originX = left + plotWidth * (bothXPositive ? 0.2 : bothXNegative ? 0.8 : 0.5);
-  const originY = top + plotHeight * (bothYPositive ? 0.8 : bothYNegative ? 0.2 : 0.5);
+  let originY = top + plotHeight * (
+    bothYPositive
+      ? negativeIntercept ? 0.62 : 0.79
+      : bothYNegative
+        ? positiveIntercept ? 0.38 : 0.21
+        : 0.5
+  );
 
   const xSlots: readonly [number, number] = bothXPositive
     ? [left + plotWidth * 0.43, left + plotWidth * 0.76]
@@ -140,6 +158,38 @@ const canonicalSchematicGeometry = (
     screen[xOrder[1]].y = positiveGradient ? mid - halfRise : mid + halfRise;
   }
 
+  // The sketch is intentionally not to scale, but it must never contradict the
+  // generated equation. In particular, a non-zero intercept must cross the
+  // y-axis visibly on the correct side of the x-axis and must not masquerade as
+  // a line through O. We therefore translate the schematic line vertically while
+  // keeping its direction, point ordering and compact slope unchanged.
+  const currentInterceptY = lineYAtX(screen[0], screen[1], originX);
+  const interceptClearance = Math.max(15, plotHeight * 0.13);
+  const desiredInterceptY = positiveIntercept
+    ? originY - interceptClearance
+    : negativeIntercept
+      ? originY + interceptClearance
+      : originY;
+  const lineShift = desiredInterceptY - currentInterceptY;
+  screen[0].y += lineShift;
+  screen[1].y += lineShift;
+
+  // Keep the whole sketch comfortably inside the small plotting window. Shift
+  // the axes and line together so the intercept relationship cannot be lost by
+  // later framing adjustments.
+  const safeTop = top + 7;
+  const safeBottom = top + plotHeight - 7;
+  const minY = Math.min(originY, screen[0].y, screen[1].y, desiredInterceptY);
+  const maxY = Math.max(originY, screen[0].y, screen[1].y, desiredInterceptY);
+  let frameShift = 0;
+  if (minY < safeTop) frameShift += safeTop - minY;
+  if (maxY + frameShift > safeBottom) frameShift += safeBottom - (maxY + frameShift);
+  if (Math.abs(frameShift) > EPSILON) {
+    originY += frameShift;
+    screen[0].y += frameShift;
+    screen[1].y += frameShift;
+  }
+
   return { origin: { x: originX, y: originY }, screen };
 };
 
@@ -155,7 +205,7 @@ function SchematicGraphV3({ visual }: { visual: Extract<G1GeneratedVisualSpec, {
   const plotWidth = width - left - right;
   const plotHeight = height - top - bottom;
   const points = visual.kind === "G1_COORDINATE_DIAGRAM" ? visual.points : visual.labelledPoints;
-  const { origin, screen } = canonicalSchematicGeometry(points, visual.line.gradient, left, top, plotWidth, plotHeight);
+  const { origin, screen } = canonicalSchematicGeometry(points, visual.line.gradient, visual.line.intercept, left, top, plotWidth, plotHeight);
   const lineEnds = extendScreenLine(screen[0], screen[1], { left, right: left + plotWidth, top, bottom: top + plotHeight });
   const axis = visual.axis;
 
