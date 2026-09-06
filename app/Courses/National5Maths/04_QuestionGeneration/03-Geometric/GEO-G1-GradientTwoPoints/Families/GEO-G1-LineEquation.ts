@@ -8,7 +8,7 @@ export const GEO_G1_LINE_EQUATION = {
     "COORDINATE_DIAGRAM_LINE_EQUATION",
   ],
   papers: ["P1"],
-  difficulties: [1],
+  difficulties: [1, 2],
   marks: 3,
   standard: "C",
   thinking: "OPERATIONAL",
