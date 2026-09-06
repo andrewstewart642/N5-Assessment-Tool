@@ -28,9 +28,11 @@ export const G1_COORDINATE_DIAGRAM_GENERATION_GUARDRAILS = [
   "Do not draw gridlines, numeric tick scales or an emphasised y-intercept on this surface.",
   "Draw exactly two simple point markers joined by one solid straight line and show each point label with its generated coordinate pair.",
   "Choose label offsets so point text never crosses the line, point marker, axes or other point text.",
+  "Neither generated point may lie on the x-axis or y-axis; an axis point removes too much of the intended substitution demand.",
+  "Treat the picture as a sketch of the generated relationship rather than a one-to-one scale drawing; preserve direction and quadrant information but avoid an almost-horizontal line that could mislead a less confident pupil.",
   "Keep the viewing window tight around the two points while still containing the origin; the axes must not extend substantially farther than the geometry needs.",
   "The diagram must communicate the generated point coordinates but must not make the y-intercept directly readable from a scale.",
-  "The diagram is essential mathematical data; renderer validation must preserve the stored points and line direction even though the surface is intentionally schematic.",
+  "The diagram is essential mathematical data; renderer validation must preserve the stored point labels and line direction even though the surface is intentionally schematic.",
 ] as const;
 
 export const G1_CONTEXT_GRAPH_GENERATION_GUARDRAILS = [
@@ -39,6 +41,9 @@ export const G1_CONTEXT_GRAPH_GENERATION_GUARDRAILS = [
   "Do not visually advertise the y-intercept: the pupil should obtain it by calculation from the two supplied points.",
   "State the measured variables and units in the surrounding wording and require the final equation to be written in those contextual variables.",
   "State point A and point B as separate pieces of information rather than compressing them into an essay-like paragraph.",
+  "Maintain a broad bank of genuinely different plausible contexts so repeated practice does not feel like a tariff question with renamed nouns.",
+  "Include a substantial minority of physically meaningful decreasing relationships rather than defaulting overwhelmingly to positive correlation.",
+  "Sensible terminating decimals may be used, but the coordinate subtraction in the non-calculator gradient route must simplify cleanly; gratuitous decimal precision is invalid difficulty.",
   "Axis variables, units, line direction and contextual wording must all agree with the generated mathematical state.",
   "Keep the diagram visually secondary to the question text and compact enough not to dominate the page.",
 ] as const;
@@ -47,9 +52,12 @@ export const G1_BEST_FIT_GRAPH_GENERATION_GUARDRAILS = [
   "The line of best fit is supplied by the question; the pupil is not asked to draw it in the current G1 family.",
   "Scatter points must plausibly surround the supplied line and must be independently generated rather than copied from historical data.",
   "Labelled-point variants should use a restrained scattergraph without unnecessary grid clutter because the two model-defining point values are supplied in text.",
-  "Grid-read variants must use a genuine scale with a modest number of useful gridlines rather than a dense spreadsheet-style grid.",
+  "On labelled-point variants, use a schematic display window that spreads the data cloud across the available plotting area instead of preserving large unused space back to a numerical origin that the pupil never has to read.",
+  "Grid-read variants must use a genuine scale beginning at zero with a modest number of useful gridlines rather than a dense spreadsheet-style grid.",
+  "No grid-read axis should exceed eighteen major intervals; if a context cannot support a readable zero-origin scale it must be regenerated or reserved for the labelled-point surface.",
   "A generated grid-read graph must contain exactly two intended scatter points on the fitted line; both must lie on clean grid intersections and every other scatter point must lie visibly off the line.",
   "The two intended grid-read points must be separated enough to make a stable gradient calculation and must be objectively recoverable from the axis scale.",
+  "The scatter cloud must occupy a meaningful proportion of the plotting area and must not bunch tightly around the two intended line points.",
   "Positive and negative fitted-line directions should follow their observed corpus balance as a prior; do not default almost every generated graph to positive correlation.",
   "The one-mark follow-up remains S2-owned and must stay explicitly separated in generation metadata even when the historical wrapper is multipart.",
 ] as const;
