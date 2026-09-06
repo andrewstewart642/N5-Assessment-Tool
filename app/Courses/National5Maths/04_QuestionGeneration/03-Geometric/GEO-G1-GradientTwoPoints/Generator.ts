@@ -96,6 +96,11 @@ const multiplyRational = (value: G1Rational, scalar: number): G1Rational =>
 const evaluateLine = (gradient: G1Rational, intercept: G1Rational, x: number): G1Rational =>
   addRational(multiplyRational(gradient, x), intercept);
 
+const numericValue = (value: G1Rational) => {
+  const reduced = reduceG1Rational(value);
+  return reduced.numerator / reduced.denominator;
+};
+
 const integerValue = (value: G1Rational): number | null => {
   const reduced = reduceG1Rational(value);
   return reduced.denominator === 1 ? reduced.numerator : null;
@@ -122,33 +127,46 @@ const baseLineState = (
   };
 };
 
+const niceTickInterval = (range: number, targetTicks = 8) => {
+  const raw = Math.max(range / Math.max(2, targetTicks), 0.0001);
+  const power = 10 ** Math.floor(Math.log10(raw));
+  const scaled = raw / power;
+  const factor = scaled <= 1 ? 1 : scaled <= 2 ? 2 : scaled <= 5 ? 5 : 10;
+  return factor * power;
+};
+
 const axisWindow = (
   xVariable: string,
   yVariable: string,
   points: readonly G1NumericPoint[],
   labels?: { xLabel: string; yLabel: string; xUnit: string | null; yUnit: string | null },
+  includeOrigin = true,
 ): G1AxisSpec => {
   const xs = points.map((point) => point.x);
   const ys = points.map((point) => point.y);
-  const xMinimumRaw = Math.min(...xs);
-  const xMaximumRaw = Math.max(...xs);
-  const yMinimumRaw = Math.min(...ys);
-  const yMaximumRaw = Math.max(...ys);
-  const xPad = Math.max(2, Math.ceil((xMaximumRaw - xMinimumRaw) * 0.2));
-  const yPad = Math.max(2, Math.ceil((yMaximumRaw - yMinimumRaw) * 0.15));
+  const xLow = Math.min(...xs, ...(includeOrigin ? [0] : []));
+  const xHigh = Math.max(...xs, ...(includeOrigin ? [0] : []));
+  const yLow = Math.min(...ys, ...(includeOrigin ? [0] : []));
+  const yHigh = Math.max(...ys, ...(includeOrigin ? [0] : []));
+  const xPad = Math.max(1, (xHigh - xLow) * 0.12);
+  const yPad = Math.max(1, (yHigh - yLow) * 0.12);
+  const xMinimum = Math.floor(xLow - xPad);
+  const xMaximum = Math.ceil(xHigh + xPad);
+  const yMinimum = Math.floor(yLow - yPad);
+  const yMaximum = Math.ceil(yHigh + yPad);
   return {
     xVariable,
     yVariable,
-    xLabel: labels?.xLabel ?? "x",
-    yLabel: labels?.yLabel ?? "y",
+    xLabel: labels?.xLabel ?? xVariable,
+    yLabel: labels?.yLabel ?? yVariable,
     xUnit: labels?.xUnit ?? null,
     yUnit: labels?.yUnit ?? null,
-    xMinimum: Math.min(0, Math.floor(xMinimumRaw - xPad)),
-    xMaximum: Math.max(0, Math.ceil(xMaximumRaw + xPad)),
-    xTickInterval: 1,
-    yMinimum: Math.min(0, Math.floor(yMinimumRaw - yPad)),
-    yMaximum: Math.max(0, Math.ceil(yMaximumRaw + yPad)),
-    yTickInterval: 1,
+    xMinimum,
+    xMaximum,
+    xTickInterval: niceTickInterval(xMaximum - xMinimum),
+    yMinimum,
+    yMaximum,
+    yTickInterval: niceTickInterval(yMaximum - yMinimum),
   };
 };
 
@@ -187,27 +205,58 @@ const chooseLineSurface = (
     }
     return requested;
   }
+  // Two direct and two diagram instances are observed in the reviewed line family.
   return mixSeed(seed, 0x610001) % 2 === 0
     ? "DIRECT_COORDINATES_LINE_EQUATION"
     : "COORDINATE_DIAGRAM_LINE_EQUATION";
 };
 
-const lineEquationState = (seed: number): G1LineModelState & { family: "LINE_EQUATION_FROM_TWO_POINTS" } => {
-  const rng = new SeededRandom(mixSeed(seed, 0x610101));
-  const gradients = [-5, -4, -3, -2, 2, 3, 4, 5] as const;
-  const intercepts = [-12, -10, -8, -7, -5, 4, 6, 8, 10, 11, 13, 15] as const;
+const chooseLineDifficulty = (seed: number, requested?: G1GeneratorDifficulty): G1GeneratorDifficulty => {
+  if (requested) return requested;
+  // The historical centre of gravity remains the baseline. A smaller extension
+  // band introduces clean fractional gradients without overwhelming the family.
+  return mixSeed(seed, 0x6100D1) % 4 === 0 ? 2 : 1;
+};
 
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    const gradient = rational(rng.pick(gradients));
+const chooseHistoricalLineSign = (rng: SeededRandom) => rng.int(0, 3) < 3 ? -1 : 1;
+
+const lineEquationState = (
+  seed: number,
+  difficulty: G1GeneratorDifficulty,
+): G1LineModelState & { family: "LINE_EQUATION_FROM_TWO_POINTS" } => {
+  const rng = new SeededRandom(mixSeed(seed, 0x610101));
+  const intercepts = [-13, -11, -9, -7, -5, 4, 6, 8, 10, 12, 14, 16] as const;
+  const upperFractions = [
+    rational(1, 2), rational(3, 2), rational(1, 3), rational(2, 3), rational(4, 3),
+    rational(1, 4), rational(3, 4), rational(5, 4), rational(2, 5), rational(3, 5), rational(4, 5),
+  ] as const;
+
+  for (let attempt = 0; attempt < 700; attempt += 1) {
+    const sign = chooseHistoricalLineSign(rng);
+    const gradient = difficulty === 1
+      ? rational(sign * rng.pick([2, 3, 4, 5] as const))
+      : multiplyRational(rng.pick(upperFractions), sign);
     const intercept = rational(rng.pick(intercepts));
-    const x1 = rng.int(-6, 4);
-    const gap = rng.pick([2, 3, 4, 5] as const);
-    const x2 = x1 + gap;
-    if (x2 > 7) continue;
+
+    let x1: number;
+    let x2: number;
+    if (difficulty === 1) {
+      x1 = rng.int(-6, 3);
+      x2 = x1 + rng.pick([2, 3, 4, 5] as const);
+    } else {
+      const denominator = gradient.denominator;
+      const firstMultiple = rng.int(-3, 1);
+      const gapMultiple = rng.pick([1, 2, 3] as const);
+      x1 = firstMultiple * denominator;
+      x2 = (firstMultiple + gapMultiple) * denominator;
+    }
+    if (x1 === x2 || x2 > 10 || x1 < -12) continue;
+
     const y1 = integerValue(evaluateLine(gradient, intercept, x1));
     const y2 = integerValue(evaluateLine(gradient, intercept, x2));
     if (y1 == null || y2 == null) continue;
-    if (Math.max(Math.abs(y1), Math.abs(y2)) > 22) continue;
+    if (Math.max(Math.abs(y1), Math.abs(y2)) > 30) continue;
+
     const state = baseLineState(
       "LINE_EQUATION_FROM_TWO_POINTS",
       "x",
@@ -240,11 +289,13 @@ const coordinateVisual = (state: G1LineModelState): G1CoordinateDiagramVisualSpe
 const lineQuestion = (
   seed: number,
   surfaceStyleId: G1LineEquationGeneratedQuestion["surfaceStyleId"],
+  requestedDifficulty?: G1GeneratorDifficulty,
 ): G1LineEquationGeneratedQuestion => {
-  const state = lineEquationState(seed);
+  const targetDifficulty = chooseLineDifficulty(seed, requestedDifficulty);
+  const state = lineEquationState(seed, targetDifficulty);
   const prompt = surfaceStyleId === "DIRECT_COORDINATES_LINE_EQUATION"
     ? buildG1DirectLinePrompt(state, seed)
-    : buildG1DiagramLinePrompt(seed);
+    : buildG1DiagramLinePrompt();
   const sourceBasis = historicalReferenceForG1("LINE_EQUATION_FROM_TWO_POINTS", surfaceStyleId, "P1");
   const quality = qualityFor(
     "LINE_EQUATION_FROM_TWO_POINTS",
@@ -254,17 +305,17 @@ const lineQuestion = (
     sourceBasis,
     [
       "two exact generated coordinate points",
-      `non-zero integer gradient ${state.gradient.numerator}`,
-      `non-zero intercept ${state.intercept.numerator}`,
+      targetDifficulty === 1 ? "source-centred integer-gradient route" : "simple exact fractional-gradient extension",
+      state.gradient.numerator < 0 ? "negative gradient" : "positive gradient",
       surfaceStyleId === "COORDINATE_DIAGRAM_LINE_EQUATION"
-        ? "coordinates recovered from generated visual data"
+        ? "coordinates recovered from a sparse schematic diagram"
         : "coordinates supplied directly",
     ],
   );
 
   return {
     generatorId: "G1_GRADIENT_TWO_POINTS_V1",
-    instanceId: `G1-P1-LINE-${surfaceStyleId}-${seed >>> 0}`,
+    instanceId: `G1-P1-LINE-${surfaceStyleId}-L${targetDifficulty}-${seed >>> 0}`,
     seed,
     skillId: "geo-g01-gradient-two-points",
     conceptId: "geo-g1-1",
@@ -272,7 +323,7 @@ const lineQuestion = (
     familyReadiness: "CORE",
     surfaceStyleId,
     paper: "P1",
-    difficulty: 1,
+    difficulty: quality.difficultyBandId === "UPPER_VALID" ? 2 : 1,
     marks: 3,
     standard: "C",
     thinking: "OPERATIONAL",
@@ -289,78 +340,111 @@ const lineQuestion = (
   };
 };
 
-const CONTEXTS: readonly G1ContextProfile[] = [
+type ContextRecipe = {
+  context: G1ContextProfile;
+  gradients: readonly G1Rational[];
+  intercepts: readonly number[];
+  xScale: number;
+};
+
+const CONTEXT_RECIPES: readonly ContextRecipe[] = [
   {
-    domainId: "BICYCLE_HIRE",
-    introduction: "A bicycle-hire company uses a straight-line model for the total hire charge.",
-    xDescription: "hire time",
-    yDescription: "total charge",
-    xVariable: "t",
-    yVariable: "C",
-    xUnit: "hours",
-    yUnit: "pounds",
+    context: {
+      domainId: "TAXI_FARE",
+      introduction: "A taxi fare is made up of a fixed charge and a charge for the distance travelled.",
+      xDescription: "distance travelled",
+      yDescription: "taxi fare",
+      xVariable: "d",
+      yVariable: "P",
+      xUnit: "miles",
+      yUnit: "pounds",
+    },
+    gradients: [rational(3, 2), rational(5, 4), rational(7, 4)],
+    intercepts: [2, 3, 4, 5],
+    xScale: 1,
   },
   {
-    domainId: "WATER_STORAGE",
-    introduction: "Water enters a storage vessel at a steady rate, giving a straight-line relationship between time and volume.",
-    xDescription: "time",
-    yDescription: "volume of water",
-    xVariable: "t",
-    yVariable: "V",
-    xUnit: "minutes",
-    yUnit: "litres",
+    context: {
+      domainId: "WEEKLY_WAGE",
+      introduction: "An employee is paid a basic weekly wage together with commission on sales.",
+      xDescription: "sales",
+      yDescription: "weekly wage",
+      xVariable: "S",
+      yVariable: "W",
+      xUnit: "pounds",
+      yUnit: "pounds",
+    },
+    gradients: [rational(1, 20), rational(1, 25), rational(1, 40)],
+    intercepts: [120, 140, 160, 180, 200],
+    xScale: 100,
   },
   {
-    domainId: "PARCEL_MASS",
-    introduction: "A packing process gives a straight-line relationship between the number of identical items and the total parcel mass.",
-    xDescription: "number of items",
-    yDescription: "parcel mass",
-    xVariable: "n",
-    yVariable: "M",
-    xUnit: "items",
-    yUnit: "kg",
+    context: {
+      domainId: "COURIER_CHARGE",
+      introduction: "A courier company charges a fixed booking fee and an additional amount for each kilometre travelled.",
+      xDescription: "delivery distance",
+      yDescription: "delivery charge",
+      xVariable: "d",
+      yVariable: "C",
+      xUnit: "km",
+      yUnit: "pounds",
+    },
+    gradients: [rational(5, 4), rational(3, 2), rational(7, 5)],
+    intercepts: [4, 5, 6, 8],
+    xScale: 1,
   },
   {
-    domainId: "PRINTING_CHARGE",
-    introduction: "A print service uses a straight-line model connecting the number of batches ordered and the total charge.",
-    xDescription: "number of batches",
-    yDescription: "total charge",
-    xVariable: "b",
-    yVariable: "P",
-    xUnit: "batches",
-    yUnit: "pounds",
+    context: {
+      domainId: "WATER_DRAIN",
+      introduction: "Water is drained from a storage tank at a steady rate.",
+      xDescription: "time elapsed",
+      yDescription: "volume of water remaining",
+      xVariable: "t",
+      yVariable: "V",
+      xUnit: "minutes",
+      yUnit: "litres",
+    },
+    gradients: [rational(-5, 2), rational(-3, 2), rational(-7, 4)],
+    intercepts: [180, 200, 220, 240],
+    xScale: 2,
+  },
+  {
+    context: {
+      domainId: "BATTERY_DRAIN",
+      introduction: "A device battery loses charge at a steady rate while it is in use.",
+      xDescription: "time in use",
+      yDescription: "battery charge remaining",
+      xVariable: "t",
+      yVariable: "B",
+      xUnit: "hours",
+      yUnit: "percent",
+    },
+    gradients: [rational(-15, 2), rational(-25, 4), rational(-10, 3)],
+    intercepts: [90, 95, 100],
+    xScale: 1,
   },
 ] as const;
 
 const contextualState = (seed: number): G1ContextualLineState => {
   const rng = new SeededRandom(mixSeed(seed, 0x610202));
-  const gradients = [
-    rational(1, 2),
-    rational(3, 2),
-    rational(5, 2),
-    rational(1, 4),
-    rational(3, 4),
-    rational(1, 5),
-    rational(2, 5),
-    rational(3, 5),
-  ] as const;
-  const intercepts = [3, 4, 6, 7, 9, 11, 12, 14, 16, 18] as const;
 
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    const context = rng.pick(CONTEXTS);
-    const gradient = rng.pick(gradients);
-    const intercept = rational(rng.pick(intercepts));
-    const step = gradient.denominator;
-    const k1 = rng.int(1, 3);
-    const k2 = k1 + rng.pick([2, 3, 4] as const);
+  for (let attempt = 0; attempt < 700; attempt += 1) {
+    const recipe = rng.pick(CONTEXT_RECIPES);
+    const context = recipe.context;
+    const gradient = rng.pick(recipe.gradients);
+    const intercept = rational(rng.pick(recipe.intercepts));
+    const step = gradient.denominator * recipe.xScale;
+    const k1 = rng.int(1, 2);
+    const k2 = k1 + rng.pick([1, 2] as const);
     const x1 = k1 * step;
     const x2 = k2 * step;
     const y1 = integerValue(evaluateLine(gradient, intercept, x1));
     const y2 = integerValue(evaluateLine(gradient, intercept, x2));
-    if (y1 == null || y2 == null || y2 > 80) continue;
-    const inputChoices = [k2 + 1, k2 + 2, k2 + 3].map((value) => value * step);
-    const followInput = rng.pick(inputChoices);
+    if (y1 == null || y2 == null || Math.min(y1, y2) <= 0) continue;
+    const followInput = (k2 + rng.pick([1, 2] as const)) * step;
     const exactOutput = evaluateLine(gradient, intercept, followInput);
+    if (numericValue(exactOutput) <= 0) continue;
+
     const base = baseLineState(
       "CONTEXTUAL_LINEAR_MODEL",
       context.xVariable,
@@ -370,6 +454,7 @@ const contextualState = (seed: number): G1ContextualLineState => {
       intercept,
     );
     if (historicalG1NumericOverlap(base)) continue;
+
     return {
       ...base,
       family: "CONTEXTUAL_LINEAR_MODEL",
@@ -391,10 +476,10 @@ const contextVisual = (state: G1ContextualLineState): G1ContextLineVisualSpec =>
   axis: axisWindow(
     state.context.xVariable,
     state.context.yVariable,
-    [...state.points, { x: state.followUp.input, y: integerValue(state.followUp.exactOutput) ?? state.followUp.exactOutput.numerator / state.followUp.exactOutput.denominator }],
+    state.points,
     {
-      xLabel: state.context.xDescription,
-      yLabel: state.context.yDescription,
+      xLabel: state.context.xVariable,
+      yLabel: state.context.yVariable,
       xUnit: state.context.xUnit,
       yUnit: state.context.yUnit,
     },
@@ -406,14 +491,14 @@ const contextVisual = (state: G1ContextualLineState): G1ContextLineVisualSpec =>
   ],
   requirements: [
     ...G1_GENERATOR_CONTEXT_GUARDRAILS,
-    "The line and labelled coordinates must be generated from the stored mathematical state.",
+    "The line and labelled points must be generated from the stored mathematical state.",
   ],
 });
 
 const contextQuestion = (seed: number): G1ContextualGeneratedQuestion => {
   const state = contextualState(seed);
   const surfaceStyleId = "CONTEXT_LINE_GRAPH_LABELLED_POINTS" as const;
-  const prompt = buildG1ContextPrompt(state, seed);
+  const prompt = buildG1ContextPrompt(state);
   const sourceBasis = historicalReferenceForG1("CONTEXTUAL_LINEAR_MODEL", surfaceStyleId, "P1");
   const quality = qualityFor(
     "CONTEXTUAL_LINEAR_MODEL",
@@ -422,13 +507,17 @@ const contextQuestion = (seed: number): G1ContextualGeneratedQuestion => {
     state,
     sourceBasis,
     [
-      "deterministic contextual relationship",
-      `exact fractional gradient ${state.gradient.numerator}/${state.gradient.denominator}`,
-      "two explicit model-defining points",
-      "three-mark model construction",
-      "one-mark deterministic model application owned by G1",
+      "plausible deterministic real-world relationship",
+      `exact gradient ${state.gradient.numerator}/${state.gradient.denominator}`,
+      Math.max(...state.points.flatMap((point) => [Math.abs(point.x), Math.abs(point.y)])) >= 100
+        ? "large but ratio-friendly contextual scale"
+        : "compact contextual scale",
+      state.gradient.numerator < 0 ? "physically meaningful decreasing model" : "physically meaningful increasing model",
+      "context variables required in the final equation",
+      "one-mark deterministic application remains G1-owned",
     ],
   );
+
   return {
     generatorId: "G1_GRADIENT_TWO_POINTS_V1",
     instanceId: `G1-P1-CONTEXT-${state.context.domainId}-${seed >>> 0}`,
@@ -456,53 +545,63 @@ const contextQuestion = (seed: number): G1ContextualGeneratedQuestion => {
   };
 };
 
-const BEST_FIT_CONTEXTS: readonly G1ContextProfile[] = [
+type BestFitRecipe = {
+  context: G1ContextProfile;
+  direction: "POSITIVE" | "NEGATIVE";
+  xValues: readonly number[];
+  gradients: readonly number[];
+  intercepts: readonly number[];
+  scatterOffsets: readonly number[];
+};
+
+const BEST_FIT_RECIPES: readonly BestFitRecipe[] = [
   {
-    domainId: "SUNLIGHT_GROWTH",
-    introduction: "A researcher compares daily sunlight with plant growth for a group of plants.",
-    xDescription: "daily sunlight",
-    yDescription: "growth",
-    xVariable: "H",
-    yVariable: "G",
-    xUnit: "hours",
-    yUnit: "mm",
+    direction: "NEGATIVE",
+    context: { domainId: "ENGINE_FUEL", introduction: "A motoring study compares engine size with fuel consumption for several cars.", xDescription: "engine size", yDescription: "fuel consumption", xVariable: "E", yVariable: "F", xUnit: "litres", yUnit: "km/litre" },
+    xValues: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5],
+    gradients: [-2, -4],
+    intercepts: [18, 20, 22, 24],
+    scatterOffsets: [-1, 1, -2, 2],
   },
   {
-    domainId: "MACHINE_AGE_EFFICIENCY",
-    introduction: "Measurements compare the age of several machines with an efficiency score.",
-    xDescription: "machine age",
-    yDescription: "efficiency score",
-    xVariable: "A",
-    yVariable: "E",
-    xUnit: "years",
-    yUnit: "points",
+    direction: "NEGATIVE",
+    context: { domainId: "RALLY_DISTANCE", introduction: "During a timed route, measurements compare elapsed time with the distance still to travel.", xDescription: "time elapsed", yDescription: "distance remaining", xVariable: "T", yVariable: "D", xUnit: "minutes", yUnit: "km" },
+    xValues: [1, 2, 3, 4, 5, 6, 7, 8],
+    gradients: [-2, -3, -4],
+    intercepts: [28, 32, 36, 40],
+    scatterOffsets: [-2, 2, -3, 3],
   },
   {
-    domainId: "EXERCISE_PULSE",
-    introduction: "Data compare weekly exercise time with resting pulse rate for a group of adults.",
-    xDescription: "weekly exercise",
-    yDescription: "resting pulse rate",
-    xVariable: "T",
-    yVariable: "R",
-    xUnit: "hours",
-    yUnit: "beats/min",
+    direction: "POSITIVE",
+    context: { domainId: "CALF_GROWTH", introduction: "A farmer records the age and mass of several young animals.", xDescription: "age", yDescription: "mass", xVariable: "A", yVariable: "W", xUnit: "weeks", yUnit: "kg" },
+    xValues: [2, 4, 6, 8, 10, 12, 14, 16],
+    gradients: [2, 3, 4],
+    intercepts: [30, 40, 50, 60],
+    scatterOffsets: [-4, 4, -6, 6],
+  },
+  {
+    direction: "POSITIVE",
+    context: { domainId: "SUNLIGHT_GROWTH", introduction: "A researcher compares daily sunlight with plant growth for a group of plants.", xDescription: "daily sunlight", yDescription: "growth", xVariable: "H", yVariable: "G", xUnit: "hours", yUnit: "mm" },
+    xValues: [1, 2, 3, 4, 5, 6, 7, 8],
+    gradients: [2, 3, 4],
+    intercepts: [10, 12, 16, 20],
+    scatterOffsets: [-2, 2, -3, 3],
+  },
+  {
+    direction: "NEGATIVE",
+    context: { domainId: "MACHINE_EFFICIENCY", introduction: "Measurements compare the age of several machines with an efficiency score.", xDescription: "machine age", yDescription: "efficiency score", xVariable: "A", yVariable: "E", xUnit: "years", yUnit: "points" },
+    xValues: [1, 2, 3, 4, 5, 6, 7, 8],
+    gradients: [-2, -3],
+    intercepts: [40, 44, 48, 52, 56],
+    scatterOffsets: [-2, 2, -3, 3],
   },
 ] as const;
 
-const scatterAroundLine = (
-  gradient: G1Rational,
-  intercept: G1Rational,
-  rng: SeededRandom,
-): G1NumericPoint[] => {
-  const offsets = [-3, 2, -2, 3, -1, 2, -2, 1] as const;
-  const points: G1NumericPoint[] = [];
-  for (let x = 1; x <= 8; x += 1) {
-    const lineValue = integerValue(evaluateLine(gradient, intercept, x));
-    if (lineValue == null) continue;
-    const offset = offsets[(x + rng.int(0, offsets.length - 1)) % offsets.length];
-    points.push({ x, y: Math.max(1, lineValue + offset) });
-  }
-  return points;
+const selectBestFitRecipe = (rng: SeededRandom): BestFitRecipe => {
+  // Five reviewed best-fit questions include two negative-gradient examples.
+  const wantNegative = rng.int(0, 4) < 2;
+  const candidates = BEST_FIT_RECIPES.filter((recipe) => recipe.direction === (wantNegative ? "NEGATIVE" : "POSITIVE"));
+  return rng.pick(candidates);
 };
 
 const bestFitState = (
@@ -510,20 +609,21 @@ const bestFitState = (
   surfaceStyleId: G1BestFitGeneratedQuestion["surfaceStyleId"],
 ): G1BestFitLineState => {
   const rng = new SeededRandom(mixSeed(seed, 0x610303));
-  const gradients = surfaceStyleId === "BEST_FIT_LABELLED_POINTS_CONTEXT"
-    ? ([2, 3, 4] as const)
-    : ([-3, -2, 2, 3, 4] as const);
-  const intercepts = [12, 16, 20, 24, 28, 32, 36, 42] as const;
 
-  for (let attempt = 0; attempt < 500; attempt += 1) {
-    const context = rng.pick(BEST_FIT_CONTEXTS);
-    const gradient = rational(rng.pick(gradients));
-    const intercept = rational(rng.pick(intercepts));
-    const x1 = rng.pick([1, 2, 3] as const);
-    const x2 = rng.pick([6, 7, 8] as const);
-    const y1 = integerValue(evaluateLine(gradient, intercept, x1));
-    const y2 = integerValue(evaluateLine(gradient, intercept, x2));
-    if (y1 == null || y2 == null || Math.min(y1, y2) <= 5 || Math.max(y1, y2) > 70) continue;
+  for (let attempt = 0; attempt < 700; attempt += 1) {
+    const recipe = selectBestFitRecipe(rng);
+    const context = recipe.context;
+    const gradient = rational(rng.pick(recipe.gradients));
+    const intercept = rational(rng.pick(recipe.intercepts));
+    const xValues = recipe.xValues;
+    const readIndexA = 1;
+    const readIndexB = xValues.length - 2;
+    const x1 = xValues[readIndexA];
+    const x2 = xValues[readIndexB];
+    const y1 = numericValue(evaluateLine(gradient, intercept, x1));
+    const y2 = numericValue(evaluateLine(gradient, intercept, x2));
+    if (!Number.isFinite(y1) || !Number.isFinite(y2) || Math.min(y1, y2) <= 2) continue;
+
     const base = baseLineState(
       "BEST_FIT_LINEAR_MODEL",
       context.xVariable,
@@ -533,19 +633,22 @@ const bestFitState = (
       intercept,
     );
     if (historicalG1NumericOverlap(base)) continue;
-    const scatterPoints = scatterAroundLine(gradient, intercept, rng);
-    if (scatterPoints.length < 6) continue;
-    const middleX = Math.round((x1 + x2) / 2);
-    const middleY = integerValue(evaluateLine(gradient, intercept, middleX));
-    const lineReadPoints = middleY == null
-      ? [base.points[0], base.points[1]]
-      : [base.points[0], { x: middleX, y: middleY }, base.points[1]];
+
+    const scatterPoints = xValues.map((x, index) => {
+      const lineY = numericValue(evaluateLine(gradient, intercept, x));
+      if (surfaceStyleId === "BEST_FIT_GRID_READ_POINTS" && (index === readIndexA || index === readIndexB)) {
+        return { x, y: lineY };
+      }
+      const offset = rng.pick(recipe.scatterOffsets);
+      return { x, y: Math.max(0.5, lineY + offset) };
+    });
+
     return {
       ...base,
       family: "BEST_FIT_LINEAR_MODEL",
       context,
       scatterPoints,
-      lineReadPoints,
+      lineReadPoints: [base.points[0], base.points[1]],
       embeddedS2MarksDeferred: 1,
     };
   }
@@ -568,6 +671,7 @@ const bestFitVisual = (
       xUnit: state.context.xUnit,
       yUnit: state.context.yUnit,
     },
+    false,
   ),
   line: { gradient: state.gradient, intercept: state.intercept },
   scatterPoints: state.scatterPoints,
@@ -591,7 +695,6 @@ const bestFitQuestion = (
   const state = bestFitState(seed, surfaceStyleId);
   const prompt = buildG1BestFitPrompt(state, surfaceStyleId);
   const sourceBasis = historicalReferenceForG1("BEST_FIT_LINEAR_MODEL", surfaceStyleId, "P1");
-  const difficulty = assessG1Difficulty("BEST_FIT_LINEAR_MODEL", surfaceStyleId, state);
   const quality = qualityFor(
     "BEST_FIT_LINEAR_MODEL",
     surfaceStyleId,
@@ -600,13 +703,16 @@ const bestFitQuestion = (
     sourceBasis,
     [
       "generated scatter data and supplied fitted line",
+      state.gradient.numerator < 0 ? "negative fitted-line direction" : "positive fitted-line direction",
       surfaceStyleId === "BEST_FIT_GRID_READ_POINTS"
-        ? "candidate must recover exact line points from scaled visual data"
-        : "two line points stated explicitly",
+        ? "exactly two intended scatter points lie on the fitted line at readable grid intersections"
+        : "two model-defining fitted-line points are stated explicitly",
+      "context variables required in the final equation",
       "three G1 marks stop at fitted-model construction",
-      "one S2 mark deliberately deferred",
+      "one adjacent S2 mark deliberately deferred",
     ],
   );
+
   return {
     generatorId: "G1_GRADIENT_TWO_POINTS_V1",
     instanceId: `G1-P1-BEST-FIT-${surfaceStyleId}-${seed >>> 0}`,
@@ -617,7 +723,7 @@ const bestFitQuestion = (
     familyReadiness: "COMPOSITE_DEFERRED",
     surfaceStyleId,
     paper: "P1",
-    difficulty: difficulty.difficulty,
+    difficulty: quality.difficultyBandId === "UPPER_VALID" ? 2 : 1,
     marks: 3,
     standard: "C",
     thinking: "OPERATIONAL",
@@ -629,7 +735,7 @@ const bestFitQuestion = (
       g1MarksGenerated: 3,
       embeddedSkillId: "stat-s02-linear-model",
       embeddedMarksDeferred: 1,
-      reason: "The historical best-fit architecture adds a one-mark statistical estimate. That cross-skill mark remains deferred until the statistical generation layer is deliberately implemented.",
+      reason: "The reviewed best-fit architecture includes an adjacent one-mark statistical estimate. That cross-skill mark remains deferred until the statistical generation layer is deliberately implemented.",
     },
     sourceBasis,
     generationConstraints: [
@@ -644,16 +750,13 @@ const bestFitQuestion = (
 const symbolicState = (seed: number): G1SymbolicGradientState => {
   const rng = new SeededRandom(mixSeed(seed, 0x610404));
   const parameters = ["p", "q", "r", "t", "u"] as const;
-  for (let attempt = 0; attempt < 300; attempt += 1) {
+  for (let attempt = 0; attempt < 400; attempt += 1) {
     const parameter = rng.pick(parameters);
     const denominatorScale = rng.pick([2, 3, 4] as const);
     const parameterCoefficient = rng.pick([1, 2, 3] as const);
     const constant = rng.pick([2, 4, 5, 6, 7] as const);
     if (parameterCoefficient % denominatorScale === 0 && constant % denominatorScale === 0) continue;
-    const numericPoint = {
-      x: denominatorScale * constant,
-      y: constant * constant,
-    };
+    const numericPoint = { x: denominatorScale * constant, y: constant * constant };
     const parameterisedPoint = {
       xCoefficient: denominatorScale * parameterCoefficient,
       yCoefficient: parameterCoefficient * parameterCoefficient,
@@ -697,6 +800,7 @@ const symbolicQuestion = (seed: number): G1SymbolicGeneratedQuestion => {
     state,
     sourceBasis,
     [
+      "rare source-calibrated P2 family",
       "parameterised coordinate point",
       "two-point gradient quotient",
       "difference-of-squares factorisation",
@@ -754,6 +858,7 @@ const surfaceForBestFit = (
   }
   if (requestedDifficulty === 1) return "BEST_FIT_LABELLED_POINTS_CONTEXT";
   if (requestedDifficulty === 2) return "BEST_FIT_GRID_READ_POINTS";
+  // Observed best-fit split: 3 explicit-point surfaces and 2 graph-read surfaces.
   return mixSeed(seed, 0x610505) % 5 < 3
     ? "BEST_FIT_LABELLED_POINTS_CONTEXT"
     : "BEST_FIT_GRID_READ_POINTS";
@@ -761,7 +866,9 @@ const surfaceForBestFit = (
 
 export const generateG1Question = (options: G1GenerateOptions): G1GeneratedQuestion => {
   const includeExperimentalFamilies = options.includeExperimentalFamilies ?? true;
-  const includeDeferredCompositeFamilies = options.includeDeferredCompositeFamilies ?? false;
+  // Generic G1 generation includes the three G1 marks from the historically
+  // common best-fit wrapper while retaining the adjacent S2 mark as deferred.
+  const includeDeferredCompositeFamilies = options.includeDeferredCompositeFamilies ?? true;
   const paper = chooseG1Paper(options.seed, options.family, options.paper);
   const family = selectG1Family(
     options.seed,
@@ -774,20 +881,14 @@ export const generateG1Question = (options: G1GenerateOptions): G1GeneratedQuest
 
   let question: G1GeneratedQuestion;
   if (family === "LINE_EQUATION_FROM_TWO_POINTS") {
-    if (options.difficulty === 2) {
-      throw new Error("The current standalone numeric G1 line family is calibrated to lower-band difficulty only.");
-    }
-    question = lineQuestion(options.seed, chooseLineSurface(options.seed, options.surfaceStyleId));
+    question = lineQuestion(options.seed, chooseLineSurface(options.seed, options.surfaceStyleId), options.difficulty);
   } else if (family === "CONTEXTUAL_LINEAR_MODEL") {
     if (options.difficulty === 1) {
       throw new Error("The deterministic contextual G1 family is calibrated to upper-band difficulty.");
     }
     question = contextQuestion(options.seed);
   } else if (family === "BEST_FIT_LINEAR_MODEL") {
-    question = bestFitQuestion(
-      options.seed,
-      surfaceForBestFit(options.seed, options.surfaceStyleId, options.difficulty),
-    );
+    question = bestFitQuestion(options.seed, surfaceForBestFit(options.seed, options.surfaceStyleId, options.difficulty));
   } else {
     if (options.difficulty === 1) {
       throw new Error("The symbolic G1 family is calibrated to upper-band difficulty.");
@@ -830,13 +931,14 @@ const exactSignature = (question: G1GeneratedQuestion): string => {
 const structuralSignature = (question: G1GeneratedQuestion): string => {
   if (question.family === "SYMBOLIC_GRADIENT_FROM_TWO_POINTS") {
     const state = question.mathState;
-    return `S:${state.denominatorScale}:${state.parameterCoefficient}:${state.constant % state.denominatorScale}`;
+    return `S:${state.denominatorScale}:${state.parameterCoefficient}:${state.constant}:${state.parameter}`;
   }
   return [
     question.family,
     question.surfaceStyleId,
-    Math.sign(question.mathState.gradient.numerator),
+    question.mathState.gradient.numerator,
     question.mathState.gradient.denominator,
+    question.mathState.intercept.numerator,
     Math.abs(question.mathState.points[1].x - question.mathState.points[0].x),
   ].join(":");
 };
@@ -852,7 +954,7 @@ export const generateG1QuestionBatch = (
 
   for (let index = 0; index < count; index += 1) {
     let accepted: G1GeneratedQuestion | null = null;
-    for (let retry = 0; retry < 260; retry += 1) {
+    for (let retry = 0; retry < 320; retry += 1) {
       const candidateSeed = mixSeed(options.seed, (index + 1) * 173 + retry * 7919);
       const candidate = generateG1Question({ ...options, seed: candidateSeed });
       const exact = exactSignature(candidate);
