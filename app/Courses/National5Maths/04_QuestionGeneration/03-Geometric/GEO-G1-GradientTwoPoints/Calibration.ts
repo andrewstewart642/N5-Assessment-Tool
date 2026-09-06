@@ -1,7 +1,6 @@
 import {
   G1_CORPUS_ENTRIES,
   G1_GENERATOR_SCOPE,
-  type G1CorpusFamily,
 } from "../../../03_SkillCatalog/03-Geometric/GEO-G1-GradientTwoPoints/G1CrossCorpusAnalysis";
 import {
   G1_EMPIRICAL_FAMILY_FREQUENCY,
@@ -68,6 +67,27 @@ export const g1FamilyFrequency = (
   };
 };
 
+/**
+ * Generic G1 selection deliberately uses the reviewed occurrence counts as its
+ * prior rather than hand-tuned "interesting question" weights.
+ *
+ * Across the 12 reviewed G1 appearances this gives approximately:
+ *   line equation 4/12, contextual model 2/12, best fit 5/12, symbolic 1/12.
+ * P1 selection is therefore 4:2:5 and generic paper selection reserves roughly
+ * 1/12 for the historically rare P2 symbolic family.
+ */
+export const G1_HISTORICAL_SELECTION_PRIOR = {
+  overall: Object.fromEntries(
+    G1_EMPIRICAL_FAMILY_FREQUENCY.overall.map((entry) => [entry.family, entry.count]),
+  ) as Record<G1GeneratorFamily, number>,
+  P1: Object.fromEntries(
+    G1_EMPIRICAL_FAMILY_FREQUENCY.P1.map((entry) => [entry.family, entry.count]),
+  ) as Record<G1GeneratorFamily, number>,
+  P2: Object.fromEntries(
+    G1_EMPIRICAL_FAMILY_FREQUENCY.P2.map((entry) => [entry.family, entry.count]),
+  ) as Record<G1GeneratorFamily, number>,
+} as const;
+
 export const historicalG1NumericOverlap = (state: G1LineModelState): boolean =>
   G1_NUMERIC_LINE_FINGERPRINTS.some((fingerprint) => {
     const sameLine = sameRational(state.gradient, fingerprint.gradient)
@@ -132,6 +152,7 @@ export const chooseG1Paper = (
     return requestedPaper ?? profile.supportedPapers[0];
   }
   if (requestedPaper) return requestedPaper;
+  // One of the twelve reviewed G1 appearances is the P2 symbolic family.
   return positiveModulo(seed, 12) === 0 ? "P2" : "P1";
 };
 
@@ -166,18 +187,16 @@ export const selectG1Family = (
     throw new Error(`No G1 generator family is enabled for ${paper}.`);
   }
 
-  if (paper === "P2") return "SYMBOLIC_GRADIENT_FROM_TWO_POINTS";
-
-  const weighted: G1CorpusFamily[] = [];
+  const weighted: G1GeneratorFamily[] = [];
   for (const profile of candidates) {
-    const weight = profile.family === "LINE_EQUATION_FROM_TWO_POINTS"
-      ? 6
-      : profile.family === "CONTEXTUAL_LINEAR_MODEL"
-        ? 3
-        : profile.family === "BEST_FIT_LINEAR_MODEL"
-          ? 2
-          : 1;
+    const weight = Math.max(0, g1FamilyFrequency(profile.family, paper).count);
     for (let index = 0; index < weight; index += 1) weighted.push(profile.family);
   }
-  return weighted[positiveModulo(seed, weighted.length)] as G1GeneratorFamily;
+
+  // This fallback only matters if a future filtered paper has no observed
+  // occurrences for any enabled family. Current reviewed P1/P2 data never use it.
+  if (!weighted.length) {
+    return candidates[positiveModulo(seed, candidates.length)].family;
+  }
+  return weighted[positiveModulo(seed, weighted.length)];
 };
