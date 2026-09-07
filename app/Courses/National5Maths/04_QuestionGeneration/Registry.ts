@@ -58,7 +58,11 @@ import {
   A8MixedConceptModule,
 } from "../../National5MathsLegacy/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Algebraic/NQ_N5_ALG_A08_SimultaneousEquations";
 import {
+  G1AlgebraicCoordinatesConceptModule,
+  G1BestFitScattergraphsConceptModule,
+  G1EquationFromTwoPointsConceptModule,
   G1GeneralConceptModule,
+  G1StraightLineModelsConceptModule,
 } from "./03-Geometric/GEO-G1-GradientTwoPoints/BuilderModules";
 import TrigEquationsConceptModule from "../../National5MathsLegacy/QuestionAndAnswerGeneration/QuestionWriting/ConceptModules/Numerical/Trigonometry/NQ_N5_TRIG_T02_2_Equations";
 
@@ -91,6 +95,10 @@ const conceptModules: ConceptGeneratorModule[] = [
   A8GraphConceptModule,
   A8DerivedConceptModule,
   G1GeneralConceptModule,
+  G1EquationFromTwoPointsConceptModule,
+  G1StraightLineModelsConceptModule,
+  G1BestFitScattergraphsConceptModule,
+  G1AlgebraicCoordinatesConceptModule,
   TrigEquationsConceptModule,
 ];
 
