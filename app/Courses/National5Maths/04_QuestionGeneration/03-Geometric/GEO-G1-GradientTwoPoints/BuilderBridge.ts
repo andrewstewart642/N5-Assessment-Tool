@@ -159,6 +159,16 @@ const P1_VARIANTS: readonly G1BuilderVariant[] = [
     cMarks: 4,
     aMarks: 0,
   },
+  {
+    family: "SYMBOLIC_GRADIENT_FROM_TWO_POINTS",
+    surfaceStyleId: "SYMBOLIC_COORDINATE_GRADIENT",
+    paper: "P1",
+    difficulty: 2,
+    weight: 1,
+    totalMarks: 3,
+    cMarks: 0,
+    aMarks: 3,
+  },
 ];
 
 const P2_VARIANTS: readonly G1BuilderVariant[] = [
