@@ -113,13 +113,34 @@ const validateBestFitVisualPolicy = (question: G1GeneratedQuestion, issues: G1Va
   }
 };
 
+const validateSymbolicPaperPolicy = (question: G1GeneratedQuestion, issues: G1ValidationIssue[]) => {
+  if (question.family !== "SYMBOLIC_GRADIENT_FROM_TWO_POINTS") return;
+  if (
+    question.standard !== "A" ||
+    question.difficulty !== 2 ||
+    question.marks !== 3 ||
+    question.visual !== null
+  ) {
+    pushError(
+      issues,
+      "G1_SYMBOLIC_V3_PROFILE",
+      "Symbolic G1 generation must remain A-standard, upper-band, three marks and non-visual; it may be placed on either paper.",
+    );
+  }
+};
+
 export const validateG1GeneratedQuestion = (question: G1GeneratedQuestion): G1ValidationResult => {
   const base = validateG1GeneratedQuestionV2(question);
-  const issues = [...base.issues];
+  const issues = base.issues.filter((issue) => !(
+    question.family === "SYMBOLIC_GRADIENT_FROM_TWO_POINTS" &&
+    question.paper === "P1" &&
+    issue.code === "G1_SYMBOLIC_PROFILE"
+  ));
   validateStandaloneLinePolicy(question, issues);
   validateInterceptIntegrity(question, issues);
   validateContextArithmeticPolicy(question, issues);
   validateBestFitVisualPolicy(question, issues);
+  validateSymbolicPaperPolicy(question, issues);
   return {
     valid: !issues.some((issue) => issue.severity === "ERROR"),
     issues,
@@ -130,4 +151,5 @@ export const G1_V3_VALIDATION_LIMITS = {
   maxBestFitMajorIntervalsPerAxis: MAX_BEST_FIT_MAJOR_INTERVALS,
   minGridReadHorizontalCoverage: 0.3,
   generatedLineInterceptMustBeNonZero: true,
+  symbolicPaperSuitability: "BOTH",
 } as const;
