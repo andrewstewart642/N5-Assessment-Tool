@@ -15,6 +15,9 @@ const STALE_A8_SPACING_BASE_PX =
 const N2_GENERATOR_PREFIX =
   "N2_INDICES_V1_";
 
+const G1_GENERATOR_PREFIX =
+  "G1-V3-";
+
 function isA8GeneratedQuestion(
   question: Question
 ): boolean {
@@ -31,6 +34,16 @@ function isN2GeneratedQuestion(
   return Boolean(
     question.questionCode?.startsWith(
       N2_GENERATOR_PREFIX
+    )
+  );
+}
+
+function isG1GeneratedQuestion(
+  question: Question
+): boolean {
+  return Boolean(
+    question.questionCode?.startsWith(
+      G1_GENERATOR_PREFIX
     )
   );
 }
@@ -118,8 +131,13 @@ export function applyAssessmentQuestionSpacingBase(
   question: Question
 ): Question {
   if (
-    isN2GeneratedQuestion(
-      question
+    (
+      isN2GeneratedQuestion(
+        question
+      ) ||
+      isG1GeneratedQuestion(
+        question
+      )
     ) &&
     hasExplicitSpacingBasePx(
       question
