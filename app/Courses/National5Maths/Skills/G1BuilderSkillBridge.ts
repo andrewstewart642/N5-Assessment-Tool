@@ -69,7 +69,7 @@ export const G1_BUILDER_CONCEPTS: Concept[] = [
     },
   ),
   g1Concept(
-    "geo-g1-equation-two-points",
+    "geo-g1-1",
     "G1.1",
     "Equation from two points",
     {
