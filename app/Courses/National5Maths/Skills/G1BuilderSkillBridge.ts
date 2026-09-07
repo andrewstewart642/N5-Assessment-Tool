@@ -123,12 +123,12 @@ export const G1_BUILDER_CONCEPTS: Concept[] = [
     {
       marks: 3,
       standard: "A",
-      paperSuitability: "P2",
+      paperSuitability: "BOTH",
       calculator: "optional",
       availableDifficultyLevels: [2],
       defaultDifficultyLevel: 2,
       fullDescription:
-        "Find and simplify the gradient when one of the coordinate pairs is expressed algebraically.",
+        "Find and simplify the gradient when one of the coordinate pairs is expressed algebraically. The reviewed occurrence is on Paper 2, but the mathematical route is valid for either paper.",
       topicTags: ["algebraic coordinates", "symbolic gradient"],
     },
   ),
