@@ -1,5 +1,6 @@
 import {
   chooseG1Paper,
+  g1FamilyFrequency,
   selectG1Family,
 } from "./Calibration";
 import { generateG1Question as generateG1QuestionV2 } from "./GeneratorV2";
@@ -8,6 +9,7 @@ import type {
   G1GeneratedQuestion,
   G1GeneratorDifficulty,
   G1GeneratorFamily,
+  G1GeneratorPaper,
   G1GeneratorSurfaceStyle,
 } from "./Types";
 import { validateG1GeneratedQuestion } from "./Validation";
@@ -60,6 +62,38 @@ const signPolicySatisfied = (
     return (question.mathState.gradient.numerator < 0) === desiredContextSignIsNegative(externalSeed);
   }
   return true;
+};
+
+const normalizeSymbolicPaper = (
+  question: G1GeneratedQuestion,
+  requestedPaper: G1GeneratorPaper,
+): G1GeneratedQuestion => {
+  if (
+    question.family !== "SYMBOLIC_GRADIENT_FROM_TWO_POINTS" ||
+    question.paper === requestedPaper
+  ) {
+    return question;
+  }
+
+  const frequency = g1FamilyFrequency(question.family, requestedPaper);
+  return {
+    ...question,
+    paper: requestedPaper,
+    quality: {
+      ...question.quality,
+      familyObservedCount: frequency.count,
+      familyObservedTotal: frequency.total,
+      familyObservedProportion: frequency.proportion,
+      paperArithmeticProfile:
+        requestedPaper === "P1"
+          ? "P1_WRITTEN"
+          : "P2_CALCULATOR_AVAILABLE",
+      structuralLevers: [
+        ...question.quality.structuralLevers,
+        "symbolic G1 is historically observed on P2 but is mathematically eligible for either paper",
+      ],
+    },
+  } as G1GeneratedQuestion;
 };
 
 const withV3Metadata = (
@@ -134,14 +168,17 @@ export const generateG1Question = (options: G1GenerateOptions): G1GeneratedQuest
       // Best-fit V2 historically checked requested difficulty only after state
       // manufacture. V3 therefore constrains the surface first, lets V2 build a
       // valid state, then accepts only the requested route-based band.
-      const candidate = generateG1QuestionV2({
-        ...options,
-        seed: candidateSeed,
-        family,
+      const candidate = normalizeSymbolicPaper(
+        generateG1QuestionV2({
+          ...options,
+          seed: candidateSeed,
+          family,
+          paper,
+          surfaceStyleId,
+          difficulty: family === "BEST_FIT_LINEAR_MODEL" ? undefined : options.difficulty,
+        }),
         paper,
-        surfaceStyleId,
-        difficulty: family === "BEST_FIT_LINEAR_MODEL" ? undefined : options.difficulty,
-      });
+      );
 
       if (options.difficulty && candidate.difficulty !== options.difficulty) {
         lastError = `Candidate was difficulty ${candidate.difficulty}, not requested difficulty ${options.difficulty}.`;
@@ -250,6 +287,7 @@ export const G1_GENERATOR_V3_GUARDRAILS = [
   "Requested best-fit difficulty is a construction constraint: unsuitable states are regenerated rather than surfaced as a post-generation mismatch error.",
   "Grid-read best-fit graphs reject excessive major-grid density and horizontally compressed data clouds.",
   "Labelled-point and other supportive diagrams may use schematic visual spacing; visual ugliness is never a difficulty lever, but schematic freedom never permits mathematically misleading intercept placement.",
+  "The symbolic coordinate-gradient family may be placed on either paper; Paper 2 remains its historical default because that is the only observed occurrence.",
 ] as const;
 
 export { G1_GENERATOR_DESIGN_NOTES } from "./GeneratorV2";
