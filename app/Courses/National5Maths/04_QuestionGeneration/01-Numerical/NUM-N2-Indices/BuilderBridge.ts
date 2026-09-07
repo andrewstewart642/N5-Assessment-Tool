@@ -46,6 +46,9 @@ import type {
 } from "./Types";
 
 const N2_SKILL_ID = "num-n2-indices";
+const N2_RESPONSE_SPACE_MIN_PX = 104;
+const N2_RESPONSE_SPACE_MAX_PX = 168;
+const N2_WORKED_LINE_SPACE_PX = 20;
 const randomSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 const text = (value: string): PaperPart => ({ kind: "text", value });
 const math = (latex: string): PaperPart => ({ kind: "math", latex, displayMode: false });
@@ -211,6 +214,24 @@ const workedAnswers = (
   })),
 });
 
+const getN2BuilderSpacingBasePx = (
+  question: ReturnType<typeof generateN2Question>,
+  marking: ReturnType<typeof generateN2Answer>,
+): number => {
+  const longestWorkedMethod = marking.methods.reduce(
+    (longest, method) => Math.max(longest, method.lines.length),
+    1,
+  );
+  const workedLineFloor = 72 + longestWorkedMethod * N2_WORKED_LINE_SPACE_PX;
+  const markFloor = question.marks >= 3 ? 120 : N2_RESPONSE_SPACE_MIN_PX;
+  const difficultyFloor = question.difficulty === 2 ? 112 : N2_RESPONSE_SPACE_MIN_PX;
+
+  return Math.min(
+    N2_RESPONSE_SPACE_MAX_PX,
+    Math.max(workedLineFloor, markFloor, difficultyFloor),
+  );
+};
+
 const scopeFromContext = (context: GeneratorContext): N2BuilderScope => {
   const code = context.concept?.code ?? context.selectedConceptText;
   if (code === "N2") return "N2";
@@ -279,6 +300,7 @@ export function buildN2BuilderGenerated(
     answer: marking.finalAnswers.map((entry) => entry.normalisedAnswer).join("; "),
     answerParts: answerParts(question.mathState),
     workedAnswers: workedAnswers(marking),
+    spacingBasePx: getN2BuilderSpacingBasePx(question, marking),
     historicalReference: {
       label: formattedReference ? `See ${formattedReference}` : "Historical reference",
       questionCatalogId: referenceId,
