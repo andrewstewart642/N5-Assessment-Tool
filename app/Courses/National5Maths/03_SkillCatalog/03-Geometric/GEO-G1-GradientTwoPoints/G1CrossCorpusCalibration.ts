@@ -70,6 +70,7 @@ export const G1_EMPIRICAL_FAMILY_FREQUENCY = {
     "The prior controls family frequency, not a claim about future assessment probability.",
     "The 5/12 best-fit share refers only to the three G1 model-construction marks; the adjacent statistical mark remains separately owned and deferred.",
     "The symbolic family remains intentionally rare because one reviewed source supports it.",
+    "Paper eligibility is not inferred mechanically from occurrence: the symbolic family is observed only on P2 but may be generated on P1 or P2, with P2 retained as the default when paper is unspecified.",
   ],
 } as const;
 
@@ -121,7 +122,7 @@ export const G1_BEST_FIT_GENERATION_ENVELOPE = {
 } as const;
 
 export const G1_SYMBOLIC_GENERATION_ENVELOPE = {
-  supportedPaper: "P2" as const,
+  supportedPapers: ["P2", "P1"] as const,
   marks: 3 as const,
   generatorGuardrails: [
     "Begin with two coordinate points, with at least one genuinely parameterised coordinate.",
@@ -131,6 +132,7 @@ export const G1_SYMBOLIC_GENERATION_ENVELOPE = {
     "Exclude parameter values that make the two x-coordinates equal.",
     "Do not generate a free-standing factorisation prompt; coordinate geometry is the ownership invariant.",
     "Keep the family rare in generic selection because it accounts for one of twelve reviewed G1 appearances.",
+    "Paper 2 is the only historically observed placement, but the route has no calculator dependency and is valid on either paper.",
   ],
 } as const;
 
@@ -142,4 +144,5 @@ export const G1_CALIBRATION_DECISIONS = [
   "Negative line directions should appear at corpus-informed frequencies and only in contexts where the direction makes sense.",
   "Difficulty is separate from C/A Standard. Representation, exact fractional structure and graph-reading burden control the within-skill difficulty band.",
   "Generated answer schemes must preserve contextual-variable requirements and should not randomise source-year-specific marking regimes.",
+  "Observed paper placement and generated paper eligibility are separate for G1.4: retain P2 as the historical default while permitting either paper.",
 ] as const;
