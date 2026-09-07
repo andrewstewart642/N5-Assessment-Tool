@@ -113,7 +113,7 @@ export const G1_FAMILY_COMPARISONS: readonly G1FamilyComparison[] = [
     observedPattern: "One reviewed question begins with two coordinate points, one parameterised, then requires a three-mark gradient simplification through substitution, difference-of-squares factorisation and common-factor cancellation.",
     stableFeatures: ["three G1 marks", "A-standard", "Operational", "geometric coordinate origin", "symbolic two-point gradient quotient", "factorisation and cancellation are subordinate algebra inside the G1 route", "simplest exact gradient expression required"],
     variableFeatures: ["Only one historical source currently fixes this family.", "No second source establishes a wider range of parameterised coordinate architectures.", "Only Paper 2 placement is historically evidenced in the reviewed corpus."],
-    generatorDecision: "Keep this family experimental and narrow. Generated variants must begin from genuine coordinate geometry and must construct a cancellable gradient quotient without drifting into a free-standing algebraic factorisation exercise.",
+    generatorDecision: "Keep this family experimental and narrow. Generated variants must begin from genuine coordinate geometry and must construct a cancellable gradient quotient without drifting into a free-standing algebraic factorisation exercise. Preserve Paper 2 as the historical/default placement, but permit Paper 1 because the route has no calculator dependency and nothing in the mathematical demand intrinsically requires Paper 2.",
   },
 ] as const;
 
@@ -121,7 +121,7 @@ export const G1_GENERATOR_SCOPE = [
   { family: "LINE_EQUATION_FROM_TWO_POINTS" as const, readiness: "CORE" as G1GeneratorReadiness, evidenceCount: 4, supportedPapers: ["P1"] as const, marks: 3 as const, standard: "C" as const, thinking: "OPERATIONAL" as const },
   { family: "CONTEXTUAL_LINEAR_MODEL" as const, readiness: "SUPPORTED" as G1GeneratorReadiness, evidenceCount: 2, supportedPapers: ["P1"] as const, marks: 4 as const, standard: "C" as const, thinking: "OPERATIONAL" as const },
   { family: "BEST_FIT_LINEAR_MODEL" as const, readiness: "COMPOSITE_DEFERRED" as G1GeneratorReadiness, evidenceCount: 5, supportedPapers: ["P1"] as const, marks: 4 as const, standard: "C" as const, thinking: "MIXED" as const },
-  { family: "SYMBOLIC_GRADIENT_FROM_TWO_POINTS" as const, readiness: "EXPERIMENTAL" as G1GeneratorReadiness, evidenceCount: 1, supportedPapers: ["P2"] as const, marks: 3 as const, standard: "A" as const, thinking: "OPERATIONAL" as const },
+  { family: "SYMBOLIC_GRADIENT_FROM_TWO_POINTS" as const, readiness: "EXPERIMENTAL" as G1GeneratorReadiness, evidenceCount: 1, supportedPapers: ["P2", "P1"] as const, marks: 3 as const, standard: "A" as const, thinking: "OPERATIONAL" as const },
 ] as const;
 
 export const G1_CROSS_CORPUS_GENERATION_INVARIANTS = [
@@ -134,6 +134,7 @@ export const G1_CROSS_CORPUS_GENERATION_INVARIANTS = [
   "Best-fit questions retain a 3 G1 + 1 S2 mark split. The S2 follow-up must not be reclassified as G1 simply because it shares the same question wrapper.",
   "Deterministic contextual line questions may keep the fourth follow-up mark in G1 when it is a direct calculation from the geometrically constructed model rather than a statistical estimate.",
   "The symbolic family must begin from coordinate data and use the two-point gradient definition before any factorisation or cancellation.",
+  "Historical placement and paper eligibility are separate: the symbolic family is observed only on Paper 2, but generated G1.4 questions are eligible for either paper while Paper 2 remains the default when no paper is requested.",
   "Question generation and answer generation must consume the same generated coordinate/model state so points, gradient, intercept, final equation and mark pathway cannot drift apart.",
   "Historical wording, artwork, coordinates and exact layout are reference evidence only and are never generation templates.",
 ] as const;
