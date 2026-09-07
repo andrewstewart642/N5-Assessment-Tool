@@ -49,6 +49,24 @@ const randomSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 const text = (value: string): PaperPart => ({ kind: "text", value });
 const math = (latex: string): PaperPart => ({ kind: "math", latex, displayMode: false });
 
+type G1BuilderScope = "G1" | "G1.1" | "G1.2" | "G1.3" | "G1.4";
+
+const G1_FAMILIES_BY_SCOPE: Record<
+  G1BuilderScope,
+  readonly G1GeneratorFamily[]
+> = {
+  G1: [
+    "LINE_EQUATION_FROM_TWO_POINTS",
+    "CONTEXTUAL_LINEAR_MODEL",
+    "BEST_FIT_LINEAR_MODEL",
+    "SYMBOLIC_GRADIENT_FROM_TWO_POINTS",
+  ],
+  "G1.1": ["LINE_EQUATION_FROM_TWO_POINTS"],
+  "G1.2": ["CONTEXTUAL_LINEAR_MODEL"],
+  "G1.3": ["BEST_FIT_LINEAR_MODEL"],
+  "G1.4": ["SYMBOLIC_GRADIENT_FROM_TWO_POINTS"],
+};
+
 export type G1BuilderVariant = {
   family: G1GeneratorFamily;
   surfaceStyleId: G1GeneratorSurfaceStyle;
@@ -190,6 +208,16 @@ export const g1VariantSelectionMeta = (
       : "CalculatorAllowed",
 });
 
+const scopeFromContext = (context: GeneratorContext): G1BuilderScope => {
+  const raw = context.concept?.code ?? context.selectedConceptText.trim();
+  const code = raw.split(/\s+/)[0];
+  if (code === "G1.1") return "G1.1";
+  if (code === "G1.2") return "G1.2";
+  if (code === "G1.3") return "G1.3";
+  if (code === "G1.4") return "G1.4";
+  return "G1";
+};
+
 const resolvePaper = (context: GeneratorContext): G1GeneratorPaper =>
   context.paper === "P2" || context.selectionFilters?.targetPaper === "P2"
     ? "P2"
@@ -201,11 +229,14 @@ const resolveDifficulty = (
 
 const chooseVariant = (
   context: GeneratorContext,
+  scope: G1BuilderScope,
   paper: G1GeneratorPaper,
   difficulty: G1GeneratorDifficulty,
   seed: number
 ): G1BuilderVariant => {
+  const allowedFamilies = G1_FAMILIES_BY_SCOPE[scope];
   const candidates = G1_BUILDER_VARIANTS
+    .filter((variant) => allowedFamilies.includes(variant.family))
     .filter((variant) => variant.paper === paper)
     .filter((variant) => variant.difficulty === difficulty)
     .filter((variant) =>
@@ -218,7 +249,7 @@ const chooseVariant = (
 
   if (candidates.length === 0) {
     throw new Error(
-      `No G1 question family matches the active Builder filters on ${paper} at difficulty ${difficulty}.`
+      `No ${scope} question family matches the active Builder filters on ${paper} at difficulty ${difficulty}.`
     );
   }
 
@@ -339,6 +370,27 @@ const workedAnswersFor = (
   })),
 });
 
+const responseSpacePxFor = (
+  question: G1GeneratedQuestion,
+  marking: ReturnType<typeof generateG1Answer>
+): number => {
+  const longestMethodLines = Math.max(
+    1,
+    ...marking.methods.map((method) => method.lines.length),
+  );
+
+  const familyBase = question.family === "LINE_EQUATION_FROM_TWO_POINTS"
+    ? 170
+    : question.family === "CONTEXTUAL_LINEAR_MODEL"
+      ? 230
+      : question.family === "BEST_FIT_LINEAR_MODEL"
+        ? 240
+        : 190;
+
+  const methodAllowance = Math.max(0, longestMethodLines - 3) * 16;
+  return Math.min(300, familyBase + methodAllowance);
+};
+
 const structureFor = (
   question: G1GeneratedQuestion
 ): StructureType => {
@@ -379,10 +431,11 @@ export function buildG1BuilderGenerated(
     throw new Error("G1 Builder bridge received a non-G1 skill.");
   }
 
+  const scope = scopeFromContext(context);
   const paper = resolvePaper(context);
   const difficulty = resolveDifficulty(context);
   const seed = randomSeed();
-  const variant = chooseVariant(context, paper, difficulty, seed);
+  const variant = chooseVariant(context, scope, paper, difficulty, seed);
   const question = generateG1Question({
     seed,
     paper,
@@ -420,6 +473,7 @@ export function buildG1BuilderGenerated(
     answer: answerText(answers),
     answerParts: answerPartsFor(answers),
     workedAnswers: workedAnswersFor(marking),
+    spacingBasePx: responseSpacePxFor(question, marking),
     historicalReference: {
       label: formattedReference ? `See ${formattedReference}` : "Historical reference",
       questionCatalogId: referenceId,
@@ -438,7 +492,7 @@ export function buildG1BuilderGenerated(
       paperSuitability: paper,
     },
     sourceSkillCode: "G1",
-    sourceConceptCode: context.concept?.code ?? "G1.1",
+    sourceConceptCode: context.concept?.code ?? scope,
     sourceConceptLabel:
       context.concept?.label ?? "Gradient and equation of a straight line",
     templateId,
