@@ -85,6 +85,9 @@ export type GeneratedQuestionData = {
 
   workedAnswers?: WorkedAnswerSet;
 
+  /** Optional Builder response-space baseline for this generated question. */
+  spacingBasePx?: number;
+
   /** Builder-only historical source anchor for teacher confidence. */
   historicalReference?: HistoricalQuestionReference;
 
