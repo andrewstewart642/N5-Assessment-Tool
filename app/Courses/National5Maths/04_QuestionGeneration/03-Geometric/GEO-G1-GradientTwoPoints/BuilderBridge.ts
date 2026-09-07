@@ -164,7 +164,10 @@ const P1_VARIANTS: readonly G1BuilderVariant[] = [
     surfaceStyleId: "SYMBOLIC_COORDINATE_GRADIENT",
     paper: "P1",
     difficulty: 2,
-    weight: 1,
+    // Eligible when G1.4 (or an explicit A-standard filter) is requested, but
+    // zero-weight in the unfiltered P1 mixed bag because no reviewed P1
+    // occurrence exists for this family.
+    weight: 0,
     totalMarks: 3,
     cMarks: 0,
     aMarks: 3,
@@ -264,10 +267,13 @@ const chooseVariant = (
   }
 
   const weighted = candidates.flatMap((variant) =>
-    Array.from({ length: Math.max(1, variant.weight) }, () => variant)
+    Array.from({ length: Math.max(0, variant.weight) }, () => variant)
   );
 
-  return weighted[(seed >>> 0) % weighted.length];
+  // A zero-weight candidate can still be deliberately selected by a pinned
+  // concept/filter; zero only suppresses it from an otherwise mixed pool.
+  const pool = weighted.length > 0 ? weighted : candidates;
+  return pool[(seed >>> 0) % pool.length];
 };
 
 const promptPartsFor = (
