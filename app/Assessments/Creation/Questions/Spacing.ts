@@ -1,6 +1,6 @@
 import {
   getNational5MathsQuestionSpacingBasePx,
-} from "@/app/Courses/National5Maths/Documents/National5MathsQuestionSpacing";
+} from "@/app/Courses/National5MathsLegacy/Documents/National5MathsQuestionSpacing";
 
 import type {
   Question,
@@ -12,12 +12,25 @@ const DEFAULT_ASSESSMENT_QUESTION_SPACING_BASE_PX =
 const STALE_A8_SPACING_BASE_PX =
   40;
 
+const N2_GENERATOR_PREFIX =
+  "N2_INDICES_V1_";
+
 function isA8GeneratedQuestion(
   question: Question
 ): boolean {
   return Boolean(
     question.questionCode?.startsWith(
       "A8-"
+    )
+  );
+}
+
+function isN2GeneratedQuestion(
+  question: Question
+): boolean {
+  return Boolean(
+    question.questionCode?.startsWith(
+      N2_GENERATOR_PREFIX
     )
   );
 }
@@ -104,6 +117,17 @@ export function getAssessmentQuestionSpacingBasePx(
 export function applyAssessmentQuestionSpacingBase(
   question: Question
 ): Question {
+  if (
+    isN2GeneratedQuestion(
+      question
+    ) &&
+    hasExplicitSpacingBasePx(
+      question
+    )
+  ) {
+    return question;
+  }
+
   const a7Spacing =
     getA7GeneratedSpacingBasePx(
       question.questionCode
