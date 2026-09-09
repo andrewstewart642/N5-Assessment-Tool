@@ -44,7 +44,9 @@ import type {
 } from "./Types";
 
 const G1_SKILL_ID = "geo-g01-gradient-two-points";
+const G1_COVERAGE_UNIT_ID = "GEO_G1";
 const S2_SKILL_ID = "stat-s02-linear-model";
+const S2_COVERAGE_UNIT_ID = "STAT_S2";
 const randomSeed = () => Math.floor(Math.random() * 0x7fffffff) + 1;
 const text = (value: string): PaperPart => ({ kind: "text", value });
 const math = (latex: string): PaperPart => ({ kind: "math", latex, displayMode: false });
@@ -509,6 +511,10 @@ export function buildG1BuilderGenerated(
       paperSuitability: paper,
     },
     sourceSkillCode: "G1",
+    coverageSkillIds:
+      question.family === "BEST_FIT_LINEAR_MODEL"
+        ? [G1_COVERAGE_UNIT_ID, S2_COVERAGE_UNIT_ID]
+        : [G1_COVERAGE_UNIT_ID],
     sourceConceptCode: context.concept?.code ?? scope,
     sourceConceptLabel:
       context.concept?.label ?? "Gradient and equation of a straight line",

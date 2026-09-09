@@ -9,7 +9,7 @@ import type {
 } from "./BuilderSkillRegistration";
 
 type A8ConceptOptions = {
-  marks: number;
+  marks?: number;
   thinkingType: NonNullable<Concept["metadata"]>["thinkingType"];
   paperSuitability: SkillPaperSuitability;
   calculator: NonNullable<Concept["metadata"]>["calculator"];
@@ -57,7 +57,6 @@ export const A8_BUILDER_CONCEPTS: Concept[] = [
     "A8",
     "Mixed simultaneous equations",
     {
-      marks: 3,
       thinkingType: "mixed",
       paperSuitability: "BOTH",
       calculator: "optional",

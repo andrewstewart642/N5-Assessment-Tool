@@ -46,6 +46,8 @@ type A8BuilderCode =
 
 type A8Level = 1 | 2 | 3;
 
+const A8_COVERAGE_UNIT_ID = "ALG_A8";
+
 type A8MetricMarkProfile = {
   totalMarks: number;
   cMarks: number;
@@ -575,6 +577,9 @@ const generateBuilderA8 = (
     },
     sourceSkillCode:
       "A8",
+    coverageSkillIds: [
+      A8_COVERAGE_UNIT_ID,
+    ],
     sourceConceptCode:
       conceptCode,
     sourceConceptLabel:
