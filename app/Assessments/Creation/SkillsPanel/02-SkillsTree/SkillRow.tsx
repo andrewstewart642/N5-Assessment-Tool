@@ -6,10 +6,6 @@ import {
 
 import ActionButton from "@/app/UI/Application/Components/ActionButton";
 
-import {
-  rankConceptsByTargetMarks,
-} from "@/app/Courses/National5Maths/QuestionAndAnswerGeneration/QuestionWriting/ConceptSelection";
-
 import type {
   DifficultyLevel,
   Skill,
@@ -153,14 +149,9 @@ export default function SkillRow({
 
   const ranked =
     useMemo(
-      () =>
-        rankConceptsByTargetMarks(
-          skill.concepts,
-          targetMarks
-        ),
+      () => skill.concepts,
       [
         skill.concepts,
-        targetMarks,
       ]
     );
 
