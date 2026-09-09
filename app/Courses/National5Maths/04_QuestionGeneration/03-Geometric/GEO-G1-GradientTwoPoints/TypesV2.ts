@@ -276,7 +276,7 @@ export type G1BestFitGeneratedQuestion = G1GeneratedQuestionBase & {
 export type G1SymbolicGeneratedQuestion = G1GeneratedQuestionBase & {
   family: "SYMBOLIC_GRADIENT_FROM_TWO_POINTS";
   familyReadiness: "EXPERIMENTAL";
-  paper: "P2";
+  paper: G1GeneratorPaper;
   difficulty: 2;
   marks: 3;
   standard: "A";

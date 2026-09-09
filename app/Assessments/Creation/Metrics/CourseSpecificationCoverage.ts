@@ -1,4 +1,5 @@
 import type {
+  Concept,
   Question,
   Skill,
   SkillsData,
@@ -6,6 +7,11 @@ import type {
 
 type CoverageAwareSkill =
   Skill & {
+    coverageUnitId?: string;
+  };
+
+type CoverageAwareConcept =
+  Concept & {
     coverageUnitId?: string;
   };
 
@@ -18,11 +24,41 @@ export function getSkillCoverageUnitId(
   skill: Skill
 ): string {
   const explicit =
+    skill.courseCoverageFamilyId
+      ?.trim() ??
     (skill as CoverageAwareSkill)
       .coverageUnitId
       ?.trim();
 
   return explicit || skill.id;
+}
+
+export function getConceptCoverageUnitId(
+  skill: Skill,
+  concept: Concept | undefined
+): string {
+  const explicit =
+    concept
+      ?.metadata
+      ?.courseCoverageFamilyId
+      ?.trim() ??
+    (concept as CoverageAwareConcept | undefined)
+      ?.coverageUnitId
+      ?.trim();
+
+  return explicit || getSkillCoverageUnitId(skill);
+}
+
+export function getCoverageUnitIdsForSelection(
+  skill: Skill,
+  concept: Concept | undefined
+): string[] {
+  return [
+    getConceptCoverageUnitId(
+      skill,
+      concept
+    ),
+  ];
 }
 
 export function getCoverageUnitIdsFromSkillsData(
@@ -97,6 +133,27 @@ export function getQuestionCoverageUnitIds(
       ...new Set(
         explicit
       ),
+    ];
+  }
+
+  const variantCoverage =
+    question
+      .selectionMeta
+      ?.coverageUnitId
+      ?.trim();
+
+  if (variantCoverage) {
+    return [
+      variantCoverage,
+    ];
+  }
+
+  if (
+    question.skillDomain &&
+    question.skillCode
+  ) {
+    return [
+      `${question.skillDomain}_${question.skillCode}`,
     ];
   }
 

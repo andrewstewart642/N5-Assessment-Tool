@@ -279,7 +279,8 @@ const chooseVariant = (
 const promptPartsFor = (
   question: G1GeneratedQuestion
 ): PaperPart[] => {
-  if (!question.visual) return [...question.promptParts];
+  const originalPromptParts = question.promptParts;
+  if (!question.visual) return [...originalPromptParts];
 
   const graph = buildG1StraightLineModelGraphPart(question.visual);
   const lines = question.prompt.split("\n");
@@ -308,7 +309,7 @@ const promptPartsFor = (
     ];
   }
 
-  return [...question.promptParts];
+  return [...originalPromptParts];
 };
 
 type BuilderFinalAnswer = {

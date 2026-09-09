@@ -124,6 +124,14 @@ export type ConceptMetadata = {
 
   defaultDifficultyLevel?:
     DifficultyLevel;
+
+  /**
+   * Formal course-specification family counted for course coverage.
+   *
+   * Visible Skills Tree rows and question-type concepts may be finer than this.
+   */
+  courseCoverageFamilyId?:
+    string;
 };
 
 export type Concept = {
@@ -182,6 +190,13 @@ export type Skill = {
 
   tags?:
     string[];
+
+  /**
+   * Formal course-specification family represented by this visible Skills Tree
+   * row. Several visible rows may intentionally share the same coverage family.
+   */
+  courseCoverageFamilyId?:
+    string;
 };
 
 export type SkillsData =
@@ -321,4 +336,8 @@ export type Question = {
   /** Topic mark ownership for whole-assessment monitoring. */
   topicMarkBreakdown?:
     QuestionTopicMarkBreakdown;
+
+  /** Formal course-specification families represented by this question. */
+  coverageSkillIds?:
+    string[];
 };

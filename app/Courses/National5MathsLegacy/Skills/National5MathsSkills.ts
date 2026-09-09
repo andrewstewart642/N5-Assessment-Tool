@@ -103,6 +103,8 @@ function buildSkill(
     text,
     domain,
     paperSuitability,
+    courseCoverageFamilyId:
+      `${domain}_${code}`,
     concepts,
   };
 }
@@ -532,9 +534,25 @@ export const skillsData: SkillsData = {
         buildConcept(
           "alg-a7-2",
           "A7.2",
-          "Linear inequalities",
+          "Work with linear inequalities",
           2,
           "C"
+        ),
+
+        buildConcept(
+          "alg-a7-2-solve",
+          "A7.2.1",
+          "Solve linear inequalities",
+          2,
+          "C"
+        ),
+
+        buildConcept(
+          "alg-a7-2-context",
+          "A7.2.2",
+          "Form and solve linear inequalities",
+          2,
+          "C+A"
         ),
       ],
       "ALG"

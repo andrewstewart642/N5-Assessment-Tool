@@ -111,6 +111,9 @@ export type GeneratedQuestionData = {
 
   /** Optional selection metadata for the specific generated question. */
   selectionMeta?: QuestionVariantSelectionMeta;
+
+  /** Optional formal course-specification families represented by this question. */
+  coverageSkillIds?: string[];
 };
 
 export type GeneratorContext = {

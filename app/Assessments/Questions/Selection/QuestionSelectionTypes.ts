@@ -112,6 +112,12 @@ export type QuestionVariantSelectionMeta = {
    * Calculator suitability.
    */
   calculatorStatus: QuestionCalculatorStatus;
+
+  /**
+   * Formal course-specification family represented by this generated variant.
+   * This is deliberately broader than visible concept/question-type codes.
+   */
+  coverageUnitId?: string;
 };
 
 /**

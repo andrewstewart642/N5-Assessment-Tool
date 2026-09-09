@@ -42,6 +42,10 @@ import {
   applyAssessmentQuestionSpacingBase,
 } from "./Spacing";
 
+import {
+  getCoverageUnitIdsForSelection,
+} from "../Metrics/CourseSpecificationCoverage";
+
 import type {
   AssessmentEditQuestionDraftByPaper,
   AssessmentQuestionDraftByPaper,
@@ -469,6 +473,13 @@ export function useAssessmentQuestionDraftGeneration({
             conceptMeta
           );
 
+        const coverageSkillIds =
+          generated.coverageSkillIds ??
+          getCoverageUnitIdsForSelection(
+            skill,
+            conceptMeta
+          );
+
         const resolvedMarks =
           resolveGeneratedTotalMarks(
             generated,
@@ -506,6 +517,8 @@ export function useAssessmentQuestionDraftGeneration({
               [],
 
             skillLinks,
+
+            coverageSkillIds,
 
             standardFilter,
 
@@ -669,6 +682,13 @@ export function useAssessmentQuestionDraftGeneration({
             conceptMeta
           );
 
+        const coverageSkillIds =
+          generated.coverageSkillIds ??
+          getCoverageUnitIdsForSelection(
+            skill,
+            conceptMeta
+          );
+
         const resolvedMarks =
           resolveGeneratedTotalMarks(
             generated,
@@ -708,6 +728,8 @@ export function useAssessmentQuestionDraftGeneration({
                 [],
 
               skillLinks,
+
+              coverageSkillIds,
 
               standardFilter,
 
@@ -817,6 +839,8 @@ export function useAssessmentQuestionDraftGeneration({
               [],
 
             skillLinks,
+
+            coverageSkillIds,
 
             standardFilter,
 
