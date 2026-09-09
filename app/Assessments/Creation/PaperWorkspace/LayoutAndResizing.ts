@@ -15,6 +15,7 @@ import {
   ASSESSMENT_WORKSPACE_DEFAULT_LEFT_PANE_RATIO,
   ASSESSMENT_WORKSPACE_DIVIDER_WIDTH_PX,
   ASSESSMENT_WORKSPACE_HUD_RESIZE_HANDLE_HEIGHT,
+  ASSESSMENT_WORKSPACE_LEGACY_DEFAULT_HUD_HEIGHT,
   ASSESSMENT_WORKSPACE_MAX_LEFT_PANE_RATIO,
   ASSESSMENT_WORKSPACE_MIN_HUD_HEIGHT,
   ASSESSMENT_WORKSPACE_MIN_LEFT_PANE_RATIO,
@@ -212,7 +213,10 @@ export function useAssessmentWorkspaceLayout() {
         ) {
           setHudHeight(
             clampHudHeight(
-              parsedHudHeight
+              parsedHudHeight ===
+                ASSESSMENT_WORKSPACE_LEGACY_DEFAULT_HUD_HEIGHT
+                ? ASSESSMENT_WORKSPACE_DEFAULT_HUD_HEIGHT
+                : parsedHudHeight
             )
           );
         }

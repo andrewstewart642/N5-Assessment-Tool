@@ -21,6 +21,7 @@ import {
 
 import {
   ASSESSMENT_WORKSPACE_DEFAULT_HUD_HEIGHT,
+  ASSESSMENT_WORKSPACE_LEGACY_DEFAULT_HUD_HEIGHT,
   ASSESSMENT_WORKSPACE_MAX_LEFT_PANE_RATIO,
   ASSESSMENT_WORKSPACE_MIN_LEFT_PANE_RATIO,
 } from "../PaperWorkspace/Dimensions";
@@ -364,7 +365,10 @@ export function useAssessmentCreatorInitialisation({
         ) {
           setHudHeight(
             clampNumber(
-              parsed,
+              parsed ===
+                ASSESSMENT_WORKSPACE_LEGACY_DEFAULT_HUD_HEIGHT
+                ? ASSESSMENT_WORKSPACE_DEFAULT_HUD_HEIGHT
+                : parsed,
               ASSESSMENT_WORKSPACE_DEFAULT_HUD_HEIGHT,
               280
             )
